@@ -11,6 +11,25 @@ sudo node server/server.js --hostname=webide-dev.se -pp 80
 
 */
 
+//console.log("server.js process.argv=" + JSON.stringify(process.argv));
+
+var getArg = require("../shared/getArg.js");
+
+var LOGLEVEL = getArg(["ll", "loglevel"]) || 7; // Will show log messages lower then or equal to this number
+var log; // Using small caps because it looks and feels better
+(function setLogginModule() { // Self calling function to not clutter script scope
+	// Enhanced console.log ...
+	var logModule = require("../shared/log.js");
+
+	logModule.setLogLevel(LOGLEVEL);
+	log = logModule.log;
+
+	var logFile = getArg(["log", "logfile"]) || null; // default: Write to stdout, if specified write to a file
+
+	if(logFile) logModule.setLogFile(logFile);
+
+})();
+
 // Declare modules here as a OPTIMIZATION
 var module_fs = require("fs");
 var module_chownr = require("chownr");
@@ -53,27 +72,6 @@ catch(err) {
 	log("Unable to load optional module(s): " + err.message);
 }
 
-
-
-
-//console.log("server.js process.argv=" + JSON.stringify(process.argv));
-
-var getArg = require("../shared/getArg.js");
-
-var LOGLEVEL = getArg(["ll", "loglevel"]) || 7; // Will show log messages lower then or equal to this number
-var log; // Using small caps because it looks and feels better
-(function setLogginModule() { // Self calling function to not clutter script scope
-	// Enhanced console.log ...
-	var logModule = require("../shared/log.js");
-	
-	logModule.setLogLevel(LOGLEVEL);
-	log = logModule.log;
-	
-	var logFile = getArg(["log", "logfile"]) || null; // default: Write to stdout, if specified write to a file
-	
-	if(logFile) logModule.setLogFile(logFile);
-	
-})();
 
 var nodeVersion = parseInt(process.version.match(/v(\d*)\./)[1]);
 var testedNodeVersions = [0,4,6,8,10];
