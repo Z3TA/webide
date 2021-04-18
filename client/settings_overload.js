@@ -46,6 +46,8 @@
 	
 */
 
+console.log("settings_overload: loaded settings_overload.js");
+
 (function() { // Self calling function to not clutter global scope
 	"use strict";
 	
@@ -58,6 +60,8 @@
 	var verySlowBrowser = false;
 	var loadFont = [];
 	var whenFontLoaded = [];
+
+	var loadCSS_error = false;
 
 	// These timers are cleared in the window.onload event...
 	var slowLoad = window.setTimeout( function() {
@@ -76,7 +80,8 @@
 		
 		if(err) {
 console.error(err);
-return makeGlyphWidthDetector();
+			loadCSS_error = err;
+			return makeGlyphWidthDetector();
 		}
 
 		if(typeof whenFontLoaded != "function") return makeGlyphWidthDetector();
@@ -134,7 +139,7 @@ return makeGlyphWidthDetector();
 			CLIENT.cmdTimeout = CLIENT.pingTimeout * 6;
 			
 if(webFontLoading != "ubuntu") { // Always load the ubuntu font because it will be downloaded by the service worker!
-			console.warn("settings_overload: Not loading font because browser is too slow!");
+				console.warn("settings_overload: Not loading font because browser is too slow! webFontLoading=" + webFontLoading);
 			return;
 }
 		}
@@ -145,7 +150,7 @@ if(webFontLoading != "ubuntu") { // Always load the ubuntu font because it will 
 		}
 
 		if(typeof loadFont != "function") {
-			console.log("settings_overload: No web font will be loaded!");
+			console.log("settings_overload: No web font will be loaded because typeof loadFont = " + (typeof loadFont) + "!");
 			return;
 		}
 		
@@ -318,7 +323,10 @@ EDITOR.settings.style.font = "LiberationMono";
 				}
 				catch(err) {
 					if(err) {
-						debug("Failed to load font: " + err.message);
+						debug("Failed to load font (" + webFontLoading + ")  error: " + err.message);
+
+						webFontLoading = null;
+						loadCSS_error = err;
 					}
 				}
 			};
@@ -333,8 +341,8 @@ EDITOR.settings.style.font = "LiberationMono";
 					
 					// Text has a different width if it's antialiased!
 					var antialias = detectAntialias();
-if(antialias) {
-debug("Antialias detected! Updating grid width");
+					if(antialias) {
+						debug("Antialias detected! Updating grid width");
 EDITOR.settings.gridWidth = 7.5;
 }
 					
@@ -396,8 +404,6 @@ webFontLoading = "DejaVuSansMono";
 		// So Consolas wont look that good ...
 		// Nor does Internet Explorer support custom fonts (unless on localhost)!
 		
-		debug("Using web safe font");
-		
 		// We better use a web safe font in the browser
 		
 		
@@ -408,6 +414,7 @@ webFontLoading = "DejaVuSansMono";
 		EDITOR.settings.gridHeight = 23;
 		EDITOR.settings.gridWidth = 9;
 		
+		debug("Using web safe font (" + EDITOR.settings.style.font + ")");
 		
 		var width = parseInt(window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth);
 		var height = parseInt(window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight);
@@ -437,12 +444,13 @@ webFontLoading = "DejaVuSansMono";
 	function debug(msg) {
 		
 		console.log("settings_overload: debug: " + msg);
-		return;
+		if(! QUERY_STRING["debugFont"] ) return;
 		
 		// Because Edge and Firefox's Developer tools are so freaking slow
 		alert(msg + "\nRUNTIME=" + RUNTIME + "\nBROWSER=" + BROWSER + "\nprocess.platform=" + process.platform + "\n" +
 "MSWIN=" + MSWIN + " LINUX=" + LINUX + " MAC=" + MAC + " MSIE=" + MSIE + "\n" +
-		"ligatures=" + ligatures + "\nwindow.devicePixelRatio=" + window.devicePixelRatio + "\n");
+		"ligatures=" + ligatures + "\nwindow.devicePixelRatio=" + window.devicePixelRatio + "\n" +
+		"loadCSS_error=" + (loadCSS_error && loadCSS_error.message));
 		
 	}
 	
