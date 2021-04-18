@@ -1,0 +1,20 @@
+
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg">
+
+	<rect x="0" y="0" width="32" height="32" fill="#fdffe7" />
+
+	<path stroke="#1c00a0" stroke-width="3" fill="none" d="
+	M 18,8
+	L 8 15
+	L 18 23
+	" />
+
+	<path stroke="#000000" stroke-width="2" fill="none" d="
+	M 22,1
+	L 22 30
+	L 27 30
+	" />
+
+</svg>
+
