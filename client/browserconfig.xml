@@ -3,12 +3,12 @@
     <msapplication>
         <tile>
 			
-			<square70x70logo src="/gfx/mstile-70x70.png"/>
-			<square150x150logo src="/gfx/mstile-150x150.png"/>
-			<wide310x150logo src="/gfx/mstile-310x150.png"/>
-			<square310x310logo src="/gfx/mstile-310x310.png"/>
+<square70x70logo src="/gfx/icon70x70.png"/>
+<square150x150logo src="/gfx/icon150x150.png"/>
+<wide310x150logo src="/gfx/icon_wide310x150.png"/>
+<square310x310logo src="/gfx/logo310x310.png"/>
 			
-            <TileColor>#f3e036</TileColor>
-        </tile>
+<TileColor>#ffffff</TileColor>
+</tile>
     </msapplication>
 </browserconfig>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 310 150" version="1.1" xmlns="http://www.w3.org/2000/svg">
+		
+	<rect x="0" y="0" width="310" height="150" fill="#ffffff" stroke="#eaeaec" stroke-width="3"/>
+
+	<rect x="1" y="24" width="308" height="40" fill="#fdffe7" />
+	
+	<path stroke="#1c00a0" stroke-width="3" fill="none" d="
+	M 25,35
+	L 13 44
+	L 25 54
+	" />
+
+	<path stroke="#000000" stroke-width="3" fill="none" d="
+	M 31,25
+	L 31 61
+	L 37 61
+	" />
+	
+</svg>
