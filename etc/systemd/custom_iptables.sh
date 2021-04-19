@@ -10,6 +10,16 @@
 iptables -F
 ip6tables -F
 
+
+# Block crypto miners
+# mine.c3pool.com
+# note: ip6tables wants ipv6 IP
+iptables -A OUTPUT -d 18.130.178.39 -j REJECT
+iptables -A OUTPUT -d 51.79.220.193 -j REJECT
+iptables -A INPUT -s 18.130.178.39 -j DROP
+iptables -A INPUT -s 51.79.220.193 -j DROP
+
+
 # Set default chain policies
 ip6tables -P INPUT ACCEPT
 iptables -P INPUT ACCEPT
@@ -157,14 +167,6 @@ iptables -A INPUT -p tcp --dport 8103 -m state --state NEW -j ACCEPT
 iptables -A OUTPUT -p tcp -d 153.92.126.143 --dport 25 -j ACCEPT
 ip6tables -A OUTPUT -p tcp --dport 25 -j REJECT
 iptables -A OUTPUT -p tcp --dport 25 -j REJECT
-
-# Block crypto miners
-# mine.c3pool.com
-# note: ip6tables wants ipv6 IP
-iptables -A OUTPUT -d 18.130.178.39 -j REJECT
-iptables -A OUTPUT -d 51.79.220.193 -j REJECT
-
-
 
 
 # Reject all incoming
