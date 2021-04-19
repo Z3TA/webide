@@ -9,12 +9,12 @@
   "description": "Editor/IDE for creating progressive web apps, and web sites.",
   "icons": [
     {
-      "src": "/gfx/android-chrome-192x192.png",
+      "src": "/gfx/icon192x192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "/gfx/android-chrome-512x512.png",
+      "src": "/gfx/icon512x512.png",
       "sizes": "512x512",
       "type": "image/png"
     }

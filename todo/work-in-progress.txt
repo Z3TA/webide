@@ -3,6 +3,8 @@
 What I'm working on
 -------------------
 
+inkscape -z -w 192 -h 192 icon.svg -e icon192x192.png
+
 When I download a file in my browser, I want it to be saved in webide...
 
 todo: udate icons with the new icon.svg
