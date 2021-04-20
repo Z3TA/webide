@@ -1425,17 +1425,25 @@ if(EDITOR.files.hasOwnProperty(path)) throw new Error("path=" + path + " already
 				
 				
 				var disableParsing = file.disableParsing;
+				//console.log("EDITOR.openFile: (path=" + path + ") disableParsing=", disableParsing)
 				if(disableParsing !== undefined) Object.defineProperty(file, "disableParsing", {get: function get() { return disableParsing; }, set: function trap() { throw new Error(trapErrorMsg + " (offending property is disableParsing)") }});
 
+				//console.log("EDITOR.openFile: (path=" + path + ") file.disableParsing=", file.disableParsing)
 				
+				//console.log("EDITOR.openFile: (path=" + path + ") disableParsing==file.disableParsing ? " + (disableParsing == file.disableParsing));
+
 				// At last, call the function(s) to be run after the file has been opened
+				// gotcha: If there is an error in the callback, the bug trap wont be removed!
 				callCallbacks(null, file);
 				
+				//console.log("EDITOR.openFile: (path=" + path + ") disableParsing=", disableParsing)
+
 				// Remove bug traps
 				if(disableParsing !== undefined) {
 					delete file.disableParsing;
 					file.disableParsing = disableParsing;
-}
+					//console.log("EDITOR.openFile: (path=" + path + ") Removed bug trap for file.disableParsing as set original file.disableParsing=", file.disableParsing)
+				}
 				
 			}
 		}
