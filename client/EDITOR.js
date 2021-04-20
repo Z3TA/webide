@@ -1425,7 +1425,7 @@ if(EDITOR.files.hasOwnProperty(path)) throw new Error("path=" + path + " already
 				
 				
 				var disableParsing = file.disableParsing;
-				if(disableParsing !== undefined) Object.defineProperty(file, "disableParsing", {get: function get() { return disableParsing; }, set: function trap() { throw new Error(trapErrorMsg) }});
+				if(disableParsing !== undefined) Object.defineProperty(file, "disableParsing", {get: function get() { return disableParsing; }, set: function trap() { throw new Error(trapErrorMsg + " (offending property is disableParsing)") }});
 
 				
 				// At last, call the function(s) to be run after the file has been opened
@@ -6494,15 +6494,15 @@ var renderWidth = EDITOR.canvasContext.measureText(char).width;
 return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWidth*10));
 }
 	
-	EDITOR.autoComplete = function autoComplete(file, combo, character, charCode, keyPushDirection) {
+	EDITOR.autoComplete = function autoComplete(file) {
 		/*
 			An abstraction that lets you have many auto-complete functions. 
 			Register using: EDITOR.on("autoComplete", function)
 			
-			The function should return an array with possible auto-complete options, or optionally, an array of arrays 
+			The listener for autoComplete should return an array with possible auto-complete options, or optionally, an array of arrays 
 			where the second index is how many characters the caret should be moved left - after inserting the text.
 			
-			Ex: [word1, word2, word3] or [[wordl, n], [word2, n]]
+			Example: [word1, word2, word3] or [[wordl, n], [word2, n]]
 			
 		*/
 		

@@ -3,7 +3,45 @@
 What I'm working on
 -------------------
 
+Was going to write a plugin that shows the file path in the url/adress bar hash
+But got annoyed that the editor placed the carret wrong when auto-completed function()
+Wrote a test
+But get error when trying to reload a file as plain text...
+
+
+Can't reload file as plain text! complains about prop overload
+
+Writing test case for autocomplation of function() {}
+
+
+---
+
+sugg: Show current file path as hash in the URL ? # then open that file if it's in the url !?
+https://webide.se/#/home/user/foo.txt
+
+---
+
+When scrolled to the right in a file with long lines and saving using Ctrl+S 
+it scrolls the text further to the left, while parenthesis highligtning in still on the old spot
+
+---
+
+top -p `pgrep -d "," xmrig`
+
+Got a modal about terminal exit code that was not very helpful...
+
+Arrows don't work in terminal when in less, for example in git diff !!
+
+åäö doesn't work in the terminal!!
+
+---
+
 todo: Stop polling for cpu and memory graph when afk!
+
+---
+
+polishing: When double click on a word "11px" only select the numeric part, if the word ends with px or rem!
+(also select the 2. in decimal numbers like 2.5rem)
 
 ---
 
@@ -34,6 +72,17 @@ todo: Detect if a font failed to load by making a new canvas and printing text w
 and if they are the same it probably means something...
 
 ubunto font loaded on Windows on Chrome, but did not download!
+
+---
+
+When trying to run "git commit" in terminal...
+
+git commit
+hint: Waiting for your editor to close the file... Connection error: connect ECONNREFUSED 8103.johan.webide.se
+Edit /home/johan//.webide/webider.json or
+try connecting to another host using -host and -port flags
+error: There was a problem with the editor 'webide'.
+Please supply the message using either -m or -F option.
 
 ---
 

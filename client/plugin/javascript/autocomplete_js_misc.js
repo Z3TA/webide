@@ -19,8 +19,10 @@
 
 		var lbLength = file.lineBreak.length;
 
+		console.log("autoCompleteJsMisc: lbLength=" + lbLength + " whiteSpace.length=" + whiteSpace.length + "  ");
+
 		if("function".substr(0, wordLength) == word) {
-			options.push(["function () {" + file.lineBreak + file.lineBreak + whiteSpace + "}", 4+lbLength*2+whiteSpace.length]);
+			options.push(["function () {" + file.lineBreak + file.lineBreak + whiteSpace + "}", 5+lbLength*2+whiteSpace.length]);
 		}
 		else if("for".substr(0, wordLength) == word) {
 			options.push(["for (var i=0; i<.length; i++) {" + file.lineBreak + file.lineBreak + whiteSpace + "}", 16+lbLength*2+whiteSpace.length]);
@@ -35,5 +37,55 @@
 		return options;
 	}
 	
+
+	// TEST-CODE-START
+
+	EDITOR.addTest(1, false, function testAutoCompleteFunctionStr(callback) {
+
+		EDITOR.openFile("testAutoCompleteFunctionStr.js", "functio\n", function(err, file) {
+			if(err) throw err;
+
+			file.moveCaretToIndex(7);
+
+			EDITOR.autoComplete();
+
+			UTIL.assert(file.rowText(0), "function () {");
+			UTIL.assert(file.caret.col, 9);
+
+			EDITOR.closeFile(file);
+
+			EDITOR.openFile("testAutoCompleteFunctionStr2.js", "{\n\t{\n\t\tfunctio\n", function(err, file) {
+				if(err) throw err;
+
+				file.moveCaretToIndex(14);
+
+				EDITOR.autoComplete();
+
+				UTIL.assert(file.rowText(2), "function () {");
+				UTIL.assert(file.caret.col, 9);
+
+				EDITOR.closeFile(file);
+
+				EDITOR.openFile("testAutoCompleteFunctionStr3.js", "{\r\n\t{\r\n\t\tfunctio\r\n", function(err, file) {
+					if(err) throw err;
+
+					file.moveCaretToIndex(16);
+
+					EDITOR.autoComplete();
+
+					UTIL.assert(file.rowText(2), "function () {");
+					UTIL.assert(file.caret.col, 9);
+
+					callback(true);
+
+				});
+
+			});
+
+		});
+
+	});
+
+	// TEST-CODE-END
 	
 })();
