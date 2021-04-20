@@ -21,6 +21,22 @@
 
 		console.log("autoCompleteJsMisc: lbLength=" + lbLength + " whiteSpace.length=" + whiteSpace.length + "  ");
 
+		/*
+			math skill: 
+			} = 1 char
+			white space before } = whiteSpace
+			two lines breaks = lbLength*2
+			() { = 4 chars
+			
+			gotcha: EDITOR.autocomplete uses file.moveCaretLeft for stepping,
+			so if the file is loaded as code, it wont step over white space!
+			and line break counts as one step even though it's CRLF
+		*/
+		if(file.fullAutoIndentation) {
+			whiteSpace = "";
+			lbLength = 1;
+		}
+
 		if("function".substr(0, wordLength) == word) {
 			options.push(["function () {" + file.lineBreak + file.lineBreak + whiteSpace + "}", 5+lbLength*2+whiteSpace.length]);
 		}
@@ -49,7 +65,7 @@
 
 			EDITOR.autoComplete();
 
-			UTIL.assert(file.rowText(0), "function () {");
+			UTIL.assert(file.rowText(0, false), "function () {");
 			UTIL.assert(file.caret.col, 9);
 
 			EDITOR.closeFile(file);
@@ -61,7 +77,7 @@
 
 				EDITOR.autoComplete();
 
-				UTIL.assert(file.rowText(2), "function () {");
+				UTIL.assert(file.rowText(2, false), "function () {");
 				UTIL.assert(file.caret.col, 9);
 
 				EDITOR.closeFile(file);
@@ -73,7 +89,7 @@
 
 					EDITOR.autoComplete();
 
-					UTIL.assert(file.rowText(2), "function () {");
+					UTIL.assert(file.rowText(2, false), "function () {");
 					UTIL.assert(file.caret.col, 9);
 
 					callback(true);
