@@ -3,8 +3,10 @@
 #
 #  Rules for ACCEPT should always be placed before DROP or REJECT!
 #
+# gotcha: Blocking rules (preventing SMTP spam etc) also needs to be in FORWARD table!!
 #
-
+# note: ip6tables wants ipv6 IP
+#
 
 # Reset
 iptables -F
@@ -13,14 +15,27 @@ ip6tables -F
 
 # Block crypto miners
 # mine.c3pool.com
-# note: ip6tables wants ipv6 IP
 iptables -A OUTPUT -d 18.130.178.39 -j REJECT
 iptables -A OUTPUT -d 51.79.220.193 -j REJECT
 iptables -A INPUT -s 18.130.178.39 -j DROP
 iptables -A INPUT -s 51.79.220.193 -j DROP
+iptables -A FORWARD -d 18.130.178.39 -j DROP
+iptables -A FORWARD -d 51.79.220.193 -j DROP
+
+# iptables -I FORWARD 1 -d 51.79.220.193 -j DROP
+
+
+# Prevent sending spam
+iptables -A OUTPUT -p tcp -d 153.92.126.143 --dport 25 -j ACCEPT
+ip6tables -A OUTPUT -p tcp --dport 25 -j REJECT
+iptables -A OUTPUT -p tcp --dport 25 -j REJECT
+
+ip6tables -A FORWARD -p tcp --dport 25 -j REJECT
+iptables -A FORWARD -p tcp --dport 25 -j REJECT
 
 
 # Set default chain policies
+# Does these ignore the blocks further down !?!?
 ip6tables -P INPUT ACCEPT
 iptables -P INPUT ACCEPT
 
@@ -31,8 +46,11 @@ ip6tables -P OUTPUT ACCEPT
 iptables -P OUTPUT ACCEPT
 
 
+
+
 # Needed so that Linux network namespaces can get responses
-iptables -t nat -A POSTROUTING -s 10.0.0.0/16 -j MASQUERADE
+#iptables -t nat -A POSTROUTING -s 10.0.0.0/16 -j MASQUERADE
+# Do we need to have the POSTROUTING here or should other rules come first !?
 
 
 # Accept already established connections
@@ -153,20 +171,14 @@ ip6tables -A OUTPUT -p tcp --dport 514 -m state --state NEW -j ACCEPT
 iptables -A OUTPUT -p tcp --dport 514 -m state --state NEW -j ACCEPT
 
 
-# Package forwarding, needed for Linux network namespace bridges
-iptables -t nat -A POSTROUTING -s 10.0.0.0/16 -j MASQUERADE
-
-
-
 # Allow webider (editing remote files via local editor)
 ip6tables -A INPUT -p tcp --dport 8103 -m state --state NEW -j ACCEPT
 iptables -A INPUT -p tcp --dport 8103 -m state --state NEW -j ACCEPT
 
 
-# Prevent sending spam
-iptables -A OUTPUT -p tcp -d 153.92.126.143 --dport 25 -j ACCEPT
-ip6tables -A OUTPUT -p tcp --dport 25 -j REJECT
-iptables -A OUTPUT -p tcp --dport 25 -j REJECT
+
+# Package forwarding, needed for Linux network namespace bridges
+iptables -t nat -A POSTROUTING -s 10.0.0.0/16 -j MASQUERADE
 
 
 # Reject all incoming
