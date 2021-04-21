@@ -14,7 +14,9 @@
 
 
 	function teest() {
+		alert("test!");
 
+		return PREVENT_DEFAULT;
 	}
 
 })();
