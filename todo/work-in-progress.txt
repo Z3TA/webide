@@ -3,18 +3,11 @@
 What I'm working on
 -------------------
 
-Was going to write a plugin that shows the file path in the url/adress bar hash
-But got annoyed that the editor placed the carret wrong when auto-completed function()
-Wrote a test
-But get error when trying to reload a file as plain text...
-
-
-Can't reload file as plain text! complains about prop overload
-
-Writing test case for autocomplation of function() {}
-
 
 ---
+
+I often look at the top for the full path, but when running in the browser we can't control the top bar (only tabs)
+So use the free space in the URL to show info!
 
 sugg: Show current file path as hash in the URL ? # then open that file if it's in the url !?
 https://webide.se/#/home/user/foo.txt
@@ -23,6 +16,10 @@ https://webide.se/#/home/user/foo.txt
 
 When scrolled to the right in a file with long lines and saving using Ctrl+S 
 it scrolls the text further to the left, while parenthesis highligtning in still on the old spot
+
+---
+
+todo: js parser: Handle function name destgructuring eg. var foo {bar() {}} don't need the function keyword!
 
 ---
 
