@@ -58,8 +58,8 @@ console.log("settings_overload: loaded settings_overload.js");
 	
 	var slowBrowser = false;
 	var verySlowBrowser = false;
-	var loadFont = [];
-	var whenFontLoaded = [];
+	var loadFont;
+	var whenFontLoaded;
 
 	var loadCSS_error = false;
 
@@ -73,89 +73,6 @@ console.log("settings_overload: loaded settings_overload.js");
 		verySlowBrowser = true;
 		console.warn("settings_overload: Browser is VERY slow");
 	}, 1000 );
-	
-	
-	// note: The css file is loaded in the window.onload event.
-	function cssLoadedMaybe(err) {
-		if(err) {
-			console.error(err);
-			loadCSS_error = err;
-			return makeGlyphWidthDetector();
-		}
-
-		if(typeof whenFontLoaded != "function") return makeGlyphWidthDetector();
-		
-		if(document.fonts && document.fonts.ready) {
-			document.fonts.ready.then(function () {
-				
-				console.log("settings_overload: All fonts ready!");
-				
-				whenFontLoaded();
-				
-				makeGlyphWidthDetector();
-				
-			});
-		}
-		else {
-			// Re-render after the font have fully loaded (we never know when)
-			
-			var time = 300;
-			if(slowBrowser) time = 1000;
-			if(verySlowBrowser) time = 5000;
-			
-			setTimeout(function renderAfterFontLoad() {
-				
-				console.log("settings_overload: All fonts ready maybe!?");
-				
-				whenFontLoaded();
-				
-				makeGlyphWidthDetector();
-				
-			}, time);
-		}
-		
-		function makeGlyphWidthDetector() {
-			EDITOR.glyphWidth = EDITOR.makeGlyphWidthDetector();
-			
-			EDITOR.renderNeeded();
-			EDITOR.render();
-		}
-		
-	}
-	
-	
-	window.addEventListener( 'load', function() {
-		window.clearTimeout(slowLoad);
-		window.clearTimeout(verySlowLoad);
-		
-		if(slowBrowser) {
-			CLIENT.pingTimeout = 3000;
-			CLIENT.cmdTimeout = CLIENT.pingTimeout * 6;
-		}
-		
-		if(verySlowBrowser) {
-			CLIENT.pingTimeout = 6000;
-			CLIENT.cmdTimeout = CLIENT.pingTimeout * 6;
-			
-if(webFontLoading != "ubuntu") { // Always load the ubuntu font because it will be downloaded by the service worker!
-				console.warn("settings_overload: Not loading font because browser is too slow! webFontLoading=" + webFontLoading);
-			return;
-}
-		}
-		
-		if( QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("font") != -1 ) {
-			console.warn("settings_overload: Not loading font because font is in the disable query string!");
-			return;
-		}
-
-		if(typeof loadFont != "function") {
-			console.log("settings_overload: No web font will be loaded because typeof loadFont = " + (typeof loadFont) + "!");
-			return;
-		}
-		
-		loadFont(); // Loads the css file containing the font
-		
-	}, false );
 	
 	console.log("settings_overload: RUNTIME=" + RUNTIME + " browser=" + browser + " process.platform=" + process.platform + 
 	" ligatures=" + ligatures + " window.devicePixelRatio=" + window.devicePixelRatio);
@@ -287,11 +204,7 @@ EDITOR.settings.style.font = "Fira Code";
 			Font's seem to work nice on localhost/127.0.0.1 in IE, but not when using a domain ...
 */
 		
-
-		
 		debug("Loading nice font ... LCD=" + EDITOR.settings.sub_pixel_antialias + " platform=" + process.platform);
-		
-		
 		
 		if(MSWIN) {
 			// Windows fonts are rendered more hard and slightly smaller then on Linux and Mac, so use a more roundish font
@@ -420,6 +333,86 @@ webFontLoading = "DejaVuSansMono";
 		
 	}
 	
+	window.addEventListener( 'load', function() {
+		window.clearTimeout(slowLoad);
+		window.clearTimeout(verySlowLoad);
+
+		if(slowBrowser) {
+			CLIENT.pingTimeout = 3000;
+			CLIENT.cmdTimeout = CLIENT.pingTimeout * 6;
+		}
+
+		if(verySlowBrowser) {
+			CLIENT.pingTimeout = 6000;
+			CLIENT.cmdTimeout = CLIENT.pingTimeout * 6;
+
+			if(webFontLoading != "ubuntu") { // Always load the ubuntu font because it will be downloaded by the service worker!
+				console.warn("settings_overload: Not loading font because browser is too slow! webFontLoading=" + webFontLoading);
+				return makeGlyphWidthDetector();
+			}
+		}
+
+		if( QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("font") != -1 ) {
+			console.warn("settings_overload: Not loading font because font is in the disable query string!");
+			return makeGlyphWidthDetector();
+		}
+
+		if(typeof loadFont != "function") {
+			console.log("settings_overload: No web font will be loaded because typeof loadFont = " + (typeof loadFont) + "!");
+			return makeGlyphWidthDetector();
+		}
+
+		loadFont(); // Loads the css file containing the font
+
+	}, false );
+
+	// note: The css file is loaded in the window.onload event.
+	function cssLoadedMaybe(err) {
+		if(err) {
+			console.error(err);
+			loadCSS_error = err;
+			return makeGlyphWidthDetector();
+		}
+
+		if(typeof whenFontLoaded != "function") return makeGlyphWidthDetector();
+
+		if(document.fonts && document.fonts.ready) {
+			document.fonts.ready.then(function () {
+
+				console.log("settings_overload: All fonts ready!");
+
+				whenFontLoaded();
+
+				return makeGlyphWidthDetector();
+
+			});
+		}
+		else {
+			// Re-render after the font have fully loaded (we never know when)
+
+			var time = 300;
+			if(slowBrowser) time = 1000;
+			if(verySlowBrowser) time = 5000;
+
+			setTimeout(function renderAfterFontLoad() {
+
+				console.log("settings_overload: All fonts ready maybe!?");
+
+				whenFontLoaded();
+
+				return makeGlyphWidthDetector();
+
+			}, time);
+		}
+	}
+
+	function makeGlyphWidthDetector() {
+		EDITOR.glyphWidth = EDITOR.makeGlyphWidthDetector();
+
+		EDITOR.renderNeeded();
+		EDITOR.render();
+	}
+
 	function debug(msg) {
 		
 		console.log("settings_overload: debug: " + msg);
@@ -429,6 +422,7 @@ webFontLoading = "DejaVuSansMono";
 		alert(msg + "\nRUNTIME=" + RUNTIME + "\nBROWSER=" + BROWSER + "\nprocess.platform=" + process.platform + "\n" +
 "MSWIN=" + MSWIN + " LINUX=" + LINUX + " MAC=" + MAC + " MSIE=" + MSIE + "\n" +
 		"ligatures=" + ligatures + "\nwindow.devicePixelRatio=" + window.devicePixelRatio + "\n" +
+		"slowBrowser=" + slowBrowser + " verySlowBrowser=" + verySlowBrowser + "\n" +
 		"loadCSS_error=" + (loadCSS_error && loadCSS_error.message));
 		
 	}
