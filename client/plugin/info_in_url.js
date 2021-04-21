@@ -1,22 +1,39 @@
 (function() {
+	/*
 
+		todo: Load file in the hash when editor starts!
+
+
+	*/
 	EDITOR.plugin({
-		desc: "Show file path in URL",
+		desc: "Show file info in URL",
 		load: function loadUrlFile() {
 
-			EDITOR.bindKey({desc: "teeest", key: "tab", combo: SHIFT, fun: teest});
+			EDITOR.on("fileShow", showInfoInUrl);
 
 		},
 		unload: function unloadUrlFile() {
-
+			EDITOR.removeEvent("fileShow", showInfoInUrl);
 		}
 	});
 
+	function showInfoInUrl(file) {
+		if(!file) return;
 
-	function teest() {
-		alert("test!");
+		var urlPath = window.location.search + "#" + file.path;
 
-		return PREVENT_DEFAULT;
+		window.history.pushState({"filePath": file.path}, file.path, urlPath);
+
 	}
+
+	window.onpopstate = function browserNavigation(ev){
+		console.log("info_in_url: browserNavigation: ev=", ev);
+		if(ev.state) {
+			console.log("info_in_url:browserNavigation: ev.state=", ev.state);
+		
+			// todo: Switch to the file in the adress hash!
+
+		}
+	};
 
 })();
