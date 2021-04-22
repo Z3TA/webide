@@ -26,6 +26,15 @@
 
 			EDITOR.on("moveCaret", rememberCaretPosition);
 
+			// No need to show stuff in the address if the user can't see the address eg. standalone mode
+			if(DISPLAY_MODE == "browser") {
+				EDITOR.on("fileShow", showInfoInUrl);
+
+				window.addEventListener("popstate", browserNavigation);
+			}
+
+
+
 		},
 		unload: function unloadGoBack() {
 
@@ -39,8 +48,32 @@
 			lastJump = {};
 			lastFile = undefined;
 
+			if(DISPLAY_MODE == "browser") {
+				EDITOR.removeEvent("fileShow", showInfoInUrl);
+				window.removeEventListener("popstate", browserNavigation);
+			}
+
 		}
 	});
+
+	function browserNavigation(ev){
+		console.log("info_in_url: browserNavigation: ev=", ev);
+		if(ev.state) {
+			console.log("info_in_url:browserNavigation: ev.state=", ev.state);
+
+			// todo: Switch to the file in the adress hash!
+
+		}
+	};
+
+	function showInfoInUrl(file) {
+		if(!file) return;
+
+		var urlPath = window.location.search + "#" + file.path;
+
+		window.history.pushState({"filePath": file.path}, file.path, urlPath);
+
+	}
 
 	function moveCaretBackToLastPosition2(file) {
 		return moveCaretBackToLastPosition(file);
