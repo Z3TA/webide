@@ -1,6 +1,9 @@
 /*
 
+	I often look at the top for the full path, but when running in the browser we can't control the top bar (only tabs)
+	So use the free space in the URL to show info!
 
+	#SCP-branch#file-PATH#Row (only change row when making a large jump, the we can use browsers back button to go back!)
 
 */
 
@@ -69,9 +72,9 @@
 	function showInfoInUrl(file) {
 		if(!file) return;
 
-		var urlPath = window.location.search + "#" + file.path;
+		var urlPath = window.location.search + "#" + file.path + "#" + file.caret.row;
 
-		window.history.pushState({"filePath": file.path}, file.path, urlPath);
+		window.history.pushState({"filePath": file.path, row: file.caret.row}, file.path, urlPath);
 
 	}
 

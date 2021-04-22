@@ -7,6 +7,8 @@ What I'm working on
 
 ---
 
+hmm, we could also use the browser back/forward buttons for undo/redo!
+
 I often look at the top for the full path, but when running in the browser we can't control the top bar (only tabs)
 So use the free space in the URL to show info!
 
