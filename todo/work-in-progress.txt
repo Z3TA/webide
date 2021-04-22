@@ -10,6 +10,8 @@ What I'm working on
 I often look at the top for the full path, but when running in the browser we can't control the top bar (only tabs)
 So use the free space in the URL to show info!
 
+#SCP-branch#file-PATH#Row (only change row when making a large jump, the we can use browsers back button to go back!)
+
 sugg: Show current file path as hash in the URL ? # then open that file if it's in the url !?
 https://webide.se/#/home/user/foo.txt
 
