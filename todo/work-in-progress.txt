@@ -3,7 +3,14 @@
 What I'm working on
 -------------------
 
+How to implement projects!?
+What to do with open terminals ?
 
+Many plugins use EDITOR.files as a source of truth
+
+
+
+Would be really nice if you could switch between projects, and keep all open file tabs and working dir
 
 ---
 

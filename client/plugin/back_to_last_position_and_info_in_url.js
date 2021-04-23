@@ -3,7 +3,10 @@
 	I often look at the top for the full path, but when running in the browser we can't control the top bar (only tabs)
 	So use the free space in the URL to show info!
 
-	#SCP-branch#file-PATH#Row (only change row when making a large jump, the we can use browsers back button to go back!)
+	#project#SCP-branch#file-PATH#Row (only change row when making a large jump, the we can use browsers back button to go back!)
+
+	Git branch names can't start with /
+
 
 */
 
@@ -15,6 +18,11 @@
 	var lastFile;
 	var winMenuMoveBack;
 	var lastCaretPos = {}; // {index, row, col}
+
+	var PROJECT_NAME = "";
+	var BRANCH_NAME = "";
+	VAR PATH = "";
+	var ROW = "";
 
 	EDITOR.plugin({
 		desc: "Move caret back to last position",
@@ -59,6 +67,28 @@
 		}
 	});
 
+	function setUrl() {
+
+		if(DISPLAY_MODE == "standalone") return; // Don't bother if we can't see the URL or back/forward buttons
+
+		var state = {
+			project: PROJECT_NAME,
+			branch: BRANCH_NAME,
+			path: PATH,
+			row: ROW
+		};
+
+		var title = PATH; // Not used by any browser!?
+
+		var url = window.location.search;
+		if(PROJECT_NAME) url = url + "#" + PROJECT_NAME;
+		if(BRANCH_NAME) url = url + "#" + BRANCH_NAME;
+		if(PATH) url = url + "#" + PATH;
+		if(ROW) url = url + "#" + ROW;
+
+		window.history.pushState(state, title, url);
+	}
+
 	function browserNavigation(ev){
 		console.log("info_in_url: browserNavigation: ev=", ev);
 		if(ev.state) {
@@ -72,9 +102,12 @@
 	function showInfoInUrl(file) {
 		if(!file) return;
 
-		var urlPath = window.location.search + "#" + file.path + "#" + file.caret.row;
+		PATH = file.path;
 
-		window.history.pushState({"filePath": file.path, row: file.caret.row}, file.path, urlPath);
+		if(lastJump.hasOwnProperty(file.path)) ROW = lastJump[file.path].row
+		else ROW = file.caret.row;
+
+		setUrl();
 
 	}
 

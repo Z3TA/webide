@@ -188,6 +188,8 @@ EDITOR.eventListeners = { // Use EDITOR.on to add listeners to these events:
 		autoComplete: [],
 		keyPressed: [],
 		changeWorkingDir: [],
+	changeProject: [],
+	changeBranch: [],
 		bootstrap: [],
 		storageReady: [], // When server storage is ready to be used
 		commitTool: [],
@@ -369,12 +371,20 @@ ctxMenuVisibleOnce = true;
 	var workingDirectory; // Private variable
 	var _editorInput = true;
 	var _soundAssist = false;
-	
+	var _project = "default";
+
 	if(!Object.defineProperty) {
 		// Object.defineProperty (ES5) should work in most browsers!
 		alert("Object.defineProperty not available in your browser (" + BROWSER + ") some editor functionality might not work!");
 	}
 	else {
+
+		Object.defineProperty(EDITOR, 'project', {
+			get: function getProjectName() { return _project; },
+			set: function setProjectName(newValue) { throw new Error("Use EDITOR.changeProject() to switch to another project or EDITOR.changeProjectName() to change the name of the current project!"); },
+			enumerable: true
+		});
+
 		Object.defineProperty(EDITOR, 'workingDirectory', {
 			get: function getWorkingDirectory() { return workingDirectory; },
 			set: function setWorkingDirectory(newValue) { throw new Error("Use EDITOR.changeWorkingDir(newDir) to change working directory!"); },
@@ -9678,6 +9688,36 @@ Searches down towards the root, looking for file names
 		//if(n.charAt(n.length-1) == "0" && n.charAt(n.length-2) != ".") n = n.slice(0, -1);
 
 		return n + " " + prefix;
+	}
+
+	EDITOR.projects = {}; // project: {files: [], workingDirectory}
+
+	EDITOR.changeProject = function(projectName) {
+
+		// Stach current project
+		EDITOR.projects[_project] = {files: EDITOR.files, workingDirectory: EDITOR.workingDirectory};
+		
+		if( EDITOR.projects.hasOwnProperty(projectName) ) {
+			// Switch to this project
+			EDITOR.files = EDITOR.projects[projectName].files;
+			EDITOR.changeWorkingDir(EDITOR.projects[projectName].workingDir);
+		}
+		else {
+			// Create new project
+			EDITOR.projects[projectName] = {};
+			EDITOR.projects[projectName].files = EDITOR.files = [];
+			EDITOR.projects[projectName].workingDir = workingDirectory;
+		}
+
+		_project = projectName;
+
+		var f = EDITOR.eventListeners.changeProject.map(funMap);
+		console.log("Calling changeProject listeners (" + f.length + ") _project=" + _project);
+		for(var i=0; i<f.length; i++) {
+			//console.log("function " + UTIL.getFunctionName(f[i]));
+			f[i](_project); // Call function
+		}
+
 	}
 
 	CLIENT.on("connectionClosed", function connectionClosed(protocol, serverAddress) {
