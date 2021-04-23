@@ -103,33 +103,37 @@
 		setUrl();
 	}
 
-	function browserNavigation(ev) {
-		console.log("info_in_url: browserNavigation: ev=", ev);
-		
-		var state = ev.state;
-
-		console.log("info_in_url:browserNavigation: state=", state);
-
-		if(!state) return;
-
-		if(state.project != EDITOR.project) EDITOR.changeProject(state.project);
-		if(state.branch != EDITOR.branch) EDITOR.checkoutSCMBranch(state.branch);
-		if(EDITOR.currentFile && state.path != EDITOR.currentFile.path) EDITOR.showFile(state.path);
-		if(EDITOR.currentFile && state.line != EDITOR.currentFile.currentLine()) EDITOR.currentFile.gotoLine(state.line);
-		
-	};
-
 	function showInfoInUrl(file) {
 		if(!file) return;
 
 		PATH = file.path;
 
 		if(lastJump.hasOwnProperty(file.path)) LINE = lastJump[file.path].row + file.startRow + 1;
-		else LINE = file.caret.row;
+		else LINE = file.currentLine();
 
 		setUrl();
 
 	}
+
+	function browserNavigation(ev) {
+		console.log("browserNavigation: ev=", ev);
+
+		var state = ev.state;
+
+		console.log("browserNavigation: state=", state);
+
+		if(!state) return;
+
+		if(state.project != EDITOR.project) EDITOR.changeProject(state.project);
+		if(state.branch != EDITOR.branch) EDITOR.checkoutSCMBranch(state.branch);
+		if(EDITOR.currentFile && state.path != EDITOR.currentFile.path) EDITOR.showFile(state.path);
+
+		if(EDITOR.currentFile && state.line != EDITOR.currentFile.currentLine()) EDITOR.currentFile.gotoLine(state.line);
+		else {
+			console.log("browserNavigation: EDITOR.currentFile?" + !!EDITOR.currentFile + " EDITOR.currentFile.currentLine()=" + EDITOR.currentFile.currentLine() + " ");
+		}
+
+	};
 
 	function moveCaretBackToLastPosition2(file) {
 		return moveCaretBackToLastPosition(file);
@@ -204,6 +208,9 @@
 
 			// Moving more then visible rows counts as a big jump
 			
+				LINE = file.currentLine();
+				setUrl();
+
 				lastJump[file.path].index = lastCaretPos[file.path].index;
 				lastJump[file.path].row = lastCaretPos[file.path].row;
 				lastJump[file.path].col = lastCaretPos[file.path].col;

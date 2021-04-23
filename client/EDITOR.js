@@ -373,12 +373,20 @@ ctxMenuVisibleOnce = true;
 	var _editorInput = true;
 	var _soundAssist = false;
 	var _project = "default";
+	var _scmBranch = "";
 
 	if(!Object.defineProperty) {
 		// Object.defineProperty (ES5) should work in most browsers!
 		alert("Object.defineProperty not available in your browser (" + BROWSER + ") some editor functionality might not work!");
 	}
 	else {
+
+
+		Object.defineProperty(EDITOR, 'branch', {
+			get: function getProjectName() { return _scmBranch; },
+			set: function setProjectName(newValue) { throw new Error("Use EDITOR.checkoutSCMBranch() to change branch!"); },
+			enumerable: true
+		});
 
 		Object.defineProperty(EDITOR, 'project', {
 			get: function getProjectName() { return _project; },
@@ -9756,6 +9764,8 @@ Searches down towards the root, looking for file names
 });
 
 	CLIENT.on("changeSCMBranch", function changeBranch(branchName) {
+
+		_scmBranch = branchName;
 
 		var f = EDITOR.eventListeners.changeBranch.map(funMap);
 		console.log("Calling changeBranch listeners (" + f.length + ") branchName=" + branchName);
