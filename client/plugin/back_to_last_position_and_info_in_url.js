@@ -21,8 +21,8 @@
 
 	var PROJECT_NAME = "";
 	var BRANCH_NAME = "";
-	VAR PATH = "";
-	var ROW = "";
+	var PATH = "";
+	var LINE = "";
 
 	EDITOR.plugin({
 		desc: "Move caret back to last position",
@@ -40,6 +40,8 @@
 			// No need to show stuff in the address if the user can't see the address eg. standalone mode
 			if(DISPLAY_MODE == "browser") {
 				EDITOR.on("fileShow", showInfoInUrl);
+				EDITOR.on("changeProject", updateProjectInUrl);
+				EDITOR.on("changeBranch", updateBranchInUrl);
 
 				window.addEventListener("popstate", browserNavigation);
 			}
@@ -61,6 +63,8 @@
 
 			if(DISPLAY_MODE == "browser") {
 				EDITOR.removeEvent("fileShow", showInfoInUrl);
+				EDITOR.removeEvent("changeProject", updateProjectInUrl);
+
 				window.removeEventListener("popstate", browserNavigation);
 			}
 
@@ -75,7 +79,7 @@
 			project: PROJECT_NAME,
 			branch: BRANCH_NAME,
 			path: PATH,
-			row: ROW
+			line: LINE
 		};
 
 		var title = PATH; // Not used by any browser!?
@@ -84,19 +88,35 @@
 		if(PROJECT_NAME) url = url + "#" + PROJECT_NAME;
 		if(BRANCH_NAME) url = url + "#" + BRANCH_NAME;
 		if(PATH) url = url + "#" + PATH;
-		if(ROW) url = url + "#" + ROW;
+		if(LINE) url = url + "#" + LINE;
 
 		window.history.pushState(state, title, url);
 	}
 
-	function browserNavigation(ev){
+	function updateBranchInUrl(branchName) {
+		BRANCH_NAME = branchName;
+		setUrl();
+	}
+
+	function updateProjectInUrl(projectName, oldProjectName) {
+		PROJECT_NAME = projectName;
+		setUrl();
+	}
+
+	function browserNavigation(ev) {
 		console.log("info_in_url: browserNavigation: ev=", ev);
-		if(ev.state) {
-			console.log("info_in_url:browserNavigation: ev.state=", ev.state);
+		
+		var state = ev.state;
 
-			// todo: Switch to the file in the adress hash!
+		console.log("info_in_url:browserNavigation: state=", state);
 
-		}
+		if(!state) return;
+
+		if(state.project != EDITOR.project) EDITOR.changeProject(state.project);
+		if(state.branch != EDITOR.branch) EDITOR.checkoutSCMBranch(state.branch);
+		if(EDITOR.currentFile && state.path != EDITOR.currentFile.path) EDITOR.showFile(state.path);
+		if(EDITOR.currentFile && state.line != EDITOR.currentFile.currentLine()) EDITOR.currentFile.gotoLine(state.line);
+		
 	};
 
 	function showInfoInUrl(file) {
@@ -104,8 +124,8 @@
 
 		PATH = file.path;
 
-		if(lastJump.hasOwnProperty(file.path)) ROW = lastJump[file.path].row
-		else ROW = file.caret.row;
+		if(lastJump.hasOwnProperty(file.path)) LINE = lastJump[file.path].row + file.startRow + 1;
+		else LINE = file.caret.row;
 
 		setUrl();
 

@@ -189,8 +189,9 @@ EDITOR.eventListeners = { // Use EDITOR.on to add listeners to these events:
 		keyPressed: [],
 		changeWorkingDir: [],
 	changeProject: [],
-	changeBranch: [],
-		bootstrap: [],
+	changeBranch: [], // I'ts up to the SCM plugins (mercurial/git) to send a changeSCMBranch event to the client!
+	checkoutSCMBranch: [], // Client SCM plugins must listen to this event, which can be called/triggered by any client plugin in order to change SCM branch
+	bootstrap: [],
 		storageReady: [], // When server storage is ready to be used
 		commitTool: [],
 		resolveTool: [],
@@ -381,7 +382,7 @@ ctxMenuVisibleOnce = true;
 
 		Object.defineProperty(EDITOR, 'project', {
 			get: function getProjectName() { return _project; },
-			set: function setProjectName(newValue) { throw new Error("Use EDITOR.changeProject() to switch to another project or EDITOR.changeProjectName() to change the name of the current project!"); },
+			set: function setProjectName(newValue) { throw new Error("Use EDITOR.changeProject() to change project!"); },
 			enumerable: true
 		});
 
@@ -9690,24 +9691,23 @@ Searches down towards the root, looking for file names
 		return n + " " + prefix;
 	}
 
-	EDITOR.projects = {}; // project: {files: [], workingDirectory}
+	EDITOR.checkoutSCMBranch = function(branchName) {
+		// Can be called by any plugin,
+		// SCM plugins should listen for checkoutSCMBranch and change the branch
+
+		var f = EDITOR.eventListeners.checkoutSCMBranch.map(funMap);
+		console.log("Calling checkoutSCMBranch listeners (" + f.length + ") branchName=" + branchName);
+		for(var i=0; i<f.length; i++) {
+			//console.log("function " + UTIL.getFunctionName(f[i]));
+			f[i](branchName); // Call function
+		}
+	}
 
 	EDITOR.changeProject = function(projectName) {
 
-		// Stach current project
-		EDITOR.projects[_project] = {files: EDITOR.files, workingDirectory: EDITOR.workingDirectory};
-		
-		if( EDITOR.projects.hasOwnProperty(projectName) ) {
-			// Switch to this project
-			EDITOR.files = EDITOR.projects[projectName].files;
-			EDITOR.changeWorkingDir(EDITOR.projects[projectName].workingDir);
-		}
-		else {
-			// Create new project
-			EDITOR.projects[projectName] = {};
-			EDITOR.projects[projectName].files = EDITOR.files = [];
-			EDITOR.projects[projectName].workingDir = workingDirectory;
-		}
+		// Leave it up to the plugins what to do when a project changes, just notify about the project change!
+
+		var oldProject = _project;
 
 		_project = projectName;
 
@@ -9715,7 +9715,7 @@ Searches down towards the root, looking for file names
 		console.log("Calling changeProject listeners (" + f.length + ") _project=" + _project);
 		for(var i=0; i<f.length; i++) {
 			//console.log("function " + UTIL.getFunctionName(f[i]));
-			f[i](_project); // Call function
+			f[i](_project, oldProject); // Call function
 		}
 
 	}
@@ -9754,6 +9754,17 @@ Searches down towards the root, looking for file names
 	}
 	
 });
+
+	CLIENT.on("changeSCMBranch", function changeBranch(branchName) {
+
+		var f = EDITOR.eventListeners.changeBranch.map(funMap);
+		console.log("Calling changeBranch listeners (" + f.length + ") branchName=" + branchName);
+		for(var i=0; i<f.length; i++) {
+			//console.log("function " + UTIL.getFunctionName(f[i]));
+			f[i](branchName); // Call function
+		}
+
+	});
 
 function removeFrom(list, fun) {
 	// Removes an object from an array of objects

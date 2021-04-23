@@ -234,6 +234,14 @@ var File; // File object is global
 		
 		return file.mutateCaret({}, caret);
 	}
+
+	File.prototype.currentLine = function currentLine(caret) {
+		var file = this;
+
+		if(caret == undefined) caret = file.caret;
+
+		return caret.row + file.startRow + 1;
+	}
 	
 	File.prototype.mutateCaret = function(oldCaret, newCaret) {
 		var file = this;
