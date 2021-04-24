@@ -1390,7 +1390,7 @@ fun: function space(click) {
 		
 		function add(char, options) {
 			
-			console.log("Adding virtual keyboard key: char=" + char + " orientation=" + orientation);
+			//console.log("Adding virtual keyboard key: char=" + char + " orientation=" + orientation);
 			
 			if(options == undefined) options = {};
 			

@@ -161,10 +161,10 @@ var CLIENT = {}; // Client object is global
 	CLIENT.cmd = function cmd(req, json, timeout, callback) {
 		// Sends a request to the server.
 		
-		if(req != "log") {
-			console.warn("CLIENT: CLIENT.cmd id=" + id + " req=" + req); // So we get a stack trace and can find out where the request was made while debugging
-		}
-		
+
+		// Uncomment below to get a stack trace and can find out where the request was made while debugging}
+		//if(req != "log") { console.log("CLIENT: CLIENT.cmd id=" + id + " req=" + req); } 
+
 		if(typeof timeout == "function" && callback == undefined) {
 			callback = timeout;
 			timeout = CLIENT.cmdTimeout;

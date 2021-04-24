@@ -2448,8 +2448,8 @@ callback(error);
 		var ctx = canvas.getContext("2d", ctxSettings);
 		
 		if( canvas == EDITOR.canvas ) {
-EDITOR.canvasContext = ctx;
-			console.warn("EDITOR.getCanvasContext: ctx set as EDITOR.canvasContext!");
+			EDITOR.canvasContext = ctx;
+			//console.log("EDITOR.getCanvasContext: ctx set as EDITOR.canvasContext!");
 		}
 		
 		if(typeof ctx.getContextAttributes == "function") {
@@ -3652,7 +3652,7 @@ throw new Error("Second or third argument to EDITOR.on: callback=" + callback + 
 		}
 		
 		if(eventName == "voiceCommand" && !recognition) {
-			console.warn("Speech Recognition not supported in your browser!");
+			console.warn("Speech Recognition not supported in browser=" + BROWSER + "!");
 		}
 		
 		if(eventName == "registerAltKey" && EDITOR.registeredAltKeys.length > 0) {
@@ -4033,7 +4033,7 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 		menu.activated = false; // true if the menu have been engaged
 		menu.visible = false; // If the menu is visible
 		
-		console.warn("new DropdownMenu: menu.orientation=" + menu.orientation);
+		//console.log("new DropdownMenu: menu.orientation=" + menu.orientation);
 		
 		menu.domElement = document.createElement("table");
 		menu.domElement.setAttribute("border", "0");
@@ -4303,7 +4303,7 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 			return; // Never hide the stem
 		}
 		
-		console.warn("DropdownMenu:hide: menu.parentMenu?" + (!!menu.parentMenu) + " menu.activated=" + menu.activated);
+		//console.log("DropdownMenu:hide: menu.parentMenu?" + (!!menu.parentMenu) + " menu.activated=" + menu.activated);
 		
 		if(menu.domElement.hasAttribute("aria-expanded")) menu.domElement.setAttribute("aria-expanded", "false");
 		
@@ -5115,7 +5115,7 @@ if(menuItem.parentMenu) {
 			
 			li.setAttribute("aria-label", options.text + (keyCombo ? " " + keyCombo : ""));
 			
-			console.warn("EDITOR.ctxMenu.addItem: Adding menu item: " + options.text + " keyCombo=" + keyCombo);
+			//console.log("EDITOR.ctxMenu.addItem: Adding menu item: " + options.text + " keyCombo=" + keyCombo);
 			
 			if(options.callback) {
 				li.onclick = clickOnCtxItem;
@@ -8160,7 +8160,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 			Some browsers (Chrome) will allow the popup if another window is closed prior.
 		*/
 		
-		console.warn("EDITOR.createWindow: Creating new window url=" + url);
+		//console.log("EDITOR.createWindow: Creating new window url=" + url);
 		
 		// Decide window width, height and placement ...
 		// Some browsers (which?) will not allow us to change these via script after the window have has been created (so we must set them here).

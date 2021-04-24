@@ -93,7 +93,6 @@
 		navigate(state);
 	}
 
-
 	function parseHash(hash) {
 		var arr = hash.split("#");
 
@@ -146,15 +145,8 @@
 			else if( EDITOR.files.hasOwnProperty(str) ) return true;
 			else return false;
 		}
-
 	}
-	// assert: parseHash("#/foo/bar#123")=   
-	// assert: parseHash("#branch#/foo/bar#123")=   
-	// assert: parseHash("#project#branch#/foo/bar#123")=   
-	// assert: parseHash("#/foo/bar")=   
-
-
-
+	
 	function setUrl() {
 
 		if(DISPLAY_MODE == "standalone") return; // Don't bother if we can't see the URL or back/forward buttons
@@ -229,6 +221,10 @@
 					EDITOR.openFile(state.path, fileOpened);
 				}
 			}
+		}
+
+		if( (state.path && EDITOR.currentFile && state.path == EDITOR.currentFile.path) ) {
+			EDITOR.dashboard.hide();
 		}
 
 		function fileOpened(err) {

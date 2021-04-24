@@ -49,15 +49,16 @@
 	function checkAssertions(file) {
 		clearTimeout(checkTimer);
 
-		setTimeout(function() {
+		checkTimer = setTimeout(function() {
 			doCheck(file);
-		}, 0);
+		}, 256);
 	
 	}
 
 	function doCheck(file) {
 
 		if(!file.parsed) return;
+		if(EDITOR.currentFile != file) return;
 
 		render.length = 0;
 

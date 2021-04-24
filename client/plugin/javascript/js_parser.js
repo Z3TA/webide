@@ -969,7 +969,7 @@
 	
 	function parseJavaScript(file, options) {
 		
-		console.warn("parseJavaScript: options=" + JSON.stringify(options));
+		//console.log("parseJavaScript: options=" + JSON.stringify(options));
 		
 		console.time("parseJavaScript");
 		
@@ -2510,7 +2510,7 @@
 									break;
 								}
 							}
-							if(j==functions.length) console.warn("Unable to find function " + properties[properties.length-3]);
+							//if(j==functions.length) console.warn("Unable to find function " + properties[properties.length-3]);
 							
 						}
 						else if(properties.length > 1) {
