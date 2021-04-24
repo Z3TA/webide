@@ -3,6 +3,11 @@
 What I'm working on
 -------------------
 
+problem: Moving to another line will trigger a pushstate!
+
+
+---
+
 bug: Function list gets deselected in Firefox after you have typed ...
 
 It's good to have console.logs to more easily spot if the editor does something stupid

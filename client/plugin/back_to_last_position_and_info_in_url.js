@@ -25,6 +25,9 @@
 
 	var currentState = {};
 
+	var ignoreHashChange = false;
+
+
 	EDITOR.plugin({
 		desc: "Move caret back to last position",
 		load: function loadGoBack() {
@@ -85,12 +88,6 @@
 			navigate(state, true);
 		}, 2000);
 		
-	}
-
-	function hashChange(ev) {
-		var hash = window.location.hash;
-		var state = parseHash(hash);
-		navigate(state);
 	}
 
 	function parseHash(hash) {
@@ -168,6 +165,8 @@
 		if(PATH) url = url + "#" + PATH;
 		if(LINE) url = url + "#" + LINE;
 
+		console.warn("url-history: pushState: " + JSON.stringify(currentState));
+
 		window.history.pushState(currentState, title, url);
 	}
 
@@ -194,20 +193,32 @@
 	}
 
 	function browserNavigation(ev) {
-		console.log("browserNavigation: ev=", ev);
-
 		var state = ev.state;
 
-		console.log("browserNavigation: state=", state);
+		console.log("url-history: browserNavigation: state=", state);
 
 		if(!state) return;
 
+		ignoreHashChange = true;
+
+		navigate(state);
+	}
+
+	function hashChange(ev) {
+		// note: hashChange also triggers after browserNavigation triggers!
+		if(ignoreHashChange) {
+			ignoreHashChange = false;
+			return;
+		}
+
+		var hash = window.location.hash;
+		var state = parseHash(hash);
 		navigate(state);
 	}
 
 	function navigate(state, openFileIfNotOpen) {
 
-		alert("navigate: state=" + JSON.stringify(state));
+		console.warn("url-history: navigate: state=" + JSON.stringify(state));
 
 		if(state.project && state.project != EDITOR.project) EDITOR.changeProject(state.project);
 		if(state.branch && state.branch != EDITOR.branch) EDITOR.checkoutSCMBranch(state.branch);
@@ -222,6 +233,13 @@
 				}
 			}
 		}
+
+		if(EDITOR.currentFile && state.path && EDITOR.currentFile.path == state.path && state.line != EDITOR.currentFile.currentLine()) EDITOR.currentFile.gotoLine(state.line);
+
+		/*
+			problem: Moving to another line will trigger a pushstate!
+
+		*/
 
 		if( (state.path && EDITOR.currentFile && state.path == EDITOR.currentFile.path) ) {
 			EDITOR.dashboard.hide();
@@ -241,7 +259,7 @@
 
 	function moveCaretBackToLastPosition(file) {
 
-		console.log("to_last_position: moveCaretBackToLastPosition! file.path=" + file.path + " ");
+		console.log("url-history: to_last_position: moveCaretBackToLastPosition! file.path=" + file.path + " ");
 
 		if( lastJump.hasOwnProperty(file.path) ) {
 
@@ -256,7 +274,7 @@
 			var row = lastJump[file.path].row;
 			var col = lastJump[file.path].col;
 
-			console.log("to_last_position: moveCaretBackToLastPosition: row=" + row + " lastCaretPos=", lastCaretPos[file.path]);
+			console.log("url-history: to_last_position: moveCaretBackToLastPosition: row=" + row + " lastCaretPos=", lastCaretPos[file.path]);
 
 			file.moveCaret(undefined, row);
 
@@ -267,7 +285,7 @@
 
 		}
 		else if(lastFile) {
-			console.log("to_last_position: moveCaretBackToLastPosition: Showing last file =" + lastFile.path);
+			console.log("url-history: to_last_position: moveCaretBackToLastPosition: Showing last file =" + lastFile.path);
 			EDITOR.show(lastFile);
 		}
 		else {
@@ -281,7 +299,7 @@
 
 		// Note: We want to save the caret postion we where on *before* the jump, not the new position!
 
-		console.log("to_last_position: rememberCaretPosition: file.path=" + file.path + " ");
+		console.log("url-history: to_last_position: rememberCaretPosition: file.path=" + file.path + " ");
 
 		if( !lastJump.hasOwnProperty(file.path) ) {
 			lastJump[file.path] = {
@@ -296,7 +314,7 @@
 				col: caret.col
 			};
 
-			console.log("to_last_position: rememberCaretPosition: init! file.path=" + file.path + " lastJump=", lastJump[file.path]);
+			console.log("url-history: to_last_position: rememberCaretPosition: init! file.path=" + file.path + " lastJump=", lastJump[file.path]);
 
 		}
 		else {
@@ -304,7 +322,7 @@
 			var jump = Math.abs(lastCaretPos[file.path].row - caret.row);
 			if( jump > EDITOR.view.visibleRows ) {
 
-				console.log("to_last_position: rememberCaretPosition: before-update file.path=" + file.path + " lastJump=", lastJump[file.path]);
+				console.log("url-history: to_last_position: rememberCaretPosition: before-update file.path=" + file.path + " lastJump=", lastJump[file.path]);
 
 				// Moving more then visible rows counts as a big jump
 			
@@ -315,10 +333,10 @@
 				lastJump[file.path].row = lastCaretPos[file.path].row;
 				lastJump[file.path].col = lastCaretPos[file.path].col;
 
-				console.log("to_last_position: rememberCaretPosition: update! file.path=" + file.path + " lastCaretPos=",  lastCaretPos[file.path]);
+				console.log("url-history: to_last_position: rememberCaretPosition: update! file.path=" + file.path + " lastCaretPos=",  lastCaretPos[file.path]);
 			}
 			else {
-				console.log("to_last_position: rememberCaretPosition: Not long enough jump=" + jump + " EDITOR.view.visibleRows=" + EDITOR.view.visibleRows);
+				console.log("url-history: to_last_position: rememberCaretPosition: Not long enough jump=" + jump + " EDITOR.view.visibleRows=" + EDITOR.view.visibleRows);
 			}
 
 			lastCaretPos[file.path].index = caret.index;
