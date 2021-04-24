@@ -414,8 +414,8 @@ ctxMenuVisibleOnce = true;
 		Object.defineProperty(EDITOR, 'input', {
 			get: function getEditorInputFocus() { return _editorInput; },
 			set: function setEditorInputFocus(newValue) {
-				console.warn("Set EDITOR.input to " + newValue);
-				console.log(UTIL.getStack("Set EDITOR.input to " + newValue));
+				//console.warn("Set EDITOR.input to " + newValue);
+				//console.log(UTIL.getStack("Set EDITOR.input to " + newValue));
 				if(newValue) {
 _editorInput = true;
 					EDITOR.canvas.focus(); // Need to have focus if user are using a screen reader
@@ -436,15 +436,6 @@ _editorInput = true;
 	
 	setWorkingDirectory(UTIL.trailingSlash(process.cwd()));
 	
-	if(RUNTIME!="browser") {
-		// Check if the working directory is the same as the editor (hmm, why?)
-		
-		console.log("__dirname=" + __dirname);
-		console.log("workingDirectory=" + EDITOR.workingDirectory);
-		
-		if(__dirname != EDITOR.workingDirectory) console.warn("Working directory is not the current directory __dirname=" + __dirname + " EDITOR.workingDirectory=" + EDITOR.workingDirectory);
-	}
-	
 	function setWorkingDirectory(workingDir) {
 		
 		// Private function to internally change working directory and calling event listeners that listen for workingDirectory changes.
@@ -452,7 +443,7 @@ _editorInput = true;
 		workingDirectory = UTIL.trailingSlash(workingDir);
 		
 		var f = EDITOR.eventListeners.changeWorkingDir.map(funMap);
-		console.log("Calling changeWorkingDir listeners (" + f.length + ") workingDirectory=" + workingDirectory);
+		//console.log("Calling changeWorkingDir listeners (" + f.length + ") workingDirectory=" + workingDirectory);
 		for(var i=0; i<f.length; i++) {
 			//console.log("function " + UTIL.getFunctionName(f[i]));
 			f[i](workingDirectory); // Call function
@@ -686,7 +677,7 @@ callback = value;
 	}
 	
 	EDITOR.loadSettings = function loadSettings(settings, defaults, callback) {
-		console.log("settings: load: settings=" + settings + " ...");
+		//console.log("settings: load: settings=" + settings + " ...");
 
 		if(callback == undefined && typeof defaults == "function") {
 			callback = defaults;
@@ -707,7 +698,7 @@ callback = value;
 				console.warn("settings: load: settings=" + settings + " value=" + value + " (something probably went wrong when saving the settings)");
 			}
 			
-			console.log("settings: load: settings=" + settings + " value=" + value + " defaults=" + defaults + "   " + value + "==null?" + (value==null) + " " + defaults + "=== undefined?" + (defaults === undefined) + "  ");
+			//console.log("settings: load: settings=" + settings + " value=" + value + " defaults=" + defaults + "   " + value + "==null?" + (value==null) + " " + defaults + "=== undefined?" + (defaults === undefined) + "  ");
 
 			if((value === null || value=="undefined") && defaults !== undefined) {
 				callback(defaults);
@@ -725,7 +716,7 @@ callback = value;
 					var error = new Error("Failed to parse value=" + value + " Error: " + err.message);
 					throw error;
 				}
-				console.log("settings: load: settings=" + settings + " obj=", obj);
+				//console.log("settings: load: settings=" + settings + " obj=", obj);
 				callback(obj);
 			}
 			else throw new Error("Unsuspected: value=" + value + " defaults=" + defaults);
@@ -734,7 +725,7 @@ callback = value;
 	}
 	
 	EDITOR.saveSettings = function saveSettings(settings, value) {
-		console.log("settings: save: settings=" + settings + " value=" + value);
+		//console.log("settings: save: settings=" + settings + " value=" + value);
 		
 		if(value === undefined) throw new Error("Can not save settings=" + settings + " because value=" + value);
 		if(value == "undefined") throw new Error("Can not save settings=" + settings + " because value=" + value + " cannot be parsed");
@@ -743,13 +734,13 @@ callback = value;
 		
 		if(str == undefined || str == "undefined" || typeof str != "string") throw new Error("Error when stringifying value=" + value + " str=" + str);
 		
-		console.log("settings: save: settings=" + settings + " str=" + str + " ...");
+		//console.log("settings: save: settings=" + settings + " str=" + str + " ...");
 		
 if(EDITOR.storage.ready()) saveSettingOnceStorageReady();
 else EDITOR.once("storageReady", saveSettingOnceStorageReady);
 
 		function saveSettingOnceStorageReady() {
-			console.log("settings: save: settings=" + settings + " str=" + str + " !");
+			//console.log("settings: save: settings=" + settings + " str=" + str + " !");
 			EDITOR.storage.setItem(settings, str);
 		}
 	}
@@ -855,13 +846,13 @@ EDITOR.bindKey(b);
 		}
 		
 		EDITOR.pseudoClipboard = text;
-		console.log("EDITOR.putIntoClipboard: Put " + text.length + " characters into EDITOR.pseudoClipboard");
+		//console.log("EDITOR.putIntoClipboard: Put " + text.length + " characters into EDITOR.pseudoClipboard");
 		
 		if (!navigator.clipboard) {
 			return fallbackCopyTextToClipboard(text);
 		}
 		navigator.clipboard.writeText(text).then(function() {
-			console.log('Async: Copying to clipboard was successful!');
+			//console.log('Async: Copying to clipboard was successful!');
 			done(null, true, false);
 		}, function(err) {
 			console.error('Async: Could not copy text: ', err);
@@ -870,7 +861,7 @@ EDITOR.bindKey(b);
 		
 		function done(error, copiedIntoPlatformClipboard, manuallyCopied) {
 			var f = EDITOR.eventListeners.copy.map(funMap);
-			console.log("Calling copy listeners (" + f.length + ") workingDirectory=" + workingDirectory);
+			//console.log("Calling copy listeners (" + f.length + ") workingDirectory=" + workingDirectory);
 			for(var i=0; i<f.length; i++) {
 				//console.log("function " + UTIL.getFunctionName(f[i]));
 				f[i](text, copiedIntoPlatformClipboard, manuallyCopied); // Call function
@@ -895,7 +886,7 @@ EDITOR.bindKey(b);
 			try {
 				var successful = document.execCommand('copy');
 				var msg = successful ? 'successful' : 'unsuccessful';
-				console.log('Fallback: Copying text command was ' + msg);
+				//console.log('Fallback: Copying text command was ' + msg);
 			}
 			catch (err) {
 				console.error('Fallback: Oops, unable to copy', err);
@@ -952,7 +943,7 @@ usePseudoClipboard = false;
 		
 		function pseudo() {
 			EDITOR.pseudoClipboard = text;
-			console.log("EDITOR.putIntoClipboard:pseudo: Put " + text.length + " characters into EDITOR.pseudoClipboard");
+			//console.log("EDITOR.putIntoClipboard:pseudo: Put " + text.length + " characters into EDITOR.pseudoClipboard");
 			done(null, false, false);
 			return false;
 		}
@@ -977,17 +968,17 @@ usePseudoClipboard = false;
 		if(typeof callback != "function") throw new Error("No callback function found in arguments to EDITOR.getClipboardContent!");
 		
 		if(navigator.clipboard && typeof navigator.clipboard.readText == "function") {
-			console.log("getClipboardContent: Trying navigator.clipboard ...");
+			//console.log("getClipboardContent: Trying navigator.clipboard ...");
 			navigator.clipboard.readText().then(function(data) {
-				console.log("getClipboardContent: navigator.clipboard.readText succeeded!");
+				//console.log("getClipboardContent: navigator.clipboard.readText succeeded!");
 				readSuccess(data);
 			}).catch(function(err, something) {
-				console.log("getClipboardContent: navigator.clipboard.readText failed!");
+				//console.log("getClipboardContent: navigator.clipboard.readText failed!");
 				readFail(err || something);
 			});
 		}
 		else if(window.clipboardData) {
-			console.log("getClipboardContent: Trying  window.clipboardData.getData ...");
+			//console.log("getClipboardContent: Trying  window.clipboardData.getData ...");
 			try {
 				var data = window.clipboardData.getData('Text')
 			}
@@ -996,16 +987,16 @@ usePseudoClipboard = false;
 			}
 
 			if(error) {
-				console.log("getClipboardContent: window.clipboardData.getData failed!");
+				//console.log("getClipboardContent: window.clipboardData.getData failed!");
 				readFail(error);
 			}
 			else {
-				console.log("getClipboardContent: window.clipboardData.getData succeeded!");
+				//console.log("getClipboardContent: window.clipboardData.getData succeeded!");
 				readSuccess(data);
 			}
 		}
 		else if(!options.silent) {
-			console.log("getClipboardContent: Using prompt! navigator.clipboard=" + navigator.clipboard + " window.clipboardData=" + window.clipboardData);
+			//console.log("getClipboardContent: Using prompt! navigator.clipboard=" + navigator.clipboard + " window.clipboardData=" + window.clipboardData);
 			
 			/*
 				Should we use the pseudo clipboard or always prompt !?
@@ -1033,7 +1024,7 @@ usePseudoClipboard = false;
 		}
 		
 		function readSuccess(text) {
-			console.log("getClipboardContent: readSuccess: text=" + text);
+			//console.log("getClipboardContent: readSuccess: text=" + text);
 			callback(null, text, false);
 		}
 		
@@ -1047,13 +1038,13 @@ usePseudoClipboard = false;
 				else err = new Error(JSON.stringify(err));
 			}
 			
-			console.log("getClipboardContent: readFail: err.message=" + err.message);
+			//console.log("getClipboardContent: readFail: err.message=" + err.message);
 			if(EDITOR.pseudoClipboard.length > 0 && err.code != "CANCEL") {
-				console.log("getClipboardContent: Using pseudoClipboard! data=" + EDITOR.pseudoClipboard);
+				//console.log("getClipboardContent: Using pseudoClipboard! data=" + EDITOR.pseudoClipboard);
 				return callback(null, EDITOR.pseudoClipboard, true);
 			}
 			else {
-				console.log("getClipboardContent: Nothing in pseudoClipboard! All attempts to read clipboard failed!");
+				//console.log("getClipboardContent: Nothing in pseudoClipboard! All attempts to read clipboard failed!");
 				callback(err);
 			}
 		}
@@ -1062,7 +1053,7 @@ usePseudoClipboard = false;
 	
 	EDITOR.changeWorkingDir = function(workingDir) {
 		
-		console.log("Changing working directory to: " + workingDir);
+		//console.log("Changing working directory to: " + workingDir);
 		
 		// Update internally (on client)
 		var workingDirectory = setWorkingDirectory(workingDir);
@@ -1136,7 +1127,7 @@ usePseudoClipboard = false;
 		
 		if(path == undefined) path = "new file";
 		
-		console.log("Opening file: " + path + " typeof text=" + typeof text);
+		//console.log("Opening file: " + path + " typeof text=" + typeof text);
 		
 		var pathToBeOpened = path;
 		
@@ -1217,7 +1208,7 @@ usePseudoClipboard = false;
 		}
 		
 		if(EDITOR.openFileQueue.indexOf(path) != -1) {
-			console.log("File in EDITOR.openFileQueue! path=" + path);
+			//console.log("File in EDITOR.openFileQueue! path=" + path);
 			
 			/*
 				If two things are waiting for a particular file to open, call both things once it has opened.
@@ -1242,7 +1233,7 @@ usePseudoClipboard = false;
 					throw new Error("Callback=" + UTIL.getFunctionName(callback) + " is already in fileOpenExtraCallbacks for path=" + path);
 				}
 				
-				console.log("Pushing callback=" + UTIL.getFunctionName(callback) + " to fileOpenExtraCallbacks for path=" + path);
+				//console.log("Pushing callback=" + UTIL.getFunctionName(callback) + " to fileOpenExtraCallbacks for path=" + path);
 				
 				fileOpenExtraCallbacks[path].push(callback);
 				
@@ -1256,7 +1247,7 @@ usePseudoClipboard = false;
 		}
 		else {
 			EDITOR.openFileQueue.push(path);
-			console.log("File path=" + path + " added to EDITOR.openFileQueue=" + JSON.stringify(EDITOR.openFileQueue));
+			//console.log("File path=" + path + " added to EDITOR.openFileQueue=" + JSON.stringify(EDITOR.openFileQueue));
 		}
 		
 		if(!UTIL.isString(path)) return fileOpenError(new Error("EDITOR.openFile: Error: First argument is not a string: path=" + path));
@@ -1272,14 +1263,14 @@ usePseudoClipboard = false;
 			var imageFileExt = ["jpg", "jpge", "gif", "bmp", "tiff", "png"];
 			if(imageFileExt.indexOf(fileExtension) != -1) {
 				var isImage = true;
-				console.log("It's a image (" + fileExtension + "): " + path);
+				//console.log("It's a image (" + fileExtension + "): " + path);
 				
 				EDITOR.readFromDisk(path, false, "base64", load);
 				
 			}
 			else {
 				// Check the file size
-				console.log("Getting file size on disk. path=" + path);
+				//console.log("Getting file size on disk. path=" + path);
 				EDITOR.getFileSizeOnDisk(path, function gotFileSize(err, fileSizeInBytes) {
 					
 					if(err) {
@@ -1292,7 +1283,7 @@ usePseudoClipboard = false;
 					}
 					else {
 						
-						console.log("fileSizeInBytes=" + fileSizeInBytes);
+						//console.log("fileSizeInBytes=" + fileSizeInBytes);
 						
 						if(fileSizeInBytes > EDITOR.settings.bigFileSize) {
 							//alertBox("Opening big fies is not yet supported!");
@@ -1318,7 +1309,7 @@ usePseudoClipboard = false;
 		else {
 			//console.log("text is NOT undefined! But is it a string?");
 			if(!UTIL.isString(text)) {
-				console.log("text=" + text);
+				//console.log("text=" + text);
 				return fileOpenError(new Error("EDITOR.openFile: Error: Second argument is not a string: text=" + text));
 				
 			}
@@ -1331,7 +1322,7 @@ usePseudoClipboard = false;
 			
 			if(err) return fileOpenError(err);
 			
-			console.log("Loading file (isImage=" + isImage + ") to editor: " + path);
+			//console.log("Loading file (isImage=" + isImage + ") to editor: " + path);
 			
 			if(!notFromDisk && path != pathToBeOpened) throw new Error("path=" + path + " not pathToBeOpened=" + pathToBeOpened + " notFromDisk=" + notFromDisk + " tooBig=" + tooBig);
 			
@@ -1412,13 +1403,13 @@ if(EDITOR.files.hasOwnProperty(path)) throw new Error("path=" + path + " already
 				}
 				
 				var f = EDITOR.eventListeners.fileOpen.map(funMap);
-				console.log("Calling fileOpen listeners (" + f.length + ") path=" + path);
+				//console.log("Calling fileOpen listeners (" + f.length + ") path=" + path);
 				for(var i=0; i<f.length; i++) {
 					//console.log("function " + UTIL.getFunctionName(f[i]));
 					f[i](file); // Call function
 				}
 				
-				console.log("state?" + !!state + " state.show=" + (state && state.show) + " showFile=" + showFile + " path=" + path);
+				//console.log("state?" + !!state + " state.show=" + (state && state.show) + " showFile=" + showFile + " path=" + path);
 				if( (!state || state.show !== false) && (showFile == undefined || showFile == path) ) {
 					// Switch to this file
 					EDITOR.showFile(file);
@@ -1487,7 +1478,7 @@ if(EDITOR.files.hasOwnProperty(path)) throw new Error("path=" + path + " already
 				alertBox("EDITOR.openFile: Error when opening " + path + "\n" + err.message);
 			}
 			else if(file) {
-				console.log("No callback for file.path=" + file.path);
+				console.warn("No callback for file.path=" + file.path);
 			}
 			
 			if(fileOpenExtraCallbacks.hasOwnProperty(path)) {
@@ -1511,7 +1502,7 @@ if(EDITOR.files.hasOwnProperty(path)) throw new Error("path=" + path + " already
 			var removed = EDITOR.openFileQueue.splice(EDITOR.openFileQueue.indexOf(path), 1); // Take the file off the queue
 			
 			if(EDITOR.openFileQueue.indexOf(path) != -1) throw new Error("File path=" + path + " still in EDITOR.openFileQueue=" + JSON.stringify(EDITOR.openFileQueue) + " removed=" + removed);
-			console.log("Removed from EDITOR.openFileQueue! path=" + path);
+			//console.log("Removed from EDITOR.openFileQueue! path=" + path);
 		}
 		
 	}
@@ -1526,7 +1517,7 @@ if(EDITOR.files.hasOwnProperty(path)) throw new Error("path=" + path + " already
 	EDITOR.getFileSizeOnDisk = function(path, callback) {
 		// Check the file size
 		
-		console.log("EDITOR.getFileSizeOnDisk: path=" + path);
+		//console.log("EDITOR.getFileSizeOnDisk: path=" + path);
 		
 		if(!callback) throw new Error("Callback not defined!");
 		
@@ -1620,13 +1611,13 @@ if(EDITOR.files.hasOwnProperty(path)) throw new Error("path=" + path + " already
 		}
 		else {
 			
-			console.log("Closing file: path=" + path);
+			//console.log("Closing file: path=" + path);
 			
 			var file = EDITOR.files[path];
 			
 			// Call listeners (before we switch to another file, and before we delete the file content)
 			var f = EDITOR.eventListeners.fileClose.map(funMap);
-			console.log("Calling fileClose listeners (" + f.length + ") ...");
+			//console.log("Calling fileClose listeners (" + f.length + ") ...");
 			for(var i=0; i<f.length; i++) {
 				f[i](file); // Call function
 			}
@@ -1637,7 +1628,7 @@ if(EDITOR.files.hasOwnProperty(path)) throw new Error("path=" + path + " already
 			if(EDITOR.lastFileShowed == file) {
 				console.warn("lastFileShowed is the file being closed!");
 				EDITOR.lastFileShowed = EDITOR.lastChangedFile([file]);
-				console.log("Changed lastFileShowed to: " + EDITOR.lastFileShowed.path);
+				//console.log("Changed lastFileShowed to: " + EDITOR.lastFileShowed.path);
 			}
 			
 			// Make sure lastFile is not currentFile
@@ -1684,7 +1675,7 @@ if(EDITOR.files.hasOwnProperty(path)) throw new Error("path=" + path + " already
 			}, 100);
 			
 			if(switchTo) {
-				console.log("Showing '" + switchTo.path + "' because '" + path + "' was closing.");
+				//console.log("Showing '" + switchTo.path + "' because '" + path + "' was closing.");
 				if(switchTo == file) throw new Error("Trying to switch to the file being closed!");
 				EDITOR.showFile(switchTo, true, true);
 			}
@@ -1731,7 +1722,7 @@ if(EDITOR.files.hasOwnProperty(path)) throw new Error("path=" + path + " already
 		
 		if(callback == undefined || typeof callback != "function") throw new Error("No callback function! callback=" + callback);
 		
-		console.log("Reading file: " + path);
+		//console.log("Reading file: " + path);
 		
 		//var protocol = UTIL.urlProtocol(path);
 		
@@ -1750,7 +1741,7 @@ if(EDITOR.files.hasOwnProperty(path)) throw new Error("path=" + path + " already
 	EDITOR.countLines = function countLines(filePath, callback) {
 		// You probably want to use EDITOR.readLines instead! (EDITOR.readLines gives totalLines as well as lines)
 		
-		console.log("Counting lines in: filePath=" + filePath + "");
+		//console.log("Counting lines in: filePath=" + filePath + "");
 		
 		var json = {path: filePath};
 		
@@ -1763,7 +1754,7 @@ if(EDITOR.files.hasOwnProperty(path)) throw new Error("path=" + path + " already
 	EDITOR.readLines = function readLines(filePath, options, callback) {
 		// Reads lines options.start to options.end of file, calls back with the lines as an array
 		
-		console.log("Reading lines from: filePath=" + filePath + " options=" + JSON.stringify(options));
+		//console.log("Reading lines from: filePath=" + filePath + " options=" + JSON.stringify(options));
 		
 		var json = {path: filePath, start: options.start, end: options.end};
 		
@@ -1779,7 +1770,7 @@ if(EDITOR.files.hasOwnProperty(path)) throw new Error("path=" + path + " already
 		if(typeof start != "number") throw new Error('Parameter "start" needs to be a number!');
 		if( Object.prototype.toString.call( lines ) != '[object Array]' ) throw new Error('Parameter "lines" needs to be an array!');
 		
-		console.log("Writing lines to: filePath=" + filePath + " start=" + start);
+		//console.log("Writing lines to: filePath=" + filePath + " start=" + start);
 		
 		var json = {path: filePath, start: start, lines: lines};
 		
@@ -1809,7 +1800,7 @@ if(EDITOR.files.hasOwnProperty(path)) throw new Error("path=" + path + " already
 			It can handle "save-as". 
 		*/
 		
-		console.log("EDITOR.saveFile: path=" + path + " file.path=" + file.path + " file.hash=" + file.hash + " file.isSaved=" + file.isSaved + " file.savedAs=" + file.savedAs + " file.changed=" + file.changed)
+		//console.log("EDITOR.saveFile: path=" + path + " file.path=" + file.path + " file.hash=" + file.hash + " file.isSaved=" + file.isSaved + " file.savedAs=" + file.savedAs + " file.changed=" + file.changed)
 		
 		if(file == undefined) file = EDITOR.currentFile;
 		
@@ -1849,7 +1840,7 @@ if(EDITOR.files.hasOwnProperty(path)) throw new Error("path=" + path + " already
 			if(errors.length > 0) {
 				var errorMessages = [];
 				for (var i=0; i<errors.length; i++) {
-					console.log("EDITOR.saveFile: Error in beforeSave event listener! (see below)");
+					//console.log("EDITOR.saveFile: Error in beforeSave event listener! (see below)");
 					console.error(errors[i]);
 					errorMessages.push(errors[i].message);
 				}
@@ -1884,20 +1875,20 @@ error.code = fName;
 		});
 		
 		function beginSaving() {
-			console.log("EDITOR.saveFile: beginSaving: file.path=" + file.path + " path=" + path + " file.hash=" + file.hash + " file.isSaved=" + file.isSaved + " file.savedAs=" + file.savedAs + " file.changed=" + file.changed);
+			//console.log("EDITOR.saveFile: beginSaving: file.path=" + file.path + " path=" + path + " file.hash=" + file.hash + " file.isSaved=" + file.isSaved + " file.savedAs=" + file.savedAs + " file.changed=" + file.changed);
 			
 			if(file instanceof ImageFile) {
 				text = file.canvas.toDataURL("image/png");
 				if(text.indexOf("base64,") == -1) throw new Error("EDITOR.saveFile: text does not contain base64, !! text=" + text);
 				
-				console.log("EDITOR.saveFile: Image data starts with: " + text.slice(0, 100) + " and ends with " + text.slice(-100));
+				//console.log("EDITOR.saveFile: Image data starts with: " + text.slice(0, 100) + " and ends with " + text.slice(-100));
 				
 				var quoted = (text.slice(0,1) == text.slice(-1) == '"'); // Some images doesn't get a quote around them!
 				
 				if(quoted) text = text.slice(text.indexOf("base64,") + 7, -1);
 				else text = text.slice(text.indexOf("base64,") + 7);
 				
-				console.log("EDITOR.saveFile: Image data starts with: " + text.slice(0, 100) + " and ends with " + text.slice(-100));
+				//console.log("EDITOR.saveFile: Image data starts with: " + text.slice(0, 100) + " and ends with " + text.slice(-100));
 				
 				encoding = "base64";
 				isImage = true;
@@ -1994,7 +1985,7 @@ else if(err.code == "ENETDOWN") {
 						}
 					}
 					else if(file.hash != hash) {
-						console.log("EDITOR.saveFile: file.hash=" + file.hash + " hash=" + hash);
+						//console.log("EDITOR.saveFile: file.hash=" + file.hash + " hash=" + hash);
 						alertBox("FAILED TO SAVE FILE.\nFile changed on disk!\nSave as another name to prevent losing data.", "FILE", "warning");
 						return;
 					}
@@ -2036,7 +2027,7 @@ else if(err.code == "ENETDOWN") {
 			
 			if(hash) file.hash = hash;
 			
-			console.log("EDITOR.saveFile: Successfully saved " + file.path);
+			//console.log("EDITOR.saveFile: Successfully saved " + file.path);
 			
 			// Change state to saved, and call afterSave listeners
 			file.saved(function updatedSavedState(err) {
@@ -2096,7 +2087,7 @@ else if(err.code == "ENETDOWN") {
 		if(text.length > lengthLimit) return uploadBigFile(path, text, inputBuffer, encoding, saveToDiskCallback);
 		// Posting to /share also seem to work when running as a desktop editor (not a cloud IDE) !
 		
-		console.log("EDITOR.uploadSpeed=" + EDITOR.uploadSpeed + " text.length=" + text.length);
+		//console.log("EDITOR.uploadSpeed=" + EDITOR.uploadSpeed + " text.length=" + text.length);
 		if(EDITOR.uploadSpeed && text.length / EDITOR.uploadSpeed > 1024) {
 			var estimatedUploadTime = Math.floor(text.length / EDITOR.uploadSpeed);
 			var progress = document.getElementById("progress");
@@ -2107,7 +2098,7 @@ else if(err.code == "ENETDOWN") {
 			progress.style.display="block";
 			EDITOR.resizeNeeded();
 			var progressInterval = setInterval(function () {
-				console.log("UploadProgress: progress.value=" + progress.value + " progress.max=" + progress.max + " intervalTime=" + intervalTime + " estimatedUploadTime=" + estimatedUploadTime + " text.length=" + text.length + " EDITOR.uploadSpeed=" + EDITOR.uploadSpeed + " saveTimeout=" + saveTimeout);
+				//console.log("UploadProgress: progress.value=" + progress.value + " progress.max=" + progress.max + " intervalTime=" + intervalTime + " estimatedUploadTime=" + estimatedUploadTime + " text.length=" + text.length + " EDITOR.uploadSpeed=" + EDITOR.uploadSpeed + " saveTimeout=" + saveTimeout);
 				progressValue += intervalTime;
 				progress.value = progressValue;
 			}, intervalTime);
@@ -2138,7 +2129,7 @@ else if(err.code == "ENETDOWN") {
 				
 				if(saveToDiskCallback) saveToDiskCallback(null, json.path, json.hash);
 				else {
-console.log("File saved to disk: " + json.path);
+					//console.log("File saved to disk: " + json.path);
 				}
 			}
 		});
@@ -2146,7 +2137,7 @@ console.log("File saved to disk: " + json.path);
 	
 	function uploadBigFile(path, text, inputBuffer, encoding, callback) {
 		
-		console.log("uploadBigFile: path=" + path + " text.length=" + text.length + " inputBuffer=" + inputBuffer + " encoding=" + encoding + " ")
+		//console.log("uploadBigFile: path=" + path + " text.length=" + text.length + " inputBuffer=" + inputBuffer + " encoding=" + encoding + " ")
 		
 		if(typeof FormData == "undefined") return error(new Error("Large file upload not supported because FormData object does not exist in your browser=" + BROWSER + " Please contact support and tell them your browser version!"));
 		
@@ -2167,18 +2158,18 @@ console.log("File saved to disk: " + json.path);
 			progress.style.display="block";
 			EDITOR.resizeNeeded();
 			x.upload.addEventListener("progress", function(progressEvent) {
-				console.log("uploadBigFile: progress: progressEvent=", progressEvent);
+				//console.log("uploadBigFile: progress: progressEvent=", progressEvent);
 				progress.value = progressEvent.loaded;
 				progress.max = progressEvent.total;
 				
 			});
 		}
 		x.onreadystatechange = function () {
-			console.log("uploadBigFile: readyState=" + x.readyState);
+			//console.log("uploadBigFile: readyState=" + x.readyState);
 			if(x.readyState == 4) {
-				console.log("uploadBigFile: status=" + x.status);
+				//console.log("uploadBigFile: status=" + x.status);
 				if(x.status == 200) {
-					console.log("uploadBigFile: Upload success!");
+					//console.log("uploadBigFile: Upload success!");
 					CLIENT.cmd("move", {oldPath: uploadPath, newPath: path}, function(err, hash) {
 						if(err) return error(new Error("Unable to move file after uploading! Error: " + err.message), err.code)
 						CLIENT.cmd("hash", {path: path}, function(err, hash) {
@@ -2193,7 +2184,7 @@ console.log("File saved to disk: " + json.path);
 					}
 				}
 				else {
-					console.log("uploadBigFile: Upload failed!");
+					//console.log("uploadBigFile: Upload failed!");
 					//console.log(x);
 					error(new Error("Upload failed! path=" + path + " x.status=" + x.status + " text=" + UTIL.shortString(text) ));
 				}
@@ -2267,7 +2258,7 @@ callback(error);
 		if(text == undefined) throw new Error("text=" + text);
 		
 		var f = EDITOR.eventListeners.sanitize.map(funMap);
-		console.log("Calling sanitize listeners (" + f.length + ") ...");
+		//console.log("Calling sanitize listeners (" + f.length + ") ...");
 		for(var i=0; i<f.length; i++) {
 			text = f[i](file, text);
 			if(typeof text != "string") throw new Error("sanitize listener: " + UTIL.getFunctionName(f[i]) + " returned: (" + (typeof text) + ") \n" + text);
@@ -2282,10 +2273,10 @@ callback(error);
 			File path is then passed to the callback function.
 		*/
 		
-		console.log("Bringing up the file open dialog ...");
+		//console.log("Bringing up the file open dialog ...");
 		
 		if(typeof window.chooseFileSystemEntries == "function") {
-			console.log("Using native file system API!");
+			//console.log("Using native file system API!");
 			
 			window.chooseFileSystemEntries().then(function(fileHandle) {
 				fileHandle.getFile().then(function readText(localFile) {
@@ -2328,7 +2319,7 @@ callback(error);
 	
 	EDITOR.directoryDialog = function(defaultPath, callback) {
 		
-		console.log("Bringing up the directory dialog ...");
+		//console.log("Bringing up the directory dialog ...");
 		
 		directoryDialogCallback = callback;
 		
@@ -2344,7 +2335,7 @@ callback(error);
 		
 		if(EDITOR.settings.devMode && EDITOR.shouldResize == false) {
 			// For debugging, so we know why a resize was needed
-			console.log(UTIL.getStack("resizeNeeded"));
+			//console.log(UTIL.getStack("resizeNeeded"));
 		}
 		EDITOR.shouldResize = true;
 	}
@@ -2411,7 +2402,7 @@ callback(error);
 		
 		canvas.addEventListener("dragover", function(dragOverEvent) {
 			dragOverEvent.preventDefault();
-			console.log(dragOverEvent.target.className + " dragover");
+			//console.log(dragOverEvent.target.className + " dragover");
 			
 			//dragOverEvent.dataTransfer.dropEffect = 'copy';  // required to enable drop on DIV
 			return false;
@@ -2452,7 +2443,7 @@ callback(error);
 			ctxSettings.alpha = false; // {alpha: false} allows sub pixel anti-alias (LCD-text).
 		}
 		
-		console.log("EDITOR.getCanvasContext: EDITOR.canvas?" + (canvas == EDITOR.canvas) + " EDITOR.settings.sub_pixel_antialias=" + EDITOR.settings.sub_pixel_antialias + " ctxSettings=" + JSON.stringify(ctxSettings));
+		//console.log("EDITOR.getCanvasContext: EDITOR.canvas?" + (canvas == EDITOR.canvas) + " EDITOR.settings.sub_pixel_antialias=" + EDITOR.settings.sub_pixel_antialias + " ctxSettings=" + JSON.stringify(ctxSettings));
 		
 		var ctx = canvas.getContext("2d", ctxSettings);
 		
@@ -2491,7 +2482,7 @@ EDITOR.canvasContext = ctx;
 		
 		ctx.save();
 		
-		console.log("DebugCtx: canvasContextReset()  windowLoaded=" + windowLoaded + " Set ctx.imageSmoothingEnabled=" + ctx.imageSmoothingEnabled + " EDITOR.canvasContext.imageSmoothingEnabled=" + EDITOR.canvasContext.imageSmoothingEnabled + " ctx.font=" + ctx.font);
+		//console.log("DebugCtx: canvasContextReset()  windowLoaded=" + windowLoaded + " Set ctx.imageSmoothingEnabled=" + ctx.imageSmoothingEnabled + " EDITOR.canvasContext.imageSmoothingEnabled=" + EDITOR.canvasContext.imageSmoothingEnabled + " ctx.font=" + ctx.font);
 		
 	}
 	
@@ -2543,7 +2534,7 @@ EDITOR.canvasContext = ctx;
 			return;
 		}
 		
-		console.log("DebugCtx: EDITOR.render()  windowLoaded=" + windowLoaded + " ctx.imageSmoothingEnabled=" + ctx.imageSmoothingEnabled + " Using EDITOR.canvasContext?" + (ctx == EDITOR.canvasContext) + " ctx.font=" + ctx.font);
+		//console.log("DebugCtx: EDITOR.render()  windowLoaded=" + windowLoaded + " ctx.imageSmoothingEnabled=" + ctx.imageSmoothingEnabled + " Using EDITOR.canvasContext?" + (ctx == EDITOR.canvasContext) + " ctx.font=" + ctx.font);
 		
 		
 		if(screenStartRow == undefined) screenStartRow = 0; 
@@ -2684,7 +2675,7 @@ EDITOR.canvasContext = ctx;
 			var fillY = screenStartRow==0 ? 0: screenStartRow * EDITOR.settings.gridHeight + EDITOR.settings.topMargin;
 			var fillWidth = EDITOR.view.canvasWidth;
 			var fillHeight = (fileEndRow-fileStartRow+1) * EDITOR.settings.gridHeight + (screenStartRow==0 ? EDITOR.settings.topMargin : 0);
-			console.log("fillX=" + fillX + " fillY=" + fillY + " fillWidth=" + fillWidth + " fillHeight=" + fillHeight);
+			//console.log("fillX=" + fillX + " fillY=" + fillY + " fillWidth=" + fillWidth + " fillHeight=" + fillHeight);
 			ctx.fillRect(fillX, fillY, fillWidth, fillHeight);
 			
 			
@@ -2796,7 +2787,7 @@ EDITOR.canvasContext = ctx;
 	
 	EDITOR.renderRow = function(row) {
 		
-		console.log("rendering ROW ... EDITOR.shouldResize=" + EDITOR.shouldResize + "");
+		//console.log("rendering ROW ... EDITOR.shouldResize=" + EDITOR.shouldResize + "");
 		
 		if(EDITOR.currentFile) {
 			
@@ -2857,7 +2848,7 @@ EDITOR.canvasContext = ctx;
 				ctx.lineWidth = 1;
 			*/
 			
-			console.log("Rendering row=" + row);
+			//console.log("Rendering row=" + row);
 			
 			for(var i=0; i<EDITOR.renderFunctions.length; i++) {
 				EDITOR.renderFunctions[i](ctx, buffer, file, screenStartRow, containSpecialWidthCharacters, row, row); // Call render
@@ -2867,7 +2858,7 @@ EDITOR.canvasContext = ctx;
 			
 		}
 		else {
-			console.log("No file open");
+			//console.log("No file open");
 		}
 		
 	}
@@ -2961,7 +2952,7 @@ ca 20ms to render, ca 13ms to render without creating new objects
 		
 		function walk() {
 			if(state.done) {
-				console.log("gridWalker: Already done! state.col=" + state.col + " endCol=" + endCol + " We are done!");
+				//console.log("gridWalker: Already done! state.col=" + state.col + " endCol=" + endCol + " We are done!");
 				return state;
 			}
 			
@@ -3134,7 +3125,7 @@ ca 20ms to render, ca 13ms to render without creating new objects
 		
 		if(EDITOR.settings.devMode && EDITOR.shouldRender == false) {
 			// For debugging, so we know why a render was needed
-			console.log(UTIL.getStack("renderNeeded"));
+			//console.log(UTIL.getStack("renderNeeded"));
 		}
 		EDITOR.shouldRender = true;
 		
@@ -3185,7 +3176,7 @@ ca 20ms to render, ca 13ms to render without creating new objects
 		
 		// Resize listeners (before)
 		var f = EDITOR.eventListeners.beforeResize.map(funMap);
-		console.log("Calling beforeResize listeners (" + f.length + ") ...");
+		//console.log("Calling beforeResize listeners (" + f.length + ") ...");
 		for(var i=0; i<f.length; i++) {
 			f[i](EDITOR.currentFile, windowWidth, windowHeight);
 		}
@@ -3240,7 +3231,8 @@ ca 20ms to render, ca 13ms to render without creating new objects
 		var contentHeight = windowHeight - headerFooterHeight;
 		var columnsHeight = contentHeight;
 		
-		if(QUERY_STRING["debug"]) {
+		/*
+			if(QUERY_STRING["debug"]) {
 			console.log("windowWidth=" + windowWidth);
 			console.log("windowHeight=" + windowHeight);
 			console.log("leftColumnWidth=" + leftColumnWidth);
@@ -3252,11 +3244,12 @@ ca 20ms to render, ca 13ms to render without creating new objects
 			console.log("contentWidth=" + contentWidth + " (offsetWidth=" + content.offsetWidth + " innerWidth=" + content.innerWidth + " )");
 			console.log("contentHeight=" + contentHeight + " (offsetHeight=" + content.offsetHeight + " innerHeight=" + content.innerHeight + " )");
 			console.log("columnsHeight=" + columnsHeight + " (offsetHeight=" + columns.offsetHeight + " innerHeight=" + columns.innerHeight + " )");
-			
+
 			console.log("offsetWidth=" + content.offsetWidth);
 			console.log("innerWidth=" + content.innerWidth);
 			console.log("outherWidth=" + content.outherWidth);
-		}
+			}
+		*/
 		
 		EDITOR.height = windowHeight;
 		EDITOR.width = windowWidth;
@@ -3270,7 +3263,7 @@ ca 20ms to render, ca 13ms to render without creating new objects
 				The footer is probably the biggest offender, try to limit it's height ...
 			*/ 
 			
-			console.log("resize: contentHeight=" + contentHeight);
+			//console.log("resize: contentHeight=" + contentHeight);
 			
 			var someMargin = 15;
 			var footerHeightLimit = footerHeight + contentHeight - someMargin;
@@ -3297,8 +3290,8 @@ ca 20ms to render, ca 13ms to render without creating new objects
 			content.style.height = EDITOR.view.canvasHeight + "px";
 		*/
 		
-		console.log("canvasWidth=" + EDITOR.view.canvasWidth);
-		console.log("canvasHeight=" + EDITOR.view.canvasHeight);
+		//console.log("canvasWidth=" + EDITOR.view.canvasWidth);
+		//console.log("canvasHeight=" + EDITOR.view.canvasHeight);
 		
 		
 		leftColumn.style.height = EDITOR.view.canvasHeight + "px";
@@ -3330,7 +3323,7 @@ ca 20ms to render, ca 13ms to render without creating new objects
 		
 		// Restore scrolling of the wrappers
 		for (var i = 0; i < wrappers.length; i++) {
-			console.log("Restoring scroll " +  wrappers[i].getAttribute("id") + " savedScrollTop=" + wrappers[i].getAttribute("savedScrollTop"));
+			//console.log("Restoring scroll " +  wrappers[i].getAttribute("id") + " savedScrollTop=" + wrappers[i].getAttribute("savedScrollTop"));
 			wrappers[i].scrollTop = wrappers[i].getAttribute("savedScrollTop");
 			wrappers[i].scrollLeft = wrappers[i].getAttribute("savedScrollLeft");
 		}
@@ -3373,11 +3366,11 @@ ca 20ms to render, ca 13ms to render without creating new objects
 		//var canvasHeight = EDITOR.view.canvasHeight / PIXEL_RATIO;
 		//}
 		
-		console.log("PIXEL_RATIO=" + PIXEL_RATIO + " canvasWidth=" + canvasWidth + " canvasHeight=" + canvasHeight);
+		//console.log("PIXEL_RATIO=" + PIXEL_RATIO + " canvasWidth=" + canvasWidth + " canvasHeight=" + canvasHeight);
 		
 		if( EDITOR.canvas && (EDITOR.canvas.width != canvasWidth || EDITOR.canvas.height != canvasHeight || resizeOverride) ) {
 			
-			console.log("DebugCtx: Before canvas resize: windowLoaded=" + windowLoaded + " EDITOR.canvasContext.imageSmoothingEnabled=" + EDITOR.canvasContext.imageSmoothingEnabled);
+			//console.log("DebugCtx: Before canvas resize: windowLoaded=" + windowLoaded + " EDITOR.canvasContext.imageSmoothingEnabled=" + EDITOR.canvasContext.imageSmoothingEnabled);
 			
 			EDITOR.canvas.style.width = EDITOR.view.canvasWidth + "px";
 			EDITOR.canvas.style.height = EDITOR.view.canvasHeight + "px";
@@ -3385,7 +3378,7 @@ ca 20ms to render, ca 13ms to render without creating new objects
 			EDITOR.canvas.width  = canvasWidth;
 			EDITOR.canvas.height = canvasHeight;
 			
-			console.log("DebugCtx: After canvas resize: EDITOR.canvasContext.imageSmoothingEnabled=" + EDITOR.canvasContext.imageSmoothingEnabled);
+			//console.log("DebugCtx: After canvas resize: EDITOR.canvasContext.imageSmoothingEnabled=" + EDITOR.canvasContext.imageSmoothingEnabled);
 			
 			// The canvas is reset when resizing!
 			canvasContextReset();
@@ -3396,7 +3389,7 @@ ca 20ms to render, ca 13ms to render without creating new objects
 			EDITOR.settings.verticalScrollZone = EDITOR.settings.gridWidth*3 + EDITOR.settings.rightMargin; // Scrollbar zone, right
 			EDITOR.settings.horizontalScrollZone = EDITOR.settings.gridHeight*2 + EDITOR.settings.topMargin; // Scrollbar zone, bottom. When touching down in the zone we should scroll
 			
-			console.log("Set canvas: EDITOR.canvas.width=" + EDITOR.canvas.width + " EDITOR.canvas.height=" + EDITOR.canvas.height + " EDITOR.canvas.style.width=" + EDITOR.canvas.style.width + " EDITOR.canvas.style.height=" + EDITOR.canvas.style.height);
+			//console.log("Set canvas: EDITOR.canvas.width=" + EDITOR.canvas.width + " EDITOR.canvas.height=" + EDITOR.canvas.height + " EDITOR.canvas.style.width=" + EDITOR.canvas.style.width + " EDITOR.canvas.style.height=" + EDITOR.canvas.style.height);
 			
 			var dashboard = document.getElementById("dashboard");
 			dashboard.style.width = EDITOR.view.canvasWidth + "px";
@@ -3404,12 +3397,12 @@ ca 20ms to render, ca 13ms to render without creating new objects
 			
 			
 			// Need to re-render after resizing the canvas!
-			console.log("re-render after resizing the canvas!");
+			//console.log("re-render after resizing the canvas!");
 			EDITOR.shouldRender = true;
 			
 		}
 		else if(EDITOR.canvas) {
-			console.log("Not resetting canvas dimensions. It's already at EDITOR.canvas.width=" + EDITOR.canvas.width + " EDITOR.canvas.height=" + EDITOR.canvas.height);
+			//console.log("Not resetting canvas dimensions. It's already at EDITOR.canvas.width=" + EDITOR.canvas.width + " EDITOR.canvas.height=" + EDITOR.canvas.height);
 		}
 		
 		if(EDITOR.currentFile) {
@@ -3434,7 +3427,7 @@ ca 20ms to render, ca 13ms to render without creating new objects
 		
 		// Resize listeners (after)
 		var f = EDITOR.eventListeners.afterResize.map(funMap);
-		console.log("Calling afterResize listeners (" + f.length + ") ...");
+		//console.log("Calling afterResize listeners (" + f.length + ") ...");
 		for(var i=0; i<f.length; i++) {
 			f[i](EDITOR.currentFile, windowWidth, windowHeight);
 		}
@@ -3458,7 +3451,7 @@ ca 20ms to render, ca 13ms to render without creating new objects
 			
 			// If there are many elements in leftColumn or rightColumn, they have to share the height
 			
-			console.log("resize: shareHeight: maxTotalHeight=" + maxTotalHeight + " elements: ", elements);
+			//console.log("resize: shareHeight: maxTotalHeight=" + maxTotalHeight + " elements: ", elements);
 			
 			var devidedHeight = Math.floor(maxTotalHeight / elements.length);
 			var computedStyle;
@@ -3697,7 +3690,7 @@ throw new Error("Second or third argument to EDITOR.on: callback=" + callback + 
 				}
 			}
 		}
-		console.log("Removed " + found + " occurrences of " + fname + " from " + eventName);
+		//console.log("Removed " + found + " occurrences of " + fname + " from " + eventName);
 	}
 	
 	EDITOR.hasEvent = function(eventName, fun) {
@@ -3885,7 +3878,7 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 				return;
 			}
 			
-			console.log("discoveryBar:show: showDisoveryBarWindowMenuItem=", showDisoveryBarWindowMenuItem);
+			//console.log("discoveryBar:show: showDisoveryBarWindowMenuItem=", showDisoveryBarWindowMenuItem);
 			
 			if(!discoveryBar.parentElement) {
 				var editorWidth = window.innerWidth || parseInt(EDITOR.canvas.width);
@@ -3934,7 +3927,7 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 			
 			if(showDisoveryBarWindowMenuItem) showDisoveryBarWindowMenuItem.activate();
 			else {
-				console.log("discoveryBar: No showDisoveryBarWindowMenuItem? ", showDisoveryBarWindowMenuItem);
+				//console.log("discoveryBar: No showDisoveryBarWindowMenuItem? ", showDisoveryBarWindowMenuItem);
 				setTimeout(function() {
 					if(showDisoveryBarWindowMenuItem) showDisoveryBarWindowMenuItem.activate();
 				}, 1000);
@@ -3953,13 +3946,13 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 					
 					EDITOR.resizeNeeded();
 				}
-				console.log("discoveryBar: editorWidth=" + editorWidth + " editorHeight=" + editorHeight + " tabListHeight=" + tabListHeight + " ");
+				//console.log("discoveryBar: editorWidth=" + editorWidth + " editorHeight=" + editorHeight + " tabListHeight=" + tabListHeight + " ");
 			}
 			
 		},
 		hide: function hideDiscoveryBar() {
 			// Hides the whole discovery bar
-			console.log("discoveryBar:hide: showDisoveryBarWindowMenuItem=", showDisoveryBarWindowMenuItem);
+			//console.log("discoveryBar:hide: showDisoveryBarWindowMenuItem=", showDisoveryBarWindowMenuItem);
 			discoveryBar.style.display = "none";
 			if(showDisoveryBarWindowMenuItem) showDisoveryBarWindowMenuItem.deactivate();
 			EDITOR.discoveryBar.isVisible = false;
@@ -3968,7 +3961,7 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 		},
 		toggle: function toggleDiscoveryBar() {
 			// Hides or shows the whole discovery bar
-			console.log("discoveryBar:toggle: discoveryBar.style.display=" + discoveryBar.style.display);
+			//console.log("discoveryBar:toggle: discoveryBar.style.display=" + discoveryBar.style.display);
 			if(discoveryBar.style.display == "none") {
 				EDITOR.discoveryBar.show();
 			}
@@ -4075,7 +4068,7 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 			if(!mouseEvent) mouseEvent = event;
 			var element = mouseEvent.toElement || mouseEvent.relatedTarget;
 			
-			console.log("DropdownMenu:stillActive: domElement=", menu.domElement, " movedto=", element);
+			//console.log("DropdownMenu:stillActive: domElement=", menu.domElement, " movedto=", element);
 			menu.active = true;
 		}
 		
@@ -4128,7 +4121,7 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 						if(subMenu) {
 							if(subMenu.active) {
 								oneChildActive = true;
-								console.log("DropdownMenu:hideMaybe:check: item=" + item + " subMenu.active=" + subMenu.active);
+								//console.log("DropdownMenu:hideMaybe:check: item=" + item + " subMenu.active=" + subMenu.active);
 								return;
 							}
 							check(subMenu.items);
@@ -4202,7 +4195,7 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 		menu.firstItem = order[0];
 		menu.lastItem = order[order.length-1];
 		
-		console.log("DropdownMenu:addItem: label=" + label + " menu.orientation=" + menu.orientation);
+		//console.log("DropdownMenu:addItem: label=" + label + " menu.orientation=" + menu.orientation);
 		
 		return item;
 	}
@@ -4229,7 +4222,7 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 		menu.domElement.style.display = ""; // Reset to default
 		
 		
-		console.log("parentItemRect=" + JSON.stringify(parentItemRect));
+		//console.log("parentItemRect=" + JSON.stringify(parentItemRect));
 		
 		var borderWidth = 1;
 		var menuTop = 0;
@@ -4253,9 +4246,9 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 		menuWidth = Math.max(menuWidth, menuRect.width);
 		var windowWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
 		if(windowWidth) {
-			console.log("menuLeft=" + menuLeft + " menuWidth=" + menuWidth + " windowWidth=" + windowWidth + " menuRect=" + JSON.stringify(menuRect));
+			//console.log("menuLeft=" + menuLeft + " menuWidth=" + menuWidth + " windowWidth=" + windowWidth + " menuRect=" + JSON.stringify(menuRect));
 			if( (menuLeft + menuWidth) > windowWidth) {
-				console.log("Pullout " + menu.pullout + " menu doesn't fit on the right side! windowWidth=" + windowWidth + " menuLeft=" + menuLeft + " menuWidth=" + menuWidth);
+				//console.log("Pullout " + menu.pullout + " menu doesn't fit on the right side! windowWidth=" + windowWidth + " menuLeft=" + menuLeft + " menuWidth=" + menuWidth);
 				
 				if( (parentItemRect.left - menuWidth) >= 0) {
 					// It fits on the left side. Place it on left side
@@ -4334,7 +4327,7 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 	
 	function DropdownMenuItem(options) {
 		
-		console.log("DropdownMenuItem: options.label=" + options.label + " options.parentMenu=", options.parentMenu);
+		//console.log("DropdownMenuItem: options.label=" + options.label + " options.parentMenu=", options.parentMenu);
 
 		if(typeof options != "object") throw new Error("Expected an object: options=" + options);
 		
@@ -4459,7 +4452,7 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 			
 			var target = keydownEvent.target;
 			
-			console.log("windowMenuItemKeyDown: key=" + keydownEvent.key + " keyCode=" + keydownEvent.keyCode + " target=", target + " (" + target.innerText + ")");
+			//console.log("windowMenuItemKeyDown: key=" + keydownEvent.key + " keyCode=" + keydownEvent.keyCode + " target=", target + " (" + target.innerText + ")");
 			
 			// ref: https://www.w3.org/TR/wai-aria-practices/examples/menubar/menubar-1/menubar-1.html
 			
@@ -4489,7 +4482,7 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 				// Go to the first item in the menu
 				var cell = item.parentMenu.domElement.firstChild;
 				var label = cell.getElementsByTagName("a")[0];
-				console.log("windowMenuItemKeyDown: EDITOR.input=" + EDITOR.input + " Focusing label=", label, " on cell=", cell);
+				//console.log("windowMenuItemKeyDown: EDITOR.input=" + EDITOR.input + " Focusing label=", label, " on cell=", cell);
 				label.focus();
 			}
 			// ### pressing End key on window menu
@@ -4497,7 +4490,7 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 				// Go to the last item in the menu
 				var cell = item.parentMenu.domElement.lastChild;
 				var label = cell.getElementsByTagName("a")[0];
-				console.log("windowMenuItemKeyDown: EDITOR.input=" + EDITOR.input + " Focusing label=", label, " on cell=", cell);
+				//console.log("windowMenuItemKeyDown: EDITOR.input=" + EDITOR.input + " Focusing label=", label, " on cell=", cell);
 				label.focus();
 			}
 			else if(key == "UpArrow" || code == keyUpArrow) {
@@ -4506,7 +4499,7 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 				var cell = item.domElement.previousSibling;
 				if(!cell) cell = item.parentMenu.domElement.lastChild;
 				var label = cell.getElementsByTagName("a")[0];
-				console.log("windowMenuItemKeyDown: Focusing label=", label, " on cell=", cell);
+				//console.log("windowMenuItemKeyDown: Focusing label=", label, " on cell=", cell);
 				label.focus();
 				
 			}
@@ -4522,7 +4515,7 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 				var cell = item.domElement.nextSibling;
 				if(!cell) cell = item.parentMenu.domElement.firstChild;
 				var label = cell.getElementsByTagName("a")[0];
-				console.log("windowMenuItemKeyDown: Focusing label=", label, " on cell=", cell);
+				//console.log("windowMenuItemKeyDown: Focusing label=", label, " on cell=", cell);
 				label.focus();
 			}
 			// ### pressing right on window menu
@@ -4536,25 +4529,25 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 				// If we are in a menu that pulls out/down, we should go the the next menu
 				if(item.parentMenu && item.parentMenu.parentMenu && !item.parentMenu.parentMenu.parentMenu) {
 					var parentMenuItem = item.parentMenu.parentMenuItem;
-					console.log("windowMenuItemKeyDown: parentMenuItem=", parentMenuItem);
+					//console.log("windowMenuItemKeyDown: parentMenuItem=", parentMenuItem);
 					
 					var menu = item.parentMenu.parentMenu;
-					console.log("windowMenuItemKeyDown: menu=", menu);
+					//console.log("windowMenuItemKeyDown: menu=", menu);
 					
 					menu.hideSiblings(); // Hide all submenus
 					
 					var nextItem = parentMenuItem.nextSibling;
 					if(!nextItem) nextItem = menu.firstItem;
-					console.log("windowMenuItemKeyDown: nextItem=", nextItem);
+					//console.log("windowMenuItemKeyDown: nextItem=", nextItem);
 					
 					nextItem.domElement.click(); // Show next submenu
 					
 					var subMenu = nextItem.subMenu;
-					console.log("windowMenuItemKeyDown: subMenu=", subMenu);
+					//console.log("windowMenuItemKeyDown: subMenu=", subMenu);
 					
 					if(subMenu) {
 						var firstItem = subMenu.firstItem;
-					console.log("windowMenuItemKeyDown: firstItem=", firstItem);
+						//console.log("windowMenuItemKeyDown: firstItem=", firstItem);
 					var label = firstItem.domElement.getElementsByTagName("a")[0];
 					}
 					else {
@@ -4563,7 +4556,7 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 						keydownEvent.preventDefault(); 
 					}
 					
-					console.log("windowMenuItemKeyDown: label=", label);
+					//console.log("windowMenuItemKeyDown: label=", label);
 					label.focus();
 					
 					return false;
@@ -4573,7 +4566,7 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 				var nextItem = item.nextSibling;
 				if(!nextItem) nextItem = item.parentMenu.firstItem;
 				var label = nextItem.domElement.getElementsByTagName("a")[0];
-				console.log("windowMenuItemKeyDown: Focusing label=", label, " on nextItem=", nextItem);
+				//console.log("windowMenuItemKeyDown: Focusing label=", label, " on nextItem=", nextItem);
 				label.focus();
 			}
 			// ### pressing left on window menu
@@ -4581,7 +4574,7 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 				
 				// If we are in a submenu that was pulled out to the right, pressing left arrow should go back to parent menu
 				if(item.parentMenu && item.parentMenu.parentMenu && item.parentMenu.parentMenu && item.parentMenu.parentMenu.parentMenu) {
-					console.log("windowMenuItemKeyDown: Going back to left menu");
+					//console.log("windowMenuItemKeyDown: Going back to left menu");
 					item.parentMenu.hide(); // Hide this menu
 					
 					var leftMenu =  item.parentMenu.parentMenu;
@@ -4593,7 +4586,7 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 					// Focus on the item that opened this menu
 					var parentMenuItem = item.parentMenu.parentMenuItem;
 					var label = parentMenuItem.domElement.getElementsByTagName("a")[0];
-					console.log("windowMenuItemKeyDown: label=", label);
+					//console.log("windowMenuItemKeyDown: label=", label);
 					label.focus();
 					
 					return;
@@ -4602,27 +4595,27 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 				// If we are in a menu that pulls out/down, we should go the the left/last menu
 				if(item.parentMenu && item.parentMenu.parentMenu && !item.parentMenu.parentMenu.parentMenu) {
 					var parentMenuItem = item.parentMenu.parentMenuItem;
-					console.log("windowMenuItemKeyDown: parentMenuItem=", parentMenuItem);
+					//console.log("windowMenuItemKeyDown: parentMenuItem=", parentMenuItem);
 					
 					var menu = item.parentMenu.parentMenu;
-					console.log("windowMenuItemKeyDown: menu=", menu);
+					//console.log("windowMenuItemKeyDown: menu=", menu);
 					
 					menu.hideSiblings(); // Hide all submenus
 					
 					var lastItem = parentMenuItem.previousSibling;
 					if(!lastItem) lastItem = menu.lastItem;
-					console.log("windowMenuItemKeyDown: lastItem=", lastItem);
+					//console.log("windowMenuItemKeyDown: lastItem=", lastItem);
 					
 					lastItem.domElement.click(); // Show submenu
 					
 					var subMenu = lastItem.subMenu;
-					console.log("windowMenuItemKeyDown: subMenu=", subMenu);
+					//console.log("windowMenuItemKeyDown: subMenu=", subMenu);
 					
 					var firstItem = subMenu.firstItem;
-					console.log("windowMenuItemKeyDown: firstItem=", firstItem);
+					//console.log("windowMenuItemKeyDown: firstItem=", firstItem);
 					
 					var label = firstItem.domElement.getElementsByTagName("a")[0];
-					console.log("windowMenuItemKeyDown: label=", label);
+					//console.log("windowMenuItemKeyDown: label=", label);
 					label.focus();
 					
 					return;
@@ -4632,14 +4625,14 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 				var lastItem = item.previousSibling;
 				if(!lastItem) lastItem = item.parentMenu.lastItem;
 				var label = lastItem.domElement.getElementsByTagName("a")[0];
-				console.log("windowMenuItemKeyDown: Focusing label=", label, " on lastItem=", lastItem);
+				//console.log("windowMenuItemKeyDown: Focusing label=", label, " on lastItem=", lastItem);
 				label.focus();
 			}
 			// ### Pressing any key on the Window menu
 			else {
 				// Any other character searches the menu
 				
-				console.log("windowMenuItemKeyDown: item.subMenu?" + (item.subMenu) + " visible=" + (item.subMenu && item.subMenu.visible) + " active=" + (item.subMenu && item.subMenu.active) + " activated=" + (item.subMenu && item.subMenu.activated) + ""); 
+				//console.log("windowMenuItemKeyDown: item.subMenu?" + (item.subMenu) + " visible=" + (item.subMenu && item.subMenu.visible) + " active=" + (item.subMenu && item.subMenu.active) + " activated=" + (item.subMenu && item.subMenu.activated) + ""); 
 				
 				// If a submenu is opened, we want to do the search on that
 				if(item.subMenu && (item.subMenu.visible || item.subMenu.active || item.subMenu.activated)) {
@@ -4654,21 +4647,21 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 				for(var i=0, str, firstLetter; i<labels.length; i++) {
 					str = labels[i].innerText.toLowerCase();
 					firstLetter = str.charAt(0);
-					console.log("windowMenuItemKeyDown: str=" + str + " firstLetter=" + firstLetter + " character=" + character + " (" + (firstLetter==character) + ")");
+					//console.log("windowMenuItemKeyDown: str=" + str + " firstLetter=" + firstLetter + " character=" + character + " (" + (firstLetter==character) + ")");
 					if(firstLetter == character && labels[i] != target) {
-						console.log("windowMenuItemKeyDown: Focusing label=", labels[i], "");
+						//console.log("windowMenuItemKeyDown: Focusing label=", labels[i], "");
 						labels[i].focus();
 						return false;
 					}
 				}
 				
-				console.log("windowMenuItemKeyDown: Did not find character=" + character + " in labels=", labels);
+				//console.log("windowMenuItemKeyDown: Did not find character=" + character + " in labels=", labels);
 				
 			}
 			
 			
 			function openSubMenu(focusLast) {
-				console.log("windowMenuItemKeyDown: Opening sub menu");
+				//console.log("windowMenuItemKeyDown: Opening sub menu");
 				
 				item.domElement.click(); // Opens the submenu
 				
@@ -4682,7 +4675,7 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 				}
 
 				var label = cell.getElementsByTagName("a")[0];
-				console.log("windowMenuItemKeyDown: Focusing label=", label, " (" + label.innerText + ") on cell=", cell);
+				//console.log("windowMenuItemKeyDown: Focusing label=", label, " (" + label.innerText + ") on cell=", cell);
 				label.focus();
 				
 				// Prevent click on first item
@@ -4758,13 +4751,13 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 		
 		item.subMenu.hide(false);
 		
-		console.log("DropdownMenuItem:addSubmenu: pullout=" + pullout + " item.parentMenu=" + item.parentMenu + " item.parentMenu.parentMenu=" + (item.parentMenu && item.parentMenu.parentMenu));
+		//console.log("DropdownMenuItem:addSubmenu: pullout=" + pullout + " item.parentMenu=" + item.parentMenu + " item.parentMenu.parentMenu=" + (item.parentMenu && item.parentMenu.parentMenu));
 		
 		return item.subMenu;
 		
 		
 		function showSubmenu(mouseEvent) {
-			console.log("showSubmenu");
+			//console.log("showSubmenu");
 			
 			if(!mouseEvent && typeof event != "undefined") mouseEvent = event;
 			
@@ -4874,12 +4867,12 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 				// Key to activate the root window menu (Ctrl+Esc)
 				EDITOR.bindKey({desc: "Focus window menu", charCode: 27, combo: CTRL, fun:
 					function focusWindowMenu() {
-						console.log("windowMenu: Focusing on Window menu ...");
+						//console.log("windowMenu: Focusing on Window menu ...");
 						
 						var item = dropdownMenuRoot.items[S("Editor")];
 						var label = item.domElement.getElementsByTagName("a")[0];
 						
-						console.log("windowMenu: label=", label);
+						//console.log("windowMenu: label=", label);
 						
 						label.focus();
 						
@@ -5096,7 +5089,7 @@ if(menuItem.parentMenu) {
 				var menu = document.getElementById("contextmenuGeneral");
 			}
 			
-			console.log("EDITOR.ctxMenu.addItem: text=" + options.text + " menu=", menu);
+			//console.log("EDITOR.ctxMenu.addItem: text=" + options.text + " menu=", menu);
 			
 			var li = document.createElement("li");
 			li.setAttribute("class", "item");
@@ -5139,14 +5132,14 @@ if(menuItem.parentMenu) {
 				li.id = liId;
 			}
 			
-			console.log("EDITOR.ctxMenu.addItem: li.id=" + li.id);
+			//console.log("EDITOR.ctxMenu.addItem: li.id=" + li.id);
 			
 			var preventClick = false;
 			
 			function keyupOnCtxItem(keyEvent) {
 				// Number 13 is the "Enter" key on the keyboard
 				if (keyEvent.keyCode === 13) {
-					console.log("EDITOR.ctxMenu.addItem: Pressed enter on item!");
+					//console.log("EDITOR.ctxMenu.addItem: Pressed enter on item!");
 					
 					// Cancel the default action, if needed
 					keyEvent.preventDefault();
@@ -5160,22 +5153,22 @@ if(menuItem.parentMenu) {
 			
 			function mouseupOnCtxItem(mouseUpEvent) {
 				preventClick = true; // Prevent the click event from firing (preventDefault() had no effect)
-				console.log("EDITOR.ctxMenu.addItem: mouseupOnCtxItem! preventClick=" + preventClick);
+				//console.log("EDITOR.ctxMenu.addItem: mouseupOnCtxItem! preventClick=" + preventClick);
 				ctxItemClickAction(mouseUpEvent);
 			}
 			
 			function clickOnCtxItem(clickEvent) {
 				if(preventClick) {
-					console.log("EDITOR.ctxMenu.addItem: clickOnCtxItem prevented!");
+					//console.log("EDITOR.ctxMenu.addItem: clickOnCtxItem prevented!");
 					preventClick = false;
 					return false;
 				}
-				console.log("EDITOR.ctxMenu.addItem: clickOnCtxItem! preventClick=" + preventClick);
+				//console.log("EDITOR.ctxMenu.addItem: clickOnCtxItem! preventClick=" + preventClick);
 				ctxItemClickAction(clickEvent);
 			}
 			
 			function ctxItemClickAction(someEvent) {
-				console.log("EDITOR.ctxMenu.addItem: ctxItemClickAction! someEvent.ctrlKey=" + someEvent.ctrlKey);
+				//console.log("EDITOR.ctxMenu.addItem: ctxItemClickAction! someEvent.ctrlKey=" + someEvent.ctrlKey);
 				// Give the same function parameters as key bound events
 				if(options.callback) options.callback(EDITOR.currentFile, getCombo(someEvent), null, 0, "down", someEvent);
 			}
@@ -5203,7 +5196,7 @@ if(menuItem.parentMenu) {
 				else {
 					separator.setAttribute("position", defaultPosition);
 				}
-				console.log("EDITOR.ctxMenu.addItem: Added separator=", separator, " fName=" + fName + " options.order=" + options.order);
+				//console.log("EDITOR.ctxMenu.addItem: Added separator=", separator, " fName=" + fName + " options.order=" + options.order);
 				
 				menu.appendChild(separator);
 			}
@@ -5211,12 +5204,12 @@ if(menuItem.parentMenu) {
 			// Re-order positions of the menu items
 			var itemCount = options.temp ? 100 : 200; // Temporary items start with tabindex 100, Ordinary items start with tabindex 200
 			var items = Array.prototype.slice.call( menu.getElementsByTagName("LI"), 0 ); // Convert DOM array to normal array for convenience
-			console.log("EDITOR.ctxMenu.addItem: items=", items);
+			//console.log("EDITOR.ctxMenu.addItem: items=", items);
 			items.sort(function sortItemsByPosition(a,b) {
 				var pA = parseInt(a.getAttribute("position"));
 				var pB = parseInt(b.getAttribute("position"));
 				
-				console.log("EDITOR.ctxMenu.addItem: Sorting a=", a, " b=", b, " pA=" + pA + " vs pB=" + pB + "  " + pA + ">" + pB + "?" + (pA> pB));
+				//console.log("EDITOR.ctxMenu.addItem: Sorting a=", a, " b=", b, " pA=" + pA + " vs pB=" + pB + "  " + pA + ">" + pB + "?" + (pA> pB));
 				
 				if(isNaN(pA)) throw new Error("NaN: No position attribute in a=" + (a.innerHTML ? a.innerHTML : a) );
 				if(isNaN(pB)) throw new Error("NaN: No position attribute in b=" + b + " b.outerHTML=" + b.outerHTML + " " );
@@ -5229,7 +5222,7 @@ if(menuItem.parentMenu) {
 			items.forEach(function (li) {
 				itemCount++;
 				
-				console.log("EDITOR.ctxMenu.addItem: itemCount=" + itemCount + " Reappening li=", li);
+				//console.log("EDITOR.ctxMenu.addItem: itemCount=" + itemCount + " Reappening li=", li);
 				menu.appendChild(li);
 				
 				// tabindex is needed in order for tab navigating to work (in Chrome)
@@ -5257,11 +5250,11 @@ if(menuItem.parentMenu) {
 				var posY = parseInt(contextmenu.style.top);
 				var borderOrSomething = 3;
 				
-				console.log("EDITOR.ctxMenu.addItem: itemHeight=" + itemHeight + " contextmenu.style.top=" + contextmenu.style.top + " contextmenu.style.bottom=" + contextmenu.style.bottom + " EDITOR.height=" + EDITOR.height + " offsetHeight=" + offsetHeight);
+				//console.log("EDITOR.ctxMenu.addItem: itemHeight=" + itemHeight + " contextmenu.style.top=" + contextmenu.style.top + " contextmenu.style.bottom=" + contextmenu.style.bottom + " EDITOR.height=" + EDITOR.height + " offsetHeight=" + offsetHeight);
 				
 				if(posY > (EDITOR.height - offsetHeight)) {
 					posY = EDITOR.height - offsetHeight - borderOrSomething;
-					console.log("EDITOR.ctxMenu.addItem: Updating posY=" + posY);
+					//console.log("EDITOR.ctxMenu.addItem: Updating posY=" + posY);
 					contextmenu.style.top = posY + "px";
 				}
 			}
@@ -5291,7 +5284,7 @@ if(menuItem.parentMenu) {
 			menuElement.onmouseup = null;
 			menuElement.onkeyup = null;
 			
-			console.log("EDITOR.ctxMenu.remove: id=" + menuElement.id);
+			//console.log("EDITOR.ctxMenu.remove: id=" + menuElement.id);
 			
 			menuElement.id = "removeMe";
 			
@@ -5357,7 +5350,7 @@ if(menuItem.parentMenu) {
 		},
 		hide: function hideCtxMenu() {
 			
-			console.log(UTIL.getStack("Hide context menu"));
+			//console.log(UTIL.getStack("Hide context menu"));
 			
 			var menu = document.getElementById("contextmenu");
 			
@@ -5395,7 +5388,7 @@ if(menuItem.parentMenu) {
 			if(clickEventOrTargetElement == undefined && typeof event != "undefined") clickEventOrTargetElement = event;
 			if(clickEventOrTargetElement == undefined) throw new Error("First argument to EDITOR.ctxMenu.show() needs to be a mouse/click event or a DOM target element!");
 			
-			console.log("showCtxMenu: Showing context menu! clickEventOrTargetElement=" + clickEventOrTargetElement + " ctrl?" + clickEventOrTargetElement.ctrlKey + " callStack:" + UTIL.getStack("showCtxMenu"));
+			//console.log("showCtxMenu: Showing context menu! clickEventOrTargetElement=" + clickEventOrTargetElement + " ctrl?" + clickEventOrTargetElement.ctrlKey + " callStack:" + UTIL.getStack("showCtxMenu"));
 			
 			if(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("ctxMenu") != -1) return new Error("Menu is disabled by query string!");;
 			
@@ -5423,7 +5416,7 @@ if(menuItem.parentMenu) {
 			
 			// Clear temorary menu items
 			var tempItems = document.getElementById("contextmenuTemp");
-			console.log("showCtxMenu: tempItems=", tempItems);
+			//console.log("showCtxMenu: tempItems=", tempItems);
 			while(tempItems.firstChild){
 				EDITOR.ctxMenu.remove(tempItems.firstChild);
 			}
@@ -5447,7 +5440,7 @@ if(menuItem.parentMenu) {
 			if(target.className=="fileCanvas") var caret = EDITOR.mousePositionToCaret();
 			else var caret = null;
 			
-			console.log("showCtxMenu: caret=" + JSON.stringify(caret));
+			//console.log("showCtxMenu: caret=" + JSON.stringify(caret));
 			
 			var posX = touchX + notUpOnMenu;
 			var posY = touchY + menuDownABit;
@@ -5484,7 +5477,7 @@ if(menuItem.parentMenu) {
 			
 			//alert("offsetHeight=" + offsetHeight + " offsetWidth=" + offsetWidth);
 			
-			console.log("showCtxMenu: menu.offsetHeight=" + offsetHeight + " menu.offsetWidth=" + offsetWidth + " EDITOR.width=" + EDITOR.width + " EDITOR.height=" + EDITOR.height + " EDITOR.mouseX=" + EDITOR.mouseX + " EDITOR.mouseY=" + EDITOR.mouseY);
+			//console.log("showCtxMenu: menu.offsetHeight=" + offsetHeight + " menu.offsetWidth=" + offsetWidth + " EDITOR.width=" + EDITOR.width + " EDITOR.height=" + EDITOR.height + " EDITOR.mouseX=" + EDITOR.mouseX + " EDITOR.mouseY=" + EDITOR.mouseY);
 			
 			/*
 				When long touching the menu comes up underneath and a menu click is triggered!
@@ -5498,11 +5491,11 @@ if(menuItem.parentMenu) {
 			if((posY+offsetHeight) > EDITOR.height) posY = EDITOR.height - offsetHeight - borderOrSomething;
 			if((posX+offsetWidth) > EDITOR.width) {
 posX = EDITOR.width - offsetWidth;
-				console.log("showCtxMenu: Placing the menu inside the screen area (the clicks was far to the right) EDITOR.width=" + EDITOR.width + " menu.offsetWidth=" + menu.offsetWidth + " new posX=" + posX + " orgX=" + orgX + " EDITOR.mouseX=" + EDITOR.mouseX);
+				//console.log("showCtxMenu: Placing the menu inside the screen area (the clicks was far to the right) EDITOR.width=" + EDITOR.width + " menu.offsetWidth=" + menu.offsetWidth + " new posX=" + posX + " orgX=" + orgX + " EDITOR.mouseX=" + EDITOR.mouseX);
 				
 				if(posX <= EDITOR.mouseX) {
 					// Place the menu on the left side
-					console.log("showCtxMenu: Placing the menu on the left side because posX=" + posX + " <= " + EDITOR.mouseX + "");
+					//console.log("showCtxMenu: Placing the menu on the left side because posX=" + posX + " <= " + EDITOR.mouseX + "");
 					posX = EDITOR.mouseX - offsetWidth - notUpOnMenu;
 				}
 			}
@@ -5512,10 +5505,7 @@ posX = EDITOR.width - offsetWidth;
 			
 			var belowTouch = !((touchX < posX || touchX > posX + offsetWidth) && (touchY < posY || touchY > posY + offsetHeight));
 			
-			console.log("showCtxMenu: EDITOR.touchDown=" + EDITOR.touchDown + " belowTouch=" + belowTouch + " touchX=" + touchX + " posX=" + posX +
-			" offsetWidth=" + offsetWidth + " touchY=" + touchY + " posY=" + posY + " offsetHeight=" + offsetHeight +
-			" orgX=" + orgX + " orgY=" + orgY + " EDITOR.width=" + EDITOR.width + " EDITOR.height=" + EDITOR.height +
-			" menu.style.width=" + menu.style.width + " menu.style.height=" + menu.style.height);
+			//console.log("showCtxMenu: EDITOR.touchDown=" + EDITOR.touchDown + " belowTouch=" + belowTouch + " touchX=" + touchX + " posX=" + posX + " offsetWidth=" + offsetWidth + " touchY=" + touchY + " posY=" + posY + " offsetHeight=" + offsetHeight + " orgX=" + orgX + " orgY=" + orgY + " EDITOR.width=" + EDITOR.width + " EDITOR.height=" + EDITOR.height + " menu.style.width=" + menu.style.width + " menu.style.height=" + menu.style.height);
 			
 			if(EDITOR.touchDown && belowTouch) {
 				
@@ -5537,13 +5527,13 @@ posX = EDITOR.width - offsetWidth;
 			
 			//menu.style.height = "100%";
 			
-			console.log("showCtxMenu: menu.style.visibility=" + menu.style.visibility);
+			//console.log("showCtxMenu: menu.style.visibility=" + menu.style.visibility);
 			
-			console.log("showCtxMenu: menu.childNodes=", menu.childNodes);
-			console.log("showCtxMenu: menu.children=", menu.children);
+			//console.log("showCtxMenu: menu.childNodes=", menu.childNodes);
+			//console.log("showCtxMenu: menu.children=", menu.children);
 			
-			console.log("showCtxMenu: menu=", menu);
-			console.log("showCtxMenu: menu.childNodes[0]=", menu.childNodes[0]);
+			//console.log("showCtxMenu: menu=", menu);
+			//console.log("showCtxMenu: menu.childNodes[0]=", menu.childNodes[0]);
 			
 			// element[0] is the temp-holder
 			menu.children[1].focus(); // Focus the first element
@@ -5556,7 +5546,7 @@ posX = EDITOR.width - offsetWidth;
 			
 			
 			function waitForTouchUp() {
-				console.log("showCtxMenu: waitForTouchUp:");
+				//console.log("showCtxMenu: waitForTouchUp:");
 				if(typeof event != "undefined" && typeof event.preventDefault == "function") event.preventDefault();
 				if(typeof clickEvent != "undefined" && typeof clickEvent.preventDefault == "function") clickEvent.preventDefault();
 				clearSelection();
@@ -5565,12 +5555,12 @@ posX = EDITOR.width - offsetWidth;
 				//if((posY+offsetHeight) > EDITOR.height) posY = EDITOR.height - offsetHeight;
 				
 				if(!EDITOR.touchDown) {
-					console.log("TshowCtxMenu: here where no touch down!");
+					//console.log("TshowCtxMenu: here where no touch down!");
 					giveUp();
 					fullScreenMenuMaybe();
 				}
 				else {
-					console.log("showCtxMenu: There was a touch down!");
+					//console.log("showCtxMenu: There was a touch down!");
 					//menu.style.top = posY + "px";
 					//menu.style.left = posX + "px";
 				}
@@ -5584,14 +5574,14 @@ posX = EDITOR.width - offsetWidth;
 			function fullScreenMenuMaybe() {
 				
 				var offsetHeight = parseInt(menu.offsetHeight);
-				console.log("showCtxMenu: fullScreenMenuMaybe: offsetHeight=" + offsetHeight + " EDITOR.height=" + EDITOR.height + " EDITOR.width=" + EDITOR.width);
+				//console.log("showCtxMenu: fullScreenMenuMaybe: offsetHeight=" + offsetHeight + " EDITOR.height=" + EDITOR.height + " EDITOR.width=" + EDITOR.width);
 				if(offsetHeight > EDITOR.height || offsetWidth*1.1 > EDITOR.width || EDITOR.width < 500) {
 					// Hide everything besides the menu
-					console.log("showCtxMenu: fullScreenMenuMaybe: Entering full screen menu ...");
+					//console.log("showCtxMenu: fullScreenMenuMaybe: Entering full screen menu ...");
 					fullScreenMenu(menu);
 				}
 				else {
-					console.log("showCtxMenu: fullScreenMenuMaybe: No need to enter full screen menu");
+					//console.log("showCtxMenu: fullScreenMenuMaybe: No need to enter full screen menu");
 					menu.style.top = posY + "px";
 					menu.style.left = posX + "px";
 				}
@@ -5623,7 +5613,7 @@ posX = EDITOR.width - offsetWidth;
 					return;
 				}
 				
-				console.log("display.start: info=" + JSON.stringify(info));
+				//console.log("display.start: info=" + JSON.stringify(info));
 				
 				EDITOR.virtualDisplay.password = info.password;
 				EDITOR.virtualDisplay.port = info.port;
@@ -5667,9 +5657,9 @@ posX = EDITOR.width - offsetWidth;
 			if(!EDITOR.virtualDisplay.started) return EDITOR.virtualDisplay.start(true, preferredWith, preferredHeight, callback, ++recurse);
 
 			// The display should be running, but check status just in case! (user worker might have restarted)
-			console.log("EDITOR.virtualDisplay.show: Checking display.status...");
+			//console.log("EDITOR.virtualDisplay.show: Checking display.status...");
 			CLIENT.cmd("display.status", function checkedDisplayStatus(err, status) {
-				console.log("EDITOR.virtualDisplay.show: Got display.status: " + JSON.stringify(status));
+				//console.log("EDITOR.virtualDisplay.show: Got display.status: " + JSON.stringify(status));
 				if(err) {
 					callback(new Error("Unable to get display.status! Error: " + err.message));
 					callback = null;
@@ -5693,7 +5683,7 @@ posX = EDITOR.width - offsetWidth;
 			return PREVENT_DEFAULT;
 			
 			function openWindow() {
-				console.log("EDITOR.virtualDisplay.show: Opening window...");
+				//console.log("EDITOR.virtualDisplay.show: Opening window...");
 				
 			if(EDITOR.virtualDisplay.open) {
 				if(callback) callback(null);
@@ -5745,7 +5735,7 @@ setTimeout(function winNeverLoaded() {
 				
 				function winLoaded(err, win) {
 					winLoadedCalled = true;
-					console.log("EDITOR.virtualDisplay window loaded!");
+					//console.log("EDITOR.virtualDisplay window loaded!");
 					
 					if(err && err.code != "CROSS_ORIGIN") return alertBox("Problem opening window for desktop: " + err.message);
 				
@@ -5901,7 +5891,7 @@ console.warn(err.message);
 		if(! file instanceof File) throw new Error("Third argument file is supposed to be a File object");
 		if(lvl == undefined) lvl = 3; // 1=Err 2=Warn 3=Info
 		
-		console.log("EDITOR.addInfo: row=" + row + " col=" + col + " textString=" + textString + " file.path=" + file.path);
+		//console.log("EDITOR.addInfo: row=" + row + " col=" + col + " textString=" + textString + " file.path=" + file.path);
 		
 		if(textString == undefined) throw new Error("EDITOR.addInfo: Third argument textString=" + textString + " can not be undefined! arguments=" + JSON.stringify(arguments));
 		
@@ -5922,7 +5912,7 @@ console.warn(err.message);
 		
 		// Why not just create div's and show them on top of the canvas!?!?
 		
-		console.log("EDITOR.addInfo: textString=" + textString);
+		//console.log("EDITOR.addInfo: textString=" + textString);
 		
 		if(EDITOR.soundAssist) {
 			if(lvl == 3) var message = "Info: ";
@@ -5958,7 +5948,7 @@ console.warn(err.message);
 			
 			var found = false;
 			
-			console.log("EDITOR.addInfo: imgArray.length=" + imgArray.length);
+			//console.log("EDITOR.addInfo: imgArray.length=" + imgArray.length);
 			
 			// Remove all text at next editor interaction ?
 			// nope: They will be removed when moving the cursor
@@ -5976,7 +5966,7 @@ console.warn(err.message);
 				if(info[i].row == row && info[i].col == col) {
 					
 					if(info[i].str == textString) {
-						console.log("EDITOR.addInfo: Same text as in info[" + i + "]");
+						//console.log("EDITOR.addInfo: Same text as in info[" + i + "]");
 						info[i].count++;
 					}
 					else {
@@ -5988,7 +5978,7 @@ console.warn(err.message);
 						}
 						
 						for(var j=0; j<imgArray.length; j++) {
-							console.log("EDITOR.addInfo: Adding info to info[" + i + "]");
+							//console.log("EDITOR.addInfo: Adding info to info[" + i + "]");
 							info[i].text.push(imgArray[j]);
 						}
 					}
@@ -5998,7 +5988,7 @@ console.warn(err.message);
 			}
 			
 			if(!found) {
-				console.log("EDITOR.addInfo: No info found on that position. Adding it!");
+				//console.log("EDITOR.addInfo: No info found on that position. Adding it!");
 				info.push({
 					row: row,
 					col: col,
@@ -6012,7 +6002,7 @@ console.warn(err.message);
 			
 			console.timeEnd("addInfo");
 			
-			console.log("EDITOR.addInfo: Info added on row=" + row + " col=" + col + " textString=" + textString + " file.path=" + file.path);
+			//console.log("EDITOR.addInfo: Info added on row=" + row + " col=" + col + " textString=" + textString + " file.path=" + file.path);
 			// todo: only re-render if the info is in view
 			EDITOR.renderNeeded();
 			resizeAndRender();
@@ -6020,14 +6010,14 @@ console.warn(err.message);
 		}
 		
 		function makeImage(item) {
-			console.log("EDITOR.addInfo: makeImage item=" + item);
+			//console.log("EDITOR.addInfo: makeImage item=" + item);
 			htmlToImage(item, function(img) {
 				imgArray.push(img);
 				
 				imagesMade++;
 				
-				console.log("EDITOR.addInfo: imagesToMake=" + imagesToMake);
-				console.log("EDITOR.addInfo: imagesMade=" + imagesMade);
+				//console.log("EDITOR.addInfo: imagesToMake=" + imagesToMake);
+				//console.log("EDITOR.addInfo: imagesMade=" + imagesMade);
 				
 				if(imagesMade == imagesToMake) {
 					allImagesMade();
@@ -6077,11 +6067,11 @@ console.warn(err.message);
 			else console.warn("Unable to get error info from errorStack=" + errorStack);
 		}
 		
-		console.log("EDITOR.error: message=" + message + " source=" + source + " lineno=" + lineno + " colno=" + colno);
+		//console.log("EDITOR.error: message=" + message + " source=" + source + " lineno=" + lineno + " colno=" + colno);
 		
 		var f = EDITOR.eventListeners.error.map(funMap);
 		if(f.length > 0) {
-			console.log("Calling error listeners (" + f.length + ") ...");
+			//console.log("Calling error listeners (" + f.length + ") ...");
 			for(var i=0; i<f.length; i++) {
 				f[i](message, source, lineno, colno, error); // Call function
 			}
@@ -6129,7 +6119,7 @@ console.warn(err.message);
 		if(afk) {
 			afk = false;
 EDITOR.fireEvent("btk");
-			console.log("Setting mainLoopInterval because btk!");
+			//console.log("Setting mainLoopInterval because btk!");
 			mainLoopInterval = setInterval(resizeAndRender, 16); // Start main loop
 		}
 		
@@ -6137,7 +6127,7 @@ EDITOR.fireEvent("btk");
 		
 		var f = EDITOR.eventListeners.interaction.map(funMap);
 		if(f.length > 0) {
-			console.log("Calling interaction listeners (" + f.length + ") ...");
+			//console.log("Calling interaction listeners (" + f.length + ") ...");
 			for(var i=0; i<f.length; i++) {
 				f[i](EDITOR.currentFile, interaction, options); // Call function
 			}
@@ -6197,7 +6187,7 @@ EDITOR.fireEvent("btk");
 		if(args == undefined) args = [];
 		if(!Array.isArray(args)) throw new Error("args need to be an Array!");
 		
-		console.log("Firing event: " + eventName);
+		//console.log("Firing event: " + eventName);
 		
 		if(!EDITOR.eventListeners.hasOwnProperty(eventName)) {
 			var err = new Error("Uknown event listener:" + eventName);
@@ -6222,7 +6212,7 @@ EDITOR.fireEvent("btk");
 		}
 		
 		function wait() {
-			console.log("waitingForEventListenerCallbacks=" + waitingForEventListenerCallbacks + " Still waiting for " + JSON.stringify(waitingForFunction));
+			//console.log("waitingForEventListenerCallbacks=" + waitingForEventListenerCallbacks + " Still waiting for " + JSON.stringify(waitingForFunction));
 			if(++waitCounter >= maxWaitTimes) {
 				clearTimeout(waitInterval);
 				throw new Error("The following " + waitingForEventListenerCallbacks + " " + eventName + " event listeners never returned or called back: " + JSON.stringify(waitingForFunction));
@@ -6238,7 +6228,7 @@ EDITOR.fireEvent("btk");
 				
 			// Add callback function
 			var fargs = args.concat(function(err, ret) {
-				console.log("Callback called from fName=" + fName + " waitingForEventListenerCallbacks=" + waitingForEventListenerCallbacks);
+				//console.log("Callback called from fName=" + fName + " waitingForEventListenerCallbacks=" + waitingForEventListenerCallbacks);
 				returns[fName] = ret;
 				waitingForFunction.splice(waitingForFunction.indexOf(fName), 1);
 				if(--waitingForEventListenerCallbacks == 0) {
@@ -6336,7 +6326,7 @@ EDITOR.fireEvent("btk");
 	}
 	
 	EDITOR.removeRender = function(fun) {
-		console.log("Removing render: " + UTIL.getFunctionName(fun));
+		//console.log("Removing render: " + UTIL.getFunctionName(fun));
 		
 		delete EDITOR.renderOrder[ UTIL.getFunctionName(fun) ];
 		
@@ -6419,7 +6409,7 @@ EDITOR.fireEvent("btk");
 				var extraSpace = walker.extraSpace;
 				var charWidth = walker.charWidth;
 				
-				console.log("mousePositionToCaret: mouseCol=" + mouseCol + " walker=" + JSON.stringify(walker));
+				//console.log("mousePositionToCaret: mouseCol=" + mouseCol + " walker=" + JSON.stringify(walker));
 				
 				if(mouseCol > walker.totalWidth) {
 					// Place mouse at EOL
@@ -6431,9 +6421,9 @@ EDITOR.fireEvent("btk");
 					if(charWidth > 0) {
 						var mouseColX = Math.floor((EDITOR.settings.leftMargin + ((gridRow.indentation) * EDITOR.settings.tabSpace - file.startColumn + walker.totalWidth ) * EDITOR.settings.gridWidth));
 						var diff = mouseColX - mouseX;
-						console.log("mousePositionToCaret: charWidth=" + charWidth + " mouseCol=" + mouseCol + " extraSpace=" + extraSpace + " mouseColX=" + mouseColX + " mouseX=" + mouseX + " diff=" + diff + " ");
+						//console.log("mousePositionToCaret: charWidth=" + charWidth + " mouseCol=" + mouseCol + " extraSpace=" + extraSpace + " mouseColX=" + mouseColX + " mouseX=" + mouseX + " diff=" + diff + " ");
 						if(diff/EDITOR.settings.gridWidth > walker.charWidth/2) {
-							console.log("mousePositionToCaret: Adjusting to left glyph as we clicked left of it");
+							//console.log("mousePositionToCaret: Adjusting to left glyph as we clicked left of it");
 							mouseCol -= walker.charCodePoints;
 						}
 						
@@ -6450,11 +6440,11 @@ EDITOR.fireEvent("btk");
 				}
 				
 				if( gridRow[mouseCol] && UTIL.isSurrogateEnd(gridRow[mouseCol].char) ) {
-					console.log("mousePositionToCaret: surrogate END! mouseCol=" + mouseCol);
+					//console.log("mousePositionToCaret: surrogate END! mouseCol=" + mouseCol);
 					mouseCol++;
 				}
 				else if( gridRow[mouseCol] && UTIL.isSurrogateModifierStart(gridRow[mouseCol].char) ) {
-					console.log("mousePositionToCaret: at surrogate modifier start! mouseCol=" + mouseCol);
+					//console.log("mousePositionToCaret: at surrogate modifier start! mouseCol=" + mouseCol);
 					mouseCol += 2;
 				}
 				
@@ -6567,7 +6557,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 			
 			//if(char == "") continue; // "abc".indexOf("") = 0
 			
-			console.log("EDITOR.autoComplete: char=" + char);
+			//console.log("EDITOR.autoComplete: char=" + char);
 			
 			if(char == "(") {
 				leftParentheses++;
@@ -6581,14 +6571,14 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 			
 			// don't include if(
 			else if(char == "(" && left2 == "i" && left1 == "f") {
-				console.log("EDITOR.autoComplete: break because of if(");
+				//console.log("EDITOR.autoComplete: break because of if(");
 				break;
 			}
 			
 			//if(isWhiteSpace(char) || char == ",") break;
 			
 			word = char + word;
-			console.log("EDITOR.autoComplete: word=" + word);
+			//console.log("EDITOR.autoComplete: word=" + word);
 			
 			caretStepLeft++;
 		}
@@ -6597,7 +6587,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		for(var i=file.caret.index; i<file.text.length; i++) {
 			char = file.text.charAt(i);
 			
-			console.log("EDITOR.autoComplete: char=" + char);
+			//console.log("EDITOR.autoComplete: char=" + char);
 			
 			if(wordDelimitersRight.indexOf(char) > -1) break; // Exit loop
 			
@@ -6608,17 +6598,17 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		
 		word = word.trim();
 		var wordLength = word.length;
-		console.log("EDITOR.autoComplete: Autocomplete: *" + word + "* (" + wordLength + " chars)");
+		//console.log("EDITOR.autoComplete: Autocomplete: *" + word + "* (" + wordLength + " chars)");
 		
 		var ret, addWord, addMcl, functionArguments, removeOptions = [];
 		
 		var f = EDITOR.eventListeners.autoComplete.map(funMap);
-		console.log("EDITOR.autoComplete: Calling autoComplete listeners (" + f.length + ") ...");
+		//console.log("EDITOR.autoComplete: Calling autoComplete listeners (" + f.length + ") ...");
 		for(var i=0; i<f.length; i++) {
 			
 			ret = f[i](file, word, wordLength, options.length, callback);
 			
-			console.log("EDITOR.autoComplete: function " + UTIL.getFunctionName(f[i]) + " returned: " + JSON.stringify(ret));
+			//console.log("EDITOR.autoComplete: function " + UTIL.getFunctionName(f[i]) + " returned: " + JSON.stringify(ret));
 			
 			if(ret == undefined) continue;
 
@@ -6639,7 +6629,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 				return false;
 			}
 			
-			console.log("EDITOR.autoComplete: options:" + JSON.stringify(options, null, 2));
+			//console.log("EDITOR.autoComplete: options:" + JSON.stringify(options, null, 2));
 			
 			var removeIndex = -1;
 			for(var i=0; i<removeOptions.length; i++) {
@@ -6660,7 +6650,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 				// Type up until the common character  fooBar vs fooBaz, type fooBa|
 				var shared = sharedStart(options);
 				
-				console.log("EDITOR.autoComplete: sharedStart=" + shared + " word=" + word);
+				//console.log("EDITOR.autoComplete: sharedStart=" + shared + " word=" + word);
 				
 				// hmm!?
 				/*
@@ -6700,7 +6690,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		function callback(ret, notAsync) {
 			if(!ret) return;
 			
-			console.log("EDITOR.autoComplete: ret=" + JSON.stringify(ret) + " waitingForAsync=" + waitingForAsync);
+			//console.log("EDITOR.autoComplete: ret=" + JSON.stringify(ret) + " waitingForAsync=" + waitingForAsync);
 			
 			if(!Array.isArray(ret) && typeof ret == "object") {
 				if(ret.remove) removeOptions = removeOptions.concat(ret.remove);
@@ -6720,7 +6710,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 						addMcl = 0;
 					}
 					
-					console.log("EDITOR.autoComplete: word=" + word + " addWord=" + addWord + " addMcl=" + addMcl);
+					//console.log("EDITOR.autoComplete: word=" + word + " addWord=" + addWord + " addMcl=" + addMcl);
 					
 					if(word.length > 0 && addWord.indexOf(word) != 0) {
 						console.warn("EDITOR.autoComplete: Function " + UTIL.getFunctionName(f[i]) + " returned '" + addWord + "' witch does not start with word=" + word + " !");
@@ -6774,7 +6764,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 				var insert = wholeWord.substring(word.length); // Start at length, continue to end
 			}
 			
-			console.log("EDITOR.autoComplete: Completing word=" + word + " wholeWord=" + wholeWord + " moveCaret=" + moveCaret + " insert=" + insert + "");
+			//console.log("EDITOR.autoComplete: Completing word=" + word + " wholeWord=" + wholeWord + " moveCaret=" + moveCaret + " insert=" + insert + "");
 			
 			
 			/* Use insertText for non-single letters ...
@@ -6820,7 +6810,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 	EDITOR.autoCompletePath = function autoCompletePath(options, callback) {
 		// Returns an array of possible autocomplete values
 		
-		console.log("EDITOR.autoCompletePath: options=" + JSON.stringify(options));
+		//console.log("EDITOR.autoCompletePath: options=" + JSON.stringify(options));
 		
 		if(typeof options == "function" && callback == undefined) {
 			callback = options;
@@ -6839,7 +6829,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 			throw new Error("No path specified in options=" + JSON.stringify(options));
 		}
 		
-		console.log("autoCompletePath: path=" + options.path);
+		//console.log("autoCompletePath: path=" + options.path);
 		
 		EDITOR.listFiles(folder, function fileList(err, files) {
 			
@@ -6857,11 +6847,11 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 				return callback(error);
 			}
 			
-			console.log("filesNames=" + filesNames);
+			//console.log("filesNames=" + filesNames);
 			
 			var path = folder + sharedStart(filesNames);
 			
-			console.log("EDITOR.autoCompletePath: " + options.path + " => " + path);
+			//console.log("EDITOR.autoCompletePath: " + options.path + " => " + path);
 			
 			callback(err, path, filePaths);
 		});
@@ -6891,19 +6881,19 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 	
 	EDITOR.exit = function() {
 		
-		console.log("Calling exit event listeners...");
+		//console.log("Calling exit event listeners...");
 		EDITOR.fireEvent("exit", ["exit"], function afterExitEvent(err, returns) {
-			console.log("All exit event listeners called!");
+			//console.log("All exit event listeners called!");
 			if(err) throw(err);
 			
 			if(CLIENT.inFlight == 0) exitNow();
 			else {
-				console.log("Waiting one second before exiting... CLIENT.inFlight=" + CLIENT.inFlight);
+				//console.log("Waiting one second before exiting... CLIENT.inFlight=" + CLIENT.inFlight);
 				setTimeout(exitNow, 1000);
 			}
 			
 			function exitNow() {
-				console.log("Closing the editor ...");
+				//console.log("Closing the editor ...");
 				if(typeof process == "object" && typeof process.exit == "function") process.exit(1);
 				
 				if(CLIENT.connected) {
@@ -6960,7 +6950,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 			return;
 		}
 		
-		console.log("Showing file: " + file.path + " (EDITOR.focus=" + EDITOR.input + " focus=" + focus + "");
+		//console.log("Showing file: " + file.path + " (EDITOR.focus=" + EDITOR.input + " focus=" + focus + "");
 		
 		if(file == EDITOR.currentFile) {
 			console.warn("File already in view: " + file.path);
@@ -6972,7 +6962,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		if(EDITOR.currentFile) {
 			// Hide current file
 			var f = EDITOR.eventListeners.fileHide.map(funMap);
-			console.log("Calling fileHide listeners (" + f.length + ") EDITOR.currentFile.path=" + EDITOR.currentFile.path);
+			//console.log("Calling fileHide listeners (" + f.length + ") EDITOR.currentFile.path=" + EDITOR.currentFile.path);
 			for(var i=0; i<f.length; i++) {
 				f[i](EDITOR.currentFile); // Call function
 			}
@@ -7014,7 +7004,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		
 		
 		var f = EDITOR.eventListeners.fileShow.map(funMap);
-		console.log("Calling fileShow listeners (" + f.length + ") file.path=" + file.path);
+		//console.log("Calling fileShow listeners (" + f.length + ") file.path=" + file.path);
 		for(var i=0; i<f.length; i++) {
 			f[i](file, EDITOR.lastFileShowed); // Call function
 		}
@@ -7352,7 +7342,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		if((typeof b.fun !== "function")) throw new Error("Object argument needs to have a 'fun' method!");
 		
 		if(!b.desc) {
-			console.log(UTIL.getStack("Key binding should have a description!"));
+			//console.log(UTIL.getStack("Key binding should have a description!"));
 		}
 		
 		if(b.mode == undefined) {
@@ -7377,7 +7367,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 				if(b.disableOthers) disable.push(keyBindings[i]);
 				else {
 					// It's OK to bind the same key combo to do many things, eg Esc key, but we should give a warning:
-					console.log(UTIL.getStack("There's already a key binding (" + UTIL.getFunctionName(keyBindings[i].fun) + ") for charCode=" + b.charCode + " and combo=" + b.combo + " !"));
+					//console.log(UTIL.getStack("There's already a key binding (" + UTIL.getFunctionName(keyBindings[i].fun) + ") for charCode=" + b.charCode + " and combo=" + b.combo + " !"));
 				}
 			}
 		}
@@ -7415,7 +7405,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 				f.charCode = charCode;
 				f.combo = combo;
 				rebound = true;
-				console.log("Rebound " + funName + " to " + EDITOR.getKeyFor(funName) );
+				//console.log("Rebound " + funName + " to " + EDITOR.getKeyFor(funName) );
 			}
 		}
 	}
@@ -7434,7 +7424,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 				
 				keyBindings.splice(i, 1);
 				
-				console.log("unbindKey " + funName);
+				//console.log("unbindKey " + funName);
 				return true;
 				//return EDITOR.unbindKey(funName);
 			}
@@ -7489,7 +7479,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 				
 				if(remove) EDITOR.plugins.splice(i, 1);
 				
-				console.log("Plugin disabled" + (remove ? " and removed": "") + ": " + desc);
+				//console.log("Plugin disabled" + (remove ? " and removed": "") + ": " + desc);
 				
 				return true;
 			}
@@ -7508,7 +7498,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 				
 				plugin.load();
 				
-				console.log("Plugin re-enabled: " + desc);
+				//console.log("Plugin re-enabled: " + desc);
 				
 				return true;
 			}
@@ -7637,14 +7627,14 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 	}
 
 	EDITOR.folderExistIn = function(pathToParentFolder, folderName, folderExistInCallback) {
-		console.log("folderExistIn pathToParentFolder=" + pathToParentFolder);
+		//console.log("folderExistIn pathToParentFolder=" + pathToParentFolder);
 		
 		EDITOR.listFiles(pathToParentFolder, function(err, list) {
 			
-			console.log("list=" + list);
+			//console.log("list=" + list);
 			
 			if(err) {
-				console.log("folderExistIn pathToParentFolder=" + pathToParentFolder + " err.message=" + err.message);
+				//console.log("folderExistIn pathToParentFolder=" + pathToParentFolder + " err.message=" + err.message);
 				
 				if(err.code != "ENOENT") {
 					var error = new Error("Unable to check if folder=" + folderName + " exist in pathToParentFolder=" + pathToParentFolder + "\n" + err.message);
@@ -7663,7 +7653,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 						folderExistInCallback(null, list[i].path);
 						return;
 					}
-					else console.log(list[i].type + " " + list[i].name + " != " + folderName);
+					//else console.log(list[i].type + " " + list[i].name + " != " + folderName);
 				}
 				// end of for loop reached, no folder found:
 				folderExistInCallback(null, false);
@@ -7677,7 +7667,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		// Check if path exists
 		// And ask's to create the path if it doesn't exist
 		
-		console.log("EDITOR.checkPath: fullPath=" + fullPath);
+		//console.log("EDITOR.checkPath: fullPath=" + fullPath);
 		
 		if(typeof dontMsg == "function") {
 			callback = dontMsg;
@@ -7696,7 +7686,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		var folderPath = fullPath.slice(0, fullPath.lastIndexOf(folderDelimiter)) + folderDelimiter;
 		var folderPaths = UTIL.getFolders(folderPath, includeHostInfo);
 		
-		console.log("folderPaths=" + JSON.stringify(folderPaths));
+		//console.log("folderPaths=" + JSON.stringify(folderPaths));
 		
 		if(folderPaths.length > 1) {
 			var pathToParentFolder = folderPaths[folderPaths.length-2];
@@ -7731,7 +7721,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 						}
 						else if(answer == another) {
 							EDITOR.pathPickerTool({defaultPath: fullPath}, function changedPath(err, newPath) {
-								console.log("EDITOR.checkPath: EDITOR.pathPickerTool: err=" + (err && err.message) + " newPath=" + newPath); 
+								//console.log("EDITOR.checkPath: EDITOR.pathPickerTool: err=" + (err && err.message) + " newPath=" + newPath); 
 								if(err) {
 									return callback(err);
 								}
@@ -7788,7 +7778,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		
 		var protocol = UTIL.urlProtocol(pathToFolder);
 		
-		console.log("EDITOR.listFiles: pathToFolder=" + pathToFolder + " protocol=" + protocol);
+		//console.log("EDITOR.listFiles: pathToFolder=" + pathToFolder + " protocol=" + protocol);
 		
 		var json = {pathToFolder: pathToFolder};
 			
@@ -7804,7 +7794,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 			
 		*/
 		
-		console.log("createPath: " + directoryPathToCreate);
+		//console.log("createPath: " + directoryPathToCreate);
 		
 		var lastCharOfPath = directoryPathToCreate.substr(directoryPathToCreate.length-1);
 		if(lastCharOfPath != "/" && lastCharOfPath != "\\") {
@@ -7821,7 +7811,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 			}
 			else {
 				if(createPathCallback) createPathCallback(null, json.path);
-				else console.log("Path created: " + json.path);
+				//else console.log("Path created: " + json.path);
 			}
 		});
 		
@@ -7831,7 +7821,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		
 		// Simulate ... 
 		
-		console.log("EDITOR.mock: mock=" + mock + " options=" + JSON.stringify(options));
+		//console.log("EDITOR.mock: mock=" + mock + " options=" + JSON.stringify(options));
 		
 		if(mock == "keydown") {
 			if(typeof options == "string") {
@@ -7913,10 +7903,10 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 				offsetY: options.y, 
 				target: options.target, 
 				button: options.button,
-				preventDefault: function() {console.log("Mocked doubleClick event prevent default.")},
-				stopPropagation: function() {console.log("Mocked doubleClick event stop propagation.")}
-				}
-			console.log(doubleClickEvent);
+				preventDefault: function() {/*console.log("Mocked doubleClick event prevent default.")*/},
+				stopPropagation: function() {/*console.log("Mocked doubleClick event stop propagation.")*/}
+			}
+			//console.log(doubleClickEvent);
 			
 			mouseDown(doubleClickEvent);
 			mouseUp(doubleClickEvent);
@@ -7950,7 +7940,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 			
 			// But when this function is called, the DOM *will* exist!
 			
-			console.log("Building widget " + UTIL.getFunctionName(buildFunction));
+			//console.log("Building widget " + UTIL.getFunctionName(buildFunction));
 			
 			var build;
 			
@@ -7975,7 +7965,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 			
 			if(options == undefined) options = {};
 			
-			console.log("Showing widget ...");
+			//console.log("Showing widget ...");
 			
 			if(options.stealFocus !== false) {
 				EDITOR.input = false; // Steal focus from the file
@@ -8007,7 +7997,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		
 		widget.hide = function showWidget() {
 			
-			console.log("Hiding widget ...");
+			//console.log("Hiding widget ...");
 			
 			var wasHidden = true;
 			
@@ -8192,16 +8182,16 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		var theWindow = open(url);
 		// Sometimes we will not get theWindow descriptor right away... (for example when there is a cross-origin error)
 		if(theWindow != null) {
-			console.log("EDITOR.createWindow: theWindow available right away!");
+			//console.log("EDITOR.createWindow: theWindow available right away!");
 			testWindow(theWindow);
 		}
 		else setTimeout(function waitedBecauseWindowWasNullOrUndefined() {
 		if(theWindow != null) {
-				console.log("EDITOR.createWindow: theWindow available after timeout!");
+				//console.log("EDITOR.createWindow: theWindow available after timeout!");
 				testWindow(theWindow);
 			}
 			else {
-				console.log("EDITOR.createWindow: theWindow not available!");
+				//console.log("EDITOR.createWindow: theWindow not available!");
 				
 			// If something goes wrong, for example if the window is stopped by a popup stopper, theWindow will be null
 			
@@ -8246,7 +8236,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		return theWindow;
 		
 		function testWindow(theWindow) {
-			console.log("EDITOR.createWindow: testWindow!");
+			//console.log("EDITOR.createWindow: testWindow!");
 			/*
 				Due to CORS we might get errors accessing properties on the new window
 				
@@ -8260,7 +8250,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 				var test = theWindow.document.domain;
 			}
 			catch(err) {
-				console.log("EDITOR.createWindow: Possible cross-origin error!");
+				//console.log("EDITOR.createWindow: Possible cross-origin error!");
 				
 				var origin = UTIL.getLocation(document.location.href);
 				var other = UTIL.getLocation(url);
@@ -8279,7 +8269,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 				return;
 			}
 			
-			console.log("EDITOR.createWindow: We can access theWindow.document.domain=" + test);
+			//console.log("EDITOR.createWindow: We can access theWindow.document.domain=" + test);
 			
 			/*
 				Problem: It's impossible to tell if the window has finished loading. eg. if we attach a load event listener to it, it might never fire!
@@ -8291,9 +8281,9 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 			*/
 			
 			try { // Edge browser throws 0: Permission denied
-				console.log("EDITOR.createWindow: theWindow.location.href = " + theWindow.location.href); 
-				console.log("EDITOR.createWindow: New window: " + (new Date()).getTime() + " document.readyState=" + theWindow.document.readyState + " theWindow.location.href=" + theWindow.location.href);
-				console.log("EDITOR.createWindow: theWindow.document.documentElement.innerHTML=" + theWindow.document.documentElement.innerHTML);
+				//console.log("EDITOR.createWindow: theWindow.location.href = " + theWindow.location.href); 
+				//console.log("EDITOR.createWindow: New window: " + (new Date()).getTime() + " document.readyState=" + theWindow.document.readyState + " theWindow.location.href=" + theWindow.location.href);
+				//console.log("EDITOR.createWindow: theWindow.document.documentElement.innerHTML=" + theWindow.document.documentElement.innerHTML);
 				
 				if(theWindow.location.href == "about:blank") theWindow.loadedByWebideYo = false;  // Unique property for sanity
 				else theWindow.loadedByWebideYo = true;
@@ -8306,8 +8296,8 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 			}
 			
 			theWindow.addEventListener("load", function createdWindowLoaded() {
-				console.log("EDITOR.createWindow: New window: " +  UTIL.timeStamp() + " load event!");
-				console.log("EDITOR.createWindow: theWindow.location.href = " + theWindow.location.href);
+				//console.log("EDITOR.createWindow: New window: " +  UTIL.timeStamp() + " load event!");
+				//console.log("EDITOR.createWindow: theWindow.location.href = " + theWindow.location.href);
 				/*
 					document.readyState === "complete" does not mean everything has loaded!
 					So because it's impossible to tell if the window has loaded or not,
@@ -8324,14 +8314,16 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 					callback = function() { return "Already called callback after theWindow got load event" };
 				}
 				
-}, false);
-			theWindow.addEventListener("DOMContentLoaded", function createdWindowDOMContentLoaded() {
-				console.log("EDITOR.createWindow: New window: " + UTIL.timeStamp() + " DOMContentLoaded event! theWindow.document.readyState changed to: " + theWindow.document.readyState); 
-				console.log("EDITOR.createWindow: theWindow.location.href = " + theWindow.location.href);
 			}, false);
+			/*
+				theWindow.addEventListener("DOMContentLoaded", function createdWindowDOMContentLoaded() {
+				console.log("EDITOR.createWindow: New window: " + UTIL.timeStamp() + " DOMContentLoaded event! theWindow.document.readyState changed to: " + theWindow.document.readyState);
+				console.log("EDITOR.createWindow: theWindow.location.href = " + theWindow.location.href);
+				}, false);
+			*/
 			
-			console.log("EDITOR.createWindow: theWindow.document.domain=" + theWindow.document.domain);
-			console.log("EDITOR.createWindow: document.domain=" + document.domain);
+			//console.log("EDITOR.createWindow: theWindow.document.domain=" + theWindow.document.domain);
+			//console.log("EDITOR.createWindow: document.domain=" + document.domain);
 			
 			if(!url) {
 				theWindow.document.open();
@@ -8355,10 +8347,10 @@ var loaded = !!theWindow.location.href;
 			catch(err) {
 				console.error(err);
 			}
-			console.log("EDITOR.createWindow: waitUntilLoaded=" + waitUntilLoaded + " loaded=" + loaded + " ");
+			//console.log("EDITOR.createWindow: waitUntilLoaded=" + waitUntilLoaded + " loaded=" + loaded + " ");
 			if(waitUntilLoaded && loaded) {
 				// A timeout to be really sure it has been loaded
-console.log("EDITOR.createWindow: Waiting to be really sure the window have been loaded...");
+				//console.log("EDITOR.createWindow: Waiting to be really sure the window have been loaded...");
 				setTimeout(function waitedToBeSureWindowHadLoaded() {
 					if(theWindow.loadedByWebideYo === true) {
 						console.warn("EDITOR.createWindow: waitUntilLoaded=" + waitUntilLoaded + " loaded=" + loaded + " Aborting callback because theWindow.loadedByWebideYo=" + theWindow.loadedByWebideYo);
@@ -8385,7 +8377,7 @@ console.log("EDITOR.createWindow: Waiting to be really sure the window have been
 	// Tools for handling repositories (Mercurial, Git, etc)
 	EDITOR.commitTool = function commitTool(directory) {
 		var f = EDITOR.eventListeners.commitTool.map(funMap);
-		console.log("Calling commitTool listeners (" + f.length + ")");
+		//console.log("Calling commitTool listeners (" + f.length + ")");
 		for(var i=0; i<f.length; i++) {
 			f[i](directory);
 		}
@@ -8399,7 +8391,7 @@ console.log("EDITOR.createWindow: Waiting to be really sure the window have been
 		}
 		
 		var f = EDITOR.eventListeners.resolveTool.map(funMap);
-		console.log("Calling resolveTool listeners (" + f.length + ")");
+		//console.log("Calling resolveTool listeners (" + f.length + ")");
 		for(var i=0; i<f.length; i++) {
 			f[i](resolved, unresolved, directory);
 		}
@@ -8407,7 +8399,7 @@ console.log("EDITOR.createWindow: Waiting to be really sure the window have been
 	
 	EDITOR.mergeTool = function mergeTool(directory) {
 		var f = EDITOR.eventListeners.mergeTool.map(funMap);
-		console.log("Calling mergeTool listeners (" +f.length + ")");
+		//console.log("Calling mergeTool listeners (" +f.length + ")");
 		for(var i=0, f; i<f.length; i++) {
 			f[i](directory);
 		}
@@ -8428,7 +8420,7 @@ console.log("EDITOR.createWindow: Waiting to be really sure the window have been
 	
 	EDITOR.deleteFile = function(filePath, callback) {
 		
-		console.log("Deleting filePath=" + filePath);
+		//console.log("Deleting filePath=" + filePath);
 		
 		var json = {filePath: filePath};
 		
@@ -8450,7 +8442,7 @@ console.log("EDITOR.createWindow: Waiting to be really sure the window have been
 			if(typeof el == "function") throw new Error("Parameter el in EDITOR.addDashboardWidget is a function. Expected a HTML DOM Node!");
 			
 			var dashboard = document.getElementById("dashboard");
-			console.log(dashboard);
+			//console.log(dashboard);
 			try {
 				var child = dashboard.appendChild(el);
 			}
@@ -8523,7 +8515,7 @@ console.log("EDITOR.createWindow: Waiting to be really sure the window have been
 	
 	EDITOR.openFileTool = function fileOpenTool(options, filePath) {
 		var f = EDITOR.eventListeners.openFileTool.map(funMap);
-		console.log("Calling openFileTool listeners (" + f.length + ")");
+		//console.log("Calling openFileTool listeners (" + f.length + ")");
 		
 		var ret = false;
 		
@@ -8540,7 +8532,7 @@ console.log("EDITOR.createWindow: Waiting to be really sure the window have been
 	EDITOR.pathPickerTool = function pathPicker(options, callback) {
 		// Show a tool for picking a file path, which will callback with the chosen path
 		// If the user clicks cancel or Esc to close the dialog, first parameter in callback will be an error with code=CANCEL
-		console.log("EDITOR.pathPickerTool: options=" + JSON.stringify(options));
+		//console.log("EDITOR.pathPickerTool: options=" + JSON.stringify(options));
 		
 		if(typeof options == "function") {
 			callback = options;
@@ -8552,7 +8544,7 @@ console.log("EDITOR.createWindow: Waiting to be really sure the window have been
 		if(typeof options == "string") options = {defaultPath: options};
 		
 		var f = EDITOR.eventListeners.pathPickerTool.map(funMap);
-		console.log("Calling pathPickerTool listeners (" + f.length + ") ");
+		//console.log("Calling pathPickerTool listeners (" + f.length + ") ");
 		
 		var ret = false;
 		
@@ -8578,7 +8570,7 @@ console.log("EDITOR.createWindow: Waiting to be really sure the window have been
 		function gotPath(err, path) {
 			if(err) return callback(err);
 			
-			console.log("EDITOR.pathPickerTool: err=" + (err && err.message) + " path=" + path); 
+			//console.log("EDITOR.pathPickerTool: err=" + (err && err.message) + " path=" + path); 
 			
 			// EDITOR.checkPath will call EDITOR.pathPickerTool
 			// So it's safest to not call it from here to prevent and endless loop
@@ -8607,14 +8599,14 @@ console.log("EDITOR.createWindow: Waiting to be really sure the window have been
 			if(! file instanceof File) throw new Error("First argument file need to be a File object!");
 			
 			// Must pass the (click) event so plugins can know if shift,ctrl etc was pressed
-			console.log("ev.constructor.name=" + (ev && ev.constructor && ev.constructor.name));
+			//console.log("ev.constructor.name=" + (ev && ev.constructor && ev.constructor.name));
 			if(typeof ev != "object") throw new Error("Second argument to " + eventListenerName + " needs to be an event object (mouseClick,keyPress, etc)!");
 			
 			
 			if(!EDITOR.eventListeners.hasOwnProperty(eventListenerName)) throw new Error("Unknown event listener: " + eventListenerName);
 			
 			var f = EDITOR.eventListeners[eventListenerName].map(funMap);
-			console.log("Calling eventListener=" + eventListenerName + " (" + f.length + ")");
+			//console.log("Calling eventListener=" + eventListenerName + " (" + f.length + ")");
 			
 			var ret = PASS;
 			
@@ -8645,7 +8637,7 @@ console.log("EDITOR.createWindow: Waiting to be really sure the window have been
 	
 	EDITOR.fileExplorer = function fileExplorerTool(directory) {
 		var f = EDITOR.eventListeners.fileExplorer.map(funMap);
-		console.log("Calling fileExplorer listeners (" +f.length + ") to explore directory=" + directory);
+		//console.log("Calling fileExplorer listeners (" +f.length + ") to explore directory=" + directory);
 		
 		var ret = false;
 		
@@ -8660,7 +8652,7 @@ console.log("EDITOR.createWindow: Waiting to be really sure the window have been
 	EDITOR.move = function renameFile(oldPath, newPath, callback) {
 		// Also used for renaming files and folders!
 		
-		console.log("Moving oldPath=" + oldPath + " to newPath=" + newPath);
+		//console.log("Moving oldPath=" + oldPath + " to newPath=" + newPath);
 		
 		if(callback == undefined || typeof callback != "function") throw new Error("Expected third function argument callback in EDITOR.move to be a callback function! typeof callback = " + (typeof callback) + " ");
 		
@@ -8745,14 +8737,14 @@ EDITOR.callEventListeners = function callEventListeners(ev, file, allListenersCa
 		uniqueFunctionNames.push(fName);
 		
 		waitingFor.push(fName);
-		console.log("Calling " + ev + " eventListener: " + fName);
+			//console.log("Calling " + ev + " eventListener: " + fName);
 		var ret = fun(file, evCallback);
 		eventFunsCalled++;
-		console.log(ev + " event listener " + fName + " returned " + ret + " (" + (typeof ret) + ")");
+			//console.log(ev + " event listener " + fName + " returned " + ret + " (" + (typeof ret) + ")");
 		if(ret || ret === false || ret === null) evCallback(null, ret);// The function did not return void, asume it's done!
 		
 		function evCallback(err, ret) {
-			console.log("Got " + ev + " event callback from " + fName + " err=" + err);
+				//console.log("Got " + ev + " event callback from " + fName + " err=" + err);
 			if(returnedOrCalledBack.indexOf(fName) != -1) throw new Error(fName + " has already returned or called back! stackTrace[" + fName + "]=" + stackTrace[fName] + "\n\n");
 			returnedOrCalledBack.push(fName);
 			
@@ -8837,15 +8829,15 @@ EDITOR.loadScript = function loadScript(src, dontAsk, callback) {
 EDITOR.reload = function reload(url) {
 	console.warn("Reloading the editor ...");
 		
-		console.log("Calling exit event listeners...");
+		//console.log("Calling exit event listeners...");
 		EDITOR.fireEvent("exit", ["reload"], function afterExitEvent(err, returns) {
-			console.log("All exit event listeners called!");
+			//console.log("All exit event listeners called!");
 		if(err) throw err;
 		
 		var gotError = false;
 		
 		for(var fName in returns) {
-			console.log(fName + " returned " + returns[fName]);
+				//console.log(fName + " returned " + returns[fName]);
 			if(returns[fName] === false || returns[fName] instanceof Error) {
 				gotError = true;
 				break;
@@ -8859,7 +8851,7 @@ EDITOR.reload = function reload(url) {
 			
 			// Unload all plugins
 			for(var i=0; i<EDITOR.plugins.length; i++) {
-				console.log("unloading plugin: " + EDITOR.plugins[i].desc);
+					//console.log("unloading plugin: " + EDITOR.plugins[i].desc);
 				EDITOR.plugins[i].unload(); // Call function (and pass global objects!?)
 			}
 			
@@ -8880,14 +8872,14 @@ EDITOR.reload = function reload(url) {
 			
 				if(CLIENT.inFlight == 0) reloadNow(); 
 				else {
-					console.log("Waiting one second before reloading... CLIENT.inFlight=" + CLIENT.inFlight);
+					//console.log("Waiting one second before reloading... CLIENT.inFlight=" + CLIENT.inFlight);
 					setTimeout(reloadNow, 1000);
 				}
 				
 			}
 
 function reloadNow() {
-console.log("Reloading! RUNTIME=" + RUNTIME);
+				//console.log("Reloading! RUNTIME=" + RUNTIME);
 
 window.onbeforeunload = null;
 if(url) window.location=url;
@@ -9021,7 +9013,7 @@ EDITOR.hideVirtualKeyboard = function hideVirtualKeyboard(keyboards) {
 
 EDITOR.showVirtualKeyboard = function showVirtualKeyboard(keyboards) {
 	if(keyboards == undefined) keyboards = []; // An empty array hides all keyboards
-	console.log("showVirtualKeyboard: keyboards=" + JSON.stringify(keyboards));
+		//console.log("showVirtualKeyboard: keyboards=" + JSON.stringify(keyboards));
 	var returns = [];
 		var f = EDITOR.eventListeners.showVirtualKeyboard.map(funMap);
 		for (var j=0, ret; j<f; j++) {
@@ -9038,35 +9030,35 @@ EDITOR.showMessageFromStackTrace = function showMessageFromStackTrace(options) {
 	
 		// Edge will throw SCRIPT28: SCRIPT28: Out of stack space
 		// When trying to stringify the options!
-		console.log("EDITOR.showMessageFromStackTrace: options=" + JSON.stringify(Object.keys(options)));
+		//console.log("EDITOR.showMessageFromStackTrace: options=" + JSON.stringify(Object.keys(options)));
 	
 	if(options.message) {
-			console.log("showMessageFromStackTrace: message=options.message=" + options.message);
+			//console.log("showMessageFromStackTrace: message=options.message=" + options.message);
 		var message = options.message;
 	}
 	else if(options.error) {
-			console.log("showMessageFromStackTrace: options.error! message=options.error.message=" + options.error.message);
+			//console.log("showMessageFromStackTrace: options.error! message=options.error.message=" + options.error.message);
 			var message = options.error.message;
 	}
 	else if(options.errorEvent) {
 			if(!options.errorEvent.error) {
-			console.log("showMessageFromStackTrace: options.errorEvent: ", options.errorEvent);
+				//console.log("showMessageFromStackTrace: options.errorEvent: ", options.errorEvent);
 			return FAIL;
 		}
-			console.log("showMessageFromStackTrace: options.errorEvent! message=options.errorEvent.error.message=" + options.errorEvent.error.message);
+			//console.log("showMessageFromStackTrace: options.errorEvent! message=options.errorEvent.error.message=" + options.errorEvent.error.message);
 			var message = options.errorEvent.error.message;
 	}
 	
 	if(options.stackTrace) {
-			console.log("showMessageFromStackTrace: options.stackTrace!");
+			//console.log("showMessageFromStackTrace: options.stackTrace!");
 			var errorStack = options.stackTrace;
 	}
 	else if(options.error) {
-			console.log("showMessageFromStackTrace: options.error!");
+			//console.log("showMessageFromStackTrace: options.error!");
 		var errorStack = options.error.stack;
 	}
 	else if(options.errorEvent) {
-			console.log("showMessageFromStackTrace: options.errorEvent!");
+			//console.log("showMessageFromStackTrace: options.errorEvent!");
 		var errorStack = options.errorEvent.error.stack;
 		
 		if(!errorStack) {
@@ -9081,7 +9073,7 @@ EDITOR.showMessageFromStackTrace = function showMessageFromStackTrace(options) {
 		
 	}
 	else {
-			console.log("showMessageFromStackTrace: Generating stack!");
+			//console.log("showMessageFromStackTrace: Generating stack!");
 		var errorStack = UTIL.getStack(message);
 	}
 	
@@ -9092,7 +9084,7 @@ EDITOR.showMessageFromStackTrace = function showMessageFromStackTrace(options) {
 		var parsedError = UTIL.parseErrorMessage(errorStack);
 		//var stackLines = UTIL.parseStackTrace(errorStack);
 		
-		console.log("parsedError: " + JSON.stringify(parsedError, null, 2));
+		//console.log("parsedError: " + JSON.stringify(parsedError, null, 2));
 		
 		if(!parsedError) {
 		console.warn("showMessageFromStackTrace: Failed to parse errorStack: " + errorStack);
@@ -9145,11 +9137,11 @@ EDITOR.showMessageFromStackTrace = function showMessageFromStackTrace(options) {
 			
 			if(sourcePath.charAt(0) == "/") sourcePath = sourcePath.slice(1);
 			
-			console.log("showMessageFromStackTrace: sourcePath=" + sourcePath + " in filePath=" + filePath + " ?");
+					//console.log("showMessageFromStackTrace: sourcePath=" + sourcePath + " in filePath=" + filePath + " ?");
 			if(filePath.indexOf(sourcePath) != -1) {
 				var fileExt = UTIL.getFileExtension(filePath);
 				if(fileExt == "stdout") {
-					console.log("showMessageFromStackTrace: sourcePath in filePath: Yes, but it's a " + fileExt + " file!");
+							//console.log("showMessageFromStackTrace: sourcePath in filePath: Yes, but it's a " + fileExt + " file!");
 					continue;
 				}
 				
@@ -9157,11 +9149,11 @@ EDITOR.showMessageFromStackTrace = function showMessageFromStackTrace(options) {
 				var file = EDITOR.files[filePath];
 						lineno = stackLines[i].line || stackLines[i].lineno;
 						colno = stackLines[i].col || stackLines[i].colno;
-						console.log("showMessageFromStackTrace: sourcePath in filePath: yes! ");
+						//console.log("showMessageFromStackTrace: sourcePath in filePath: yes! ");
 						
 				break stackLoop;
 			}
-			else console.log("showMessageFromStackTrace: sourcePath in filePath: nope");
+					//else console.log("showMessageFromStackTrace: sourcePath in filePath: nope");
 		}
 	}
 			
@@ -9170,7 +9162,7 @@ EDITOR.showMessageFromStackTrace = function showMessageFromStackTrace(options) {
 		
 		if(!file || !lineno) {
 			stackLines = UTIL.parseStackTrace(errorStack)
-			console.log("showMessageFromStackTrace: Trying UTIL.parseStackTrace: " + (!!stackLines));
+			//console.log("showMessageFromStackTrace: Trying UTIL.parseStackTrace: " + (!!stackLines));
 			if(stackLines) {
 			var file = findFile(stackLines);
 			}
@@ -9218,7 +9210,7 @@ EDITOR.getSSHPublicKey = function getSSHPublicKey(callback) {
 				if(answer == yes) {
 					CLIENT.cmd("run", {command: 'ssh-keygen -f /.ssh/id_rsa -N ""'}, function(err, channels) {
 						if(err) return callback(err);
-						console.log("ssh-keygen: channels=" + JSON.stringify(channels, null, 2));
+							//console.log("ssh-keygen: channels=" + JSON.stringify(channels, null, 2));
 						EDITOR.readFromDisk(pubKeyPath, gotPubKeyMaybe);
 					});
 				}
@@ -9323,14 +9315,14 @@ EDITOR.closeAllDialogs = function closeAllDialogs(dialogCode, retryCount) {
 	
 	var closedCount = 0;
 	
-	console.log("EDITOR.closeAllDialogs: " + EDITOR.openDialogs.length + " open dialogs... dialogCode=" + dialogCode);
+		//console.log("EDITOR.closeAllDialogs: " + EDITOR.openDialogs.length + " open dialogs... dialogCode=" + dialogCode);
 	for (var i=0; i<EDITOR.openDialogs.length; i++) {
 		
 		if(dialogCode && dialogCode != EDITOR.openDialogs[i].code) {
-			console.log("EDITOR.closeAllDialogs: Not closing (code=" + EDITOR.openDialogs[i].code + " is not dialogCode=" + dialogCode + "): " + EDITOR.openDialogs[i].div.innerText);
+				//console.log("EDITOR.closeAllDialogs: Not closing (code=" + EDITOR.openDialogs[i].code + " is not dialogCode=" + dialogCode + "): " + EDITOR.openDialogs[i].div.innerText);
 			continue;
 		}
-		console.log("EDITOR.closeAllDialogs: Closing dialog: " + EDITOR.openDialogs[i].div.innerText);
+			//console.log("EDITOR.closeAllDialogs: Closing dialog: " + EDITOR.openDialogs[i].div.innerText);
 		closedCount++;
 		EDITOR.openDialogs[i].close();
 		
@@ -9425,7 +9417,7 @@ EDITOR.closeAllDialogs = function closeAllDialogs(dialogCode, retryCount) {
 			var selStart = t.selectionStart || parseInt(t.getAttribute("selStart")) || 0;
 			var selEnd = t.selectionEnd || parseInt(t.getAttribute("selEnd")) || 0;
 			
-			console.log("insertAtCaret: text=" + text + " Element: id=" + t.id + " sTop=" + sTop + " selStart=" + selStart + " selEnd=" + selEnd);
+			//console.log("insertAtCaret: text=" + text + " Element: id=" + t.id + " sTop=" + sTop + " selStart=" + selStart + " selEnd=" + selEnd);
 			
 			if( typeof selStart != "number" || isNaN(selStart) ){
 				throw new Error("Unable to get caret position (selStart=" + selStart + ") for element id=" + t.id + " selectionStart=" + t.selectionStart + " attribute selStart=" + t.getAttribute("selStart") + " value=" + t.value );
@@ -9456,12 +9448,12 @@ EDITOR.closeAllDialogs = function closeAllDialogs(dialogCode, retryCount) {
 				sTop++;
 			}
 			else if(text == "\b") {
-				console.log("Deleting character: " + front.slice(-1) + " at selStart=" + selStart);
+				//console.log("Deleting character: " + front.slice(-1) + " at selStart=" + selStart);
 				t.value = front.slice(0, -1) + back;
 				selStart = selStart - 1;
 			}
 			else {
-				console.log("Adding character(s): " + text + " at selStart=" + selStart);
+				//console.log("Adding character(s): " + text + " at selStart=" + selStart);
 				t.value = front + text + back;
 				selStart = selStart + text.length;
 			}
@@ -9499,7 +9491,7 @@ EDITOR.closeAllDialogs = function closeAllDialogs(dialogCode, retryCount) {
 	if('speechSynthesis' in window) {
 		EDITOR.say = function say(text, rate) {
 			
-			console.log("EDITOR.say: text=" + text + " rate=" + rate);
+			//console.log("EDITOR.say: text=" + text + " rate=" + rate);
 			
 			if(rate == undefined) rate = EDITOR.speechRate;
 			
@@ -9517,7 +9509,7 @@ EDITOR.closeAllDialogs = function closeAllDialogs(dialogCode, retryCount) {
 					if(rate > 10) throw new Error("Highest rate is 10");
 				}
 				
-				console.log("EDITOR.say:Speaking: text=" + text);
+				//console.log("EDITOR.say:Speaking: text=" + text);
 				
 				var msg = new SpeechSynthesisUtterance(text);
 				
@@ -9527,13 +9519,9 @@ EDITOR.closeAllDialogs = function closeAllDialogs(dialogCode, retryCount) {
 				msg.text = text;
 				msg.lang = 'en-US';
 				
-				msg.onend = function(e) {
-					console.log('EDITOR.say: Finished speak in ' + e.elapsedTime + ' seconds.');
-				};
+				//msg.onend = function(e) {console.log('EDITOR.say: Finished speak in ' + e.elapsedTime + ' seconds.');};
 				
-				msg.onerror = function(event) {
-					console.log("EDITOR.say: " + event.error);
-				};
+				//msg.onerror = function(event) {console.log("EDITOR.say: " + event.error);};
 				
 				window.speechSynthesis.speak(msg);
 				
@@ -9577,7 +9565,7 @@ EDITOR.closeAllDialogs = function closeAllDialogs(dialogCode, retryCount) {
 			}
 			else if(respStr.indexOf("Bad Gateway") != -1 || respStr.indexOf("Meddelande mottaget") == -1) {
 				alertBox("Problem sending feedback. Please e-mail it it to editor@webtigerteam.com (it will be copied to clipboard) Error: " + respStr + "");
-				console.log("respStr=" + respStr);
+				//console.log("respStr=" + respStr);
 			
 				EDITOR.putIntoClipboard(feedback, "Copy feedback to clipboard");
 
@@ -9606,7 +9594,7 @@ Searches down towards the root, looking for file names
 		function search(currentFolder) {
 			EDITOR.listFiles(currentFolder, function listedFiles(err, files) {
 				
-				console.log("findFileReverseRecursive: startDir=" + startDir + " currentFolder= " + currentFolder + " err=" + (err && err.message));
+				//console.log("findFileReverseRecursive: startDir=" + startDir + " currentFolder= " + currentFolder + " err=" + (err && err.message));
 
 				if(err) {
 					// File/folder has probably been deleted! Or we have been disconnected Or we don't have access
@@ -9616,7 +9604,7 @@ Searches down towards the root, looking for file names
 				
 				for (var i=0; i<files.length; i++) {
 					if(names.indexOf(files[i].name) != -1) {
-						console.log("findFileReverseRecursive: Found " + files[i].name + " in " + JSON.stringify(names));
+						//console.log("findFileReverseRecursive: Found " + files[i].name + " in " + JSON.stringify(names));
 						filesFound.push(UTIL.trailingSlash(currentFolder) + files[i].name);
 					}
 				}
@@ -9646,7 +9634,7 @@ Searches down towards the root, looking for file names
 
 			var obj = msg.data;
 
-			console.log("from evalWorker: obj=", obj);
+			//console.log("from evalWorker: obj=", obj);
 
 			var id = obj.id;
 
@@ -9663,7 +9651,7 @@ Searches down towards the root, looking for file names
 
 		var id = ++evalWorkerCounter;
 
-		console.log("EDITOR.eval: id=" + id + " evalWorkerCounter=" + evalWorkerCounter);
+		//console.log("EDITOR.eval: id=" + id + " evalWorkerCounter=" + evalWorkerCounter);
 
 		evalWorkerCallbacks[id] = callback;
 
@@ -9689,7 +9677,7 @@ Searches down towards the root, looking for file names
 		else if(n > 10) decimals = 2;
 		else decimals = 3;
 
-		console.log("humanReadableNumber: n=" + n + " prefix=" + prefix + " decimals=" + decimals);
+		//console.log("humanReadableNumber: n=" + n + " prefix=" + prefix + " decimals=" + decimals);
 
 		n = n.toFixed(decimals);
 
@@ -9706,7 +9694,7 @@ Searches down towards the root, looking for file names
 		// SCM plugins should listen for checkoutSCMBranch and change the branch
 
 		var f = EDITOR.eventListeners.checkoutSCMBranch.map(funMap);
-		console.log("Calling checkoutSCMBranch listeners (" + f.length + ") branchName=" + branchName);
+		//console.log("Calling checkoutSCMBranch listeners (" + f.length + ") branchName=" + branchName);
 		for(var i=0; i<f.length; i++) {
 			//console.log("function " + UTIL.getFunctionName(f[i]));
 			f[i](branchName); // Call function
@@ -9722,7 +9710,7 @@ Searches down towards the root, looking for file names
 		_project = projectName;
 
 		var f = EDITOR.eventListeners.changeProject.map(funMap);
-		console.log("Calling changeProject listeners (" + f.length + ") _project=" + _project);
+		//console.log("Calling changeProject listeners (" + f.length + ") _project=" + _project);
 		for(var i=0; i<f.length; i++) {
 			//console.log("function " + UTIL.getFunctionName(f[i]));
 			f[i](_project, oldProject); // Call function
@@ -9751,7 +9739,7 @@ Searches down towards the root, looking for file names
 		// Returns an array of currently opened files connected to this server
 		var list = [];
 		for(var path in EDITOR.files) {
-			console.log("path=" + path);
+				//console.log("path=" + path);
 			if(protocol == "ftp") { // protocol is always lower case!
 				if(path.indexOf("ftp://" + serverAddress) != -1) list.push(path);
 			}
@@ -9770,7 +9758,7 @@ Searches down towards the root, looking for file names
 		_scmBranch = branchName;
 
 		var f = EDITOR.eventListeners.changeBranch.map(funMap);
-		console.log("Calling changeBranch listeners (" + f.length + ") branchName=" + branchName);
+		//console.log("Calling changeBranch listeners (" + f.length + ") branchName=" + branchName);
 		for(var i=0; i<f.length; i++) {
 			//console.log("function " + UTIL.getFunctionName(f[i]));
 			f[i](branchName); // Call function
@@ -9782,9 +9770,9 @@ function removeFrom(list, fun) {
 	// Removes an object from an array of objects
 	for(var i=0; i<list.length; i++) {
 		if(list[i] == fun) {
-			console.log("removeFrom: list length before: " + list.length);
+				//console.log("removeFrom: list length before: " + list.length);
 			list.splice(i, 1);
-			console.log("removeFrom: list length after: " + list.length);
+				//console.log("removeFrom: list length after: " + list.length);
 			removeFrom(list, fun); // Remove dublicates
 			return true;
 		}
@@ -9807,21 +9795,21 @@ if(RUNTIME == "nw.js") {
 		var ret = true;
 		var name = "";
 		
-		console.log("Closing the editor ...");
+			//console.log("Closing the editor ...");
 		
 		if(!EDITOR.storage.ready()) {
 			console.warn("EDITOR.storage not ready!");
 		}
 		
-			console.log("Calling exit event listeners...");
+			//console.log("Calling exit event listeners...");
 			EDITOR.fireEvent("exit", ["close"], function(err, returns) {
-				console.log("All exit event listeners called!");
+				//console.log("All exit event listeners called!");
 			if(err) throw err;
 			
 			var gotError = false;
 			
 			for(var fName in returns) {
-				console.log(fName + " returned " + returns[fName]);
+					//console.log(fName + " returned " + returns[fName]);
 				if(returns[fName] === false || returns[fName] instanceof Error) {
 					gotError = true;
 					break;
@@ -9883,12 +9871,12 @@ window.addEventListener("resize", function resizeAndRenderOnInteraction(resizeEv
 }, false);
 	
 	window.addEventListener("unload", function unloading() {
-		console.log("unload event!");
+		//console.log("unload event!");
 		
 		// It is unlikely that we manage to run all exit events...
-		console.log("Calling exit event listeners...");
+		//console.log("Calling exit event listeners...");
 		EDITOR.fireEvent("exit", ["unload"], function afterExitEvent(err, returns) {
-			console.log("All exit event listeners called!");
+			//console.log("All exit event listeners called!");
 			if(err) console.error(err);
 		});
 		
@@ -9951,14 +9939,14 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 	var tag = target.tagName;
 	
 		if(target.className == "allowDefault") {
-			console.log("contextmenu: (target.className=allowDefault)");
+			//console.log("contextmenu: (target.className=allowDefault)");
 			return true;
 		}
 
 		if(tag=="INPUT" || tag=="TEXTAREA") return true; // Allow context menu on text input
 	
 		contextMenuEvent.preventDefault();
-		console.log("contextmenu prevented! tag=" + tag);
+		//console.log("contextmenu prevented! tag=" + tag);
 		return false;
 	}, false);
 
@@ -9993,7 +9981,7 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 		event.preventDefault();
 		event.stopPropagation();
 		window.scrollTo(0, 0);
-		console.log("Prevented scroll!");
+		//console.log("Prevented scroll!");
 	}
 
 	// End: Annoying scrolling fix
@@ -10001,7 +9989,7 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 
 	function main() {
 	
-		console.log("Starting the editor ...");
+		//console.log("Starting the editor ...");
 	
 		window.name = "editor"; // For focus access
 	
@@ -10080,7 +10068,7 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 			connectToBackend(server, nat_code);
 
 			function connectToBackend(server, nat_code) {
-				console.log("Connecting to backend server=" + JSON.stringify(server) + " ...");
+				//console.log("Connecting to backend server=" + JSON.stringify(server) + " ...");
 				CLIENT.connect(server, function connectedToServer(err, url) {
 					if(err) {
 						loginMessage.innerText = err.message;
@@ -10093,9 +10081,9 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 					
 					if(nat_code) {
 						// Send nat request before logging in
-						console.log("Seding NAT request after submitting form...");
+						//console.log("Seding NAT request after submitting form...");
 						CLIENT.cmd("NAT", {code: nat_code}, function natResponse(err, resp) {
-							console.log("NAT request response (after submitting form)! err=" + err + " resp=" + resp);
+							//console.log("NAT request response (after submitting form)! err=" + err + " resp=" + resp);
 							if(err) return alertBox("Unable to send NAT request! Error: " + err.message);
 							loginMaybe();
 						});
@@ -10158,15 +10146,15 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 
 							return confirmBox("You have been logged in with a Guest account. Guest accounts will be reset after two weeks of inactivity!", [alreadyHaveAccount, createAccount, keeploginAsGuest], function(answer) {
 								if(answer == keeploginAsGuest) {
-									console.log("User wants to continue using the guest account.");
+									//console.log("User wants to continue using the guest account.");
 								}
 								else if(answer == createAccount) {
-									console.log("The user is currently logged in with a guest account. But want to create a new account.");
+									//console.log("The user is currently logged in with a guest account. But want to create a new account.");
 									window.onbeforeunload = null;
 									document.location = "/signup/signup.htm" + window.location.search;
 								}
 								else if(answer == alreadyHaveAccount) {
-									console.log("The user is currently logged in with a guest account, but the users sais he/she already have an account.");
+									//console.log("The user is currently logged in with a guest account, but the users sais he/she already have an account.");
 									loginScreen.style.display='block';
 									loginButton.disabled = false;
 									loginAsGuest.disabled = false;
@@ -10266,7 +10254,7 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 		window.onbeforeunload = confirmExit;
 	
 		window.onblur = function() {
-			console.log("window.onblur!");
+			//console.log("window.onblur!");
 			EDITOR.windowGotFocus = false;
 			// If user is holding down a key, we probably wont get the keyup event!
 			EDITOR.metaKeyIsDown = false;
@@ -10277,7 +10265,7 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 		}
 		
 		window.onfocus = function() {
-			console.log("window.onfocus!");
+			//console.log("window.onfocus!");
 			EDITOR.windowGotFocus = true;
 		}
 		
@@ -10301,7 +10289,7 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 		directoryDialogHtmlElement = document.getElementById("directoryInput");
 		directoryDialogHtmlElement.addEventListener('change', function directorySelected(changeEvent) {
 		
-			console.log("Directory selected ...");
+			//console.log("Directory selected ...");
 		
 			if(directoryDialogCallback == undefined) {
 				throw new Error("There is no listener for the open directory dialog!");
@@ -10316,7 +10304,7 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 			var fileName = file.name;
 			var filePath = file.path;
 		
-			console.log("Calling directory-dialog callback: " + UTIL.getFunctionName(directoryDialogCallback) + " ...");
+			//console.log("Calling directory-dialog callback: " + UTIL.getFunctionName(directoryDialogCallback) + " ...");
 			directoryDialogCallback(filePath);
 			directoryDialogCallback = undefined;
 		
@@ -10354,7 +10342,7 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 			EDITOR.installDirectory = login.installDirectory || "/";
 			//alertBox(JSON.stringify(login));
 		
-			console.log("Logged in as user: " + EDITOR.user.name + " on a " + EDITOR.user.platform + " server");
+			//console.log("Logged in as user: " + EDITOR.user.name + " on a " + EDITOR.user.platform + " server");
 		
 			// Use servers working directory
 			CLIENT.cmd("workingDirectory", null, function(err, json) {
@@ -10437,7 +10425,7 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 			progress.max = progressMax;
 			progress.value = progressValue;
 		
-			console.log("progress: value=" + progressValue + " max=" + progressMax);
+			//console.log("progress: value=" + progressValue + " max=" + progressMax);
 		
 		});
 	
@@ -10472,7 +10460,7 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 		//console.log("startlistener:" + UTIL.getFunctionName(EDITOR.eventListeners.start[i].fun) + " (order=" + EDITOR.eventListeners.start[i].order + ")");
 		//}
 	
-		console.log("Calling start listeners (" + EDITOR.eventListeners.start.length + ")");
+		//console.log("Calling start listeners (" + EDITOR.eventListeners.start.length + ")");
 		var f = EDITOR.eventListeners.start.map(funMap);
 		for(var i=0; i<f.length; i++) {
 			//console.time("Start listener: " + UTIL.getFunctionName(f[i]));
@@ -10498,7 +10486,7 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 		//EDITOR.plugins.map(function (p) {console.log(p.order + ": " + p.desc)});
 	
 		var pluginLoaders = EDITOR.plugins.map(function(p) {return p.load});
-		console.log("Loading plugins (length=" + pluginLoaders.length + ")");
+		//console.log("Loading plugins (length=" + pluginLoaders.length + ")");
 		for(var i=0; i<pluginLoaders.length; i++) {
 			
 			//console.time("Load plugin: " + UTIL.getFunctionName(pluginLoaders[i]));
@@ -10522,7 +10510,7 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 		}
 	
 	
-		console.log("Setting mainLoopInterval because first load!");
+		//console.log("Setting mainLoopInterval because first load!");
 		mainLoopInterval = setInterval(resizeAndRender, 16); // So that we always see the latest and greatest
 	
 		// note to self: Just temorary, dont forget to remove:
@@ -10573,7 +10561,7 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 		enableVoiceCommands = EDITOR.windowMenu.add(S("enable_voice_commands"), [S("Editor"), 50], toggleVoiceCommands);
 		
 		
-		console.log("typeof navigator.keyboard = " + (typeof navigator.keyboard));
+		//console.log("typeof navigator.keyboard = " + (typeof navigator.keyboard));
 		if(typeof navigator.keyboard == "object") {
 			//navigator.keyboard.lock();
 		}
@@ -10621,8 +10609,8 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 						alertBox("Speech recognition error: " + ev.error);
 					}
 					recognition.onnomatch = function speechRecognitionNomatch(ev) {
-						console.log(ev);
-						console.warn("Speech recognition found no matching commands!");
+						//console.log(ev);
+						//console.warn("Speech recognition found no matching commands!");
 					}
 				}
 				else {
@@ -10785,7 +10773,7 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 			throw new Error("testInfo: Could not find a test with id=1");
 		}
 		else {
-			console.log("testInfo: Running " + testsToRun + " tests ...");
+				//console.log("testInfo: Running " + testsToRun + " tests ...");
 			
 			//console.log(EDITOR.tests);
 			
@@ -10794,18 +10782,18 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 		
 		function testLoop() {
 			if(waitingForSync) {
-				console.log("testInfo: Waiting for " + currentRunningTest + " ...");
+					//console.log("testInfo: Waiting for " + currentRunningTest + " ...");
 				return;
 			}
 			
 			if(finished == testsToRun) return allTestsDone();
 			
 			if(aborted) {
-				console.log("testLoop: Tests aborted!");
+					//console.log("testLoop: Tests aborted!");
 				return;
 			}
 			
-			console.log("testInfo: testLoop: testsToRun=" + testsToRun + " finished=" + finished + " started=" + started + " maxParallel=" + maxParallel + "  ");
+				//console.log("testInfo: testLoop: testsToRun=" + testsToRun + " finished=" + finished + " started=" + started + " maxParallel=" + maxParallel + "  ");
 			
 			for(var i=started; i<testsToRun && (started-finished)<maxParallel; i++) {
 				started++;// This counter here to prevent any sync test to finish all tests
@@ -10823,7 +10811,7 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 			if( (testsToRun / finished) < 1.1 ) {
 				// 90% of tests are done, show those that are still not finished
 				
-				console.log("testInfo: Not finished: " + stillRunning.join(", "));
+					console.log("testInfo: Not finished: " + stillRunning.join(", "));
 				
 			}
 		}
@@ -10972,13 +10960,13 @@ function speechRecognitionResult(speechRecognitionEvent) {
 	var speechResult = speechRecognitionEvent.results[last][0].transcript;
 	//var speechResult = speechRecognitionEvent.results[0][0].transcript;
 	
-	console.log ("speechResult=" + speechResult);
+		//console.log ("speechResult=" + speechResult);
 	
 	var file = EDITOR.currentFile;
 	
 		// Need to copy list in case of one listener removing itself 
 		var voiceListeners = EDITOR.eventListeners.voiceCommand.map(function(voiceListener) {  return {re: voiceListener.re, fun: voiceListener.fun}  });
-		console.log("Calling voiceCommand listeners (" + voiceListeners.length + ")");
+		//console.log("Calling voiceCommand listeners (" + voiceListeners.length + ")");
 		for(var i=0, re, match, captured; i<voiceListeners.length; i++) {
 			re = voiceListeners[i].re;
 		if(re) {
@@ -11010,7 +10998,7 @@ function speechRecognitionResult(speechRecognitionEvent) {
 	else if(file) EDITOR.addInfo(file.caret.row, file.caret.col, speechResult);
 	
 	
-	console.log(speechRecognitionEvent);
+		//console.log(speechRecognitionEvent);
 }
 
 function insertAtCaret(txtarea, text) {
@@ -11031,7 +11019,7 @@ function insertAtCaret(txtarea, text) {
 
 function readSingleFile(fileOpenDialogEvent) {
 	
-	console.log("Reading single file ...");
+		//console.log("Reading single file ...");
 	
 	if(EDITOR.fileOpenCallback == undefined) {
 		throw new Error("There is no listener for the open file dialog!");
@@ -11066,7 +11054,7 @@ function readSingleFile(fileOpenDialogEvent) {
 	}
 	
 	function callCallback() {
-		console.log("Calling file-dialog callback: " + UTIL.getFunctionName(EDITOR.fileOpenCallback) + " ...");
+			//console.log("Calling file-dialog callback: " + UTIL.getFunctionName(EDITOR.fileOpenCallback) + " ...");
 		EDITOR.fileOpenCallback(filePath, fileContent);
 		EDITOR.fileOpenCallback = undefined;
 		
@@ -11107,15 +11095,15 @@ function fadeInCaretAnimation() {
 function fileDrop(fileDropEvent) {
 	fileDropEvent.preventDefault();
 	
-	console.log("fileDrop: fileDropEvent:");
-	console.log(fileDropEvent);
+		//console.log("fileDrop: fileDropEvent:");
+		//console.log(fileDropEvent);
 	
 	ctxMenuVisibleOnce = true; // Show the dropped content
 	
 	var text = fileDropEvent.dataTransfer.getData('Text');
 	
 	if(text) {
-		console.log("fileDrop: Dragged text.length=" + text.length + " to the editor.");
+			//console.log("fileDrop: Dragged text.length=" + text.length + " to the editor.");
 		
 		if(text.length < 512) {
 			var url = UTIL.getLocation(text);
@@ -11153,7 +11141,7 @@ function fileDrop(fileDropEvent) {
 			var matchBlobUrl = text.match(reBlobUrl);
 			if(matchBlobUrl) {
 				
-				console.log("fileDrop: Dropped a blob URL ...")
+				//console.log("fileDrop: Dropped a blob URL ...")
 				
 // Blob URL's can only be accessed if they are from the same page :/
 
@@ -11186,13 +11174,13 @@ function fileDrop(fileDropEvent) {
 			return alertBox("The dropped object doesn't seem to be a file!");
 		}
 		
-		console.log("fileDrop: fileDropEvent.dataTransfer:");
-		console.log( fileDropEvent.dataTransfer );
+		//console.log("fileDrop: fileDropEvent.dataTransfer:");
+		//console.log( fileDropEvent.dataTransfer );
 		
 		var items = fileDropEvent.dataTransfer.items;
 		var files = fileDropEvent.dataTransfer.files;
 		
-		console.log("items.length=" + items.length + " files.length=" + files.length);
+		//console.log("items.length=" + items.length + " files.length=" + files.length);
 		
 		var filesToSave = 0;
 		var filesSaved = 0;
@@ -11204,7 +11192,7 @@ function fileDrop(fileDropEvent) {
 		var done = false;
 		
 		if(items && items.length > 1) {
-			console.log("fileDrop: Dropped " + items.length + " items ...");
+			//console.log("fileDrop: Dropped " + items.length + " items ...");
 			var progressBar = document.createElement("progress");
 			progressBar.max = items.length;
 			progressBar.value = 0;
@@ -11230,7 +11218,7 @@ function fileDrop(fileDropEvent) {
 			var file = fileDropEvent.dataTransfer.files[0];
 			var filePath = file.path || file.name;
 			
-			console.log("fileDrop: Dropped Single file !? file.path=" + file.path + " file.name=" + file.name);
+			//console.log("fileDrop: Dropped Single file !? file.path=" + file.path + " file.name=" + file.name);
 			
 			if(filePath.indexOf("/") == -1 && filePath.indexOf("\\") == -1) filePath = (EDITOR.workingDirectory || "/upload/") + filePath;
 			
@@ -11242,7 +11230,7 @@ function fileDrop(fileDropEvent) {
 			if(!supported(fileType)) {
 				
 				var f = EDITOR.eventListeners.fileDrop.map(funMap);
-				console.log("fileDrop: File is not supported. Calling fileDrop listeners (" +f.length + ")");
+				//console.log("fileDrop: File is not supported. Calling fileDrop listeners (" +f.length + ")");
 				for(var i=0, h=false; i<f.length; i++) {
 					h = f[i](file);
 					if(h) handled = true;
@@ -11263,7 +11251,7 @@ function fileDrop(fileDropEvent) {
 			}
 		}
 		else {
-			console.log("fileDrop: File is supported! fileType=" + fileType);
+				//console.log("fileDrop: File is supported! fileType=" + fileType);
 			readFile();
 		}
 		EDITOR.interact("fileDrop", fileDropEvent);
@@ -11273,7 +11261,7 @@ function fileDrop(fileDropEvent) {
 	
 	
 	function traverseFileTree(item, path) {
-		console.log("fileDrop: traverseFileTree: item=" + item + " path=" + path);
+			//console.log("fileDrop: traverseFileTree: item=" + item + " path=" + path);
 
 if(!EDITOR.user) return alertBox("Need to be logged in to upload files!");
 
@@ -11284,7 +11272,7 @@ if(!EDITOR.user) return alertBox("Need to be logged in to upload files!");
 			
 			item.file(function(file) {
 				var filePath = path + file.name;
-				console.log("fileDrop:item.file: filePath=", filePath);
+					//console.log("fileDrop:item.file: filePath=", filePath);
 				if(filePath.match(/(readme)|(main)|(index)/i) && !fileToOpen) fileToOpen = filePath;
 				saveFile(file, path + file.name, true, fileSaved);
 			});
@@ -11298,7 +11286,7 @@ if(!EDITOR.user) return alertBox("Need to be logged in to upload files!");
 				for (var i=0; i<entries.length; i++) {
 					traverseFileTree(entries[i], path + item.name + "/");
 				}
-				console.log("fileDrop: dirReader.readEntries: filesToSave=" + filesToSave + " filesSaved=" + filesSaved + " foldersRead=" + foldersRead + " foldersToRead=" + foldersToRead);
+					//console.log("fileDrop: dirReader.readEntries: filesToSave=" + filesToSave + " filesSaved=" + filesSaved + " foldersRead=" + foldersRead + " foldersToRead=" + foldersToRead);
 				if(filesToSave == filesSaved && foldersRead == foldersToRead) uploadComplete();
 			});
 		}
@@ -11312,12 +11300,12 @@ if(!EDITOR.user) return alertBox("Need to be logged in to upload files!");
 			filesSaved++;
 			progressBar.value = filesSaved+foldersRead;
 			if(path) lastPath = path;
-			console.log("fileDrop:fileSaved: path=" + path + " filesToSave=" + filesToSave + " filesSaved=" + filesSaved + " foldersRead=" + foldersRead + " foldersToRead=" + foldersToRead);
+				//console.log("fileDrop:fileSaved: path=" + path + " filesToSave=" + filesToSave + " filesSaved=" + filesSaved + " foldersRead=" + foldersRead + " foldersToRead=" + foldersToRead);
 			if(filesToSave == filesSaved && foldersRead == foldersToRead) uploadComplete();
 		}
 		
 		function uploadComplete() {
-			console.log("fileDrop:uploadComplete: filesToSave=" + filesToSave + " filesSaved=" + filesSaved + " items.length=" + items.length);
+				//console.log("fileDrop:uploadComplete: filesToSave=" + filesToSave + " filesSaved=" + filesSaved + " items.length=" + items.length);
 			
 			if(done) {
 				console.warn("fileDrop:uploadComplete: Already done!"); // Might happen on rare ocations, actually should never happen! But it did, once (unable to repeat)
@@ -11335,7 +11323,7 @@ if(!EDITOR.user) return alertBox("Need to be logged in to upload files!");
 			var folders = UTIL.getFolders(folder);
 			var baseFolder = folders.length > 0 ? folders[folders.length-1] : "/upload/";
 			
-			console.log("baseFolder=" + baseFolder + " folders=" + JSON.stringify(folders));
+				//console.log("baseFolder=" + baseFolder + " folders=" + JSON.stringify(folders));
 			
 			footer.removeChild(progressBar);
 			
@@ -11344,7 +11332,7 @@ if(!EDITOR.user) return alertBox("Need to be logged in to upload files!");
 			
 			if(fileToOpen) {
 				var fileExtension = UTIL.getFileExtension(fileToOpen);
-				console.log("fileDrop: fileToOpen=" + fileToOpen + " fileExtension=" + fileExtension);
+					//console.log("fileDrop: fileToOpen=" + fileToOpen + " fileExtension=" + fileExtension);
 				// Open right away if it's a supported file
 				if(EDITOR.parseFileExtensionAsCode.indexOf(fileExtension) != -1 || EDITOR.plainTextFileExtensions.indexOf(fileExtension) != -1) {
 					EDITOR.openFile(fileToOpen);
@@ -11385,8 +11373,8 @@ if(!EDITOR.user) return alertBox("Need to be logged in to upload files!");
 		reader.onload = function (readerEvent) {
 			var data = readerEvent.target.result;
 			
-			console.log("data:");
-			console.log(data);
+				//console.log("data:");
+				//console.log(data);
 			
 			// Specifying encoding:base64 will magically convert to binary! 
 			// We do have to remove the data:image/png metadata though!
@@ -11428,7 +11416,7 @@ if(!EDITOR.user) return alertBox("Need to be logged in to upload files!");
 		if(fileType.indexOf("text") == 0) return true;
 		if( fileType.match(/application\/(javascript|ecmascript|xml|json|text)/) ) return true;
 		
-		console.log("Not supported: fileType=" + fileType);
+			//console.log("Not supported: fileType=" + fileType);
 		return false;
 	}
 	
@@ -11437,7 +11425,7 @@ if(!EDITOR.user) return alertBox("Need to be logged in to upload files!");
 		var reader = new FileReader();
 		
 		reader.onload = function (readerEvent) {
-			console.log("fileDrop: reader.onload: readerEvent.target=" + readerEvent.target);
+				//console.log("fileDrop: reader.onload: readerEvent.target=" + readerEvent.target);
 			var content = readerEvent.target.result;
 			
 			// Check for weird characters
@@ -11445,7 +11433,7 @@ if(!EDITOR.user) return alertBox("Need to be logged in to upload files!");
 			var total = Math.min(content.length, 100);
 			for (var i=0, charCode=0; i<total; i++) {
 				charCode = content.charCodeAt(i);
-				console.log("content " + i + " = " + charCode);
+					//console.log("content " + i + " = " + charCode);
 				if(charCode < 30 || charCode > 56000) weird++;
 			}
 			
@@ -11459,7 +11447,7 @@ if(!EDITOR.user) return alertBox("Need to be logged in to upload files!");
 			}
 			else if(content.length > EDITOR.settings.bigFileSize) {
 				//var tmpPath = UTIL.joinPaths([EDITOR.workingDirectory, filePath]);
-					console.log("fileDrop: Saving file to disk before opening because content.length=" + content.length + " > " + EDITOR.settings.bigFileSize + " : " + filePath);
+					//console.log("fileDrop: Saving file to disk before opening because content.length=" + content.length + " > " + EDITOR.settings.bigFileSize + " : " + filePath);
 				
 					EDITOR.checkPath(filePath, "Do not upload", function(err, fullPath) {
 					if(err) {
@@ -11476,12 +11464,12 @@ if(!EDITOR.user) return alertBox("Need to be logged in to upload files!");
 			else EDITOR.openFile(filePath, content);
 			
 		};
-		console.log("fileDrop: readFile: file:");
-		console.log(file);
+			//console.log("fileDrop: readFile: file:");
+			//console.log(file);
 		
 		//reader.readAsDataURL(file); // For binary files (will be base64 encoded)
 		var readText = reader.readAsText(file);
-		console.log("fileDrop: readText=" + readText); // Does it give a success indication (so I know if I should use readAsText or readAsDataURL)
+			//console.log("fileDrop: readText=" + readText); // Does it give a success indication (so I know if I should use readAsText or readAsDataURL)
 		
 		/*
 			for (var i = 0; i < e.dataTransfer.files.length; ++i) {
@@ -11499,7 +11487,7 @@ function onMessage(windowMessageEvent) {
 	var origin = windowMessageEvent.origin
 	var msg = windowMessageEvent.data;
 	
-	console.log("Window message from: origin=" + origin);
+		//console.log("Window message from: origin=" + origin);
 	
 	if(msg.openFile) EDITOR.openFile(msg.openFile.name, msg.openFile.content, function fileOpened(err, file) {
 		if(err) throw err;
@@ -11517,11 +11505,11 @@ function onMessage(windowMessageEvent) {
 	else if(msg.disablePlugin) EDITOR.disablePlugin(msg.disablePlugin, true);
 		else if(msg.createFile) {
 			
-			console.log("createFile: ", EDITOR.user);
+			//console.log("createFile: ", EDITOR.user);
 			
 			if(EDITOR.user) createFileOnce(false);
 			else {
-				console.log("createFile: Waiting for login ...");
+				//console.log("createFile: Waiting for login ...");
 				CLIENT.on("loginSuccess", createFileOnce);
 			}
 			
@@ -11534,7 +11522,7 @@ function onMessage(windowMessageEvent) {
 		EDITOR.stat("window_message");
 		
 		function createFileOnce(removeListener) {
-			console.log("createFileOnce! removeListener=" + removeListener)
+			//console.log("createFileOnce! removeListener=" + removeListener)
 			var filePath = UTIL.joinPaths(EDITOR.user.homeDir, "/embed/", msg.createFile.path);
 			var content = msg.createFile.content;
 			createFile(filePath, content);
@@ -11542,7 +11530,7 @@ function onMessage(windowMessageEvent) {
 		}
 		
 		function createFile(filePath, content) {
-			console.log("createFile: filePath=" + filePath);
+			//console.log("createFile: filePath=" + filePath);
 			EDITOR.createPath(UTIL.getDirectoryFromPath(filePath), function(err, path) {
 				if(err) return alertBox("Unable to create path:" + filePath + " Error:" + err.message);
 				EDITOR.saveToDisk(filePath, content, function(err, path) {
@@ -11593,14 +11581,14 @@ function copy(copyEvent) {
 		copyEvent.preventDefault();
 		
 			var f = EDITOR.eventListeners.copy.map(funMap);
-			console.log("Calling copy listeners (" + f.length + ") workingDirectory=" + workingDirectory);
+				//console.log("Calling copy listeners (" + f.length + ") workingDirectory=" + workingDirectory);
 			for(var i=0; i<f.length; i++) {
 				//console.log("function " + UTIL.getFunctionName(f[i]));
 				f[i](textToPutOnClipboard, true, false); // Call function
 			}
 			
 			EDITOR.pseudoClipboard = textToPutOnClipboard;
-			console.log("copy: Put " + textToPutOnClipboard.length + " characters into EDITOR.pseudoClipboard");
+				//console.log("copy: Put " + textToPutOnClipboard.length + " characters into EDITOR.pseudoClipboard");
 			}
 		}
 		else {
@@ -11617,7 +11605,7 @@ function copy(copyEvent) {
 
 function cut(cutEvent) {
 	
-	console.log("cutEvent EDITOR.input=" + EDITOR.input + " EDITOR.settings.useCliboardcatcher=" + EDITOR.settings.useCliboardcatcher + " giveBackFocusAfterClipboardEvent=" + giveBackFocusAfterClipboardEvent);
+		//console.log("cutEvent EDITOR.input=" + EDITOR.input + " EDITOR.settings.useCliboardcatcher=" + EDITOR.settings.useCliboardcatcher + " giveBackFocusAfterClipboardEvent=" + giveBackFocusAfterClipboardEvent);
 	
 		nativeCut = false; // Allow next key press to register
 		
@@ -11657,9 +11645,7 @@ function cut(cutEvent) {
 
 function paste(pasteEvent) {
 	
-	console.log("pasteEvent EDITOR.input=" + EDITOR.input + 
-	" EDITOR.settings.useCliboardcatcher=" + EDITOR.settings.useCliboardcatcher + 
-	" giveBackFocusAfterClipboardEvent=" + giveBackFocusAfterClipboardEvent);
+		//console.log("pasteEvent EDITOR.input=" + EDITOR.input + " EDITOR.settings.useCliboardcatcher=" + EDITOR.settings.useCliboardcatcher + " giveBackFocusAfterClipboardEvent=" + giveBackFocusAfterClipboardEvent);
 	
 		nativePaste = false; // Allow next key press to register
 		
@@ -11719,7 +11705,7 @@ function paste(pasteEvent) {
 			}
 			
 			function saveToDisk(filePath) {
-				console.log("Saving file content with the pasted data as " + filePath + " ...");
+					//console.log("Saving file content with the pasted data as " + filePath + " ...");
 				var combinedText = file.text.slice(0, file.caret.index) + text + file.text.slice(file.caret.index);
 				EDITOR.saveToDisk(filePath, combinedText, function saveToDiskComplete(err, path, hash) {
 					if(err) return alertBox("Unable to save the file! " + err.message, "FILE", "error");
@@ -11747,12 +11733,12 @@ function paste(pasteEvent) {
 	//console.log("PASTE: " + UTIL.lbChars(text));
 	
 		var f = EDITOR.eventListeners.paste.map(funMap);
-			console.log("Calling paste listeners on paste event (" + f.length + ") ...");
+		//console.log("Calling paste listeners on paste event (" + f.length + ") ...");
 			for(var i=0; i<f.length; i++) {
 			
 				ret = f[i](EDITOR.currentFile, text, pasteEvent);
 			
-				if(EDITOR.settings.devMode) console.log("Paste listener: " + UTIL.getFunctionName(f[i]) + " returned: (" + (typeof ret) + ") \n" + ret);
+			//if(EDITOR.settings.devMode) console.log("Paste listener: " + UTIL.getFunctionName(f[i]) + " returned: (" + (typeof ret) + ") \n" + ret);
 			
 			if(typeof ret == "string") {
 				if(textChanged) {
@@ -11820,7 +11806,7 @@ function paste(pasteEvent) {
 	}
 	else {
 			// Do the default action (enable pasting outside the canvas)
-			console.log("paste: Not inserting text because EDITOR.input=" + EDITOR.input + " EDITOR.currentFile=" + EDITOR.currentFile);
+			//console.log("paste: Not inserting text because EDITOR.input=" + EDITOR.input + " EDITOR.currentFile=" + EDITOR.currentFile);
 	}
 	
 		
@@ -11877,7 +11863,7 @@ function keyPressed(keyPressEvent) {
 	}
 	
 		var f = EDITOR.eventListeners.keyPressed.map(funMap);
-		console.log("Calling keyPressed listeners (" + f.length + ") ...");
+		//console.log("Calling keyPressed listeners (" + f.length + ") ...");
 		for(var i=0; i<f.length; i++) {
 			funReturn = f[i](file, character, combo, keyPressEvent); // Call function
 		
@@ -11889,7 +11875,7 @@ function keyPressed(keyPressEvent) {
 		if(funReturn === false && !preventDefault) {
 			preventDefault = true;
 				if(file && EDITOR.input) {
-console.log(UTIL.getFunctionName(f[i]) + " prevented insertion of character=" + character + " into file.path=" + file.path);
+					//console.log(UTIL.getFunctionName(f[i]) + " prevented insertion of character=" + character + " into file.path=" + file.path);
 				}
 			}
 		}
@@ -11946,7 +11932,7 @@ console.log(UTIL.getFunctionName(f[i]) + " prevented insertion of character=" + 
 				// It seems we can only capture this when running in app mode!
 				if(keyPressEvent.key == "I" && comboStr == "SHIFT + CTRL") {
 					EDITOR.stat("shift_ctrl_i");
-					console.log("Showing developer console!?");
+					//console.log("Showing developer console!?");
 					return;
 				}
 				//console.log("keyPressEvent.key=" + keyPressEvent.key + " comboStr=" + comboStr);
@@ -11995,13 +11981,13 @@ console.log(UTIL.getFunctionName(f[i]) + " prevented insertion of character=" + 
 				*/
 			
 				if(new Date() - EDITOR.lastTimeCharacterInserted > 1000 || EDITOR.lastTimeCharacterInserted - EDITOR.lastTimeInteraction < -20 || EDITOR.lastTimeCharacterInserted - EDITOR.lastTimeInteraction > 3000) {
-					console.log("FadingCaret: Rendering caret!");
+					//console.log("FadingCaret: Rendering caret!");
 					EDITOR.renderCaret(file.caret);
 					EDITOR.canvas.style.cursor = 'text';
 					cursorHidden = false;
 				}
 				else {
-					console.log("FadingCaret: Fading caret!");
+					//console.log("FadingCaret: Fading caret!");
 					
 					EDITOR.addAnimation(fadeInCaretAnimation);
 				
@@ -12049,7 +12035,7 @@ console.log(UTIL.getFunctionName(f[i]) + " prevented insertion of character=" + 
 		EDITOR.stat("key_press");
 		
 		if(preventDefault) {
-			console.log("keyPressed: Preventing default browser action!");
+			//console.log("keyPressed: Preventing default browser action!");
 		if(typeof keyPressEvent.preventDefault == "function") keyPressEvent.preventDefault();
 		return false;
 	}
@@ -12136,7 +12122,7 @@ function resizeAndRender(afterResize) {
 			var dWidth = sWidth;
 			var dHeight = sHeight;
 			
-			console.log("sx=" + sx + " sy=" + sy + " sWidth=" + sWidth + " sHeight=" + sHeight);
+				//console.log("sx=" + sx + " sy=" + sy + " sWidth=" + sWidth + " sHeight=" + sHeight);
 			
 			try {
 					EDITOR.canvasContext.drawImage(EDITOR.canvas, sx*PIXEL_RATIO, sy*PIXEL_RATIO, sWidth*PIXEL_RATIO, sHeight*PIXEL_RATIO, dx, dy, dWidth, dHeight);
@@ -12151,7 +12137,7 @@ function resizeAndRender(afterResize) {
 		}
 		
 		if(EDITOR.shouldRender) {
-			console.log("resizeAndRender: render! EDITOR.isScrolling=" + EDITOR.isScrolling + " fileStartRow=" + fileStartRow + " fileEndRow=" + fileEndRow + " rowDiff=" + rowDiff + " screenStartRow=" + screenStartRow);
+				//console.log("resizeAndRender: render! EDITOR.isScrolling=" + EDITOR.isScrolling + " fileStartRow=" + fileStartRow + " fileEndRow=" + fileEndRow + " rowDiff=" + rowDiff + " screenStartRow=" + screenStartRow);
 			
 				EDITOR.render(file, fileStartRow, fileEndRow, screenStartRow, EDITOR.canvas, EDITOR.canvasContext);
 		}
@@ -12189,7 +12175,7 @@ function keyboardCatcherKey(keyEvent) {
 	var keyboardCatcher = document.getElementById("keyboardCatcher");
 	var inputValue = keyboardCatcher.value;
 	
-	console.log("keyboardCatcherKey: inputValue=" + inputValue + " key=" + key + " charCode=" + charCode + " keyCode=" + keyCode + " code=" + code + " which=" + which + " shiftKey=" + shiftKey);
+		//console.log("keyboardCatcherKey: inputValue=" + inputValue + " key=" + key + " charCode=" + charCode + " keyCode=" + keyCode + " code=" + code + " which=" + which + " shiftKey=" + shiftKey);
 	
 	/*
 		Android don't want to give us key (key=Unidentified). And it wont give us keyPress events ...
@@ -12295,14 +12281,14 @@ function keyboardCatcherKey(keyEvent) {
 	
 		EDITOR.lastKeyDown = key || charCode;
 		
-		console.log("keyIsDown: key=" + keyDownEvent.key + " charCode=" + charCode + " keyCode=" + keyDownEvent.keyCode + " which=" + keyDownEvent.which + " character=" + character + " lastKeyDown=" + lastKeyDown + " combo=" + JSON.stringify(combo) + " EDITOR.metaKeyIsDown=" + EDITOR.metaKeyIsDown + " targetElementClass=" + targetElementClass + " EDITOR.mode=" + EDITOR.mode + " EDITOR.input=" + EDITOR.input);
+		//console.log("keyIsDown: key=" + keyDownEvent.key + " charCode=" + charCode + " keyCode=" + keyDownEvent.keyCode + " which=" + keyDownEvent.which + " character=" + character + " lastKeyDown=" + lastKeyDown + " combo=" + JSON.stringify(combo) + " EDITOR.metaKeyIsDown=" + EDITOR.metaKeyIsDown + " targetElementClass=" + targetElementClass + " EDITOR.mode=" + EDITOR.mode + " EDITOR.input=" + EDITOR.input);
 	
 		//alertBox("keyIsDown: key=" + keyDownEvent.key + " charCode=" + charCode + " keyCode=" + keyDownEvent.keyCode + " which=" + keyDownEvent.which + " character=" + character + " lastKeyDown=" + lastKeyDown + " combo=" + JSON.stringify(combo) + " targetElementClass=" + targetElementClass + " EDITOR.mode=" + EDITOR.mode + " EDITOR.input=" + EDITOR.input);
 		
 		
 		// Voice recognition support in browsers seem to have been discontinued :(
 		if(charCode == charCodeCtrl && voiceCommandsEnabled) {
-			console.log("keyIsDown: recognition start! (keyDown Ctrl)");
+			//console.log("keyIsDown: recognition start! (keyDown Ctrl)");
 		if(recognition) {
 			try {
 				recognition.start();
@@ -12339,7 +12325,7 @@ function keyboardCatcherKey(keyEvent) {
 		
 		if(funReturn === false) {
 			preventDefault = true;
-			console.log("keyIsDown: Default browser action prevented by keyDown listener " + UTIL.getFunctionName(f[i]) + "!");
+				//console.log("keyIsDown: Default browser action prevented by keyDown listener " + UTIL.getFunctionName(f[i]) + "!");
 		}
 	}
 	
@@ -12347,7 +12333,7 @@ function keyboardCatcherKey(keyEvent) {
 		// Check key bindings
 		var capturedBy = [];
 		var f = [];
-			console.log("keyIsDown: combo.sum=" + combo.sum + " EDITOR.mode=" + EDITOR.mode);
+			//console.log("keyIsDown: combo.sum=" + combo.sum + " EDITOR.mode=" + EDITOR.mode);
 		for(var i=0, binding; i<keyBindings.length; i++) {
 			
 			binding = keyBindings[i];
@@ -12381,7 +12367,7 @@ function keyboardCatcherKey(keyEvent) {
 		
 		// call key bindings
 		for(var i=0; i<f.length; i++) {
-				console.log("keyIsDown: Calling function: " + UTIL.getFunctionName(f[i]) + "...");
+				//console.log("keyIsDown: Calling function: " + UTIL.getFunctionName(f[i]) + "...");
 			
 			if(captured) {
 					console.warn("keyIsDown: Key combo has already been captured by " + capturedBy.map(UTIL.getFunctionName).join(",") + " : ");
@@ -12398,7 +12384,7 @@ function keyboardCatcherKey(keyEvent) {
 			
 			if(funReturn === false) { // If one of the functions returns false, the default action will be prevented!
 				preventDefault = true;
-				console.log("keyIsDown: Default browser action prevented by key binding=" + UTIL.getFunctionName(binding.fun) + "!");
+					//console.log("keyIsDown: Default browser action prevented by key binding=" + UTIL.getFunctionName(binding.fun) + "!");
 			}
 			else if(funReturn !== true) {
 					throw new Error("You must make an active choice whether to allow (return true) or prevent (return false) default (chromium) browser action,\
@@ -12425,13 +12411,13 @@ function keyboardCatcherKey(keyEvent) {
 	var windowKey = lastKeyDown == leftWindowKey || lastKeyDown == rightWindowKey;
 	var metaCmdKey = keyDownEvent.metaKey; // The key labeled cmd on a Mac keyboard
 	
-		console.log("keyIsDown: combo.sum=" + combo.sum + " windowKey=" + windowKey + " metaCmdKey=" + metaCmdKey + " EDITOR.metaKeyIsDown=" + EDITOR.metaKeyIsDown + " BROWSER=" + BROWSER + " MAC=" + MAC);
+		//console.log("keyIsDown: combo.sum=" + combo.sum + " windowKey=" + windowKey + " metaCmdKey=" + metaCmdKey + " EDITOR.metaKeyIsDown=" + EDITOR.metaKeyIsDown + " BROWSER=" + BROWSER + " MAC=" + MAC);
 	
 	if((combo.sum > 0 || metaCmdKey) && !captured) {
 		// The user hit a combo, with shift, alt, ctrl + something, but it was not captured.
 		
 		if( (combo.ctrl || metaCmdKey) && character == "C") {
-				console.log("keyIsDown: Native command: copy !? MAC=" + MAC);
+				//console.log("keyIsDown: Native command: copy !? MAC=" + MAC);
 			
 			if(MAC) nativeCopy = true;
 			
@@ -12454,7 +12440,7 @@ function keyboardCatcherKey(keyEvent) {
 			}
 		}
 		else if( (combo.ctrl || metaCmdKey) && character == "V") {
-				console.log("keyIsDown: Native command: paste !? MAC=" + MAC + " EDITOR.settings.useCliboardcatcher=" + EDITOR.settings.useCliboardcatcher + " EDITOR.input=" + EDITOR.input);
+				//console.log("keyIsDown: Native command: paste !? MAC=" + MAC + " EDITOR.settings.useCliboardcatcher=" + EDITOR.settings.useCliboardcatcher + " EDITOR.input=" + EDITOR.input);
 			
 			if(MAC) nativePaste = true;
 			
@@ -12471,7 +12457,7 @@ function keyboardCatcherKey(keyEvent) {
 			}
 		}
 		else if( (combo.ctrl || metaCmdKey) && character == "X") {
-				console.log("keyIsDown: Native command: cut !?");
+				//console.log("keyIsDown: Native command: cut !?");
 			
 			if(MAC) nativeCut = true;
 			
@@ -12501,10 +12487,10 @@ function keyboardCatcherKey(keyEvent) {
 		else if(combo.ctrl && combo.alt) {} // This is Alt gr (used to insert {[]} etc)
 		else if(combo.alt) {} // Wait for ALT+key combo!
 else if(combo.meta) {} // Wait for cmd+key combo!
-			else if(charCode == 17 || combo.ctrl) {console.log("keyIsDown: Ctrl ...");} // Wait for Ctrl+key combo!
-			else if(windowKey) {console.log("keyIsDown: Window key ...");preventDefault = true;} // Do we want to capture Window combos !?
-			else if(metaCmdKey) {console.log("keyIsDown: meta/cmd key ...");preventDefault = true;} // Do we want to capture Meta/Cmd combos !?
-		else {
+			else if(charCode == 17 || combo.ctrl) {/*console.log("keyIsDown: Ctrl ...");*/} // Wait for Ctrl+key combo!
+			else if(windowKey) {/*console.log("keyIsDown: Window key ...");*/preventDefault = true;} // Do we want to capture Window combos !?
+			else if(metaCmdKey) {/*console.log("keyIsDown: meta/cmd key ...");*/preventDefault = true;} // Do we want to capture Meta/Cmd combos !?
+			else {
 			throw Error("Unsupported! combo: " + JSON.stringify(combo) + " character=" + character + " charCode=" + charCode);
 			
 			preventDefault = true;
@@ -12526,7 +12512,7 @@ else if(combo.meta) {} // Wait for cmd+key combo!
 	
 	if(preventDefault) {
 		//alert("Preventing default browser action!");
-		console.log("keyIsDown: Preventing default browser action!");
+		//console.log("keyIsDown: Preventing default browser action!");
 		
 		if(typeof keyDownEvent.stopPropagation == "function") keyDownEvent.stopPropagation();
 		if(window.event && typeof window.event.cancelBubble != "undefined") window.event.cancelBubble = true;
@@ -12538,9 +12524,7 @@ else if(combo.meta) {} // Wait for cmd+key combo!
 	else {
 			//console.log("keyIsDown: Executing default browser/OS action ...");
 		
-			if(keyDownEvent.target == document.getElementById("windowMenu")) {
-				console.log("keyIsDown: Key down on Window menu!");
-			}
+			//if(keyDownEvent.target == document.getElementById("windowMenu")) {console.log("keyIsDown: Key down on Window menu!");}
 			
 		return true;
 	}
@@ -12606,7 +12590,7 @@ function keyIsUp(keyUpEvent) {
 		
 		if(charCode==17) EDITOR.ctrlKeyIsDown = false; 
 		
-		console.log("keyUp: key=" + keyUpEvent.key + " charCode=" + charCode + " character=" + character + " combo=" + JSON.stringify(combo) + " EDITOR.metaKeyIsDown=" + EDITOR.metaKeyIsDown + "");
+		//console.log("keyUp: key=" + keyUpEvent.key + " charCode=" + charCode + " character=" + character + " combo=" + JSON.stringify(combo) + " EDITOR.metaKeyIsDown=" + EDITOR.metaKeyIsDown + "");
 	
 	/*
 		
@@ -12672,7 +12656,7 @@ function keyIsUp(keyUpEvent) {
 		
 		if( (binding.char == character || binding.charCode == charCode) && (binding.combo == combo.sum || (binding.combo === undefined && combo.sum===0)) && (binding.dir == "up") && (binding.mode == EDITOR.mode || binding.mode == "*") ) { // down is the default direction
 			
-			console.log("keyUp: Calling function: " + UTIL.getFunctionName(binding.fun) + "...");
+				//console.log("keyUp: Calling function: " + UTIL.getFunctionName(binding.fun) + "...");
 			
 			funReturn = binding.fun(EDITOR.currentFile, combo, character, charCode, "up", targetElementClass, keyUpEvent);
 			
@@ -12680,7 +12664,7 @@ function keyIsUp(keyUpEvent) {
 			
 			if(funReturn === false) {
 				preventDefault = true;
-				console.log("Default action will be prevented!");
+					//console.log("Default action will be prevented!");
 			}
 			else if(funReturn !== true) {
 				throw new Error("To prevent bugs, keybound functions always need to return either true or false!\nAlthough it doesn't matter on keyup events. Returning false on keydown event will prevent default action.");
@@ -12692,7 +12676,7 @@ function keyIsUp(keyUpEvent) {
 	
 	var charCodeCtrl = 17;
 		if(charCode == charCodeCtrl && voiceCommandsEnabled) {
-		console.log("recognition stop! (keyUp Ctrl)");
+			//console.log("recognition stop! (keyUp Ctrl)");
 		if(recognition) {
 			recognition.stop();
 		}
@@ -12702,12 +12686,12 @@ function keyIsUp(keyUpEvent) {
 	EDITOR.interact("keyUp", keyUpEvent);
 	
 	if(preventDefault) {
-		console.log("keyIsUp: Preventing default browser action! key=" + keyUpEvent.key + "");
+			//console.log("keyIsUp: Preventing default browser action! key=" + keyUpEvent.key + "");
 		if(typeof keyUpEvent.preventDefault == "function") keyUpEvent.preventDefault();
 		return false;
 	}
 	else {
-		console.log("keyIsUp: Default browser action allowed ... key=" + keyUpEvent.key + "");
+			//console.log("keyIsUp: Default browser action allowed ... key=" + keyUpEvent.key + "");
 		return true;
 	}
 }
@@ -12775,10 +12759,10 @@ function mouseDown(mouseDownEvent) {
 	
 		var menu = document.getElementById("contextmenu");
 	
-	console.log("mouseDown on target.className=" + target.className);
+		//console.log("mouseDown on target.className=" + target.className);
 	
 		if(target.className == "allowDefault") {
-			console.log("mouseDown: (target.className=allowDefault)");
+			//console.log("mouseDown: (target.className=allowDefault)");
 			return true;
 		}
 	else if(target.className == "fileCanvas" || target.className == "content centerColumn") {
@@ -12797,12 +12781,12 @@ function mouseDown(mouseDownEvent) {
 			
 			// Remove focus from everything else
 			if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
-			else console.log("mouseDown: Unable to blur active element!:");
+				//else console.log("mouseDown: Unable to blur active element!:");
 			
 				EDITOR.canvas.focus();
 			
 			// Delete selection outside of the canvas
-				console.log("Removing selection!");
+				//console.log("Removing selection!");
 			window.getSelection().removeAllRanges();
 			
 			/*
@@ -12822,7 +12806,7 @@ function mouseDown(mouseDownEvent) {
 		}
 		else{
 			
-		console.log("mouseDown: Removing focus/input from the Editor because the click was registered outside the canvas!");
+			//console.log("mouseDown: Removing focus/input from the Editor because the click was registered outside the canvas!");
 		EDITOR.input = false;
 		
 		if(targetIsDashboard(target)) {
@@ -12850,8 +12834,8 @@ function mouseDown(mouseDownEvent) {
 		mouseDownEvent.preventDefault();
 	}
 	
-	console.log("mouseDown:  caret=" + JSON.stringify(caret) + " (" + mouseX + "," + mouseY + ") button=" + button + " className=" + target.className + " tagName=" + target.tagName);
-	console.log(mouseDownEvent);
+		//console.log("mouseDown:  caret=" + JSON.stringify(caret) + " (" + mouseX + "," + mouseY + ") button=" + button + " className=" + target.className + " tagName=" + target.tagName);
+		//console.log(mouseDownEvent);
 	
 		var f = [];
 		for(var i=0, binding; i<EDITOR.eventListeners.mouseClick.length; i++) {
@@ -12869,17 +12853,17 @@ function mouseDown(mouseDownEvent) {
 	}
 		
 		var funReturn;
-		console.log("mouseDown: Calling mouseClick (down) listeners (" + f.length + ") ...");
+		//console.log("mouseDown: Calling mouseClick (down) listeners (" + f.length + ") ...");
 		for(var i=0; i<f.length; i++) {
 			// Note that caret is a temporary position caret (not the current file.caret)!
 			
 			funReturn = f[i](mouseX, mouseY, caret, mouseDirection, button, target, keyboardCombo, mouseDownEvent); // Call it
 			
-			console.log("mouseDown: mouseClick event " + UTIL.getFunctionName(f[i]) + " for mouseDown returned " + funReturn);
+			//console.log("mouseDown: mouseClick event " + UTIL.getFunctionName(f[i]) + " for mouseDown returned " + funReturn);
 			
 			if(funReturn === false) {
 				preventDefault = true;
-				console.log("mouseDown: " + UTIL.getFunctionName(f[i]) + " prevented other mouseClick actions!");
+				//console.log("mouseDown: " + UTIL.getFunctionName(f[i]) + " prevented other mouseClick actions!");
 				break;
 			}
 			else if(funReturn !== true) {
@@ -12922,7 +12906,7 @@ function mouseDown(mouseDownEvent) {
 		else EDITOR.stat("mouse_down");
 		
 		if(preventDefault) {
-			console.log("mouseDown:Preventing default!");
+			//console.log("mouseDown:Preventing default!");
 		mouseDownEvent.preventDefault(); // To prevent the annoying menus
 		mouseDownEvent.stopPropagation();
 		return false;
@@ -12964,7 +12948,7 @@ function mouseUp(mouseUpEvent) {
 	//console.log(mouseUpEvent);
 	
 		if(target.className == "allowDefault") {
-			console.log("mouseUp: (target.className=allowDefault)");
+			//console.log("mouseUp: (target.className=allowDefault)");
 			return true;
 		}
 		else if(target.className == "fileCanvas") {
@@ -12978,7 +12962,7 @@ function mouseUp(mouseUpEvent) {
 		
 	}
 	
-	console.log("Calling mouseClick (up) listeners (" + EDITOR.eventListeners.mouseClick.length + ") ...");
+		//console.log("Calling mouseClick (up) listeners (" + EDITOR.eventListeners.mouseClick.length + ") ...");
 	console.time("mouseClick listeners");
 	var funReturn = true;
 	var preventDefault = false;
@@ -13004,11 +12988,11 @@ function mouseUp(mouseUpEvent) {
 			funReturn = f[i](mouseX, mouseY, caret, mouseDirection, button, target, keyboardCombo, mouseUpEvent); // Call it
 			console.timeEnd(fName);
 			
-			console.log("mouseClick event " + fName + " for mouseUp returned " + funReturn);
+			//console.log("mouseClick event " + fName + " for mouseUp returned " + funReturn);
 			
 			if(funReturn === false) {
 				preventDefault = true;
-				console.log("" + fName + " prevented other mouseClick actions!");
+				//console.log("" + fName + " prevented other mouseClick actions!");
 				break;
 			}
 			else if(funReturn !== true) {
@@ -13039,7 +13023,7 @@ function mouseUp(mouseUpEvent) {
 		EDITOR.interact("mouseUp", mouseUpEvent);
 	
 	if(preventDefault) {
-		console.log("mouseUp: Preventing default!");
+			//console.log("mouseUp: Preventing default!");
 		if(typeof mouseUpEvent.preventDefault == "function") mouseUpEvent.preventDefault();
 		if(typeof mouseUpEvent.stopPropagation == "function") mouseUpEvent.stopPropagation();
 		return false;
@@ -13187,7 +13171,7 @@ function mouseclick(mouseClickEvent) {
 		
 		For events that are not bound to mouseUp or mouseDown
 	*/
-	console.log("mouseClick, EDITOR.shouldRender=" + EDITOR.shouldRender + ", EDITOR.shouldResize=" + EDITOR.shouldResize + " EDITOR.input=" + EDITOR.input);
+		//console.log("mouseClick, EDITOR.shouldRender=" + EDITOR.shouldRender + ", EDITOR.shouldResize=" + EDITOR.shouldResize + " EDITOR.input=" + EDITOR.input);
 	
 	EDITOR.interact("mouseClick", mouseClickEvent);
 	
@@ -13225,7 +13209,7 @@ function dblclick(dblClickEvent) {
 				EDITOR.canvas.focus();
 			
 			// Delete selection outside of the canvas
-				console.log("Removing selection!");
+				//console.log("Removing selection!");
 			window.getSelection().removeAllRanges();
 			
 		}
@@ -13238,7 +13222,7 @@ function dblclick(dblClickEvent) {
 		}
 	}
 	
-		console.log("dblclick: caret=" + JSON.stringify(caret) + " (" + mouseX + "," + mouseY + ") button=" + button + " className=" + target.className + " tagName=" + target.tagName);
+		//console.log("dblclick: caret=" + JSON.stringify(caret) + " (" + mouseX + "," + mouseY + ") button=" + button + " className=" + target.className + " tagName=" + target.tagName);
 	
 		var f = [];
 		for(var i=0, binding; i<EDITOR.eventListeners.dblclick.length; i++) {
@@ -13254,7 +13238,7 @@ function dblclick(dblClickEvent) {
 		}
 	}
 		
-		console.log("Calling dblclick listeners (" + f.length + ") ...");
+		//console.log("Calling dblclick listeners (" + f.length + ") ...");
 		for(var i=0; i<f.length; i++) {
 			//console.log("Calling " + UTIL.getFunctionName(f[i]) + " ...");
 			
@@ -13284,7 +13268,7 @@ function scrollWheel(scrollWheelEvent) {
 	
 	scrollWheelEvent = scrollWheelEvent || window.event;
 	
-	console.log("scroll ... scrollWheelEvent.ctrlKey=" + scrollWheelEvent.ctrlKey);
+		//console.log("scroll ... scrollWheelEvent.ctrlKey=" + scrollWheelEvent.ctrlKey);
 	
 	//console.log("wheelDelta=" + scrollWheelEvent.wheelDelta + " wheelDeltaY=" + scrollWheelEvent.wheelDeltaY + " deltaY=" + scrollWheelEvent.deltaY + " detail=" + scrollWheelEvent.detail );
 	
@@ -13295,11 +13279,11 @@ function scrollWheel(scrollWheelEvent) {
 	var dir = delta > 0 ? -1 : 1;
 	var steps = Math.abs(delta);
 	
-	console.log("Scrolling on " + tagName);
+		//console.log("Scrolling on " + tagName);
 	
 	if(tagName == "CANVAS") {
 			var f = EDITOR.eventListeners.mouseScroll.map(funMap);
-			console.log("Calling mouseScroll listeners (" + f.length + ") ...");
+			//console.log("Calling mouseScroll listeners (" + f.length + ") ...");
 			for(var i=0; i<f.length; i++) {
 				f[i](dir, steps, combo, scrollWheelEvent);
 		}
@@ -13313,7 +13297,7 @@ function scrollWheel(scrollWheelEvent) {
 
 function getFile(url, callback) {
 	
-	console.log("Opening url:" + url);
+		//console.log("Opening url:" + url);
 	
 	var xmlHttp = new XMLHttpRequest();
 	xmlHttp.onreadystatechange = processRequest;
@@ -13327,7 +13311,7 @@ function getFile(url, callback) {
 			
 			if(xmlHttp.status == 200) {
 				
-				console.log("File loaded.");
+					//console.log("File loaded.");
 				
 				callback(null, xmlHttp.responseText, url);
 				
@@ -13378,7 +13362,7 @@ function getFile(url, callback) {
 			var data = '<svg xmlns="http://www.w3.org/2000/svg" width="' + width + '" height="' + height + '"><text x="0" y="16">' + UTIL.stripHtml(html) + '</text></svg>';
 		}
 		
-		console.log("htmlToImage: (BROWSER=" + BROWSER + ") Creating SVG image: data=" + data);
+		//console.log("htmlToImage: (BROWSER=" + BROWSER + ") Creating SVG image: data=" + data);
 		
 		var img = new Image();
 		
@@ -13390,10 +13374,10 @@ function getFile(url, callback) {
 		
 		img.onload = function () {
 			onloadCalled = true;
-			console.log("htmlToImage: SVG image created/loaced! (img.onload event) img.width=" + img.width + " img.height=" + img.height);
+			//console.log("htmlToImage: SVG image created/loaced! (img.onload event) img.width=" + img.width + " img.height=" + img.height);
 			
 			if(url) {
-				console.log("htmlToImage: Releasing object URL")
+				//console.log("htmlToImage: Releasing object URL")
 				domurl.revokeObjectURL(url);
 			}
 			
@@ -13407,24 +13391,24 @@ function getFile(url, callback) {
 		}
 		
 		if( domurl.createObjectURL && BROWSER != "Safari") { // Safari ends up with a zero width image
-			console.log("htmlToImage: Creating image using domurl.createObjectURL")
+			//console.log("htmlToImage: Creating image using domurl.createObjectURL")
 			var svg = new Blob([data], {type: 'image/svg+xml;charset=utf-8'});
 			var url = domurl.createObjectURL(svg);
 			img.src = url;
 		}
 		else {
-			console.log("htmlToImage: Creating image using data src")
+			//console.log("htmlToImage: Creating image using data src")
 			data = "data:image/svg+xml," + data;
 			img.src = data;
 		
-			console.log("htmlToImage: SVG image created!? img.width=" + img.width + " img.height=" + img.height);
+			//console.log("htmlToImage: SVG image created!? img.width=" + img.width + " img.height=" + img.height);
 		}
 		
 		img.onerror = function imageError(err) {
 			onErrorCalled = true;
 			
 			clearTimeout(timeoutTimer);
-			console.log("htmlToImage: Problem creating image! html=" + html + "\nError: " + (err.message || err))
+			//console.log("htmlToImage: Problem creating image! html=" + html + "\nError: " + (err.message || err))
 			
 			if(!callback) {
 				throw new Error("htmlToImage: Failed to create image. But we have already called back! BROWSER=" + BROWSER + " domurl.createObjectURL?" + (!!domurl.createObjectURL) + " onloadCalled=" + onloadCalled + " onErrorCalled=" + onErrorCalled + " timeoutOut=" + timeoutOut + "");
@@ -13450,7 +13434,7 @@ function getFile(url, callback) {
 		if(BROWSER != "Firefox") {
 		var timeoutTimer = setTimeout(function() {
 				timeoutOut = true;
-			console.log("htmlToImage: Callback timeout! callback?" + (!!callback));
+				//console.log("htmlToImage: Callback timeout! callback?" + (!!callback));
 			if(callback) {
 				callback(img);
 				callback = null;
@@ -13462,7 +13446,7 @@ function getFile(url, callback) {
 	
 	function bootstrap() {
 		// Make a HTTP get request to the url located in file bootstrap.url to get boostrap info like credentials etc
-		console.log("Editor version: " + EDITOR.version);
+		//console.log("Editor version: " + EDITOR.version);
 		EDITOR.readFromDisk(__dirname + "/bootstrap.url", function bootstrap(err, path, url) {
 			if(err) {
 				console.warn("bootstrap.url: " + err.message);
@@ -13530,7 +13514,7 @@ function getFile(url, callback) {
 	}
 	
 	function clearSelection() {
-		console.log("Removing selection! (clearSelection)");
+		//console.log("Removing selection! (clearSelection)");
 		if ( document.selection ) {
 			document.selection.empty();
 		} else if ( window.getSelection ) {
@@ -13541,7 +13525,7 @@ function getFile(url, callback) {
 	function fullScreenMenu(menu) {
 		// The menu will cover the whole screen
 		
-		console.log("fullScreenMenu:");
+		//console.log("fullScreenMenu:");
 		
 		var wireframe = document.getElementById("wireframe");
 		wireframe.style.display = "none";
