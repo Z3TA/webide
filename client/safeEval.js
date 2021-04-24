@@ -19,6 +19,8 @@ function handleMsg(msg) {
 
 	console.log("in evalWorker: str=", str, " result=", result, " error=", error);
 
+	if(typeof result == "object") result = JSON.stringify(result); // Don't want [object object]
+
 	self.postMessage({
 		id: id,
 		error: error,

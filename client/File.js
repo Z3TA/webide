@@ -240,7 +240,7 @@ var File; // File object is global
 
 		if(caret == undefined) caret = file.caret;
 
-		return caret.row + file.startRow + 1;
+		return caret.row + file.partStartRow + 1;
 	}
 	
 	File.prototype.mutateCaret = function(oldCaret, newCaret) {

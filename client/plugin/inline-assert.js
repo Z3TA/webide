@@ -95,7 +95,7 @@
 		var func = scope.functions[test.fname];
 
 		var row = file.rowFromIndex(end).row;
-		var pos = {row: row, col: str.length + 1};
+		var pos = {row: row, col: str.length + 4};
 		
 		if(!func) {
 			// It might be a builtin function!

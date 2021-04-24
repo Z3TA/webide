@@ -7,7 +7,6 @@
 
 	Git branch names can't start with /
 
-
 */
 
 (function() {
@@ -23,6 +22,8 @@
 	var BRANCH_NAME = "";
 	var PATH = "";
 	var LINE = "";
+
+	var currentState = {};
 
 	EDITOR.plugin({
 		desc: "Move caret back to last position",
@@ -42,11 +43,11 @@
 				EDITOR.on("fileShow", showInfoInUrl);
 				EDITOR.on("changeProject", updateProjectInUrl);
 				EDITOR.on("changeBranch", updateBranchInUrl);
+				EDITOR.on("start", checkUrlParametersOnStart);
 
 				window.addEventListener("popstate", browserNavigation);
+				window.addEventListener("hashchange", hashChange);
 			}
-
-
 
 		},
 		unload: function unloadGoBack() {
@@ -64,18 +65,96 @@
 			if(DISPLAY_MODE == "browser") {
 				EDITOR.removeEvent("fileShow", showInfoInUrl);
 				EDITOR.removeEvent("changeProject", updateProjectInUrl);
+				EDITOR.removeEvent("changeBranch", updateBranchInUrl);
+				EDITOR.removeEvent("start", checkUrlParametersOnStart);
 
 				window.removeEventListener("popstate", browserNavigation);
+				window.removeEventListener("hashchange", hashChange);
 			}
 
 		}
 	});
 
+	function checkUrlParametersOnStart() {
+		var hash = window.location.hash;
+		var state = parseHash(hash);
+
+		// Wait until the file has fully loaded
+		// The editor is probably re-opening a bunch of files...
+		setTimeout(function() {
+			navigate(state);
+		}, 2000);
+		
+	}
+
+	function hashChange(ev) {
+		var hash = window.location.hash;
+		var state = parseHash(hash);
+		navigate(state);
+	}
+
+
+	function parseHash(hash) {
+		var arr = hash.split("#");
+
+		if(hash.charAt(0) == "#") arr.shift();
+
+		var last = arr.pop();
+		// Last is probably line nr
+		if( !isNaN(parseInt(last)) ) {
+			var line = parseInt(last);
+		}
+		else if(last.charAt(0) == "/") {
+			// It's a path !? {
+			var path = last;
+		}
+		else if(last && last.trim() != "") throw new Error("Unable to determine what " + last + " means in the url hash");
+
+		var last = arr.pop();
+
+		if(line && last.charAt(0) == "/") {
+			var path = last;
+		}
+		else if(path) {
+			var branch = last;
+		}
+		else if(last && last.trim() != "") throw new Error("Unable to determine what " + last + " means in the url hash");
+
+		var last = arr.pop();
+
+		if(last != undefined) {
+			var branch = last;
+		}
+
+		var last = arr.pop();
+
+		if(last != undefined) {
+			var project = last;
+		}
+
+		var obj = {};
+
+		if(line) obj.line = line;
+		if(path) obj.path = path;
+		if(branch) obj.branch = branch;
+		if(project) obj.project = project;
+
+		return obj;
+	}
+	// assert: parseHash("#/foo/bar#123")=   
+	// assert: parseHash("#branch#/foo/bar#123")=   
+	// assert: parseHash("#project#branch#/foo/bar#123")=   
+	// assert: parseHash("#/foo/bar")=   
+
+
+
 	function setUrl() {
 
 		if(DISPLAY_MODE == "standalone") return; // Don't bother if we can't see the URL or back/forward buttons
 
-		var state = {
+		if(PROJECT_NAME == currentState.project && BRANCH_NAME == currentState.branch && PATH == currentState.path && LINE == currentState.line) return; // No need to push another history
+
+		currentState = {
 			project: PROJECT_NAME,
 			branch: BRANCH_NAME,
 			path: PATH,
@@ -90,7 +169,7 @@
 		if(PATH) url = url + "#" + PATH;
 		if(LINE) url = url + "#" + LINE;
 
-		window.history.pushState(state, title, url);
+		window.history.pushState(currentState, title, url);
 	}
 
 	function updateBranchInUrl(branchName) {
@@ -124,16 +203,18 @@
 
 		if(!state) return;
 
+		navigate(state);
+	}
+
+	function navigate(state) {
+
+		alert("navigate: state=" + JSON.stringify(state));
+
 		if(state.project != EDITOR.project) EDITOR.changeProject(state.project);
 		if(state.branch != EDITOR.branch) EDITOR.checkoutSCMBranch(state.branch);
 		if(EDITOR.currentFile && state.path != EDITOR.currentFile.path) EDITOR.showFile(state.path);
-
 		if(EDITOR.currentFile && state.line != EDITOR.currentFile.currentLine()) EDITOR.currentFile.gotoLine(state.line);
-		else {
-			console.log("browserNavigation: EDITOR.currentFile?" + !!EDITOR.currentFile + " EDITOR.currentFile.currentLine()=" + EDITOR.currentFile.currentLine() + " ");
-		}
-
-	};
+	}
 
 	function moveCaretBackToLastPosition2(file) {
 		return moveCaretBackToLastPosition(file);
