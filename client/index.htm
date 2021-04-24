@@ -127,10 +127,10 @@
 		
 		<div class="loginbox">
 			<label for="username">Username: </label>
-			<input type="text" class="inputtext" id="username" placeholder="username" bundle="test" /><br />
+			<input type="text" class="inputtext" id="username" placeholder="username" bundle="test" autocomplete="on" /><br />
 			
 			<label for="password">Password: &nbsp;</label>
-			<input type="password" id="password" placeholder="password" />
+			<input type="password" id="password" placeholder="password" autocomplete="on" />
 		</div>
 
 		
@@ -151,7 +151,7 @@
 			<input type="text" class="inputtext" id="backend_url" placeholder="https://webide.se/webide" /><br />
 
 			<label for="nat_code">"NAT"-code: </label>
-			<input type="text" class="inputtext" id="nat_code" placeholder="D7KJ9LL15C" /><br />
+			<input type="text" class="inputtext" id="nat_code" placeholder="D7KJ9LL15C" autocomplete="on" /><br />
 
 			<button id="connectButton" type="button" class="button">Connect to backend</button> 
 
@@ -195,7 +195,7 @@
 <textarea id="clipboardcatcher"></textarea>
 
 <!-- Allow mobile users to type using their onboard/virtual keyboard -->
-<input type="text" id="keyboardCatcher" class="keyboardCatcher" value="x" />
+<input type="text" id="keyboardCatcher" class="keyboardCatcher" value="x" autocomplete="off" />
 
 <input id="fileInput" type="file" />
 
