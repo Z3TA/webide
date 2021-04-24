@@ -1290,7 +1290,7 @@ terminalFiles.push(file);
 		
 		function print() {
 			
-			console.log("Terminal Insert: caret=" + JSON.stringify(file.caret) + " length=" + charBuffer.length + " " + UTIL.lbChars(charBuffer) + " backgroundColor=" + backgroundColor + " foregroundColor=" + foregroundColor + " reverse=" + reverse);
+			//console.log("Terminal Insert: caret=" + JSON.stringify(file.caret) + " length=" + charBuffer.length + " " + UTIL.lbChars(charBuffer) + " backgroundColor=" + backgroundColor + " foregroundColor=" + foregroundColor + " reverse=" + reverse);
 			//if(!file.caret.eol && (data.charCodeAt(0) == 8 || data.charCodeAt(data.length-1) == 8 || data.charCodeAt(i-1) == 8 || data.length == 1 )) file.deleteCharacter();
 			// terminal always overwrite !?
 			var colStart = file.caret.col;

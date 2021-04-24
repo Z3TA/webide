@@ -214,6 +214,7 @@
 		if(state.branch != EDITOR.branch) EDITOR.checkoutSCMBranch(state.branch);
 		if(EDITOR.currentFile && state.path != EDITOR.currentFile.path) EDITOR.showFile(state.path);
 		if(EDITOR.currentFile && state.line != EDITOR.currentFile.currentLine()) EDITOR.currentFile.gotoLine(state.line);
+		EDITOR.dashboard.hide();
 	}
 
 	function moveCaretBackToLastPosition2(file) {

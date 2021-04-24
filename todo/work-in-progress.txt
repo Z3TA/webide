@@ -3,6 +3,12 @@
 What I'm working on
 -------------------
 
+Still some console.log's lingering in the bundle. Comment out all console.logs ?
+Dev tools also grinds to an halt because of all the console logs.
+
+
+---
+
 debugging: Getting two navigation messages when using browser back button
 (why does the forward button only work sometimes!?)
 

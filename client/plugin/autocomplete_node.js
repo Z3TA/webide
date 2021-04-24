@@ -116,7 +116,7 @@ prototype: {
 					word = c + word;
 				}
 				else {
-					console.log("autoCompleteNode: insideFunctionCall: white space = c=" + c + " " + UTIL.lbChars(c));
+					//console.log("autoCompleteNode: insideFunctionCall: white space = c=" + c + " " + UTIL.lbChars(c));
 				}
 			}
 			else if(c == "(") {

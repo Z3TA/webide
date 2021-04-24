@@ -129,7 +129,7 @@ desc: "Shift+scroll to increment/decrement a numeric value",
 		
 		var i = caret.index;
 		
-		console.log("scrollNumber: onNumber: at char=" + (file.text[i] && UTIL.lbChars(file.text[i])) + " i=" + i + " caret.row=" + caret.row + " row=" + file.rowText(caret.row));
+		//console.log("scrollNumber: onNumber: at char=" + (file.text[i] && UTIL.lbChars(file.text[i])) + " i=" + i + " caret.row=" + caret.row + " row=" + file.rowText(caret.row));
 		
 		
 		// Go left
