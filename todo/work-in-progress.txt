@@ -3,6 +3,8 @@
 What I'm working on
 -------------------
 
+bug: Function list gets deselected in Firefox after you have typed ...
+
 It's good to have console.logs to more easily spot if the editor does something stupid
 But the slowness of dev tools and junk in the bundle overweight the pros.
 

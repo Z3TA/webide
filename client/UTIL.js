@@ -244,7 +244,8 @@ var UTIL = {
 	},
 	
 	isLocalPath: function isLocalPath(path) {
-		if(path.charAt(0) == "/") return true; // Unix
+		if(typeof path != "string") throw new Error("isLocalPath: path=" + path + " should be a string!");
+		else if(path.charAt(0) == "/") return true; // Unix
 		else if(path.indexOf("\\") > 0) return true; // Windows !?
 		else return false;
 	},
@@ -1551,13 +1552,14 @@ namedFunction = false;
 				
 			}
 		}
-		
-		function UrlExists(url) {
+		/*
+			function UrlExists(url) {
 			var http = new XMLHttpRequest();
 			http.open('HEAD', url, false);
 			http.send();
 			return http.status!=404;
-		}
+			}
+		*/
 	},
 
 	getFileExtension: function getFileExtension(filePath) {

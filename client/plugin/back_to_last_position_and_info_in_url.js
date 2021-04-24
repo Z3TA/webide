@@ -82,7 +82,7 @@
 		// Wait until the file has fully loaded
 		// The editor is probably re-opening a bunch of files...
 		setTimeout(function() {
-			navigate(state);
+			navigate(state, true);
 		}, 2000);
 		
 	}
@@ -104,7 +104,7 @@
 		if( !isNaN(parseInt(last)) ) {
 			var line = parseInt(last);
 		}
-		else if(last.charAt(0) == "/") {
+		else if( isPath(last) ) {
 			// It's a path !? {
 			var path = last;
 		}
@@ -112,7 +112,7 @@
 
 		var last = arr.pop();
 
-		if(line && last.charAt(0) == "/") {
+		if(line && isPath(last)) {
 			var path = last;
 		}
 		else if(path) {
@@ -140,6 +140,13 @@
 		if(project) obj.project = project;
 
 		return obj;
+	
+		function isPath(str) {
+			if( UTIL.isFilePath(str) ) return true;
+			else if( EDITOR.files.hasOwnProperty(str) ) return true;
+			else return false;
+		}
+
 	}
 	// assert: parseHash("#/foo/bar#123")=   
 	// assert: parseHash("#branch#/foo/bar#123")=   
@@ -206,15 +213,23 @@
 		navigate(state);
 	}
 
-	function navigate(state) {
+	function navigate(state, openFileIfNotOpen) {
 
 		alert("navigate: state=" + JSON.stringify(state));
 
-		if(state.project != EDITOR.project) EDITOR.changeProject(state.project);
-		if(state.branch != EDITOR.branch) EDITOR.checkoutSCMBranch(state.branch);
-		if(EDITOR.currentFile && state.path != EDITOR.currentFile.path) EDITOR.showFile(state.path);
-		if(EDITOR.currentFile && state.line != EDITOR.currentFile.currentLine()) EDITOR.currentFile.gotoLine(state.line);
-		EDITOR.dashboard.hide();
+		if(state.project && state.project != EDITOR.project) EDITOR.changeProject(state.project);
+		if(state.branch && state.branch != EDITOR.branch) EDITOR.checkoutSCMBranch(state.branch);
+		if(state.path && EDITOR.currentFile && state.path != EDITOR.currentFile.path) {
+			if( EDITOR.files.hasOwnProperty(state.path) ) EDITOR.showFile(state.path);
+			else if( openFileIfNotOpen ) {
+				if( UTIL.isLocalPath(state.path) ) EDITOR.openFile(state.path);
+				return;
+			}
+
+			if(EDITOR.currentFile && state.path && EDITOR.currentFile.path == state.path && state.line != EDITOR.currentFile.currentLine()) EDITOR.currentFile.gotoLine(state.line);
+		
+			EDITOR.dashboard.hide();
+		}
 	}
 
 	function moveCaretBackToLastPosition2(file) {
