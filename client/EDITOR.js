@@ -1157,6 +1157,9 @@ usePseudoClipboard = false;
 			}, 5000);
 		}
 		
+
+		console.log("EDITOR.openFile: path=" + path + " state=" + JSON.stringify(state) + " " + UTIL.getStack("openFile"));
+
 		// Check if the file is already opened
 		if(EDITOR.files.hasOwnProperty(path)) {
 			console.warn("File already opened: " + path);
@@ -1409,9 +1412,10 @@ if(EDITOR.files.hasOwnProperty(path)) throw new Error("path=" + path + " already
 					f[i](file); // Call function
 				}
 				
-				//console.log("state?" + !!state + " state.show=" + (state && state.show) + " showFile=" + showFile + " path=" + path);
+				console.log("EDITOR.openFile: state?" + !!state + " state.show=" + (state && state.show) + " showFile=" + showFile + " path=" + path);
 				if( (!state || state.show !== false) && (showFile == undefined || showFile == path) ) {
 					// Switch to this file
+					console.log("EDITOR.openFile: Showing file.path=" + file.path + " " + UTIL.getStack("showing file"));
 					EDITOR.showFile(file);
 					EDITOR.view.endingColumn = EDITOR.view.visibleColumns; // Because file.startColumn = 0;
 				}
@@ -1721,8 +1725,6 @@ if(EDITOR.files.hasOwnProperty(path)) throw new Error("path=" + path + " already
 		}
 		
 		if(callback == undefined || typeof callback != "function") throw new Error("No callback function! callback=" + callback);
-		
-		//console.log("Reading file: " + path);
 		
 		//var protocol = UTIL.urlProtocol(path);
 		
@@ -6945,6 +6947,8 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		
 		if(!file) throw new Error("fileOrFilePath=" + fileOrFilePath + " need to be a File object or a path to an open file");
 		
+		console.log("EDITOR.showFile: file.path=" + file.path + " " + UTIL.getStack("showFile"));
+
 		if(!overrideShowFile && showFile != undefined && showFile != file.path) {
 			console.warn("Not showing: file.path=" + file.path + " because showFile=" + showFile);
 			return;

@@ -7,6 +7,10 @@
 
 	Git branch names can't start with /
 
+	problem: 
+
+
+
 */
 
 (function() {
@@ -199,14 +203,24 @@
 
 		ignoreMoveLine = -1;
 
-		if(lastJump.hasOwnProperty(file.path)) LINE = lastJump[file.path].row + file.startRow + 1;
-		else LINE = file.currentLine();
+		var currentLine = file.currentLine();
+
+		if(lastJump.hasOwnProperty(file.path)) {
+			var lastLineJump = lastJump[file.path].row + file.startRow + 1;
+		}
+
+		console.log("url-history: changeFileInUrl (fileShow " + file.path + "): lastLineJump=" + lastLineJump + " currentLine=" + currentLine + " ");
+
+		if(lastLineJump) LINE = lastLineJump;
+		else LINE = currentLine;
 
 		setUrl();
 
 	}
 
 	function browserNavigation(ev) {
+		// User uses the browser back button (or forward)
+
 		var state = ev.state;
 
 		console.log("url-history: browserNavigation: state=", state);
@@ -220,11 +234,12 @@
 	}
 
 	function hashChange(ev) {
+		// user have changed the hash part of the url
 		// note: hashChange also triggers after browserNavigation triggers!
 		var hash = window.location.hash;
 		
 		if(ignoreHashChange == hash) {
-			console.log("url-history: Ignoring ignoreHashChange=" + ignoreHashChange + " has=" + hash + "");
+			console.log("url-history: Ignoring ignoreHashChange=" + ignoreHashChange + " hash=" + hash + "");
 			return;
 		}
 

@@ -542,7 +542,7 @@
 									content = lastFileState.text;
 								}
 								
-								EDITOR.openFile(path, content, {props: stateprops}, fileReopened); 
+								EDITOR.openFile(path, content, {props: stateprops, show: false}, fileReopened); 
 								
 							});
 							
@@ -558,7 +558,7 @@
 					}
 					console.log("reopenFiles: Reopening file path=" + path +" typeof content=" + typeof content);
 					
-					EDITOR.openFile(path, content, {props: stateprops}, fileReopened); 
+					EDITOR.openFile(path, content, {props: stateprops, show: false}, fileReopened); 
 				}
 				
 				
