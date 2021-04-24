@@ -3,7 +3,8 @@
 What I'm working on
 -------------------
 
-
+debugging: Getting two navigation messages when using browser back button
+(why does the forward button only work sometimes!?)
 
 ---
 
