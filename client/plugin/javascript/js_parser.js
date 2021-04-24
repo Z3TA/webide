@@ -161,7 +161,7 @@
 	
 	function parseRequest(fileOrString, lang, path, callback) {
 		if(lang != "JS" && lang != "JavaScript") {
-			console.log("Ignoring parse request because lang=" + lang + " is not JavaScript!");
+			//console.log("Ignoring parse request because lang=" + lang + " is not JavaScript!");
 			return false;
 		}
 		
@@ -193,13 +193,13 @@
 			if(ext == "jsx" || ext == "tsx") options.jsx = true;
 		}
 		
-		console.log("parseRequest" + id + " = " + file.path);
+		//console.log("parseRequest" + id + " = " + file.path);
 		
 		console.time("parseRequest" + id);
 		
 		if(parseWorker && callback) {
 			parseWorkerCallbacks[id] = callback;
-			console.log("Posting message to parseWorker ...");
+			//console.log("Posting message to parseWorker ...");
 			parseWorker.postMessage({id: id, file: file, options: options});
 		}
 		else {
@@ -218,7 +218,7 @@
 	}
 	
 	function messageFromParseWorker(e) {
-		console.log("Recived message from parseWorker ...");
+		//console.log("Recived message from parseWorker ...");
 		
 		var id = e.data.id;
 		console.timeEnd("parseRequest" + id);
@@ -233,7 +233,7 @@
 	/* ### start: Helper code for parse worker */
 	
 	function workerReciveMessage(e) {
-		console.log("parseWorker recived message ...");
+		//console.log("parseWorker recived message ...");
 		
 		var id = e.data.id;
 		var file = e.data.file;
@@ -244,7 +244,7 @@
 			parseError = err;
 		}
 		var parseResult = parseJavaScript(file, options);
-		console.log("parseWorker posting message ...");
+		//console.log("parseWorker posting message ...");
 		postMessage({id: id, error: parseError, result: parseResult});
 		
 	}
@@ -279,11 +279,11 @@
 	function shouldParse(file) {
 		
 		if(file.disableParsing) {
-			console.log("js_parser: shouldParse? Not parsing " + file.path + " because file.disableParsing=" + file.disableParsing);
+			//console.log("js_parser: shouldParse? Not parsing " + file.path + " because file.disableParsing=" + file.disableParsing);
 			return false;
 		}
 		if(file.isBig) {
-			console.log("js_parser: shouldParse? Not parsing " + file.path + " because file.isBig=" + file.isBig);
+			//console.log("js_parser: shouldParse? Not parsing " + file.path + " because file.isBig=" + file.isBig);
 			return false;
 		}
 		/* 
@@ -293,15 +293,15 @@
 		*/
 		
 		if( parserControl.fileExtensions.indexOf( file.fileExtension ) != -1 ) {
-			console.log("js_parser: shouldParse? Parsing " + file.path + " because file.fileExtension=" + file.fileExtension + " ");
+			//console.log("js_parser: shouldParse? Parsing " + file.path + " because file.fileExtension=" + file.fileExtension + " ");
 			return true;
 		}
 		else if(file.fileExtension=="xml" && (file.text.indexOf("<?JS") != -1)) {
 			return true;
-			console.log("js_parser: shouldParse? Parsing " + file.path + " because file.fileExtension=" + file.fileExtension + " and it contains <?JS ");
+			//console.log("js_parser: shouldParse? Parsing " + file.path + " because file.fileExtension=" + file.fileExtension + " and it contains <?JS ");
 		}
 		else {
-			console.log("js_parser: shouldParse? Not parsing " + file.path + " because else");
+			//console.log("js_parser: shouldParse? Not parsing " + file.path + " because else");
 			return false;
 		}
 	}
@@ -358,7 +358,7 @@
 			
 			if(file.text.length > evilSize && file.parsed && characters.length==1 && (type =="insert" || type=="delete") && lastCharacter != "\\" && specialCharacters.indexOf(characters)==-1)  {
 				
-				console.log("no re-parse opt");
+				//console.log("no re-parse opt");
 				
 				var charactersLength = 1;
 				if(type=="delete") charactersLength = -1;
@@ -675,7 +675,7 @@
 							for(var i=0; i<oldParse.xmlTags.length; i++) {
 								if(oldParse.xmlTags[i].start > oldStart && oldParse.xmlTags[i].end < oldEnd) {
 									spliceLen++;
-									console.log("remove xmlTags " + i + " spliceLen=" + spliceLen + " : " + file.text.substring(oldParse.xmlTags[i].start, oldParse.xmlTags[i].end));
+									//console.log("remove xmlTags " + i + " spliceLen=" + spliceLen + " : " + file.text.substring(oldParse.xmlTags[i].start, oldParse.xmlTags[i].end));
 									if(spliceStart==-1) spliceStart = i;
 									continue;
 								}
@@ -683,7 +683,7 @@
 									break;
 								}
 								else if(oldParse.xmlTags[i].start > oldEnd) {
-									console.log("Update spliceStart=" + spliceStart + " to " + i + " because oldParse.xmlTags[" + i + "].start=" + oldParse.xmlTags[i].start + ">oldEnd=" + oldEnd + " ");
+									//console.log("Update spliceStart=" + spliceStart + " to " + i + " because oldParse.xmlTags[" + i + "].start=" + oldParse.xmlTags[i].start + ">oldEnd=" + oldEnd + " ");
 									
 									spliceStart = i;
 									break;
@@ -777,7 +777,7 @@
 							if(EDITOR.settings.devMode && newParse.blockMatch) {
 								
 								// Make a full parse and compare to see if there are any bugs
-								console.log("fullParse to check for errors:");
+								//console.log("fullParse to check for errors:");
 								
 								var options = {noIndention: true, jsx: EDITOR.settings.jsx};
 								
@@ -808,7 +808,7 @@
 								
 								// Sanity check (we had some problems with functions having bad start and end, which need to be correct for the "parse only current function" optimizer)
 								if(EDITOR.settings.devMode && newParse.blockMatch) {
-									console.log("Checking checkFunctionStartEnd");
+									//console.log("Checking checkFunctionStartEnd");
 									try {
 										checkFunctionStartEnd(file, newParse.functions);
 									}
@@ -824,24 +824,16 @@
 							
 							return;
 						}
-						else {
-							console.log("f.end=" + f.end + " - f.start=" + f.start + " < maxFunctionBodySize=" + maxFunctionBodySize + " file.text.charAt(" + (f.end + charactersLength) + ")=" + UTIL.lbChars(file.text.charAt(f.end + charactersLength)));
-						}
+						//else {console.log("f.end=" + f.end + " - f.start=" + f.start + " < maxFunctionBodySize=" + maxFunctionBodySize + " file.text.charAt(" + (f.end + charactersLength) + ")=" + UTIL.lbChars(file.text.charAt(f.end + charactersLength)));}
 					}
-					else {
-						console.log("Not inside any function!");
-					}
+					//else {console.log("Not inside any function!");}
 				}
-				else {
-					console.log("oldParse.blockMatch=" + oldParse.blockMatch);
-				}
+				//else {console.log("oldParse.blockMatch=" + oldParse.blockMatch);}
 			}
-			else {
-				console.log((file.parsed ? "file was parsed before" : "file was NOT parsed before") + " type=" + type);
-			}
+			//else {console.log((file.parsed ? "file was parsed before" : "file was NOT parsed before") + " type=" + type);}
 			
 			// Parse the whole file
-			console.log("Parsing whole file");
+			//console.log("Parsing whole file");
 			
 			var options = {jsx: EDITOR.settings.jsx};
 			
@@ -1156,7 +1148,7 @@
 			if(matchHtml) {
 				if(matchHtml.index==0) {
 					xmlMode = true;
-					console.log("Set xmlMode=" + xmlMode);
+					//console.log("Set xmlMode=" + xmlMode);
 				}
 			}
 		}
@@ -3019,7 +3011,7 @@
 					}
 					else if(word=="function" || word == "async function") {
 						// Detects var foo = function() ...
-						console.log(word + " detected!");
+						//console.log(word + " detected!");
 						insideFunctionDeclaration = true;
 						word = "";
 						return;
@@ -3033,7 +3025,7 @@
 							findVariables( word.slice(1,word.indexOf(";")), myFunction, subFunctionDepth);
 						}
 						else if(lastVariable && lastVariable.value) {
-							console.log("Got arguments=" + word + " for function call to variable with value=" + lastVariable.value + " method=" + lastVariable.method + " type=" + lastVariable.type + " lastVariableName=" + lastVariableName);
+							//console.log("Got arguments=" + word + " for function call to variable with value=" + lastVariable.value + " method=" + lastVariable.method + " type=" + lastVariable.type + " lastVariableName=" + lastVariableName);
 							lastVariable.args = word;
 							lastVariable = undefined;
 						}
@@ -3168,13 +3160,13 @@
 						// If it's not found inside the function, asume it's a global
 						if(Object.hasOwnProperty.call(globalVariables, properties[0])) variable = globalVariables[properties[0]];
 						else {
-							console.log("Variable " + properties[0] + " doesn't exist in global variables. Creating it!");
+							//console.log("Variable " + properties[0] + " doesn't exist in global variables. Creating it!");
 							variable = globalVariables[properties[0]] = new Variable(); // Add it if it doesn't exist
 							
 						}
 					}
 					
-					console.log("Variable: " + properties[0] + "=" + JSON.stringify(variable, null, 2) + " type=" + variable.type + " (" + (typeof variable.type) + ")");
+					//console.log("Variable: " + properties[0] + "=" + JSON.stringify(variable, null, 2) + " type=" + variable.type + " (" + (typeof variable.type) + ")");
 					
 					if(properties.length>1) {
 						variable = traverseVariableTree(properties, variable, 1);

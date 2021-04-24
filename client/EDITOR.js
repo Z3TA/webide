@@ -7542,7 +7542,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		
 		if(funName.length == 0) throw new Error("Test function can not be anonymous!");
 		
-		console.log("Adding test " + funName + " with order=" + order + " and parallel=" + parallel);
+		//console.log("Adding test " + funName + " with order=" + order + " and parallel=" + parallel);
 		
 		for(var i=0; i<EDITOR.tests.length; i++) {
 			if(EDITOR.tests[i].text == funName) {

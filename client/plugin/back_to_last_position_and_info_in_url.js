@@ -220,16 +220,23 @@
 		if(state.project && state.project != EDITOR.project) EDITOR.changeProject(state.project);
 		if(state.branch && state.branch != EDITOR.branch) EDITOR.checkoutSCMBranch(state.branch);
 		if(state.path && EDITOR.currentFile && state.path != EDITOR.currentFile.path) {
-			if( EDITOR.files.hasOwnProperty(state.path) ) EDITOR.showFile(state.path);
-			else if( openFileIfNotOpen ) {
-				if( UTIL.isLocalPath(state.path) ) EDITOR.openFile(state.path);
-				return;
+			if( EDITOR.files.hasOwnProperty(state.path) ) {
+				EDITOR.showFile(state.path);
+				fileOpened();
 			}
+			else if( openFileIfNotOpen ) {
+				if( UTIL.isLocalPath(state.path) ) {
+					EDITOR.openFile(state.path, fileOpened);
+				}
+			}
+		}
 
+		function fileOpened(err) {
 			if(EDITOR.currentFile && state.path && EDITOR.currentFile.path == state.path && state.line != EDITOR.currentFile.currentLine()) EDITOR.currentFile.gotoLine(state.line);
-		
+
 			EDITOR.dashboard.hide();
 		}
+
 	}
 
 	function moveCaretBackToLastPosition2(file) {
@@ -299,11 +306,11 @@
 		else {
 
 			var jump = Math.abs(lastCaretPos[file.path].row - caret.row);
-		if( jump > EDITOR.view.visibleRows ) {
+			if( jump > EDITOR.view.visibleRows ) {
 
 				console.log("to_last_position: rememberCaretPosition: before-update file.path=" + file.path + " lastJump=", lastJump[file.path]);
 
-			// Moving more then visible rows counts as a big jump
+				// Moving more then visible rows counts as a big jump
 			
 				LINE = file.currentLine();
 				setUrl();
@@ -314,11 +321,11 @@
 
 				console.log("to_last_position: rememberCaretPosition: update! file.path=" + file.path + " lastCaretPos=",  lastCaretPos[file.path]);
 			}
-		else {
-			console.log("to_last_position: rememberCaretPosition: Not long enough jump=" + jump + " EDITOR.view.visibleRows=" + EDITOR.view.visibleRows);
-		}
+			else {
+				console.log("to_last_position: rememberCaretPosition: Not long enough jump=" + jump + " EDITOR.view.visibleRows=" + EDITOR.view.visibleRows);
+			}
 
-		lastCaretPos[file.path].index = caret.index;
+			lastCaretPos[file.path].index = caret.index;
 			lastCaretPos[file.path].row = caret.row;
 			lastCaretPos[file.path].col = caret.col;
 

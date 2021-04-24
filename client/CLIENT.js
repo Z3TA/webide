@@ -12,7 +12,7 @@ var CLIENT = {}; // Client object is global
 	
 	"use strict";
 	
-	console.log("CLIENT: Hello from CLIENT.js");
+	//console.log("CLIENT: Hello from CLIENT.js");
 	
 	var eventListeners = {}; // Events are added on demand via CLIENT.on("someEvent"). It can be *anything* so that you can easaily add new server events
 	var idCounter = 0;
@@ -62,7 +62,7 @@ var CLIENT = {}; // Client object is global
 		
 		if(!protocol) throw new Error("Unable to get protocol from window.location.href=" + window.location.href);
 
-		console.log("CLIENT: Connecting... protocol=" + protocol + " loc=" + JSON.stringify(loc, null, 2));
+		//console.log("CLIENT: Connecting... protocol=" + protocol + " loc=" + JSON.stringify(loc, null, 2));
 
 		var defaultURL = loc.protocol + "://" + loc.host + "/webide"; // loc.host includes port!
 		
@@ -76,13 +76,13 @@ var CLIENT = {}; // Client object is global
 			defaultURL = "https://webide.se/webide";
 		}
 		
-		console.log("CLIENT: defaultURL=" + defaultURL);
+		//console.log("CLIENT: defaultURL=" + defaultURL);
 		
 		if(server == undefined) server = {url: defaultURL};
 		
 		var url = server.url || defaultURL; // 'http://' + host + ':' + port + pathName + apiUrl
 		
-		console.log("CLIENT: Connecting to webide server: url=" + url);
+		//console.log("CLIENT: Connecting to webide server: url=" + url);
 		//connection = new SockJS(apiUrl);
 		
 		var sockJsReservedQuirk = '';
@@ -90,13 +90,13 @@ var CLIENT = {}; // Client object is global
 		
 		connection = new SockJS(url, sockJsReservedQuirk, sockJsOptions); 
 		connection.onopen = function serverConnected() {
-			console.log("CLIENT: connected to server=" + JSON.stringify(server));
+			//console.log("CLIENT: connected to server=" + JSON.stringify(server));
 			CLIENT.connected = true;
 			CLIENT.url = url;
 			
 			lastUsedserver = server;
 			
-			console.log("CLIENT: connection.onopen: connection.readyState=" + connection.readyState);
+			//console.log("CLIENT: connection.onopen: connection.readyState=" + connection.readyState);
 			// readyState when using xhr !? Wait for readyState !?
 			
 			if(callback) callback(null, url); // Don't wait for login, just callback and say we successfully connected
@@ -104,7 +104,7 @@ var CLIENT = {}; // Client object is global
 			
 			CLIENT.fireEvent("connectionConnected");
 			
-			console.log("CLIENT: Setting reconnectTimeoutTime=" + reconnectTimeoutTime + " back to reconnectTimeoutTimeOriginal=" + reconnectTimeoutTimeOriginal + " because connection is open");
+			//console.log("CLIENT: Setting reconnectTimeoutTime=" + reconnectTimeoutTime + " back to reconnectTimeoutTimeOriginal=" + reconnectTimeoutTimeOriginal + " because connection is open");
 			reconnectTimeoutTime = reconnectTimeoutTimeOriginal;
 			
 			startPing();
@@ -115,7 +115,7 @@ var CLIENT = {}; // Client object is global
 		
 		
 		connection.onclose = function serverDisconnected() {
-			console.log("CLIENT: connection closed! url=" + url);
+			//console.log("CLIENT: connection closed! url=" + url);
 			CLIENT.connected = false;
 			CLIENT.url = null;
 			
@@ -133,10 +133,10 @@ var CLIENT = {}; // Client object is global
 			
 			// Attempt to reconnect ...
 			reconnectTimeout = setTimeout(function reconnect() {
-				console.log("CLIENT: reconnect: Reconnecting to server=" + JSON.stringify(server) + " reconnectTimeoutTime=" + reconnectTimeoutTime);
+				//console.log("CLIENT: reconnect: Reconnecting to server=" + JSON.stringify(server) + " reconnectTimeoutTime=" + reconnectTimeoutTime);
 				
 				if(CLIENT.connected) {
-					console.log("CLIENT: reconnect: Already connected! CLIENT.connected=" + CLIENT.connected);
+					//console.log("CLIENT: reconnect: Already connected! CLIENT.connected=" + CLIENT.connected);
 					return;
 				}
 				
@@ -145,14 +145,14 @@ var CLIENT = {}; // Client object is global
 			}, reconnectTimeoutTime);
 			
 			reconnectTimeoutTime += 1000;
-			console.log("CLIENT: Increasing reconnectTimeoutTime to " + reconnectTimeoutTime + " because many attempts");
+			//console.log("CLIENT: Increasing reconnectTimeoutTime to " + reconnectTimeoutTime + " because many attempts");
 			
 		}
 		
 	}
 	
 	CLIENT.disconnect = function disconnect() {
-		console.log("CLIENT: Disconnecting from editor server url=" + CLIENT.url);
+		//console.log("CLIENT: Disconnecting from editor server url=" + CLIENT.url);
 		connection.close();
 		CLIENT.connected = false;
 		stopPing();
@@ -193,7 +193,7 @@ throw new Error("Second argument json (" + (typeof json) + ") must be an object!
 			error.code = "ENETUNREACH";
 		}
 		else if(connection.readyState!=WEBSOCK_OPEN) {
-			console.log("CLIENT: connection.readyState=" + connection.readyState);
+			//console.log("CLIENT: connection.readyState=" + connection.readyState);
 			
 			var error = new Error("Not connected to webide server! Unable to send cmd: req=" + req);
 			error.code = "CONNECTION_CLOSED";
@@ -242,7 +242,7 @@ throw new Error("Second argument json (" + (typeof json) + ") must be an object!
 			console.warn("CLIENT: No callback defined for req=" + req);
 		}
 		
-		console.log("CLIENT: Sending: " + UTIL.shortString(string) + " to server ...");
+		//console.log("CLIENT: Sending: " + UTIL.shortString(string) + " to server ...");
 		
 		connection.send(string);
 		
@@ -331,18 +331,18 @@ throw new Error("Second argument json (" + (typeof json) + ") must be an object!
 		*/
 		
 		if(!eventListeners.hasOwnProperty(ev)) {
-			console.log("CLIENT: Creating new event (listener): " + ev);
+			//console.log("CLIENT: Creating new event (listener): " + ev);
 			eventListeners[ev] = [];
 		}
 		
 		if(eventListeners[ev].indexOf(cb) != -1) throw new Error("Event listener already registered for ev=" + ev + " and cb=" + cb);
 		
-		console.log("CLIENT: Adding new cb=" + UTIL.getFunctionName(cb) + " to event=" + ev + " (length=" + eventListeners[ev].length + " loggedIn=" + loggedIn + ")");
+		//console.log("CLIENT: Adding new cb=" + UTIL.getFunctionName(cb) + " to event=" + ev + " (length=" + eventListeners[ev].length + " loggedIn=" + loggedIn + ")");
 		
 		eventListeners[ev].push(cb);
 		
 		if(ev == "loginSuccess" && loggedIn) {
-			console.log("CLIENT: Firing cb=" + UTIL.getFunctionName(cb) + " right away because already logged in!");
+			//console.log("CLIENT: Firing cb=" + UTIL.getFunctionName(cb) + " right away because already logged in!");
 			cb(loggedIn);
 		}
 		
@@ -365,10 +365,10 @@ throw new Error("Second argument json (" + (typeof json) + ") must be an object!
 				console.warn("CLIENT: No event listeners for event=" + ev);
 			}
 			
-			console.log("CLIENT: Calling listeners: ", f.map(function(f) {return UTIL.getFunctionName(f)}));
+			//console.log("CLIENT: Calling listeners: ", f.map(function(f) {return UTIL.getFunctionName(f)}));
 			
 			for(var i=0; i<f.length; i++) {
-				console.log("CLIENT: firing " + ev + " event listener: " + UTIL.getFunctionName(f[i]))
+				//console.log("CLIENT: firing " + ev + " event listener: " + UTIL.getFunctionName(f[i]))
 				f[i](data);
 			}
 			
@@ -392,7 +392,7 @@ throw new Error("Second argument json (" + (typeof json) + ") must be an object!
 		function removeThem() {
 			for(var i=0; i<events.length; i++) {
 				if(events[i] == fun) {
-					console.log("CLIENT: Removing fun=" + UTIL.getFunctionName(fun) + " from eventName=" + eventName);
+					//console.log("CLIENT: Removing fun=" + UTIL.getFunctionName(fun) + " from eventName=" + eventName);
 					events.splice(i, 1);
 					found++;
 					removeThem();
@@ -400,13 +400,13 @@ throw new Error("Second argument json (" + (typeof json) + ") must be an object!
 				}
 			}
 		}
-		console.log("CLIENT: Removed " + found + " occurrences of " + fname + " from " + eventName);
+		//console.log("CLIENT: Removed " + found + " occurrences of " + fname + " from " + eventName);
 	}
 
 	CLIENT.mock = serverMessage; // When you want to manually fire server messages
 	
 	CLIENT.on("loginSuccess", function clientSaveConnectionId(json) {
-		console.log("CLIENT: loginSuccess: json=" + JSON.stringify(json));
+		//console.log("CLIENT: loginSuccess: json=" + JSON.stringify(json));
 		
 		if(json.cId == undefined) throw new Error("Did not get cId from loginSuccess event!");
 		CLIENT.connectionId = json.cId;
@@ -423,7 +423,7 @@ throw new Error("Second argument json (" + (typeof json) + ") must be an object!
 		// Always tell the service worker what version the server is on, so it can update the cache if needed
 		var serviceWorkerError = true;
 		if(typeof navigator == "object" && navigator.serviceWorker &&  navigator.serviceWorker.controller) {
-			console.log("CLIENT: editorVersion: Telling the serviceWorker about server version=" + newVersion);
+			//console.log("CLIENT: editorVersion: Telling the serviceWorker about server version=" + newVersion);
 			serviceWorkerError = false;
 			try {
 				navigator.serviceWorker.controller.postMessage("editorVersion=" + newVersion);
@@ -433,9 +433,7 @@ throw new Error("Second argument json (" + (typeof json) + ") must be an object!
 				console.warn("CLIENT: editorVersion: Failed to post message to server worker: " + err.message);
 			}
 		}
-		else {
-			console.log("CLIENT: editorVersion: ServiceWorker not supported on BROWSER=" + BROWSER);
-		}
+		//else {console.log("CLIENT: editorVersion: ServiceWorker not supported on BROWSER=" + BROWSER);}
 		
 		if(EDITOR.version == 0 && EDITOR.settings.devMode) {
 			console.warn("CLIENT: editorVersion: Ignoring editor version upgrade from " + oldVersion + " to " + newVersion + " because we are in development mode!");
@@ -463,7 +461,7 @@ console.warn("CLIENT: editorVersion: Unable to talk to service worker! No point 
 				
 				var version = parseInt(str);
 				
-				console.log("CLIENT: editorVersion: server=" + newVersion + " version.txt=" + version);
+				//console.log("CLIENT: editorVersion: server=" + newVersion + " version.txt=" + version);
 				
 				if(version < newVersion && !serviceWorkerError) {
 					console.warn("CLIENT: editorVersion: Force refresh the cache!");
@@ -471,7 +469,7 @@ console.warn("CLIENT: editorVersion: Unable to talk to service worker! No point 
 					setTimeout(refresh, 20000);
 				}
 				else {
-					console.log("CLIENT: editorVersion: We now have the new version=" + version + " in the cache, same as newVersion=" + newVersion);
+					//console.log("CLIENT: editorVersion: We now have the new version=" + version + " in the cache, same as newVersion=" + newVersion);
 					var ok = "Reload now!";
 					var cancel = "Update another time"
 					confirmBox("The editor has been updated from version=" + oldVersion + " to " + newVersion + "\nReload to get the new version.", [cancel, ok], function(answer) {
@@ -485,26 +483,26 @@ console.warn("CLIENT: editorVersion: Unable to talk to service worker! No point 
 	});
 	
 	function checkEditor() {
-		console.log("CLIENT: Wait for editor to load and then attach events for afk");
+		//console.log("CLIENT: Wait for editor to load and then attach events for afk");
 		if(typeof EDITOR != "undefined" && typeof EDITOR.on == "function") {
-			console.log("CLIENT: Editor loaded. Attaching afk and btk events!");
+			//console.log("CLIENT: Editor loaded. Attaching afk and btk events!");
 			clearInterval(checkEditorInterval);
 			
 			EDITOR.on("afk", function increaseReconnectTime() {
 				if(!CLIENT.connected) {
 reconnectTimeoutTime += 10000;
-					console.log("CLIENT: Increasing reconnectTimeoutTime to " + reconnectTimeoutTime + " because afk and not connected");
+					//console.log("CLIENT: Increasing reconnectTimeoutTime to " + reconnectTimeoutTime + " because afk and not connected");
 				}
 				stopPing();
 				return true;
 			});
 			
 			EDITOR.on("btk", function tryReconnectAndUpdateReconnectTime() {
-				console.log("CLIENT: Setting reconnectTimeoutTime=" + reconnectTimeoutTime + " back to reconnectTimeoutTimeOriginal=" + reconnectTimeoutTimeOriginal + " because btk");
+				//console.log("CLIENT: Setting reconnectTimeoutTime=" + reconnectTimeoutTime + " back to reconnectTimeoutTimeOriginal=" + reconnectTimeoutTimeOriginal + " because btk");
 				reconnectTimeoutTime = reconnectTimeoutTimeOriginal;
 				if(!CLIENT.connected) {
 					clearTimeout(reconnectTimeout);
-					console.log("CLIENT: Attempting connect after btk");
+					//console.log("CLIENT: Attempting connect after btk");
 					CLIENT.connect(lastUsedserver);
 				}
 				else {
@@ -520,7 +518,7 @@ reconnectTimeoutTime += 10000;
 		var msg = sockJsEvent.data;
 		
 		//console.log("CLIENT: Server: " + UTIL.shortString(msg));
-		console.log( "CLIENT: Server: " + msg );
+		//console.log( "CLIENT: Server: " + msg );
 		
 		CLIENT.connected = true;
 		
@@ -639,7 +637,7 @@ console.error(new Error("Unexpected server response. (No registered event listen
 	}
 	
 	function startPing() {
-		console.log("CLIENT: ping! start sendingPings=" + sendingPings);
+		//console.log("CLIENT: ping! start sendingPings=" + sendingPings);
 		
 		if(sendingPings) {
 			console.warn("CLIENT: ping! Already sending pings!");
@@ -655,7 +653,7 @@ console.error(new Error("Unexpected server response. (No registered event listen
 	}
 	
 	function stopPing() {
-		console.log("CLIENT: ping! stop sendingPings=" + sendingPings);
+		//console.log("CLIENT: ping! stop sendingPings=" + sendingPings);
 		sendingPings = false;
 		clearTimeout(nextPingTimer);
 		clearTimeout(pingTimeout);
@@ -702,6 +700,6 @@ console.error(new Error("Unexpected server response. (No registered event listen
 		}, CLIENT.pingTimeout);
 	}
 	
-	console.log("CLIENT: End of CLIENT.js");
+	//console.log("CLIENT: End of CLIENT.js");
 	
 })();
