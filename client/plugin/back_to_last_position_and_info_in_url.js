@@ -150,7 +150,10 @@
 
 		if(PROJECT_NAME == currentState.project && BRANCH_NAME == currentState.branch && PATH == currentState.path && LINE == currentState.line) return; // No need to push another history
 
-		if(LINE == ignoreMoveLine) return;
+		if(LINE == ignoreMoveLine) {
+			console.log("url-history: setUrl: Ignoring LINE=" + LINE + " ignoreMoveLine=" + ignoreMoveLine + " ");
+			return;
+		}
 
 		currentState = {
 			project: PROJECT_NAME,
@@ -161,13 +164,20 @@
 
 		var title = PATH; // Not used by any browser!?
 
-		var url = window.location.search;
-		if(PROJECT_NAME) url = url + "#" + PROJECT_NAME;
-		if(BRANCH_NAME) url = url + "#" + BRANCH_NAME;
-		if(PATH) url = url + "#" + PATH;
-		if(LINE) url = url + "#" + LINE;
+		var hash = "";
+		if(PROJECT_NAME) hash = hash + "#" + PROJECT_NAME;
+		if(BRANCH_NAME) hash = hash + "#" + BRANCH_NAME;
+		if(PATH) hash = hash + "#" + PATH;
+		if(LINE) hash = hash + "#" + LINE;
 
-		console.warn("url-history: pushState: " + JSON.stringify(currentState));
+		if( hash == ignoreHashChange) {
+			console.log("url-history: setUrl: Not doing a pushState because hash==ignoreHashChange=" + ignoreHashChange);
+			return;
+		}
+
+		var url = window.location.search + hash;
+
+		console.warn("url-history: setUrl: (pushState) url= " + url + " ignoreHashChange=" + ignoreHashChange + " stack=" + UTIL.getStack("pushState") );
 
 		window.history.pushState(currentState, title, url);
 	}
@@ -204,6 +214,7 @@
 		if(!state) return;
 
 		ignoreHashChange = window.location.hash;
+		console.log("url-history: browserNavigation: Setting ignoreHashChange=" + ignoreHashChange);
 
 		navigate(state);
 	}
@@ -212,7 +223,10 @@
 		// note: hashChange also triggers after browserNavigation triggers!
 		var hash = window.location.hash;
 		
-		if(ignoreHashChange == hash) return;
+		if(ignoreHashChange == hash) {
+			console.log("url-history: Ignoring ignoreHashChange=" + ignoreHashChange + " has=" + hash + "");
+			return;
+		}
 
 		var state = parseHash(hash);
 		navigate(state);
@@ -244,6 +258,7 @@
 
 		function fileOpened(err) {
 			checkLine();
+			ignoreHashChange = window.location.hash;
 			EDITOR.dashboard.hide();
 		}
 
@@ -251,6 +266,7 @@
 			if(EDITOR.currentFile && state.path && EDITOR.currentFile.path == state.path && state.line != EDITOR.currentFile.currentLine()) {
 				// Moving to another line would trigger a pushstate!
 				ignoreMoveLine = state.line;
+				console.log("url-history: checkLine: Setting ignoreMoveLine=" + ignoreMoveLine);
 				EDITOR.currentFile.gotoLine(state.line);
 			}
 		}
