@@ -3,7 +3,12 @@
 What I'm working on
 -------------------
 
+problem: Firefox makes a pushstate when moving back to a different file, but with a weird line! eg. not same line as the one just navigated to
 
+url-history: setUrl: (pushState) url= ?user=test&pw=123#/home/johan/repo/jzedit/client/CLIENT.js#14 ignoreHashChange=#/home/johan/repo/jzedit/client/CLIENT.js#1 stack=pushState: geFileInUrl@https://test.johan.webide.se/plugin/back_to_last_position_and_info_in_url.js:205:3
+EDITOR.showFile@https://test.johan.webide.se/EDITOR.js:7009:8
+navigate@https://test.johan.webide.se/plugin/back_to_last_position_and_info_in_url.js:243:12
+browserNavigation@https://test.johan.webide.se/plugin/back_to_last_position_and_info_in_url.js:219:11
 
 
 ---
