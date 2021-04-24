@@ -124,7 +124,7 @@
 			// Need to pass both the function and test function call so that it is run in the same eval
 			EDITOR.eval(fBody + ";" + test.left, function(err, result) {
 				if(err) {
-					render.push({pos: pos, text: err.message});
+					render.push({pos: pos, text: err && err.message || err});
 					EDITOR.renderNeeded();
 					return;
 				}

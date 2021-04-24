@@ -2947,7 +2947,7 @@ ca 20ms to render, ca 13ms to render without creating new objects
 		if(endCol >= gridRow.length) endCol = gridRow.length-1;
 		
 		if(gridRow.length == 0) {
-			console.log("gridWalker: gridRow.length=" + gridRow.length + " Nothing to walk on!");
+			console.warn("gridWalker: gridRow.length=" + gridRow.length + " Nothing to walk on!");
 			state.done = true;
 			return state;
 		}
@@ -9661,7 +9661,9 @@ Searches down towards the root, looking for file names
 
 		if(typeof callback != "function") throw new Error("Second argument to EDITOR.eval needs to be a callback function!");
 
-		var id = evalWorkerCounter++;
+		var id = ++evalWorkerCounter;
+
+		console.log("EDITOR.eval: id=" + id + " evalWorkerCounter=" + evalWorkerCounter);
 
 		evalWorkerCallbacks[id] = callback;
 
