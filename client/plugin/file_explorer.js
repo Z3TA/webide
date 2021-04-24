@@ -329,10 +329,15 @@
 		
 		
 		// We want to start from the root, then work our way towards fullPath
-		
 		var folders = UTIL.getFolders(fullPath, true);
 		
-		//console.log("File explorer: fullPath=" + fullPath + " folders=" + JSON.stringify(folders));
+		// But if the path includes the homeDir we want to use the homeDir as root!
+		if(EDITOR.user && fullPath.indexOf(EDITOR.user.homeDir) != -1) {
+			var homeFolderCount = UTIL.getFolders(EDITOR.user.homeDir, true).length;
+			folders.splice(0, homeFolderCount);
+		}
+		
+		console.log("File explorer: fullPath=" + fullPath + " homeFolderCount=" + homeFolderCount + " folders=" + JSON.stringify(folders));
 		
 		// Recursive 
 		lookUpPath(folders, 0);
