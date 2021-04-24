@@ -4023,7 +4023,7 @@ throw new Error("lastIndex=" + lastIndex + " can not be on a line break!");
 		
 		var textWidth = file.measureText(caret.row, caret.col, false);
 		
-		console.warn("scrollToCaret: textWidth=" + textWidth + " indentationWidth=" + indentationWidth + " EDITOR.view.endingColumn=" + EDITOR.view.endingColumn + " lookAhead=" + lookAhead + " startColumn=" + startColumn + " caret.col=" + caret.col + " ");
+		//console.log("scrollToCaret: textWidth=" + textWidth + " indentationWidth=" + indentationWidth + " EDITOR.view.endingColumn=" + EDITOR.view.endingColumn + " lookAhead=" + lookAhead + " startColumn=" + startColumn + " caret.col=" + caret.col + " ");
 		
 		if((textWidth+indentationWidth) > (EDITOR.view.endingColumn-lookAhead)) {
 			//console.log("scrollToCaret: Caret is after the visible space");
@@ -4100,7 +4100,9 @@ if(startColumn-indentationWidth > minIndentation*EDITOR.settings.tabSpace) {
 		// The afterSave event listeners need to take a callback or return something, so we can know when they're done'
 		EDITOR.callEventListeners("afterSave", file, function allListenersCalled(errors) {
 			
-			if(errors.length > 0) console.warn("Some afterSave event listeners failed:");
+			if(errors.length > 0) {
+				console.warn("Some afterSave event listeners failed:");
+			}
 			// see error stacktraces in dev tools!
 			for (var i=0; i<errors.length; i++) {
 				console.error(errors[i]);
@@ -4385,7 +4387,7 @@ if(startColumn-indentationWidth > minIndentation*EDITOR.settings.tabSpace) {
 		var oldPartStartRow = file.partStartRow;
 		
 		if((x == undefined || x == startColumn) && (y == undefined || y == startRow)) {
-			console.warn("No need to scroll! x=" + x + " y=" + y + " startRow=" + startRow + " startColumn=" + startColumn + "");
+			//console.warn("No need to scroll! x=" + x + " y=" + y + " startRow=" + startRow + " startColumn=" + startColumn + "");
 			return;
 		}
 		

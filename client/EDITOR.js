@@ -2488,7 +2488,7 @@ callback(error);
 	
 	EDITOR.render = function render(file, fileStartRow, fileEndRow, screenStartRow, canvas, ctx, renderOverride, background) {
 		
-		console.warn("EDITOR.render! renderOverride=" + renderOverride + " EDITOR.shouldRender=" + EDITOR.shouldRender + " Editor canvas ? " + (canvas == undefined || canvas == EDITOR.canvas));
+		//console.warn("EDITOR.render! renderOverride=" + renderOverride + " EDITOR.shouldRender=" + EDITOR.shouldRender + " Editor canvas ? " + (canvas == undefined || canvas == EDITOR.canvas));
 		
 		if(file == undefined) file = EDITOR.currentFile;
 		
@@ -2938,7 +2938,7 @@ ca 20ms to render, ca 13ms to render without creating new objects
 		if(endCol >= gridRow.length) endCol = gridRow.length-1;
 		
 		if(gridRow.length == 0) {
-			console.warn("gridWalker: gridRow.length=" + gridRow.length + " Nothing to walk on!");
+			//console.warn("gridWalker: gridRow.length=" + gridRow.length + " Nothing to walk on!");
 			state.done = true;
 			return state;
 		}
@@ -3121,7 +3121,7 @@ ca 20ms to render, ca 13ms to render without creating new objects
 	EDITOR.renderNeeded = function renderNeeded() {
 		// Tell the editor that it needs to render
 		
-		console.warn("Render needed!");
+		//console.warn("Render needed!");
 		
 		if(EDITOR.settings.devMode && EDITOR.shouldRender == false) {
 			// For debugging, so we know why a render was needed
@@ -5355,7 +5355,7 @@ if(menuItem.parentMenu) {
 			var menu = document.getElementById("contextmenu");
 			
 			if(!menu.classList.contains("visible")) {
-				console.warn("Context menu already hidden. No need to hide it!");
+				//console.warn("Context menu already hidden. No need to hide it!");
 				return;
 			}
 			
@@ -9862,7 +9862,7 @@ window.addEventListener("dblclick", dblclick);
 
 window.addEventListener("load", main, false);
 window.addEventListener("resize", function resizeAndRenderOnInteraction(resizeEvent) {
-	console.warn("EVENT RESIZE!");
+		console.log("EVENT RESIZE!");
 	EDITOR.resizeNeeded();
 	EDITOR.renderNeeded();
 	

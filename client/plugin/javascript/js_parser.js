@@ -1261,7 +1261,7 @@
 			
 			
 			if(codeBlockDepth < 0) {
-				console.warn("Code-block doesn't match in:" + file.path);
+				//console.warn("Code-block doesn't match in:" + file.path);
 				codeBlockDepth = 0;
 			}
 			
@@ -2772,14 +2772,14 @@
 				
 				// If we are still inside a quote, and the line break was not preceded with a backslash: ignore the quote
 				if((insideSingleQuote || insideDblQuote) && lnw != "\\") {
-					console.warn("Line " + lineNumber + ": Unclosed quote!");
+					//console.warn("Line " + lineNumber + ": Unclosed quote!");
 					insideDblQuote = false;
 					insideSingleQuote = false;
 				}
 				
 				// We can not have multi line regexp
 				if(insideRegExp) {
-					console.warn("Line " + lineNumber + ": Lonely slash! path=" + file.path); // NodeJS says: Invalid regular expression: missing /
+					//console.warn("Line " + lineNumber + ": Lonely slash! path=" + file.path); // NodeJS says: Invalid regular expression: missing /
 					insideRegExp = false;
 					insideRegExpBracket = false;
 				}
