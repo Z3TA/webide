@@ -25,8 +25,8 @@
 
 	var currentState = {};
 
-	var ignoreHashChange = false;
-
+	var ignoreHashChange = "";
+	var ignoreMoveLine = -1;
 
 	EDITOR.plugin({
 		desc: "Move caret back to last position",
@@ -43,7 +43,7 @@
 
 			// No need to show stuff in the address if the user can't see the address eg. standalone mode
 			if(DISPLAY_MODE == "browser") {
-				EDITOR.on("fileShow", showInfoInUrl);
+				EDITOR.on("fileShow", changeFileInUrl);
 				EDITOR.on("changeProject", updateProjectInUrl);
 				EDITOR.on("changeBranch", updateBranchInUrl);
 				EDITOR.on("start", checkUrlParametersOnStart);
@@ -66,7 +66,7 @@
 			lastFile = undefined;
 
 			if(DISPLAY_MODE == "browser") {
-				EDITOR.removeEvent("fileShow", showInfoInUrl);
+				EDITOR.removeEvent("fileShow", changeFileInUrl);
 				EDITOR.removeEvent("changeProject", updateProjectInUrl);
 				EDITOR.removeEvent("changeBranch", updateBranchInUrl);
 				EDITOR.removeEvent("start", checkUrlParametersOnStart);
@@ -150,6 +150,8 @@
 
 		if(PROJECT_NAME == currentState.project && BRANCH_NAME == currentState.branch && PATH == currentState.path && LINE == currentState.line) return; // No need to push another history
 
+		if(LINE == ignoreMoveLine) return;
+
 		currentState = {
 			project: PROJECT_NAME,
 			branch: BRANCH_NAME,
@@ -180,10 +182,12 @@
 		setUrl();
 	}
 
-	function showInfoInUrl(file) {
+	function changeFileInUrl(file) {
 		if(!file) return;
 
 		PATH = file.path;
+
+		ignoreMoveLine = -1;
 
 		if(lastJump.hasOwnProperty(file.path)) LINE = lastJump[file.path].row + file.startRow + 1;
 		else LINE = file.currentLine();
@@ -199,19 +203,17 @@
 
 		if(!state) return;
 
-		ignoreHashChange = true;
+		ignoreHashChange = window.location.hash;
 
 		navigate(state);
 	}
 
 	function hashChange(ev) {
 		// note: hashChange also triggers after browserNavigation triggers!
-		if(ignoreHashChange) {
-			ignoreHashChange = false;
-			return;
-		}
-
 		var hash = window.location.hash;
+		
+		if(ignoreHashChange == hash) return;
+
 		var state = parseHash(hash);
 		navigate(state);
 	}
@@ -234,23 +236,24 @@
 			}
 		}
 
-		if(EDITOR.currentFile && state.path && EDITOR.currentFile.path == state.path && state.line != EDITOR.currentFile.currentLine()) EDITOR.currentFile.gotoLine(state.line);
-
-		/*
-			problem: Moving to another line will trigger a pushstate!
-
-		*/
+		checkLine();
 
 		if( (state.path && EDITOR.currentFile && state.path == EDITOR.currentFile.path) ) {
 			EDITOR.dashboard.hide();
 		}
 
 		function fileOpened(err) {
-			if(EDITOR.currentFile && state.path && EDITOR.currentFile.path == state.path && state.line != EDITOR.currentFile.currentLine()) EDITOR.currentFile.gotoLine(state.line);
-
+			checkLine();
 			EDITOR.dashboard.hide();
 		}
 
+		function checkLine() {
+			if(EDITOR.currentFile && state.path && EDITOR.currentFile.path == state.path && state.line != EDITOR.currentFile.currentLine()) {
+				// Moving to another line would trigger a pushstate!
+				ignoreMoveLine = state.line;
+				EDITOR.currentFile.gotoLine(state.line);
+			}
+		}
 	}
 
 	function moveCaretBackToLastPosition2(file) {
