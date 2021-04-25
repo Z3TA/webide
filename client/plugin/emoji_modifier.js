@@ -72,8 +72,7 @@
 			}
 		}
 		
-return;
-
+		// Should we add color to a emoji without color info !?
 		if( char.length==2 && UTIL.isSurrogateStart(char[0]) && UTIL.isSurrogateEnd(char[1]) ) {
 			// Attempt to give it a color
 			file.deleteCharacter(caret);
@@ -85,6 +84,7 @@ return;
 			file.moveCaretLeft(caret); // Should step over both modifier and surrogate
 			return rotate(surrogateModifierEndings, 3);
 		}
+		
 		
 		function rotate(comboArr, charIndex) {
 			var charArr = char.split('');

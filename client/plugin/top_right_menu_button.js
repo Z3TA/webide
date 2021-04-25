@@ -1,7 +1,7 @@
 /*
 	
-	In some browsers (Firefox on Android) you can't bring up the meny by long pressing!
-	So show a menu button just in case the "irght click" menu doesn't work!
+	In some browsers (Firefox on Android) you can't bring up the menu by long pressing!
+	So show a menu button just in case the "tight click" menu doesn't work!
 	
 */
 (function() {
@@ -21,23 +21,8 @@ load: function loadTopRightMenuButton() {
 			
 			winMenu.domElement.getElementsByTagName("a")[0].setAttribute("title", "Activate Context menu");
 			
-			return;
-			
-			button = document.createElement("button");
-			button.innerText = "☰";
-			button.setAttribute("title", "Activate Context menu");
-			button.setAttribute("class", "topRightMenuButton"); // For styling
-			
-			button.onclick = function(clickEvent) {
-				EDITOR.ctxMenu.hide();
-				EDITOR.ctxMenu.show(clickEvent);
-			};
-			
-			var header = document.getElementById("header");
-			header.appendChild(button);
-			
 		},
-unload: function unloadTopRightMenuButton() {
+		unload: function unloadTopRightMenuButton() {
 
 			EDITOR.windowMenu.remove(winMenu);
 			

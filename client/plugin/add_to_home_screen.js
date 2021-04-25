@@ -76,21 +76,7 @@ EDITOR.windowMenu.remove(windowMenuAdd2HS);
 		}
 		
 		installed = true;
-
-return;
-
-// Most browsers will automatically remove the "chrome", so this question wont make sense.
-		var yes = "OK, I will click on the WebIDE icon";
-		var no = "No, I'll keep using the browser";
-		confirmBox('Do you want to re-open the editor via "home screen" ?', [yes, no], function(answer) {
-			if(answer == yes) {
-				window.onbeforeunload = null;
-				window.close();
-			}
-		});
-		
-		
-	}
+}
 	
 	function beforeinstallprompt(evt) {
 		//console.log("A2HS: Got beforeinstallprompt event!");

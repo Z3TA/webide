@@ -1243,33 +1243,8 @@ option.setAttribute("selected", "selected");
 	}
 	
 	function createTable() {
-		
 		createTableHelper.show();
-		
-		return;
-		
-		openQueryFile(function(err, file) {
-			if(err) throw err;
-			
-			file.writeLineBreak();
-			file.writeLineBreak();
-			
-			var selStart = file.caret.index;
-			
-			file.writeLine("CREATE TABLE foo (");
-			file.writeLine("bar VARCHAR(20) DEFAULT NULL");
-			file.writeLine(")");
-			
-			var selEnd = file.caret.index;
-			
-			file.writeLineBreak();
-			file.writeLineBreak();
-			
-			var selectRange = file.createTextRange(selStart, selEnd);
-			file.select(selectRange);
-			
-		});
-	}
+		}
 	
 	function runQuery(ev) {
 		

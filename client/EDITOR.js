@@ -9602,8 +9602,9 @@ Searches down towards the root, looking for file names
 
 				if(err) {
 					// File/folder has probably been deleted! Or we have been disconnected Or we don't have access
-					return callback(err);
+					callback(err);
 					callback = null;
+					return;
 				}
 				
 				for (var i=0; i<files.length; i++) {
@@ -9615,8 +9616,9 @@ Searches down towards the root, looking for file names
 				
 				if(folders.length > 0) search(folders.pop());
 				else {
-					return callback(null, filesFound);
+					callback(null, filesFound);
 					callback = null;
+					return;
 				}
 				
 			});

@@ -131,18 +131,8 @@ EDITOR.plugin({
 			
 			formattedDate.innerText = dayOfMonth + " " + monthNames[date.getMonth()] + " " + date.getFullYear();
 			
-			
-			
 			timeZone.innerText = "Time Zone: UTC " + date.getTimezoneOffset() / 60;
-			
 		}
-		
-		
-		
-		
-		
-		
-		return timeWidget;
 	}
 	
 })();

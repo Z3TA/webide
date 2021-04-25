@@ -138,28 +138,7 @@ file.dHeight = scaledCanvas.height;
 		
 		EDITOR.renderNeeded();
 		
-		return;
-		
-		
-		var origData = origCanvasContext.getImageData(0,0, origCanvas.width, origCanvas.height);
-		var scaledData = scaledCanvasContext.getImageData(0,0, scaledCanvas.width, scaledCanvas.height);
-		for (var x=0; x<scaledCanvas.width; x++) {
-			for (var y=0; y<scaledCanvas.height; y++) {
-				for (var c=0; c<4; c++) {
-					// you can improve these calculations, I let them so for clarity
-					
-					// >>1 devides by 2
-					
-					scaledData.data[(y*scaledCanvas.height+x)*4+c] = origData.data[((y>>1)*origCanvas.height+(x>>1))*4+c];
-				}
-			}
 		}
-		scaledCanvasContext.putImageData(scaledData, 0, 0);
-		
-		
-		EDITOR.renderNeeded();
-		
-	}
 	
 	ImageFile.prototype.centralize = function(centerX, centerY) {
 		var file = this;

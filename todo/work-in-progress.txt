@@ -3,16 +3,6 @@
 What I'm working on
 -------------------
 
-
----
-
-
-
----
-
-todo: Delete unreachable code after return statement
-
-
 problem: Firefox makes a pushstate when moving back to a different file, but with a weird line! eg. not same line as the one just navigated to
 
 url-history: setUrl: (pushState) url= ?user=test&pw=123#/home/johan/repo/jzedit/client/CLIENT.js#14 ignoreHashChange=#/home/johan/repo/jzedit/client/CLIENT.js#1 

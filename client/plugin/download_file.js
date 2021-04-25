@@ -56,8 +56,5 @@ element.click();
 
 document.body.removeChild(element);
 		}
-		
-		return true;
-}
-
+	}
 })();
