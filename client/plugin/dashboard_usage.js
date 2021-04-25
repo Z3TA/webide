@@ -19,19 +19,34 @@
 			EDITOR.on("showDashboard", startCpuAndMemoryTimer);
 			EDITOR.on("hideDashboard", stopCpuAndMemoryTimer);
 			
+			EDITOR.on("afk", stopCpuAndMemoryTimer);
+			EDITOR.on("btk", startCpuAndMemoryTimerWhenBackToKeyboard);
+
 			EDITOR.dashboard.addWidget(cpuWidget.domElement);
 			EDITOR.dashboard.addWidget(memoryWidget.domElement);
 			
 		},
 		unload: function unloadCpuAndMemoryWidget() {
 			
-			EDITOR.dashboard.removeWidget(cpuWidget.domElement);
-			
 			EDITOR.removeEvent("showDashboard", startCpuAndMemoryTimer);
 			EDITOR.removeEvent("hideDashboard", stopCpuAndMemoryTimer);
+
+			EDITOR.removeEvent("afk", stopCpuAndMemoryTimer);
+			EDITOR.removeEvent("btk", startCpuAndMemoryTimerWhenBackToKeyboard);
+
+			EDITOR.dashboard.removeWidget(cpuWidget.domElement);
+			EDITOR.dashboard.removeWidget(memoryWidget.domElement);
+
 		}
 	});
 	
+	function startCpuAndMemoryTimerWhenBackToKeyboard() {
+		if( EDITOR.dashboard.isVisible ) {
+			return startCpuAndMemoryTimer();
+		}
+		return false;
+	}
+
 	function startCpuAndMemoryTimer() {
 		
 		if(updateInterval) clearInterval(updateInterval);

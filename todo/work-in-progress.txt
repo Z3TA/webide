@@ -31,10 +31,6 @@ Arrows don't work in terminal! For example when in less, or for example in git d
 
 ---
 
-todo: Stop polling for cpu and memory graph when afk!
-
----
-
 polishing: When double click on a word "11px" only select the numeric part, if the word ends with px or rem!
 (also select the 2. in decimal numbers like 2.5rem)
 
