@@ -179,6 +179,11 @@
 			return;
 		}
 
+		if(hash == window.location.hash) {
+			console.log("url-history: setUrl: Not doing a pushState because hash=" + hash + " is already what we where going to save!");
+			return;
+		}
+
 		var url = window.location.search + hash;
 
 		console.warn("url-history: setUrl: (pushState) url= " + url + " ignoreHashChange=" + ignoreHashChange + " stack=" + UTIL.getStack("pushState") );
@@ -255,15 +260,18 @@
 		if(state.branch && state.branch != EDITOR.branch) EDITOR.checkoutSCMBranch(state.branch);
 		if(state.path && EDITOR.currentFile && state.path != EDITOR.currentFile.path) {
 			if( EDITOR.files.hasOwnProperty(state.path) ) {
+				console.warn("url-history: navigate: Showing file path=" + state.path);
 				EDITOR.showFile(state.path);
 				fileOpened();
 			}
 			else if( openFileIfNotOpen ) {
 				if( UTIL.isLocalPath(state.path) ) {
+					console.warn("url-history: navigate: Opening file path=" + state.path);
 					EDITOR.openFile(state.path, fileOpened);
 				}
 			}
 		}
+		else console.log("url-history: navigate: Not chaning file because it's already the current file path=" + state.path);
 
 		checkLine();
 
@@ -281,9 +289,10 @@
 			if(EDITOR.currentFile && state.path && EDITOR.currentFile.path == state.path && state.line != EDITOR.currentFile.currentLine()) {
 				// Moving to another line would trigger a pushstate!
 				ignoreMoveLine = state.line;
-				console.log("url-history: checkLine: Setting ignoreMoveLine=" + ignoreMoveLine);
+				console.log("url-history: navigate: checkLine: Switching to line=" + state.line + " and Setting ignoreMoveLine=" + ignoreMoveLine);
 				EDITOR.currentFile.gotoLine(state.line);
 			}
+			else console.log("url-history: navigate: checkLine: Not switching line because current file is already on line=" + state.line);
 		}
 	}
 
