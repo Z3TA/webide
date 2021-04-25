@@ -643,7 +643,7 @@
 						
 						if(lastFileState.caret !== undefined) {
 							// Set the caret as it was
-							console.log("reopenFiles: Placing caret in file.path=" + file.path);
+							console.log("reopenFiles: Placing caret in file.path=" + file.path + " on row=" + lastFileState.caret.row + " col=" + lastFileState.caret.col + " ");
 							// There can be errors, for example if the file has been changed by another program
 							try {
 								//file.caret = file.createCaret(lastFileState.caret.index, lastFileState.caret.row, lastFileState.caret.col);
