@@ -615,6 +615,10 @@ console.warn("functionListWrap not available!");
 				
 				if(!file) return;
 				
+				if( functionListSelect.options[functionListSelect.selectedIndex] == undefined ) {
+					throw new Error("functionListSelect=" + functionListSelect + " functionListSelect.selectedIndex=" + (functionListSelect && functionListSelect.selectedIndex) + " functionListSelect.options=" + (functionListSelect && functionListSelect.options) + " functionListSelect.options.length=" + (functionListSelect && functionListSelect.options && functionListSelect.options.length));
+				}
+
 				var line = functionListSelect.options[functionListSelect.selectedIndex].value;
 				if(isNaN(line)) throw new Error("line=" + line + " options=" + JSON.stringify(functionListSelect.options) + " selectedIndex=" + functionListSelect.selectedIndex);
 				

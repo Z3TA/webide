@@ -1607,6 +1607,14 @@ Unable to repeat bugs (happens rarely)
 
 ---
 
+Sometimes when scrolled far to the right and you are typing it scrolls further to the right and you can't see the text, you can only see the parenthesis highlighting which seem to be out of place...
+
+---
+
+Sometimes when searching in Firefox you have to click "Right" many times for it to jump to next match...
+
+---
+
 Stacktrace:
 Error: fName=showVersionControlWidget is not a unique function name among context menu items! Or there is still a reference to an old element!
 at Object.addItem (https://webide.se/:20:70959)

@@ -6,7 +6,7 @@ What I'm working on
 
 ---
 
-Sometimes when searching in Firefox you have to click "Right" many times for it to jump to next match...
+
 
 ---
 
