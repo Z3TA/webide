@@ -34,6 +34,15 @@
 			
 			EDITOR.loadSettings("preferred_font", "default", function(savedFont) {
 				if(savedFont && savedFont != "default") {
+					/*
+						Problem: The user might be on a different system where the font (Ubuntu in this case) doesn't exist
+
+						Download the font ? Or only change font SIZE if the saved font is the same as current font !?
+
+					*/
+
+					if( EDITOR.settings.style.font.indexOf("Ubuntu") == -1 ) return;
+
 					load[savedFont]();
 				}
 			});
