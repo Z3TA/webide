@@ -86,9 +86,12 @@
 		var hash = window.location.hash;
 		var state = parseHash(hash);
 
+		console.warn("url-history: checkUrlParametersOnStart: hash=" + hash + " state=" + JSON.stringify(state));
+
 		// Wait until the file has fully loaded
 		// The editor is probably re-opening a bunch of files...
 		setTimeout(function() {
+			console.warn("url-history: checkUrlParametersOnStart: Calling navigate()...");
 			navigate(state, true);
 		}, 2000);
 		
@@ -266,12 +269,12 @@
 		}
 
 		var state = parseHash(hash);
-		navigate(state);
+		navigate(state, true);
 	}
 
 	function navigate(state, openFileIfNotOpen) {
 
-		console.warn("url-history: navigate: state=" + JSON.stringify(state));
+		console.log("url-history: navigate: state=" + JSON.stringify(state));
 
 		if(state.project && state.project != EDITOR.project) EDITOR.changeProject(state.project);
 		if(state.branch && state.branch != EDITOR.branch) EDITOR.checkoutSCMBranch(state.branch);
@@ -286,9 +289,11 @@
 					console.warn("url-history: navigate: Opening file path=" + state.path);
 					EDITOR.openFile(state.path, fileOpened);
 				}
+				else console.log("url-history: navigate: Not opening " + state.path + " because it's not a local file-path");
 			}
+			else console.log("url-history: navigate: Not changing to " + state.path + " because it's not open and openFileIfNotOpen=" + openFileIfNotOpen + "");
 		}
-		else console.log("url-history: navigate: Not chaning file because it's already the current file path=" + state.path);
+		else console.log("url-history: navigate: Not changing to " + state.path + " because it's already the current file path=" + state.path);
 
 		checkLine();
 
@@ -303,10 +308,10 @@
 		}
 
 		function checkLine() {
-			if(EDITOR.currentFile && state.path && EDITOR.currentFile.path == state.path && state.line != EDITOR.currentFile.currentLine()) {
+			if(state.line && EDITOR.currentFile && state.path && EDITOR.currentFile.path == state.path && state.line != EDITOR.currentFile.currentLine()) {
 				// Moving to another line would trigger a pushstate!
 				ignoreMoveLine = state.line;
-				console.log("url-history: navigate: checkLine: Switching to line=" + state.line + " and Setting ignoreMoveLine=" + ignoreMoveLine);
+				console.warn("url-history: navigate: checkLine: Switching to line=" + state.line + " and Setting ignoreMoveLine=" + ignoreMoveLine);
 				EDITOR.currentFile.gotoLine(state.line);
 			}
 			else console.log("url-history: navigate: checkLine: Not switching line because current file is already on line=" + state.line);
