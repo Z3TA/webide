@@ -14,7 +14,8 @@
 	
 	var winMenu = {};
 	var originalFont, originalHighlightMatchFont, originalFontSize, originalGridHeight, originalGridWidth, originalLeftMargin, originalTabSpace;
-	
+	var loadedFonts = [];
+
 	EDITOR.plugin({
 		desc: "Change font size",
 		load: function loadFontSizePlugin() {
@@ -58,8 +59,26 @@
 		EDITOR.saveSettings("preferred_font", fontName);
 	}
 	
+	function downloadFontJustInCase(font) {
+
+		console.log("font_size: downloadFontJustInCase: font=" + font + " ");
+
+		if( loadedFonts.indexOf(font) != -1 ) {
+			console.log("font_size: downloadFontJustInCase: CSS file already loaded for font=" + font + " ");
+			return;
+		}
+
+		if(font == "ubuntu") {
+			UTIL.loadCSS("/gfx/font/ubuntu/ubuntu.css", function(err) {
+				if(!err) loadedFonts.push(font);
+			});
+		}
+		
+	}
+
 	var load = {
 		ubuntu10: function() {
+			downloadFontJustInCase("ubuntu");
 			EDITOR.settings.style.font = "ubuntu";
 			EDITOR.settings.style.highlightMatchFont = "bold 10px ubuntu";
 			EDITOR.settings.style.fontSize = 10;
@@ -70,6 +89,7 @@
 			activateMenu("ubuntu10");
 		},
 		ubuntu11: function() {
+			downloadFontJustInCase("ubuntu");
 			EDITOR.settings.style.font = "ubuntu";
 			EDITOR.settings.style.highlightMatchFont = "bold 11px ubuntu";
 			EDITOR.settings.style.fontSize = 11;
@@ -80,6 +100,7 @@
 			activateMenu("ubuntu11");
 		},
 		ubuntu12: function() {
+			downloadFontJustInCase("ubuntu");
 			EDITOR.settings.style.font = "ubuntu";
 			EDITOR.settings.style.highlightMatchFont = "bold 12px ubuntu";
 			EDITOR.settings.style.fontSize = 12;
@@ -90,6 +111,7 @@
 			activateMenu("ubuntu12");
 		},
 		ubuntu13: function() {
+			downloadFontJustInCase("ubuntu");
 			EDITOR.settings.style.font = "ubuntu";
 			EDITOR.settings.style.highlightMatchFont = "bold 13px ubuntu";
 			EDITOR.settings.style.fontSize = 13;
@@ -100,6 +122,7 @@
 			activateMenu("ubuntu13");
 		},
 		ubuntu14: function() {
+			downloadFontJustInCase("ubuntu");
 			EDITOR.settings.style.font = "ubuntu";
 			EDITOR.settings.style.highlightMatchFont = "bold 14px ubuntu";
 			EDITOR.settings.style.fontSize = 14;
@@ -110,6 +133,7 @@
 			activateMenu("ubuntu14");
 		},
 		ubuntu15: function() {
+			downloadFontJustInCase("ubuntu");
 			EDITOR.settings.style.font = "ubuntu";
 			EDITOR.settings.style.highlightMatchFont = "bold 15px ubuntu";
 			EDITOR.settings.style.fontSize = 15;
@@ -120,6 +144,7 @@
 			activateMenu("ubuntu15");
 		},
 		ubuntu16: function() {
+			downloadFontJustInCase("ubuntu");
 			EDITOR.settings.style.font = "ubuntu";
 			EDITOR.settings.style.highlightMatchFont = "bold 16px ubuntu";
 			EDITOR.settings.style.fontSize = 16;
@@ -130,6 +155,7 @@
 			activateMenu("ubuntu16");
 		},
 		ubuntu17: function() {
+			downloadFontJustInCase("ubuntu");
 			EDITOR.settings.style.font = "ubuntu";
 			EDITOR.settings.style.highlightMatchFont = "bold 17px ubuntu";
 			EDITOR.settings.style.fontSize = 17;
@@ -140,6 +166,7 @@
 			activateMenu("ubuntu17");
 		},
 		ubuntu18: function() {
+			downloadFontJustInCase("ubuntu");
 			EDITOR.settings.style.font = "ubuntu";
 			EDITOR.settings.style.highlightMatchFont = "bold 18px ubuntu";
 			EDITOR.settings.style.fontSize = 18;
@@ -150,6 +177,7 @@
 			activateMenu("ubuntu18");
 		},
 		ubuntu19: function() {
+			downloadFontJustInCase("ubuntu");
 			EDITOR.settings.style.font = "ubuntu";
 			EDITOR.settings.style.highlightMatchFont = "bold 19px ubuntu";
 			EDITOR.settings.style.fontSize = 19;
@@ -160,6 +188,7 @@
 			activateMenu("ubuntu19");
 		},
 		ubuntu20: function() {
+			downloadFontJustInCase("ubuntu");
 			EDITOR.settings.style.font = "ubuntu";
 			EDITOR.settings.style.highlightMatchFont = "bold 20px ubuntu";
 			EDITOR.settings.style.fontSize = 20;
