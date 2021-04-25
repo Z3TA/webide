@@ -168,12 +168,8 @@
 
 		var title = PATH; // Not used by any browser!?
 
-		var hash = "";
-		if(PROJECT_NAME) hash = hash + "#" + PROJECT_NAME;
-		if(BRANCH_NAME) hash = hash + "#" + BRANCH_NAME;
-		if(PATH) hash = hash + "#" + PATH;
-		if(LINE) hash = hash + "#" + LINE;
-
+		var hash = hashFromState(currentState);
+		
 		if( hash == ignoreHashChange) {
 			console.log("url-history: setUrl: Not doing a pushState because hash==ignoreHashChange=" + ignoreHashChange);
 			return;
@@ -223,6 +219,16 @@
 
 	}
 
+	function hashFromState(state) {
+		var hash = "";
+		if(state.project) hash = hash + "#" + state.project;
+		if(state.branch) hash = hash + "#" + state.branch;
+		if(state.path) hash = hash + "#" + state.path;
+		if(state.line) hash = hash + "#" + state.line;
+
+		return hash;
+	}
+
 	function browserNavigation(ev) {
 		// User uses the browser back button (or forward)
 
@@ -232,8 +238,15 @@
 
 		if(!state) return;
 
-		ignoreHashChange = window.location.hash;
-		console.log("url-history: browserNavigation: Setting ignoreHashChange=" + ignoreHashChange);
+		var hash = hashFromState(state);
+		if(ignoreHashChange == hash) {
+			console.log("url-history: browserNavigation: Ignoring ignoreHashChange=" + ignoreHashChange + " hash=" + hash + "");
+			return;
+		}
+		else {
+			ignoreHashChange = window.location.hash;
+			console.log("url-history: browserNavigation: Setting ignoreHashChange=" + ignoreHashChange);
+		}
 
 		navigate(state);
 	}
@@ -244,8 +257,12 @@
 		var hash = window.location.hash;
 		
 		if(ignoreHashChange == hash) {
-			console.log("url-history: Ignoring ignoreHashChange=" + ignoreHashChange + " hash=" + hash + "");
+			console.log("url-history: hashChange: Ignoring ignoreHashChange=" + ignoreHashChange + " hash=" + hash + "");
 			return;
+		}
+		else {
+			ignoreHashChange = hash;
+			console.log("url-history: hashChange: Setting ignoreHashChange=" + ignoreHashChange);
 		}
 
 		var state = parseHash(hash);

@@ -3,11 +3,6 @@
 What I'm working on
 -------------------
 
-state is set two times for the same file !?!?
-reopen_files.js:651
-/reopen_files.js:651
-
-url info: url hash is set to something else afternavitation because jumptoline is set to another line...
 
 ---
 
