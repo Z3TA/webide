@@ -1607,6 +1607,15 @@ Unable to repeat bugs (happens rarely)
 
 ---
 
+Function list gets deselected in Firefox after you have typed ...
+
+---
+
+When scrolled to the right in a file with long lines and saving using Ctrl+S
+it scrolls the text further to the left, while parenthesis highligtning in still on the old spot
+
+---
+
 Sometimes when scrolled far to the right and you are typing it scrolls further to the right and you can't see the text, you can only see the parenthesis highlighting which seem to be out of place...
 
 ---

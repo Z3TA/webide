@@ -4,7 +4,11 @@ This file contains a list of things we can do to improve already implemented fea
 Polishing (only existing features)
 ==================================
 
+Use the same umask as the parent folder when saving a file. Very annoying the editor uses 750 by default when working with docker andd wwwdata needs to access files
 
+js parser: Handle function name destgructuring eg. var foo {bar() {}} don't need the function keyword!
+
+In find in files, to prevent crashing the server, check if the RegExp is valid! show red bg like in regular find/replace
 
 auto update the file explorer when files are added/removed
 
