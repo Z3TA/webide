@@ -1,7 +1,20 @@
 
+testing on webide: node server/server.js --port=/home/johan/sock/test --domain=test.johan.webide.se --username=test --password=123 --home=/home/johan/
 
 What I'm working on
 -------------------
+
+When trying to run "git commit" in terminal...
+
+git commit
+hint: Waiting for your editor to close the file... Connection error: connect ECONNREFUSED 8103.johan.webide.se
+Edit /home/johan//.webide/webider.json or
+try connecting to another host using -host and -port flags
+error: There was a problem with the editor 'webide'.
+Please supply the message using either -m or -F option.
+
+
+---
 
 It's good to have console.logs to more easily spot if the editor does something stupid
 But the slowness of dev tools and junk in the bundle overweight the pros.
@@ -29,116 +42,20 @@ Arrows don't work in terminal! For example when in less, or for example in git d
 
 åäö doesn't work in the terminal!!
 
----
+terminal emulator goes nuts when resizing (to very small or negative size) and crashes the server worker!
 
-polishing: When double click on a word "11px" only select the numeric part, if the word ends with px or rem!
-(also select the 2. in decimal numbers like 2.5rem)
-
----
-
-terminal emulator goes nuts when resizing and crashes the server worker!
+Test the terminal emulator using VTTEST (and make it VT500 compatible)
 
 ---
 
-inkscape -z -w 192 -h 192 icon.svg -e icon192x192.png
-inkscape -z -w 310 -h 150 icon-wide.svg -e icon_wide310x150.png
-
-When I download a file in my browser, I want it to be saved in webide...
-
-todo: udate icons with the new icon.svg
-
-logo and icons can be different!
-keep old logo (with blue circles?) and use new ones
-for desktop/dravier icons!
-
-favicon.ico needs to be compressed!
-
-magick -density 256x256 -background transparent logo.svg -define icon:auto-resize -colors 256 logo10.ico
-
-node server/server.js --port=/home/johan/sock/test --domain=test.johan.webide.se --username=test --password=123 --home=/home/johan/
-
-Maybe the font is set into font size module !?
-
-todo: Detect if a font failed to load by making a new canvas and printing text with unknown font, then printing it with the EDITOR.settings.style.font
-and if they are the same it probably means something...
-
-ubunto font loaded on Windows on Chrome, but did not download!
-
----
-
-When trying to run "git commit" in terminal...
-
-git commit
-hint: Waiting for your editor to close the file... Connection error: connect ECONNREFUSED 8103.johan.webide.se
-Edit /home/johan//.webide/webider.json or
-try connecting to another host using -host and -port flags
-error: There was a problem with the editor 'webide'.
-Please supply the message using either -m or -F option.
-
----
-
-When trying to commit after a merge it says (mercurial) "We need to reslove the merge conflict manually." 
-when clicking "check for problems" it says "you need to commit" ...
-
-I could however commit via command line! hg commit -m "merge??"
-
-
----
-
-Problems with crypto miners...
-todo: Check for processes that use a lot of CPU, then if they are still running after 1 minute, drasticly limit cpu usage using cpulimit
-
-
-getting "connection to backend closed" on devices that I have logged in from before (works in inknognito)
-seems like /jzedit is cahced!?!? 
-Show which server you are connecting to (when it can't connect to)
-
----
-
-Or do we need a VPS anyway if we want to test the webide itself within the webide !?
-
-.domainmap.txt ???
-
-mydomain.com docker:8080 /
-mydomain.com netns:8080 /
-mydomain.com wwwpub /folder
-
-
-mydomain.com docker:8080 /
-
-server {
-  server_name mydomain.com;
-  
-    access_log %HOMEDIR%log/access.log %USERNAME%;
-    
-    
-}
-
-
-custom domains. Able to (add to nginx) a domain name that points to myuser.webide.se or d80.myuser.webide.se or 8080.myuser.webide.se
-
-
-
+problem: When using another web/app service and saving/downloading a file, it's downloaded to the local computer (rather then staying in the "cloud")
+It should be possible to "download" a file directly to webide!
 
 ---
 
 todo: Test color/theme highlight colors (on dark theme)
 
 ---
-
-todo: Test the terminal emulator using VTTEST (and make it VT500 compatible)
-
-
----
-
-False positive indexOf warning: 
-else if( ( nextChar == '"' && (selectedText.indexOf('"') == -1 ) ) {
-
-}
-
-
----
-
 
 Tree-sitter support!
 

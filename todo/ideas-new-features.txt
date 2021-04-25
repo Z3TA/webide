@@ -40,6 +40,10 @@ Feature list (Not ordered/prioritized)
 
 ---
 
+Make it possible to add custom domains that is proxied to the user ns or docker container port !?
+
+---
+
 Able to dublicate a file so that you have two views of the same file
 
 ---

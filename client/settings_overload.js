@@ -42,6 +42,11 @@
 	before: FMP 6632ms
 	after: FMP 6123
 	
+
+	If font failed to load ?
+	We could detect if a font failed to load by making a new canvas and printing text with unknown font, 
+	then printing it with the EDITOR.settings.style.font
+	and if they are the same it probably means our font failed to load...
 	
 	
 */

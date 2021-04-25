@@ -4,6 +4,13 @@ This file contains a list of things we can do to improve already implemented fea
 Polishing (only existing features)
 ==================================
 
+When trying to commit after a merge it says (mercurial) "We need to reslove the merge conflict manually."
+when clicking "check for problems" it says "you need to commit" ...
+I could however commit via command line! hg commit -m "merge??"
+
+When double click on a word "11px" only select the numeric part, if the word ends with px or rem!
+(also select the 2. in decimal numbers like 2.5rem)
+
 Use the same umask as the parent folder when saving a file. Very annoying the editor uses 750 by default when working with docker andd wwwdata needs to access files
 
 js parser: Handle function name destgructuring eg. var foo {bar() {}} don't need the function keyword!

@@ -36,6 +36,15 @@ Run all tests! (to make sure you did not break anything else)
 BUGS (and issues)
 =================
 
+
+---
+
+False positive indexOf warning:
+else if( ( nextChar == '"' && (selectedText.indexOf('"') == -1 ) ) {
+}
+
+---
+
 Open local desktop from Macbook. The VNC screen is too large. Able to zoom!? on Safari
 
 ---
