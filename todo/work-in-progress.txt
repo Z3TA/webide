@@ -1,8 +1,15 @@
 
-testing on webide: node server/server.js --port=/home/johan/sock/test --domain=test.johan.webide.se --username=test --password=123 --home=/home/johan/
+testing on webide: 
+node server/server.js --port=/home/johan/sock/test --domain=test.johan.webide.se --username=test --password=123 --home=/home/johan/
 
 What I'm working on
 -------------------
+
+Crypto miners
+
+
+
+---
 
 When trying to run "git commit" in terminal...
 

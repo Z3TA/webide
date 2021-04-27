@@ -408,8 +408,9 @@ if (!String.prototype.repeat) {
 	}
 }
 
-
-
+if(!USERNAME || USERNAME == "test") {
+	var loginLog = module_fs.createWriteStream( module_path.join(module_os.homedir(), "webide_logins.log"), {flags:'a'} );
+}
 
 function connectToNatServer() {
 
@@ -1570,7 +1571,7 @@ return;
 		});
 	}
 	
-	if(info.uid == 0 && module_psList) {
+	if(!USERNAME && module_psList) {
 		/*
 			Some users install crypto miners on the free shared backend...
 
@@ -2980,6 +2981,10 @@ clearTimeout(USER_CLEANUP_TIMEOUT[userConnectionName]);
 						function acceptUser() {
 							log("acceptUser! username=" + username, DEBUG);
 							
+							if(loginLog) {
+								loginLog.write(new Date().toISOString() + "\t" + username + "\t" + IP + "\n");
+							}
+
 							clientSessionId = json.sessionId;
 							
 							if(!USER_CONNECTIONS.hasOwnProperty(userConnectionName)) {
