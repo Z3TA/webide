@@ -1570,13 +1570,11 @@ return;
 		});
 	}
 	
-	if(info.uid == 0) {
+	if(info.uid == 0 && module_psList) {
 		/*
 			Some users install crypto miners on the free shared backend...
 
 			sudo apt install cgroup-tools
-
-
 
 		*/
 
