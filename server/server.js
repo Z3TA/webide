@@ -1624,7 +1624,7 @@ return;
 					if(! highCpuUsage.hasOwnProperty(p[i].pid) ) highCpuUsage[p[i].pid] = Object.assign({cpuHistory: [p[i].cpu]}, p[i]); 
 					else highCpuUsage[p[i].pid].cpuHistory.push( p[i].cpu );
 
-					log("checkCpuUsage: " + p[i].name + " uses " + p[i].cpu + " CPU", DEBUG);
+					log("checkCpuUsage: " + p[i].name + " (uid=" + p[i].uid + ") uses " + p[i].cpu + " CPU", DEBUG);
 
 				}
 				else break;
