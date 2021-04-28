@@ -187,7 +187,14 @@
 
 		console.warn("url-history: setUrl: (pushState) url= " + url + " ignoreHashChange=" + ignoreHashChange + " stack=" + UTIL.getStack("pushState") );
 
+		// SecurityError: The operation is insecure.
+		try {
 		window.history.pushState(currentState, title, url);
+		}
+		catch(err) {
+			console.error(err);
+			console.log("url-history: setUrl: currentState=" + JSON.stringify(currentState) + " title=" + title + " url=" + url);
+		}
 	}
 
 	function updateBranchInUrl(branchName) {
