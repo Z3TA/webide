@@ -10517,8 +10517,9 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 	
 	
 		//console.log("Setting mainLoopInterval because first load!");
-		mainLoopInterval = setInterval(resizeAndRender, 16); // So that we always see the latest and greatest
-	
+		//mainLoopInterval = setInterval(resizeAndRender, 16); // So that we always see the latest and greatest
+		// The interval above uses about 1% CPU while idle just for the function call overhead
+
 		// note to self: Just temorary, dont forget to remove:
 		//if(EDITOR.settings.devMode == true) EDITOR.openFile(testfile);
 	
