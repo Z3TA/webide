@@ -10607,9 +10607,7 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 			document.getElementById("leftColumn").classList.remove("beforeload");
 			document.getElementById("editorCanvas").classList.remove("beforeload");
 
-			// Hopefully a resize is not needed
-			EDITOR.renderNeeded();
-			EDITOR.render();
+			EDITOR.resize();
 		}
 	}
 	
