@@ -220,7 +220,7 @@
 		
 		if(EDITOR.storage.ready()) getSites();
 		else EDITOR.on("storageReady", getSites);
-		
+
 		var keyF9 = 120;
 		var keyEscape = 27;
 		
