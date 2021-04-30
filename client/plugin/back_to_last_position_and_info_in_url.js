@@ -106,6 +106,8 @@
 		if(hash.charAt(0) == "#") arr.shift();
 
 		var last = arr.pop();
+		if(last == undefined) return patchObj();
+
 		// Last is probably line nr
 		if( !isNaN(parseInt(last)) ) {
 			var line = parseInt(last);
@@ -117,6 +119,7 @@
 		else if(last && last.trim() != "") throw new Error("Unable to determine what " + last + " means in the url hash");
 
 		var last = arr.pop();
+if(last == undefined) return patchObj();
 
 		if(line && isPath(last)) {
 			var path = last;
@@ -131,26 +134,31 @@
 		else if(last && last.trim() != "") throw new Error("Unable to determine what " + last + " means in the url hash");
 
 		var last = arr.pop();
+		if(last == undefined) return patchObj();
 
-		if(last != undefined) {
 			var branch = last;
-		}
+		
 
 		var last = arr.pop();
+		if(last == undefined) return patchObj();
 
 		if(last != undefined) {
 			var project = last;
 		}
 
-		var obj = {};
-
-		if(line) obj.line = line;
-		if(path) obj.path = path;
-		if(branch) obj.branch = branch;
-		if(project) obj.project = project;
-
-		return obj;
+		return patchObj();
 	
+		function patchObj() {
+			var obj = {};
+
+			if(line) obj.line = line;
+			if(path) obj.path = path;
+			if(branch) obj.branch = branch;
+			if(project) obj.project = project;
+
+			return obj;
+		}
+
 		function isPath(str) {
 			if( UTIL.isFilePath(str) ) return true;
 			else if( EDITOR.files.hasOwnProperty(str) ) return true;
