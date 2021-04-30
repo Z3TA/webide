@@ -414,8 +414,13 @@ webFontLoading = "DejaVuSansMono";
 	function makeGlyphWidthDetector() {
 		EDITOR.glyphWidth = EDITOR.makeGlyphWidthDetector();
 
-		EDITOR.renderNeeded();
-		EDITOR.render();
+		/*
+			This function is always called!
+			If we did load the font, it should now have finished loaded,
+		*/
+
+		EDITOR.resize(true); // Only way to set the canvas context font it seems, is to force/destroy the context by resizing the canvas!
+		
 	}
 
 	function debug(msg) {

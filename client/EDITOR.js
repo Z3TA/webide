@@ -2465,8 +2465,11 @@ callback(error);
 	
 	function canvasContextReset(ctx) {
 		
-		// note: The editor is resized as least once when the page loads, which calls this function
-		
+		/*
+			This function is called every time the editor resizes!
+			It seems the only way to actually set the canvas.font is to resize the canvas first!!??? - so there is no idea/reason to make this function public
+		*/
+
 		if(ctx == undefined) ctx = EDITOR.canvasContext;
 		
 		// Do not "smooth" the image, keep it sharp!
@@ -2484,13 +2487,13 @@ callback(error);
 		
 		ctx.save();
 		
-		//console.log("DebugCtx: canvasContextReset()  windowLoaded=" + windowLoaded + " Set ctx.imageSmoothingEnabled=" + ctx.imageSmoothingEnabled + " EDITOR.canvasContext.imageSmoothingEnabled=" + EDITOR.canvasContext.imageSmoothingEnabled + " ctx.font=" + ctx.font);
+		console.log("DebugCtx: canvasContextReset()  windowLoaded=" + windowLoaded + " Set ctx.imageSmoothingEnabled=" + ctx.imageSmoothingEnabled + " EDITOR.canvasContext.imageSmoothingEnabled=" + EDITOR.canvasContext.imageSmoothingEnabled + " ctx.font=" + ctx.font);
 		
 	}
 	
 	EDITOR.render = function render(file, fileStartRow, fileEndRow, screenStartRow, canvas, ctx, renderOverride, background) {
 		
-		//console.warn("EDITOR.render! renderOverride=" + renderOverride + " EDITOR.shouldRender=" + EDITOR.shouldRender + " Editor canvas ? " + (canvas == undefined || canvas == EDITOR.canvas));
+		console.warn("EDITOR.render! renderOverride=" + renderOverride + " EDITOR.shouldRender=" + EDITOR.shouldRender + " Editor canvas ? " + (canvas == undefined || canvas == EDITOR.canvas) + " EDITOR.canvasContext.font=" + EDITOR.canvasContext.font);
 		
 		if(file == undefined) file = EDITOR.currentFile;
 		
@@ -2687,6 +2690,8 @@ callback(error);
 				ctx.lineWidth = 1;
 			*/
 			
+			console.log("EDITOR.render: ctx==EDITOR.canvasContext?" + (ctx==EDITOR.canvasContext) + " ctx.font=" + ctx.font);
+
 			// Render functions need to be ordered, so we can't optimize them with web workers
 			//console.time("renders");
 			for(var i=0; i<EDITOR.renderFunctions.length; i++) {
@@ -2729,8 +2734,8 @@ callback(error);
 			
 			//canvasContextReset(ctx);
 			
-			ctx.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
-			ctx.textBaseline = "middle";
+			//ctx.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
+			//ctx.textBaseline = "middle";
 			
 			/*
 				
@@ -10013,6 +10018,11 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 				return;
 			}
 
+			if(QUERY_STRING["skiplogin"]) {
+				loginScreen.style.display='none';
+				return;
+			}
+			
 			var loginButton = document.getElementById("loginButton");
 			var loginAsGuest = document.getElementById("loginAsGuest");
 			var loginMessage = document.getElementById("loginMessage");
@@ -10062,11 +10072,6 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 				return false;
 			}
 
-			if(QUERY_STRING["skiplogin"]) {
-				loginScreen.style.display='none';
-				return;
-			}
-
 			CLIENT.on("connectionConnected", function clearLoginMessage() {
 				if(typeof loginMessage == "object") loginMessage.innerText = "";
 			});
@@ -10103,6 +10108,8 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 						if(stored.editorServerUser && stored.editorServerPw) return attemptLogin(stored.editorServerUser, stored.editorServerPw);
 						if(locally) return attemptLogin(DEFAULT_USERNAME, DEFAULT_PASSWORD);
 
+						loginScreen.style.display = "block";
+
 						username.focus();
 						loginButton.disabled = false;
 						loginAsGuest.disabled = false;
@@ -10119,6 +10126,9 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 
 				CLIENT.cmd("identify", {username: userValue, password: pwValue, sessionId: EDITOR.sessionId, editorVersion: EDITOR.version}, function loggedInMaybe(err, resp) {
 					if(err) {
+
+						loginScreen.style.display = "block";
+
 						console.error(err);
 						loginButton.disabled = false;
 						loginAsGuest.disabled = false;
@@ -10141,7 +10151,7 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 					}
 					else {
 						loginScreen.style.display='none';
-
+						
 						if( userValue.match(/^guest\d+$/) && EDITOR.startedCounter > 2 && QUERY_STRING["user"] != "guest") {
 							// User have logged in with a guest account
 							// It's Not the first time user logs in
@@ -10203,11 +10213,17 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 		setTimeout(debugCtx, 10);
 		setTimeout(debugCtx, 100);
 		setTimeout(debugCtx, 1000);
-		
+		setTimeout(debugCtx, 2000);
+		setTimeout(debugCtx, 3000);
+		setTimeout(debugCtx, 4000);
+		setTimeout(debugCtx, 5000);
+		setTimeout(debugCtx, 6000);
+
 		function debugCtx() {
 			console.log("DebugCtx: (interval) windowLoaded=" + windowLoaded + " ctx.imageSmoothingEnabled=" + ctx.imageSmoothingEnabled + " EDITOR.canvasContext.imageSmoothingEnabled=" + EDITOR.canvasContext.imageSmoothingEnabled + " ctx==EDITOR.canvasContext?" + (EDITOR.canvasContext==ctx) + " ctx.font=" + ctx.font);
 		}
 		// TEST-CODE-END
+		
 		
 		EDITOR.resizeNeeded(); // We must call the resize function at least once at editor startup.
 	
@@ -10574,20 +10590,27 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 		}
 		
 		// Loading styles reset
-		setTimeout(function() {
-			document.getElementById("wireframe").classList.remove("beforeload");
-			document.getElementById("header").classList.remove("beforeload");
-			document.getElementById("columns").classList.remove("beforeload");
-			document.getElementById("leftColumn").classList.remove("beforeload");
-			document.getElementById("editorCanvas").classList.remove("beforeload");
-			EDITOR.resizeNeeded(); // If the measurements in beforeload CSS is correct there won't be a resize!
-		}, 1000); // Wont get the login dialog in the footer until the reset!
+		setTimeout(removeBeforeloadClasses, 850);
 		
 		sendStatistics();
 		
 		
 		
 		windowLoaded = true;
+
+		function removeBeforeloadClasses() {
+			// It seems we can't interact with the editor before these classes are removed!!
+			// By having the beforeload classes we hopefully can avoid the flickering caused by header resize due to file tabs
+			document.getElementById("wireframe").classList.remove("beforeload");
+			document.getElementById("header").classList.remove("beforeload");
+			document.getElementById("columns").classList.remove("beforeload");
+			document.getElementById("leftColumn").classList.remove("beforeload");
+			document.getElementById("editorCanvas").classList.remove("beforeload");
+
+			// Hopefully a resize is not needed
+			EDITOR.renderNeeded();
+			EDITOR.render();
+		}
 	}
 	
 	function toggleVoiceCommands() {
@@ -12051,7 +12074,7 @@ function keyPressed(keyPressEvent) {
 
 function resizeAndRender(afterResize) {
 	
-		//console.log("resizeAndRender: EDITOR.shouldResize=" + EDITOR.shouldResize + " EDITOR.shouldRender=" + EDITOR.shouldRender + " EDITOR.isScrolling=" + EDITOR.isScrolling + " windowLoaded=" + windowLoaded);
+		console.log("resizeAndRender: EDITOR.shouldResize=" + EDITOR.shouldResize + " EDITOR.shouldRender=" + EDITOR.shouldRender + " EDITOR.isScrolling=" + EDITOR.isScrolling + " windowLoaded=" + windowLoaded);
 	
 	// Only do the resize or render if it's actually needed
 	if(EDITOR.shouldResize) return EDITOR.resize(); // EDITOR.resize() will call resizeAndRender()

@@ -52,7 +52,9 @@ var CLIENT = {}; // Client object is global
 	CLIENT.cmdTimeout = CLIENT.pingTimeout * 6;
 	CLIENT.inFlight = 0;
 	CLIENT.lastMsgFromServer = null; // Used for debugging
-	
+	CLIENT.commandCounter = 0;
+	CLIENT.lastCommand = "";
+
 	var checkEditorInterval = setInterval(checkEditor, 2000);
 	
 	CLIENT.connect = function(server, callback) {
@@ -211,7 +213,8 @@ throw new Error("Second argument json (" + (typeof json) + ") must be an object!
 		
 		var id = ++idCounter;
 		
-		
+		CLIENT.lastCommand = req;
+		CLIENT.commandCounter = idCounter;
 		
 		var string = id + GS + req;
 		

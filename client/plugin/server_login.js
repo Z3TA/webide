@@ -95,6 +95,8 @@
 	function serverReLoginOnConnected(err) {
 		// ## Automaitcally re-loggin when re-connected to server
 		
+		console.log("serverReLoginOnConnected: CLIENT.lastCommand=" + CLIENT.lastCommand + " CLIENT.commandCounter=" + CLIENT.commandCounter + " CLIENT.inFlight=" + CLIENT.inFlight);
+
 		var loginScreen = document.getElementById("loginScreen");
 		if(loginScreen && loginScreen.style.display != "none") {
 			console.log("Not re-login if loginScreen is visible");
@@ -102,6 +104,11 @@
 		}
 		else {
 			console.log("loginScreen=", loginScreen, " loginScreen.style.display=" + loginScreen.style.display);
+		}
+
+		if(CLIENT.commandCounter < 3) {
+			console.log("Not re-login because CLIENT.commandCounter=" + CLIENT.commandCounter);
+			return;
 		}
 
 		if(loggingIn) return;
@@ -144,6 +151,7 @@
 		}
 		
 		function attemptLogin() {
+
 			console.trace("attemptLogin!");
 			if(!userValue && locally) {
 				console.log("Using default login because userValue=" + userValue + " and locally=" + locally);
