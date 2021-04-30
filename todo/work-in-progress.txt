@@ -5,9 +5,14 @@ node server/server.js --port=/home/johan/sock/test --domain=test.johan.webide.se
 What I'm working on
 -------------------
 
-Crypto miners
+back_to_last_position_and_info_in_url.js
+unable to determina what "terminal1", "new file" etc means in hash!
+todo: Add tests to the parse function!
 
 
+---
+
+Crypto miners...
 
 ---
 

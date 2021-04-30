@@ -98,6 +98,9 @@
 	}
 
 	function parseHash(hash) {
+
+		hash = decodeURI(hash);
+
 		var arr = hash.split("#");
 
 		if(hash.charAt(0) == "#") arr.shift();
@@ -120,6 +123,10 @@
 		}
 		else if(path) {
 			var branch = last;
+		}
+		else if(last.length > 0) {
+			// Assume it's a file name
+			var path = last;
 		}
 		else if(last && last.trim() != "") throw new Error("Unable to determine what " + last + " means in the url hash");
 
@@ -151,6 +158,26 @@
 		}
 	}
 	
+	// TEST-CODE-START
+
+	EDITOR.addTest(1, function parseUrlHash(callback) {
+
+		test("#/foo/bar#1337", {path:"/foo/bar", line: 1337});
+		test("#new+file#123", {path:"new file", line: 123});
+		test("#new%20file#123", {path:"new file", line: 123});
+
+		function test(hash, obj) {
+			var ret = parseHash(hash)
+			for(var prop in obj) {
+				if(ret[prop] == undefined || ret[prop] != obj[prop]) throw new Error(prop + " in " + JSON.stringify(ret) + " does not match!");
+			}
+		}
+
+	});
+
+	// TEST-CODE-END
+
+
 	function setUrl() {
 
 		if(DISPLAY_MODE == "standalone") return; // Don't bother if we can't see the URL or back/forward buttons
@@ -187,9 +214,10 @@
 
 		console.warn("url-history: setUrl: (pushState) url= " + url + " ignoreHashChange=" + ignoreHashChange + " stack=" + UTIL.getStack("pushState") );
 
-		// SecurityError: The operation is insecure.
+		// error1: SecurityError: The operation is insecure.
+		// error2: Too many calls to Location or History APIs within a short timeframe.
 		try {
-		window.history.pushState(currentState, title, url);
+			window.history.pushState(currentState, title, url);
 		}
 		catch(err) {
 			console.error(err);

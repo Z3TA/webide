@@ -56,7 +56,7 @@
 
 	// TEST-CODE-START
 
-	EDITOR.addTest(1, false, function testAutoCompleteFunctionStr(callback) {
+	EDITOR.addTest(false, function testAutoCompleteFunctionStr(callback) {
 
 		EDITOR.openFile("testAutoCompleteFunctionStr.js", "functio\n", function(err, file) {
 			if(err) throw err;
