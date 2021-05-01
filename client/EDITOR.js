@@ -3153,7 +3153,7 @@ ca 20ms to render, ca 13ms to render without creating new objects
 		*/
 		
 		if(!EDITOR.shouldResize && !resizeOverride) {
-			console.warn("Not resizing because EDITOR.shouldResize=" + EDITOR.shouldResize); // Don't resize if it's not needed.
+			//console.warn("EDITOR.resize: Not resizing because EDITOR.shouldResize=" + EDITOR.shouldResize); // Don't resize if it's not needed.
 			return;
 		}
 		
@@ -3165,7 +3165,7 @@ ca 20ms to render, ca 13ms to render without creating new objects
 		
 		if(oldFullScreenWidget) {
 			// There is a widget covering the whole screen!
-			console.warn("Not resizing because oldFullScreenWidget=", oldFullScreenWidget);
+			//console.warn("EDITOR.resize: Not resizing because oldFullScreenWidget=", oldFullScreenWidget);
 			return;
 		}
 		
@@ -3185,7 +3185,7 @@ ca 20ms to render, ca 13ms to render without creating new objects
 		
 		// Resize listeners (before)
 		var f = EDITOR.eventListeners.beforeResize.map(funMap);
-		//console.log("Calling beforeResize listeners (" + f.length + ") ...");
+		//console.log("EDITOR.resize: Calling beforeResize listeners (" + f.length + ") ...");
 		for(var i=0; i<f.length; i++) {
 			f[i](EDITOR.currentFile, windowWidth, windowHeight);
 		}
@@ -3213,9 +3213,6 @@ ca 20ms to render, ca 13ms to render without creating new objects
 		
 		
 		
-		//console.log("Resizing stuff ...")
-		
-		
 		var header = document.getElementById("header");
 		var footer = document.getElementById("footer");
 		var leftColumn = document.getElementById("leftColumn");
@@ -3224,7 +3221,7 @@ ca 20ms to render, ca 13ms to render without creating new objects
 		var columns = document.getElementById("columns");
 		var virtualKeyboard = document.getElementById("virtualKeyboard2");
 		if(!footer) {
-			console.warn("Not resizing because no footer!"); // Page has not yet fully loaded
+			//console.warn("EDITOR.resize: Not resizing because no footer!"); // Page has not yet fully loaded
 			return;
 		}
 		
@@ -3272,7 +3269,7 @@ ca 20ms to render, ca 13ms to render without creating new objects
 				The footer is probably the biggest offender, try to limit it's height ...
 			*/ 
 			
-			//console.log("resize: contentHeight=" + contentHeight);
+			//console.log("EDITOR.resize: : contentHeight=" + contentHeight);
 			
 			var someMargin = 15;
 			var footerHeightLimit = footerHeight + contentHeight - someMargin;
@@ -3299,8 +3296,8 @@ ca 20ms to render, ca 13ms to render without creating new objects
 			content.style.height = EDITOR.view.canvasHeight + "px";
 		*/
 		
-		//console.log("canvasWidth=" + EDITOR.view.canvasWidth);
-		//console.log("canvasHeight=" + EDITOR.view.canvasHeight);
+		//console.log("EDITOR.resize: canvasWidth=" + EDITOR.view.canvasWidth);
+		//console.log("EDITOR.resize: canvasHeight=" + EDITOR.view.canvasHeight);
 		
 		
 		leftColumn.style.height = EDITOR.view.canvasHeight + "px";
@@ -3312,7 +3309,7 @@ ca 20ms to render, ca 13ms to render without creating new objects
 		// To make 
 		
 		var leftColumnPadding = window.getComputedStyle(document.getElementById("leftColumn")).getPropertyValue("padding");
-		//console.log("leftColumnPadding=" + leftColumnPadding);
+		//console.log("EDITOR.resize: leftColumnPadding=" + leftColumnPadding);
 		var columnPadding = parseInt(leftColumnPadding);
 		var leftWrappers = leftColumn.getElementsByClassName("wrap");
 		for (var i = 0; i < leftWrappers.length; i++) {
@@ -3332,7 +3329,7 @@ ca 20ms to render, ca 13ms to render without creating new objects
 		
 		// Restore scrolling of the wrappers
 		for (var i = 0; i < wrappers.length; i++) {
-			//console.log("Restoring scroll " +  wrappers[i].getAttribute("id") + " savedScrollTop=" + wrappers[i].getAttribute("savedScrollTop"));
+			//console.log("EDITOR.resize: Restoring scroll " +  wrappers[i].getAttribute("id") + " savedScrollTop=" + wrappers[i].getAttribute("savedScrollTop"));
 			wrappers[i].scrollTop = wrappers[i].getAttribute("savedScrollTop");
 			wrappers[i].scrollLeft = wrappers[i].getAttribute("savedScrollLeft");
 		}
@@ -3349,21 +3346,21 @@ ca 20ms to render, ca 13ms to render without creating new objects
 			}
 		*/
 		
-		//console.log("columnPadding=" + columnPadding);
+		//console.log("EDITOR.resize: columnPadding=" + columnPadding);
 		
 		
 		// Calculate column width and row height
 		EDITOR.view.visibleColumns = Math.ceil((EDITOR.view.canvasWidth - EDITOR.settings.leftMargin - EDITOR.settings.rightMargin) / EDITOR.settings.gridWidth);
 		
-		//console.log("(resize1) EDITOR.view.visibleColumns=" + EDITOR.view.visibleColumns);
-		//console.log("(resize1) EDITOR.view.endingColumn=" + EDITOR.view.endingColumn);
+		//console.log("EDITOR.resize: (resize1) EDITOR.view.visibleColumns=" + EDITOR.view.visibleColumns);
+		//console.log("EDITOR.resize: (resize1) EDITOR.view.endingColumn=" + EDITOR.view.endingColumn);
 		
 		// ceil (overflow)
 		EDITOR.view.visibleRows = Math.ceil((EDITOR.view.canvasHeight - EDITOR.settings.topMargin - EDITOR.settings.bottomMargin) / EDITOR.settings.gridHeight);
 		
-		//console.log("visibleRows=" + EDITOR.view.visibleRows);
-		//console.log("topMargin=" + EDITOR.settings.topMargin);
-		//console.log("bottomMargin=" + EDITOR.settings.bottomMargin);
+		//console.log("EDITOR.resize: visibleRows=" + EDITOR.view.visibleRows);
+		//console.log("EDITOR.resize: topMargin=" + EDITOR.settings.topMargin);
+		//console.log("EDITOR.resize: bottomMargin=" + EDITOR.settings.bottomMargin);
 		
 		
 		//if(PIXEL_RATIO >= 1) {
@@ -3375,11 +3372,11 @@ ca 20ms to render, ca 13ms to render without creating new objects
 		//var canvasHeight = EDITOR.view.canvasHeight / PIXEL_RATIO;
 		//}
 		
-		//console.log("PIXEL_RATIO=" + PIXEL_RATIO + " canvasWidth=" + canvasWidth + " canvasHeight=" + canvasHeight);
+		//console.log("EDITOR.resize: PIXEL_RATIO=" + PIXEL_RATIO + " canvasWidth=" + canvasWidth + " canvasHeight=" + canvasHeight);
 		
 		if( EDITOR.canvas && (EDITOR.canvas.width != canvasWidth || EDITOR.canvas.height != canvasHeight || resizeOverride) ) {
 			
-			//console.log("DebugCtx: Before canvas resize: windowLoaded=" + windowLoaded + " EDITOR.canvasContext.imageSmoothingEnabled=" + EDITOR.canvasContext.imageSmoothingEnabled);
+			//console.log("EDITOR.resize: DebugCtx: Before canvas resize: windowLoaded=" + windowLoaded + " EDITOR.canvasContext.imageSmoothingEnabled=" + EDITOR.canvasContext.imageSmoothingEnabled);
 			
 			EDITOR.canvas.style.width = EDITOR.view.canvasWidth + "px";
 			EDITOR.canvas.style.height = EDITOR.view.canvasHeight + "px";
@@ -3387,7 +3384,7 @@ ca 20ms to render, ca 13ms to render without creating new objects
 			EDITOR.canvas.width  = canvasWidth;
 			EDITOR.canvas.height = canvasHeight;
 			
-			//console.log("DebugCtx: After canvas resize: EDITOR.canvasContext.imageSmoothingEnabled=" + EDITOR.canvasContext.imageSmoothingEnabled);
+			//console.log("EDITOR.resize: DebugCtx: After canvas resize: EDITOR.canvasContext.imageSmoothingEnabled=" + EDITOR.canvasContext.imageSmoothingEnabled);
 			
 			// The canvas is reset when resizing!
 			canvasContextReset();
@@ -3398,7 +3395,7 @@ ca 20ms to render, ca 13ms to render without creating new objects
 			EDITOR.settings.verticalScrollZone = EDITOR.settings.gridWidth*3 + EDITOR.settings.rightMargin; // Scrollbar zone, right
 			EDITOR.settings.horizontalScrollZone = EDITOR.settings.gridHeight*2 + EDITOR.settings.topMargin; // Scrollbar zone, bottom. When touching down in the zone we should scroll
 			
-			//console.log("Set canvas: EDITOR.canvas.width=" + EDITOR.canvas.width + " EDITOR.canvas.height=" + EDITOR.canvas.height + " EDITOR.canvas.style.width=" + EDITOR.canvas.style.width + " EDITOR.canvas.style.height=" + EDITOR.canvas.style.height);
+			//console.log("EDITOR.resize: Set canvas: EDITOR.canvas.width=" + EDITOR.canvas.width + " EDITOR.canvas.height=" + EDITOR.canvas.height + " EDITOR.canvas.style.width=" + EDITOR.canvas.style.width + " EDITOR.canvas.style.height=" + EDITOR.canvas.style.height);
 			
 			var dashboard = document.getElementById("dashboard");
 			dashboard.style.width = EDITOR.view.canvasWidth + "px";
@@ -3406,12 +3403,12 @@ ca 20ms to render, ca 13ms to render without creating new objects
 			
 			
 			// Need to re-render after resizing the canvas!
-			//console.log("re-render after resizing the canvas!");
+			//console.log("EDITOR.resize: re-render after resizing the canvas!");
 			EDITOR.shouldRender = true;
 			
 		}
 		else if(EDITOR.canvas) {
-			//console.log("Not resetting canvas dimensions. It's already at EDITOR.canvas.width=" + EDITOR.canvas.width + " EDITOR.canvas.height=" + EDITOR.canvas.height);
+			//console.log("EDITOR.resize: Not resetting canvas dimensions. It's already at EDITOR.canvas.width=" + EDITOR.canvas.width + " EDITOR.canvas.height=" + EDITOR.canvas.height);
 		}
 		
 		if(EDITOR.currentFile) {
@@ -3426,17 +3423,17 @@ ca 20ms to render, ca 13ms to render without creating new objects
 			
 		}
 		else {
-			console.warn("No current file! EDITOR.currentFile=" + EDITOR.currentFile);
+			//console.warn("EDITOR.resize: No current file! EDITOR.currentFile=" + EDITOR.currentFile);
 			EDITOR.view.endingColumn = EDITOR.view.visibleColumns;
 			
 		}
 		
-		//console.log("(resize2) EDITOR.view.visibleColumns=" + EDITOR.view.visibleColumns);
-		//console.log("(resize2) EDITOR.view.endingColumn=" + EDITOR.view.endingColumn);
+		//console.log("EDITOR.resize: (resize2) EDITOR.view.visibleColumns=" + EDITOR.view.visibleColumns);
+		//console.log("EDITOR.resize: (resize2) EDITOR.view.endingColumn=" + EDITOR.view.endingColumn);
 		
 		// Resize listeners (after)
 		var f = EDITOR.eventListeners.afterResize.map(funMap);
-		//console.log("Calling afterResize listeners (" + f.length + ") ...");
+		//console.log("EDITOR.resize: Calling afterResize listeners (" + f.length + ") ...");
 		for(var i=0; i<f.length; i++) {
 			f[i](EDITOR.currentFile, windowWidth, windowHeight);
 		}
@@ -3460,7 +3457,7 @@ ca 20ms to render, ca 13ms to render without creating new objects
 			
 			// If there are many elements in leftColumn or rightColumn, they have to share the height
 			
-			//console.log("resize: shareHeight: maxTotalHeight=" + maxTotalHeight + " elements: ", elements);
+			//console.log("EDITOR.resize: : shareHeight: maxTotalHeight=" + maxTotalHeight + " elements: ", elements);
 			
 			var devidedHeight = Math.floor(maxTotalHeight / elements.length);
 			var computedStyle;
