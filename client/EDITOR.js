@@ -2495,6 +2495,7 @@ callback(error);
 	
 	//EDITOR.resetCanvasContext = canvasContextReset;
 
+
 	EDITOR.render = function render(file, fileStartRow, fileEndRow, screenStartRow, canvas, ctx, renderOverride, background) {
 		
 		//console.warn("EDITOR.render! renderOverride=" + renderOverride + " EDITOR.shouldRender=" + EDITOR.shouldRender + " Editor canvas ? " + (canvas == undefined || canvas == EDITOR.canvas) + " EDITOR.canvasContext.font=" + EDITOR.canvasContext.font);
@@ -3129,17 +3130,34 @@ ca 20ms to render, ca 13ms to render without creating new objects
 		
 	}
 	
+	var renderTimer;
 	EDITOR.renderNeeded = function renderNeeded() {
 		// Tell the editor that it needs to render
 		
-		console.warn("Render needed!");
+		//console.warn("Render needed!");
 		
+		/*
+			The reason why we want functions to call EDITOR.renderNeeded() is to "buffer" the render so we don't make unneccesary renders
+
+			In order to save CPU when idle, we have set the main loop to only re-render every 1000ms (one second)...
+			Resulting in some action seem laggy, for example opening a new file, there will be a re-render when pressing Enter, 
+			but the file opens async and have to wait up to one second for next render...
+
+			(gotcha: if we call window.requestAnimationFrame 1000 times in a row it will also run 1000 times! eg. it doesn't buffer calls )
+		*/
+
+
 		if(EDITOR.settings.devMode && EDITOR.shouldRender == false) {
 			// For debugging, so we know why a render was needed
 			//console.log(UTIL.getStack("renderNeeded"));
 		}
 		EDITOR.shouldRender = true;
 		
+		clearTimeout(renderTimer);
+		renderTimer = setTimeout(function renderMaybe() {
+			resizeAndRender();
+		}, 10);
+
 		if(EDITOR.animationFunctions.length > 0 && !isAnimating && window.requestAnimationFrame) {
 			window.requestAnimationFrame(animate);
 		}
@@ -6123,7 +6141,7 @@ console.warn(err.message);
 		// This function will be called on every interaction
 		
 		// Calling render here (efter each key event) seems to be the fastest (faster then waiting for requestAnimationFrame)
-		if(EDITOR.fontLoaded) resizeAndRender();
+		resizeAndRender();
 
 
 		nextInteractionFunctions();

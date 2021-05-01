@@ -162,7 +162,6 @@ EDITOR.unbindKey(show_gotoFileInput2);
 					file.changed = false;
 					
 					EDITOR.renderNeeded();
-					//EDITOR.render(); // It will be black!? if we render right away!
 					
 				});
 				
@@ -215,7 +214,7 @@ EDITOR.unbindKey(show_gotoFileInput2);
 				if(fileHandle) file.nativeFileSystemFileHandle = fileHandle;
 				
 				EDITOR.renderNeeded();
-				EDITOR.render();
+				
 				//console.log("goto_file: File ready for editing");
 				
 			});
@@ -696,11 +695,12 @@ if(maxResults <= 0) {
 							ignoreSelection = true;
 						show_gotoFileInput(file, combo);
 						}
+						EDITOR.renderNeeded();
 					});
-			}
+				}
 			}
 			
-// Is there a file path/name in the clipboard?
+			// Is there a file path/name in the clipboard?
 
 			// Is the caret on a file path or file name ? And a line number ? Eg. in a bug report
 			var filePath = ""
@@ -1013,7 +1013,6 @@ abortFindFiles();
 					EDITOR.dashboard.hide();
 					
 					//console.log("goto_file: Going to line " + lineNr);
-					EDITOR.renderNeeded();
 					
 					var dir = UTIL.getDirectoryFromPath(path);
 					
@@ -1027,6 +1026,8 @@ abortFindFiles();
 						file.scrollToCaret();
 						gotoLine = null;
 					}
+
+					EDITOR.renderNeeded();
 					
 				});
 				
