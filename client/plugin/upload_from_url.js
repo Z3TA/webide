@@ -27,7 +27,7 @@
 		
 		EDITOR.getClipboardContent(function(err, clipboardContent, pseudoClipboard) {
 			
-			console.log("uploadFromUrl: clipboardContent=" + clipboardContent);
+			//console.log("uploadFromUrl: clipboardContent=" + clipboardContent);
 			
 			if(clipboardContent) {
 				
@@ -36,14 +36,12 @@
 				
 				if(matchProtocol) {
 					var protocol = matchProtocol[1].toLowerCase();
-					console.log("uploadFromUrl: protocol=" + protocol);
+					//console.log("uploadFromUrl: protocol=" + protocol);
 					if(protocol == "http" || protocol == "https") {
 						var defaultUrl = clipboardContent;
 					}
 				}
-				else {
-					console.log("uploadFromUrl: clipboardContent=" + clipboardContent + " does not match reProtocol=" + reProtocol);
-				}
+				//else {console.log("uploadFromUrl: clipboardContent=" + clipboardContent + " does not match reProtocol=" + reProtocol);}
 			}
 			
 			promptBox("URL to download from: ", {defaultValue: defaultUrl}, function(url) {

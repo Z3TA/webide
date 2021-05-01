@@ -76,7 +76,7 @@ zoomedOnce = true;
 
 		winMenuZoom.activate();
 		
-		console.log("zooming!");
+		//console.log("zooming!");
 		EDITOR.settings.gridHeight = EDITOR.settings.gridHeight / 6;
 		EDITOR.settings.gridWidth = EDITOR.settings.gridWidth / 6;
 		EDITOR.settings.style.fontSize = EDITOR.settings.style.fontSize / 4;
@@ -132,7 +132,7 @@ zoomedOnce = true;
 		
 		if(zoomedIn) {
 		
-		console.log("zoom reset!");
+			//console.log("zoom reset!");
 		EDITOR.settings.gridHeight = o_gridHeight;
 		EDITOR.settings.gridWidth = o_gridWidth;
 		EDITOR.settings.style.fontSize = o_fontSize;
@@ -290,7 +290,7 @@ zoomedOnce = true;
 				}
 			}
 			
-			console.log("Heading " + size + " :" + text);
+			//console.log("Heading " + size + " :" + text);
 			
 			if(size > 0 || 1==1) {
 				// ## Paint header

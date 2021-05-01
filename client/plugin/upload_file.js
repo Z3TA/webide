@@ -44,11 +44,11 @@ fileInput = document.createElement("input")
 	
 	function handleFiles(fileInputChangeEvent) {
 		
-		console.log("fileInputChangeEvent:", fileInputChangeEvent);
+		//console.log("fileInputChangeEvent:", fileInputChangeEvent);
 		
 		var files = fileInput.files;
 		
-		console.log("files=", files);
+		//console.log("files=", files);
 		
 		var filesToSave = 0;
 		var filesSaved = 0;
@@ -56,7 +56,7 @@ fileInput = document.createElement("input")
 		
 		if(files.length == 0) return;
 		
-		console.log("files is an array ? " + Array.isArray(files));
+		//console.log("files is an array ? " + Array.isArray(files));
 		
 		if(files.length == 1) var instruction = "Where to save " + files[0].name + " ? (specify folder path)";
 		else var instruction = "Where to save the files ? (specify folder path)";
@@ -67,7 +67,7 @@ fileInput = document.createElement("input")
 			EDITOR.createPath(path, function(err) {
 				if(err) return alertBox("Unable to create upload path=" + path + " Error: " + err.message);
 				
-				console.log("Uploading " + files.length + " files ...");
+				//console.log("Uploading " + files.length + " files ...");
 				
 				for(var i=0; i<files.length; i++) upload(files[i]);
 				
@@ -78,12 +78,12 @@ fileInput = document.createElement("input")
 				reader.onload = function (readerEvent) {
 					var data = readerEvent.target.result;
 					
-					console.log("Read file.name=" + file.name);
+					//console.log("Read file.name=" + file.name);
 					
 					var filePath = UTIL.joinPaths(path, file.name);
 					
-					console.log("data:");
-					console.log(data);
+					//console.log("data:");
+					//console.log(data);
 					
 					// Specifying encoding:base64 will magically convert to binary!
 					// We do have to remove the data:image/png metadata though!

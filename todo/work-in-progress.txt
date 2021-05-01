@@ -5,6 +5,10 @@ node server/server.js --port=/home/johan/sock/test --domain=test.johan.webide.se
 What I'm working on
 -------------------
 
+removing console.log debug messages
+
+---
+
 optimizing startup time
 
 

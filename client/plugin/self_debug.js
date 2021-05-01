@@ -119,7 +119,7 @@ sendit();
 				}
 				else if(respStr.indexOf("Bad Gateway") != -1 || respStr.indexOf("Meddelande mottaget") == -1) {
 					alertBox("Problem with bug reporting server. Try e-mailing the bug report. " + respStr);
-					console.log("respStr=" + respStr);
+					//console.log("respStr=" + respStr);
 				}
 				else {
 					alertBox("Bug report sent!");
@@ -209,12 +209,12 @@ sendit();
 			
 			// The source is always in client folder
 			var url = UTIL.getLocation(source);
-			console.log(url);
-			console.log("document.location.href=" + document.location.href);
-			console.log("url.pathname=" + url.pathname);
+			//console.log(url);
+			//console.log("document.location.href=" + document.location.href);
+			//console.log("url.pathname=" + url.pathname);
 			
 			var source = source.replace(url.pathname, "/client" + url.pathname);
-			console.log("source=" + source);
+			//console.log("source=" + source);
 			
 			if(EDITOR.user) {
 				source = EDITOR.installDirectory + 'client/' + url.pathname;
@@ -232,7 +232,7 @@ sendit();
 	
 	
 	function showErrorMessage(message, source, lineno, colno, error) {
-		console.log("source=" + source);
+		//console.log("source=" + source);
 		source = UTIL.toSystemPathDelimiters(source);
 		
 		if(EDITOR.settings.devMode) {
@@ -265,12 +265,12 @@ sendit();
 		
 		var lastMsgFromServer = CLIENT.lastMsgFromServer;
 		
-		console.log("selfDebug: Asking the user what to do...");
+		//console.log("selfDebug: Asking the user what to do...");
 		var dialog = confirmBox("" + sourceLink + lineString + message + " (code=" + (error && error.code) + ")<br><br>Close/restart the editor ?", [
 			yes, sendBugReport, no
 		], function (answer) {
 			
-			console.log("selfDebug: answer=" + answer);
+			//console.log("selfDebug: answer=" + answer);
 			
 			if(answer == createTestRestart || answer == createTestKeepRunning) {
 				
@@ -298,7 +298,7 @@ sendit();
 				if(RUNTIME == "browser") {
 
 					if ('serviceWorker' in navigator) {
-						console.log("selfDebug: Unregister service worker ...");
+						//console.log("selfDebug: Unregister service worker ...");
 						navigator.serviceWorker.getRegistrations().then(function(registrations) {
 							
 							for(var registration in registrations) {
@@ -310,10 +310,10 @@ sendit();
 						});
 					}
 					
-					console.log("selfDebug: Forcing reload ...");
+					//console.log("selfDebug: Forcing reload ...");
 					if(document.location.href.indexOf('#') != -1) {
 						// If the location has a #hash in it, it won't reload the page!
-						console.log("selfDebug: Removing hash"); 
+						//console.log("selfDebug: Removing hash"); 
 						document.location = document.location.href.substr(0, document.location.href.indexOf('#'));
 					}
 					else {

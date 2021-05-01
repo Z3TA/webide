@@ -4,7 +4,7 @@
 	var winMenuItem;
 	var defaultSubpixelAntialias = EDITOR.settings.sub_pixel_antialias;
 	
-	console.log("toggle_subpixel_antialias: defaultSubpixelAntialias=" + defaultSubpixelAntialias);
+	//console.log("toggle_subpixel_antialias: defaultSubpixelAntialias=" + defaultSubpixelAntialias);
 	
 	var defaultFontSmoothing, defaultFontSmooth;
 	
@@ -23,7 +23,7 @@ EDITOR.plugin({
 			defaultFontSmoothing = body.style.fontSmoothing || body.style.webkitFontSmoothing || body.style.mozFontSmoothing || body.style.mozOsxFontSmoothing;
 			defaultFontSmooth = body.style.fontSmooth; // https://developer.mozilla.org/en-US/docs/Web/CSS/font-smooth
 			
-			console.log("toggle_subpixel_antialias: defaultFontSmoothing=" + defaultFontSmoothing + " defaultFontSmooth=" + defaultFontSmooth);
+			//console.log("toggle_subpixel_antialias: defaultFontSmoothing=" + defaultFontSmoothing + " defaultFontSmooth=" + defaultFontSmooth);
 			
 			winMenuItem = EDITOR.windowMenu.add(S("sub_pixel_antialias"), [S("View"), 60], toggleSubpixelAntialias);
 			if(EDITOR.settings.sub_pixel_antialias) winMenuItem.activate();
@@ -33,7 +33,7 @@ EDITOR.plugin({
 				EDITOR.localStorage.getItem("sub_pixel_antialias", function whenChecked(err, value) {
 					if(err) throw err;
 					
-					console.log("toggle_subpixel_antialias: logalStorage value=" + value);
+					//console.log("toggle_subpixel_antialias: logalStorage value=" + value);
 					
 					if(value == null) return; // No setting saved
 					
@@ -58,19 +58,19 @@ EDITOR.ctxMenu.hide();
 				});
 			}
 			
-			console.log("toggle_subpixel_antialias: winMenuItem=", winMenuItem);
+			//console.log("toggle_subpixel_antialias: winMenuItem=", winMenuItem);
 			
 			EDITOR.localStorage.getItem("sub_pixel_antialias", function (err, value) {
-				console.log("toggle_subpixel_antialias: logalStorage value=" + value);
+				//console.log("toggle_subpixel_antialias: logalStorage value=" + value);
 				
 				if(value == "true") {
-					console.log("toggle_subpixel_antialias: Enable by editor storage");
+					//console.log("toggle_subpixel_antialias: Enable by editor storage");
 					setSubpixelAntialias(true);
 					winMenuItem.activate();
 					winMenuItem.domElement.title = "Saved in settings";
 				}
 				else if(value == "false") {
-					console.log("toggle_subpixel_antialias: Disable by editor storage");
+					//console.log("toggle_subpixel_antialias: Disable by editor storage");
 					setSubpixelAntialias(false);
 					winMenuItem.deactivate();
 					winMenuItem.domElement.title = "Saved in settings";
@@ -96,7 +96,7 @@ EDITOR.ctxMenu.hide();
 	});
 	
 	function setSubpixelAntialias(state, reset) {
-		console.warn("toggle_subpixel_antialias: Setting EDITOR.settings.sub_pixel_antialias=" + state);
+		//console.warn("toggle_subpixel_antialias: Setting EDITOR.settings.sub_pixel_antialias=" + state);
 		EDITOR.settings.sub_pixel_antialias = state;
 		
 		var body = document.getElementById("body");
@@ -105,21 +105,21 @@ EDITOR.ctxMenu.hide();
 			body.style.webkitFontSmoothing = "auto"; // auto, none, antialiased, subpixel-antialiased
 			body.style.mozFontSmoothing = "auto";
 			body.style.mozOsxFontSmoothing = "auto"; // auto or grayscale
-			console.log("toggle_subpixel_antialias: Set fontSmoothing to auto");
+			//console.log("toggle_subpixel_antialias: Set fontSmoothing to auto");
 		}
 		else if(state === false) {
 			body.style.fontSmoothing = "none";
 			body.style.webkitFontSmoothing = "none"; // auto, none, antialiased, subpixel-antialiased
 			body.style.mozFontSmoothing = "none";
 			body.style.mozOsxFontSmoothing = "none"; // auto or grayscale
-			console.log("toggle_subpixel_antialias: Set fontSmoothing to none");
+			//console.log("toggle_subpixel_antialias: Set fontSmoothing to none");
 		}
 		else if(state === true) {
 			body.style.fontSmoothing = "subpixel-antialiased";
 			body.style.webkitFontSmoothing = "subpixel-antialiased"; // auto, none, antialiased, subpixel-antialiased
 			body.style.mozFontSmoothing = "subpixel-antialiased";
 			body.style.mozOsxFontSmoothing = "subpixel-antialiased"; // auto or grayscale
-			console.log("toggle_subpixel_antialias: Set fontSmoothing to subpixel-antialiased");
+			//console.log("toggle_subpixel_antialias: Set fontSmoothing to subpixel-antialiased");
 		}
 		
 		
@@ -146,7 +146,7 @@ EDITOR.ctxMenu.hide();
 	
 	function toggleSubpixelAntialias() {
 		
-		console.log("toggle_subpixel_antialias: toggleSubpixelAntialias: EDITOR.settings.sub_pixel_antialias=" + EDITOR.settings.sub_pixel_antialias);
+		//console.log("toggle_subpixel_antialias: toggleSubpixelAntialias: EDITOR.settings.sub_pixel_antialias=" + EDITOR.settings.sub_pixel_antialias);
 		
 		if(EDITOR.settings.sub_pixel_antialias) {
 			setSubpixelAntialias(false);

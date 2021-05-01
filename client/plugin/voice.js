@@ -30,7 +30,7 @@
 		desc: "Speech Synthesis assistant",
 		load: function loadVoicePlugin() {
 			
-			console.log("Loading " + this.desc + " ...");
+			//console.log("Loading " + this.desc + " ...");
 			
 			var key_M = 77;
 			var key_S = 83;
@@ -63,14 +63,14 @@
 	function increaseVoiceSpeed() {
 		// Stupid floating point nr will of course make it 0.00000000023 so prevent that
 		EDITOR.speechRate = ((EDITOR.speechRate*10 +1) | 0) / 10;
-		console.log("EDITOR.speechRate=" + EDITOR.speechRate);
+		//console.log("EDITOR.speechRate=" + EDITOR.speechRate);
 		EDITOR.say("Speech rate " + EDITOR.speechRate);
 		return false;
 	}
 	
 	function decreaseVoiceSpeed() {
 		EDITOR.speechRate = ((EDITOR.speechRate*10 - 1) | 0) / 10;
-console.log("EDITOR.speechRate=" + EDITOR.speechRate);
+		//console.log("EDITOR.speechRate=" + EDITOR.speechRate);
 		EDITOR.say("Speech rate " + EDITOR.speechRate);
 		return false;
 	}
@@ -142,11 +142,11 @@ console.log("EDITOR.speechRate=" + EDITOR.speechRate);
 			var char = file.text.charAt(caret.index).toString("utf-8");
 			var charToTheLeft = file.text.charAt(caret.index-1);
 			
-			console.log("char=" + char + " is a non-letter-character ? " + (char.match(/\W/)) );
+			//console.log("char=" + char + " is a non-letter-character ? " + (char.match(/\W/)) );
 			
 			if(char == " ") add("space");
 			else if(char.match(/\W/)) {
-				console.log("Non word character: " + char);
+				//console.log("Non word character: " + char);
 				//add("spec.");
 				if(char == "_") add("underscore");
 				else if(char == "(") add("left parenthesis");
@@ -183,15 +183,15 @@ console.log("EDITOR.speechRate=" + EDITOR.speechRate);
 				}
 			}
 			else if(charToTheLeft.match(/\W/) || caret.col == 0) {
-				console.log("get word caret.index=" + caret.index + " char=" + char + " ...");
+				//console.log("get word caret.index=" + caret.index + " char=" + char + " ...");
 			var word = "";
 			for (var i=caret.index, char; i<file.text.length; i++) {
 				char = file.text.charAt(i)
 				if(char.match(/\s/)) {
-					console.log("Space at index=" + i);
+						//console.log("Space at index=" + i);
 					break;
 				}
-				console.log("char=" + char + " at index=" + i);
+					//console.log("char=" + char + " at index=" + i);
 				word += char;
 			}
 			add(word);
@@ -214,7 +214,7 @@ console.log("EDITOR.speechRate=" + EDITOR.speechRate);
 		function add(str) {
 			if(msg.length != 0) msg += " ";
 			msg += str;
-			console.log("say:add:" + str);
+			//console.log("say:add:" + str);
 		}
 		
 	}

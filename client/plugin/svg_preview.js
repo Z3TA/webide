@@ -113,7 +113,7 @@ widget.unload();
 		var width = Math.ceil(orgWidth * currentValue / 100);
 		var height = Math.ceil(orgHeight * currentValue / 100);
 		
-		console.log("zoom: width=" + width + " height=" + height + " orgWidth=" + orgWidth + " orgHeight=" + orgHeight + " x1=" + x1 + " x2=" + x2 + " y1=" + y1 + " y2=" + y2 + " ");
+		//console.log("zoom: width=" + width + " height=" + height + " orgWidth=" + orgWidth + " orgHeight=" + orgHeight + " x1=" + x1 + " x2=" + x2 + " y1=" + y1 + " y2=" + y2 + " ");
 		
 		var previewWin = info.previewWin;
 		
@@ -145,7 +145,7 @@ widget.unload();
 		
 		var ext = UTIL.getFileExtension(file.path);
 		if(!ext.match(/svg/i)) {
-			console.log("previewSvg: Not a SVG file: " + ext);
+			//console.log("previewSvg: Not a SVG file: " + ext);
 			return false;
 		}
 		

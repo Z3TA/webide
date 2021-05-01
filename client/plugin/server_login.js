@@ -78,7 +78,7 @@
 	}
 	
 	function serverLoginLoginNeeded(loginNeededByCommand) {
-		console.log("Login needed because of command: " + loginNeededByCommand);
+		//console.log("Login needed because of command: " + loginNeededByCommand);
 		showLoginDialog();
 	}
 	
@@ -86,7 +86,7 @@
 		
 		// The editor will try to connect to the default server when it starts
 		
-		console.log("Connection to the server has been lost!");
+		//console.log("Connection to the server has been lost!");
 		
 		showLoginDialog({stealFocus: false});
 		
@@ -95,25 +95,23 @@
 	function serverReLoginOnConnected(err) {
 		// ## Automaitcally re-loggin when re-connected to server
 		
-		console.log("serverReLoginOnConnected: CLIENT.lastCommand=" + CLIENT.lastCommand + " CLIENT.commandCounter=" + CLIENT.commandCounter + " CLIENT.inFlight=" + CLIENT.inFlight);
+		//console.log("serverReLoginOnConnected: CLIENT.lastCommand=" + CLIENT.lastCommand + " CLIENT.commandCounter=" + CLIENT.commandCounter + " CLIENT.inFlight=" + CLIENT.inFlight);
 
 		var loginScreen = document.getElementById("loginScreen");
 		if(loginScreen && loginScreen.style.display != "none") {
-			console.log("Not re-login if loginScreen is visible");
+			//console.log("Not re-login if loginScreen is visible");
 			return;
 		}
-		else {
-			console.log("loginScreen=", loginScreen, " loginScreen.style.display=" + loginScreen.style.display);
-		}
+		//else {console.log("loginScreen=", loginScreen, " loginScreen.style.display=" + loginScreen.style.display);}
 
 		if(CLIENT.commandCounter < 3) {
-			console.log("Not re-login because CLIENT.commandCounter=" + CLIENT.commandCounter);
+			//console.log("Not re-login because CLIENT.commandCounter=" + CLIENT.commandCounter);
 			return;
 		}
 
 		if(loggingIn) return;
 			
-		console.log("Got connect callback! err=" + err);
+		//console.log("Got connect callback! err=" + err);
 		if(err) {
 			if(err.code != "CONNECTION_CLOSED") throw new Error(err.message);
 			//alertBox("Unable to connect to server ...	The editor will have limited functionality !");
@@ -124,23 +122,21 @@
 			var userValue = QUERY_STRING["user"];
 			var pwValue = QUERY_STRING["pw"];
 
-			console.log("userValue=" + userValue + " pwValue=" + pwValue);
+			//console.log("userValue=" + userValue + " pwValue=" + pwValue);
 			
 			if(EDITOR.localStorage) { // && !userValue
-				console.log("Checking for editorServerUser and editorServerPw in local storage ...");
+				//console.log("Checking for editorServerUser and editorServerPw in local storage ...");
 				EDITOR.localStorage.getItem(["editorServerUser", "editorServerPw"], function gotLoginFromLocalStorage(err, obj) {
 					if(err) console.error(err);
 					
-					console.log("credentials: ", obj);
+					//console.log("credentials: ", obj);
 					if(obj && obj.editorServerUser) {
-						console.log("Using saved credentials to login ...");
+						//console.log("Using saved credentials to login ...");
 						userValue = obj["editorServerUser"] || userValue;
 						pwValue = obj["editorServerPw"] || pwValue;
 					}
 					
-					else {
-						console.log("EDITOR.startedCounter=" + EDITOR.startedCounter + " RUNTIME=" + RUNTIME + " window.location.hostname=" + window.location.hostname);
-					}
+					//else {console.log("EDITOR.startedCounter=" + EDITOR.startedCounter + " RUNTIME=" + RUNTIME + " window.location.hostname=" + window.location.hostname);}
 					
 					attemptLogin();
 				});
@@ -152,24 +148,24 @@
 		
 		function attemptLogin() {
 
-			console.trace("attemptLogin!");
+			//console.trace("attemptLogin!");
 			if(!userValue && locally) {
-				console.log("Using default login because userValue=" + userValue + " and locally=" + locally);
+				//console.log("Using default login because userValue=" + userValue + " and locally=" + locally);
 				userValue = DEFAULT_USERNAME;
 				pwValue = DEFAULT_PASSWORD;
 			}
 			
 			if(userValue && pwValue) {
-				console.log("Attempting to login to server with user=" + userValue + " pwValue=" + pwValue + " EDITOR.version=" + EDITOR.version + " ...");
+				//console.log("Attempting to login to server with user=" + userValue + " pwValue=" + pwValue + " EDITOR.version=" + EDITOR.version + " ...");
 				loggingIn = true;
 				if(loginButton) loginButton.disabled = true;
 				
 				var nat_code = QUERY_STRING["nat_code"];
 				if(nat_code) {
 					// Send nat request before logging in
-					console.log("Sending NAT request... (before auto login)!");
+					//console.log("Sending NAT request... (before auto login)!");
 					CLIENT.cmd("NAT", {code: nat_code}, function natResponse(err, resp) {
-						console.log("NAT request response (before auto login)! err=" + err + " resp=" + resp);
+						//console.log("NAT request response (before auto login)! err=" + err + " resp=" + resp);
 						if(err) return alertBox("Unable to automatically connect to server! Error: " + err.message);
 						identify();
 					});
@@ -212,7 +208,7 @@
 					else {
 						hideLoginDialog();
 
-						console.log("Successfully logged into server with user=" + resp.loginSuccess.user);
+						//console.log("Successfully logged into server with user=" + resp.loginSuccess.user);
 
 						
 					}
@@ -232,35 +228,35 @@
 
 		}
 
-		console.warn("showLoginDialog: options=" + JSON.stringify(options) + " serverLoginDialog.visible=" + serverLoginDialog.visible);
+		//console.warn("showLoginDialog: options=" + JSON.stringify(options) + " serverLoginDialog.visible=" + serverLoginDialog.visible);
 		if(QUERY_STRING["skiplogin"]) {
 			
-			console.log('Not showing login dialog because QUERY_STRING["skiplogin"]=' + QUERY_STRING["skiplogin"]);
+			//console.log('Not showing login dialog because QUERY_STRING["skiplogin"]=' + QUERY_STRING["skiplogin"]);
 			return true;
 		
 		}
 		if(serverLoginDialog.visible) {
-			console.log("Not showing login dialog because serverLoginDialog.visible=" + serverLoginDialog.visible);
+			//console.log("Not showing login dialog because serverLoginDialog.visible=" + serverLoginDialog.visible);
 			return true;
 		}
 		
-		console.log("Showing login dialog! options=" + JSON.stringify(options))
+		//console.log("Showing login dialog! options=" + JSON.stringify(options))
 		return serverLoginDialog.show(options);
 	}
 	
 	function hideLoginDialog() {
-		console.log("hideLoginDialog!");
+		//console.log("hideLoginDialog!");
 
 		if(typeof loginScreen == "object") {
 			loginScreen.style.display="none";
 		}
 
-		console.log(UTIL.getStack("hideLoginDialog"));
+		//console.log(UTIL.getStack("hideLoginDialog"));
 		return serverLoginDialog.hide();
 	}
 	
 	function saveLogin(user) {
-		console.log("SaveLogin:", user);
+		//console.log("SaveLogin:", user);
 		EDITOR.localStorage.setItem("editorServerUrl", CLIENT.url);
 		EDITOR.localStorage.setItem("editorServerUser", user.user);
 		EDITOR.localStorage.setItem("editorServerPw", user.pw);
@@ -461,18 +457,19 @@
 			var userValue = user.value;
 			var pwValue = pw.value;
 			
-			if(!EDITOR.localStorage) console.warn("No EDITOR.localstorage available! Server URL and credentials will not be remembered!");
-			else {
-				EDITOR.localStorage.getItem(["editorServerUrl", "editorServerUser", "editorServerPw"], function(err, obj) {
-					if(err) throw err;
-					
-					if(urlValue && obj.editorServerUrl != urlValue) EDITOR.localStorage.setItem("editorServerUrl", urlValue);
-					if(userValue && obj.editorServerUser != userValue) EDITOR.localStorage.setItem("editorServerUser", userValue);
-					if(pwValue && obj.editorServerPw != pwValue) EDITOR.localStorage.setItem("editorServerPw", pwValue);
-				});
+			if(!EDITOR.localStorage) {
+				//console.warn("No EDITOR.localstorage available! Server URL and credentials will not be remembered!");
+				return;
 			}
+
+			EDITOR.localStorage.getItem(["editorServerUrl", "editorServerUser", "editorServerPw"], function(err, obj) {
+				if(err) throw err;
+					
+				if(urlValue && obj.editorServerUrl != urlValue) EDITOR.localStorage.setItem("editorServerUrl", urlValue);
+				if(userValue && obj.editorServerUser != userValue) EDITOR.localStorage.setItem("editorServerUser", userValue);
+				if(pwValue && obj.editorServerPw != pwValue) EDITOR.localStorage.setItem("editorServerPw", pwValue);
+			});
 		}
-		
 		
 		function connectToServer(e) {
 			
@@ -481,14 +478,14 @@
 			// ## Manually logging in via login form
 			
 			clickedConnectLogin = true;
-			console.log("Login form submitted! Connecting to server ...");
+			//console.log("Login form submitted! Connecting to server ...");
 			
 			var server = nat_code ? {url: nat_code} : {url: url.value};
 			
 			if(CLIENT.connected) {
 				if(CLIENT.url != server.url || (EDITOR.user && EDITOR.user.name != user.value)) {
 					// Must disconnect in order to login as a different user!
-					console.log("Disconnecting from server becasue: CLIENT.url=" + CLIENT.url + " server.url=" + server.url + " EDITOR.user.name=" + (EDITOR.user && EDITOR.user.name) + " user.value=" + user.value);
+					//console.log("Disconnecting from server becasue: CLIENT.url=" + CLIENT.url + " server.url=" + server.url + " EDITOR.user.name=" + (EDITOR.user && EDITOR.user.name) + " user.value=" + user.value);
 					CLIENT.disconnect();
 					connectToServer();
 				}
@@ -527,7 +524,7 @@
 						
 					}
 					else {
-						console.log("Attempting logging in after connection ...");
+						//console.log("Attempting logging in after connection ...");
 						login();
 					}
 				});
@@ -548,9 +545,9 @@
 				var nat_code = QUERY_STRING["nat_code"];
 				if(nat_code) {
 					// Send nat request before logging in
-					console.log("Seding NAT request after submitting form...");
+					//console.log("Seding NAT request after submitting form...");
 					CLIENT.cmd("NAT", {code: nat_code}, function natResponse(err, resp) {
-						console.log("NAT request response (after submitting form)! err=" + err + " resp=" + resp);
+						//console.log("NAT request response (after submitting form)! err=" + err + " resp=" + resp);
 						if(err) return alertBox("Unable to send NAT request! Error: " + err.message);
 						identify();
 					});

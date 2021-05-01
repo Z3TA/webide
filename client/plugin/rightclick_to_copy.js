@@ -82,10 +82,10 @@ contentPreview += text;
 		EDITOR.getClipboardContent(function(err, text) {
 			EDITOR.ctxMenu.hide();
 			
-			console.log("ctxPaste: EDITOR.getClipboardContent: err=" + (err && err.message) + " text=" + text);
+			//console.log("ctxPaste: EDITOR.getClipboardContent: err=" + (err && err.message) + " text=" + text);
 			
 			if(err && err.code != "CANCEL") {
-				console.log("ctxPaste: Using pseudoClipboard because of error from EDITOR.getClipboardContent: " + err.message);
+				//console.log("ctxPaste: Using pseudoClipboard because of error from EDITOR.getClipboardContent: " + err.message);
 				text = EDITOR.pseudoClipboard;
 			}
 			

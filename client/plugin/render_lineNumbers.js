@@ -60,7 +60,7 @@
 	function linerNumbersAfterResize() {
 		pixelRatio = window.devicePixelRatio || 1;
 		
-		console.log("render_lineNumbers: pixelRatio=" + pixelRatio);
+		//console.log("render_lineNumbers: pixelRatio=" + pixelRatio);
 		
 		cacheCanvasWidth = EDITOR.settings.leftMargin - leftMargin;
 		cacheCanvasHeight = EDITOR.view.canvasHeight;
@@ -157,11 +157,7 @@
 		var destinationWidth = sourceRectWidth / pixelRatio; // scale sourceRectWidth to destinationWidth and draw a destinationWidth wide sub-image on the canvas
 		var destinationHeight = sourceRectHeight / pixelRatio; // scale sourceRectHeight to destinationHeight and draw a destinationHeight high sub-image on the canvas
 		
-		console.log("render_lineNumbers: screenStartRow=" + screenStartRow + " fileStartRow=" + fileStartRow + " fileEndRow=" + fileEndRow + " sourceX=" + sourceX + 
-		" sourceY=" + sourceY + " sourceRectWidth=" + sourceRectWidth + " sourceRectHeight=" + sourceRectHeight + " destinationX=" + destinationX + 
-		" destinationY=" + destinationY + " destinationWidth=" + destinationWidth + " destinationHeight=" + destinationHeight + 
-		" cacheCanvas.width=" + cacheCanvas.width + " cacheCanvasWidth=" + cacheCanvasWidth + " EDITOR.canvas.width=" + EDITOR.canvas.width + 
-		" cacheCanvas.height=" + cacheCanvas.height + " cacheCanvasHeight=" + cacheCanvasHeight + " EDITOR.canvas.height=" + EDITOR.canvas.height);
+		//console.log("render_lineNumbers: screenStartRow=" + screenStartRow + " fileStartRow=" + fileStartRow + " fileEndRow=" + fileEndRow + " sourceX=" + sourceX + " sourceY=" + sourceY + " sourceRectWidth=" + sourceRectWidth + " sourceRectHeight=" + sourceRectHeight + " destinationX=" + destinationX + " destinationY=" + destinationY + " destinationWidth=" + destinationWidth + " destinationHeight=" + destinationHeight + " cacheCanvas.width=" + cacheCanvas.width + " cacheCanvasWidth=" + cacheCanvasWidth + " EDITOR.canvas.width=" + EDITOR.canvas.width + " cacheCanvas.height=" + cacheCanvas.height + " cacheCanvasHeight=" + cacheCanvasHeight + " EDITOR.canvas.height=" + EDITOR.canvas.height);
 		
 		ctx.drawImage(
 		cacheCanvas, 

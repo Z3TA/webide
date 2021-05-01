@@ -55,7 +55,7 @@ var W = 87;
 		
 		if(!file) return FAIL;
 		
-		console.log("file.lineBreak=" + UTIL.lbChars(file.lineBreak));
+		//console.log("file.lineBreak=" + UTIL.lbChars(file.lineBreak));
 		
 		// Find the paragraph
 		var lastLineBreakCharacter = file.lineBreak.charAt(file.lineBreak.length-1);
@@ -114,8 +114,8 @@ var W = 87;
 		
 		
 		
-		console.log("startOfParagraph=" + startOfParagraph);
-		console.log("endOfParagraph=" + endOfParagraph);
+		//console.log("startOfParagraph=" + startOfParagraph);
+		//console.log("endOfParagraph=" + endOfParagraph);
 		
 		var text = file.text.substring(startOfParagraph, endOfParagraph+1);
 		
@@ -133,34 +133,34 @@ var W = 87;
 		var secondCharacter = text.charAt(1);
 		var lastCharacter = text.charAt(text.length-1);
 		
-		console.log("firstCharacter=" + UTIL.lbChars(firstCharacter));
-		console.log("secondCharacter=" + UTIL.lbChars(secondCharacter));
-		console.log("lastCharacter=" + UTIL.lbChars(lastCharacter));
+		//console.log("firstCharacter=" + UTIL.lbChars(firstCharacter));
+		//console.log("secondCharacter=" + UTIL.lbChars(secondCharacter));
+		//console.log("lastCharacter=" + UTIL.lbChars(lastCharacter));
 		
 		// todo: Allow it to start and end with tags besides p if the tags are the same
 		
 		if(firstCharacter != "<" && secondCharacter != "p" && file.parsed != null) {
 			alertBox("The word wrapper is currently only supported inside HTML paragraphs or in plain text files");
-			console.log("firstCharacter=" + firstCharacter);
-			console.log("secondCharacter=" + secondCharacter);
-			console.log("file.parsed=" + file.parsed);
-			console.log("startOfParagraph=" + startOfParagraph);
-			console.log("endOfParagraph=" + endOfParagraph);
-			console.log("text=" + UTIL.lbChars(text));
+			//console.log("firstCharacter=" + firstCharacter);
+			//console.log("secondCharacter=" + secondCharacter);
+			//console.log("file.parsed=" + file.parsed);
+			//console.log("startOfParagraph=" + startOfParagraph);
+			//console.log("endOfParagraph=" + endOfParagraph);
+			//console.log("text=" + UTIL.lbChars(text));
 			return FAIL;
 		}
 		
 		if(firstCharacter == "<") {
 			if(lastCharacter != ">") {
 				alertBox("The word wrapper: Paragraph must have an ending tag!");
-				console.log("firstCharacter=" + firstCharacter);
-				console.log("lastCharacter=" + lastCharacter);
-				console.log("text=" + UTIL.lbChars(text));
+				//console.log("firstCharacter=" + firstCharacter);
+				//console.log("lastCharacter=" + lastCharacter);
+				//console.log("text=" + UTIL.lbChars(text));
 				return FAIL;
 			}
 		}
 		
-		console.log( "paragraph text=" + UTIL.lbChars(text));
+		//console.log( "paragraph text=" + UTIL.lbChars(text));
 		
 		//return false;
 		
@@ -190,7 +190,7 @@ var W = 87;
 		text = wordWrapText(text, maxTextWidth - indentation * EDITOR.settings.tabSpace);
 		var textLengthAfter = text.length;
 		
-		console.log("text='" + UTIL.debugWhiteSpace(text) + "'");
+		//console.log("text='" + UTIL.debugWhiteSpace(text) + "'");
 		
 		
 		// Sanity check: The text should still start and end with the same characters!
@@ -208,14 +208,14 @@ var W = 87;
 		
 		// Find out where to move the caret ... it should stay at the same place in the text!
 		var textLengthDiff = textLengthBefore - textLengthAfter;
-		console.log("textLengthDiff=" + textLengthDiff);
+		//console.log("textLengthDiff=" + textLengthDiff);
 		// Place the caret where it was in the text
 		var leftWord, rightWord;
 		for(var i=Math.max(0, caretIndex - Math.abs(textLengthDiff)); i<Math.min(Math.max(0, endOfParagraph - Math.abs(textLengthDiff)), file.text.length); i++) {
 			leftWord = getWord(i, true);
 			rightWord = getWord(i, false);
 			
-			console.log("'" + leftWord + "==" + wordLeftOfCaret + "' '" + rightWord + "==" + wordRightOfCaret + "'");
+			//console.log("'" + leftWord + "==" + wordLeftOfCaret + "' '" + rightWord + "==" + wordRightOfCaret + "'");
 			
 			if( leftWord == wordLeftOfCaret && rightWord == wordRightOfCaret) {
 				file.moveCaretToIndex(i);
@@ -293,7 +293,7 @@ var W = 87;
 			text = text.trim(); // Remove white space at the edges
 			
 			if(text.length <= width) {
-				console.log("text.length=" + text.length + " <= width=" + width);
+				//console.log("text.length=" + text.length + " <= width=" + width);
 				return text;
 			}
 			

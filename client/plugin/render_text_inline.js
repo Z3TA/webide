@@ -20,7 +20,7 @@
 
 	EDITOR.addRender(textRender, 2100);
 
-	console.log("Loaded textRenderer");
+	//console.log("Loaded textRenderer");
 	
 	
 	/*

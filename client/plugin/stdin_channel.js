@@ -31,7 +31,7 @@ Test in bash:
 		EDITOR.on("fileClose", stdinChannelFileClose);
 		//EDITOR.on("afterSave", stdinChannelAfterSave);
 
-		console.log("stdin_channel: stdin channel module loaded!");
+		//console.log("stdin_channel: stdin channel module loaded!");
 	}
 
 	function unloadStdinChannelPlugin() {
@@ -68,7 +68,7 @@ Test in bash:
 		var filePath = str;
 		stdinFilePath = filePath; // This file will also serve as stdin file (if we get data from stdin)
 		stdinFile = null; // filePath is the *new* stdin-file!
-		console.log("stdin_channel: Set stdinFilePath to " + stdinFilePath);
+		//console.log("stdin_channel: Set stdinFilePath to " + stdinFilePath);
 
 		EDITOR.openFile(filePath, undefined, function(err, file) {
 			/*
@@ -90,7 +90,7 @@ Test in bash:
 	}
 
 	function fileOpened(file) {
-		console.log("stdin_channel: File specified in arguments opened: " + file.path)
+		//console.log("stdin_channel: File specified in arguments opened: " + file.path)
 
 		watchFiles.push(file.path);
 
@@ -102,25 +102,25 @@ Test in bash:
 	
 	function stdinPrint(str) {
 		
-		console.log("stdin_channel: stdinPrint: str=" + str);
+		//console.log("stdin_channel: stdinPrint: str=" + str);
 		
 		if(stdinFile && stdinFile.path != stdinFilePath) {
-			console.log("stdin_channel: Changing stdinFile from " + stdinFile.path + " to " + stdinFilePath);
+			//console.log("stdin_channel: Changing stdinFile from " + stdinFile.path + " to " + stdinFilePath);
 			stdinFile = null;
 			EDITOR.openFile(stdinFilePath, undefined, stdinFileOpened);
 		}
 		else if(stdinFile) {
 			
 			// What if the stdinfile has been closed !?
-			console.log("stdin_channel: stdinFile.path=" + stdinFile.path);
+			//console.log("stdin_channel: stdinFile.path=" + stdinFile.path);
 			
 			
-			console.log("stdin_channel: stdinFile.path=" + stdinFile.path + " stdinFilePath=" + stdinFilePath);
+			//console.log("stdin_channel: stdinFile.path=" + stdinFile.path + " stdinFilePath=" + stdinFilePath);
 			stdinFile.write(str);
 			EDITOR.renderNeeded();
 			return;
 		}
-		else console.log("stdin_channel: No stdinFile available")
+		//else console.log("stdin_channel: No stdinFile available")
 		
 		stdinBuffer += str;
 
@@ -130,7 +130,7 @@ Test in bash:
 		// Don't open the stdin file right away, we might get "arguments".
 		setTimeout(function() {
 			if(EDITOR.openFileQueue.indexOf(stdinFilePath) != -1) return;
-			console.log("stdin_channel: Opening stdinFile ...");
+			//console.log("stdin_channel: Opening stdinFile ...");
 			EDITOR.openFile(stdinFilePath, "", stdinFileOpened);
 		}, 100);
 
@@ -140,10 +140,10 @@ Test in bash:
 	function stdinFileOpened(err, file) {
 		if(err) throw err;
 
-		console.log("stdin_channel: stdinFile opened! file==stdinFile?" + (file == stdinFile) + " path=" + file.path);
+		//console.log("stdin_channel: stdinFile opened! file==stdinFile?" + (file == stdinFile) + " path=" + file.path);
 		
 		if(file.path != stdinFilePath) {
-			console.warn("stdin_channel: Wrong stdinFile opened! file.path=" + file.path + " stdinFilePath=" + stdinFilePath + "\n");
+			//console.warn("stdin_channel: Wrong stdinFile opened! file.path=" + file.path + " stdinFilePath=" + stdinFilePath + "\n");
 			wrongStdinFileCount++;
 			if(wrongStdinFileCount > 3) {
 				// Avoid opening too many files

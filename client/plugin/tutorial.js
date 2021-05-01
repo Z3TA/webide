@@ -31,7 +31,8 @@
 				alertBox("<i>Friendly tip:</i><br>Run (install) the editor in application mode in Chrome menu (upper right corner): More Tools => Add to desktop (or home screen)");
 				delete tutorialMessages.appMode;
 			}
-		} else console.log("isChrome=" + isChrome() + " isInWebAppiOS=" + isInWebAppiOS + " isInWebAppChrome=" + isInWebAppChrome + "");
+		} 
+		//else console.log("isChrome=" + isChrome() + " isInWebAppiOS=" + isInWebAppiOS + " isInWebAppChrome=" + isInWebAppChrome + "");
 		
 		// Show a friendly "message" every second (messages should remove themselves once they have executed)
 		tutorialMessageInterval = setInterval(showTotorialMessage, 60000);

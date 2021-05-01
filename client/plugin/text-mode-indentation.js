@@ -54,7 +54,7 @@
 	function showWhiteSpaceMaybe(file, combo, caret, target) {
 		if(file == undefined) return; // There might be no file open
 
-		console.log("showWhiteSpaceMaybe: file.parsed=" + !!(file && file.parsed) + " file.fullAutoIndentation=" + file.fullAutoIndentation + " target.className=" + (target && target.className));
+		//console.log("showWhiteSpaceMaybe: file.parsed=" + !!(file && file.parsed) + " file.fullAutoIndentation=" + file.fullAutoIndentation + " target.className=" + (target && target.className));
 		
 		if(target.className != "fileCanvas") return;
 		if(!file) return;
@@ -244,7 +244,7 @@
 		if(file == undefined) return ALLOW_DEFAULT;
 		
 		if(file.parsed!=null || !EDITOR.input) {
-			console.log("indentate:addindentation Not indentating! file.parsed=" + !!file.parsed + " EDITOR.input=" + EDITOR.input + " file.disableParsing=" + file.disableParsing + " file?" + (!!file) + " ");
+			//console.log("indentate:addindentation Not indentating! file.parsed=" + !!file.parsed + " EDITOR.input=" + EDITOR.input + " file.disableParsing=" + file.disableParsing + " file?" + (!!file) + " ");
 			return ALLOW_DEFAULT;
 		}
 		
@@ -260,7 +260,7 @@
 			shouldHaveIndentation = indentationRowAbove + file.indentation;
 		}
 		
-		console.log("indentate: addindentation: row=" + row + " indentationCurrentRow=" + indentationCurrentRow.length + " shouldHaveIndentation=" + shouldHaveIndentation.length + " lastRowEndWithLeftBracket=" + lastRowEndWithLeftBracket + " last=" + last);
+		//console.log("indentate: addindentation: row=" + row + " indentationCurrentRow=" + indentationCurrentRow.length + " shouldHaveIndentation=" + shouldHaveIndentation.length + " lastRowEndWithLeftBracket=" + lastRowEndWithLeftBracket + " last=" + last);
 		
 		if( indentationCurrentRow != shouldHaveIndentation  && (shouldHaveIndentation.length > 0 || file.caret.col > 0)) {
 			var currentRow = file.grid[row];
@@ -302,10 +302,10 @@
 		if(!file) return ALLOW_DEFAULT;;
 		if(!EDITOR.input) return ALLOW_DEFAULT;
 		
-		console.log("indentate: shift=" + shift);
+		//console.log("indentate: shift=" + shift);
 		
 		if(file.fullAutoIndentation) {
-			console.log("indentate: Not indentating because file.fullAutoIndentation=" + file.fullAutoIndentation);
+			//console.log("indentate: Not indentating because file.fullAutoIndentation=" + file.fullAutoIndentation);
 			return ALLOW_DEFAULT;
 		}
 		
@@ -319,24 +319,24 @@
 			var char = "";
 			while(col--) {
 				char = file.grid[caret.row][col].char;
-				console.log("indentate: row=" + caret.row + " col=" + col + " char=" + UTIL.lbChars(char));
+				//console.log("indentate: row=" + caret.row + " col=" + col + " char=" + UTIL.lbChars(char));
 				if(char != "\t" && char != " ") {
 					break;
 				}
 			}
-			console.log("indentate: col=" + col);
+			//console.log("indentate: col=" + col);
 			if(col == -1) beforeText = true;
 		}
 		
 		var selectedRows = getSelectedRowsStartindex(file);
 		
 		if(selectedRows.length == 0 && !shift && !beforeText) {
-			console.log("indentate: Not indentating because selectedRows.length=" + selectedRows.length + " shift=" + shift + " beforeText=" + beforeText + " ");
+			//console.log("indentate: Not indentating because selectedRows.length=" + selectedRows.length + " shift=" + shift + " beforeText=" + beforeText + " ");
 			return ALLOW_DEFAULT;
 		}
 		
 		if(selectedRows.length > 0) {
-			console.log("indentate: selectedRows=" + JSON.stringify(selectedRows));
+			//console.log("indentate: selectedRows=" + JSON.stringify(selectedRows));
 			if(shift) {
 				// Remove indentation
 				for (var i=selectedRows.length-1; i>-1; i--) {
@@ -366,7 +366,7 @@
 				
 				var lastCharOnLine = file.grid[caret.row][ file.grid[caret.row].length-1 ].char;
 				
-				console.log("indentate: lastCharOnLine=" + lastCharOnLine );
+				//console.log("indentate: lastCharOnLine=" + lastCharOnLine );
 				
 				if( lastCharOnLine == " " || lastCharOnLine == "\t") file.moveCaretToEndOfLine(file.caret);
 				
@@ -384,7 +384,7 @@
 		var characters = file.indentation;
 		var caret = file.createCaret(index);
 		
-		console.warn("indentate: insertIndentation: row=" + caret.row + " index=" + index + " characters=" + UTIL.lbChars(characters));
+		//console.warn("indentate: insertIndentation: row=" + caret.row + " index=" + index + " characters=" + UTIL.lbChars(characters));
 		
 		// Use insertText instead of putCharacter to keep selection
 		file.insertText(characters, caret);
@@ -396,7 +396,7 @@
 		var characters = file.indentation;
 		var caret = file.createCaret(rowStartIndex);
 		
-		console.log("indentate:removeIndentation: row=" + caret.row + " index=" + rowStartIndex + " characters=" + UTIL.lbChars(characters));
+		//console.log("indentate:removeIndentation: row=" + caret.row + " index=" + rowStartIndex + " characters=" + UTIL.lbChars(characters));
 		
 		for (var i=0; i<characters.length; i++) {
 			if(file.text.charAt(rowStartIndex) != characters[i]) break;

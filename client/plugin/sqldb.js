@@ -77,7 +77,7 @@
 				CLIENT.removeEvent("loginSuccess", checkDbServiceOnceLoggedIn);
 
 if(!login.tld) {
-console.warn("Disabling DB plugin");
+					//console.warn("Disabling DB plugin");
 EDITOR.disablePlugin("Mange SQL databases", true);
 return;
 }
@@ -91,7 +91,7 @@ return;
 						console.log("loadSqldb: No database service available!? " + err.message);
 }
 else {
-						console.log("loadSqldb: query resp:", resp);
+						//console.log("loadSqldb: query resp:", resp);
 						connectedToDbServer = true;
 			
 			}
@@ -202,20 +202,20 @@ else {
 		
 		dbNames.forEach(function(name) {
 			
-			console.log("dbExplorer: database name=" + name);
+			//console.log("dbExplorer: database name=" + name);
 			
 			var li = document.createElement("li");
 			li.setAttribute("id", name);
 			
 			li.addEventListener("click", function clickOnDatabase(e) {
 				
-				console.log("dbExplorer: Click on database " + name + " e=", e);
+				//console.log("dbExplorer: Click on database " + name + " e=", e);
 				
 				// Try to stop event from propagating down though parents
 				e = window.event || e;
 				e.stopPropagation();
 				if( e.target !== this) {
-					console.warn("dbExplorer: Click e.target=" + e.target + " not on database " + name + "");
+					//console.warn("dbExplorer: Click e.target=" + e.target + " not on database " + name + "");
 					return;
 				}
 				
@@ -275,7 +275,7 @@ else {
 			
 			if(err) return alertBox(err.message);
 			
-			console.log("dbExplorer: show tables: resp=" + JSON.stringify(resp, null, 2));
+			//console.log("dbExplorer: show tables: resp=" + JSON.stringify(resp, null, 2));
 			
 			var tables = resp.results.map(function(obj) {
 				return obj["Tables_in_" + dbName];
@@ -299,12 +299,12 @@ else {
 				
 				li.addEventListener("click", function clickOnTable(e) {
 					
-					console.log("dbExplorer: Click on table " + tableName + " e=", e);
+					//console.log("dbExplorer: Click on table " + tableName + " e=", e);
 					
 					e = window.event || e;
 					e.stopPropagation();
 					if( e.target !== this) {
-						console.warn("dbExplorer: Click e.target=" + e.target + " not on table " + tableName + "");
+						//console.warn("dbExplorer: Click e.target=" + e.target + " not on table " + tableName + "");
 return;
 					}
 					
@@ -359,7 +359,7 @@ return;
 		CLIENT.cmd("mysql.query", {database: dbName, query: "DESCRIBE " + tableName }, function(err, resp) {
 			if(err) return alertBox(err.message);
 
-			console.log("dbExplorer: DESCRIBE: resp=" + JSON.stringify(resp, null, 2));
+			//console.log("dbExplorer: DESCRIBE: resp=" + JSON.stringify(resp, null, 2));
 			
 			var fields = resp.results;
 			
@@ -1158,14 +1158,14 @@ return wrap;
 	
 	
 	function changeDb(e) {
-		console.log(e);
+		//console.log(e);
 		
 		selectedDb = selectMysqlDb.options[selectMysqlDb.selectedIndex].value;
 	}
 	
 	function getDatabases(selectedName) {
 		
-		console.log(UTIL.getStack("dbExplorer: getDatabases()"));
+		//console.log(UTIL.getStack("dbExplorer: getDatabases()"));
 		
 		CLIENT.cmd("mysql.query", {database: selectedDb, query: "SHOW DATABASES"}, function(err, resp) {
 			if(err) return alertBox(err.message);
@@ -1202,7 +1202,7 @@ option.setAttribute("selected", "selected");
 	
 	function createDatabase() {
 		promptBox("Database name: ", function(dbName) {
-			console.log("createDatabase: dbName=" + dbName);
+			//console.log("createDatabase: dbName=" + dbName);
 			if(dbName != null) CLIENT.cmd("createMysqlDb", {name: dbName}, function(err) {
 				if(err) {
 					if(err.code == "ER_DB_CREATE_EXISTS") alertBox("The name " + dbName + " is already taken. Try another name or prepend it (" + EDITOR.user.name + "_" + dbName + ")");
@@ -1248,8 +1248,8 @@ option.setAttribute("selected", "selected");
 	
 	function runQuery(ev) {
 		
-		console.log("runQuery: event:");
-		console.log(ev);
+		//console.log("runQuery: event:");
+		//console.log(ev);
 		
 		ev.target.blur(); // Prevent further key presses/runs
 		
@@ -1262,9 +1262,9 @@ option.setAttribute("selected", "selected");
 			var results = resp && resp.results;
 			var fields = resp && resp.fields;
 			
-			console.log("runQuery: results=" + JSON.stringify(results, null, 2));
-			console.log("runQuery: fields=" + JSON.stringify(fields, null, 2));
-			console.log("runQuery: queryError=" + (!!queryError ? queryError.message : queryError) );
+			//console.log("runQuery: results=" + JSON.stringify(results, null, 2));
+			//console.log("runQuery: fields=" + JSON.stringify(fields, null, 2));
+			//console.log("runQuery: queryError=" + (!!queryError ? queryError.message : queryError) );
 			
 			if(results && results.length == 0) return alertBox("The query returned no results!\n\n<pre>" + selectedText.trim() + "</pre>");
 			
@@ -1378,19 +1378,19 @@ else {
 					value = UTIL.toString(results[i][key]);
 					results[i][key] = value; // So we don't have to convert to string again at next run'
 					
-					console.log("sqldb.js:write: maxLength[" + key + "]=" + maxLength[key] + " len(results[" + i + "][" + keys[j] + "])=" + len(value) );
+					//console.log("sqldb.js:write: maxLength[" + key + "]=" + maxLength[key] + " len(results[" + i + "][" + keys[j] + "])=" + len(value) );
 					maxLength[key] = Math.max( maxLength[key], len(value) );
 					if( value.indexOf("\n") != -1 ) hasLineBreaks[ key ] = true;
 					
 				}
 			}
 			
-			console.log("sqldb.js:write: maxLength=" + JSON.stringify(maxLength));
+			//console.log("sqldb.js:write: maxLength=" + JSON.stringify(maxLength));
 			
 			var totalLength = 0;
 			for(var key in maxLength) totalLength += maxLength[key];
 			
-			console.log("sqldb.js:write: totalLength=" + totalLength + " maxColumns=" + maxColumns + " keys=" + JSON.stringify(keys) + " maxLength=" + JSON.stringify(maxLength));
+			//console.log("sqldb.js:write: totalLength=" + totalLength + " maxColumns=" + maxColumns + " keys=" + JSON.stringify(keys) + " maxLength=" + JSON.stringify(maxLength));
 			
 			
 			// Sort the keys so that the longest is last
@@ -1433,13 +1433,13 @@ else {
 					if(j == keys.length-1 && value.indexOf("\n") != -1) {
 						// The last item, we can split it 
 						var rows = value.split(/\r\n|\n/);
-						console.log("sqldb.js:write: rows.length=" + rows.length + " lastPadding=" + lastPadding);
+						//console.log("sqldb.js:write: rows.length=" + rows.length + " lastPadding=" + lastPadding);
 						for (var row=0; row<rows.length; row++) {
 							file.write( (row==0 ? "": padding(lastPadding)) + rows[row], true );
 						}
 					}
 					else {
-						console.log("sqldb.js:write: j=" + j + " keys.length=" + keys.length + " value.indexOf('\\n')=" + value.indexOf("\n") );
+						//console.log("sqldb.js:write: j=" + j + " keys.length=" + keys.length + " value.indexOf('\\n')=" + value.indexOf("\n") );
 						file.write( value );
 					}
 					

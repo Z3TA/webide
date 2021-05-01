@@ -19,7 +19,7 @@ desc: "Shift+scroll to increment/decrement a numeric value",
 });
 
 	function changeNumericValue(dir, steps, combo, scrollEvent) {
-		console.log("scrollNumber: combo.sum=" + combo.sum + " dir=" + dir);
+		//console.log("scrollNumber: combo.sum=" + combo.sum + " dir=" + dir);
 		if(combo.sum != SHIFT) return;
 		
 		var caret = EDITOR.mousePositionToCaret(EDITOR.canvasMouseX, EDITOR.canvasMouseY, 0);
@@ -52,11 +52,11 @@ desc: "Shift+scroll to increment/decrement a numeric value",
 		var number = onNumber(file, caret);
 		if(color) {
 			
-			console.log("scrollNumber: Before, color.rgb=" + JSON.stringify(color.rgb) + "");
+			//console.log("scrollNumber: Before, color.rgb=" + JSON.stringify(color.rgb) + "");
 			
 			incrementColor(color.rgb, dir);
 			
-			console.log("scrollNumber: Efter, color.rgb=" + JSON.stringify(color.rgb) + "");
+			//console.log("scrollNumber: Efter, color.rgb=" + JSON.stringify(color.rgb) + "");
 			
 			var start = color.start;
 			var end = color.end;
@@ -141,14 +141,14 @@ desc: "Shift+scroll to increment/decrement a numeric value",
 		if(file.text[i].match(/e|p|%/)) i--;
 		
 		while(isNr(file.text[i]) && i > 0) {
-			console.log("scrollNumber: onNumber: Left, Numeric value=" + file.text[i] + " at i=" + i);
+			//console.log("scrollNumber: onNumber: Left, Numeric value=" + file.text[i] + " at i=" + i);
 			i--;
 		}
 		var start = ++i;
 		
 		// Go right
 		while(isNr(file.text[i]) && i < file.text.length) {
-			console.log("scrollNumber: onNumber: Right, Numeric value=" + file.text[i] + " at i=" + i);
+			//console.log("scrollNumber: onNumber: Right, Numeric value=" + file.text[i] + " at i=" + i);
 			i++;
 		}
 		
@@ -164,7 +164,7 @@ desc: "Shift+scroll to increment/decrement a numeric value",
 		
 		var nr = parseFloat(numberStr);
 		
-		console.log("scrollNumber: onNumber: numberStr=" + numberStr + " nr=" + nr + " decimals=" + decimals + " start=" + start + " end=" + end);
+		//console.log("scrollNumber: onNumber: numberStr=" + numberStr + " nr=" + nr + " decimals=" + decimals + " start=" + start + " end=" + end);
 		
 		if(isNaN(nr)) return null;
 		
@@ -186,25 +186,25 @@ desc: "Shift+scroll to increment/decrement a numeric value",
 		if(caret.eol) i--;
 		
 		while(isHex(file.text[i]) && i > 0) {
-			console.log("scrollNumber: onColor: Left, value=" + file.text[i] + " at i=" + i);
+			//console.log("scrollNumber: onColor: Left, value=" + file.text[i] + " at i=" + i);
 			i--;
 		}
 		
 		if(file.text[i] != "#") {
-			console.log("scrollNumber: onColor: character i=" + i + " " + file.text[i] + " is not a hashtag!");
+			//console.log("scrollNumber: onColor: character i=" + i + " " + file.text[i] + " is not a hashtag!");
 			return null;
 		}
 		var start = ++i;
 		
 		// Go right
 		while(isHex(file.text[i]) && i < file.text.length) {
-			console.log("scrollNumber: onColor: Right, value=" + file.text[i] + " at i=" + i);
+			//console.log("scrollNumber: onColor: Right, value=" + file.text[i] + " at i=" + i);
 			i++;
 		}
 		var end = i;
 		
 		var letters = file.text.slice(start, end);;
-		console.log("scrollNumber: letters=" + letters + " letters.length=" + letters.length + " start=" + start + " end=" + end);
+		//console.log("scrollNumber: letters=" + letters + " letters.length=" + letters.length + " start=" + start + " end=" + end);
 		
 		if(letters.length == 3) {
 			var rgb = {

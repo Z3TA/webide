@@ -3,7 +3,7 @@
 	/*
 		
 		Some functionality is dublicated with stdin_channel.js plugin!
-		The main different is that remote_file.js work with bin/webider and stdin_channel.js work with bin/webide
+		The main difference is that remote_file.js work with bin/webider and stdin_channel.js work with bin/webide
 		
 		bin/webide is for running locally, and bin/webider should run remotely.
 		
@@ -68,7 +68,7 @@
 	
 	function remotePipeData(remotePipe) {
 		
-		console.log("remote_file: remotePipeData: remotePipe=" + JSON.stringify(remotePipe));
+		//console.log("remote_file: remotePipeData: remotePipe=" + JSON.stringify(remotePipe));
 		
 		if(remotePipe.start) {
 			// Do not use the same is as the socket id to prevent reusing old files
@@ -77,7 +77,7 @@
 		}
 		
 		if(remotePipe.end) {
-			console.log("remote_file: Remote pipe " + remotePipe.id + " ended!");
+			//console.log("remote_file: Remote pipe " + remotePipe.id + " ended!");
 return;
 		}
 		
@@ -88,7 +88,7 @@ return;
 		if(EDITOR.openFileQueue.indexOf(fileName) != -1) {
 			// The pipe file is about the be opened, meanwhile buffer
 			if(remotePipe.content != undefined) pipeBuffer += remotePipe.content;
-			console.log("remote_file: Waiting for " + fileName + " to be opened ...");
+			//console.log("remote_file: Waiting for " + fileName + " to be opened ...");
 			
 return;
 		}
@@ -103,7 +103,7 @@ return;
 		}
 		else {
 			if(remotePipe.content != undefined) pipeBuffer += remotePipe.content;
-			console.log("remote_file: Opening " + fileName + " ...");
+			//console.log("remote_file: Opening " + fileName + " ...");
 			EDITOR.openFile(fileName, "", function(err, file) {
 				file.write(pipeBuffer);
 				pipeBuffer = "";
@@ -111,7 +111,7 @@ return;
 				
 				
 				if( !EDITOR.getKeyFor(sendPipeData) ) {
-					console.log("remote_file: Binding Enter key to sendPipeData");
+					//console.log("remote_file: Binding Enter key to sendPipeData");
 					EDITOR.bindKey({desc: "Send the row through remote pipe", charCode: 13, fun: sendPipeData});
 				}
 			});
@@ -123,7 +123,7 @@ return;
 		
 		
 		var localPipeId = isPipe(file);
-		console.log("remote_file: Pressed Enter! localPipeId=" + localPipeId);
+		//console.log("remote_file: Pressed Enter! localPipeId=" + localPipeId);
 		if(localPipeId) {
 			CLIENT.cmd("remotePipe", {id: socketId[localPipeId], content: file.rowText(file.caret.row-1)}, function(err) {
 				if(err) console.warn("remote_file: Remote pipe socket error: " + err.message);
@@ -135,7 +135,7 @@ return;
 	
 	function openRemoteFile(json) {
 		
-		console.log( "remote_file: openRemoteFile: json=" + JSON.stringify(json, null, 2) );
+		//console.log( "remote_file: openRemoteFile: json=" + JSON.stringify(json, null, 2) );
 		
 		var url = "remote://" + json.host + (json.fileName.indexOf("/") == 0 ? "" : "/") + json.fileName;
 		
@@ -148,9 +148,9 @@ return;
 	
 	function remoteFileSaved(file) {
 		
-		console.log( "remote_file: remoteFileSaved: file.path=" + file.path );
+		//console.log( "remote_file: remoteFileSaved: file.path=" + file.path );
 		
-		console.log( "remote_file: remoteFileSaved: remoteFiles=" + JSON.stringify(remoteFiles.map(mapPath)) );
+		//console.log( "remote_file: remoteFileSaved: remoteFiles=" + JSON.stringify(remoteFiles.map(mapPath)) );
 		
 		if(remoteFiles.indexOf(file) != -1) {
 			
@@ -159,7 +159,7 @@ return;
 			CLIENT.cmd("remoteFile", {name: fileName, content: file.text}, function(err) {
 				if(err) alertBox("Failed to save remote file " + fileName + ".\nError: " + err.message);
 				else {
-					console.log( "remote_file: remoteFileSaved: Data sent to remote host!" );
+					//console.log( "remote_file: remoteFileSaved: Data sent to remote host!" );
 				file.saved();
 				}
 			});
@@ -181,10 +181,10 @@ return;
 		
 		var localPipeId = isPipe(file);
 		
-		console.log( "remote_file: remoteFileClosed: file.path=" + file.path + " index=" + index + " remoteFiles=" + JSON.stringify(remoteFiles.map(mapPath)) + " localPipeId=" + localPipeId );
+		//console.log( "remote_file: remoteFileClosed: file.path=" + file.path + " index=" + index + " remoteFiles=" + JSON.stringify(remoteFiles.map(mapPath)) + " localPipeId=" + localPipeId );
 		
 		if(localPipeId) {
-			console.log( "remote_file: localPipeId=" + localPipeId + " server socketId=" + socketId[localPipeId] + " socketId=" + JSON.stringify(socketId));
+			//console.log( "remote_file: localPipeId=" + localPipeId + " server socketId=" + socketId[localPipeId] + " socketId=" + JSON.stringify(socketId));
 			CLIENT.cmd("remotePipe", {id: socketId[localPipeId], close: true}, function(err) {
 				if(err) console.warn("remote_file: Remote pipe socket error: " + err.message);
 			});
@@ -193,7 +193,7 @@ return;
 			
 			var activePipes = Object.keys(socketId);
 			if(activePipes.length == 0) {
-				console.log("remote_file: Unbinding Enter listener");
+				//console.log("remote_file: Unbinding Enter listener");
 				EDITOR.unbindKey(sendPipeData);
 			}
 		}

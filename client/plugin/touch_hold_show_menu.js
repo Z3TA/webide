@@ -34,7 +34,7 @@
 	
 	function ltTouchDown(mouseX, mouseY, caret, direction, button, target, keyboardCombo, mouseDownEvent) {
 		
-		console.log("ltTouchDown! mouseDownEvent.type=" + mouseDownEvent.type + " mouseDownEvent.which=" + mouseDownEvent.which + " direction=" + direction);
+		//console.log("ltTouchDown! mouseDownEvent.type=" + mouseDownEvent.type + " mouseDownEvent.which=" + mouseDownEvent.which + " direction=" + direction);
 		
 		if(mouseDownEvent.which > 1) {
 			// The user is using a regular mouse, so this plugin is not necessary
@@ -49,12 +49,12 @@
 		
 		touchDownTimer = setTimeout(function showMenu() {
 			showTheMenu = true;
-			console.log("ltTouchDown touchDownTimer!");
+			//console.log("ltTouchDown touchDownTimer!");
 		}, 300);
 		
 		touchTooLongTimer = setTimeout(function showMenu() {
 			showTheMenu = false;
-			console.log("ltTouchDown touchTooLongTimer!");
+			//console.log("ltTouchDown touchTooLongTimer!");
 		}, 1500);
 		
 		return true;
@@ -63,7 +63,7 @@
 	
 	function ltTouchUp(mouseX, mouseY, caret, direction, button, target, keyboardCombo, mouseDownEvent) {
 		
-		console.log("ltTouchUp showTheMenu=" + showTheMenu);
+		//console.log("ltTouchUp showTheMenu=" + showTheMenu);
 		
 		if(mouseDownEvent.type != "touchend") return true;
 		

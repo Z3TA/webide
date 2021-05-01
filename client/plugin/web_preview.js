@@ -197,7 +197,7 @@ EDITOR.discoveryBar.remove(discoveryBarIcon);
 	
 	function openPreviewWindow(file, wysiwyg) {
 		
-		console.log("openPreviewWindow: file.path=" + file.path);
+		//console.log("openPreviewWindow: file.path=" + file.path);
 		
 		// Need to start in a shallow folder if there are ../ relative paths
 		var backCount = 0;
@@ -216,8 +216,7 @@ EDITOR.discoveryBar.remove(discoveryBarIcon);
 			var paths = folders.slice(folderIndex);
 			var serveFolders = folders.slice(0, folderIndex);
 			var folder = UTIL.trailingSlash(UTIL.joinPaths(root, serveFolders));
-			console.log("web_preview: file.path=" + file.path + " folders=" + JSON.stringify(folders) + " folderIndex=" + folderIndex + 
-			" backCount=" + backCount + " paths=" + paths + " serveFolders=" + serveFolders + " folder=" + folder);
+			//console.log("web_preview: file.path=" + file.path + " folders=" + JSON.stringify(folders) + " folderIndex=" + folderIndex + " backCount=" + backCount + " paths=" + paths + " serveFolders=" + serveFolders + " folder=" + folder);
 		}
 		else {
 			var folder = UTIL.getDirectoryFromPath(file.path);
@@ -226,7 +225,7 @@ EDITOR.discoveryBar.remove(discoveryBarIcon);
 		CLIENT.cmd("serve", {folder: folder}, function httpServerStarted(err, json) {
 			if(err) return alertBox(err.message);
 			
-			console.log("web_preview: json.url=" + json.url);
+			//console.log("web_preview: json.url=" + json.url);
 			
 			var urlPath = json.url;
 			
@@ -240,11 +239,11 @@ EDITOR.discoveryBar.remove(discoveryBarIcon);
 			}
 			var fileName = UTIL.getFilenameFromPath(file.path);
 			
-			console.log("web_preview: urlPath=" + urlPath + " paths=" + JSON.stringify(paths) + " fileName=" + fileName);
+			//console.log("web_preview: urlPath=" + urlPath + " paths=" + JSON.stringify(paths) + " fileName=" + fileName);
 			
 			var url = UTIL.joinPaths(urlPath, paths, fileName);
 			
-			console.log("web_preview: url=" + url);
+			//console.log("web_preview: url=" + url);
 			
 			var wEditor = new WysiwygEditor({
 				sourceFile: file,

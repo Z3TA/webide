@@ -38,7 +38,7 @@
 			var filePath = target.getAttribute("path");
 		}
 		
-		console.log("rename_file: filePath=" + filePath);
+		//console.log("rename_file: filePath=" + filePath);
 		
 		if(!filePath) return;
 		

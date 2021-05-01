@@ -16,7 +16,7 @@
 
 	EDITOR.addRender(highlightRender, 1915);
 	
-	console.log("Loaded highlightRender");
+	//console.log("Loaded highlightRender");
 	
 	function highlightRender(ctx, buffer, file, startRow, containSpecialWidthCharacters) {
 		

@@ -54,7 +54,7 @@
 		
 		//ctx.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
 
-		console.log("render_info: comments.length=" + comments.length);
+		//console.log("render_info: comments.length=" + comments.length);
 		
 		for(var i=0; i<comments.length; i++) {
 			comment = comments[i];
@@ -74,12 +74,12 @@
 
 			textHeight = comment.text.length * fontHeight;
 			
-			console.log("render_info: Rendering info message on row=" + comment.row + " textHeight=" + textHeight);
+			//console.log("render_info: Rendering info message on row=" + comment.row + " textHeight=" + textHeight);
 			
 			// Measure max text width
 			for(var j=0; j<comment.text.length;j++) {
 				//textWidth = Math.max(textWidth, ctx.measureText(comment.text[j]).width);
-				console.log("render_info: imgWidth=" + comment.text[j].width);
+				//console.log("render_info: imgWidth=" + comment.text[j].width);
 				textWidth = Math.max(textWidth, comment.text[j].width, Math.ceil(comment.str.length * EDITOR.settings.gridWidth));
 				// Some browsers (IE11) can't get image width! (width=0)
 			}
@@ -105,13 +105,13 @@
 			if(comment.lvl == 1) {
 				
 				var drawErrorIcon = function() {
-					console.log("render_info: Rendering error.svg");
+					//console.log("render_info: Rendering error.svg");
 					ctx.drawImage(iconError, x+textPadding, y + textHeight/2 - iconHeight/2 + textPadding, iconHeight,iconHeight);
 				}
 				
 				if(iconError) drawErrorIcon();
 				else {
-					console.log("render_info: Loading error.svg ...");
+					//console.log("render_info: Loading error.svg ...");
 					iconError = new Image();
 					iconError.src = "gfx/error.svg";
 					iconError.onload = drawErrorIcon;
@@ -122,13 +122,13 @@
 			else if(comment.lvl == 2) {
 
 				var drawWarningIcon = function() {
-					console.log("render_info: Rendering warning.svg");
+					//console.log("render_info: Rendering warning.svg");
 					ctx.drawImage(iconWarning, x+textPadding, y + textHeight/2 - iconHeight/2 - 2 + textPadding, iconHeight,iconHeight);
 				}
 
 				if(iconWarning) drawWarningIcon();
 				else {
-					console.log("render_info: Loading error.svg ...");
+					//console.log("render_info: Loading error.svg ...");
 					iconWarning = new Image();
 					iconWarning.src = "gfx/warning.svg";
 					iconWarning.onload = drawWarningIcon;

@@ -11,7 +11,7 @@
 	*/
 	
 	
-	console.log("Hello from server_manager.js");
+	//console.log("Hello from server_manager.js");
 	
 	var serverManager;
 	
@@ -57,10 +57,10 @@
 	function loadFtpServerManager() {
 		// Called when the module is loaded
 		
-		console.log("Loading server manager");
+		//console.log("Loading server manager");
 		
 		if(!EDITOR.localStorage) {
-			console.warn("EDITOR.localStorage not available! server_manager.js plugin disabled.");
+			//console.warn("EDITOR.localStorage not available! server_manager.js plugin disabled.");
 			return false;
 		}
 		
@@ -134,7 +134,7 @@
 			return false;
 		}
 		else {
-			console.log("document.activeElement=" + document.activeElement);
+			//console.log("document.activeElement=" + document.activeElement);
 			return true;
 	}
 }
@@ -142,7 +142,7 @@
 	
 	function build() {
 		
-		console.log("Building server manager");
+		//console.log("Building server manager");
 		
 		var footer = document.getElementById("footer");
 		
@@ -158,7 +158,7 @@
 		
 		footer.appendChild(serverManager);
 		
-		console.log("done building server manager");
+		//console.log("done building server manager");
 	}
 	
 	function addConnectionOption(connection, index) {
@@ -175,7 +175,7 @@
 	
 	function buildConn() {
 		
-		console.log("building connection view");
+		//console.log("building connection view");
 		
 		connectionView = document.createElement("div");
 		
@@ -254,7 +254,7 @@
 		
 		if(remoteConnections.length > 0) changeSelectConnection(); // Select the one currently selected
 		
-		console.log("done building connection view");
+		//console.log("done building connection view");
 		
 		
 		function editConnection() {
@@ -275,7 +275,7 @@
 				});
 				
 			}
-			else console.warn("Not connected to " + selectedConnection.host);
+			//else console.warn("Not connected to " + selectedConnection.host);
 			
 			// Hide the disconnect button
 			buttonDisconnect.classList.add("removed");
@@ -318,7 +318,7 @@
 	
 	
 	function buildEdit() {
-		console.log("building edit view");
+		//console.log("building edit view");
 		
 		editView = document.createElement("div");
 		
@@ -501,7 +501,7 @@
 			
 			if(!selectedConnection) throw new Error("No selectedConnection!");
 			
-			console.log(typeof inputEditPw);
+			//console.log(typeof inputEditPw);
 			
 			inputEditPw.value = selectedConnection.pw;
 			inputHost.value = selectedConnection.host;
@@ -567,7 +567,7 @@
 	
 	function showServerManger() {
 		
-		console.log("Show server manager");
+		//console.log("Show server manager");
 		
 		EDITOR.ctxMenu.hide();
 		winMenuServerManager.hide();
@@ -629,7 +629,7 @@
 					alertBox(err.message + "\nProbably wrong key password")
 				}
 				else alertBox(err.message);
-				console.log("Connection error: " + err.message);
+				//console.log("Connection error: " + err.message);
 			}
 			else {
 				//alertBox("Connected to " + protocol + " on " + hostName + "!");

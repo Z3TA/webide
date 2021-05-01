@@ -21,7 +21,7 @@ desc: "Allow sharing stuff with other apps",
 			
 			windowMenu = EDITOR.windowMenu.add(S("Share"), [S("File"), 15], shareSomething);
 
-			console.log("typeof navigator.share=" + typeof navigator.share);
+			//console.log("typeof navigator.share=" + typeof navigator.share);
 
 			var order = 100; // Before download_file.js
 			EDITOR.on("share", shareSomething, order);
@@ -38,7 +38,7 @@ desc: "Allow sharing stuff with other apps",
 });
 	
 	function uploadedFiles(fileNames) {
-		console.log("uploadedFiles: " + JSON.stringify(fileNames));
+		//console.log("uploadedFiles: " + JSON.stringify(fileNames));
 		
 		for(var i=0, path; i<fileNames.length; i++) {
 			path = UTIL.joinPaths(EDITOR.user.homeDir, "/upload/", fileNames[i]);
@@ -54,7 +54,7 @@ desc: "Allow sharing stuff with other apps",
 		}
 		else {
 			
-			console.log(UTIL.getStack("shareUsingUrl"));
+			//console.log(UTIL.getStack("shareUsingUrl"));
 			
 			var newPath = UTIL.joinPaths(EDITOR.user.homeDir, "/wwwpub/", filePath); 
 			
@@ -99,7 +99,7 @@ desc: "Allow sharing stuff with other apps",
 		
 		function showUrl(filePath) {
 			
-			console.log("showUrl: filePath=" + filePath);
+			//console.log("showUrl: filePath=" + filePath);
 			
 			if(filePath instanceof File) filePath = filePath.path;
 			
@@ -142,7 +142,7 @@ desc: "Allow sharing stuff with other apps",
 		}
 		
 		if(typeof navigator.share == "undefined") {
-			console.warn("navigator.share not available on your browser/device (" + BROWSER + ")");
+			//console.warn("navigator.share not available on your browser/device (" + BROWSER + ")");
 			return shareUsingUrl(filePath);
 		}
 		else if(filePath.indexOf("/wwwpub/") == 0) {
@@ -215,7 +215,7 @@ desc: "Allow sharing stuff with other apps",
 			}
 			
 			function shareSuccessful() {
-				console.log('Share was successful.');
+				//console.log('Share was successful.');
 				windowMenu.hide();
 			}
 			

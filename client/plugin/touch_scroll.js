@@ -56,7 +56,7 @@
 	
 	function tsTouchDown(x, y, caret, mouseDirection, button, target, keyboardCombo, mouseDownEvent) {
 		
-		console.log("tsTouchDown: x=" + x + " y=" + y + " mouseDownEvent.type=" + mouseDownEvent.type);
+		//console.log("tsTouchDown: x=" + x + " y=" + y + " mouseDownEvent.type=" + mouseDownEvent.type);
 		
 		if( mouseDownEvent.type != "touch" && mouseDownEvent.type != "touchstart") return true;
 		
@@ -83,7 +83,7 @@
 	
 	function tsTouchUp(x, y, caret, mouseDirection, button, target, keyboardCombo, mouseUpEvent) {
 		
-		console.log("tsTouchUp: x=" + x + " y=" + y + " mouseUpEvent.type=" + mouseUpEvent.type);
+		//console.log("tsTouchUp: x=" + x + " y=" + y + " mouseUpEvent.type=" + mouseUpEvent.type);
 		
 		
 		if( mouseUpEvent.type != "touch" && mouseUpEvent.type != "touchend") return true;
@@ -123,11 +123,7 @@
 			ev.stopPropagation();
 			window.scrollTo(0, 0);
 			
-			console.log("touchmove: maybeScroll=" + maybeScroll + 
-			" x=" + x +
-			" y=" + y + 
-			" horizontalScrolling=" + horizontalScrolling + 
-			" verticalScrolling=" + verticalScrolling);
+		//console.log("touchmove: maybeScroll=" + maybeScroll + " x=" + x +" y=" + y + " horizontalScrolling=" + horizontalScrolling + " verticalScrolling=" + verticalScrolling);
 			
 		
 			/*
@@ -164,8 +160,7 @@
 					horizontalScrolling = true;
 				}
 		else {
-			console.log("Not in scroll zone! x=" + x + " y=" + y + " EDITOR.view.canvasWidth=" + EDITOR.view.canvasWidth + " EDITOR.view.canvasHeight=" + EDITOR.view.canvasHeight + 
-			" EDITOR.settings.verticalScrollZone=" + EDITOR.settings.verticalScrollZone + " EDITOR.settings.verticalScrollZone=" + EDITOR.settings.horizontalScrollZone);
+			//console.log("Not in scroll zone! x=" + x + " y=" + y + " EDITOR.view.canvasWidth=" + EDITOR.view.canvasWidth + " EDITOR.view.canvasHeight=" + EDITOR.view.canvasHeight + " EDITOR.settings.verticalScrollZone=" + EDITOR.settings.verticalScrollZone + " EDITOR.settings.verticalScrollZone=" + EDITOR.settings.horizontalScrollZone);
 			reset();
 			return; // Outside the scrolling zone. Do nothing!
 		}
@@ -214,27 +209,11 @@
 				Swping down should scroll up
 			*/
 		
-			console.log(" -- verticalScrolling=" + verticalScrolling + 
-			" horizontalScrolling=" + horizontalScrolling + 
-		" lastMoveDirectionX=" + lastMoveDirectionX + 
-			" moveDistanceX=" + moveDistanceX + 
-		" moveDistanceY=" + moveDistanceY + 
-			" scrollSpeedX=" + scrollSpeedX + 
-			" scrollSpeedY=" + scrollSpeedY + 
-			" x=" + x + 
-			" y=" + y + 
-		" lastMeasureX=" + lastMeasureX + 
-		" lastMeasureY=" + lastMeasureY + 
-			" lastPosX=" + lastPosX + 
-			" lastPosY=" + lastPosY + 
-			" deltaX=" + deltaX + 
-			" deltaY=" + deltaY + 
-		" startColumn=" + startColumn +
-		" startRow=" + startRow + "");
+		//console.log(" -- verticalScrolling=" + verticalScrolling + " horizontalScrolling=" + horizontalScrolling + " lastMoveDirectionX=" + lastMoveDirectionX + " moveDistanceX=" + moveDistanceX + " moveDistanceY=" + moveDistanceY + " scrollSpeedX=" + scrollSpeedX + " scrollSpeedY=" + scrollSpeedY + " x=" + x + " y=" + y + " lastMeasureX=" + lastMeasureX + " lastMeasureY=" + lastMeasureY + " lastPosX=" + lastPosX + " lastPosY=" + lastPosY + " deltaX=" + deltaX + " deltaY=" + deltaY + " startColumn=" + startColumn +" startRow=" + startRow + "");
 			
 		if(verticalScrolling) {
 			virtualKeyboardWasVisible = EDITOR.hideVirtualKeyboard();
-			console.log("Hidden keyboards: " + JSON.stringify(virtualKeyboardWasVisible));
+			//console.log("Hidden keyboards: " + JSON.stringify(virtualKeyboardWasVisible));
 			EDITOR.isScrolling = true;
 		}
 		
@@ -245,10 +224,10 @@
 				
 			if(isNaN(scrollToRow)) throw new Error("scrollToRow=" + scrollToRow + " startRow=" + startRow + " startColumn=" + startColumn + " scrollSpeedY=" + scrollSpeedY + " lastMoveDirectionY=" + lastMoveDirectionY);
 				
-				console.log("file.startRow=" + file.startRow + " scrollToRow=" + scrollToRow);
+			//console.log("file.startRow=" + file.startRow + " scrollToRow=" + scrollToRow);
 				
 				if(file.startRow != scrollToRow) {
-				console.log("Scrolling from row " + file.startRow + " to " + scrollToRow + " deltaY=" + deltaY + " lastMoveDirectionY=" + lastMoveDirectionY + " scrollSpeedY=" + scrollSpeedY + " ");
+				//console.log("Scrolling from row " + file.startRow + " to " + scrollToRow + " deltaY=" + deltaY + " lastMoveDirectionY=" + lastMoveDirectionY + " scrollSpeedY=" + scrollSpeedY + " ");
 					
 					file.scrollTo(undefined, scrollToRow);
 					reset();
@@ -262,10 +241,10 @@
 				
 			if(isNaN(scrollToColumn)) throw new Error("scrollToColumn=" + scrollToColumn + " startColumn=" + startColumn + " scrollSpeedX=" + scrollSpeedX + " lastMoveDirectionX=" + lastMoveDirectionX);
 				
-				console.log("file.startColumn=" + file.startColumn + " scrollToColumn=" + scrollToColumn);
+			//console.log("file.startColumn=" + file.startColumn + " scrollToColumn=" + scrollToColumn);
 				
 				if(file.startColumn != scrollToColumn) {
-				console.log("Gonna scroll ---");
+				//console.log("Gonna scroll ---");
 				if(lastMoveDirectionX == 1) {
 					var foundText = false;
 					// Prevent scrolling too far to the right
@@ -278,7 +257,7 @@
 							break;
 						}
 					}
-					if(!foundText) console.warn("Did not scroll to the right because there's nothing there!");
+					//if(!foundText) console.warn("Did not scroll to the right because there's nothing there!");
 				}
 				else if(lastMoveDirectionX == -1) {
 					// Scrolling left

@@ -34,7 +34,7 @@ EDITOR.plugin({
 			if(fName) {
 				keyCombo = EDITOR.getKeyFor(fName);
 				if(!keyCombo) {
-					console.warn("No key combination for fName=" + fName);
+					//console.warn("No key combination for fName=" + fName);
 					continue;
 				}
 				

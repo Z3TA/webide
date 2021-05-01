@@ -1,5 +1,7 @@
 /*
 
+	!DO:NOT:BUNDLE!
+
 	?treesitter=true&disable=js_parser
 
 	https://tree-sitter.github.io/tree-sitter/

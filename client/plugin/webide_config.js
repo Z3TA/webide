@@ -66,7 +66,7 @@
 	function configurationMaybe(file) {
 		var fileName = UTIL.getFilenameFromPath(file.path);
 		
-		console.warn("configurationMaybe: fileName=" + fileName);
+		//console.log("configurationMaybe: fileName=" + fileName);
 		
 		if(fileName == nameOfJS || fileName == nameOfCSS) {
 			var yes = "Yes";

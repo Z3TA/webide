@@ -1,4 +1,12 @@
 
+/*
+
+	DEPRECATED!!!
+
+	No longer useful after we show file in url/address hash!
+
+*/
+
 (function() {
 	"use strict";
 	

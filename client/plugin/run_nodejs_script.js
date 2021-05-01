@@ -74,7 +74,7 @@
 	function nodejsScriptFileOpenedMaybe(file) {
 		
 		if(!(file instanceof File)) {
-			console.log("nodejsScriptFileOpenedMaybe: Not a File (text or code) file.path=" + file.path);
+			//console.log("nodejsScriptFileOpenedMaybe: Not a File (text or code) file.path=" + file.path);
 return;
 		}
 		
@@ -82,7 +82,7 @@ return;
 		var reSock = /\/sock\/([^'" ]*)/;
 		var match = file.text.match(reSock);
 		
-		console.log("nodejsScriptFileOpenedMaybe: ext=" + ext + " match?" + (!!match) + " EDITOR.user?" + (!!EDITOR.user));
+		//console.log("nodejsScriptFileOpenedMaybe: ext=" + ext + " match?" + (!!match) + " EDITOR.user?" + (!!EDITOR.user));
 		
 		if((ext == "js" || ext == "stdout") && match && EDITOR.user) {
 			var name = match[1].trim();
@@ -126,7 +126,7 @@ nodeJsBanner.hide();
 		
 		var url = banner.url;
 		
-		console.log("showNodejsBanner: url=" +url);
+		//console.log("showNodejsBanner: url=" +url);
 		
 		while(urlHolder.firstChild) urlHolder.removeChild(urlHolder.firstChild);
 		var link = createBannerUrl(url);
@@ -177,7 +177,7 @@ nodeJsBanner.hide();
 	function runNodeJsScriptMaybe(file, combo) {
 		var ext = UTIL.getFileExtension(file.path);
 		
-		console.log("Run nodejs script: runNodeJsScriptMaybe: ext=" + ext + " isNodejsScript(file)=" + isNodejsScript(file));
+		//console.log("Run nodejs script: runNodeJsScriptMaybe: ext=" + ext + " isNodejsScript(file)=" + isNodejsScript(file));
 
 		if( ext != "txt" && ext != "md" && (ext == "js" || ext == "stdout" || isNodejsScript(file))) {
 			runNodeJsScript();
@@ -322,7 +322,7 @@ text = text.replace(reNetnsIP, "$2$3$4." + username + "." + TLD);
 		}
 	
 	function nodejsMessage(msg) {
-		console.log("nodejsMessage: " + JSON.stringify(msg));
+		//console.log("nodejsMessage: " + JSON.stringify(msg));
 		
 		var filePath = msg.scriptName;
 		
@@ -344,9 +344,7 @@ text = text.replace(reNetnsIP, "$2$3$4." + username + "." + TLD);
 							// Attempt to run the script again
 							CLIENT.cmd("run_nodejs", {filePath: filePath}, function(err, json) {
 								if(err) throw err;
-								else {
-									console.log("Started script: " + json.filePath);
-								}
+								//else {console.log("Started script: " + json.filePath);}
 							});
 						}
 					});
@@ -355,9 +353,7 @@ text = text.replace(reNetnsIP, "$2$3$4." + username + "." + TLD);
 					// Run the script again, and install all modules found
 					CLIENT.cmd("run_nodejs", {filePath: filePath, installAllModules: true}, function(err, json) {
 						if(err) throw err;
-						else {
-							console.log("Started script: " + json.filePath);
-						}
+						//else {console.log("Started script: " + json.filePath);}
 					});
 				}
 				else throw new Error("Unknown answer=" + answer);
@@ -370,7 +366,7 @@ text = text.replace(reNetnsIP, "$2$3$4." + username + "." + TLD);
 			
 			stdout(msg);
 			
-			console.log("msg.stderr=" + UTIL.lbChars(msg.stderr));
+			//console.log("msg.stderr=" + UTIL.lbChars(msg.stderr));
 			
 			var ignore = ["Debugger attached.\r\nWaiting for the debugger to disconnect...\r\n"];
 			
@@ -415,7 +411,7 @@ text = text.replace(reNetnsIP, "$2$3$4." + username + "." + TLD);
 				return callback(null, file);
 			}
 			else {
-				console.log("EDITOR.files=" + Object.keys(EDITOR.files));
+				//console.log("EDITOR.files=" + Object.keys(EDITOR.files));
 				EDITOR.openFile(path, undefined, function open(err, file) {
 					if(err) return callback(err);
 					else {
@@ -468,7 +464,7 @@ text = text.replace(reNetnsIP, "$2$3$4." + username + "." + TLD);
 		var reLine = new RegExp("(" + UTIL.escapeRegExp(file.path) + "):(\\d+)");
 		var arr = text.split("\n");
 		
-		console.log("!showErrorMessage arr=", JSON.stringify(arr, null, 2));
+		//console.log("!showErrorMessage arr=", JSON.stringify(arr, null, 2));
 		
 		var loc = arr[0];
 		var inline = arr[1];
@@ -481,13 +477,13 @@ text = text.replace(reNetnsIP, "$2$3$4." + username + "." + TLD);
 			inline = arr[2];
 		}
 		
-		console.log("reLine=" + reLine);
-		console.log("loc=" + loc);
-		console.log("loc.match(reLine)=" + loc.match(reLine));
-		console.log("point.trim()=" + point.trim() + "");
+		//console.log("reLine=" + reLine);
+		//console.log("loc=" + loc);
+		//console.log("loc.match(reLine)=" + loc.match(reLine));
+		//console.log("point.trim()=" + point.trim() + "");
 		
 		if(point.trim().charAt(0) == "^") {
-			console.log("Normal error message: loc=" + loc + " inline=" + inline + " point=" + point + " desc=" + desc);
+			//console.log("Normal error message: loc=" + loc + " inline=" + inline + " point=" + point + " desc=" + desc);
 
 			var inDebugStr = false;
 			
@@ -498,19 +494,19 @@ text = text.replace(reNetnsIP, "$2$3$4." + username + "." + TLD);
 			var matchLine = text.match(reLine);
 			if(!matchLine) throw new Error("Unable to get line number! text=" + text);
 			
-			console.log("reLine=" + reLine);
-			console.log("matchLine=" + JSON.stringify(matchLine, null, 2));
+			//console.log("reLine=" + reLine);
+			//console.log("matchLine=" + JSON.stringify(matchLine, null, 2));
 			
 			var lineNr = parseInt(matchLine[2]);
-			console.log("lineNr=" + lineNr);
+			//console.log("lineNr=" + lineNr);
 			
 			// Trim inline string
 			while(inline.charAt(0).match(/\s/)) {
 				inlineTrim++;
 				inline = inline.slice(1);
 			}
-			console.log("inlineTrim=" + inlineTrim);
-			console.log("point.length=" + point.length);
+			//console.log("inlineTrim=" + inlineTrim);
+			//console.log("point.length=" + point.length);
 			
 			
 			// Figure out where to place the text
@@ -519,7 +515,7 @@ text = text.replace(reNetnsIP, "$2$3$4." + username + "." + TLD);
 			var col = rowText.indexOf(inline);
 			
 			if(col == -1) {
-				console.log("Unable to find inline=" + inline + " on rowText=" + rowText);
+				//console.log("Unable to find inline=" + inline + " on rowText=" + rowText);
 				
 				var reCol = new RegExp("(" + UTIL.escapeRegExp(file.path) + "):(\\d+):(\\d+)");
 				var matchCol = text.match(reCol);
@@ -527,32 +523,32 @@ text = text.replace(reNetnsIP, "$2$3$4." + username + "." + TLD);
 				
 				if(col == -1) {
 					/*
-					throw new Error('`value` required in setHeader("' + name + '", value).'); on rowText=response.setHeader("Access-Control-Allow-Origin", origin)
+						throw new Error('`value` required in setHeader("' + name + '", value).'); on rowText=response.setHeader("Access-Control-Allow-Origin", origin)
 					
 					
-					The "throw error" can be in another file, and we are going to show the error in one of the files in the stack trace ...
-					Example: 
-					Error: Error: `value` required in setHeader("Access-Control-Allow-Origin", value).
-					Line: response.setHeader("Access-Control-Allow-Origin", origin)
+						The "throw error" can be in another file, and we are going to show the error in one of the files in the stack trace ...
+						Example: 
+						Error: Error: `value` required in setHeader("Access-Control-Allow-Origin", value).
+						Line: response.setHeader("Access-Control-Allow-Origin", origin)
 					
-					Run a diff to see if there's anything in common !?
+						Run a diff to see if there's anything in common !?
 					
-				*/
-				var jsdiff = window.JsDiff;
-				var diff = jsdiff.diffChars(rowText, inline);
-				diff = diff.concat(jsdiff.diffChars(rowText, desc)); // The error can also be helpful
-				diff.sort(function(a, b) {
-					if(a.added || a.removed) return 1;
-					if(a.count > b.count) return -1;
-					if(b.count > a.count) return 1;
-					return 0;
-				});
-				var common = diff[0].value;
+					*/
+					var jsdiff = window.JsDiff;
+					var diff = jsdiff.diffChars(rowText, inline);
+					diff = diff.concat(jsdiff.diffChars(rowText, desc)); // The error can also be helpful
+					diff.sort(function(a, b) {
+						if(a.added || a.removed) return 1;
+						if(a.count > b.count) return -1;
+						if(b.count > a.count) return 1;
+						return 0;
+					});
+					var common = diff[0].value;
 				
-				console.log("common=" + common + " diff=" + JSON.stringify(diff, null, 2));
+					//console.log("common=" + common + " diff=" + JSON.stringify(diff, null, 2));
 				
-				if(common.length > 1) col = rowText.indexOf(common);
-				else col = 0;
+					if(common.length > 1) col = rowText.indexOf(common);
+					else col = 0;
 				}
 			}
 			else {
@@ -561,7 +557,7 @@ text = text.replace(reNetnsIP, "$2$3$4." + username + "." + TLD);
 			}
 		}
 		else {
-			console.log("Special error message!");
+			//console.log("Special error message!");
 			
 			/*
 				
@@ -584,8 +580,8 @@ text = text.replace(reNetnsIP, "$2$3$4." + username + "." + TLD);
 			var matchLine = text.match(reLine);
 			if(!matchLine) throw new Error("Unable to get line number and column! " + reLine + " from text=" + text);
 			
-			console.log("reLine=" + reLine);
-			console.log("matchLine=" + JSON.stringify(matchLine, null, 2));
+			//console.log("reLine=" + reLine);
+			//console.log("matchLine=" + JSON.stringify(matchLine, null, 2));
 			
 			var lineNr = parseInt(matchLine[2]);
 			var col = parseInt(matchLine[3]);
@@ -606,11 +602,11 @@ text = text.replace(reNetnsIP, "$2$3$4." + username + "." + TLD);
 		var stdOutFile = msg.scriptName + ".stdout";
 		
 		if(EDITOR.files.hasOwnProperty(stdOutFile)) {
-			console.log("filePath=" + stdOutFile + " exist in EDITOR.files");
+			//console.log("filePath=" + stdOutFile + " exist in EDITOR.files");
 			appendFile(EDITOR.files[stdOutFile], msg);
 		}
 		else {
-			console.log("Open file: filePath=" + stdOutFile + " ...");
+			//console.log("Open file: filePath=" + stdOutFile + " ...");
 			EDITOR.openFile(stdOutFile, 
 			firstRunMsg + "\n\n" + (new Date()) + ":\nRunning " + msg.scriptName + " ...\n\n", 
 			{
@@ -655,7 +651,7 @@ text = text.replace(reNetnsIP, "$2$3$4." + username + "." + TLD);
 	
 	function scriptStopped(filePath) {
 		if(runningScripts.indexOf(filePath) != -1) runningScripts.splice(runningScripts.indexOf(filePath), 1);
-		else console.warn("filePath=" + filePath + " not in runningScripts=" + JSON.stringify(runningScripts));
+		//else console.warn("filePath=" + filePath + " not in runningScripts=" + JSON.stringify(runningScripts));
 		
 		if(startStopButton) {
 			startStopButton.classList.add("start");
@@ -669,7 +665,7 @@ text = text.replace(reNetnsIP, "$2$3$4." + username + "." + TLD);
 		
 		var filePath = EDITOR.currentFile.path;
 		
-		console.log("Stop nodejs script: " + filePath);
+		//console.log("Stop nodejs script: " + filePath);
 		
 		EDITOR.ctxMenu.hide();
 		
@@ -680,14 +676,14 @@ text = text.replace(reNetnsIP, "$2$3$4." + username + "." + TLD);
 		CLIENT.cmd("stop_nodejs", json, function(err, json) {
 			
 			if(err) {
-				console.log("stop_nodejs: err.code=" + err.code);
+				//console.log("stop_nodejs: err.code=" + err.code);
 				if(err.code == "NOT_RUNNING") alertBox("Script was not running: " + filePath);
 				else return alertBox(err.message);
 			}
 			
 			scriptStopped(filePath);
 			
-			console.log("Stopped script: " + json.filePath);
+			//console.log("Stopped script: " + json.filePath);
 		});
 		
 		return false;
@@ -705,7 +701,7 @@ text = text.replace(reNetnsIP, "$2$3$4." + username + "." + TLD);
 		
 		var filePath = file.path;
 		
-		console.log("Run nodejs script: " + filePath);
+		//console.log("Run nodejs script: " + filePath);
 		
 		if(filePath.substr(filePath.length-7) == ".stdout") {
 			filePath = filePath.substr(0, filePath.length-7);
@@ -714,7 +710,7 @@ text = text.replace(reNetnsIP, "$2$3$4." + username + "." + TLD);
 
 		var fileName = UTIL.getFilenameFromPath(filePath);
 
-		console.log("Run nodejs script: fileName=" + fileName + " file.isSaved=" + file.isSaved + " file.savedAs=" + file.savedAs + " filePath=" + filePath + " file.path=" + file.path + " ");
+		//console.log("Run nodejs script: fileName=" + fileName + " file.isSaved=" + file.isSaved + " file.savedAs=" + file.savedAs + " filePath=" + filePath + " file.path=" + file.path + " ");
 
 		if(filePath == file.path && !file.savedAs) {
 
@@ -731,10 +727,10 @@ text = text.replace(reNetnsIP, "$2$3$4." + username + "." + TLD);
 						if(err && err.code == "CANCEL") return;
 						else if(err) throw err;
 
-						console.log("Run nodejs script: pathPickerTool err=", err, " path=" + path)
-						console.time("Run nodejs script: saveFile");
+						//console.log("Run nodejs script: pathPickerTool err=", err, " path=" + path)
+						//console.time("Run nodejs script: saveFile");
 						EDITOR.saveFile(file, path, function(err, path) {
-							console.timeEnd("Run nodejs script: saveFile");
+							//console.timeEnd("Run nodejs script: saveFile");
 							if(err) return alertBox(err.message);
 							if(answer == saveThenRun) prepare(path);
 						});
@@ -793,15 +789,15 @@ text = text.replace(reNetnsIP, "$2$3$4." + username + "." + TLD);
 				EDITOR.files[stdOutFile].writeLineBreak();
 			}
 			
-			console.time("Run nodejs script: run_nodejs");
+			//console.time("Run nodejs script: run_nodejs");
 			CLIENT.cmd("run_nodejs", json, function(err, json) {
-				console.timeEnd("Run nodejs script: run_nodejs");
+				//console.timeEnd("Run nodejs script: run_nodejs");
 				if(err) throw err;
 				else {
 					
 					scriptStarted(filePath);
 					
-					console.log("Started script: " + json.filePath);
+					//console.log("Started script: " + json.filePath);
 					EDITOR.stat("run_nodejs_script");
 				}
 			});
@@ -810,12 +806,12 @@ text = text.replace(reNetnsIP, "$2$3$4." + username + "." + TLD);
 	
 	function appendFile(file, msg) {
 		
-		console.log("appendFile: " + file.path + " msg=" + JSON.stringify(msg));
+		//console.log("appendFile: " + file.path + " msg=" + JSON.stringify(msg));
 		
 		file.noCollaboration = true; // Don't send changes of this file to collaborators (they will get the changes via the server anyway)
 		
 		var eof = file.caret.eof;
-		console.log("caret eof=" + eof + " " + JSON.stringify(file.caret));
+		//console.log("caret eof=" + eof + " " + JSON.stringify(file.caret));
 		
 		if(msg.stderr) write(msg.stderr);
 		if(msg.stdout) write( (msg.type ? msg.type + ": " : "") + msg.stdout );
@@ -851,13 +847,13 @@ text = text.replace(reNetnsIP, "$2$3$4." + username + "." + TLD);
 	function infoHas(obj) {
 		outer: for (var i=0; i<EDITOR.info.length; i++) {
 			for(var prop in obj) {
-				console.log("info " + 1 + " " + prop + "='" + EDITOR.info[i][prop] + "' = '" + obj[prop] + "'");
+				//console.log("info " + 1 + " " + prop + "='" + EDITOR.info[i][prop] + "' = '" + obj[prop] + "'");
 				if(EDITOR.info[i][prop] != obj[prop]) continue outer;
 			}
-			console.log("TRUE!");
+			//console.log("TRUE!");
 			return true;
 		}
-		console.log("FALSE!");
+		//console.log("FALSE!");
 		return false;
 	}
 	
@@ -871,7 +867,7 @@ text = text.replace(reNetnsIP, "$2$3$4." + username + "." + TLD);
 		// The v8 debugger gets the line number wrong because module stuff is inserted at the first line by Node.js
 		if(row==0 && col >= 62) col -= 62;
 		
-		console.log("columnMinusIndention: row=" + row + " col=" + col + " indentation=" + indentation);
+		//console.log("columnMinusIndention: row=" + row + " col=" + col + " indentation=" + indentation);
 		
 		var sum = col - indentation;
 		
@@ -895,9 +891,7 @@ text = text.replace(reNetnsIP, "$2$3$4." + username + "." + TLD);
 						col: callFrames[i].columnNumber
 					};
 				}
-				else {
-					console.log("findFile: Not the same: path=" + path + " callFrames[" + i + "].url=" + callFrames[i].url);
-				}
+				//else {console.log("findFile: Not the same: path=" + path + " callFrames[" + i + "].url=" + callFrames[i].url);}
 			}
 		}
 		

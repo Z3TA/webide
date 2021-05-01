@@ -64,7 +64,7 @@
 			
 			var pageHeight = pdf.internal.pageSize.getHeight();
 			var pageWidth = pdf.internal.pageSize.getWidth();
-			console.log("print2pdf: pageHeight=" + pageHeight + " pageWidth=" + pageWidth);
+			//console.log("print2pdf: pageHeight=" + pageHeight + " pageWidth=" + pageWidth);
 			
 			// Switch to a font that is included in PDF reader
 			
@@ -110,15 +110,15 @@
 			var margin = pageHeight - rowsPerPage * EDITOR.settings.gridHeight;
 			
 			// Adjust margins
-			console.log("print2pdf: rowsPerPage=" + rowsPerPage + " margin=" + margin);
+			//console.log("print2pdf: rowsPerPage=" + rowsPerPage + " margin=" + margin);
 			
 			// If margins are too large we will get an extra page
 			var topMargin = Math.floor(margin/2 - 0.01); // Make top margin an integer to prevent sub pixel rendering
 			var bottomMargin = margin - topMargin; // Fill out the remaining space
 			
-			console.log("print2pdf: Adjusting EDITOR.settings.topMargin=" + EDITOR.settings.topMargin + " to " + topMargin);
-			console.log("print2pdf: Adjusting EDITOR.settings.bottomMargin=" + EDITOR.settings.bottomMargin + " to " + bottomMargin);
-			console.log("print2pdf: Adjusting EDITOR.settings.leftMargin=" + EDITOR.settings.leftMargin + " to " + leftMargin);
+			//console.log("print2pdf: Adjusting EDITOR.settings.topMargin=" + EDITOR.settings.topMargin + " to " + topMargin);
+			//console.log("print2pdf: Adjusting EDITOR.settings.bottomMargin=" + EDITOR.settings.bottomMargin + " to " + bottomMargin);
+			//console.log("print2pdf: Adjusting EDITOR.settings.leftMargin=" + EDITOR.settings.leftMargin + " to " + leftMargin);
 			
 			EDITOR.settings.topMargin = topMargin;
 			EDITOR.settings.bottomMargin = bottomMargin;
@@ -141,7 +141,7 @@
 			EDITOR.canvas = canvas;
 			
 			// Some renders need to recalculate
-			console.log("print2pdf: Calling afterResize listeners (" + EDITOR.eventListeners.afterResize.length + ") ...");
+			//console.log("print2pdf: Calling afterResize listeners (" + EDITOR.eventListeners.afterResize.length + ") ...");
 			for(var i=0; i<EDITOR.eventListeners.afterResize.length; i++) {
 				EDITOR.eventListeners.afterResize[i].fun(EDITOR.currentFile, pageWidth, pageHeight);
 			}
@@ -167,11 +167,11 @@
 			for (var page=0; page<totalPages; page++) {
 				fileStartRow = page * rowsPerPage;
 				fileEndRow = Math.min(fileStartRow + rowsPerPage - 1, file.grid.length-1);
-				console.log("print2pdf: page=" + page + " Render fileStartRow=" + fileStartRow + " fileEndRow=" + fileEndRow);
+				//console.log("print2pdf: page=" + page + " Render fileStartRow=" + fileStartRow + " fileEndRow=" + fileEndRow);
 				EDITOR.render(file, fileStartRow, fileEndRow, screenStartRow, canvas, ctx, renderOverride);
 				
 				if(page < totalPages-1) {
-					console.log("print2pdf: Adding page! page=" + page + " totalPages=" + totalPages);
+					//console.log("print2pdf: Adding page! page=" + page + " totalPages=" + totalPages);
 					pdf.addPage();
 				}
 			}
@@ -203,7 +203,7 @@
 			EDITOR.resize(true);
 			
 			
-			console.log("print2pdf: Finished print2pdf");
+			//console.log("print2pdf: Finished print2pdf");
 			
 			EDITOR.stat("print_to_pdf");
 			
@@ -235,14 +235,12 @@
 		
 		function doneMaybe() {
 			if(counter == jsPdfDependencies.length && fontLoaded) {
-				console.log("print2pdf: All dependencies loaded!");
+				//console.log("print2pdf: All dependencies loaded!");
 				dependenciesLoaded = true;
 				callback(null);
 				callback = null; // throw error if it's called again
 			}
-			else {
-				console.log("print2pdf: Loaded " + counter + " of " + jsPdfDependencies.length + " dependencies. Waiting for " + JSON.stringify(scriptsToLoad) + " fontLoaded=" + fontLoaded);
-			}
+			//else {console.log("print2pdf: Loaded " + counter + " of " + jsPdfDependencies.length + " dependencies. Waiting for " + JSON.stringify(scriptsToLoad) + " fontLoaded=" + fontLoaded);}
 		}
 		
 		function loadDep(src) {
@@ -259,7 +257,7 @@
 					return callback(error);
 				}
 				
-				console.log("print2pdf: Loaded " + src);
+				//console.log("print2pdf: Loaded " + src);
 				
 				scriptsToLoad.splice(scriptsToLoad.indexOf(src), 1);
 				

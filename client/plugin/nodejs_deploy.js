@@ -177,7 +177,7 @@
 		function readPj(folder) {
 			if(folder == undefined) throw new Error("folder=" + folder);
 			
-			console.log("Looking for package.json in folder=" + folder + " ..."); 
+			//console.log("Looking for package.json in folder=" + folder + " ..."); 
 		EDITOR.readFromDisk(folder + "package.json", function fileRead(readFileErr, filePath, fileContent) {
 				if(folder == undefined) throw new Error("folder=" + folder);
 				

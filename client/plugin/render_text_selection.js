@@ -15,7 +15,7 @@
 
 	EDITOR.addRender(selectionRender, 1920); // Have higher order then render_textbg so we can se what we are selecting when there is a background
 
-	console.log("Loaded selectionRender");
+	//console.log("Loaded selectionRender");
 	
 	function selectionRender(ctx, buffer, file, startRow, containSpecialWidthCharacters) {
 		

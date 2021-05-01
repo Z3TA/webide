@@ -78,7 +78,7 @@ todo: Run vttest
 			// Also wait for the user to get logged in
 			EDITOR.once("storageReady", function openActiveTerminals() {
 			setTimeout(function() {
-				console.log("after waitForReopen terminalFiles=" + JSON.stringify(terminalFiles.map(function(file) {return file.path})));
+					//console.log("after waitForReopen terminalFiles=" + JSON.stringify(terminalFiles.map(function(file) {return file.path})));
 				
 				parseBuffer();
 				
@@ -88,14 +88,14 @@ todo: Run vttest
 				CLIENT.cmd("terminal.list", {}, function terminalList(err, terminalIdList) {
 					if(err) {
 							if(err.code == "MODULE_MISSING") {
-								console.warn("Disabling Terminal plugin");
+								//console.warn("Disabling Terminal plugin");
 EDITOR.disablePlugin("Terminal emulator", true);
 return;
 							}
 							else throw err;
 						}
 						
-						console.log("terminal: terminalIdList=" + JSON.stringify(terminalIdList));
+						//console.log("terminal: terminalIdList=" + JSON.stringify(terminalIdList));
 
 					for (var i=0; i<terminalIdList.length; i++) {
 						openTerminalFile(termPrefix + terminalIdList[i])
@@ -164,10 +164,10 @@ EDITOR.unbindKey(startTerminalFromKeyboard);
 	}
 	
 	function addTerminalEvents() {
-		console.warn("addTerminalEvents");
+		//console.warn("addTerminalEvents");
 		
 		if(terminalActive === true) {
-			console.warn("Terminal events already active!");
+			//console.warn("Terminal events already active!");
 			return;
 		}
 		
@@ -179,7 +179,7 @@ EDITOR.unbindKey(startTerminalFromKeyboard);
 	}
 	
 	function removeTerminalEvents() {
-		console.warn("removeTerminalEvents");
+		//console.warn("removeTerminalEvents");
 		
 		EDITOR.removeEvent("keyPressed", terminalKeyPressed);
 		EDITOR.removeEvent("keyDown", terminalKeyDown);
@@ -248,7 +248,7 @@ EDITOR.unbindKey(startTerminalFromKeyboard);
 						
 						var id = file.path.match(reTerm)[1];
 						
-						console.log("deltaCol=" + deltaCol);
+						//console.log("deltaCol=" + deltaCol);
 						
 						if(deltaCol > 0) var code = "C";
 						else var code = "D";
@@ -279,7 +279,7 @@ EDITOR.unbindKey(startTerminalFromKeyboard);
 	}
 	
 	function terminalPaste(file, text, pasteEvent) {
-		console.log("terminal paste: text=" + text);
+		//console.log("terminal paste: text=" + text);
 		
 		if(terminalFiles.indexOf(file) == -1) return true;
 		

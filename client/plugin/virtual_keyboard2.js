@@ -344,7 +344,7 @@
 	}
 	
 	function toggleBetweenKeyboards() {
-		console.log("toggleBetweenKeyboards: useNative=" + useNative + " useBuiltin=" + useBuiltin);
+		//console.log("toggleBetweenKeyboards: useNative=" + useNative + " useBuiltin=" + useBuiltin);
 		
 		EDITOR.ctxMenu.hide();
 		
@@ -381,7 +381,7 @@
 	
 	function showBuiltinKeyboard() {
 		if(useBuiltin) {
-			console.log("Builtin already active!");
+			//console.log("Builtin already active!");
 			return;
 		}
 		
@@ -411,7 +411,7 @@
 	}
 	
 	function hideBuiltinKeyboard() {
-		console.log("Hiding builtin virtual keyboard!");
+		//console.log("Hiding builtin virtual keyboard!");
 		var wrapper = document.getElementById("virtualKeyboard2");
 		wrapper.style.display="none";
 		EDITOR.resizeNeeded();
@@ -486,25 +486,25 @@ EDITOR.ctxMenu.update(menuItem, true, labelShowNative);
 				
 				delete verticalLayout[id]["alt" + altNr];
 				
-				console.log("Removed registeredAltKeys for " + UTIL.getFunctionName(fun) + " from " + verticalLayout[i].char + " !");
+				//console.log("Removed registeredAltKeys for " + UTIL.getFunctionName(fun) + " from " + verticalLayout[i].char + " !");
 				
 				return;
 			}
 		}
 		
-		console.warn("No match for " + UTIL.getFunctionName(fun) + " in registeredAltKeys!");
+		//console.warn("No match for " + UTIL.getFunctionName(fun) + " in registeredAltKeys!");
 	}
 	
 	function updateAltKey(key) {
-		console.log("updateAltKey: char=" + key.char + " alt=" + key.alt);
+		//console.log("updateAltKey: char=" + key.char + " alt=" + key.alt);
 if(key.alt > 3) {
-			console.log("Virtual keyboard only allow 3 alternatives per button!");
+			//console.log("Virtual keyboard only allow 3 alternatives per button!");
 return false;
 }
 		for (var i=0, button; i<verticalLayout.length; i++) {
 			button = verticalLayout[i];
 			if(button.char == key.char) {
-				console.log("Found char=" + key.char);
+				//console.log("Found char=" + key.char);
 				if(verticalLayout[i]["alt" + key.alt] != undefined) {
 					throw new Error("There is already something registered on " + button.char + " for alt=" + key.alt + " ! Unable to register function " + UTIL.getFunctionName(key.fun));
 					return false;
@@ -512,12 +512,12 @@ return false;
 				else {
 					verticalLayout[i]["alt" + key.alt] = key.label;
 					customAltKeys.push({id: i, alt: key.alt, fun: key.fun});
-					console.log("Added " + UTIL.getFunctionName(key.fun) + " as alt" + key.alt + " on " + key.char + " !");
+					//console.log("Added " + UTIL.getFunctionName(key.fun) + " as alt" + key.alt + " on " + key.char + " !");
 					return true;
 				}
 			}
 		}
-		console.log("Could not find char=" + key.char + " on the virtual keyboard!");
+		//console.log("Could not find char=" + key.char + " on the virtual keyboard!");
 		return false;
 	}
 	
@@ -559,9 +559,9 @@ return false;
 		if(buttonsPerRow[1] == 0) throw new Error("Second row has no buttons! buttonsPerRow=" + JSON.stringify(buttonsPerRow) + " buttons=" + JSON.stringify(buttons, null, 2));
 		if(buttonsPerRow[2] == 0) throw new Error("Third row has no buttons! buttonsPerRow=" + JSON.stringify(buttonsPerRow) + " buttons=" + JSON.stringify(buttons, null, 2));
 		
-		console.log("maxButtonsPerRow=" + maxButtonsPerRow);
-		console.log("buttonsPerRow=" + JSON.stringify(buttonsPerRow));
-		console.log("totalRows=" + totalRows);
+		//console.log("maxButtonsPerRow=" + maxButtonsPerRow);
+		//console.log("buttonsPerRow=" + JSON.stringify(buttonsPerRow));
+		//console.log("totalRows=" + totalRows);
 		
 		
 		buttonWidth = canvasWidth / maxButtonsPerRow;
@@ -578,7 +578,7 @@ return false;
 		
 		//EDITOR.virtualKeyboardHeight = canvasHeight;
 		
-		console.log("virtualKeyboardClaimHeight: canvasWidth=" + canvasWidth + " buttonWidth=" + buttonWidth + " canvasHeight=" + canvasHeight + " buttonHeight=" + buttonHeight);
+		//console.log("virtualKeyboardClaimHeight: canvasWidth=" + canvasWidth + " buttonWidth=" + buttonWidth + " canvasHeight=" + canvasHeight + " buttonHeight=" + buttonHeight);
 		
 	}
 	
@@ -588,7 +588,7 @@ return false;
 		if(!useBuiltin) return;
 		
 		if(canvasHeight == oldCanvasHeight && canvasWidth == oldCanvasWidth) {
-			console.log("resizeVirtualKeyboard: No need to re-render! canvasHeight=" + canvasHeight + " oldCanvasHeight=" + oldCanvasHeight + " canvasWidth=" + canvasWidth + " oldCanvasWidth=" + oldCanvasWidth);
+			//console.log("resizeVirtualKeyboard: No need to re-render! canvasHeight=" + canvasHeight + " oldCanvasHeight=" + oldCanvasHeight + " canvasWidth=" + canvasWidth + " oldCanvasWidth=" + oldCanvasWidth);
 			return;
 		}
 		
@@ -617,7 +617,7 @@ return false;
 		
 		// debug
 		var wrapperAfter = wrapper.offsetWidth + "x" + wrapper.offsetHeight;
-		console.log("resizeVirtualKeyboard: pixelRatio=" + pixelRatio + " windowWidth=" + windowWidth + " windowHeight=" + windowHeight + " actual window size=" + window.innerWidth + "x" + window.innerHeight + " canvasWidth=" + canvasWidth + " canvasHeight=" + canvasHeight + " wrapperBefore=" + wrapperBefore + " wrapperAfter=" + wrapperAfter);
+		//console.log("resizeVirtualKeyboard: pixelRatio=" + pixelRatio + " windowWidth=" + windowWidth + " windowHeight=" + windowHeight + " actual window size=" + window.innerWidth + "x" + window.innerHeight + " canvasWidth=" + canvasWidth + " canvasHeight=" + canvasHeight + " wrapperBefore=" + wrapperBefore + " wrapperAfter=" + wrapperAfter);
 	}
 	
 	
@@ -655,7 +655,7 @@ return false;
 			Cache background: 1.9 - 3.5 on Chrome. Huh? Seems like copying from another canvas cost a lot!
 			Use translate: 
 		*/
-		console.time("renderVirtualKeyboard");
+		//console.time("renderVirtualKeyboard");
 		
 		if(buttons.length == 0) throw new Error("buttons.length=" + buttons.length);
 		
@@ -827,7 +827,7 @@ return false;
 		buttonLocations.sort(sortLocationsX);
 		
 		
-		console.timeEnd("renderVirtualKeyboard");
+		//console.timeEnd("renderVirtualKeyboard");
 		
 		function printText(text, cX, cY, fontSize, noSplit) {
 			var textArr = [text];
@@ -836,7 +836,7 @@ return false;
 			var textWidth = ctx.measureText(text).width;
 			var maxWidth = (buttonWidth*buttons[i].width+margin*2);
 			if(textWidth > maxWidth || fontSize < 10) {
-				console.warn("printText: text=" + text + " fontSize=" + fontSize + " textWidth=" + textWidth + " buttonWidth=" + buttonWidth + " noSplit=" + noSplit);
+				//console.warn("printText: text=" + text + " fontSize=" + fontSize + " textWidth=" + textWidth + " buttonWidth=" + buttonWidth + " noSplit=" + noSplit);
 				
 				if(!noSplit) {
 					// Attempt to split it
@@ -848,7 +848,7 @@ return false;
 					// Still too wide, use smaller font
 					fontSize = Math.floor(fontSize * 0.8 * maxWidth / textWidth);
 					ctx.font =  fontSize + "px Arial";
-					console.log("Using fontSize=" + fontSize + " for text=" + text + " because textWidth was " + textWidth);
+					//console.log("Using fontSize=" + fontSize + " for text=" + text + " because textWidth was " + textWidth);
 				}
 			}
 			
@@ -921,7 +921,7 @@ return false;
 		for (var i=0; i<customAltKeys.length; i++) {
 			if(customAltKeys[i].id == id && customAltKeys[i].alt == altNr) {
 				customFunction = customAltKeys[i].fun;
-				console.log("Using custom function " + UTIL.getFunctionName(customFunction) + " from alt keys!");
+				//console.log("Using custom function " + UTIL.getFunctionName(customFunction) + " from alt keys!");
 				break;
 			}
 		}
@@ -979,9 +979,7 @@ return false;
 			
 		*/
 		
-		console.log("fireKey: charCode=" + charCode + " eventType=" + eventType +
-		" document.activeElement: id=" + document.activeElement.id + " node=" + document.activeElement.nodeName +
-		" EDITOR.lastElementWithFocus: id=" + EDITOR.lastElementWithFocus.id + " node=" + EDITOR.lastElementWithFocus.nodeName);
+		//console.log("fireKey: charCode=" + charCode + " eventType=" + eventType +" document.activeElement: id=" + document.activeElement.id + " node=" + document.activeElement.nodeName + " EDITOR.lastElementWithFocus: id=" + EDITOR.lastElementWithFocus.id + " node=" + EDITOR.lastElementWithFocus.nodeName);
 		
 		if(charCode == 8592) var KeyCode = 37; // ← left
 		if(charCode == 8594) var KeyCode = 39; // → right
@@ -998,7 +996,7 @@ return false;
 		
 		//if(document.activeElement != EDITOR.lastElementWithFocus) el = EDITOR.lastElementWithFocus;
 		
-		console.log("el: id=" + el.id + " node=" + el.nodeName + " type=" + el.type);
+		//console.log("el: id=" + el.id + " node=" + el.nodeName + " type=" + el.type);
 		
 		if(EDITOR.isTextInputElement(el)) {
 EDITOR.typeIntoElement(el, charCode);
@@ -1011,7 +1009,7 @@ EDITOR.typeIntoElement(el, charCode);
 		//setTimeout(defaultAction, 0); // Needed in order to make the canvas update!
 		//function defaultAction() {
 		var doDefaultAction = EDITOR.mock( eventType, { charCode: KeyCode || charCode } );
-		console.log("eventType=" + eventType + " doDefaultAction=" + doDefaultAction);
+		//console.log("eventType=" + eventType + " doDefaultAction=" + doDefaultAction);
 		//}
 		
 	}
