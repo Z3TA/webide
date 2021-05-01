@@ -766,7 +766,7 @@ EDITOR.bindKey(b);
 	EDITOR.setMode = function setMode(name) {
 		if(EDITOR.modes.indexOf(name) == -1) throw new Error(name + " mode is not registered as a mode/modal! Available modes are: " + JSON.stringify(EDITOR.modes));
 		EDITOR.mode = name;
-		console.warn("Set EDITOR.mode=" + EDITOR.mode);
+		//console.log("Set EDITOR.mode=" + EDITOR.mode);
 	}
 	
 
@@ -921,7 +921,7 @@ usePseudoClipboard = false;
 							return prm();
 						}
 						else {
-							console.warn("answer=" + answer);
+							console.warn("psuedo clipboard answer=" + answer);
 							return prm();
 						}
 					});
@@ -1158,7 +1158,7 @@ usePseudoClipboard = false;
 		}
 		
 
-		console.log("EDITOR.openFile: path=" + path + " state=" + JSON.stringify(state) + " " + UTIL.getStack("openFile"));
+		//console.log("EDITOR.openFile: path=" + path + " state=" + JSON.stringify(state) + " " + UTIL.getStack("openFile"));
 
 		// Check if the file is already opened
 		if(EDITOR.files.hasOwnProperty(path)) {
@@ -1260,7 +1260,7 @@ usePseudoClipboard = false;
 		
 		if(text == undefined) {
 			
-			console.warn("Text is undefined! Reading file from disk: " + path)
+			//console.log("EDIOR.openFile: Text is undefined! Reading file from disk: " + path)
 			
 			var fileExtension = UTIL.getFileExtension(path);
 			var imageFileExt = ["jpg", "jpge", "gif", "bmp", "tiff", "png"];
@@ -1412,15 +1412,15 @@ if(EDITOR.files.hasOwnProperty(path)) throw new Error("path=" + path + " already
 					f[i](file); // Call function
 				}
 				
-				console.log("EDITOR.openFile: state?" + !!state + " state.show=" + (state && state.show) + " showFile=" + showFile + " path=" + path);
+				//console.log("EDITOR.openFile: state?" + !!state + " state.show=" + (state && state.show) + " showFile=" + showFile + " path=" + path);
 				if( (!state || state.show !== false) && (showFile == undefined || showFile == path) ) {
 					// Switch to this file
-					console.log("EDITOR.openFile: Showing file.path=" + file.path + " " + UTIL.getStack("showing file"));
+					//console.log("EDITOR.openFile: Showing file.path=" + file.path + " " + UTIL.getStack("showing file"));
 					EDITOR.showFile(file);
 					EDITOR.view.endingColumn = EDITOR.view.visibleColumns; // Because file.startColumn = 0;
 				}
 				else if(showFile != undefined) {
-					console.warn("Not switching to " + path + " because showFile is set to " + showFile);
+					//console.warn("Not switching to " + path + " because showFile is set to " + showFile);
 				}
 				
 				if(err || fileLoadError) throw new Error("err=" + err + " fileLoadError=" + fileLoadError);
@@ -2076,8 +2076,10 @@ else if(err.code == "ENETDOWN") {
 		if(inputBuffer != undefined && typeof inputBuffer != "boolean") throw new Error("EDITOR.saveToDisk: Third argument inputBuffer need to be true,false or undefined!");
 		if(inputBuffer != undefined && typeof encoding != "string") throw new Error("EDITOR.saveToDisk: Fourth argument encoding need to be a string or undefined!");
 		
-		if(!saveToDiskCallback) console.warn("saveToDisk called without a callback function!");
-		
+		if(!saveToDiskCallback) {
+			console.warn("saveToDisk called without a callback function!");
+		}
+
 		var trimmedPath = path.trim();
 		if(path != trimmedPath) {
 			console.warn("Path trimmed: " + UTIL.lbChars(path) + " => " + trimmedPath);
@@ -2487,13 +2489,13 @@ callback(error);
 		
 		ctx.save();
 		
-		console.log("DebugCtx: canvasContextReset()  windowLoaded=" + windowLoaded + " Set ctx.imageSmoothingEnabled=" + ctx.imageSmoothingEnabled + " EDITOR.canvasContext.imageSmoothingEnabled=" + EDITOR.canvasContext.imageSmoothingEnabled + " ctx.font=" + ctx.font);
+		//console.log("DebugCtx: canvasContextReset()  windowLoaded=" + windowLoaded + " Set ctx.imageSmoothingEnabled=" + ctx.imageSmoothingEnabled + " EDITOR.canvasContext.imageSmoothingEnabled=" + EDITOR.canvasContext.imageSmoothingEnabled + " ctx.font=" + ctx.font);
 		
 	}
 	
 	EDITOR.render = function render(file, fileStartRow, fileEndRow, screenStartRow, canvas, ctx, renderOverride, background) {
 		
-		console.warn("EDITOR.render! renderOverride=" + renderOverride + " EDITOR.shouldRender=" + EDITOR.shouldRender + " Editor canvas ? " + (canvas == undefined || canvas == EDITOR.canvas) + " EDITOR.canvasContext.font=" + EDITOR.canvasContext.font);
+		//console.warn("EDITOR.render! renderOverride=" + renderOverride + " EDITOR.shouldRender=" + EDITOR.shouldRender + " Editor canvas ? " + (canvas == undefined || canvas == EDITOR.canvas) + " EDITOR.canvasContext.font=" + EDITOR.canvasContext.font);
 		
 		if(file == undefined) file = EDITOR.currentFile;
 		
@@ -2504,7 +2506,7 @@ callback(error);
 		}
 		else if(ctx == undefined) {
 			
-			console.warn("EDITOR.render: Getting new canvas 2d context!");
+			//console.warn("EDITOR.render: Getting new canvas 2d context!");
 			
 			if(EDITOR.settings.sub_pixel_antialias == false) {
 				ctx = canvas.getContext("2d", {lowLatency: EDITOR.settings.lowLatencyCanvas, antialias: false});
@@ -2593,7 +2595,7 @@ callback(error);
 				return;
 			}
 			
-			console.time("render");
+			//console.time("render");
 			
 			var buffer = [];
 			var grid = EDITOR.currentFile.grid;
@@ -2690,7 +2692,7 @@ callback(error);
 				ctx.lineWidth = 1;
 			*/
 			
-			console.log("EDITOR.render: ctx==EDITOR.canvasContext?" + (ctx==EDITOR.canvasContext) + " ctx.font=" + ctx.font);
+			//console.log("EDITOR.render: ctx==EDITOR.canvasContext?" + (ctx==EDITOR.canvasContext) + " ctx.font=" + ctx.font);
 
 			// Render functions need to be ordered, so we can't optimize them with web workers
 			//console.time("renders");
@@ -2710,7 +2712,7 @@ callback(error);
 			
 			lastBufferStartRow = bufferStartRow;
 			
-			console.timeEnd("render");
+			//console.timeEnd("render");
 			
 		}
 		else {
@@ -2810,7 +2812,7 @@ callback(error);
 			
 			var screenStartRow = Math.max(0, row - file.startRow);
 			
-			console.time("renderRow");
+			//console.time("renderRow");
 			
 			var buffer = [];
 			
@@ -2861,7 +2863,7 @@ callback(error);
 				EDITOR.renderFunctions[i](ctx, buffer, file, screenStartRow, containSpecialWidthCharacters, row, row); // Call render
 			}
 			
-			console.timeEnd("renderRow");
+			//console.timeEnd("renderRow");
 			
 		}
 		else {
@@ -3179,7 +3181,7 @@ ca 20ms to render, ca 13ms to render without creating new objects
 			return;
 		}
 		
-		console.time("resize");
+		//console.time("resize");
 		
 		// Resize listeners (before)
 		var f = EDITOR.eventListeners.beforeResize.map(funMap);
@@ -3448,7 +3450,7 @@ ca 20ms to render, ca 13ms to render without creating new objects
 		
 		
 		
-		console.timeEnd("resize");
+		//console.timeEnd("resize");
 		
 		
 		if(EDITOR.shouldRender) resizeAndRender(true);
@@ -5605,7 +5607,7 @@ posX = EDITOR.width - offsetWidth;
 		height: Math.round(   Math.min(  1000, screen.height-110, Math.max(screen.height, 900)  )   ),
 		start: function(show, preferredWith, preferredHeight, callback, recurse) {
 			
-			console.warn("EDITOR.virtualDisplay.start()");
+			//console.log("EDITOR.virtualDisplay.start()");
 			
 			var desktopWidth = preferredWith || EDITOR.virtualDisplay.width ;
 			var desktopHeight = preferredHeight || EDITOR.virtualDisplay.height;
@@ -5641,7 +5643,7 @@ posX = EDITOR.width - offsetWidth;
 		},
 		stop: function() {
 			
-			console.warn("EDITOR.virtualDisplay.stop()");
+			//console.log("EDITOR.virtualDisplay.stop()");
 			
 			EDITOR.virtualDisplay.started = false;
 			
@@ -5651,7 +5653,7 @@ posX = EDITOR.width - offsetWidth;
 			return PREVENT_DEFAULT;
 		},
 		show: function(preferredWith, preferredHeight, callback, recurse) {
-			console.warn("EDITOR.virtualDisplay.show()");
+			//console.log("EDITOR.virtualDisplay.show()");
 			
 			if(typeof preferredWith == "function" && preferredHeight == undefined && callback == undefined) {
 				callback = preferredWith;
@@ -5728,8 +5730,8 @@ if(EDITOR.user.domain) {
 			
 				var winLoadedCalled = false;
 				
-				console.warn("EDITOR.virtualDisplay calling EDITOR.createWindow ");
-			var theWindow = EDITOR.createWindow({url: url, width: width, height: height, top: top, left: left, waitUntilLoaded: true}, winLoaded);
+				//console.log("EDITOR.virtualDisplay calling EDITOR.createWindow ");
+				var theWindow = EDITOR.createWindow({url: url, width: width, height: height, top: top, left: left, waitUntilLoaded: true}, winLoaded);
 			
 setTimeout(function winNeverLoaded() {
 					if(!winLoadedCalled) {
@@ -5902,7 +5904,7 @@ console.warn(err.message);
 		
 		if(textString == undefined) throw new Error("EDITOR.addInfo: Third argument textString=" + textString + " can not be undefined! arguments=" + JSON.stringify(arguments));
 		
-		console.time("addInfo");
+		//console.time("addInfo");
 		
 		if(isNaN(col)) col = 0;
 		
@@ -6007,7 +6009,7 @@ console.warn(err.message);
 				});
 			}
 			
-			console.timeEnd("addInfo");
+			//console.timeEnd("addInfo");
 			
 			//console.log("EDITOR.addInfo: Info added on row=" + row + " col=" + col + " textString=" + textString + " file.path=" + file.path);
 			// todo: only re-render if the info is in view
@@ -6101,7 +6103,7 @@ console.warn(err.message);
 		for(var i=0; i<info.length; i++) {
 			if(info[i].file == file && (info[i].row == row || row == undefined) && (info[i].col == col || col == undefined)) {
 				
-				console.warn("Removing info from row=" + row + " col=" + col);
+				//console.log("Removing info from row=" + row + " col=" + col);
 				
 				// Remove info
 				info.splice(i,1);
@@ -6760,7 +6762,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 					
 					
 				*/
-				console.warn("EDITOR.autoComplete: Deleting word=" + word + " caretStepLeft=" + caretStepLeft + " to autocomple wholeWord=" + wholeWord);
+				//console.log("EDITOR.autoComplete: Deleting word=" + word + " caretStepLeft=" + caretStepLeft + " to autocomple wholeWord=" + wholeWord);
 				for(var i=0; i<Math.min(caretStepLeft, word.length); i++) {
 					file.moveCaretLeft();
 					file.deleteCharacter();
@@ -6952,7 +6954,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		
 		if(!file) throw new Error("fileOrFilePath=" + fileOrFilePath + " need to be a File object or a path to an open file");
 		
-		console.log("EDITOR.showFile: file.path=" + file.path + " " + UTIL.getStack("showFile"));
+		//console.log("EDITOR.showFile: file.path=" + file.path + " " + UTIL.getStack("showFile"));
 
 		if(!overrideShowFile && showFile != undefined && showFile != file.path) {
 			console.warn("Not showing: file.path=" + file.path + " because showFile=" + showFile);
@@ -8224,7 +8226,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 					theWindow = open(url);
 					// Kinda annoying if the user clicks "allow window" after clicking OK. Not much we can do about that !?
 					if(!theWindow) {
-							console.warn("EDITOR.createWindow: Calling back!");
+							//console.warn("EDITOR.createWindow: Calling back!");
 							callback(new Error(errorText));
 							callback = function() { return "Already called callback after open fail, after retry confirmBox" };
 							return;
@@ -8232,7 +8234,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 						else return testWindow(theWindow);
 				}
 				else {
-						console.warn("EDITOR.createWindow: Calling back!");
+						//console.warn("EDITOR.createWindow: Calling back!");
 						callback(new Error(errorText));
 						callback = function() { return "Already called callback after canceled retry confirmBox" };
 					}
@@ -8272,7 +8274,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 				var error = new Error( "Unable to access " + url + " \n" + err.message + " diff=" + JSON.stringify(diff) );
 				if(diff.length > 0) error.code = "CROSS_ORIGIN";
 				
-				console.warn("EDITOR.createWindow: Calling back!");
+				//console.warn("EDITOR.createWindow: Calling back!");
 				callback(error);
 				callback = function() { return "Already called callback after theWindow.document.domain error in testWindow" };
 				return;
@@ -8318,7 +8320,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 				if(theWindow.loadedByWebideYo === true) throw new Error("It seems the window has already loaded!!"); // Sanity check
 				theWindow.loadedByWebideYo = true; 
 				if(waitUntilLoaded) {
-					console.warn("EDITOR.createWindow: Calling back!");
+					//console.warn("EDITOR.createWindow: Calling back!");
 					callback(null, theWindow);
 					callback = function() { return "Already called callback after theWindow got load event" };
 				}
@@ -8343,7 +8345,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 			EDITOR.openWindows.push(theWindow); // So that they can be conveniently closed on reload
 			
 			if(!waitUntilLoaded) {
-				console.warn("EDITOR.createWindow: Calling back!");
+				//console.warn("EDITOR.createWindow: Calling back!");
 				callback(null, theWindow);
 				callback = function() { return "Already called callback in testWindow because not waitUntilLoaded" };
 				return;
@@ -8365,7 +8367,7 @@ var loaded = !!theWindow.location.href;
 						console.warn("EDITOR.createWindow: waitUntilLoaded=" + waitUntilLoaded + " loaded=" + loaded + " Aborting callback because theWindow.loadedByWebideYo=" + theWindow.loadedByWebideYo);
 						return;
 					}
-					console.warn("EDITOR.createWindow: Calling back!");
+					//console.warn("EDITOR.createWindow: Calling back!");
 					callback(null, theWindow);
 					callback = function() { return "Already called callback in testWindow because not waitUntilLoaded and loaded" };
 				}, 500);
@@ -8491,7 +8493,7 @@ var loaded = !!theWindow.location.href;
 		},
 		show: function showDashboard() {
 			
-			console.warn("Showing the dashboard! stayHidden=" + EDITOR.dashboard.stayHidden);
+			//console.log("Showing the dashboard! stayHidden=" + EDITOR.dashboard.stayHidden);
 			
 			if(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("dashboard") != -1) throw new Error("dashboard disabled via query string!");
 			
@@ -11543,7 +11545,7 @@ function onMessage(windowMessageEvent) {
 			
 		}
 		else {
-			console.warn("Ddoes not recognise msg=" + msg);
+			console.warn("Does not recognise msg=" + msg);
 		//throw new Error("Unable to handle message: " + msg);
 	}
 		
@@ -11572,11 +11574,7 @@ function onMessage(windowMessageEvent) {
 
 function copy(copyEvent) {
 	
-		console.warn("copyEvent EDITOR.input=" + EDITOR.input + 
-	" EDITOR.settings.useCliboardcatcher=" + EDITOR.settings.useCliboardcatcher + 
-	" giveBackFocusAfterClipboardEvent=" + giveBackFocusAfterClipboardEvent + 
-		" EDITOR.input=" + EDITOR.input + 
-		" copyEvent.target=" + copyEvent.target);
+		//console.log("copyEvent EDITOR.input=" + EDITOR.input + " EDITOR.settings.useCliboardcatcher=" + EDITOR.settings.useCliboardcatcher + " giveBackFocusAfterClipboardEvent=" + giveBackFocusAfterClipboardEvent + " EDITOR.input=" + EDITOR.input + " copyEvent.target=" + copyEvent.target);
 	
 		nativeCopy = false; // Allow next key press to register
 		
@@ -11875,7 +11873,7 @@ function keyPressed(keyPressEvent) {
 	var preventDefault = false;
 	var funReturn = true;
 	
-		console.warn("keyPressed: charCode=" + charCode + " character=" + character + " (key=" + keyPressEvent.key + " code=" + keyPressEvent.code + " charCode=" + keyPressEvent.charCode + ", keyCode=" + keyPressEvent.keyCode + ", which=" + keyPressEvent.which + ") combo=" + JSON.stringify(combo) + " EDITOR.input=" + (EDITOR.currentFile ? EDITOR.input : "NoFileOpen EDITOR.input=" + EDITOR.input + "") + "");
+		//console.log("keyPressed: charCode=" + charCode + " character=" + character + " (key=" + keyPressEvent.key + " code=" + keyPressEvent.code + " charCode=" + keyPressEvent.charCode + ", keyCode=" + keyPressEvent.keyCode + ", which=" + keyPressEvent.which + ") combo=" + JSON.stringify(combo) + " EDITOR.input=" + (EDITOR.currentFile ? EDITOR.input : "NoFileOpen EDITOR.input=" + EDITOR.input + "") + "");
 	
 	// Don't execute keypress for the browser that support it, if keyboardCatcher is focused.
 	if(keyPressEvent.target && keyPressEvent.target.className == "keyboardCatcher") return false;
@@ -11883,8 +11881,8 @@ function keyPressed(keyPressEvent) {
 	// Firefox and Safari go here before calling copy/paste/cut events
 	// Without this copy/paste will not work in Safari! Why !? 
 	if(nativeCopy || nativePaste || nativeCut) {
-		console.warn("keyPressed: Abort because nativeCopy=" + nativeCopy + " nativePaste=" + nativePaste + " nativeCut=" + nativeCut);
-		nativeCopy = false;
+		//console.warn("keyPressed: Abort because nativeCopy=" + nativeCopy + " nativePaste=" + nativePaste + " nativeCut=" + nativeCut);
+			nativeCopy = false;
 		nativePaste = false;
 		nativeCut = false;
 		return;
@@ -12072,7 +12070,7 @@ function keyPressed(keyPressEvent) {
 
 function resizeAndRender(afterResize) {
 	
-		console.log("resizeAndRender: EDITOR.shouldResize=" + EDITOR.shouldResize + " EDITOR.shouldRender=" + EDITOR.shouldRender + " EDITOR.isScrolling=" + EDITOR.isScrolling + " windowLoaded=" + windowLoaded);
+		//console.log("resizeAndRender: EDITOR.shouldResize=" + EDITOR.shouldResize + " EDITOR.shouldRender=" + EDITOR.shouldRender + " EDITOR.isScrolling=" + EDITOR.isScrolling + " windowLoaded=" + windowLoaded);
 	
 	// Only do the resize or render if it's actually needed
 	if(EDITOR.shouldResize) return EDITOR.resize(); // EDITOR.resize() will call resizeAndRender()
@@ -12080,7 +12078,7 @@ function resizeAndRender(afterResize) {
 	//if(EDITOR.shouldRender) window.requestAnimationFrame(EDITOR.render);
 	if(EDITOR.shouldRender) {
 		
-		if(EDITOR.isScrolling) console.time("Scrolling optimization");
+		//if(EDITOR.isScrolling) console.time("Scrolling optimization");
 		
 		var file = EDITOR.currentFile;
 		var fileStartRow = file ? file.startRow : 0;
@@ -12172,16 +12170,16 @@ function resizeAndRender(afterResize) {
 		
 		if(tmpLastBufferStartRow) lastBufferStartRow = tmpLastBufferStartRow;
 		
-		if(EDITOR.isScrolling) console.timeEnd("Scrolling optimization");
-	}
+		//if(EDITOR.isScrolling) console.timeEnd("Scrolling optimization");
+		}
 	
 	
-	//window.requestAnimationFrame(resizeAndRender); // Keep calling this function
+		//window.requestAnimationFrame(resizeAndRender); // Keep calling this function
 	
-	// Using requestAnimationFrame feels slightly slower then rendering on each interaction!
+		// Using requestAnimationFrame feels slightly slower then rendering on each interaction!
 	
-	if((new Date() - EDITOR.lastTimeInteraction) > afkTimeout) {
-		afk = true;
+		if((new Date() - EDITOR.lastTimeInteraction) > afkTimeout) {
+			afk = true;
 		EDITOR.fireEvent("afk");
 		// Try do do as little as possible to save power
 		clearInterval(mainLoopInterval);
@@ -12404,9 +12402,11 @@ function keyboardCatcherKey(keyEvent) {
 			captured = true;
 			capturedBy.push(f[i]);
 			
-				if(!EDITOR.currentFile) console.warn("keyIsDown: No file open!");
-			
-			funReturn = f[i](EDITOR.currentFile, combo, character, charCode, "down", targetElementClass, keyDownEvent);
+				if(!EDITOR.currentFile) {
+					console.warn("keyIsDown: No file open!");
+				}
+
+				funReturn = f[i](EDITOR.currentFile, combo, character, charCode, "down", targetElementClass, keyDownEvent);
 			
 				//console.log("keyIsDown: " + UTIL.getFunctionName(binding.fun) + " returned " + funReturn);
 			
@@ -12737,9 +12737,7 @@ function mouseDown(mouseDownEvent) {
 	EDITOR.lastElementWithFocus = document.activeElement || mouseDownEvent.target;
 	// EDITOR.lastElementWithFocus = The last element that had focus, eg, NOT the element that was just clicked!!
 	
-		if(EDITOR.lastElementWithFocus != lastFocused) {
-			console.warn("Changed focus from ", lastFocused, " to ", EDITOR.lastElementWithFocus);
-		}
+		//if(EDITOR.lastElementWithFocus != lastFocused) {console.log("Changed focus from ", lastFocused, " to ", EDITOR.lastElementWithFocus);}
 
 	
 		if(mouseDownEvent.type == "touchstart") {
@@ -12948,11 +12946,11 @@ function mouseDown(mouseDownEvent) {
 	
 	return true;
 	
-}
+	}
 
 
-function mouseUp(mouseUpEvent) {
-	console.time("mouseUp");
+	function mouseUp(mouseUpEvent) {
+	//console.time("mouseUp");
 	
 	mouseUpEvent = mouseUpEvent || window.event;
 	
@@ -12991,7 +12989,7 @@ function mouseUp(mouseUpEvent) {
 	}
 	
 		//console.log("Calling mouseClick (up) listeners (" + EDITOR.eventListeners.mouseClick.length + ") ...");
-	console.time("mouseClick listeners");
+	//console.time("mouseClick listeners");
 	var funReturn = true;
 	var preventDefault = false;
 		var f = [];
@@ -13012,9 +13010,9 @@ function mouseUp(mouseUpEvent) {
 		var fName;
 		for(var i=0; i<f.length; i++) {
 			fName = UTIL.getFunctionName(f[i])
-			console.time(fName);
+			//console.time(fName);
 			funReturn = f[i](mouseX, mouseY, caret, mouseDirection, button, target, keyboardCombo, mouseUpEvent); // Call it
-			console.timeEnd(fName);
+			//console.timeEnd(fName);
 			
 			//console.log("mouseClick event " + fName + " for mouseUp returned " + funReturn);
 			
@@ -13028,8 +13026,8 @@ function mouseUp(mouseUpEvent) {
 			}
 		}
 		
-		console.timeEnd("mouseClick listeners");
-	console.timeEnd("mouseUp");
+		//console.timeEnd("mouseClick listeners");
+		//console.timeEnd("mouseUp");
 	
 	//console.log("mouseUp, EDITOR.shouldRender=" + EDITOR.shouldRender);
 	
@@ -13072,7 +13070,7 @@ function getMousePosition(mouseEvent) {
 		var mouseY = mouseEvent.offsetY==undefined?mouseEvent.layerY:mouseEvent.offsetY;
 	}
 	catch(err) {
-		console.warn(err.message);
+			console.error(err);
 	}
 	
 	//console.log("mouseX=" + mouseX + " offsetX=" + mouseEvent.offsetX + " layerX=" + mouseEvent.layerX + " clientX=" + mouseEvent.clientX + " screenX=" + mouseEvent.screenX + " pageX=" + mouseEvent.pageX + " x=" + mouseEvent.x);
