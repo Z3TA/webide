@@ -21,7 +21,7 @@
 		
 		var scrollSpeed = Math.floor((deltaY + deltaNext) * EDITOR.settings.scrollSpeedMultiplier);
 		
-		console.log("onScroll: dir=" + dir + " time=" + (time - lastScroll) + " scrollSpeed=" + scrollSpeed + " deltaNext=" + deltaNext + " deltaY=" + deltaY + " scrollEvent.deltaY=" + scrollEvent.deltaY);
+		//console.log("onScroll: dir=" + dir + " time=" + (time - lastScroll) + " scrollSpeed=" + scrollSpeed + " deltaNext=" + deltaNext + " deltaY=" + deltaY + " scrollEvent.deltaY=" + scrollEvent.deltaY);
 		
 		//if((time - lastScroll) < 58 && navigator.platform.indexOf("Mac") != -1) {
 			// It's annoying if we limit scroll speed on most systems
@@ -39,10 +39,13 @@
 		
 		if(combo.sum == CTRL) {
 			// Resize text
-			console.log("onScroll: Not scrolling because CTRL key was down");
+			//console.log("onScroll: Not scrolling because CTRL key was down");
+			return;
 		}
 		
-		else if(combo.sum == 0) {
+		if(combo.sum != 0) {
+			return;
+		}
 			
 			var file = EDITOR.currentFile;
 			
@@ -64,11 +67,11 @@ if(file == undefined) return;
 					startRow = maxStartRow;
 				}
 				
-				console.log("onScroll: file.startRow=" + file.startRow);
-				console.log("onScroll: maxStartRow=" + maxStartRow);
-				console.log("onScroll: startRow=" + startRow);
-				console.log("onScroll: EDITOR.settings.topMargin=" + EDITOR.settings.topMargin);
-				console.log("onScroll: originalTopMargin=" + originalTopMargin);
+				//console.log("onScroll: file.startRow=" + file.startRow);
+			//console.log("onScroll: maxStartRow=" + maxStartRow);
+			//console.log("onScroll: startRow=" + startRow);
+			//console.log("onScroll: EDITOR.settings.topMargin=" + EDITOR.settings.topMargin);
+			//console.log("onScroll: originalTopMargin=" + originalTopMargin);
 				
 				/*
 					if(startRow < 0) {
@@ -97,8 +100,8 @@ if(file == undefined) return;
 				*/
 				EDITOR.view.visibleRows = Math.ceil((EDITOR.view.canvasHeight - EDITOR.settings.topMargin - EDITOR.settings.bottomMargin) / EDITOR.settings.gridHeight);
 
-				console.log("onScroll: ... startRow=" +startRow);
-				console.log("onScroll: EDITOR.settings.topMargin=" +EDITOR.settings.topMargin);
+			//console.log("onScroll: ... startRow=" +startRow);
+			//console.log("onScroll: EDITOR.settings.topMargin=" +EDITOR.settings.topMargin);
 
 				if(startRow < 0) startRow = 0;
 				
@@ -111,11 +114,9 @@ if(file == undefined) return;
 				*/
 				
 			}
-			else {
-				console.warn("onScroll: Scrolling, but no currentFile!")
-				
-			}
-		}
+		//else {console.warn("onScroll: Scrolling, but no currentFile!")}
+
+		
 		
 		EDITOR.renderNeeded();
 		

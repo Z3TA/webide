@@ -151,7 +151,7 @@
 		// Check for uncommited changes
 		CLIENT.cmd("mercurial.status", {directory: directory}, function hgstatus(err, status) {
 			if(err) {
-				console.log("mercurial.status error: " + err.message);
+				//console.log("mercurial.status error: " + err.message);
 				// Most likely no local repository found !?
 				// Because this is run every time the menu is opened, ignore any error
 				//if(err.code != "NO_HG_FOLDER" && err.code != "LOGIN_NEEDED" && err.code != "CONNECTION_CLOSED" && err.code != "ENOENT" && err.code != "ENOSYS") alertBox(err.message);
@@ -194,7 +194,7 @@
 					});
 				}
 				
-				console.log("mercurial.status: " + JSON.stringify(status) + " versionControlWidget.visible=" + versionControlWidget.visible);
+				//console.log("mercurial.status: " + JSON.stringify(status) + " versionControlWidget.visible=" + versionControlWidget.visible);
 				
 				// "modified":[],"added":[],"removed":[],"missing":[],"untracked":
 				
@@ -318,7 +318,7 @@
 	}
 	
 	function mercurialProgressStatus(status) {
-		console.log("mercurialProgressStatus: " + JSON.stringify(status));
+		//console.log("mercurialProgressStatus: " + JSON.stringify(status));
 		
 		if(!progressBar) progressBarWidget.show();
 		
@@ -345,7 +345,7 @@ else var directory = EDITOR.workingDirectory;
 		
 		CLIENT.cmd("mercurial.status", {directory: directory}, function hgstatus(err, status) {
 			if(err) {
-				console.log("mercurial.status error: " + err.message);
+				//console.log("mercurial.status error: " + err.message);
 				// Most likely no local repository found !?
 				// Because this is run every time the menu is opened, ignore any error
 				//if(err.code != "NO_HG_FOLDER" && err.code != "LOGIN_NEEDED" && err.code != "CONNECTION_CLOSED" && err.code != "ENOENT" && err.code != "ENOSYS") alertBox(err.message);
@@ -353,7 +353,7 @@ else var directory = EDITOR.workingDirectory;
 			}
 			else {
 				
-				console.log("mercurial.status : " + JSON.stringify(status) + " versionControlWidget.visible=" + versionControlWidget.visible);
+				//console.log("mercurial.status : " + JSON.stringify(status) + " versionControlWidget.visible=" + versionControlWidget.visible);
 				
 				// "modified":[],"added":[],"removed":[],"missing":[],"untracked":
 				
@@ -412,8 +412,8 @@ else var directory = EDITOR.workingDirectory;
 			
 			var rootDir = resp.directory;
 			
-			if(rootDir == null) console.warn("No Mercurial repo found in directory=" + directory);
-			else showCommitDialog(rootDir);
+			if(rootDir != null)showCommitDialog(rootDir);
+			//else console.warn("No Mercurial repo found in directory=" + directory);
 			
 		});
 	}
@@ -688,7 +688,7 @@ else var directory = EDITOR.workingDirectory;
 					revertFiles.push(filePath);
 				}
 			}
-			console.log("revertFiles=" + JSON.stringify(revertFiles, null, 2));
+			//console.log("revertFiles=" + JSON.stringify(revertFiles, null, 2));
 			
 			if(revertFiles.length == 0) return alertBox("No files selected!");
 			
@@ -748,8 +748,8 @@ else var directory = EDITOR.workingDirectory;
 					else removeFiles.push(filePath);
 				}
 			}
-			console.log("deleteUntracked=" + JSON.stringify(deleteUntracked, null, 2));
-			console.log("removeFiles=" + JSON.stringify(removeFiles, null, 2));
+			//console.log("deleteUntracked=" + JSON.stringify(deleteUntracked, null, 2));
+			//console.log("removeFiles=" + JSON.stringify(removeFiles, null, 2));
 			
 			if(removeFiles.length == 0 && deleteUntracked.length == 0) return alertBox("No files selected!");
 			
@@ -855,7 +855,7 @@ else var directory = EDITOR.workingDirectory;
 				
 				// Check if .hgignore exist, or create it
 				if(EDITOR.files.hasOwnProperty(ignoreFilePath)) {
-					console.log(".hgigonore already open");
+					//console.log(".hgigonore already open");
 					var file = EDITOR.files[ignoreFilePath];
 					
 					contentToAdd = contentToAdd.replace(/\n/, file.lineBreak);
@@ -870,7 +870,7 @@ else var directory = EDITOR.workingDirectory;
 						if(err) throw err;
 
 						if(exists) {
-							console.log(".hgigonore already exists");
+							//console.log(".hgigonore already exists");
 							EDITOR.openFile(ignoreFilePath, undefined, function fileOpened(err, file) {
 								if(err) return alertBox(err.message);
 								
@@ -883,7 +883,7 @@ else var directory = EDITOR.workingDirectory;
 							});
 						}
 						else {
-							console.log("Creating .hgigonore file");
+							//console.log("Creating .hgigonore file");
 							EDITOR.openFile(ignoreFilePath, contentToAdd, function fileOpened(err, file) {
 								if(err) return alertBox(err.message);
 								
@@ -898,7 +898,7 @@ else var directory = EDITOR.workingDirectory;
 				}
 				
 				function saveFile(file) {
-					console.log("Saving .hgignore file ...");
+					//console.log("Saving .hgignore file ...");
 					EDITOR.saveFile(file, ignoreFilePath, function fileSaved(err, filePath) {
 						if(err) return alertBox(err.message);
 						
@@ -908,11 +908,11 @@ else var directory = EDITOR.workingDirectory;
 						
 						EDITOR.renderNeeded();
 						
-						console.log("Updating commitFileSelect ...");
+						//console.log("Updating commitFileSelect ...");
 						updateCommitFileSelect(rootDir, function(err) {
 							if(err) throw err;
 							
-							console.log("commitFileSelect updated!");
+							//console.log("commitFileSelect updated!");
 							
 							//if(untracked.indexOf(".hgignore") != -1) msg += " Don't forget to commit the .hgignore file!"
 							
@@ -1011,7 +1011,7 @@ else var directory = EDITOR.workingDirectory;
 							if(selectedFileCount == fileSelect.options.length && selectedFileCount == opt.files.length && !commitAll) {
 								return readyToCommit(true);
 							}
-							else console.log("selectedFileCount=" + selectedFileCount + " fileSelect.options.length=" + fileSelect.options.length + " opt.files.length=" + opt.files.length + " commitAll=" + commitAll + " ");
+							//else console.log("selectedFileCount=" + selectedFileCount + " fileSelect.options.length=" + fileSelect.options.length + " opt.files.length=" + opt.files.length + " commitAll=" + commitAll + " ");
 							
 							alertBox("We need to reslove the merge conflict manually.");
 						}
@@ -1455,12 +1455,12 @@ else var directory = EDITOR.workingDirectory;
 			
 			function checkFolders() {
 				
-				console.log("Cloning to folderName=" + folderName + " in parentFolder=" + parentFolder);
+				//console.log("Cloning to folderName=" + folderName + " in parentFolder=" + parentFolder);
 				
 				if(parentFolder == "/") doClone(); // No need to check
 				else {
 					CLIENT.cmd("listFiles", {pathToFolder: parentFolder}, function listFilesResp(err, files) {
-						console.log("listFiles in parentFolder=" + parentFolder + " : err=" + err + " files.length=" + (files && files.length) + " files=" + JSON.stringify(files, null, 2));
+						//console.log("listFiles in parentFolder=" + parentFolder + " : err=" + err + " files.length=" + (files && files.length) + " files=" + JSON.stringify(files, null, 2));
 						if(err) {
 							if(err.code == "ENOENT") {
 								var yes = "Create it";
@@ -1472,7 +1472,7 @@ else var directory = EDITOR.workingDirectory;
 											else doClone();
 										});
 									}
-									else console.log("clone aborted by user!");
+									//else console.log("clone aborted by user!");
 								});
 							}
 							else return alertBox(err.message);
@@ -1481,9 +1481,9 @@ else var directory = EDITOR.workingDirectory;
 							// Chech if the folder already exist
 							for(var i=0; i<files.length; i++) {
 								if(files[i].name == folderName && files[i].type == "d") {
-									console.log("Destination folder exist! Check if it's emty: " + localDir.value);
+									//console.log("Destination folder exist! Check if it's emty: " + localDir.value);
 									CLIENT.cmd("listFiles", {pathToFolder: parentFolder}, function listFilesResp(err, files) {
-										console.log("listFiles in folderName=" + folderName + " : err=" + err + " files.length=" + (files && files.length) + " files=" + JSON.stringify(files, null, 2));
+										//console.log("listFiles in folderName=" + folderName + " : err=" + err + " files.length=" + (files && files.length) + " files=" + JSON.stringify(files, null, 2));
 										if(err) return alertBox(err.message);
 										else if(files.length == 0) doClone(); // It's emty
 										else {
@@ -1539,7 +1539,7 @@ else var directory = EDITOR.workingDirectory;
 							CLIENT.cmd("mercurial.checkout", {directory: resp.path, rev: _commitId}, function cloned(err, resp) {
 								if(err) alertBox("Failed to checkout " + _commitId + ". Error: " + err.message);
 
-								console.log("clone: mercurial.checkout: _commitId=" + _commitId + " resp=" + JSON.stringify(resp, null, 2));
+								//console.log("clone: mercurial.checkout: _commitId=" + _commitId + " resp=" + JSON.stringify(resp, null, 2));
 
 								if(_showFile) showFile(_showFile);
 								else findReadme();
@@ -1556,10 +1556,10 @@ else var directory = EDITOR.workingDirectory;
 					}
 
 					function showFile(filePathInRepo) {
-						console.log("clone: showFile: " + filePathInRepo);
+						//console.log("clone: showFile: " + filePathInRepo);
 						EDITOR.openFile( UTIL.joinPaths(resp.path, filePathInRepo), undefined, undefined, function(err) {
 							if(err) {
-								console.log("clone: open file error: " + err.message);
+								//console.log("clone: open file error: " + err.message);
 								findReadme();
 							}
 							else {
@@ -1570,7 +1570,7 @@ else var directory = EDITOR.workingDirectory;
 
 					function findReadme() {
 						// Show readme if one exist ...
-						console.log("clone: findReadme!");
+						//console.log("clone: findReadme!");
 						EDITOR.listFiles(resp.path, function(err, files) {
 							if(err) throw err;
 
@@ -1584,7 +1584,7 @@ else var directory = EDITOR.workingDirectory;
 
 							// No readme found
 
-							console.log("clone: no README file found in files=" + JSON.stringify(files));
+							//console.log("clone: no README file found in files=" + JSON.stringify(files));
 
 							alertBox("Successfully cloned to:\n" + resp.path);
 
@@ -1710,7 +1710,7 @@ else var directory = EDITOR.workingDirectory;
 			
 			var matchOrig = filePath.match(/(.*)\.orig$/);
 			
-			console.log("matchOrig=" + matchOrig);
+			//console.log("matchOrig=" + matchOrig);
 			
 			if(matchOrig) filePath = matchOrig[1];
 			
@@ -1722,7 +1722,7 @@ else var directory = EDITOR.workingDirectory;
 				}
 				else {
 					
-					console.log("Mercurial: Recieved annotations for file=" + file.path);
+					//console.log("Mercurial: Recieved annotations for file=" + file.path);
 					
 					annotations[file.path] = resp;
 					
@@ -1746,7 +1746,7 @@ else var directory = EDITOR.workingDirectory;
 			var annotationWidget = document.getElementById("mercurialAnnotationWidget");
 			
 			if(!annotationWidget) {
-				console.log("Creating annotationWidget!");
+				//console.log("Creating annotationWidget!");
 				annotationWidget = document.createElement("div");
 				annotationWidget.setAttribute("id", "mercurialAnnotationWidget");
 				annotationWidget.setAttribute("class", "mercurialAnnotationWidget");
@@ -1764,17 +1764,17 @@ annotationRev.setAttribute("title", "Show diff");
 				footer.appendChild(annotationWidget);
 			}
 			else {
-				console.log("annotationWidget already exist!");
-				console.log(annotationWidget);
+				//console.log("annotationWidget already exist!");
+				//console.log(annotationWidget);
 				annotationWidget.style.display="block";
-				console.log(annotationWidget.childNodes);
+				//console.log(annotationWidget.childNodes);
 				
 				if(annotationWidget.childNodes.length == 0) throw new Error("annotationWidget.childNodes.length=" + annotationWidget.childNodes.length);
 				
 				var annotationRev = annotationWidget.childNodes[0];
 				var annotationText = annotationWidget.childNodes[1];
 				
-				console.log(annotationRev.childNodes);
+				//console.log(annotationRev.childNodes);
 			}
 			
 			var line = caret.row + 1;
@@ -1802,7 +1802,7 @@ annotationRev.setAttribute("title", "Show diff");
 					else if(line >= lineStart && line <= lineSplit) return hide(line); // Users current edits
 					else if(line == lineStart || line == lineSplit || line == lineEnd) return hide(line);
 					
-					console.log("line=" + line);
+					//console.log("line=" + line);
 					
 					workingCopy = file.text.indexOf("<<<<<<< working copy", destination+19);
 					split = file.text.indexOf("=======", workingCopy + 21);
@@ -1822,15 +1822,17 @@ annotationRev.setAttribute("title", "Show diff");
 				if(!change) {
 					annotationText.innerText = "Error: Did not get a description for commit id=" + changeId + " !";
 // Add link for manually querying it!?
-					for(var id in changesets) console.log(id + " = " + changesets[id]);
-					console.warn("changesets does not have id=" + changeId + " changesets=" + JSON.stringify(changesets, null,2) + 
-					" typeof changesets = " + (typeof changesets) + " change=" + change + " Object.keys(changesets)=" + Object.keys(changesets) + 
-					" typeof changeId = " + (typeof changeId) + " changesets.hasOwnProperty(" + changeId + ")=" + changesets.hasOwnProperty(changeId) + 
-					" changesets.hasOwnProperty('0')=" + changesets.hasOwnProperty('0') + " changesets.hasOwnProperty('1')=" + changesets.hasOwnProperty('1') +
-					" lineChangeset=" + JSON.stringify(lineChangeset, null, 2));
-				}
-else {
-				console.log("change=" + change);
+						/*
+							for(var id in changesets) console.log(id + " = " + changesets[id]);
+							console.warn("changesets does not have id=" + changeId + " changesets=" + JSON.stringify(changesets, null,2) +
+							" typeof changesets = " + (typeof changesets) + " change=" + change + " Object.keys(changesets)=" + Object.keys(changesets) +
+							" typeof changeId = " + (typeof changeId) + " changesets.hasOwnProperty(" + changeId + ")=" + changesets.hasOwnProperty(changeId) +
+							" changesets.hasOwnProperty('0')=" + changesets.hasOwnProperty('0') + " changesets.hasOwnProperty('1')=" + changesets.hasOwnProperty('1') +
+							" lineChangeset=" + JSON.stringify(lineChangeset, null, 2));
+						*/
+					}
+					else {
+						//console.log("change=" + change);
 				annotationText.innerText = change.user + " - " + change.date + " - " + (change.summary || change.description);
 				}
 
@@ -1838,11 +1840,11 @@ else {
 				
 				annotationRev.onclick = diff; 
 				
-				console.log("changesets=" + JSON.stringify(changesets, null, 2));
-				console.log("showing changeset changeId=" + changeId);
+					//console.log("changesets=" + JSON.stringify(changesets, null, 2));
+					//console.log("showing changeset changeId=" + changeId);
 			}
 			else {
-				console.warn("No annotations for line " + line + " in " + file.path + " changeId=" + changeId + " lineChangeset=" + JSON.stringify(lineChangeset, null, 2));
+					//console.warn("No annotations for line " + line + " in " + file.path + " changeId=" + changeId + " lineChangeset=" + JSON.stringify(lineChangeset, null, 2));
 				annotationText.innerText = "No annotations for line " + line + " in " + file.path;
 			}
 			
@@ -1868,7 +1870,7 @@ else {
 		
 		function hide(line) {
 			
-			console.log("Hiding annotation. line=" + line + " real=" + (caret.row+1));
+				//console.log("Hiding annotation. line=" + line + " real=" + (caret.row+1));
 			
 			var annotationWidget = document.getElementById("mercurialAnnotationWidget");
 			
@@ -1975,7 +1977,7 @@ else {
 		auth.setAttribute("id", "repositoryAuthorizationDialog");
 		
 		if(document.getElementById("repositoryAuthorizationDialog")) {
-			console.warn("repositoryAuthorizationDialog already exist in footer!");
+				//console.warn("repositoryAuthorizationDialog already exist in footer!");
 			return;
 		}
 		
@@ -2096,7 +2098,7 @@ else {
 	
 	function hideVersionHistory() {
 		
-		console.log("Hiding version history!");
+			//console.log("Hiding version history!");
 		
 		versionHistoryVisible = false;
 		EDITOR.ctxMenu.hide();
@@ -2275,11 +2277,11 @@ else {
 			var fileDirectory = figureOutDirectoryIfUndefined(rootDir);
 			var fileSelEl = document.getElementById("rev_" + selectedRev.rev + "_file_sel");
 			var filePaths = getSelects(fileSelEl);
-			console.log("cat file:");
+				//console.log("cat file:");
 			
-			console.log(selectedRev);
-			console.log(fileSelEl);
-			console.log(filePaths);
+				//console.log(selectedRev);
+				//console.log(fileSelEl);
+				//console.log(filePaths);
 			if(filePaths.length != 1) return alertBox("Only one file can be selected!");
 			var filePath = filePaths[0];
 			CLIENT.cmd("mercurial.cat", {directory: fileDirectory, rev: selectedRev.rev, file: filePath}, function hgCat(err, resp) {
@@ -2454,8 +2456,10 @@ else {
 						opt.innerText = changes[i].files[j];
 						sel.appendChild(opt);
 					}
-				} else console.warn("No files: " + changes[i]);
-				td.appendChild(sel);
+				} 
+					//else console.warn("No files: " + changes[i]);
+				
+					td.appendChild(sel);
 				tr.appendChild(td);
 				
 				tr.onclick = tableRowClick;
@@ -2472,10 +2476,10 @@ else {
 				
 				if(tr.nodeName != "TR") throw new Error("Unable to get which table row on the version history you clicked on");
 				
-				console.log("selectedRev:");
-				console.log(tr);
+					//console.log("selectedRev:");
+					//console.log(tr);
 				var rev = parseInt(tr.id.slice(3)); // remove rev from rev123
-				console.log("rev=" + rev);
+					//console.log("rev=" + rev);
 				
 				
 				for (var i=0; i<changes.length; i++) {
@@ -2502,7 +2506,7 @@ else {
 						tr.classList.remove("selected");
 					}
 					
-					console.log("selectedRevisions=" + JSON.stringify(selectedRevisions));
+						//console.log("selectedRevisions=" + JSON.stringify(selectedRevisions));
 					
 					function deselectAllOther() {
 						if( selectedRevisions.length == 0 ) return;
@@ -2549,7 +2553,7 @@ else {
 			var text = resp.text;
 			var fileName = "hg.diff";
 			if(filePaths.length == 1) fileName = filePaths[0] + ".diff";
-			console.log("filePaths=" + filePaths);
+				//console.log("filePaths=" + filePaths);
 			EDITOR.openFile(fileName, text, function(err, file) {
 				if(err) alertBox(err.message);
 			});
@@ -2706,7 +2710,7 @@ else {
 						}
 						else {
 							
-							console.log("mercurial.status : " + JSON.stringify(status));
+								//console.log("mercurial.status : " + JSON.stringify(status));
 							
 							// "modified":[],"added":[],"removed":[],"missing":[],"untracked":
 							
@@ -2812,7 +2816,7 @@ else {
 	
 	function mercurialPullFromRepo(fileDirectory) {
 		// Only pull. Do not update
-		console.log("Mercurial: Pulling from remote repository ...");
+			//console.log("Mercurial: Pulling from remote repository ...");
 		
 		fileDirectory = figureOutDirectoryIfUndefined(fileDirectory);
 		
@@ -2842,7 +2846,7 @@ else {
 				}
 				else {
 					
-					console.log("pull resp: " + JSON.stringify(resp, null, 2));
+						//console.log("pull resp: " + JSON.stringify(resp, null, 2));
 					
 					var updatedFiles = resp.files;
 					var repoUrl = resp.repo;
@@ -2871,7 +2875,7 @@ else {
 	}
 	
 	function mercurialPullAndUpdate(fileDirectory) {
-		console.log("Mercurial: Pulling from remote repository ...");
+			//console.log("Mercurial: Pulling from remote repository ...");
 		
 		fileDirectory = figureOutDirectoryIfUndefined(fileDirectory);
 		
@@ -2915,7 +2919,7 @@ else {
 			if saved but not commited: ask
 		*/
 		
-		console.log("Mercurial: Update");
+			//console.log("Mercurial: Update");
 		
 		fileDirectory = figureOutDirectoryIfUndefined(fileDirectory);
 		
@@ -2948,7 +2952,7 @@ else {
 					CLIENT.cmd("mercurial.status", {directory: fileDirectory, rev: ".:tip"}, function hgStatus(err, updated) {
 						if(err) throw err;
 						
-						console.log("checkForChanges: updated=" + JSON.stringify(updated, null, 2));
+							//console.log("checkForChanges: updated=" + JSON.stringify(updated, null, 2));
 						
 						/*
 							If there are uncommited files when updating, depending on the version of Mercurial,
@@ -2971,15 +2975,13 @@ else {
 									// File opened in the editor has not been commited
 								return askCommit(EDITOR.files[path], "" + filePath + " has uncommited changes!\nTake appropriate action to prevent data loss.");
 								}
-else {
-console.log("checkForChanges: filePath=" + filePath + "  not changed.");
-}
+								//else {console.log("checkForChanges: filePath=" + filePath + "  not changed.");}
 							}
 							
-						if(current.modified.length == 0) doTheUpdate();
-						else if(current.modified.length == 1 && current.modified[0] == ignoreUpdatesInNotOpenedFile) doTheUpdate();
-						else {
-							alertBox("The following files has uncommited changes... Either commit or revert changes before updating: <ul><li>" + current.modified.join("</li><li>") + "</li></ul>");
+							if(current.modified.length == 0) doTheUpdate();
+							else if(current.modified.length == 1 && current.modified[0] == ignoreUpdatesInNotOpenedFile) doTheUpdate();
+							else {
+								alertBox("The following files has uncommited changes... Either commit or revert changes before updating: <ul><li>" + current.modified.join("</li><li>") + "</li></ul>");
 							showCommitDialog();
 						}
 						
@@ -3052,7 +3054,7 @@ console.log("checkForChanges: filePath=" + filePath + "  not changed.");
 				}
 					else {
 						
-						console.log("Mercurial: Update resp=" + JSON.stringify(resp));
+						//console.log("Mercurial: Update resp=" + JSON.stringify(resp));
 						
 				var files = resp.updated.concat(resp.merged).concat(resp.removed).concat(resp.unresolved);
 				
@@ -3062,7 +3064,7 @@ console.log("checkForChanges: filePath=" + filePath + "  not changed.");
 var filesToBeReopened = 0;
 				var filesReloaded = [];
 				
-						console.log("files that has been updated: " + JSON.stringify(files));
+						//console.log("files that has been updated: " + JSON.stringify(files));
 						
 				for(var i=0; i<files.length; i++) {
 						if(EDITOR.files.hasOwnProperty(files[i])) {
@@ -3075,7 +3077,7 @@ var filesToBeReopened = 0;
 						}
 					}
 
-						console.log("files to reopen: " + JSON.stringify(reopenFiles));
+						//console.log("files to reopen: " + JSON.stringify(reopenFiles));
 						
 for (var i=0; i<reopenFiles.length; i++) {
 EDITOR.openFile(reopenFiles[i], undefined, reopened);
@@ -3112,7 +3114,7 @@ if(filesToBeReloaded == 0 && filesToBeReopened == 0) done();
 
 function reload(file, callback) {
 var filePath = file.path;
-				console.log("Reloading " + filePath + " ...");
+				//console.log("Reloading " + filePath + " ...");
 EDITOR.readFromDisk(filePath, function(err, path, text) {
 if(err) throw err;
 else {
@@ -3128,7 +3130,7 @@ if(callback) callback(null, filePath);
 	}
 	
 	function figureOutDirectoryIfUndefined(fileDirectory) {
-		console.log("figureOutDirectoryIfUndefined: fileDirectory=" + fileDirectory + " rootDir=" + rootDir + " EDITOR.currentFile.path=" + EDITOR.currentFile.path + " EDITOR.workingDirectory=" + EDITOR.workingDirectory);
+			//console.log("figureOutDirectoryIfUndefined: fileDirectory=" + fileDirectory + " rootDir=" + rootDir + " EDITOR.currentFile.path=" + EDITOR.currentFile.path + " EDITOR.workingDirectory=" + EDITOR.workingDirectory);
 		if(fileDirectory != undefined) return fileDirectory;
 		
 		if(rootDir) fileDirectory = rootDir;
@@ -3158,7 +3160,7 @@ if(callback) callback(null, filePath);
 				else throw err;
 			}
 			
-			console.log("mercurial.resolvelist: resolvelist=" + JSON.stringify(resolvelist, null, 2) + " ");
+				//console.log("mercurial.resolvelist: resolvelist=" + JSON.stringify(resolvelist, null, 2) + " ");
 			
 			if(resolvelist.resolved.length == 0 && resolvelist.unresolved.length == 0) {
 				checkForMultipleHeads(fileDirectory, callback);
@@ -3249,7 +3251,7 @@ if(err) return alertBox(err.message);
 			if(err) return alertBox(err.message);
 			EDITOR.putIntoClipboard(pubkey, function(err, copiedIntoPlatformClipboard, manuallyCopied) {
 				if(err) throw err;
-				console.log("Public key copied to clipboard! copiedIntoPlatformClipboard=" + copiedIntoPlatformClipboard + " manuallyCopied=" + manuallyCopied);
+					//console.log("Public key copied to clipboard! copiedIntoPlatformClipboard=" + copiedIntoPlatformClipboard + " manuallyCopied=" + manuallyCopied);
 				if(!manuallyCopied) alertBox("Public key copied to " + (copiedIntoPlatformClipboard?"clipboard":"psuedo clipboard") + "!");
 			});
 		});

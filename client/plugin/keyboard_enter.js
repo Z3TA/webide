@@ -22,7 +22,7 @@
 
 	function keyboard_enter(file) {
 		
-		console.log("Pushed Enter");
+		//console.log("Pushed Enter");
 		
 		if(EDITOR.input && file) {
 			

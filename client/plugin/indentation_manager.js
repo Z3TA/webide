@@ -71,7 +71,7 @@
 	
 	function showIndentationConvention(file) {
 		if(!file) {
-			console.warn("No file!");
+			//console.warn("No file!");
 			return;
 		}
 		
@@ -144,7 +144,7 @@
 		if(num == 1) indentationCharacters = "\t";
 		else for(var i=0; i<num; i++) indentationCharacters += char;
 		
-		console.log("num=" + num + " !!indentationCharacters=" + UTIL.lbChars(indentationCharacters));
+		//console.log("num=" + num + " !!indentationCharacters=" + UTIL.lbChars(indentationCharacters));
 		
 		var file = EDITOR.currentFile;
 		

@@ -54,7 +54,7 @@
 			selection.push(grid[file.caret.row][col]);
 		}
 		
-		console.log("selectToTop: Selecting " + selection.length + " characters ...");
+		//console.log("selectToTop: Selecting " + selection.length + " characters ...");
 		
 		file.select(selection, "right");
 		
@@ -82,7 +82,7 @@
 			selection.push(grid[file.caret.row][col]);
 		}
 		
-		console.log("selectToEnd: Selecting " + selection.length + " characters ...");
+		//console.log("selectToEnd: Selecting " + selection.length + " characters ...");
 		
 		file.select(selection, "left");
 		

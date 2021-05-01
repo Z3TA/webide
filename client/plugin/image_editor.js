@@ -59,7 +59,7 @@ unload: function unloadImageEditor() {
 			var file = EDITOR.currentFile;
 			if(file.zoom == undefined) return alertBox("Current file is not (an image) zoomable!");
 			var zoomLevel = parseInt(zoomInput.value) / 100;
-			console.log("image_editor: changeZoomViaInput: zoomLevel=" + zoomLevel);
+			//console.log("image_editor: changeZoomViaInput: zoomLevel=" + zoomLevel);
 			file.zoom(zoomLevel);
 		};
 		wrap.appendChild(zoomLabel);
@@ -143,7 +143,7 @@ unload: function unloadImageEditor() {
 		}
 		
 		if(items) {
-			console.log("image_editor: Pasted " + items.length + " items. Checking if it's an image ...");
+			//console.log("image_editor: Pasted " + items.length + " items. Checking if it's an image ...");
 			for (var i = 0; i < items.length; i++) {
 				if (items[i].type.indexOf("image") !== -1) {
 					openImage(items[i]);
@@ -166,7 +166,7 @@ unload: function unloadImageEditor() {
 			var URLObj = window.URL || window.webkitURL;
 			var source = URLObj.createObjectURL(blob);
 			
-			console.log("image_editor: Opening image...");
+			//console.log("image_editor: Opening image...");
 			
 			EDITOR.openFile(item.name, source, {image: true}, function(err, file) {
 				if(err) return alertBox(err.message);
@@ -184,7 +184,7 @@ unload: function unloadImageEditor() {
 		
 		if(!(file instanceof ImageFile)) return true;
 		
-		console.log("image_editor: colorPicker: target=" + target);
+		//console.log("image_editor: colorPicker: target=" + target);
 		
 		if(target != EDITOR.canvas) return true;
 		
@@ -200,7 +200,7 @@ unload: function unloadImageEditor() {
 		
 		var rgbStr = "rgb(" + red + ", " + green + ", " + blue + ")";
 		
-		console.log("image_editor: colorPicker: red=" + red + " green=" + green + " blue=" + blue + " hex=" + hex);
+		//console.log("image_editor: colorPicker: red=" + red + " green=" + green + " blue=" + blue + " hex=" + hex);
 		
 		if(typeof colorInput != "undefined") colorInput.value = hex;
 		// Updating the colorInput will not trigger it's onchange event!
@@ -229,7 +229,7 @@ EDITOR.putIntoClipboard(rgbStr);
 	
 	function showImageFileMaybe(file) {
 		
-		console.log("image_editor: showImageFileMaybe: file.path=" + file.path);
+		//console.log("image_editor: showImageFileMaybe: file.path=" + file.path);
 		
 		if(file.canvas != undefined) {
 			enableImageMode(file);
@@ -245,7 +245,7 @@ EDITOR.putIntoClipboard(rgbStr);
 	
 	function enableImageMode(file) {
 		
-		console.log("image_editor: enableImageMode:imageModeAlreadyEnabled=" + imageModeAlreadyEnabled);
+		//console.log("image_editor: enableImageMode:imageModeAlreadyEnabled=" + imageModeAlreadyEnabled);
 		
 		if(imageModeAlreadyEnabled) return showOtherImage(file);
 		
@@ -262,7 +262,7 @@ EDITOR.putIntoClipboard(rgbStr);
 	}
 	
 	function disableImageMode() {
-		console.log("image_editor: enableImageMode:imageModeAlreadyDisabled=" + imageModeAlreadyDisabled);
+		//console.log("image_editor: enableImageMode:imageModeAlreadyDisabled=" + imageModeAlreadyDisabled);
 		
 		if(imageModeAlreadyDisabled) return;
 		

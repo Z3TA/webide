@@ -58,7 +58,7 @@
 		//alert("loginCounter=" + loginCounter);
 		
 		if(window.location.search) {
-			console.log("Not asking for feedback because window.location.search=" + window.location.search);
+			//console.log("Not asking for feedback because window.location.search=" + window.location.search);
 			return;
 		}
 		

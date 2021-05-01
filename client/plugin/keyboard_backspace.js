@@ -13,7 +13,7 @@
 		if(!EDITOR.input) return ALLOW_DEFAULT;
 		
 			if(!file) {
-				console.warn("No file! Keyboard backspace will do default (browser) action");
+			//console.warn("No file! Keyboard backspace will do default (browser) action");
 			return ALLOW_DEFAULT;
 			}
 			

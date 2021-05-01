@@ -42,11 +42,11 @@
 
 		var match = file.text.match(reIndexOfInIfStatement);
 
-		console.log("checkForCommonJsErrors: match=" + match);
+		//console.log("checkForCommonJsErrors: match=" + match);
 
 		if(match === null) return true;
 
-		console.log(match);
+		//console.log(match);
 
 		var pos = file.rowFromIndex(match.index);
 

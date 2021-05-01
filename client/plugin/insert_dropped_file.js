@@ -54,11 +54,11 @@
 		function askWhereToSave() {
 			promptBox(whereToSaveMessage, {defaultValue: defaultPath}, function(filePath) {
 				if(filePath) {
-					console.log("Saving file: " + filePath);
+					//console.log("Saving file: " + filePath);
 					saveFile(filePath, function fileSaved(err, path) {
 						if(err) return alertBox(err.message);
 						
-						console.log("Saved file: " + path);
+						//console.log("Saved file: " + path);
 						
 						var currentFileName = UTIL.getFilenameFromPath(currentFile.path);
 						
@@ -122,7 +122,7 @@
 if(err) return alertBox(err.message);
 
 					if(path === false) {
-						console.log("Path doesn't exist!");
+						//console.log("Path doesn't exist!");
 						var createPath = "Create the path";
 						var saveElsewhere = "Save the file elsewhere";
 						var dontSave = "Don't save the file";
@@ -146,7 +146,7 @@ if(err) return alertBox(err.message);
 						
 					}
 					else {
-						console.log("Path exist!");
+						//console.log("Path exist!");
 						readFile();
 					}
 				});

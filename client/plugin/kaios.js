@@ -50,7 +50,7 @@
 			
 		*/
 		if(typeof window.navigator == "object" && typeof window.navigator.mozApps == "object" && typeof window.navigator.mozApps.install == "function") {
-			console.log("KaiOS: : Attempting install ...");
+			//console.log("KaiOS: : Attempting install ...");
 			
 			/*
 				Install failed, error: INVALID_URL
@@ -82,7 +82,7 @@
 	function unloadKaiOsSupport() {}
 	
 	function kaiToggleMode() {
-		console.log("kaiToggleMode: EDITOR.mode=" + EDITOR.mode);
+		//console.log("kaiToggleMode: EDITOR.mode=" + EDITOR.mode);
 		
 		if(EDITOR.mode == INSERT) {
 			EDITOR.setMode(NAV);
@@ -107,7 +107,7 @@
 	}
 	
 	function focusNextElement() {
-		console.log("KaiOS: focusNextElement");
+		//console.log("KaiOS: focusNextElement");
 		//add all elements we want to include in our selection
 		
 		var activeElement = document.activeElement;
@@ -115,8 +115,8 @@
 		
 		if(activeElement == body) activeElement = EDITOR.lastElementWithFocus;
 		
-		console.log("focusNextElement: document.activeElement=", document.activeElement);
-		console.log("focusNextElement: EDITOR.lastElementWithFocus=", EDITOR.lastElementWithFocus);
+		//console.log("focusNextElement: document.activeElement=", document.activeElement);
+		//console.log("focusNextElement: EDITOR.lastElementWithFocus=", EDITOR.lastElementWithFocus);
 		
 		if (activeElement) {
 			// Can't have editor input or the editor will complain about control character being inserted
@@ -124,16 +124,16 @@
 			
 			activeElement.focus();
 			var focussable = getFocusableElements(activeElement);
-			console.log("focusNextElement: focussable (" + focussable.length + ") ", focussable);
+			//console.log("focusNextElement: focussable (" + focussable.length + ") ", focussable);
 			var index = focussable.indexOf(activeElement);
-			console.log("focusNextElement: index=" + index);
+			//console.log("focusNextElement: index=" + index);
 			if(index > -1) {
 				var nextElement = focussable[index + 1] || focussable[0];
 				nextElement.focus();
-				console.log(nextElement);
+				//console.log(nextElement);
 			}
 			else {
-				console.log("focusNextElement: No element to focus on!?");
+				//console.log("focusNextElement: No element to focus on!?");
 				// Give back focus to the editor, for input
 				setTimeout(function() {
 					EDITOR.input = true;

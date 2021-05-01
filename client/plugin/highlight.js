@@ -91,7 +91,7 @@
 	
 	function highlightLazyLoad(file) {
 		
-		console.log("highlight: highlightLazyLoad! file.path=" + file.path + " file.disableParsing=" + file.disableParsing + " initiated=" + initiated);
+		//console.log("highlight: highlightLazyLoad! file.path=" + file.path + " file.disableParsing=" + file.disableParsing + " initiated=" + initiated);
 		
 		if(!(file instanceof File)) return; // Can also be ImageFile
 
@@ -104,7 +104,7 @@
 	}
 	
 	function init() {
-		console.log("highlight: init!");
+		//console.log("highlight: init!");
 		
 		if(initiated) throw new Error("highlight: Already initiated!");
 		
@@ -120,14 +120,12 @@
 			initiated = true;
 			
 		}
-		else {
-			console.warn("highlight: window.Worker=" + window.Worker + " not available!");
-		}
+		else {console.warn("highlight: window.Worker=" + window.Worker + " not available!");}
 	}
 	
 	function highlightChangedFile(file) {
 		
-		console.log("highlight: highlightChangedFile: file.path=" + file.path);
+		//console.log("highlight: highlightChangedFile: file.path=" + file.path);
 		
 		worker.postMessage({text: file.text, path: file.path});
 	}
@@ -135,7 +133,7 @@
 	function highlightWorkerMessage(ev) {
 		var obj = ev.data;
 		
-		console.log("highlight: obj=", obj);
+		//console.log("highlight: obj=", obj);
 		
 		fileColors[obj.path] = obj.colors;
 		

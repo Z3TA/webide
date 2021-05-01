@@ -10,7 +10,7 @@ var winMenuHide;
 
 			if(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("windowMenu") != -1) {
 hideWindowMenu(false);
-				console.warn("Window menu disabled via query string!");
+				//console.warn("Window menu disabled via query string!");
 			}
 			else {
 EDITOR.on("storageReady", hideWindowMenuMaybe);

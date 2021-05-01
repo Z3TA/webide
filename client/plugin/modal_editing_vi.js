@@ -373,11 +373,11 @@ return escapeFromInsert(file);
 			if(!moved && !cleared) {
 				// A beep means we did nothing, and are already in normal mode
 				beep();
-				console.warn("beep!");
+				//console.warn("beep!");
 				return false;
 			}
 			else {
-				console.log("nobeep");
+				//console.log("nobeep");
 			}
 			
 			return false; // false to prevent editor default
@@ -388,14 +388,14 @@ return escapeFromInsert(file);
 		if(file == undefined) throw new Error("file=" + file);
 		
 		if(EDITOR.mode != "vimInsert") throw new Error("Expected vimInsert: EDITOR.mode=" + EDITOR.mode);
-		console.log("Setting vim mode to normal (command mode)");
+		//console.log("Setting vim mode to normal (command mode)");
 			
 		lastCommand += insertedString; // So it can be repeated with . (dot)
 
 		if(repeatInsert && repeatInsert > 0) {
 			var str = insertedString; // Closure
 			var caretIndex = file.caret.index - str.length; // Closure
-			console.log("Repeating last insert command " + repeatInsert + " times and repeatCommand ? " + !!repeatCommand + " caretIndex=" + caretIndex);
+			//console.log("Repeating last insert command " + repeatInsert + " times and repeatCommand ? " + !!repeatCommand + " caretIndex=" + caretIndex);
 			
 			for (var i=0; i<repeatInsert; i++) {
 				if(repeatCommand) {
@@ -439,7 +439,7 @@ return escapeFromInsert(file);
 	function vimKeyPress(file, char, combo) {
 		if(!VIM_ACTIVE) return true;
 
-		console.log("vimKeyPress: char=" + UTIL.lbChars(char) + " VIM_ACTIVE=" + VIM_ACTIVE + " EDITOR.mode=" + EDITOR.mode + " Enter?" + (char == "\n" || char == "\r") + " Delete?" + (char == String.fromCharCode(127)) );
+		//console.log("vimKeyPress: char=" + UTIL.lbChars(char) + " VIM_ACTIVE=" + VIM_ACTIVE + " EDITOR.mode=" + EDITOR.mode + " Enter?" + (char == "\n" || char == "\r") + " Delete?" + (char == String.fromCharCode(127)) );
 		
 if(vimCommandBuffer === undefined) throw new Error("vimCommandBuffer=" + vimCommandBuffer);
 
@@ -458,7 +458,7 @@ if(vimCommandBuffer === undefined) throw new Error("vimCommandBuffer=" + vimComm
 			
 			if(char == "\n" || char == "\r") { // Sometimes it's LF and sometime CR !? 
 				// Pressed Enter
-				console.log("Vim: pressed Enter: vimCommandBuffer=" + vimCommandBuffer);
+				//console.log("Vim: pressed Enter: vimCommandBuffer=" + vimCommandBuffer);
 				if(vimCommandBuffer.charAt(0) == ":") {
 					var editorCommand = vimCommandBuffer.slice(1);
 					var runOption = parseLineCommand(vimCommandBuffer);
@@ -550,7 +550,7 @@ if(vimCommandBuffer === undefined) throw new Error("vimCommandBuffer=" + vimComm
 				else if(vimCommandBuffer.charAt(0) != ":") {
 					var command = parseNormalCommand(vimCommandBuffer);
 			}
-				else console.log("Entering editor command : " + vimCommandBuffer + " ...");
+				//else console.log("Entering editor command : " + vimCommandBuffer + " ...");
 			}
 			
 			if(command) {
@@ -631,11 +631,11 @@ repeatCommand = {undo: command.undo, redo: command.redo};
 				In Firefox it only seems to be Enter that is captured by keyPress and everything else needed to be captured by EDITOR.bindKey!
 			*/
 			
-			console.log("VimInsert:");
+			//console.log("VimInsert:");
 			var caretIndex = file.caret.index;
 			
 			if(char == "\n" || char == "\r") {
-				console.log("Line break");
+				//console.log("Line break");
 				insertedString += "\n";
 				return rdo(function undoNewLine() {
 					file.moveCaretToIndex(caretIndex);
@@ -647,7 +647,7 @@ repeatCommand = {undo: command.undo, redo: command.redo};
 				});
 			}
 			else {
-				console.log("Vim insert character=" + UTIL.lbChars(char));
+				//console.log("Vim insert character=" + UTIL.lbChars(char));
 				insertedString += char;
 				return rdo(function insertCharacterUndo() {
 					file.moveCaretToIndex(caretIndex);
@@ -678,7 +678,7 @@ repeatCommand = {undo: command.undo, redo: command.redo};
 	function vimBackspace(file, combo) {
 		// Backspace is not captured by keyPress!
 		if(!VIM_ACTIVE) return true;
-		console.log("vim: Backspace");
+		//console.log("vim: Backspace");
 		if(EDITOR.mode == "vimInsert") {
 			
 			var backspaceRedo = function moveLeftAndDeleteCharacter() {
@@ -704,8 +704,8 @@ repeatCommand = {undo: command.undo, redo: command.redo};
 			
 		}
 		else if(EDITOR.mode == "vimNormal" && vimCommandBuffer.charAt(0) == ":") {
-			console.log("commandCaretPosition=" + commandCaretPosition);
-			console.log("vimCommandBuffer=" + vimCommandBuffer);
+			//console.log("commandCaretPosition=" + commandCaretPosition);
+			//console.log("vimCommandBuffer=" + vimCommandBuffer);
 			
 			if(commandCaretPosition == vimCommandBuffer.length) {
 				vimCommandBuffer = vimCommandBuffer.slice(0,-1);
@@ -796,7 +796,7 @@ repeatCommand = {undo: command.undo, redo: command.redo};
 	function vimUpArrowKey(file, combo) {
 		if(!VIM_ACTIVE) return true;
 		
-		console.log("vim key up");
+		//console.log("vim key up");
 		
 		if( EDITOR.mode == "vimInsert" || (EDITOR.mode == "vimNormal" && vimCommandBuffer.length == 0) ) {
 			file.moveCaretUp();
@@ -808,10 +808,10 @@ repeatCommand = {undo: command.undo, redo: command.redo};
 		}
 		else if(EDITOR.mode == "vimNormal" && vimCommandBuffer.charAt(0) == ":") {
 			
-			console.log("commandHistory.length=" + commandHistory.length + " commandHistory.index=" + commandHistory.index);
+			//console.log("commandHistory.length=" + commandHistory.length + " commandHistory.index=" + commandHistory.index);
 			
 			if(commandHistory.length == 0) {
-				console.warn("No commands have been entered! commandHistory.length=" + commandHistory.length);
+				//console.warn("No commands have been entered! commandHistory.length=" + commandHistory.length);
 				return false;
 			}
 			
@@ -821,7 +821,7 @@ repeatCommand = {undo: command.undo, redo: command.redo};
 			}
 			
 			if(commandHistory.index == 0) {
-				console.log("Already at the oldest commandHistory entry! commandHistory.index=" + commandHistory.index + " commandHistory.length=" + commandHistory + "");
+				//console.log("Already at the oldest commandHistory entry! commandHistory.index=" + commandHistory.index + " commandHistory.length=" + commandHistory + "");
 				return false;
 			}
 			
@@ -875,13 +875,13 @@ repeatCommand = {undo: command.undo, redo: command.redo};
 			// Toggle vim command history
 			
 			if(commandHistory.length == 0) {
-				console.warn("No commands have been entered! commandHistory.length=" + commandHistory.length);
+				//console.warn("No commands have been entered! commandHistory.length=" + commandHistory.length);
 				return false;
 			}
 			
 			// Do nothing if we're already at the history tip
 			if(commandHistory.index+1 == commandHistory.length) {
-				console.log("Already at history tip"); 
+				//console.log("Already at history tip"); 
 				return false;
 			}
 			
@@ -897,9 +897,9 @@ repeatCommand = {undo: command.undo, redo: command.redo};
 			}
 			else {
 				commandHistory.index++;
-				console.log("commandHistory:", commandHistory);
-				console.log("commandHistory.length=" + commandHistory.length);
-				console.log("commandHistory.index=" + commandHistory.index);
+				//console.log("commandHistory:", commandHistory);
+				//console.log("commandHistory.length=" + commandHistory.length);
+				//console.log("commandHistory.index=" + commandHistory.index);
 				vimCommandBuffer = commandHistory[commandHistory.index];
 				commandCaretPosition = vimCommandBuffer.length;
 			}
@@ -948,11 +948,11 @@ repeatCommand = {undo: command.undo, redo: command.redo};
 		
 		var fileHistory = history[file.path];
 		
-		console.log("vim:redo: file.path=" + file.path + " fileHistory.length=" + fileHistory.length + " fileHistory.currentItem=" + fileHistory.currentItem + "");
-		console.log("file.text=" + file.text);
+		//console.log("vim:redo: file.path=" + file.path + " fileHistory.length=" + fileHistory.length + " fileHistory.currentItem=" + fileHistory.currentItem + "");
+		//console.log("file.text=" + file.text);
 		
 		if(fileHistory.length == 0) {
-console.warn("Unable to redo! No recorded history!");
+			//console.warn("Unable to redo! No recorded history!");
 			return false;
 		}
 		
@@ -961,14 +961,14 @@ console.warn("Unable to redo! No recorded history!");
 		if(fileHistory.currentItem == -1 && fileHistory.length > 0) {
 			// The item index has reached the bottom in order to prevent repetition of the first undo
 			// Now go forward
-			console.log("set fileHistory.currentItem = 0");
+			//console.log("set fileHistory.currentItem = 0");
 			fileHistory.currentItem = 0;
 			alreadyGoneForward = true;
 		}
 		
 		if(fileHistory.currentItem >= fileHistory.length) {
-			console.log("fileHistory already at the tip! fileHistory.currentItem=" + fileHistory.currentItem + " fileHistory.length=" + fileHistory.length);
-			console.log(fileHistory);
+			//console.log("fileHistory already at the tip! fileHistory.currentItem=" + fileHistory.currentItem + " fileHistory.length=" + fileHistory.length);
+			//console.log(fileHistory);
 			showMessage("Already at newest change");
 			return false;
 		}
@@ -978,26 +978,26 @@ console.warn("Unable to redo! No recorded history!");
 		var historyItem = tip.item;
 		
 		var isRootBranch = (branch==fileHistory)
-		console.log("isRootBranch=" + isRootBranch);
+		//console.log("isRootBranch=" + isRootBranch);
 		
 		if(!isRootBranch) alreadyGoneForward = false;
 		
 		if(branch == fileHistory && branch.currentItem != fileHistory.currentItem) {
-			console.log(branch);
-			console.log(fileHistory);
+			//console.log(branch);
+			//console.log(fileHistory);
 			throw new Error("fileHistory.currentItem=" + fileHistory.currentItem + " branch.currentItem=" + branch.currentItem + " branch===fileHistory ? " + (branch===fileHistory));
 		}
 		
 		if(!alreadyGoneForward) {
 		// Go forward in history
 		// Redo goes forward Before redoing, while Undo goes backwards After undoing
-		console.log(branch);
-		console.log("branch.currentItem=" + branch.currentItem);
-		console.log("branch[" + branch.currentItem + "].branches.length = " + branch[branch.currentItem].branches.length + "");
-		console.log("branch[" + branch.currentItem + "].currentBranch=" + (branch[branch.currentItem] && branch[branch.currentItem].currentBranch) + "");
+			//console.log(branch);
+			//console.log("branch.currentItem=" + branch.currentItem);
+			//console.log("branch[" + branch.currentItem + "].branches.length = " + branch[branch.currentItem].branches.length + "");
+			//console.log("branch[" + branch.currentItem + "].currentBranch=" + (branch[branch.currentItem] && branch[branch.currentItem].currentBranch) + "");
 			//historyItem = branch[branch.currentItem];
 			while(historyItem && historyItem.currentBranch > -1) {
-				console.log("Go forward into historyItem.currentBranch=", historyItem.currentBranch);
+				//console.log("Go forward into historyItem.currentBranch=", historyItem.currentBranch);
 				branch = historyItem.branches[historyItem.currentBranch];
 				historyItem = branch[branch.currentItem];
 				//branch[branch.currentItem].branches[ branch[branch.currentItem].currentBranch ].currentItem++;
@@ -1006,18 +1006,18 @@ console.warn("Unable to redo! No recorded history!");
 			historyItem = branch[branch.currentItem];
 		}
 		
-		console.log("branch.currentItem=" + branch.currentItem + " branch.length=" + branch.length);
+		//console.log("branch.currentItem=" + branch.currentItem + " branch.length=" + branch.length);
 		
 		if( branch.currentItem >= branch.length) {
-			console.log("branch already at the tip! branch.currentItem=" + branch.currentItem + " branch.length=" + branch.length);
-			console.log(fileHistory);
+			//console.log("branch already at the tip! branch.currentItem=" + branch.currentItem + " branch.length=" + branch.length);
+			//console.log(fileHistory);
 			showMessage("Already at newest change");
 			return false;
 		}
 		
 		for (var i=0, f; i<historyItem.redo.length; i++) {
 			f = historyItem.redo[i]
-			console.log( "redo " + i + ":" + UTIL.getFunctionName(f) + ": " + f.toString() + (historyItem.comment && historyItem.comment[i] ? "// " + historyItem.comment[i] : "") ); 
+			//console.log( "redo " + i + ":" + UTIL.getFunctionName(f) + ": " + f.toString() + (historyItem.comment && historyItem.comment[i] ? "// " + historyItem.comment[i] : "") ); 
 			f();
 		}
 		
@@ -1033,18 +1033,18 @@ console.warn("Unable to redo! No recorded history!");
 		
 		var fileHistory = history[file.path];
 		
-		console.log("vim:undo: file.path=" + file.path + " fileHistory.length=" + fileHistory.length + " fileHistory.currentItem=" + fileHistory.currentItem);
+		//console.log("vim:undo: file.path=" + file.path + " fileHistory.length=" + fileHistory.length + " fileHistory.currentItem=" + fileHistory.currentItem);
 		
-		console.log("fileHistory: fileHistory.currentItem=" + fileHistory.currentItem);
-		console.log(fileHistory);
+		//console.log("fileHistory: fileHistory.currentItem=" + fileHistory.currentItem);
+		//console.log(fileHistory);
 		
 		if(fileHistory.length == 0) {
-console.warn("Unable to undo! No recorded history!");
+			//console.warn("Unable to undo! No recorded history!");
 			return false;
 		}
 		
 		if(fileHistory.currentItem == -1) {
-			console.log("No more history to undo!");
+			//console.log("No more history to undo!");
 			showMessage("Already at oldest change");
 			return false;
 		}
@@ -1052,7 +1052,7 @@ console.warn("Unable to undo! No recorded history!");
 		if(fileHistory.currentItem == fileHistory.length) {
 			// The item index has reached above the ceiling in order to prevent aditional redo
 			fileHistory.currentItem = fileHistory.length-1;
-			console.log("set fileHistory.currentItem = " + fileHistory.currentItem);
+			//console.log("set fileHistory.currentItem = " + fileHistory.currentItem);
 		}
 		
 		var tip = getHistoryTip(fileHistory);
@@ -1060,40 +1060,40 @@ console.warn("Unable to undo! No recorded history!");
 		var parentBranch = tip.parentBranch;
 		var historyItem = tip.item;
 		
-		console.log("root branch ? " + (branch==fileHistory));
+		//console.log("root branch ? " + (branch==fileHistory));
 		
 		if(branch.currentItem == undefined) {
-			console.log("branch:", branch);
+			//console.log("branch:", branch);
 			throw new Error("branch.currentItem=" + branch.currentItem);
 		}
 		
 		if(branch.currentItem == branch.length) {
 			// The item index has reached above the ceiling in order to prevent aditional redo
 			branch.currentItem = branch.length-1;
-			console.log("set branch.currentItem = " + branch.currentItem );
+			//console.log("set branch.currentItem = " + branch.currentItem );
 			historyItem = branch[branch.currentItem];
 		}
 		
-		console.log(branch);
-		console.log("branch.currentItem=" + branch.currentItem);
-		console.log("branch.length=" + branch.length);
-		console.log("historyItem=" + historyItem);
+		//console.log(branch);
+		//console.log("branch.currentItem=" + branch.currentItem);
+		//console.log("branch.length=" + branch.length);
+		//console.log("historyItem=" + historyItem);
 		
 		// Should the undo run backwards !? Last in last out !?
 		for (var i=historyItem.undo.length-1, f; i>-1; i--) {
 			f = historyItem.undo[i];
-			console.log( "undo " + i + ":" + UTIL.getFunctionName(f) + ": " + f.toString() + (historyItem.comment && historyItem.comment[i] ? "// " + historyItem.comment[i] : "") ); 
+			//console.log( "undo " + i + ":" + UTIL.getFunctionName(f) + ": " + f.toString() + (historyItem.comment && historyItem.comment[i] ? "// " + historyItem.comment[i] : "") ); 
 			f();
 		}
 		
 		// Go backwards in history
-		console.log("before undo: branch.currentItem=" + branch.currentItem + " parentBranch ? " + !!parentBranch);
+		//console.log("before undo: branch.currentItem=" + branch.currentItem + " parentBranch ? " + !!parentBranch);
 		branch.currentItem--;
 		if(parentBranch && branch.currentItem == -1 && parentBranch.currentBranch > -1) {
-			console.log("Step back out of the branch");
+			//console.log("Step back out of the branch");
 			parentBranch.currentBranch = -1;
 		}
-		console.log("after undo: branch.currentItem=" + branch.currentItem);
+		//console.log("after undo: branch.currentItem=" + branch.currentItem);
 		
 		// No need to have EDITOR.renderNeeded() inside each undo function
 		EDITOR.renderNeeded();
@@ -1111,12 +1111,12 @@ console.warn("Unable to undo! No recorded history!");
 	
 	function vimDelete(file) {
 		if(!VIM_ACTIVE) return true;
-		console.log("vim: DELETE");
+		//console.log("vim: DELETE");
 		
 		if( EDITOR.mode == "vimNormal" && vimCommandBuffer.charAt(0) == ":" ) {
 			// Pressing delete while editing command buffer
-			console.log("commandCaretPosition=" + commandCaretPosition);
-			console.log("vimCommandBuffer=" + vimCommandBuffer);
+			//console.log("commandCaretPosition=" + commandCaretPosition);
+			//console.log("vimCommandBuffer=" + vimCommandBuffer);
 			
 			if(commandCaretPosition == vimCommandBuffer.length-1) {
 				vimCommandBuffer = vimCommandBuffer.slice(0,-1);
@@ -1251,7 +1251,7 @@ console.warn("Unable to undo! No recorded history!");
 		var fileHistory = history[file.path];
 		
 		if(fileHistory.length == 0) {
-			console.warn("There is no history to add to! fileHistory.length=" + fileHistory.length + " Adding new history item ...");
+			//console.warn("There is no history to add to! fileHistory.length=" + fileHistory.length + " Adding new history item ...");
 			return addHistory(file, ev);
 		}
 		
@@ -1260,10 +1260,10 @@ console.warn("Unable to undo! No recorded history!");
 		var historyItem = tip.item;
 		
 		if(historyItem.undo == undefined) {
-			console.log("branch:");
-			console.log(branch);
-			console.log("fileHistory:");
-			console.log(fileHistory);
+			//console.log("branch:");
+			//console.log(branch);
+			//console.log("fileHistory:");
+			//console.log(fileHistory);
 		}
 		
 		historyItem.undo.push(ev.undo);
@@ -1274,32 +1274,32 @@ console.warn("Unable to undo! No recorded history!");
 	
 	function getHistoryTip(fileHistory) {
 		if(fileHistory.currentItem <= -1) {
-			console.log(fileHistory);
+			//console.log(fileHistory);
 			throw new Error("fileHistory.currentItem=" + fileHistory.currentItem + "");
 		}
 		if(fileHistory.currentItem >= fileHistory.length) {
-			console.log(fileHistory);
+			//console.log(fileHistory);
 			throw new Error("fileHistory.length=" + fileHistory.length + " fileHistory.currentItem=" + fileHistory.currentItem + "");
 		}
 		
 		var branch = fileHistory;
 		var parentBranch = null;
 		var historyItem = branch[branch.currentItem];
-		console.log(fileHistory);
-		console.log("branch.currentItem=" + branch.currentItem);
-		console.log("historyItem.branches.length=" + historyItem.branches.length);
-		console.log("historyItem.currentBranch=" + historyItem.currentBranch);
-		console.log("historyItem.branches[" + historyItem.currentBranch + "]=", historyItem.branches[historyItem.currentBranch]);
-		console.log("historyItem.branches[" + historyItem.currentBranch + "].currentItem=" + (historyItem.branches[historyItem.currentBranch] && historyItem.branches[historyItem.currentBranch].currentItem) );
+		//console.log(fileHistory);
+		//console.log("branch.currentItem=" + branch.currentItem);
+		//console.log("historyItem.branches.length=" + historyItem.branches.length);
+		//console.log("historyItem.currentBranch=" + historyItem.currentBranch);
+		//console.log("historyItem.branches[" + historyItem.currentBranch + "]=", historyItem.branches[historyItem.currentBranch]);
+		//console.log("historyItem.branches[" + historyItem.currentBranch + "].currentItem=" + (historyItem.branches[historyItem.currentBranch] && historyItem.branches[historyItem.currentBranch].currentItem) );
 		while(historyItem && historyItem.branches.length > 0 && historyItem.currentBranch >= -1 && historyItem.branches[historyItem.currentBranch].currentItem > -1) {
-			console.log("Selecting history branch historyItem.currentBranch=" + historyItem.currentBranch);
+			//console.log("Selecting history branch historyItem.currentBranch=" + historyItem.currentBranch);
 			parentBranch = branch;
 			branch = historyItem.branches[historyItem.currentBranch];
-			console.log("branch.currentItem=" + branch.currentItem);
-			console.log("branch.length=" + branch.length);
+			//console.log("branch.currentItem=" + branch.currentItem);
+			//console.log("branch.length=" + branch.length);
 			historyItem = branch[branch.currentItem];
-			console.log("historyItem:", historyItem);
-			console.log("branch:", branch);
+			//console.log("historyItem:", historyItem);
+			//console.log("branch:", branch);
 		}
 		if(branch.currentItem <= -1) throw new Error("branch.currentItem=" + branch.currentItem + " branch:", branch);
 		if(branch == undefined) throw new Error("branch=" + branch);
@@ -1314,8 +1314,8 @@ console.warn("Unable to undo! No recorded history!");
 		var fileHistory = history[file.path];
 		if(fileHistory == undefined) throw new Error("No history for file.path=" + file.path);
 		
-		console.log("vim:addHistory: file.path=" + file.path + " ev=", ev, " fileHistory.currentItem=" + fileHistory.currentItem); 
-		console.log("file.text=" + file.text);
+		//console.log("vim:addHistory: file.path=" + file.path + " ev=", ev, " fileHistory.currentItem=" + fileHistory.currentItem); 
+		//console.log("file.text=" + file.text);
 		
 		if(fileHistory.currentItem <= -1) {
 			// Create a new empt history item (that we will branch out from)
@@ -1331,9 +1331,9 @@ console.warn("Unable to undo! No recorded history!");
 		var branch = tip.branch;
 		var historyItem = tip.item;
 		
-		console.log(branch);
-		console.log("branch.currentItem=" + branch.currentItem);
-		console.log("branch.length=" + branch.length);
+		//console.log(branch);
+		//console.log("branch.currentItem=" + branch.currentItem);
+		//console.log("branch.length=" + branch.length);
 		
 		// Don't create a new Emty history entry if last one is already Empty!
 		if(ev == undefined && historyItem && historyItem.redo.length == 0 && historyItem.undo.length == 0) return;
@@ -1342,7 +1342,7 @@ console.warn("Unable to undo! No recorded history!");
 		
 		if(branch.currentItem < (branch.length-1) && branch.currentItem > -1) {
 			// We are in the middle of the history, so branche out
-			console.log("brancing out on branch.currentItem=" + branch.currentItem);
+			//console.log("brancing out on branch.currentItem=" + branch.currentItem);
 			branch = [];
 			historyItem.currentBranch = historyItem.branches.push(branch)-1;
 		}
@@ -1350,7 +1350,7 @@ console.warn("Unable to undo! No recorded history!");
 			// We are at the tip
 			// Replace current item if it's empty!
 			if(historyItem.undo.length == 0) {
-				console.log("Replacing tip because it's empty");
+				//console.log("Replacing tip because it's empty");
 				branch[branch.currentItem] = newEvent;
 				return;
 			}
@@ -1359,7 +1359,7 @@ console.warn("Unable to undo! No recorded history!");
 		// Add new history item/event
 		branch.currentItem = branch.push(newEvent) - 1; // Push returns the length of the array
 		
-		console.log("Added new history item/event to branch=", branch);
+		//console.log("Added new history item/event to branch=", branch);
 	}
 	
 	function HistoryItem(undo, redo, comment) {
@@ -1374,7 +1374,7 @@ console.warn("Unable to undo! No recorded history!");
 	
 	function addCommandHistory(command) {
 		if(command.charAt(0) != ":") {
-console.warn("Only store commands starting with :");
+			//console.warn("Only store commands starting with :");
 			return null;
 		}
 		
@@ -1388,14 +1388,14 @@ console.warn("Only store commands starting with :");
 			return index;
 		}
 		else {
-			console.log("command=" + command + " same ast last command in history");
+			//console.log("command=" + command + " same ast last command in history");
 			return null;
 		}
 	}
 	
 	function parseLineCommand(str) {
 		
-		console.log("Parsing vim option: " + str);
+		//console.log("Parsing vim option: " + str);
 		
 		var file = EDITOR.currentFile;
 		
@@ -1532,7 +1532,7 @@ console.warn("Only store commands starting with :");
 		
 		if(typeof str != "string") throw new Error("Nothing to parse: str=" + str);
 		
-		console.log("Parsing vim command: " + str);
+		//console.log("Parsing vim command: " + str);
 		
 		if(str.charAt(0) == ":") throw new Error("Parse using parseLineCommand instead!");
 		
@@ -1561,10 +1561,10 @@ console.warn("Only store commands starting with :");
 			lastChar = char;
 			char = getNormalMap(str.charAt(i)); // Converts to default keys
 			
-			console.log("vim:Parse char=" + char + " lastChar=" + lastChar);
+			//console.log("vim:Parse char=" + char + " lastChar=" + lastChar);
 			
 			if(replace) {
-				console.log("Replace " + repeat * operatorRepeat + " character(s) under the cursor with char=" + char);
+				//console.log("Replace " + repeat * operatorRepeat + " character(s) under the cursor with char=" + char);
 				var charsToReplace = Math.min(repeat * operatorRepeat, file.grid[file.caret.row].length - file.caret.col);
 				var removedText = file.text.slice(file.caret.index, file.caret.index + charsToReplace);
 				var insertedText = "";
@@ -1605,13 +1605,13 @@ console.warn("Only store commands starting with :");
 				if(file.caret.eof) return nil();
 				
 				var lookFor = char;
-				console.log("findRight: lookFor=" + lookFor);
+				//console.log("findRight: lookFor=" + lookFor);
 				var char = "";
 				var toRepeat = repeat;
 				
 				for (var i=caretIndex+1+findToRight; i<file.text.length; i++) {
 					char = file.text.charAt(i);
-					console.log("findRight: i=" + i + " char=" + char + " lookFor=" + lookFor);
+					//console.log("findRight: i=" + i + " char=" + char + " lookFor=" + lookFor);
 					if(char == lookFor && !(--toRepeat)) break;
 					if(char == "\r" || char == "\n") return nil();
 				}
@@ -1710,7 +1710,7 @@ console.warn("Only store commands starting with :");
 				Operators are followed by a motion ex: d2w (delete two words)
 			*/
 			else if(char == "d" && lastChar == "d") {
-				console.log("Delete " + repeat * operatorRepeat + " whole line(s)");
+				//console.log("Delete " + repeat * operatorRepeat + " whole line(s)");
 				var rowsToBeDeleted = Math.min(repeat * operatorRepeat, file.grid.length - file.caret.row);
 				var removedRows = [];
 				for (var i=0; i<rowsToBeDeleted; i++) {
@@ -1734,7 +1734,7 @@ console.warn("Only store commands starting with :");
 				return cmd(function deleteLineUndo() {
 					file.moveCaretToIndex(indexEndOfLineBefore);
 					for (var i=0; i<rowsToBeDeleted; i++) {
-						console.log("inserting on row=" + (rowBefore+i) + ": " + removedRows[i]);
+						//console.log("inserting on row=" + (rowBefore+i) + ": " + removedRows[i]);
 						if(removedRows[i].length > 0) file.insertTextRow(removedRows[i], rowBefore+i);
 						else file.insertLineBreak();
 					}
@@ -1753,7 +1753,7 @@ console.warn("Only store commands starting with :");
 				foundOperator();
 				}
 			else if(char == "J") {
-				console.log("Delete " + (repeat-1) + " line breaks to join " + (repeat) + " rows");
+				//console.log("Delete " + (repeat-1) + " line breaks to join " + (repeat) + " rows");
 				var lineBreaksToBeRemoved = Math.min(repeat > 1 ? repeat-1: 1, file.grid.length - file.caret.row);
 				
 				var lb = [];
@@ -1771,7 +1771,7 @@ console.warn("Only store commands starting with :");
 				return cmd(function joinRowsUndo() {
 					file.moveCaretToIndex(caretIndex);
 					for (var i=0; i<lineBreaksToBeRemoved; i++) {
-						console.log("Inserting line break on index=" + lb[i].index);
+						//console.log("Inserting line break on index=" + lb[i].index);
 						file.moveCaretToIndex(lb[i].index);
 						if(!lb[i].spaceBefore && !lb[i].spaceAfter) file.deleteCharacter(); // Delete the added white space
 						file.insertLineBreak();
@@ -1798,7 +1798,7 @@ file.putCharacter(" "); // Insert white space between the merged lines
 				}
 			}
 			else if( char == "x" || (char == "l" && lastChar == "d") ) {
-				console.log("Delete " + repeat + " character(s) under the cursor");
+				//console.log("Delete " + repeat + " character(s) under the cursor");
 				var charsToDelete = Math.min(repeat, file.grid[file.caret.row].length - file.caret.col);
 				var removedText = file.text.slice(file.caret.index, file.caret.index + charsToDelete);
 				return cmd(function deleteCharacterUndo() {
@@ -1812,7 +1812,7 @@ file.putCharacter(" "); // Insert white space between the merged lines
 				});
 			}
 			else if( char == "X") {
-				console.log("Vim: delete character left of the cursor");
+				//console.log("Vim: delete character left of the cursor");
 				
 			}
 			else if( char == "D" || (char == "$" && lastChar == "d") ) {
@@ -2233,7 +2233,7 @@ var lastCharIndex = gridRow[gridRow.length-1].index;
 					var charOn = file.text[index];
 					var bracketReg = /[{([\])}]/;
 					var direction = 0;
-					console.log("matchingBracket: index=" + index + " charOn=" + charOn + " match: ", charOn.match(bracketReg));
+					//console.log("matchingBracket: index=" + index + " charOn=" + charOn + " match: ", charOn.match(bracketReg));
 					
 					if(charOn.match(bracketReg) == null) {
 						
@@ -2241,7 +2241,7 @@ var lastCharIndex = gridRow[gridRow.length-1].index;
 						var indexLeft = caretIndex-1;
 						var indexRight = caretIndex+1;
 						while(indexLeft > 0 || indexRight < file.text.length-1) {
-							console.log("matchingBracket: indexLeft=" + indexLeft + " (" + file.text[indexLeft] + ") indexRight=" + indexRight + " (" + file.text[indexRight] + ") file.text.length=" + file.text.length + " ");
+							//console.log("matchingBracket: indexLeft=" + indexLeft + " (" + file.text[indexLeft] + ") indexRight=" + indexRight + " (" + file.text[indexRight] + ") file.text.length=" + file.text.length + " ");
 							if(file.text[indexLeft]) {
 								if(file.text[indexLeft].match(bracketReg) ) {
 								index = indexLeft;
@@ -2263,7 +2263,7 @@ var lastCharIndex = gridRow[gridRow.length-1].index;
 					
 					
 					charOn = file.text[index];
-					console.log("matchingBracket: charOn=" + charOn + " index=" + index);
+					//console.log("matchingBracket: charOn=" + charOn + " index=" + index);
 					var lookFor
 					
 					if(     charOn == "(") { lookFor = ")"; direction=1;}
@@ -2276,10 +2276,10 @@ var lastCharIndex = gridRow[gridRow.length-1].index;
 					if(direction == 0) throw new Error("direction=" + direction + " charOn=" + charOn + " index=" + index);
 					
 					var openBrackets = 1;
-					console.log("matchingBracket: direction=" + direction);
+					//console.log("matchingBracket: direction=" + direction);
 					// todo: Don't match inside strings unless the caret is insade that string then only match in that string !?
 					for (var i=index+direction; i<file.text.length && i>0; i+=direction) {
-						console.log("matchingBracket: direction=" + direction + " i=" + i + " openBrackets=" + openBrackets + " file.text.length=" + file.text.length);
+						//console.log("matchingBracket: direction=" + direction + " i=" + i + " openBrackets=" + openBrackets + " file.text.length=" + file.text.length);
 						if(file.text[i] == lookFor && !(--openBrackets)) break;
 						else if(file.text[i] == charOn) openBrackets++;
 					}
@@ -2353,7 +2353,7 @@ var lastCharIndex = gridRow[gridRow.length-1].index;
 			else if(char == "L") {
 				// Moves to last line of screen
 				var lastRow = Math.min(file.startRow + EDITOR.view.visibleRows - 1, file.grid.length-1);
-				console.log("lastRow=" + lastRow + " file.grid.length=" + file.grid.length + " file.startRow=" + file.startRow + " EDITOR.view.visibleRows=" + EDITOR.view.visibleRows);
+				//console.log("lastRow=" + lastRow + " file.grid.length=" + file.grid.length + " file.startRow=" + file.startRow + " EDITOR.view.visibleRows=" + EDITOR.view.visibleRows);
 				var index = file.grid[lastRow].startIndex;
 				
 				return cursorMovement(function gotoLast() {
@@ -2432,7 +2432,7 @@ var lastCharIndex = gridRow[gridRow.length-1].index;
 				}
 			}
 			else if(char == "l") {
-				console.log("Move cursor right " + repeat + " steps: file.grid[file.caret.row].length=" + file.grid[file.caret.row].length + " file.caret.col=" + file.caret.col);
+				//console.log("Move cursor right " + repeat + " steps: file.grid[file.caret.row].length=" + file.grid[file.caret.row].length + " file.caret.col=" + file.caret.col);
 				if(file.caret.col < file.grid[file.caret.row].length) {
 					return cursorMovement(function moveCursorRight() {
 						file.moveCaretRight(file.caret, Math.min(file.grid[file.caret.row].length - file.caret.col - 1, repeat));
@@ -2515,7 +2515,7 @@ var lastCharIndex = gridRow[gridRow.length-1].index;
 				// Goes to mark a, but moves you to the beginning of the line containing the mark.
 			}
 			else if(char == "a") {
-				console.log("Append text after the cursor " + repeat + " times")
+				//console.log("Append text after the cursor " + repeat + " times")
 				return toInsert(function moveCursorToEol() {
 					if(!file.caret.eol) file.moveCaretRight(file.caret);
 				}, repeat);
@@ -2560,7 +2560,7 @@ var lastCharIndex = gridRow[gridRow.length-1].index;
 			}
 			else if(char == "U") {
 				var row = history[file.path].lastEditedRow
-				console.log("Undo edit on last edited row=" + row);
+				//console.log("Undo edit on last edited row=" + row);
 				if(row == -1) return nil();
 				var oldContent = history[file.path].rowContentBeforeEdit;
 				var currentContent = file.rowText(row);
@@ -2586,9 +2586,7 @@ var lastCharIndex = gridRow[gridRow.length-1].index;
 					});
 				});
 			}
-			else {
-				console.log("Did not match any known commands: vimCommandBuffer=" + vimCommandBuffer);
-			}
+			//else {console.log("Did not match any known commands: vimCommandBuffer=" + vimCommandBuffer);}
 			
 		}
 		
@@ -2634,7 +2632,7 @@ var lastCharIndex = gridRow[gridRow.length-1].index;
 			
 			if(repeat == undefined) repeat = 1;
 			
-			console.log("str=" + str + " i=" + i);
+			//console.log("str=" + str + " i=" + i);
 			if(i < str.length-1) {
 				var text = str.slice(i+1);
 			}
@@ -2653,7 +2651,7 @@ var lastCharIndex = gridRow[gridRow.length-1].index;
 		
 		function nil() {
 			// A command was found, but it did nothing
-			console.warn("Command does nothing: " + str);
+			//console.warn("Command does nothing: " + str);
 			return null;
 		}
 		
@@ -2682,7 +2680,7 @@ var lastCharIndex = gridRow[gridRow.length-1].index;
 	}
 	
 	function clearCommandBuffer() {
-		console.log("vim:clearCommandBuffer: vimCommandBuffer=" + vimCommandBuffer + " messageToShow=" + messageToShow + " commandCaretPosition=" + commandCaretPosition + " EDITOR.mode=" + EDITOR.mode);
+		//console.log("vim:clearCommandBuffer: vimCommandBuffer=" + vimCommandBuffer + " messageToShow=" + messageToShow + " commandCaretPosition=" + commandCaretPosition + " EDITOR.mode=" + EDITOR.mode);
 		
 		if(vimCommandBuffer == "" && commandCaretPosition == 0 && messageToShow == "") {
 			return false; // We did nothing
@@ -2696,7 +2694,7 @@ var lastCharIndex = gridRow[gridRow.length-1].index;
 			messageToShow = "";
 			EDITOR.renderNeeded();
 			
-			console.log("Cleared command buffer!");
+			//console.log("Cleared command buffer!");
 			
 			return true; // We did something
 		}
@@ -2810,7 +2808,7 @@ firstTimeVim = false;
 	}
 	
 	function showMessage(msg) {
-		console.log("Vim:showMessage:", msg);
+		//console.log("Vim:showMessage:", msg);
 		if(msg == undefined) msg = "";
 		if(typeof msg != "string") msg = JSON.stringify(msg);
 		messageToShow = msg;
@@ -2824,7 +2822,7 @@ firstTimeVim = false;
 		
 		var text = messageToShow || vimCommandBuffer;
 		
-		console.log("vim:showCommandBuffer: text=" + text);
+		//console.log("vim:showCommandBuffer: text=" + text);
 		
 		if(text.length == 0) return;
 		

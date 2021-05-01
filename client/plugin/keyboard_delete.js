@@ -32,7 +32,7 @@
 			char = file.text.charAt(file.caret.index);
 		}
 		
-		console.log("deleteRightWord: char=" + UTIL.lbChars(char));
+		//console.log("deleteRightWord: char=" + UTIL.lbChars(char));
 		
 		if(char == "\r" || char == "\n") {
 			file.moveCaretDown();

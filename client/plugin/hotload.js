@@ -46,7 +46,7 @@
 		
 		if(!currentFile) throw new Error("No current file");
 		
-		console.log("scripts: ", scripts);
+		//console.log("scripts: ", scripts);
 
 		// Fun fact: In Windows there are three slashes in file:/// but in Linux it's only two!
 		var currentScript = EDITOR.currentFile.path.replace(/\\/g, "/");
@@ -58,7 +58,7 @@
 		}
 		currentScript = currentScript.slice(index+1); // Don't include the first slash (because we use relative paths)
 		
-		console.log("currentScript=" + currentScript);
+		//console.log("currentScript=" + currentScript);
 		
 		var pluginDescription = "";
 		for(var i=0, re; i<EDITOR.plugins.length; i++) {
@@ -81,12 +81,12 @@ pluginDescription = EDITOR.plugins[i].desc;
 		var reloaded = false;
 		for(var i=0; i < scripts.length; i++) {
 			if( scripts[i].src.indexOf("plugin/") == -1) {
-				console.log("Not a plugin: " + scripts[i].src);
+				//console.log("Not a plugin: " + scripts[i].src);
 				continue;
 			}
 			var parent = scripts[i].parentNode;
 			
-			console.log("parent==head?" + (parent==head) + " parent=" + parent + " " + currentScript + " in " + scripts[i].src + " ? " + (scripts[i].src.indexOf(currentScript) != -1));
+			//console.log("parent==head?" + (parent==head) + " parent=" + parent + " " + currentScript + " in " + scripts[i].src + " ? " + (scripts[i].src.indexOf(currentScript) != -1));
 			
 			if(parent && scripts[i].src.indexOf(currentScript) != -1) {
 				reloaded = append(scripts[i], parent);
@@ -102,7 +102,7 @@ pluginDescription = EDITOR.plugins[i].desc;
 		return false;
 		
 		function append(script, parent) {
-			console.log("Reloading script: " + currentScript);
+			//console.log("Reloading script: " + currentScript);
 			
 			//EDITOR.disablePlugin(loadFunctionName);
 					

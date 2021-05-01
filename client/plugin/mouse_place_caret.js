@@ -22,10 +22,10 @@ unload: function unloadMousePlaceCaret() {
 
 		if(!EDITOR.currentFile || !caret) return true;
 		
-			console.log("Setting caret to " + JSON.stringify(caret));
+			//console.log("Setting caret to " + JSON.stringify(caret));
 
-			console.log("caret.row=" + caret.row);
-			console.log("EDITOR.currentFile.caret.row=" + EDITOR.currentFile.caret.row);
+		//console.log("caret.row=" + caret.row);
+		//console.log("EDITOR.currentFile.caret.row=" + EDITOR.currentFile.caret.row);
 			
 
 			EDITOR.currentFile.scrollToCaret(caret);

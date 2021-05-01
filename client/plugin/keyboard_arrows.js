@@ -74,7 +74,7 @@ return keyboard_arrows_moveRight(file, combo);
 		if(!file) return true;
 		if(!(file instanceof File)) return ALLOW_DEFAULT;
 
-		console.log("keyboard_arrows_moveRight: Moving caret right ... combo=" + JSON.stringify(combo));
+		//console.log("keyboard_arrows_moveRight: Moving caret right ... combo=" + JSON.stringify(combo));
 		
 		// Holding down ctrl should step a while word!?
 		
@@ -99,12 +99,12 @@ return keyboard_arrows_moveRight(file, combo);
 			var lastSelectedChar = file.selected.length == 0 ? "" : file.selected[file.selected.length-1].char;
 			var rowText = file.rowText(file.caret.row, !file.parsed).slice(0, file.caret.col);
 
-			console.log("keyboard_arrows_moveRight: step to next word... selectedText=" + selectedText + " insideQuote=" + insideQuote + " currentlyAt=" + currentlyAt + " firstSelectedChar=" + firstSelectedChar);
+			//console.log("keyboard_arrows_moveRight: step to next word... selectedText=" + selectedText + " insideQuote=" + insideQuote + " currentlyAt=" + currentlyAt + " firstSelectedChar=" + firstSelectedChar);
 
 			for(var i=stepStart; i<file.text.length; i++) {
 				//char = file.text.charAt(i);
 				nextChar = file.text.charAt(i+1);
-				console.log("keyboard_arrows_moveRight: nextChar=" + nextChar);
+				//console.log("keyboard_arrows_moveRight: nextChar=" + nextChar);
 				if( isWhiteSpace(nextChar) ) {
 					stepStop = i;
 					break;
@@ -152,11 +152,11 @@ return keyboard_arrows_moveRight(file, combo);
 					file.select(file.grid[caret.row][caret.col], "right");
 					// Also select surrogate pairs
 					if(  UTIL.isSurrogateStart( file.grid[caret.row][caret.col].char)  ) {
-						console.log("keyboard_arrows_moveRight: Selecting surrogate pair");
+						//console.log("keyboard_arrows_moveRight: Selecting surrogate pair");
 						file.select(file.grid[caret.row][caret.col+1], "right");
 						// Also select surrogate modifier
 						if( file.grid[caret.row][caret.col+2] && UTIL.isSurrogateModifierStart(file.grid[caret.row][caret.col+2].char) ) {
-							console.log("keyboard_arrows_moveRight: Selecting surrogate modifier (pair)");
+							//console.log("keyboard_arrows_moveRight: Selecting surrogate modifier (pair)");
 							file.select(file.grid[caret.row][caret.col+2], "right");
 							file.select(file.grid[caret.row][caret.col+3], "right");
 						}
@@ -279,8 +279,8 @@ return keyboard_arrows_moveRight(file, combo);
 			
 		}
 		
-		console.log("keyboard_arrows_moveLeft: stepStart=" + stepStart);
-		console.log("keyboard_arrows_moveLeft: stepStop=" + stepStop);
+		//console.log("keyboard_arrows_moveLeft: stepStart=" + stepStart);
+		//console.log("keyboard_arrows_moveLeft: stepStop=" + stepStop);
 		
 		if(!combo.shift) file.deselect();
 		
@@ -290,20 +290,20 @@ return keyboard_arrows_moveRight(file, combo);
 					file.select(file.grid[caret.row][caret.col-1], "left");
 					// Also select surrogate pairs
 					if(  UTIL.isSurrogateEnd( file.grid[caret.row][caret.col-1].char)  ) {
-						console.log("keyboard_arrows_moveLeft: Selected a surrogate end!");
+						//console.log("keyboard_arrows_moveLeft: Selected a surrogate end!");
 						
 						if( UTIL.isSurrogateModifierEnd(file.grid[caret.row][caret.col-1].char) && file.grid[caret.row][caret.col-2] ) {
-							console.log("keyboard_arrows_moveLeft: Selecting surrogate modifier");
+							//console.log("keyboard_arrows_moveLeft: Selecting surrogate modifier");
 							file.select(file.grid[caret.row][caret.col-2], "left");
 							
 							if( file.grid[caret.row][caret.col-3] && UTIL.isSurrogateEnd(file.grid[caret.row][caret.col-3].char) && file.grid[caret.row][caret.col-4] ) {
-								console.log("keyboard_arrows_moveLeft: Selecting surrogate (pair) after selecting modifier");
+								//console.log("keyboard_arrows_moveLeft: Selecting surrogate (pair) after selecting modifier");
 								file.select(file.grid[caret.row][caret.col-3], "left");
 								file.select(file.grid[caret.row][caret.col-4], "left");
 							}
 						}
 						else if( UTIL.isSurrogateEnd(file.grid[caret.row][caret.col-1].char) && file.grid[caret.row][caret.col-2] ) {
-							console.log("keyboard_arrows_moveLeft: Selecting surrogate");
+							//console.log("keyboard_arrows_moveLeft: Selecting surrogate");
 							file.select(file.grid[caret.row][caret.col-2], "left");
 						}
 						
@@ -348,7 +348,7 @@ return keyboard_arrows_moveRight(file, combo);
 		if(combo.alt) return true; // Do nothing if alt key is down
 		if(combo.ctrl) return true; // Do nothing if alt ctrl is down
 		
-		console.log("Moving caret up ...");
+		//console.log("Moving caret up ...");
 	
 		if(combo.sum == SHIFT) {
 			// End the selection with the character left of the caret
@@ -429,7 +429,7 @@ return keyboard_arrows_moveRight(file, combo);
 		if(combo.alt) return true; // Do nothing if alt key is down
 		if(combo.ctrl) return true; // Do nothing if alt ctrl is down
 
-		console.log("Moving caret down ...");
+		//console.log("Moving caret down ...");
 		
 		var caret = file.caret;
 		
@@ -438,7 +438,7 @@ return keyboard_arrows_moveRight(file, combo);
 
 			// Also select the last row if we are at it
 			if(caret.row >= file.grid.length-1) {
-				console.log("on last row");
+				//console.log("on last row");
 				
 				// Move caret to eof
 				caret.eof = true;
@@ -446,9 +446,7 @@ return keyboard_arrows_moveRight(file, combo);
 				caret.col = file.grid[caret.row].length;
 				caret.index = file.text.length;
 			}
-			else {
-				console.log("on row=" + caret.row + " file.grid.length=" + file.grid.length);
-			}
+			//else {console.log("on row=" + caret.row + " file.grid.length=" + file.grid.length);}
 		}
 		else {
 			selectStart = undefined;
@@ -465,7 +463,7 @@ return keyboard_arrows_moveRight(file, combo);
 		}
 
 		
-		console.log("selectStart=" + selectStart + ", selectEnd=" + selectEnd + "");
+		//console.log("selectStart=" + selectStart + ", selectEnd=" + selectEnd + "");
 		
 		if(selectStart != undefined && selectEnd != undefined) {
 			var textRange = file.createTextRange(selectStart, selectEnd);

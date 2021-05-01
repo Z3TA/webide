@@ -68,7 +68,7 @@
 
 		for(var i=0; i<comment.length; i++) {
 
-			console.log("doCheck: ", comment[i]);
+			//console.log("doCheck: ", comment[i]);
 			checkComment(file, comment[i].start, comment[i].end);
 
 		}
@@ -79,7 +79,7 @@
 	function checkComment(file, start, end) {
 		var str = file.text.slice(start, end);
 
-		console.log("checkComment: ", str);
+		//console.log("checkComment: ", str);
 
 		var match = str.match(reAssert);
 		if(!match) return;
@@ -87,11 +87,11 @@
 		var test = parseStr(match[1]);
 		if(!test) return;
 
-		console.log("checkComment: ", test);
+		//console.log("checkComment: ", test);
 
 		var scope = UTIL.scope(start, file.parsed.functions);
 
-		console.log("checkComment: scope=", scope);
+		//console.log("checkComment: scope=", scope);
 
 		var func = scope.functions[test.fname];
 
@@ -113,7 +113,7 @@
 			var fBody = "function " + test.fname + "(" + func.arguments + ")" + file.text.slice(func.start, func.end+1);
 		}
 
-		console.log("checkComment: fBody=", fBody);
+		//console.log("checkComment: fBody=", fBody);
 		// First test the function to make sure it's parseable
 		EDITOR.eval(fBody, function(err, result) {
 			if(err) {
@@ -149,7 +149,7 @@
 	}
 
 	function parseStr(str) {
-		console.log("parseStr: ", str);
+		//console.log("parseStr: ", str);
 
 		var lastEq = str.lastIndexOf("=");
 
@@ -167,7 +167,7 @@
 
 	function inlineAssertChecks(ctx, buffer, file, screenStartRow, containSpecialWidthCharacters, bufferStartRow) {
 
-		console.log("inlineAssertChecks: ", render);
+		//console.log("inlineAssertChecks: ", render);
 
 		if(render.length == 0) return;
 
@@ -185,7 +185,7 @@
 				middle = top + Math.floor(EDITOR.settings.gridHeight/2);
 				left = EDITOR.settings.leftMargin + (file.startColumn + render[i].pos.col) * EDITOR.settings.gridWidth;
 
-				console.log("inlineAssertChecks: screenStartRow=" + screenStartRow + " bufferStartRow=" + bufferStartRow + " render[" + i + "].pos.row=" + render[i].pos.row + " left=" + left + " top=" + top + " middle=" + middle + " EDITOR.settings.gridHeight=" + EDITOR.settings.gridHeight);
+				//console.log("inlineAssertChecks: screenStartRow=" + screenStartRow + " bufferStartRow=" + bufferStartRow + " render[" + i + "].pos.row=" + render[i].pos.row + " left=" + left + " top=" + top + " middle=" + middle + " EDITOR.settings.gridHeight=" + EDITOR.settings.gridHeight);
 
 				ctx.fillText(render[i].text, left, middle);
 

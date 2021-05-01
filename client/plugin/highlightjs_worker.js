@@ -256,4 +256,4 @@ onmessage = function onmessage(ev) {
   postMessage({colors: colors, path: obj.path});
 }
 
-console.log("highlight: highlightjs_worker.js ready!");
+//console.log("highlight: highlightjs_worker.js ready!");

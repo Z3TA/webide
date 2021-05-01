@@ -29,11 +29,11 @@ EDITOR.plugin({
 		if(EDITOR.input) var selectedText = EDITOR.currentFile.getSelectedText();
 		else var selectedText = getBrowserSelectionText();
 		
-		console.log("insertSelectedText: EDITOR.input=" + EDITOR.input + " selectedText=" + selectedText);
+		//console.log("insertSelectedText: EDITOR.input=" + EDITOR.input + " selectedText=" + selectedText);
 		
 		// If nothing is selected. Get content from clipboard.
 		if(selectedText == "") {
-			console.log("insertSelectedText: Nothing is selected. Getting clipboard data...");
+			//console.log("insertSelectedText: Nothing is selected. Getting clipboard data...");
 			EDITOR.getClipboardContent(gotClipboarData);
 		}
 		else {
@@ -46,7 +46,7 @@ gotClipboarData(null, selectedText);
 			
 		*/
 		if(BROWSER=="Firefox") {
-			console.log("insertSelectedText: EDITOR.input=" + EDITOR.input);
+			//console.log("insertSelectedText: EDITOR.input=" + EDITOR.input);
 			if(EDITOR.input) {
 				EDITOR.input = false;
 				setTimeout(function giveBackInputAfterInsertingSelectedText() {
