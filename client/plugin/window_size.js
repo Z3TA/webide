@@ -48,8 +48,8 @@
 		
 		if(isAtMaxWidth) alertBox("Might not be able to resize while the window is maximized!");
 		
-		console.log("window_size: isAtMaxWidth=" + isAtMaxWidth + " screen.availWidth=" + screen.availWidth + " window.innerWidth=" + window.innerWidth + " window.height=" + window.height);
-		console.log("window_size: Resizing to " + width + "x" + height + " ");
+		//console.log("window_size: isAtMaxWidth=" + isAtMaxWidth + " screen.availWidth=" + screen.availWidth + " window.innerWidth=" + window.innerWidth + " window.height=" + window.height);
+		//console.log("window_size: Resizing to " + width + "x" + height + " ");
 		window.resizeTo(width, height);
 	}
 	

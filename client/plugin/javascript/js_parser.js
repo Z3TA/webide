@@ -195,7 +195,7 @@
 		
 		//console.log("parseRequest" + id + " = " + file.path);
 		
-		console.time("parseRequest" + id);
+		//console.time("parseRequest" + id);
 		
 		if(parseWorker && callback) {
 			parseWorkerCallbacks[id] = callback;
@@ -208,7 +208,7 @@
 				parseError = err;
 			}
 			var parseResult = parseJavaScript(file, options);
-			console.timeEnd("parseRequest" + id);
+			//console.timeEnd("parseRequest" + id);
 			
 			if(callback) callback(parseError, parseResult);
 			else return parseResult;
@@ -221,7 +221,7 @@
 		//console.log("Recived message from parseWorker ...");
 		
 		var id = e.data.id;
-		console.timeEnd("parseRequest" + id);
+		//console.timeEnd("parseRequest" + id);
 		
 		var callback = parseWorkerCallbacks[id];
 		if(!parseWorkerCallbacks.hasOwnProperty(id)) throw new Error("No callback function for id=" + id);
@@ -458,7 +458,7 @@
 						// If the function is not the majority of the file
 						if( ((f.end - f.start) < maxFunctionBodySize || EDITOR.settings.devMode) && file.text.charAt(f.end + charactersLength)=="}") {
 							
-							console.time("parseOnlyFunctionOptimizer");
+							//console.time("parseOnlyFunctionOptimizer");
 							
 							//console.log("change type=" + type);
 							
@@ -772,7 +772,7 @@
 							f.end = ff.end;
 							f.endRow = ff.endRow;
 							
-							console.timeEnd("parseOnlyFunctionOptimizer");
+							//console.timeEnd("parseOnlyFunctionOptimizer");
 							
 							if(EDITOR.settings.devMode && newParse.blockMatch) {
 								
@@ -971,7 +971,7 @@
 		
 		//console.log("parseJavaScript: options=" + JSON.stringify(options));
 		
-		console.time("parseJavaScript");
+		//console.time("parseJavaScript");
 		
 		if(options==undefined) options = {};
 		
@@ -1183,7 +1183,7 @@
 		if(insideLineComment) comments.push(new Comment(commentStart, i)); // Find comment on last line
 		
 		
-		console.timeEnd("parseJavaScript");
+		//console.timeEnd("parseJavaScript");
 		
 		
 		//console.log("words:" + JSON.stringify(words, null, 2));

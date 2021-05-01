@@ -151,10 +151,10 @@ console.error(err);
 				var start = caret.index - caretAt.left.length;
 				var end = caret.index + caretAt.right.length - 1;
 				
-				console.log("spellcheckWordOnCaret: start=" + start + " end=" + end + " caretAt.left=" + caretAt.left + " caretAt.right=" + caretAt.right);
+				//console.log("spellcheckWordOnCaret: start=" + start + " end=" + end + " caretAt.left=" + caretAt.left + " caretAt.right=" + caretAt.right);
 				
 				var deletedStr = file.deleteTextRange(start, end);
-				console.log("spellcheckWordOnCaret: deletedStr=" + UTIL.lbChars(deletedStr));
+				//console.log("spellcheckWordOnCaret: deletedStr=" + UTIL.lbChars(deletedStr));
 				
 				file.moveCaretToIndex(start, caret);
 				file.insertText(spell.suggestion, caret);
@@ -167,11 +167,11 @@ console.error(err);
 	
 	function toggleSpellCheck() {
 		
-		console.log("Currently enabled=" + enabled);
+		//console.log("Currently enabled=" + enabled);
 		
 		enabled = enabled ? false : true;
 		
-		console.log("Change status to enabled=" + enabled);
+		//console.log("Change status to enabled=" + enabled);
 		
 		EDITOR.ctxMenu.update(menuItem, enabled, S("Spellcheck"));
 		EDITOR.windowMenu.update(windowMenuSpellcheck, {active: enabled});
@@ -272,7 +272,7 @@ console.error(err);
 		
 if(target.className != "fileCanvas") return;
 		
-		console.log("showSpellSuggestion: file.path=" + file.path + " caret=" + JSON.stringify(caret) + " ");
+		//console.log("showSpellSuggestion: file.path=" + file.path + " caret=" + JSON.stringify(caret) + " ");
 		
 		//var caret = EDITOR.mousePositionToCaret(posX, posY);
 		
@@ -289,28 +289,26 @@ if(caret.eol) return true;
 		function wordOnCaret(word, start, end) {
 			
 			var suggestion = "";
-			console.log("showSpellSuggestion: wordOnCaret: word=" + word + " caret=" + JSON.stringify(caret));
+			//console.log("showSpellSuggestion: wordOnCaret: word=" + word + " caret=" + JSON.stringify(caret));
 			
 			if(!word) {
-				console.warn("showSpellSuggestion: wordOnCaret: No word on caret!");
+				//console.warn("showSpellSuggestion: wordOnCaret: No word on caret!");
 				return;
 			}
 			
 			if(misspelled.hasOwnProperty(word)) {
 				suggestion = misspelled[word];
 			}
-			else {
-				console.log("showSpellSuggestion:wordOnCaret: word=" + word + " not in misspelled=" + Object.keys(misspelled))
-			}
+			//else {console.log("showSpellSuggestion:wordOnCaret: word=" + word + " not in misspelled=" + Object.keys(misspelled))}
 			
 			if(suggestion) {
-				console.log("showSpellSuggestion:wordOnCaret: suggestion=" + suggestion);
+				//console.log("showSpellSuggestion:wordOnCaret: suggestion=" + suggestion);
 				EDITOR.ctxMenu.addItem({text: suggestion, callback: replaceWord, temp: true, order: 1, separator: true});
 				
 				
 			}
 			else if(markedAsMisspelled) {
-				console.log("showSpellSuggestion:wordOnCaret: No spell suggestion found!");
+				//console.log("showSpellSuggestion:wordOnCaret: No spell suggestion found!");
 				EDITOR.ctxMenu.addItem({text: "No spelling suggestion for <i>" + word + "</i>", temp: true, order: 1, separator: true});
 				}
 			
@@ -318,7 +316,7 @@ if(caret.eol) return true;
 			function replaceWord() {
 				EDITOR.ctxMenu.hide();
 				
-				console.log("replacing " + word + " for " + suggestion);
+				//console.log("replacing " + word + " for " + suggestion);
 				
 				// Move caret to the first letter
 				file.moveCaretToIndex(start);
@@ -345,7 +343,7 @@ if(caret.eol) return true;
 	
 	function runSpellCheck(file, change, text, index, row, col) {
 		
-		console.log("runSpellCheck file.path=" + file.path + " change=" + change);
+		//console.log("runSpellCheck file.path=" + file.path + " change=" + change);
 		
 		var wordDelimiters = " .,[]()=:\"<>/{}\t\n\r!*-+;_\\";
 		var grid = file.grid;
@@ -364,7 +362,7 @@ if(caret.eol) return true;
 			
 			if(change=="insert") {
 				// Only spell check if a wordDelimiter was inserted/deleted. 
-				console.log("wordDelimiter?: " + text + " in " + wordDelimiters + " ? " + (wordDelimiters.indexOf(text) != -1));
+				//console.log("wordDelimiter?: " + text + " in " + wordDelimiters + " ? " + (wordDelimiters.indexOf(text) != -1));
 				if(wordDelimiters.indexOf(text) == -1) { // Not a wordDelimiter
 					
 					clearTimeout(waitTimer);
@@ -403,12 +401,12 @@ if(caret.eol) return true;
 		// Run on visible rows
 		//for(var row = Math.max(0, file.startRow); row < Math.min(grid.length, file.startRow+EDITOR.view.visibleRows); row++) {
 		
-		console.time("runSpellCheckTimer");
+		//console.time("runSpellCheckTimer");
 		
 		for(var row = 0; row < grid.length; row++) {
 			checkRow(grid[row]);
 		}
-		console.timeEnd("runSpellCheckTimer");
+		//console.timeEnd("runSpellCheckTimer");
 		
 		function checkRow(gridRow) {
 			
@@ -484,7 +482,7 @@ if(caret.eol) return true;
 		var file = EDITOR.files[filePath];
 		
 		if(file === undefined) {
-			console.log("spellcheck: The file (" + filePath + ") is no longer opened!");
+			//console.log("spellcheck: The file (" + filePath + ") is no longer opened!");
 			return;
 		}
 		
@@ -494,7 +492,7 @@ if(caret.eol) return true;
 		
 		if(file.text.length < textLength) {
 			// Don't do any coloring if something has been removed.
-			console.log("Not showing spelling error because text has been removed");
+			//console.log("Not showing spelling error because text has been removed");
 		}
 		else { 
 			//console.log("'" + origWord + "' is miss-spelled. Suggestion: " + misspelled[origWord] +" row=" + row + " col=" + col);

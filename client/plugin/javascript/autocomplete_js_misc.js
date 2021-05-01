@@ -19,7 +19,7 @@
 
 		var lbLength = file.lineBreak.length;
 
-		console.log("autoCompleteJsMisc: lbLength=" + lbLength + " whiteSpace.length=" + whiteSpace.length + "  ");
+		//console.log("autoCompleteJsMisc: lbLength=" + lbLength + " whiteSpace.length=" + whiteSpace.length + "  ");
 
 		/*
 			math skill: 

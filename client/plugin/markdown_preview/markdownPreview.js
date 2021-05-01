@@ -26,7 +26,7 @@
 		
 		if(!(ext=="md" || ext=="txt" || ext=="markdown" || ext=="mdown" || ext=="mkdn" || ext=="mkd" || ext=="mdwn" 
 		|| ext=="mdtxt" || ext=="mdtext" || ext=="text" || ext=="rmd")) {
-			console.log("markdownPreview: Assuming that ext=" + ext + " is NOT a markdown file.");
+			//console.log("markdownPreview: Assuming that ext=" + ext + " is NOT a markdown file.");
 			return false;
 		}
 
@@ -40,7 +40,7 @@
 		EDITOR.createWindow({url: "about:blank", waitUntilLoaded: true}, function(err, win) {
 			if(err) return alertBox(err.message);
 			
-			console.log("markdownPreview: Window loaded!");
+			//console.log("markdownPreview: Window loaded!");
 			
 			preview.win = win;
 			
@@ -58,10 +58,10 @@
 			var head = doc.getElementsByTagName('head')[0];
 			head.appendChild(style);
 			
-			console.log("markdownPreview: style=", style, " appened to head=", head);
+			//console.log("markdownPreview: style=", style, " appened to head=", head);
 			
 			win.onbeforeunload = function markdownPreviewWindowClosed() {
-				console.log("markdownPreview: Window unloading!");
+				//console.log("markdownPreview: Window unloading!");
 				preview = null;
 				delete filesInPreview[file.path];
 				
@@ -77,7 +77,7 @@
 		if(markdownParserLoaded) run();
 		else EDITOR.loadScript(markdownParser, true, function markdownParserLoadedMaybe(err) {
 			if(err) return alertBox(err.message);
-			console.log("markdownPreview: Markdown parser loaded!");
+			//console.log("markdownPreview: Markdown parser loaded!");
 			markdownParserLoaded = true;
 			run();
 		});
@@ -85,14 +85,14 @@
 		return true;
 		
 		function run() {
-			console.log("markdownPreview: run: markdownParserLoaded=" + markdownParserLoaded + " preview.win=" + preview.win + " ");
+			//console.log("markdownPreview: run: markdownParserLoaded=" + markdownParserLoaded + " preview.win=" + preview.win + " ");
 			
 			if(!preview.win) {
-				console.warn("markdownPreview: Waiting for window to load...");
+				//console.warn("markdownPreview: Waiting for window to load...");
 				return;
 			}
 			else if(!markdownParserLoaded) {
-				console.warn("markdownPreview: Waiting for markdownParser to load...");
+				//console.warn("markdownPreview: Waiting for markdownParser to load...");
 				return;
 			}
 			
@@ -121,7 +121,7 @@
 	
 	function setData(preview) {
 		
-		console.log("markdownPreview: Setting data!");
+		//console.log("markdownPreview: Setting data!");
 		
 		var file = preview.file;
 		var html = preview.converter.makeHtml(file.text);

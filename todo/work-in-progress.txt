@@ -13,6 +13,10 @@ todo: Issue opening image files!!
 
 ---
 
+bug: Stuck on green "reconnecting..." (after changing from jzedit to webide server url!)
+
+---
+
 optimizing startup time
 
 

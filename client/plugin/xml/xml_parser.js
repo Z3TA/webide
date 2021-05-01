@@ -88,25 +88,23 @@
 
 		if(isXmlFile[file]) {
 
-			console.log("File is XML: " + file.path + " ...");
+			//console.log("File is XML: " + file.path + " ...");
 
 			var xml = parseXML(file);
 
-			console.log("xml=" + JSON.stringify(xml));
+			//console.log("xml=" + JSON.stringify(xml));
 
 			file.haveParsed(xml); // Tell the file that it has been parsed so that functions depending on the parsed data can update
 
 		}
-		else {
-			console.log("File NOT XML: " + file.path);
-		}
+		//else {console.log("File NOT XML: " + file.path);}
 
 	}
 	
 	
 	function parseXML(file) {
 		
-		console.time("parseXML");
+		//console.time("parseXML");
 		
 		
 		//var text = file.text.toLowerCase();
@@ -186,8 +184,7 @@
 			lastChar0 = char;
 			char = text.charAt(charIndex);
 			
-			console.log("char=" + char.replace(/\n/, "LF").replace(/\r/, "CR") + " insideXmlTag=" + insideXmlTag + " xmlMode=" + xmlMode + " insideSingleQuote=" + insideSingleQuote 
-			+ " insideDblQuote=" + insideDblQuote + " insideComment=" + insideComment);
+			//console.log("char=" + char.replace(/\n/, "LF").replace(/\r/, "CR") + " insideXmlTag=" + insideXmlTag + " xmlMode=" + xmlMode + " insideSingleQuote=" + insideSingleQuote + " insideDblQuote=" + insideDblQuote + " insideComment=" + insideComment);
 			
 			/*
 				<![CDATA[ " and end with the string " ]]>
@@ -360,7 +357,7 @@
 		
 		//console.log("comments:" + JSON.stringify(comments, null, 2));
 		
-		console.timeEnd("parseXML");
+		//console.timeEnd("parseXML");
 		
 		//console.log("quotes:" + JSON.stringify(quotes, null, 2));
 		//console.log("comments:" + JSON.stringify(comments, null, 2));
@@ -399,19 +396,19 @@
 		
 		if(file.parsed) {
 		if(file.parsed.language && file.parsed.language != "XML") {
-			console.warn("File has already been parsed:  file.parsed.language=" + file.parsed.language + " file.path=" + file.path);
+				//console.warn("File has already been parsed:  file.parsed.language=" + file.parsed.language + " file.path=" + file.path);
 			return false;
 		}
 		}
 		
 		if(file.fileExtension == "xml" ||
 		file.fileExtension == "svg") {
-				console.log("isXML: " + file.path + " is XML because file.fileExtension=" + file.fileExtension);
+			//console.log("isXML: " + file.path + " is XML because file.fileExtension=" + file.fileExtension);
 			return true;
 		}
 		
 		if(file.text.match(/^<\?xml.*\?>$ /i) != null) {
-				console.log("isXML: " + file.path + " is XML because <xml in content!");
+			//console.log("isXML: " + file.path + " is XML because <xml in content!");
 				return true;
 			}
 			

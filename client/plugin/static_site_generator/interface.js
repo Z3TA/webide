@@ -51,7 +51,7 @@
 	
 	function getSites() {
 		
-		console.log("Getting SSG sites ...");
+		//console.log("Getting SSG sites ...");
 		
 		var storageSites = EDITOR.storage.getItem("cmsjz_sites");
 		var filePath; // File to be opened via quickedit
@@ -66,13 +66,12 @@
 		}
 		
 		if(!sites) {
-			console.warn("Failed to get any sites from the static site generator!\n\
-			storageSites=" + storageSites + " ... " + (storageSites ? "Truthy" : "Falsy") + "\n\
-			sites=" + JSON.stringify(sites, null, 2));
+			//console.warn("Failed to get any sites from the static site generator!\nstorageSites=" + storageSites + " ... " + (storageSites ? "Truthy" : "Falsy") + "\nsites=" + JSON.stringify(sites, null, 2));
+			
 			//alertBox("You have no configurated static-site-generator sites.");
 		}
 		else {
-			console.log("sites: " + JSON.stringify(sites, null, 2));
+			//console.log("sites: " + JSON.stringify(sites, null, 2));
 			
 			// Show some quick nav in the dashboard !?
 			
@@ -83,7 +82,7 @@
 				
 				var site = isSite(url);
 				
-				console.log("quickedit: url=" + url + " site=" + site); 
+				//console.log("quickedit: url=" + url + " site=" + site); 
 				
 				if(site) {
 					filePath = UTIL.getPathFromUrl(url);
@@ -95,7 +94,7 @@
 					filePath = UTIL.trailingSlash(resolvePath(site, site.source)) + filePath;
 					while(filePath.indexOf("//") != -1) filePath = filePath.replace("//", "/");
 					
-					console.log("filePath=" + filePath + " pubUrlPath=" + pubUrlPath + " ");
+					//console.log("filePath=" + filePath + " pubUrlPath=" + pubUrlPath + " ");
 					
 					/*
 						else {
@@ -113,9 +112,8 @@
 					
 					
 				}
-				else {
-					console.warn("Couln't determine what site the url belongs to: " + url);
-				}
+				//else {console.warn("Couln't determine what site the url belongs to: " + url);}
+
 			}
 		}
 		
@@ -138,7 +136,7 @@
 					var i = 0;
 					var index = -1;
 					
-					console.log("Finding where to put caret ...");
+					//console.log("Finding where to put caret ...");
 					for(; i<element.length-1; i++) {
 						//console.log(element[i]);
 						if(element[i] == "main") {
@@ -151,14 +149,14 @@
 					
 					for(; i<element.length; i++) {
 						if(element[i] !== "") {
-							console.log(element[i]);
+							//console.log(element[i]);
 							index = file.text.indexOf(element[i], index);
 						}
 					}
 					
-					console.log("i=" + i);
-					console.log("index=" + index + " (" + file.text.substr(index, 30) + " ...)");
-					console.log("element=" + JSON.stringify(element));
+					//console.log("i=" + i);
+					//console.log("index=" + index + " (" + file.text.substr(index, 30) + " ...)");
+					//console.log("element=" + JSON.stringify(element));
 					
 					if(index != -1) {
 						/*
@@ -185,30 +183,30 @@
 		
 		function isSite(url) {
 			// Figure out if the url belongs to any of our sites ...
-			console.log("sites.length=" + sites.length);
+			//console.log("sites.length=" + sites.length);
 			for(var i=0, site; i<sites.length; i++) {
 				site = sites[i];
 				
-				console.log(url + " == " + site.url + " ??");
+				//console.log(url + " == " + site.url + " ??");
 				
 				if(url.indexOf(site.url) != -1) {
-					console.log("A site.url=" + site.url + " is in url=" + url);
+					//console.log("A site.url=" + site.url + " is in url=" + url);
 					return site;
 				}
 				else if(site.url.indexOf(url) != -1) {
-					console.log("B url=" + url + " is in site.url=" + site.url + "");
+					//console.log("B url=" + url + " is in site.url=" + site.url + "");
 					return site;
 				}
 				else if(url.indexOf(resolvePath(site, site.publish)) == 0) {
-					console.log("C site.publish=" + site.publish + " is in url=" + url + "");
+					//console.log("C site.publish=" + site.publish + " is in url=" + url + "");
 					return site;
 				}
 				else if(url.indexOf(resolvePath(site, site.preview)) == 0) {
-					console.log("D site.preview=" + site.preview + " is in url=" + url + "");
+					//console.log("D site.preview=" + site.preview + " is in url=" + url + "");
 					return site;
 				}
 			}
-			console.log("E Unable to determine which or if the url belongs to any SSG-site: url=" + url);
+			//console.log("E Unable to determine which or if the url belongs to any SSG-site: url=" + url);
 			return null;
 		}
 	}
@@ -328,7 +326,7 @@
 		var folderName = "diary";
 		
 		if(site == undefined) {
-			console.log("diaryNewEntry: No site selected!");
+			//console.log("diaryNewEntry: No site selected!");
 			if(sites.length == 0) {
 				alertBox("Create a new site for the static site generator in order to start a dirary!");
 				return PREVENT_DEFAULT;
@@ -337,7 +335,7 @@
 			sites.forEach(lookForDiaryFolder);
 		}
 		else {
-			console.log("diaryNewEntry: selected site=" + site.name);
+			//console.log("diaryNewEntry: selected site=" + site.name);
 			lookForDiaryFolder(site);
 		}
 		
@@ -348,13 +346,13 @@
 		
 		function lookForDiaryFolder(site) {
 			
-			console.log("diaryNewEntry: lookForDiaryFolder: site=" + site.name);
+			//console.log("diaryNewEntry: lookForDiaryFolder: site=" + site.name);
 			
 			sitesToCheck++;
 			EDITOR.folderExistIn(site.source, folderName, function(err, path) {
 				 sitesChecked++;
 				
-				console.log("diaryNewEntry: lookForDiaryFolder: site=" + site.name + " sitesToCheck=" + sitesToCheck + " sitesChecked=" + sitesChecked + "  Folder exist ? " + path);
+				//console.log("diaryNewEntry: lookForDiaryFolder: site=" + site.name + " sitesToCheck=" + sitesToCheck + " sitesChecked=" + sitesChecked + "  Folder exist ? " + path);
 				
 				if(err) throw err;
 				
@@ -362,7 +360,7 @@
 				
 				if(sitesChecked == sitesToCheck) {
 					
-					console.log("diaryNewEntry: lookForDiaryFolder: diariesFound.length=" + diariesFound.length);
+					//console.log("diaryNewEntry: lookForDiaryFolder: diariesFound.length=" + diariesFound.length);
 					
 					if(diariesFound.length == 1) {
 						makeEntry(diariesFound[0]);
@@ -399,7 +397,7 @@ for(var i=0; i<options.length; i++) {
 		
 		function makeEntry(site) {
 			
-			console.log("diaryNewEntry: makeEntry: site=" + site.name);
+			//console.log("diaryNewEntry: makeEntry: site=" + site.name);
 			
 			var d = new Date();
 			var dateName = d.getFullYear() + "-" + UTIL.zeroPad(d.getMonth()) + "-" + UTIL.zeroPad(d.getDate()) + ".md";
@@ -420,7 +418,7 @@ for(var i=0; i<options.length; i++) {
 		
 		function addDiaryToSite(site) {
 			
-			console.log("diaryNewEntry: addDiaryToSite: site=" + site.name);
+			//console.log("diaryNewEntry: addDiaryToSite: site=" + site.name);
 			
 			UTIL.httpGet("/plugin/static_site_generator/diary_index.htm", function(err, indexHtml) {
 				if(err) return alertBox(err.message);
@@ -444,7 +442,7 @@ for(var i=0; i<options.length; i++) {
 	}
 	
 	function ssgBuildMessage(msg) {
-		console.log("ssgBuildMessage: " + JSON.stringify(msg));
+		//console.log("ssgBuildMessage: " + JSON.stringify(msg));
 		
 		// Inlinde errors and console.log's
 		if(msg.type=="eval-console" || msg.type=="eval-error") {
@@ -463,14 +461,10 @@ for(var i=0; i<options.length; i++) {
 					EDITOR.addInfo(msg.line-1, col, msg.message, file, level);
 					if(EDITOR.currentFile != file) EDITOR.showFile(file);
 				}
-				else {
-					console.log("ssgBuildMessage: msg.line=" + msg.line + "");
-				}
+				//else {console.log("ssgBuildMessage: msg.line=" + msg.line + "");}
 				
 			}
-			else {
-				console.log("ssgBuildMessage: File not in editor: msg.source=" + msg.source);
-			}
+			//else {console.log("ssgBuildMessage: File not in editor: msg.source=" + msg.source);}
 		}
 		
 		
@@ -488,7 +482,7 @@ for(var i=0; i<options.length; i++) {
 	}
 	
 	function ssgProgressStatus(status) {
-		console.log("ssgProgressStatus: " + JSON.stringify(status));
+		//console.log("ssgProgressStatus: " + JSON.stringify(status));
 		
 		if(!progressBar) return;
 		
@@ -510,7 +504,7 @@ for(var i=0; i<options.length; i++) {
 	
 	function appendBuildLog(file, msg) {
 		
-		console.log("appendBuildLog: " + file.path + " msg=" + msg);
+		//console.log("appendBuildLog: " + file.path + " msg=" + msg);
 		
 		if(msg.type == "eval-console") file.writeLine('"' + msg.message + '" ' + msg.source + "");
 		else if(msg.type == "error") file.writeLine('ERROR: ' + msg.msg);
@@ -548,8 +542,8 @@ for(var i=0; i<options.length; i++) {
 			// Check all sites to see if the file belongs to any source
 			
 			for(var i=0; i<sites.length; i++) {
-				console.log("askToOpenSourceFileIfOpenedPreviewFile=" + askToOpenSourceFileIfOpenedPreviewFile);
-				console.log("filePath=" + filePath + " sites[" + i + "].preview=" + sites[i].preview);
+				//console.log("askToOpenSourceFileIfOpenedPreviewFile=" + askToOpenSourceFileIfOpenedPreviewFile);
+				//console.log("filePath=" + filePath + " sites[" + i + "].preview=" + sites[i].preview);
 				
 				if(filePath.indexOf(resolvePath(sites[i], sites[i].source)) != -1) {
 					showSSG();
@@ -602,7 +596,7 @@ for(var i=0; i<options.length; i++) {
 		var site = sites[index];
 		
 		if(site) {
-			console.log("Switching to site=" + site.name);
+			//console.log("Switching to site=" + site.name);
 			
 			selectedSite = site;
 			selectSite.selectedIndex = index;
@@ -617,7 +611,7 @@ for(var i=0; i<options.length; i++) {
 	
 	function build() {
 		
-		console.log("Building SSG manager");
+		//console.log("Building SSG manager");
 		
 		var footer = document.getElementById("footer");
 		
@@ -635,7 +629,7 @@ for(var i=0; i<options.length; i++) {
 		
 		
 		
-		console.log("done building server manager");
+		//console.log("done building server manager");
 	}
 	
 	
@@ -782,7 +776,7 @@ for(var i=0; i<options.length; i++) {
 		
 		//alertBox("Fired changeSelectSite");
 		
-		console.log("changeSelectSite: selectSite.selectedIndex=" + selectSite.selectedIndex + " selectSite.options=", selectSite.options);
+		//console.log("changeSelectSite: selectSite.selectedIndex=" + selectSite.selectedIndex + " selectSite.options=", selectSite.options);
 		
 		var selectedSiteIndex = selectSite.options[selectSite.selectedIndex].id;
 		selectedSite = sites[selectedSiteIndex];
@@ -803,7 +797,7 @@ for(var i=0; i<options.length; i++) {
 		inputRepository.value = selectedSite.repository;
 		inputUrl.value = selectedSite.url;
 		}
-		else console.warn("selectedSite=" + selectedSite);
+		//else console.warn("selectedSite=" + selectedSite);
 	}
 	
 	function editSiteSettings() {
@@ -1274,7 +1268,7 @@ for(var i=0; i<options.length; i++) {
 			inputRepoAuthPw.value = selectedSite.repoPw;
 			inputUrl.value = selectedSite.url;
 			}
-			else console.warn("No site selected!");
+			//else console.warn("No site selected!");
 			
 			editView.style.display = "none"; // Hide the edit view
 			controlView.style.display = "block"; // Show the connection view
@@ -1453,7 +1447,7 @@ for(var i=0; i<options.length; i++) {
 		option.id = index;
 		selectSite.appendChild(option);
 		
-		console.log("EDITOR.storage.getItem('cmsjz_selectedSiteName')=" + EDITOR.storage.getItem('cmsjz_selectedSiteName') + " site.name=" + site.name);
+		//console.log("EDITOR.storage.getItem('cmsjz_selectedSiteName')=" + EDITOR.storage.getItem('cmsjz_selectedSiteName') + " site.name=" + site.name);
 		
 		if(EDITOR.storage.getItem("cmsjz_selectedSiteName") == site.name) {
 			// Will this trigger change !? Yep, it seems to work!
@@ -1466,7 +1460,7 @@ for(var i=0; i<options.length; i++) {
 	
 	function showSSG() {
 		
-		console.log("Showing the static site generator -interface")
+		//console.log("Showing the static site generator -interface")
 		
 		EDITOR.ctxMenu.hide();
 		
@@ -1519,15 +1513,15 @@ for(var i=0; i<options.length; i++) {
 		
 		// Figure out if the file belongs to the SSG
 		
-		console.log("ssgPreviewTool");
+		//console.log("ssgPreviewTool");
 		
 		if(!selectedSite) {
-			console.log("No site selected!");
+			//console.log("No site selected!");
 			return false;
 		}
 		
 		if(file.path.indexOf(resolvePath(selectedSite, selectedSite.source)) == -1) {
-			console.log("selectedSite.source=" + selectedSite.source + " is not in file.path=" + file.path + "");
+			//console.log("selectedSite.source=" + selectedSite.source + " is not in file.path=" + file.path + "");
 			return false;
 		}
 		
@@ -1561,7 +1555,7 @@ for(var i=0; i<options.length; i++) {
 		
 		if(!site) throw new Error("site=" + site);
 		
-		console.log('Previewing site.name="' + site.name + '". edit=' + edit);
+		//console.log('Previewing site.name="' + site.name + '". edit=' + edit);
 		
 		/*
 			We must create the window here, so that it get associated with the button click
@@ -1578,14 +1572,14 @@ for(var i=0; i<options.length; i++) {
 				var test = previewWin.previewWin.innerWidth;
 			}
 			catch(err) {
-				console.warn("Unable to measure old window. It's most likely closed already: " + err.message);
+				//console.warn("Unable to measure old window. It's most likely closed already: " + err.message);
 				var options = {url: url};
 			}
 			
 			if(!options) {
-				console.log("previewWin.screenX=" + previewWin.screenX);
-				console.log("previewWin.previewWin.screenX=" + previewWin.previewWin.screenX);
-				console.log("previewWin.previewWin.innerWidth=" + previewWin.previewWin.innerWidth);
+				//console.log("previewWin.screenX=" + previewWin.screenX);
+				//console.log("previewWin.previewWin.screenX=" + previewWin.previewWin.screenX);
+				//console.log("previewWin.previewWin.innerWidth=" + previewWin.previewWin.innerWidth);
 				
 				var width = parseInt(previewWin.previewWin.innerWidth);
 				var height = parseInt(previewWin.previewWin.innerHeight);
@@ -1632,7 +1626,7 @@ for(var i=0; i<options.length; i++) {
 			if(!sourceFile) throw new Error("No source file specified!");
 			
 			if(typeof sourceFile.text != "string") {
-				console.log(sourceFile);
+				//console.log(sourceFile);
 				throw new Error("Property text in sourceFile is not a string! sourceFile.text=" + sourceFile.text);
 			}
 			
@@ -1651,7 +1645,7 @@ for(var i=0; i<options.length; i++) {
 				*/
 				
 				if(recursionCounter == undefined) {
-					console.log("Attempt automatic fix of absolute paths in sourceFile.path=" + sourceFile.path);
+					//console.log("Attempt automatic fix of absolute paths in sourceFile.path=" + sourceFile.path);
 					recursionCounter = 1;
 					
 					
@@ -1679,10 +1673,11 @@ for(var i=0; i<options.length; i++) {
 				}
 				else {
 					
-					console.log("recursionCounter=" + recursionCounter);
+					//console.log("recursionCounter=" + recursionCounter);
 					
 					newWindow.close();
-					console.log("matchAbsSrc=" + JSON.stringify(matchAbsSrc));
+					//console.log("matchAbsSrc=" + JSON.stringify(matchAbsSrc));
+					
 					alertBox("Make any src or href attributes are relative! (remove the slash from " + matchAbsSrc[0] + ")\n\n" + 
 					"src and href in headers and footers needs to be absolute, but in the page/content they need to be relative.");
 					
@@ -1701,7 +1696,7 @@ for(var i=0; i<options.length; i++) {
 			}
 			else {
 				
-				console.log("ignoreDraft=" + ignoreDraft); // publish flag that ignores files starting with _ (underscore)
+				//console.log("ignoreDraft=" + ignoreDraft); // publish flag that ignores files starting with _ (underscore)
 				compile(resolvePath(site, site.source), resolvePath(site, site.preview), ignoreDraft, function compiled_static(err) {
 					if(err) throw err;
 					
@@ -1714,7 +1709,7 @@ for(var i=0; i<options.length; i++) {
 					
 					// If the editor is run with file:// protocol we don't have to use the serve API to view the preview
 					// Provided that the preview url is not a ftp/sft/ftps url
-					console.log("site.preview=" + site.preview);
+					//console.log("site.preview=" + site.preview);
 					
 					if(resolvePath(site, site.preview).match(/^(ftp|sftp|ftps):/i)) {
 						alertBox("Preview uploaded to: " + site.preview);
@@ -1744,7 +1739,7 @@ for(var i=0; i<options.length; i++) {
 								alertBox("Serve host was " + loc.host + " but was replaced with " + window.location.host + " to prevent cross origin errors!");
 							}
 							
-							console.log("loc.host=" + loc.host + " window.location.host=" + window.location.host + " url=" + url);
+							//console.log("loc.host=" + loc.host + " window.location.host=" + window.location.host + " url=" + url);
 							
 							if(!url.match(/^http(s?):/i)) url = window.location.protocol + "//" + url;
 							
@@ -1754,15 +1749,15 @@ for(var i=0; i<options.length; i++) {
 					}
 					
 					function previewServed(url) {
-						console.log("url=" + url);
+						//console.log("url=" + url);
 						
 						if(location) {
-							console.log("location.protocol=" + location.protocol);
+							//console.log("location.protocol=" + location.protocol);
 							//if(location.protocol) url = location.protocol + "//" + url;
 						}
 						//else url = "http://" + url;
 						
-						console.log("serve url=" + url);
+						//console.log("serve url=" + url);
 						
 						
 						previewBaseUrl = url;
@@ -1845,7 +1840,7 @@ for(var i=0; i<options.length; i++) {
 								
 								if(previewWin) previewWin.close();
 								
-								console.log("SSG url=" + url + " RUNTIME=" + RUNTIME + " newWindow=" + newWindow);
+								//console.log("SSG url=" + url + " RUNTIME=" + RUNTIME + " newWindow=" + newWindow);
 								previewWin = new WysiwygEditor({
 									sourceFile: sourceFile,
 									bodyTagSource: bodyTag, 
@@ -1976,7 +1971,7 @@ if(err) return alertBox(err.message);
 			if(site.repository != undefined && site.repository != "undefined") {
 				// .hg folder don't exist. Ask if user wants to init (using clone)
 				
-				console.log("site.repository=" + site.repository);
+				//console.log("site.repository=" + site.repository);
 				
 				var cloneInit = "Clone from repository";
 				var noThanks = "No, thanks"
@@ -1993,7 +1988,7 @@ if(err) return alertBox(err.message);
 		function hgFolderFound(existingFolder) {
 			// Check if remote is the same as repository
 			var hgrcFile = existingFolder + "hgrc";
-			console.log("hgrcFile=" + hgrcFile);
+			//console.log("hgrcFile=" + hgrcFile);
 			EDITOR.readFromDisk(hgrcFile, function(err, hgrcFile, hgrcContent) {
 				if(err) throw err; // All mercurial repos should have a hgrc!
 				
@@ -2021,9 +2016,9 @@ if(err) return alertBox(err.message);
 					if(repos == null) {
 						// No default repo exist, add our repo as default
 						hgrcContent = hgrcContent.substring(0, pathPartStart + 7) + "\ndefault = " + site.repository + "\n" + hgrcContent.substring(pathPartStart + 8);
-						console.log("pathPart=" + pathPart);
-						console.log("reg: " + pathPart.match(regex) + " (" + regex + ")");
-						console.log("Saving hgrcContent:\n" + hgrcContent);
+						//console.log("pathPart=" + pathPart);
+						//console.log("reg: " + pathPart.match(regex) + " (" + regex + ")");
+						//console.log("Saving hgrcContent:\n" + hgrcContent);
 						EDITOR.saveToDisk(hgrcFile, hgrcContent, function(err, hgrcFile) {
 							if(err) throw err; // Unexpected
 							doHgSync();
@@ -2177,7 +2172,7 @@ if(err) return alertBox(err.message);
 					var rootDir = UTIL.trailingSlash(resp.rootDir);
 					var untracked = resp.untracked;
 					
-					console.log("mercurial.status resp=" + JSON.stringify(resp));
+					//console.log("mercurial.status resp=" + JSON.stringify(resp));
 					
 					if(modified.length > 0) {
 						if(syncRepositoryCallback) syncRepositoryCallback("MODIFIED");
@@ -2294,7 +2289,7 @@ if(err) return alertBox(err.message);
 						if(repoUrl == undefined) throw new Error("repoUrl=" + undefined + " resp=" + JSON.stringify(resp, null, 2));
 						
 						if(changes === 0) {
-							console.log("No incoming changes from " + repoUrl);
+							//console.log("No incoming changes from " + repoUrl);
 							
 							pushToRepo();
 							
@@ -2318,14 +2313,14 @@ if(err) return alertBox(err.message);
 						}
 						
 						if(filesOpenedInEditorAndNotSaved.length != 0) {
-							console.warn("Files not saved (but we did check before): " + filesOpenedInEditorAndNotSaved.join("\n"));
+							//console.warn("Files not saved (but we did check before): " + filesOpenedInEditorAndNotSaved.join("\n"));
 							alertBox("Can not update files that are not saved. Save the following files and then try again:\n" + filesOpenedInEditorAndNotSaved.join("\n"));
 						}
 						else {
 							CLIENT.cmd("mercurial.update", {directory: UTIL.trailingSlash(selectedSite.projectFolder)}, function hgUpdated(err, resp) {
 								if(err) return alertBox(err.message);
 								
-								console.log("mercurial.update: resp=" + JSON.stringify(resp));
+								//console.log("mercurial.update: resp=" + JSON.stringify(resp));
 								
 								var whenAllFilesReloaded = null;
 								
@@ -2377,7 +2372,7 @@ whenAllFilesReloaded();
 			}
 			
 			function pushToRepo() {
-				console.log("Calling mercurial.push!");
+				//console.log("Calling mercurial.push!");
 				CLIENT.cmd("mercurial.push", {
 					directory: UTIL.trailingSlash(selectedSite.projectFolder),
 					user: selectedSite.repoUser,
@@ -2385,7 +2380,7 @@ whenAllFilesReloaded();
 					save: temporaryPassword ? false : true
 				}, function pushed(err, resp) {
 					
-					console.log("mercurial.push: err=" + err + " syncRepositoryCallback=" + syncRepositoryCallback + " resp=" + JSON.stringify(resp));
+					//console.log("mercurial.push: err=" + err + " syncRepositoryCallback=" + syncRepositoryCallback + " resp=" + JSON.stringify(resp));
 					
 					if(err) alertBox(err.message);
 					else if(syncRepositoryCallback) syncRepositoryCallback(null);
@@ -2539,7 +2534,7 @@ whenAllFilesReloaded();
 				var sourceFilePath = url.replace(previewBaseUrl, resolvePath(site, site.source));
 			}
 			catch(err) {
-				console.log("Unable to get previewWin url: " + err.message);
+				//console.log("Unable to get previewWin url: " + err.message);
 				// Unable to get the file currently being previewed.
 				// The preview window has probably been closed.
 				pickFileToPreview(site, makeItEditable);
@@ -2547,7 +2542,7 @@ whenAllFilesReloaded();
 				// The current previewWin will be closed, and another opeened, when calling previewPage
 			}
 			
-			console.log("sourceFilePath=" + sourceFilePath);
+			//console.log("sourceFilePath=" + sourceFilePath);
 			
 			
 			// Open the file in the editor if it's not already open
@@ -2600,12 +2595,12 @@ whenAllFilesReloaded();
 		
 		// Calls back with (err,file)
 		
-		console.log("pickFileToPreview: Picking suitable file to preview/edit on site.name=" + site.name + " ...");
+		//console.log("pickFileToPreview: Picking suitable file to preview/edit on site.name=" + site.name + " ...");
 		
 		if(!site.source) throw new Error("Site name=" + site.name + " has no no source! site.source=" + site.source + " site=" + JSON.stringify(site));
 		
 		if(like(site, EDITOR.currentFile)) {
-			console.log("pickFileToPreview: site.name=" + site.name + " likes EDITOR.currentFile.path=" + EDITOR.currentFile.path);
+			//console.log("pickFileToPreview: site.name=" + site.name + " likes EDITOR.currentFile.path=" + EDITOR.currentFile.path);
 			callback(null, EDITOR.currentFile);
 		return;
 		}
@@ -2654,7 +2649,7 @@ whenAllFilesReloaded();
 		
 		function chooseFilePath(fileList) {
 			
-			console.log("pickFileToPreview: chooseFilePath: fileList.length=" + fileList.length);
+			//console.log("pickFileToPreview: chooseFilePath: fileList.length=" + fileList.length);
 			
 			if(Object.prototype.toString.call( fileList ) !== '[object Array]') throw new Error("fileList must be an array!");
 			
@@ -2678,26 +2673,26 @@ whenAllFilesReloaded();
 	function like(site, file) {
 		
 		if(!file) {
-			console.log("We don't like site=" + site + " because file=" + file);
+			//console.log("We don't like site=" + site + " because file=" + file);
 			return false;
 		}
 		
 		if(file.path.indexOf(resolvePath(site, site.source)) != 0) {
-			console.log("We don't like " + file.path + " because it's not part of site.source=" + site.source);
+			//console.log("We don't like " + file.path + " because it's not part of site.source=" + site.source);
 			return false;
 		}
 		
 		if(!file.name.match(/html?$/i)) {
-			console.log("We don't like " + file.path + " because it's not a HTML file");
+			//console.log("We don't like " + file.path + " because it's not a HTML file");
 			return false;
 		}
 		
 		if(file.name.match(/(header|footer).html?/i)) {
-			console.log("We don't like " + file.path + " because it's a header or footer file");
+			//console.log("We don't like " + file.path + " because it's a header or footer file");
 			return false;
 		}
 		
-		console.log("We DO like " + file.path + " !");
+		//console.log("We DO like " + file.path + " !");
 		
 		return true;
 	}

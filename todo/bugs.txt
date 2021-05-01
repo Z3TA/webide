@@ -36,6 +36,8 @@ Run all tests! (to make sure you did not break anything else)
 BUGS (and issues)
 =================
 
+false posetive warning about single = in if statement
+//console.warn("Checking if word=" + word + " matches function name=" + functionName + "");
 
 ---
 

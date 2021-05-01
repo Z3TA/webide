@@ -335,10 +335,10 @@ EDITOR.unbindKey(startTerminalFromKeyboard);
 			terminalName = termPrefix + terminalId;
 		}
 		
-		console.log("terminal: terminal.open terminalId=" + terminalId);
+		//console.log("terminal: terminal.open terminalId=" + terminalId);
 		CLIENT.cmd("terminal.open", {cwd: cwd, cols: cols, rows: rows, id: terminalId, env: EDITOR.env}, function terminalOpened(err, term) {
 			if(err) {
-				console.log("terminal: terminal.open err.message=" + err.message);
+				//console.log("terminal: terminal.open err.message=" + err.message);
 				// How do I repeat: Open two terminals, then close them, and open a new terminal
 				var reHigher = /Terminal id needs to be (\d+) or higher/;
 				var matchHigher = err.message.match(reHigher);
@@ -360,7 +360,7 @@ EDITOR.unbindKey(startTerminalFromKeyboard);
 				else return alertBox("Unable to start terminal: " + err.message, err.code);
 			}
 			
-			console.log("terminal: terminal.open success! term=" + JSON.stringify(term));
+			//console.log("terminal: terminal.open success! term=" + JSON.stringify(term));
 			
 			// We might get terminal data before we get the open callback!
 			openTerminalFile(terminalName, startTerminalCallback);

@@ -38,14 +38,14 @@
 	}
 	
 	function autocloseComment(file, character, combo) {
-		console.log("autocloseComment: character=" + character);
+		//console.log("autocloseComment: character=" + character);
 		
 		if(!file) return true;
 		if(!EDITOR.input) return true;
 		if(UTIL.getFileExtension(file.path) != "js") return true;
 		if(character != "*") return true;
 		
-		console.log("comment !? " + UTIL.lbChars(file.text.charAt(file.caret.index-1)));
+		//console.log("comment !? " + UTIL.lbChars(file.text.charAt(file.caret.index-1)));
 		
 		if(file.text.charAt(file.caret.index-1) != "/") return true;
 		
