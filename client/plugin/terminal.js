@@ -404,18 +404,18 @@ EDITOR.unbindKey(startTerminalFromKeyboard);
 	
 	function openTerminalFile(name, callback) {
 		
-		console.log("terminal: openTerminalFile: name=" + name);
+		//console.log("terminal: openTerminalFile: name=" + name);
 		
 		if(!name) throw new Error("name=" + name);
 		
 		if(EDITOR.openFileQueue.indexOf(name) != -1) {
-			console.warn("terminal: The terminal name=" + name + " is already in the openFileQueue=" + JSON.stringify(EDITOR.openFileQueue));
+			//console.warn("terminal: The terminal name=" + name + " is already in the openFileQueue=" + JSON.stringify(EDITOR.openFileQueue));
 			EDITOR.whenFileOpens(name, callback);
 			return;
 		}
 		
 		if(EDITOR.files.hasOwnProperty(name)) {
-			console.log("terminal: File already open! name=" + name);
+			//console.log("terminal: File already open! name=" + name);
 			// Make sure it's a proper terminal file
 			var file = EDITOR.files[name];
 terminalFiles.push(file);
@@ -434,7 +434,7 @@ terminalFiles.push(file);
 			return;
 		}
 		
-		console.log("terminal: Opening file name=" + name + " ...");
+		//console.log("terminal: Opening file name=" + name + " ...");
 		EDITOR.openFile(name, "", {show: true, props: terminalFileStateProps}, function fileOpened(err, file) {
 			if(err) {
 				if(callback) return callback(err);
@@ -451,8 +451,8 @@ terminalFiles.push(file);
 			file.writeLineBreak();
 			EDITOR.renderNeeded();
 			
-			console.log(typeof callback)
-			console.log(callback);
+			//console.log(typeof callback)
+			//console.log(callback);
 			
 			if(callback) callback(null, file);
 			
@@ -469,7 +469,7 @@ terminalFiles.push(file);
 	
 	function parse(data, file) {
 		
-		console.log("Parse data=" + data);
+		//console.log("Parse data=" + data);
 		
 		if(reNetnsIP) {
 			
@@ -637,7 +637,7 @@ terminalFiles.push(file);
 				var bottom = parseInt(inNumber);
 				var top = parseInt(numberSerie.pop());
 				
-				console.log("Set top=" + top + " and bottom=" + bottom + " lines of a window");
+				//console.log("Set top=" + top + " and bottom=" + bottom + " lines of a window");
 				
 				if( isNaN(top) || isNaN(bottom) ) throw new Error("top=" + top + " bottom=" + bottom + " data=" + data);
 				
@@ -655,7 +655,7 @@ terminalFiles.push(file);
 			// ### Clearing lines
 			else if(char == "K" && (inBracket || inNumber == "0") ) {
 				
-				console.log("Clear line from cursor right ");
+				//console.log("Clear line from cursor right ");
 				var row = file.grid[file.caret.row];
 				if(row.length > file.caret.col) {
 					var firstIndex = file.caret.index;
@@ -667,12 +667,12 @@ terminalFiles.push(file);
 				inText = true;
 			}
 			else if(char == "K" && inNumber == "1") {
-				console.log("todo: Clear line from cursor left ");
+				//console.log("todo: Clear line from cursor left ");
 				inNumber = "";
 				inText = true;
 			}
 			else if(char == "K" && inNumber == "2") {
-				console.log("Clear entire line ");
+				//console.log("Clear entire line ");
 				file.removeAllTextOnRow(file.caret.row);
 				inNumber = "";
 				inText = true;
@@ -680,20 +680,20 @@ terminalFiles.push(file);
 			
 			// ### Clearing screen
 			else if(char == "J" && (inBracket || inNumber == "0") ) {
-				console.log("todo: Clear screen from cursor down");
+				//console.log("todo: Clear screen from cursor down");
 				inBracket = false;
 				inNumber = "";
 				inText = true;
 			}
 			else if(char == "J" && inNumber == "1") {
-				console.log("todo: Clear screen from cursor up ");
+				//console.log("todo: Clear screen from cursor up ");
 				inNumber = "";
 				inText = true;
 			}
 			else if(char == "J" && inNumber == "2") { // J
 				var startRow = file.startRow;
 				
-				console.log("Clear entire screen! startRow=" + startRow + " file.grid.length=" + file.grid.length);
+				//console.log("Clear entire screen! startRow=" + startRow + " file.grid.length=" + file.grid.length);
 				
 				file.moveCaretToEndOfFile();
 				file.insertLineBreak();
@@ -718,7 +718,7 @@ terminalFiles.push(file);
 				if(inNumber) var times = parseInt(inNumber);
 				else var times = 1;
 				
-				console.log("Move cursor up " + times + " lines from caret=" + JSON.stringify(file.caret));
+				//console.log("Move cursor up " + times + " lines from caret=" + JSON.stringify(file.caret));
 				
 				var col = file.caret.col;
 				
@@ -739,12 +739,12 @@ terminalFiles.push(file);
 				if(inNumber) var times = parseInt(inNumber);
 				else var times = 1;
 				
-				console.log("Move cursor down " + times + " lines from caret=" + JSON.stringify(file.caret) );
+				//console.log("Move cursor down " + times + " lines from caret=" + JSON.stringify(file.caret) );
 				
 				var col = file.caret.col;
 				
 				for(var j=0; j<times;j++) {
-					console.log("file.caret.row=" + file.caret.row + " file.grid.length=" + file.grid.length);
+					//console.log("file.caret.row=" + file.caret.row + " file.grid.length=" + file.grid.length);
 					
 					if(file.caret.row == file.grid.length-1) {
 						// Terminal wants to move the caret down, but there are no more lines in the editor:
@@ -770,7 +770,7 @@ terminalFiles.push(file);
 				if(inNumber) var times = parseInt(inNumber);
 				else var times = 1;
 				
-				console.log("Move cursor right " + times + " columns");
+				//console.log("Move cursor right " + times + " columns");
 				for(var j=0; j<times;j++) {
 					if(file.caret.eol) file.insertText(" ");
 					else file.moveCaretRight();
@@ -786,7 +786,7 @@ terminalFiles.push(file);
 				if(inNumber) var times = parseInt(inNumber);
 				else var times = 1;
 				
-				console.log("Move cursor left " + times + " columns");
+				//console.log("Move cursor left " + times + " columns");
 				for(var j=0; j<times;j++) file.moveCaretLeft();
 				
 				inEsc = false;
@@ -800,7 +800,7 @@ terminalFiles.push(file);
 				if(inNumber) var col = parseInt(inNumber);
 				else var col = 0;
 				
-				console.log("Move to column " + col + " of current line");
+				//console.log("Move to column " + col + " of current line");
 				// Columns start on column 1 in terminals
 				file.moveCaretToCol(col-1);
 				
@@ -812,7 +812,7 @@ terminalFiles.push(file);
 			else if((inEsc && char == "H") || (inBracket && (char == "H" || char == "f"))) {
 				if(charBuffer) print();
 				
-				console.log("Move cursor to upper left corner");
+				//console.log("Move cursor to upper left corner");
 				file.moveCaret(undefined, file.startRow, 0);
 				inEsc = false;
 				inBracket = false;
@@ -824,16 +824,16 @@ terminalFiles.push(file);
 				var toCol = parseInt(inNumber) - 1;
 				var toRow = parseInt(file.startRow + parseInt(numberSerie.pop())) - 1; // + terminalState.topLine;
 				
-				console.log("Move cursor to screen location vertically row=" + toRow + ", horizontally col=" + toCol + " ");
+				//console.log("Move cursor to screen location vertically row=" + toRow + ", horizontally col=" + toCol + " ");
 				
-				console.log("file.startRow=" + file.startRow + " toCol=" + toCol + " toRow=" + toRow + " file.grid.length=" + file.grid.length + " " + toRow + "-" + file.grid.length + "=" + (toRow - file.grid.length));
+				//console.log("file.startRow=" + file.startRow + " toCol=" + toCol + " toRow=" + toRow + " file.grid.length=" + file.grid.length + " " + toRow + "-" + file.grid.length + "=" + (toRow - file.grid.length));
 				
 				while(toRow >= file.grid.length) {
 					file.writeLineBreak();
 				}
 				
-				console.log(" file.grid.length=" + file.grid.length + " toRow=" + toRow);
-				console.log(" file.grid[" + toRow + "].length=" + file.grid[toRow].length);
+				//console.log(" file.grid.length=" + file.grid.length + " toRow=" + toRow);
+				//console.log(" file.grid[" + toRow + "].length=" + file.grid[toRow].length);
 				
 				if(toCol >= file.grid[toRow].length) {
 					var spaces = "";
@@ -855,7 +855,7 @@ terminalFiles.push(file);
 			else if(inEsc && char == "E") {
 				if(charBuffer) print();
 				
-				console.log("todo: Move to next line");
+				//console.log("todo: Move to next line");
 				inEsc = false;
 				inText = true;
 			}
@@ -863,14 +863,14 @@ terminalFiles.push(file);
 			else if(inEsc && char == "7") {
 				if(charBuffer) print();
 				
-				console.log("todo: Save cursor position and attributes");
+				//console.log("todo: Save cursor position and attributes");
 				inEsc = false;
 				inText = true;
 			}
 			else if(inEsc && char == "8") {
 				if(charBuffer) print();
 				
-				console.log("todo: Restore cursor position and attributes");
+				//console.log("todo: Restore cursor position and attributes");
 				inEsc = false;
 				inText = true;
 			}
@@ -881,7 +881,7 @@ terminalFiles.push(file);
 				
 				if(inNumber) var times = parseInt(inNumber);
 				else var times = 1;
-				console.log("Move/scroll window UP " + times + " line(s)");
+				//console.log("Move/scroll window UP " + times + " line(s)");
 				var topRow = file.startRow;
 				var bottomRow = file.startRow;
 				
@@ -919,8 +919,7 @@ terminalFiles.push(file);
 				if(terminalState.topLine > 0) topRow += (terminalState.topLine-1);
 				if(terminalState.bottomLine > 0) bottomRow += terminalState.bottomLine-1;
 				
-				console.log("Move/scroll window DOWN " + times + " line(s) startRow=" + startRow + " topLine=" + terminalState.topLine +
-				" bottomLine=" + terminalState.bottomLine + " topRow=" + topRow + " bottomRow=" + bottomRow);
+				//console.log("Move/scroll window DOWN " + times + " line(s) startRow=" + startRow + " topLine=" + terminalState.topLine +" bottomLine=" + terminalState.bottomLine + " topRow=" + topRow + " bottomRow=" + bottomRow);
 				
 				var bottomLineText = "";
 				var topLineText = "";
@@ -973,9 +972,7 @@ terminalFiles.push(file);
 				if(inNumber == 4) {
 					terminalState.smoothScrolling = true;
 				}
-				else {
-					console.warn("Unknown inNumber=" + inNumber + " ");
-				}
+				//else {console.warn("Unknown inNumber=" + inNumber + " ");}
 				
 				inNumber = "";
 				inText = true;
@@ -1211,7 +1208,7 @@ terminalFiles.push(file);
 				
 				var times = parseInt(inNumber);
 				
-				console.log("Delete " + times + " characters");
+				//console.log("Delete " + times + " characters");
 				for(var j=0; j<times;j++) file.deleteCharacter();
 				
 				inNumber = "";
@@ -1231,8 +1228,7 @@ terminalFiles.push(file);
 					
 					if(charBuffer) print();
 					
-					console.log("Terminal New line: terminalState.bottomLine=" + terminalState.bottomLine + " file.startRow=" + file.startRow +
-					" file.caret.row=" + file.caret.row + " file.grid.length=" + file.grid.length + " caret=" + JSON.stringify(file.caret)  );
+					//console.log("Terminal New line: terminalState.bottomLine=" + terminalState.bottomLine + " file.startRow=" + file.startRow + " file.caret.row=" + file.caret.row + " file.grid.length=" + file.grid.length + " caret=" + JSON.stringify(file.caret)  );
 					
 					if(terminalState.topLine > 0 && terminalState.bottomLine > 0 && (terminalState.bottomLine -1 + file.startRow) == file.caret.row) {
 						file.removeRow(terminalState.topLine-1 + file.startRow);
@@ -1249,7 +1245,7 @@ terminalFiles.push(file);
 					}
 				}
 				else if(code == 13) {// Carriage Return \r
-					console.log("terminal: Carriage Return on caret=" + JSON.stringify(file.caret) );
+					//console.log("terminal: Carriage Return on caret=" + JSON.stringify(file.caret) );
 					if(charBuffer) print();
 					//file.moveCaretToEndOfLine();
 					file.moveCaretToStartOfLine();
@@ -1349,7 +1345,7 @@ terminalFiles.push(file);
 		var file = EDITOR.files[termPrefix + term.id];
 		var buffer = BUFFER[term.id];
 		
-		console.log("terminalMessage: term.id=" + term.id + " waitForReopen=" + waitForReopen + "  file?=" + (file && file.path) + " term.data=" + (term.data));
+		//console.log("terminalMessage: term.id=" + term.id + " waitForReopen=" + waitForReopen + "  file?=" + (file && file.path) + " term.data=" + (term.data));
 		
 		if(term.exit) {
 			
@@ -1365,19 +1361,19 @@ file.writeLine("\n" + file.path + " session closed " + (new Date()) + "\n");
 		}
 		
 		if(!file && term.data) {
-			console.log("terminalMessage: Got data, but terminal file is not open! Buffering...");
+			//console.log("terminalMessage: Got data, but terminal file is not open! Buffering...");
 			if(buffer == undefined) buffer = BUFFER[term.id] = [];
 			buffer.push(term.data);
 			
 			if(waitForReopen) {
-				console.log("terminalMessage: waitForReopen!");
+				//console.log("terminalMessage: waitForReopen!");
 				return; // Wait and see if the old session is opened before opening a new terminal file
 			}
 			
 			var name = termPrefix + term.id;
-			console.log("terminalMessage: openTerminalFile...");
+			//console.log("terminalMessage: openTerminalFile...");
 			openTerminalFile(name, function terminalFileOpened(err, f) {
-				console.log("terminalMessage: terminalFileOpened! buffer.length=" + buffer.length);
+				//console.log("terminalMessage: terminalFileOpened! buffer.length=" + buffer.length);
 				if(err) return alertBox("Unable to open terminal from file name=" + name + " error=" + err.message, err.code);
 				
 				if(!EDITOR.files.hasOwnProperty(termPrefix + term.id)) throw new Error("termPrefix=" + termPrefix + " + term.id=" + term.id + " file failed to open!");
@@ -1388,7 +1384,7 @@ file.writeLine("\n" + file.path + " session closed " + (new Date()) + "\n");
 			return;
 		}
 		
-		console.log("terminalFiles=" + JSON.stringify(terminalFiles.map(function(file) {return file.path})));
+		//console.log("terminalFiles=" + JSON.stringify(terminalFiles.map(function(file) {return file.path})));
 		
 		if(file && terminalFiles.indexOf(file) == -1) {
 			// File was probably reopened from last session
@@ -1398,12 +1394,10 @@ file.writeLine("\n" + file.path + " session closed " + (new Date()) + "\n");
 			}
 			if(!terminalActive) addTerminalEvents();
 		}
-else {
-console.log(file.path + " is a terminal emulator file!");
-}
+		//else {console.log(file.path + " is a terminal emulator file!");}
 		
 		if(term.data) {
-			console.log("terminalMessage: Parsing data...");
+			//console.log("terminalMessage: Parsing data...");
 			parseBuffer();
 			parse(term.data, file);
 		}
@@ -1420,7 +1414,7 @@ console.log(file.path + " is a terminal emulator file!");
 		
 		var terminalId = file.path.match(reTerm)[1];
 		
-		console.log("terminalKeyPressed: character=" + character + " combo=" + JSON.stringify(combo) + " keyPressEvent.key=" + keyPressEvent.key);
+		//console.log("terminalKeyPressed: character=" + character + " combo=" + JSON.stringify(combo) + " keyPressEvent.key=" + keyPressEvent.key);
 		
 		if(!EDITOR.input) return ALLOW_DEFAULT;
 		
@@ -1455,17 +1449,17 @@ console.log(file.path + " is a terminal emulator file!");
 		
 		if(!file) return ALLOW_DEFAULT;
 
-		console.log("terminalKeyDown: file.path=" + file.path);
-		console.log("terminalFiles=" + JSON.stringify(terminalFiles.map(function(file) {return file.path})));
+		//console.log("terminalKeyDown: file.path=" + file.path);
+		//console.log("terminalFiles=" + JSON.stringify(terminalFiles.map(function(file) {return file.path})));
 		
 		if(terminalFiles.indexOf(file) == -1) {
-			console.log("Not a terminal file: " + file.path);
+			//console.log("Not a terminal file: " + file.path);
 			return ALLOW_DEFAULT;
 		}
 		
 		var code = keyDownEvent.charCode || keyDownEvent.keyCode;
 		
-		console.log("terminalKeyDown: character=" + character + " code=" + code + " combo=" + JSON.stringify(combo) +" key=" + keyDownEvent.key);
+		//console.log("terminalKeyDown: character=" + character + " code=" + code + " combo=" + JSON.stringify(combo) +" key=" + keyDownEvent.key);
 		
 		if(!EDITOR.input) {
 			return ALLOW_DEFAULT;
@@ -1539,7 +1533,7 @@ console.log(file.path + " is a terminal emulator file!");
 					
 				}
 			}
-			else console.warn("Unable to match command: rowText=" + rowText + " match=" + JSON.stringify(match));
+			//else console.warn("Unable to match command: rowText=" + rowText + " match=" + JSON.stringify(match));
 			
 		}
 		else if(code == 27 && combo.sum == 0) { // Esc
@@ -1703,7 +1697,7 @@ console.log(file.path + " is a terminal emulator file!");
 	}
 	
 	function exitAllTerminals(reason) {
-		console.log("exitAllTerminals: " + terminalFiles.length + " reason=" + reason);
+		//console.log("exitAllTerminals: " + terminalFiles.length + " reason=" + reason);
 		
 		for (var i=0; i<terminalFiles.length; i++) {
 			if(reason=="exit") {
@@ -1762,7 +1756,7 @@ console.log(file.path + " is a terminal emulator file!");
 				
 				// Wait until the file have been opened, then close it
 				setTimeout(function closeTheFile() {
-					console.log( "openFileFromTerminal: EDITOR.files=" + JSON.stringify(Object.keys(EDITOR.files)) + " closing " + filePath + " ..." );
+					//console.log( "openFileFromTerminal: EDITOR.files=" + JSON.stringify(Object.keys(EDITOR.files)) + " closing " + filePath + " ..." );
 					
 					EDITOR.closeFile(filePath);
 					
