@@ -274,6 +274,12 @@ file.dHeight = scaledCanvas.height;
 		});
 		
 	}
+
+	ImageFile.prototype.getFileSize = function(humanReadable) {
+		// todo: Implement!
+
+		return 0;
+	}
 	
 	
 })();

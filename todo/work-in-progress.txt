@@ -9,6 +9,10 @@ removing console.log debug messages
 
 ---
 
+todo: Issue opening image files!!
+
+---
+
 optimizing startup time
 
 
