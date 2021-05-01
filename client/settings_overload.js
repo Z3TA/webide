@@ -51,7 +51,7 @@
 	
 */
 
-console.log("settings_overload: loaded settings_overload.js");
+//console.log("settings_overload: loaded settings_overload.js");
 
 (function() { // Self calling function to not clutter global scope
 	"use strict";
@@ -71,16 +71,15 @@ console.log("settings_overload: loaded settings_overload.js");
 	// These timers are cleared in the window.onload event...
 	var slowLoad = window.setTimeout( function() {
 		slowBrowser = true;
-		console.warn("settings_overload: browser is slow");
+		//console.warn("settings_overload: browser is slow");
 	}, 100 );
 	
 	var verySlowLoad = window.setTimeout( function() {
 		verySlowBrowser = true;
-		console.warn("settings_overload: Browser is VERY slow");
+		//console.warn("settings_overload: Browser is VERY slow");
 	}, 1000 );
 	
-	console.log("settings_overload: RUNTIME=" + RUNTIME + " browser=" + browser + " process.platform=" + process.platform + 
-	" ligatures=" + ligatures + " window.devicePixelRatio=" + window.devicePixelRatio);
+	//console.log("settings_overload: RUNTIME=" + RUNTIME + " browser=" + browser + " process.platform=" + process.platform + " ligatures=" + ligatures + " window.devicePixelRatio=" + window.devicePixelRatio);
 
 	if(ligatures && (browser == "Chrome" || browser == "Safari" || browser == "Firefox")) {
 		/*
@@ -209,7 +208,7 @@ EDITOR.settings.style.font = "Fira Code";
 			Font's seem to work nice on localhost/127.0.0.1 in IE, but not when using a domain ...
 */
 		
-		debug("Loading nice font ... LCD=" + EDITOR.settings.sub_pixel_antialias + " platform=" + process.platform);
+		debug("Deciding what font to use considering LCD=" + EDITOR.settings.sub_pixel_antialias + " platform=" + process.platform);
 		
 		if(MSWIN) {
 			// Windows fonts are rendered more hard and slightly smaller then on Linux and Mac, so use a more roundish font
@@ -352,18 +351,18 @@ webFontLoading = "DejaVuSansMono";
 			CLIENT.cmdTimeout = CLIENT.pingTimeout * 6;
 
 			if(webFontLoading != "ubuntu") { // Always load the ubuntu font because it will be downloaded by the service worker!
-				console.warn("settings_overload: Not loading font because browser is too slow! webFontLoading=" + webFontLoading);
+				//console.warn("settings_overload: Not loading font because browser is too slow! webFontLoading=" + webFontLoading);
 				return makeGlyphWidthDetector();
 			}
 		}
 
 		if( QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("font") != -1 ) {
-			console.warn("settings_overload: Not loading font because font is in the disable query string!");
+			//console.warn("settings_overload: Not loading font because font is in the disable query string!");
 			return makeGlyphWidthDetector();
 		}
 
 		if(typeof loadFont != "function") {
-			console.log("settings_overload: No web font will be loaded because typeof loadFont = " + (typeof loadFont) + "!");
+			//console.log("settings_overload: No web font will be loaded because typeof loadFont = " + (typeof loadFont) + "!");
 			return makeGlyphWidthDetector();
 		}
 
@@ -384,7 +383,7 @@ webFontLoading = "DejaVuSansMono";
 		if(document.fonts && document.fonts.ready) {
 			document.fonts.ready.then(function () {
 
-				console.log("settings_overload: All fonts ready!");
+				//console.log("settings_overload: All fonts ready!");
 
 				whenFontLoaded();
 
@@ -401,7 +400,7 @@ webFontLoading = "DejaVuSansMono";
 
 			setTimeout(function renderAfterFontLoad() {
 
-				console.log("settings_overload: All fonts ready maybe!?");
+				//console.log("settings_overload: All fonts ready maybe!?");
 
 				whenFontLoaded();
 
@@ -425,10 +424,13 @@ webFontLoading = "DejaVuSansMono";
 
 	function debug(msg) {
 		
+		if(!EDITOR.settings.devMode) return;
+
 		console.log("settings_overload: debug: " + msg);
+		
 		if(! QUERY_STRING["debugFont"] ) return;
 		
-		// Because Edge and Firefox's Developer tools are so freaking slow
+		// We can't access the console on some browsers, to use ye old alert...
 		alert(msg + "\nRUNTIME=" + RUNTIME + "\nBROWSER=" + BROWSER + "\nprocess.platform=" + process.platform + "\n" +
 "MSWIN=" + MSWIN + " LINUX=" + LINUX + " MAC=" + MAC + " MSIE=" + MSIE + "\n" +
 		"ligatures=" + ligatures + "\nwindow.devicePixelRatio=" + window.devicePixelRatio + "\n" +

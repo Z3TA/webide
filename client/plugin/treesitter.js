@@ -31,7 +31,7 @@
 
 
 	if(!QUERY_STRING["treesitter"]) {
-		console.warn("tree-sitter:Not loading TreeSitter parser!");
+		//console.warn("tree-sitter:Not loading TreeSitter parser!");
 		return;
 	}
 

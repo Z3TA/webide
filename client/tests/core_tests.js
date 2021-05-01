@@ -34,7 +34,7 @@
 	
 	if(EDITOR.settings.devMode) {
 		
-		console.log("Binding 'run tests' to Ctrl + Shift + T");
+		//console.log("Binding 'run tests' to Ctrl + Shift + T");
 		var keyT = 84;
 		EDITOR.bindKey({desc: "Run tests", charCode: keyT, fun: EDITOR.runTests, combo: CTRL + SHIFT});
 		

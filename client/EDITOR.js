@@ -3634,11 +3634,11 @@ throw new Error("Second or third argument to EDITOR.on: callback=" + callback + 
 		});
 		
 		if(eventName == "start" && calledStartListeners) {
-			console.warn("Editor's start event has already been fired! " + funName + " will run right away!");
+			//console.warn("Editor's start event has already been fired! " + funName + " will run right away!");
 			options.fun(); 
 		}
 		else if(eventName == "storageReady" && _serverStorage != null) {
-			console.warn("Editor's storageReady event has already been fired! " + funName + " will run right away!");
+			//console.warn("Editor's storageReady event has already been fired! " + funName + " will run right away!");
 			options.fun(_serverStorage);
 		}
 		
@@ -10198,8 +10198,6 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 			return true;
 		});
 	
-		bootstrap();
-	
 		var canvas = EDITOR.canvas = document.getElementById("editorCanvas");
 		
 		EDITOR.initCanvas(canvas);
@@ -10405,6 +10403,9 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 			});
 			
 			UTIL.setCookie("user", login.user, 999);
+
+			bootstrap();
+
 		});
 	
 		CLIENT.on("workerClose", function() {
@@ -13464,7 +13465,7 @@ function getFile(url, callback) {
 			if(callback) {
 				callback(img);
 				callback = null;
-			}
+				}
 			}, 500); // Make the timeout long enough so that the image has a chance to be created. If we call back befor it's created we will instead get an error when trying to paint the image!!
 		}
 	}
@@ -13473,9 +13474,17 @@ function getFile(url, callback) {
 	function bootstrap() {
 		// Make a HTTP get request to the url located in file bootstrap.url to get boostrap info like credentials etc
 		//console.log("Editor version: " + EDITOR.version);
-		EDITOR.readFromDisk(__dirname + "/bootstrap.url", function bootstrap(err, path, url) {
+
+		if(RUNTIME == "nw.js") {
+			var bootstrapFile = __dirname + "/bootstrap.url"
+		}
+		else {
+			var bootstrapFile = EDITOR.user.homeDir + "/bootstrap.url"
+		}
+
+		EDITOR.readFromDisk(bootstrapFile, function bootstrap(err, path, url) {
 			if(err) {
-				console.warn("bootstrap.url: " + err.message);
+				//console.warn("bootstrap: bootstrapFile=" + bootstrapFile + " error: " + err.message);
 				return;
 			}
 			
@@ -13485,7 +13494,7 @@ function getFile(url, callback) {
 			
 			UTIL.httpGet(url, function(err, data) {
 				if(err) {
-					console.warn("bootstrap get: " + err.message);
+					console.warn("bootstrap: get: " + err.message);
 					return;
 				}
 				
@@ -13493,7 +13502,7 @@ function getFile(url, callback) {
 					var json = JSON.parse(data);
 				}
 				catch(err) {
-					console.warn("bootstrap parse: Not valid JSON: " + data);
+					console.warn("bootstrap: parse: Not valid JSON: " + data);
 				}
 				
 				if(json) {

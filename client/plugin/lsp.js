@@ -33,7 +33,7 @@
 	"use strict";
 
 	if(!QUERY_STRING["lsp"]) {
-		console.warn("Not loading language server client!");
+		//console.warn("Not loading language server client!");
 		return;
 	}
 	

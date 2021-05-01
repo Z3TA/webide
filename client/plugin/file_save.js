@@ -393,19 +393,22 @@ var buttonSaveAs = document.createElement("input");
 
 			return saveAfterCheckingIfPathExist(err, path);;
 
-			if(file.savedAs) {
+			/*
+				if(file.savedAs) {
 				saveAfterCheckingIfPathExist(err, path);
-			}
-			else {
+				}
+				else {
 				// The user might have a strict umask, however he/she most likely want to save new file with the same permission as it's folder!?
 				var folderPath = UTIL.getDirectoryFromPath(path);
 				EDITOR.checkFilePermission(folderPath, function(err, mode) {
-					if(err) throw err;
+				if(err) throw err;
 
-					saveAfterCheckingIfPathExist(err, path);
+				saveAfterCheckingIfPathExist(err, path);
 				});
-				
-			}
+
+				}
+			*/
+
 		}
 
 		function saveAfterCheckingIfPathExist(err, path) {
