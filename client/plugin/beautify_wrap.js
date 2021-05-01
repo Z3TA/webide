@@ -94,12 +94,10 @@ if(!isJS(file)) return;
 		if(row < 0) return;
 		if(row >= file.grid.length) return;
 		
-		console.log("beautify: row=" + row + " file.grid[" + row + "].length=" + file.grid[row].length + " EDITOR.view.visibleColumns=" + EDITOR.view.visibleColumns);
+		//console.log("beautify: row=" + row + " file.grid[" + row + "].length=" + file.grid[row].length + " EDITOR.view.visibleColumns=" + EDITOR.view.visibleColumns);
 		
 		if(file.grid[row].length < EDITOR.view.visibleColumns) return;
-		else {
-console.log("beautify: file.grid[row].length=" + file.grid[row].length + " < EDITOR.view.visibleColumns=" + EDITOR.view.visibleColumns);
-		}
+		//else {console.log("beautify: file.grid[row].length=" + file.grid[row].length + " < EDITOR.view.visibleColumns=" + EDITOR.view.visibleColumns);}
 		
 		var scriptMenuItem = EDITOR.ctxMenu.addTemp("Wrap code block", true, wrapJsAt);
 		
@@ -111,17 +109,17 @@ console.log("beautify: file.grid[row].length=" + file.grid[row].length + " < EDI
 	}
 	
 	function wrapJavaScriptTool(file, combo) {
-		console.log("beautify: wrapJavaScriptTool: file=" + file.path);
+		//console.log("beautify: wrapJavaScriptTool: file=" + file.path);
 		var allowDefault = jsWrap(file, file.caret.row);
 		if(allowDefault) return false;
 		else return true; // Prevents other wrap tools
 	}
 	
 	function jsWrap(file, initRow) {
-		console.log("beautify: jsWrap: file=" + file.path);
+		//console.log("beautify: jsWrap: file=" + file.path);
 
 		if(!isJS(file)) {
-			console.log("beautify: Not a JavaScript file: " + file.path);
+			//console.log("beautify: Not a JavaScript file: " + file.path);
 			return true;
 		}
 		
@@ -129,9 +127,8 @@ console.log("beautify: file.grid[row].length=" + file.grid[row].length + " < EDI
 		var startIndentation = file.grid[startRow].indentation;
 		for(var row = startRow; row < file.grid.length; row++) {
 			if(file.grid[row].length == 0 && file.grid[row].indentation == startIndentation) break;
-			else {
-				console.log("beautify: jsWrap: startRow=" + startRow + " including row=" + row);
-			}
+			//else {console.log("beautify: jsWrap: startRow=" + startRow + " including row=" + row);}
+
 		}
 		var endRow = row-1;
 		
@@ -142,7 +139,7 @@ console.log("beautify: file.grid[row].length=" + file.grid[row].length + " < EDI
 	
 	function wrap(file, startRow, endRow) {
 		
-		console.log("beautify: wrap: startRow=" + startRow + " endRow=" + endRow);
+		//console.log("beautify: wrap: startRow=" + startRow + " endRow=" + endRow);
 		
 		var settings = {
 			indent_size: 0, // file.indentation.length,
@@ -166,16 +163,16 @@ console.log("beautify: file.grid[row].length=" + file.grid[row].length + " < EDI
 		var startIndex = file.grid[startRow].startIndex;
 		
 		if(endRow == file.grid.length-1) {
-			console.log("beautify: wrap: endRow=" + endRow + " on last row! text=" + file.rowText(endRow));
+			//console.log("beautify: wrap: endRow=" + endRow + " on last row! text=" + file.rowText(endRow));
 			var endIndex = file.text.length-1;
 		}
 		else if(file.grid[endRow].length == 0) {
 			throw new Error("endRow=" + endRow + " can not be on an empty row!");
-			console.log("beautify: wrap: endRow=" + endRow + " on empty row!");
+			//console.log("beautify: wrap: endRow=" + endRow + " on empty row!");
 			endIndex = file.grid[endRow].startIndex;
 		}
 		else {
-			console.log("beautify: wrap: endRow=" + endRow + " on a row with text=" + file.rowText(endRow));
+			//console.log("beautify: wrap: endRow=" + endRow + " on a row with text=" + file.rowText(endRow));
 			endIndex = file.grid[endRow][file.grid[endRow].length-1].index;
 		}
 		
@@ -191,18 +188,18 @@ console.log("beautify: file.grid[row].length=" + file.grid[row].length + " < EDI
 				return;
 			}
 			
-			console.log("beautify: wrap: before:\n" + text);
+			//console.log("beautify: wrap: before:\n" + text);
 			
 			if(isHTML(file)) {
-				console.log("beautify: wrap: using html_beautify for file.path=" + file.path)
+				//console.log("beautify: wrap: using html_beautify for file.path=" + file.path)
 				text = html_beautify(text, settings);
 			}
 			else if(isJS(file)) {
-				console.log("beautify: wrap: using js_beautify for file.path=" + file.path)
+				//console.log("beautify: wrap: using js_beautify for file.path=" + file.path)
 				text = js_beautify(text, settings);
 			}
 			
-			console.log("beautify: wrap: after:\n" + text);
+			//console.log("beautify: wrap: after:\n" + text);
 			
 			file.moveCaretToIndex(startIndex);
 			file.deleteTextRange(startIndex, endIndex);
@@ -239,7 +236,7 @@ console.log("beautify: file.grid[row].length=" + file.grid[row].length + " < EDI
 				return;
 			}
 			
-			console.log("beautify: pasteBeautified: before:\n" + text);
+			//console.log("beautify: pasteBeautified: before:\n" + text);
 			
 			var settings = {
 				indent_size: 0, // file.indentation.length,
@@ -252,18 +249,16 @@ console.log("beautify: file.grid[row].length=" + file.grid[row].length + " < EDI
 			};
 			
 			if(isHTML(file)) {
-				console.log("beautify: pasteBeautified: using html_beautify for file.path=" + file.path)
+				//console.log("beautify: pasteBeautified: using html_beautify for file.path=" + file.path)
 				text = html_beautify(text, settings);
 			}
 			else if(isJS(file)) {
-				console.log("beautify: pasteBeautified: using js_beautify for file.path=" + file.path)
+				//console.log("beautify: pasteBeautified: using js_beautify for file.path=" + file.path)
 				text = js_beautify(text, settings);
 			}
-			else {
-				console.warn("beautify: pasteBeautified: File type not supported: " + file.path);
-			}
+			//else {console.warn("beautify: pasteBeautified: File type not supported: " + file.path);}
 			
-			console.log("beautify: pasteBeautified: after:\n" + text);
+			//console.log("beautify: pasteBeautified: after:\n" + text);
 			
 			file.insertText(text);
 			
@@ -306,23 +301,23 @@ alertBox("Failed to load dependencies: " + err.message);
 			
 			var text = file.text;
 			
-			console.log("beautify: jsSettings=" + JSON.stringify(jsSettings, null, 2));
+			//console.log("beautify: jsSettings=" + JSON.stringify(jsSettings, null, 2));
 			
-			console.log("beautify: before:\n" + text);
+			//console.log("beautify: before:\n" + text);
 			
 			// html_beautify and js_beautify functions are inserted to global scope by beautify.js
 			
 			if(isHTML(file)) {
-				console.log("beautify: using html_beautify for file.path=" + file.path)
+				//console.log("beautify: using html_beautify for file.path=" + file.path)
 				text = html_beautify(text, jsSettings);
 			}
 			else if(isJS(file)) {
-				console.log("beautify: using js_beautify for file.path=" + file.path)
+				//console.log("beautify: using js_beautify for file.path=" + file.path)
 text = js_beautify(text, jsSettings);
 			}
 			else return alertBox("Unable to js-beautify ." + UTIL.getFileExtension(file.path) + " file types!");
 			
-			console.log("beautify: after:\n" + text);
+			//console.log("beautify: after:\n" + text);
 			
 			file.reload(text);
 			

@@ -104,7 +104,7 @@ file.moveCaretLeft();
 		var word = "";
 		for(var i=col-1; i>-1; i--) {
 			char = file.grid[row][i].char;
-			console.log("suggestBrackets: i=" + i + " char=" + char + " pL=" + pL + " pR=" + pR + "");
+			//console.log("suggestBrackets: i=" + i + " char=" + char + " pL=" + pL + " pR=" + pR + "");
 			if(pL==pR && char==".") return true;
 			
 			if(pL==pR) {
@@ -122,7 +122,7 @@ file.moveCaretLeft();
 			else if(char==")") pR++;
 		}
 		
-		console.log("suggestBrackets: word=" + word);
+		//console.log("suggestBrackets: word=" + word);
 		
 		if(!reKeywords.test(word)) return true;
 		
@@ -154,7 +154,7 @@ file.moveCaretLeft();
 		var left = Math.floor(EDITOR.settings.leftMargin + (col + colAdjustment + ((file.grid[row].indentation) * EDITOR.settings.tabSpace) - file.startColumn) * EDITOR.settings.gridWidth);
 		var middle = top + Math.floor(EDITOR.settings.gridHeight/2);
 		
-		console.log("suggestBrackets: Rendering on left=" + left + " middle=" + middle);
+		//console.log("suggestBrackets: Rendering on left=" + left + " middle=" + middle);
 		
 		return function renderBracketSuggestion(ctx) {
 			

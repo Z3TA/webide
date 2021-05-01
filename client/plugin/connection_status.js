@@ -7,7 +7,7 @@
 	var enabled = false;
 	
 if(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("connectionStatus") != -1) {
-console.warn("Connection status disabled via query string!");
+		//console.warn("Connection status disabled via query string!");
 return;
 }
 
@@ -19,7 +19,7 @@ return;
 			
 			EDITOR.loadSettings("show_ping", enabled, function connectionStatusSettingsLoaded(setting) {
 				
-				console.log("connectionStatus: connectionStatusSettingsLoaded: setting=" + setting);
+				//console.log("connectionStatus: connectionStatusSettingsLoaded: setting=" + setting);
 				
 enabled = !!setting;
 
@@ -45,7 +45,7 @@ disable();
 
 	function enable() {
 		
-		console.log("connectionStatus: enable!");
+		//console.log("connectionStatus: enable!");
 		
 		EDITOR.addRender(renderConnectionStatus, 4900);
 		
@@ -61,7 +61,7 @@ disable();
 	}
 	
 	function disable() {
-		console.log("connectionStatus: disable!");
+		//console.log("connectionStatus: disable!");
 		
 		CLIENT.removeEvent("pingChange", pingChange);
 		CLIENT.removeEvent("pingTimeout", pingTimeout);
@@ -79,7 +79,7 @@ disable();
 	function toggleNetworkStatus() {
 		enabled = !enabled;
 		
-		console.log("connectionStatus: toggleNetworkStatus: enabled=" + enabled + " Calling EDITOR.saveSettings...");
+		//console.log("connectionStatus: toggleNetworkStatus: enabled=" + enabled + " Calling EDITOR.saveSettings...");
 		
 		EDITOR.saveSettings("show_ping", enabled);
 		
@@ -138,9 +138,7 @@ disable();
 			var bgColor = "red";
 			var textColor = "white";
 		}
-		else {
-			console.warn("connectionStatus: renderConnectionStatus: CLIENT.connected=" + CLIENT.connected + " CLIENT.ping=" + CLIENT.ping + " huh???");
-		}
+		//else {console.warn("connectionStatus: renderConnectionStatus: CLIENT.connected=" + CLIENT.connected + " CLIENT.ping=" + CLIENT.ping + " huh???");}
 		
 		var width = Math.ceil(ctx.measureText(text).width);
 		var height = 20;
@@ -150,7 +148,7 @@ disable();
 		
 		var lastX = EDITOR.canvas.width - lastWidth - rightPadding;
 		
-		console.log("connectionStatus: renderConnectionStatus: text=" + text + " x=" + x + " y=" + y + " CLIENT.connected=" + CLIENT.connected + " CLIENT.ping=" + CLIENT.ping);
+		//console.log("connectionStatus: renderConnectionStatus: text=" + text + " x=" + x + " y=" + y + " CLIENT.connected=" + CLIENT.connected + " CLIENT.ping=" + CLIENT.ping);
 		
 		if(text == undefined) return;
 		

@@ -372,7 +372,7 @@ alertBox("No audio data!");
 					if(callback) callback(err);
 					return alertBox("Failed to create folder: " + folder + " Error: " + err.message);
 				}
-				console.log("saveAudio: Created path: " + folder);
+				//console.log("saveAudio: Created path: " + folder);
 				EDITOR.saveToDisk(audioFilePath, base64AudioMessage, false, "base64", function(err, path, hash) {
 					if(err) {
 alertBox("Failed to save audio data! " + err.message);
@@ -381,7 +381,7 @@ alertBox("Failed to save audio data! " + err.message);
 					}
 					loadedAudioFile = path;
 					
-					console.log("saveAudio: Saved audio in path=" + path);
+					//console.log("saveAudio: Saved audio in path=" + path);
 					
 					if(callback) callback(null, path);
 					
@@ -496,8 +496,8 @@ throw new Error("recordInfo.startFile=" + recordInfo.startFile + " recordInfo=" 
 		// Stop the audio stream
 		if(mediaRecorder) {
 		mediaRecorder.stop();
-		console.log(mediaRecorder.state);
-		console.log("recorder stopped");
+			//console.log(mediaRecorder.state);
+			//console.log("recorder stopped");
 		// mediaRecorder.requestData();
 		}
 		
@@ -606,7 +606,7 @@ throw new Error("recordInfo.startFile=" + recordInfo.startFile + " recordInfo=" 
 		}
 		
 		if(matchedKeyBindings.length == 0) {
-			console.log("recordKeyCombo: Did not find any key binding for character=" + character + " and combo=" + JSON.stringify(combo));
+			//console.log("recordKeyCombo: Did not find any key binding for character=" + character + " and combo=" + JSON.stringify(combo));
 			return;
 		}
 		
@@ -617,7 +617,7 @@ throw new Error("recordInfo.startFile=" + recordInfo.startFile + " recordInfo=" 
 			keyBindings: matchedKeyBindings
 		};
 		
-console.log("recordKeyCombo: " + JSON.stringify(keyComboEvent, null, 2));
+		//console.log("recordKeyCombo: " + JSON.stringify(keyComboEvent, null, 2));
 
 		record.push({date: (new Date()).getTime(), keyCombo: keyComboEvent});
 	}
@@ -636,7 +636,7 @@ console.log("recordKeyCombo: " + JSON.stringify(keyComboEvent, null, 2));
 		if(changeEvents.length > 0) {
 		var currentOrder = fileChangeEventOrderCounters[file.path];
 		var arr;
-		console.log("mousePlayback: order=" + order + " currentOrder=" + currentOrder + " fileChangeEvent=" + JSON.stringify(fileChangeEvent));
+			//console.log("mousePlayback: order=" + order + " currentOrder=" + currentOrder + " fileChangeEvent=" + JSON.stringify(fileChangeEvent));
 		while(order++ < currentOrder) {
 			
 			arr = changeEvents[order];
@@ -650,7 +650,7 @@ console.log("recordKeyCombo: " + JSON.stringify(keyComboEvent, null, 2));
 				transformBackwards(fileChangeEvent, arr[i]);
 			}
 			
-			console.log("mousePlayback: Loop: order=" + order + " currentOrder=" + currentOrder + " fileChangeEvent=" + JSON.stringify(fileChangeEvent));
+				//console.log("mousePlayback: Loop: order=" + order + " currentOrder=" + currentOrder + " fileChangeEvent=" + JSON.stringify(fileChangeEvent));
 		}
 		}
 		
@@ -705,7 +705,7 @@ console.log("recordKeyCombo: " + JSON.stringify(keyComboEvent, null, 2));
 		
 		var descriptions = [];
 		
-		console.log("playbackKeyCombo: " + JSON.stringify(keyComboEvent, null, 2));
+		//console.log("playbackKeyCombo: " + JSON.stringify(keyComboEvent, null, 2));
 		
 		var filePath = playBackFile(keyComboEvent.filePath);
 		if(!EDITOR.files.hasOwnProperty(filePath)) {
@@ -782,7 +782,7 @@ setTimeout(function() {
 		else if(keyPressEvent.target.name) {
 			var nodes = document.getElementsByName(keyPressEvent.target.name);
 			if(nodes.length > 1) {
-console.warn("More then one item with with name=" + keyPressEvent.target.name, nodes);
+				//console.warn("More then one item with with name=" + keyPressEvent.target.name, nodes);
 				alertBox("More then one item with with name=" + keyPressEvent.target.name);
 				return;
 			}
@@ -792,7 +792,7 @@ console.warn("More then one item with with name=" + keyPressEvent.target.name, n
 		else if(keyPressEvent.target.tag) {
 			var nodes = document.getElementsByTagName(keyPressEvent.target.tag);
 			if(nodes.length > 1) {
-				console.warn("More then one item with with name=" + keyPressEvent.target.name, nodes);
+				//console.warn("More then one item with with name=" + keyPressEvent.target.name, nodes);
 				alertBox("More then one item with with name=" + keyPressEvent.target.name);
 				return;
 			}
@@ -836,18 +836,18 @@ console.warn("More then one item with with name=" + keyPressEvent.target.name, n
 		visualize(stream);
 		
 		mediaRecorder.start();
-		console.log(mediaRecorder.state);
-		console.log("recorder started");
+		//console.log(mediaRecorder.state);
+		//console.log("recorder started");
 		
 		mediaRecorder.onstop = function(e) {
-			console.log("data available after MediaRecorder.stop() called.");
+			//console.log("data available after MediaRecorder.stop() called.");
 			
 			audioPlayer.controls = true;
 			audioBlob = new Blob(chunks, { 'type' : 'audio/ogg; codecs=opus' });
 			chunks = [];
 			var audioURL = window.URL.createObjectURL(audioBlob);
 			audioPlayer.src = audioURL;
-			console.log("recorder stopped");
+			//console.log("recorder stopped");
 			
 		}
 		
@@ -924,7 +924,7 @@ console.warn("More then one item with with name=" + keyPressEvent.target.name, n
 			var grid = file.rowColFromMouse(mouseX, mouseY);
 			
 			// Index is needed for the transform
-			console.log("recordMouseMovement: row=" + grid.row + " col=" + grid.col);
+			//console.log("recordMouseMovement: row=" + grid.row + " col=" + grid.col);
 			if(grid.row >= 0 && file.grid.length-1 >= grid.row) {
 				if(grid.col >= 0 && file.grid[grid.row].length-1 >= grid.col) {
 					var index = file.getIndexFromRowCol(grid.row, grid.col);
@@ -976,7 +976,7 @@ console.warn("More then one item with with name=" + keyPressEvent.target.name, n
 	
 	function recordMouseClick(mouseX, mouseY, caret, mouseDirection, button, target, keyboardCombo, mouseDownEvent) {
 		
-		console.log("recordMouseClick: button=" + button + " mouseDirection=" + mouseDirection + "");
+		//console.log("recordMouseClick: button=" + button + " mouseDirection=" + mouseDirection + "");
 		
 		if(target.className == "fileCanvas") {
 			var file = EDITOR.currentFile;
@@ -989,7 +989,7 @@ console.warn("More then one item with with name=" + keyPressEvent.target.name, n
 				type: "click"
 			};
 			
-			console.log("recordMouseClick: row=" +  grid.row + " col=" +  grid.col);
+			//console.log("recordMouseClick: row=" +  grid.row + " col=" +  grid.col);
 			
 			recordDeselect(file, file.selected);
 			
@@ -1006,10 +1006,10 @@ console.warn("More then one item with with name=" + keyPressEvent.target.name, n
 					type: "click"
 				};
 				
-				console.log("recordMouseClick: mouseTarget=" + JSON.stringify(mouseTarget));
+				//console.log("recordMouseClick: mouseTarget=" + JSON.stringify(mouseTarget));
 			}
 			else if(target.id != "startOrStopRecordningButton") {
-				console.warn("Failed to find a suitable target for mouse click: target:", target)
+				//console.warn("Failed to find a suitable target for mouse click: target:", target)
 				alertBox("Failed to find a suitable target for mouse click: id=" + target.id + " tagName=" + target.tagName + " type=" + target.type + " value=" + target.value + " innerText=" + target.innerText);
 			}
 		}
@@ -1026,7 +1026,7 @@ console.warn("More then one item with with name=" + keyPressEvent.target.name, n
 		else recursion++;
 		
 		if(!target) {
-			console.log("findMouseTarget: target=" + target + " recursion=" + recursion + " last=" + JSON.stringify(last) + " (no more parent nodes to check)");
+			//console.log("findMouseTarget: target=" + target + " recursion=" + recursion + " last=" + JSON.stringify(last) + " (no more parent nodes to check)");
 			
 			if(last) return last;
 			else return null;
@@ -1035,7 +1035,7 @@ console.warn("More then one item with with name=" + keyPressEvent.target.name, n
 		if(type == "move") {
 			// No need to record same target over and over
 			if(target == lastRecordedMouseTarget) {
-				console.log("findMouseTarget: target=", target, " is same as lastRecordedMouseTarget");
+				//console.log("findMouseTarget: target=", target, " is same as lastRecordedMouseTarget");
 				return null;
 			}
 			
@@ -1043,7 +1043,7 @@ console.warn("More then one item with with name=" + keyPressEvent.target.name, n
 			var allChildren = target.getElementsByTagName("*");
 			for(var i=0; i<allChildren.length; i++) {
 				if(allChildren[i] == lastRecordedMouseTarget) {
-					console.log("findMouseTarget: target=", target, " is a parent/grandparent for lastRecordedMouseTarget=", lastRecordedMouseTarget);
+					//console.log("findMouseTarget: target=", target, " is a parent/grandparent for lastRecordedMouseTarget=", lastRecordedMouseTarget);
 					return null;
 				}
 			}
@@ -1056,26 +1056,26 @@ console.warn("More then one item with with name=" + keyPressEvent.target.name, n
 		var tag = target.tagName;
 		
 		if(tag == "HTML" || tag == "BODY") {
-			console.log("findMouseTarget: Giving up because tag=" + tag);
+			//console.log("findMouseTarget: Giving up because tag=" + tag);
 return null;
 		}
 		
 		if(id) {
 			if(targetsToBeIgnored.indexOf(id) != -1) {
-				console.log("findMouseTarget: Ignoring id=" + id);
+				//console.log("findMouseTarget: Ignoring id=" + id);
 				return findMouseTarget(target.parentNode, type, recursion, last);
 			}
 			
 			for(var i=0; i<targetsToBeIgnoredRegexp.length; i++) {
 				if(id.match( targetsToBeIgnoredRegexp[i] )) {
-					console.log("findMouseTarget: Regexp ignoring id=" + id);
+					//console.log("findMouseTarget: Regexp ignoring id=" + id);
 					return findMouseTarget(target.parentNode, type, recursion, last);
 				}
 			}
 			
 			mouseTarget.id = id;
 			mouseTarget.tag = tag; // Save tag for debugging
-			console.log("findMouseTarget: Found id=" + id + " with tag=" + tag);
+			//console.log("findMouseTarget: Found id=" + id + " with tag=" + tag);
 return mouseTarget;
 		}
 		
@@ -1092,7 +1092,7 @@ return mouseTarget;
 			if(elementsWithText == 1) {
 				mouseTarget.tag = tag;
 				mouseTarget.text = innerText;
-				console.log("findMouseTarget: Found tag=" + tag + " innerText=" + innerText + " type=" + target.type);
+				//console.log("findMouseTarget: Found tag=" + tag + " innerText=" + innerText + " type=" + target.type);
 				// We prefer id over tag and innerText, so keep looking until we find and id, or use last
 				if(type == "move") return mouseTarget; // Prefer upper most element when recordning mouse movements
 				else if(type == "click") {
@@ -1118,7 +1118,7 @@ return mouseTarget;
 			return mouseTarget;
 		}
 		
-		console.log("findMouseTarget: Not suitable id=" + id + " tag=" + tag + " innerText=" + innerText + " value=" + target.value);
+		//console.log("findMouseTarget: Not suitable id=" + id + " tag=" + tag + " innerText=" + innerText + " value=" + target.value);
 		
 		// Does it have any click/mouseover/mousedown handlers ?
 		
@@ -1160,7 +1160,7 @@ recordInfo.files[file.path] = {
 			var data = JSON.parse(file.text);
 		}
 		catch(err) {
-			console.warn("Parse failed: " + err.message);
+			//console.warn("Parse failed: " + err.message);
 			return null;
 		}
 		
@@ -1211,7 +1211,7 @@ var file = fileOrData;
 			file = EDITOR.currentFile;
 		}
 		
-		console.log("initPlayback!");
+		//console.log("initPlayback!");
 		
 		// Load playback record if it's not yet loaded
 		if(!recordInfo) loadRecord(file);
@@ -1299,23 +1299,24 @@ var file = fileOrData;
 		function allFilesResetMaybe() {
 			
 			if(filesReset == filesToReset) callback(null);
-			else console.log("Done resetting " + filesReset + " of " + filesToReset + " files");
+			//else console.log("Done resetting " + filesReset + " of " + filesToReset + " files");
+
 		}
 	}
 	
 	function loadAudio(audioPlayer, audioFilePath, callback) {
-		console.log("Loading audio file " + audioFilePath + " ...");
+		//console.log("Loading audio file " + audioFilePath + " ...");
 		
 		if(audioFilePath.match(/^https?:/i)) {
 			audioPlayer.src = audioFilePath;
 			
 			// The file loads, but audioPlayer.onloadeddata doesn't fire ...
 			
-			console.log("Loading audio from web url:" + audioFilePath + " audioPlayer.readyState=" + audioPlayer.readyState);
+			//console.log("Loading audio from web url:" + audioFilePath + " audioPlayer.readyState=" + audioPlayer.readyState);
 			
 			var wait = function wait() {
 				var waitInterval = setInterval(function() {
-					console.log("audioPlayer.readyState=" + audioPlayer.readyState);
+					//console.log("audioPlayer.readyState=" + audioPlayer.readyState);
 					
 					var HAVE_ENOUGH_DATA = 4;
 					
@@ -1332,7 +1333,7 @@ var file = fileOrData;
 		}
 		else {
 			
-			console.log("Loading audio from disk:" + audioFilePath + " audioPlayer.readyState=" + audioPlayer.readyState);
+			//console.log("Loading audio from disk:" + audioFilePath + " audioPlayer.readyState=" + audioPlayer.readyState);
 			
 			audioPlayer.onloadeddata = function audioLoadedEvent() {
 				done(null);
@@ -1347,7 +1348,7 @@ var file = fileOrData;
 				
 				var audioData = data;
 				
-				console.log("Audio file loaded! path=" + path + " audioData=" + (typeof audioData) + " isAraray?" + Array.isArray(audioData) + " data.length=" + audioData.length);
+				//console.log("Audio file loaded! path=" + path + " audioData=" + (typeof audioData) + " isAraray?" + Array.isArray(audioData) + " data.length=" + audioData.length);
 				
 				if(BROWSER == "Chrome") {
 					var audioBlob = base64toBlob(audioData, 'audio/ogg; codecs=opus')
@@ -1427,7 +1428,7 @@ var file = fileOrData;
 		
 		var alreadyStarted = false;
 		
-		console.log("startPlayback!");
+		//console.log("startPlayback!");
 		
 		var audioLoadedSuccessfully = false;
 		
@@ -1438,7 +1439,7 @@ var file = fileOrData;
 		
 isPlaying = true;
 
-		console.log("audioPlayer.readyState=" + audioPlayer.readyState);
+		//console.log("audioPlayer.readyState=" + audioPlayer.readyState);
 		if(recordInfo.audioPath && loadedAudioFile != recordInfo.audioPath) {
 			loadAudio(audioPlayer, recordInfo.audioPath, function(err) {
 				if(err) alertBox(err);
@@ -1448,7 +1449,7 @@ isPlaying = true;
 			});
 		}
 		else {
-			console.warn("No audio record found recordInfo.audioPath=" + recordInfo.audioPath + " or audio already loaded loadedAudioFile=" + loadedAudioFile);
+			//console.warn("No audio record found recordInfo.audioPath=" + recordInfo.audioPath + " or audio already loaded loadedAudioFile=" + loadedAudioFile);
 			init();
 		}
 		function init() {
@@ -1499,7 +1500,7 @@ isPlaying = true;
 		
 		recordTimeline.max = Math.ceil(totalRecordTime / (1000/playbackFPS)) + 1;
 		
-		console.log("setTimelineMax: recordInfo.startDate=" + recordInfo.startDate + " totalRecordTime=" + totalRecordTime + " totalRecordTimeAudio=" + totalRecordTimeAudio + " totalRecordTimeRecord=" + totalRecordTimeRecord + " record.length=" + record.length + " recordTimeline.max=" + recordTimeline.max + " playbackFPS=" + playbackFPS + "");
+		//console.log("setTimelineMax: recordInfo.startDate=" + recordInfo.startDate + " totalRecordTime=" + totalRecordTime + " totalRecordTimeAudio=" + totalRecordTimeAudio + " totalRecordTimeRecord=" + totalRecordTimeRecord + " record.length=" + record.length + " recordTimeline.max=" + recordTimeline.max + " playbackFPS=" + playbackFPS + "");
 		
 		if(isNaN(recordTimeline.max) || !UTIL.isNumeric(recordTimeline.max) || !isFinite(parseInt(recordTimeline.max))) {
 			throw new Error("recordTimeline.max=" + recordTimeline.max + " playbackFPS=" + playbackFPS + " totalRecordTimeAudio=" + totalRecordTimeAudio + " totalRecordTimeRecord=" + totalRecordTimeRecord + " lastItem.date=" + lastItem.date + " recordInfo.startDate=" + recordInfo.startDate);
@@ -1517,7 +1518,7 @@ isPlaying = true;
 			console.error(err);
 		}
 		
-		console.log("seekAudio: recordTimeline.value=" + recordTimeline.value + " playbackFPS=" + playbackFPS + " audioPlayer.currentTime=" + audioPlayer.currentTime + "s");
+		//console.log("seekAudio: recordTimeline.value=" + recordTimeline.value + " playbackFPS=" + playbackFPS + " audioPlayer.currentTime=" + audioPlayer.currentTime + "s");
 		
 	}
 	
@@ -1540,7 +1541,7 @@ isPlaying = true;
 		
 		var file, filePath;
 		
-		console.log("recordInfo.startDate=" + recordInfo.startDate + " record.length=" + record.length + " record[" + lastRecordItem + "+1].date=" + record[lastRecordItem+1].date + " diff=" + (record[lastRecordItem+1].date-recordInfo.startDate) + " time-line=" + (recordTimeline.value*1000/playbackFPS) + " recordTimeline.max=" + recordTimeline.max);
+		//console.log("recordInfo.startDate=" + recordInfo.startDate + " record.length=" + record.length + " record[" + lastRecordItem + "+1].date=" + record[lastRecordItem+1].date + " diff=" + (record[lastRecordItem+1].date-recordInfo.startDate) + " time-line=" + (recordTimeline.value*1000/playbackFPS) + " recordTimeline.max=" + recordTimeline.max);
 		
 		// Interval time is 1000/playbackFPS
 		// recordTimeline.value is incremented every 1000/playbackFPS ms
@@ -1614,13 +1615,13 @@ isPlaying = true;
 		if(!EDITOR.files.hasOwnProperty(filePath)) {
 			//alertBox("File closed ? " + filePath);
 			
-			console.warn("showPlaybackFile: Unable to show playback originalFilePath=" + originalFilePath + " because it can not be found in opened files!");
+			//console.warn("showPlaybackFile: Unable to show playback originalFilePath=" + originalFilePath + " because it can not be found in opened files!");
 			
 			stopPlayback();
 			return;
 		}
 		var file = EDITOR.files[filePath];
-		console.log("showPlaybackFile: Showing file.path=" + file.path);
+		//console.log("showPlaybackFile: Showing file.path=" + file.path);
 		EDITOR.showFile(file);
 	}
 	
@@ -1631,7 +1632,7 @@ isPlaying = true;
 		
 		if(UTIL.isInFilePath(filePath, playbackDir)) {
 			// Note: The recorder might move the mouse over /foo/bar, but when playing back
-console.warn("Path already in playback folder: filePath=" + filePath);
+			//console.warn("Path already in playback folder: filePath=" + filePath);
 			return filePath;
 		}
 		
@@ -1644,7 +1645,7 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 		var col = mouseEvent.col;
 		var target = mouseEvent.target;
 		
-		console.log("mousePlayback: row=" + row + " col=" + col + " target=" + JSON.stringify(target));
+		//console.log("mousePlayback: row=" + row + " col=" + col + " target=" + JSON.stringify(target));
 		
 		// Create a fake-mouse element if one does not already exist, and show it if it's hidden
 		// Don't bother checking if there actually are any mouse playback events
@@ -1682,7 +1683,7 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 				col: col
 			}
 			var arr;
-			console.log("mousePlayback: order=" + order + " currentOrder=" + currentOrder + " changeEvents.length=" + changeEvents.length + "  fileChangeEvent=" + JSON.stringify(fileChangeEvent));
+				//console.log("mousePlayback: order=" + order + " currentOrder=" + currentOrder + " changeEvents.length=" + changeEvents.length + "  fileChangeEvent=" + JSON.stringify(fileChangeEvent));
 			while(order++ < currentOrder) {
 				
 				arr = changeEvents[order];
@@ -1696,16 +1697,15 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 					transformBackwards(fileChangeEvent, arr[i]);
 				}
 				
-				console.log("mousePlayback: Loop: order=" + order + " currentOrder=" + currentOrder + " fileChangeEvent=" + JSON.stringify(fileChangeEvent));
+					//console.log("mousePlayback: Loop: order=" + order + " currentOrder=" + currentOrder + " fileChangeEvent=" + JSON.stringify(fileChangeEvent));
 			}
 				
 				// Transformed position
 				row = fileChangeEvent.row;
 				col = fileChangeEvent.col;
 				
-				if(row != mouseEvent.row || col != mouseEvent.col) {
-					console.log("mousePlayback: Transformed from row=" + mouseEvent.row + " to " + row + " and from col=" + mouseEvent.col + " to " + col + "");
-				}
+				//if(row != mouseEvent.row || col != mouseEvent.col) {console.log("mousePlayback: Transformed from row=" + mouseEvent.row + " to " + row + " and from col=" + mouseEvent.col + " to " + col + "");}
+
 			}
 			
 			
@@ -1716,7 +1716,7 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 			var left = EDITOR.settings.leftMargin + Math.max(0, indentationWidth - file.startColumn + col) * EDITOR.settings.gridWidth;
 			var rect = EDITOR.canvas.getBoundingClientRect();
 			
-			console.log("mousePlayback: indentation=" + indentation + " indentationWidth=" + indentationWidth + " top=" + top + " middle=" + middle + " left=" + left + " rect=" + JSON.stringify(rect) + "  ");
+			//console.log("mousePlayback: indentation=" + indentation + " indentationWidth=" + indentationWidth + " top=" + top + " middle=" + middle + " left=" + left + " rect=" + JSON.stringify(rect) + "  ");
 			
 			var mouseX = Math.round(rect.left + left + EDITOR.settings.gridWidth/2);
 			var mouseY = rect.top + middle;
@@ -1724,8 +1724,12 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 		}
 		else if(target) {
 			var targetElement = getMouseTargetElement(target);
-			if(!targetElement) return console.warn("When playing back mouse event.type=" + mouseEvent.type + " was unable to locate target=" + JSON.stringify(target));
-			
+
+			if(!targetElement) {
+				//console.warn("When playing back mouse event.type=" + mouseEvent.type + " was unable to locate target=" + JSON.stringify(target));
+				return;
+			}
+
 			var rect = targetElement.getBoundingClientRect();
 			
 			var mouseX = Math.round(rect.left + targetElement.offsetWidth/2);
@@ -1820,7 +1824,7 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 		
 		if(elementsWithText == 1) return targetElement;
 		else if(elementsWithText > 1) {
-			console.warn("There exist more then one element with tag=" + target.tag + " and text=" + target.text);
+			//console.warn("There exist more then one element with tag=" + target.tag + " and text=" + target.text);
 			return targetElement;
 		}
 		
@@ -1843,15 +1847,15 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 			}
 			else throw new Error("Unable to create a new event! Event and document.createEvent are not supported by " + BROWSER);
 			
-			console.log("Dispatching to el=", el, " eventName=" + eventName + " evObj=", evObj);
+			//console.log("Dispatching to el=", el, " eventName=" + eventName + " evObj=", evObj);
 			el.dispatchEvent( evObj );
 		}
 		else if(typeof el.fireEvent == "function") {
-			console.log("Firing onname=" + onname + " on el=", el);
+			//console.log("Firing onname=" + onname + " on el=", el);
 			el.fireEvent( onname );
 		}
 		else if(el.hasOwnProperty(onname)) {
-			console.log("Calling onname=" + onname + " on el=", el);
+			//console.log("Calling onname=" + onname + " on el=", el);
 			el[onname]();
 		}
 		else throw new Error("No means to trigger eventName=" + eventName + " on el=", el, " in BROWSER=" + BROWSER);
@@ -1859,7 +1863,7 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 	
 	function mousePlaybackAnimation(newDestX, newDestY, instant) {
 		
-		console.log("mousePlaybackAnimation: newDestX=" + newDestX + " newDestY=" + newDestY + " instant=" + instant)
+		//console.log("mousePlaybackAnimation: newDestX=" + newDestX + " newDestY=" + newDestY + " instant=" + instant)
 		
 		if(instant) {
 			if(!UTIL.isNumeric(newDestX) || !UTIL.isNumeric(newDestY)) throw new Error("mousePlaybackAnimation: newDestX=" + newDestX + " newDestY=" + newDestY + " instant=" + instant);
@@ -1883,7 +1887,7 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 			mousePlaybackPositionX = Math.round(mousePlaybackPositionX + mousePlaybackDeltaX);
 			mousePlaybackPositionY = Math.round(mousePlaybackPositionY + mousePlaybackDeltaY);
 			
-			console.log("mousePlaybackAnimation: mousePlaybackPositionX=" + mousePlaybackPositionX + " mousePlaybackPositionY=" + mousePlaybackPositionY + " mousePlaybackDeltaX=" + mousePlaybackDeltaX + " mousePlaybackDeltaY=" + mousePlaybackDeltaY);
+			//console.log("mousePlaybackAnimation: mousePlaybackPositionX=" + mousePlaybackPositionX + " mousePlaybackPositionY=" + mousePlaybackPositionY + " mousePlaybackDeltaX=" + mousePlaybackDeltaX + " mousePlaybackDeltaY=" + mousePlaybackDeltaY);
 			
 			mousePlaybackCountdown--;
 			
@@ -1913,7 +1917,7 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 	*/
 	
 	function timelineChange(currentValue, oldValue, e) {
-		console.log("timelineChange: currentValue=" + currentValue + " oldValue=" + oldValue + " lastRecordItem=" + lastRecordItem);
+		//console.log("timelineChange: currentValue=" + currentValue + " oldValue=" + oldValue + " lastRecordItem=" + lastRecordItem);
 		
 		if(!recordInfo) return alertBox("A playback record has not been loaded. Try opening a .json record file, or Start recording.");
 		
@@ -2091,7 +2095,7 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 	
 	
 	function callabFileSaved(file) {
-		console.log("callabFileSaved: file.path=" + file.path + " ignoreFileSave=" + ignoreFileSave);
+		//console.log("callabFileSaved: file.path=" + file.path + " ignoreFileSave=" + ignoreFileSave);
 		if(ignoreFileSave == file.path) return true;
 		
 		var fileSaveEvent = {
@@ -2164,7 +2168,7 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 	function collabJoin(json) {
 		// A new client has connected
 		
-		console.log("collabJoin: " + JSON.stringify(json));
+		//console.log("collabJoin: " + JSON.stringify(json));
 		
 		var connectedClientIds = json.connectedClientIds;
 		
@@ -2188,7 +2192,7 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 			
 			var master = connectedClientIds[0]; // The one with the lowest connection-id
 			
-			console.log("master=" + master + " userConnectionId=" + userConnectionId + " connectedClientIds=" + JSON.stringify(connectedClientIds));
+			//console.log("master=" + master + " userConnectionId=" + userConnectionId + " connectedClientIds=" + JSON.stringify(connectedClientIds));
 			
 			if(userConnectionId == master) {
 				for(var path in EDITOR.files) {
@@ -2263,7 +2267,7 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 	function collabLeave(json) {
 		// A client has disconnected
 		
-		console.log("collabLeave: " + JSON.stringify(json));
+		//console.log("collabLeave: " + JSON.stringify(json));
 		
 		var connectedClientIds = json.connectedClientIds;
 		
@@ -2304,7 +2308,7 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 	function collabMoveCaret(file, caret) {
 		
 		if(file.noCollaboration) {
-			console.warn("Not moving caret because collaboration disabled in " + file.path);
+			//console.warn("Not moving caret because collaboration disabled in " + file.path);
 			return;
 		}
 		
@@ -2341,7 +2345,7 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 		if(!collabMode) return true;
 		
 		if(file.noCollaboration) {
-			console.warn("Collaboration disabled in " + file.path);
+			//console.warn("Collaboration disabled in " + file.path);
 			return;
 		}
 		
@@ -2368,18 +2372,18 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 	function collabSelectText(file, selection) {
 		if(!collabMode && !isRecording) return true;
 		if(file.noCollaboration) {
-			console.warn("Record selection: Collaboration disabled in " + file.path);
+			//console.warn("Record selection: Collaboration disabled in " + file.path);
 			return true;
 		}
 		
-		console.log(selection);
+		//console.log(selection);
 		
 		if(!Array.isArray(selection)) {
 			throw new Error("Not an array: " + JSON.stringify(selection));
 		}
 		
 		if(selection.length == 0) {
-			console.warn("Record selection: selection.length=" + selection.length);
+			//console.warn("Record selection: selection.length=" + selection.length);
 			return true;
 		}
 		
@@ -2394,7 +2398,7 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 		};
 		
 		if(lastSelectEvent.filePath == selectEvent.filePath && lastSelectEvent.start == selectEvent.start && lastSelectEvent.end == selectEvent.end) {
-			console.log("Record selection same as lastSelectEvent=" + JSON.stringify(lastSelectEvent));
+			//console.log("Record selection same as lastSelectEvent=" + JSON.stringify(lastSelectEvent));
 			return true;
 		}
 		
@@ -2403,7 +2407,7 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 		if(collabMode) CLIENT.cmd("echo", {eventOrder: ++eventOrder, select: selectEvent});
 		
 		if(isRecording) {
-			console.log("Record selection select: start=" + selectEvent.start + " end=" + selectEvent.end);
+			//console.log("Record selection select: start=" + selectEvent.start + " end=" + selectEvent.end);
 			record.push({date: (new Date()).getTime(), select: selectEvent});
 		}
 		return true;
@@ -2412,11 +2416,11 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 	function recordDeselect(file, selection) {
 		if(!isRecording) return true;
 		if(file.noCollaboration) {
-			console.warn("Collaboration disabled in " + file.path);
+			//console.warn("Collaboration disabled in " + file.path);
 			return;
 		}
 		
-		console.log(selection);
+		//console.log(selection);
 		
 		if(!Array.isArray(selection)) {
 			throw new Error("Not an array: " + JSON.stringify(selection));
@@ -2454,12 +2458,12 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 	function collabFileChange(file, change, text, index, row, col) {
 		if(ignoreFileChange) return true;
 		
-		console.log("fileChangeEvents: " + JSON.stringify(fileChangeEvents, null, 2));
+		//console.log("fileChangeEvents: " + JSON.stringify(fileChangeEvents, null, 2));
 		
-		console.log("collabFileChange: index=" + index + " row=" + row + " col=" + col);
+		//console.log("collabFileChange: index=" + index + " row=" + row + " col=" + col);
 		
 		if(file.noCollaboration) {
-			console.warn("Collaboration disabled in " + file.path);
+			//console.warn("Collaboration disabled in " + file.path);
 			return;
 		}
 		
@@ -2485,29 +2489,29 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 			cId: userConnectionId // The server adds cId, but we also want it in the file change object
 		};
 		
-		console.log("fileChangeEvent.order=" + fileChangeEvent.order);
+		//console.log("fileChangeEvent.order=" + fileChangeEvent.order);
 		
 		if(collabMode) {
 			if(!fileChangeEvents.hasOwnProperty(file.path)) {
-				console.log("before: fileChangeEvents[" + file.path + "]=" + typeof fileChangeEvents[file.path] + " isArray ? " + Array.isArray(fileChangeEvents[file.path]));
+				//console.log("before: fileChangeEvents[" + file.path + "]=" + typeof fileChangeEvents[file.path] + " isArray ? " + Array.isArray(fileChangeEvents[file.path]));
 				fileChangeEvents[file.path] = [];
-				console.log("after: fileChangeEvents[" + file.path + "]=" + typeof fileChangeEvents[file.path] + " isArray ? " + Array.isArray(fileChangeEvents[file.path]));
+				//console.log("after: fileChangeEvents[" + file.path + "]=" + typeof fileChangeEvents[file.path] + " isArray ? " + Array.isArray(fileChangeEvents[file.path]));
 			}
 			
 			if( fileChangeEvents[file.path][fileChangeEvent.order] ) throw new Error("Events for order=" + fileChangeEvent.order + " already exist for file=" + file.path + "\n" + JSON.stringify(fileChangeEvents[file.path][fileChangeEvent.order], null, 2));
 			
 			fileChangeEvents[file.path][fileChangeEvent.order] = [];
 			
-			console.log("A fileChangeEvents[" + file.path + "][" + fileChangeEvent.order + "] = " + JSON.stringify(fileChangeEvents[file.path][fileChangeEvent.order], null, 2));
+			//console.log("A fileChangeEvents[" + file.path + "][" + fileChangeEvent.order + "] = " + JSON.stringify(fileChangeEvents[file.path][fileChangeEvent.order], null, 2));
 			
 			if(fileChangeEvent == undefined) throw new Error("fileChangeEvent=" + fileChangeEvent);
 			
 			// should we ?
 			//fileChangeEvents[file.path][fileChangeEvent.order].push(fileChangeEvent);
 			
-			console.log("B fileChangeEvents[" + file.path + "][" + fileChangeEvent.order + "] = " + JSON.stringify(fileChangeEvents[file.path][fileChangeEvent.order], null, 2));
+			//console.log("B fileChangeEvents[" + file.path + "][" + fileChangeEvent.order + "] = " + JSON.stringify(fileChangeEvents[file.path][fileChangeEvent.order], null, 2));
 			
-			console.log("Sending fileChangeEvent=" + JSON.stringify(fileChangeEvent, null, 2));
+			//console.log("Sending fileChangeEvent=" + JSON.stringify(fileChangeEvent, null, 2));
 			
 			CLIENT.cmd("echo", {eventOrder: ++eventOrder, fileChange: fileChangeEvent});
 			
@@ -2553,7 +2557,7 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 		
 		var path = ev.filePath;
 		
-		console.warn("saveUndoRedoHistoryEvent: saveUndoRedoHistory=" + saveUndoRedoHistory + " ignoreUndoRedoEvent[path]=" + JSON.stringify(ignoreUndoRedoEvent[path]) + " ev.order=" + ev.order + " Adding event to undo/redo history: " + JSON.stringify(ev, null, 2));
+		//console.warn("saveUndoRedoHistoryEvent: saveUndoRedoHistory=" + saveUndoRedoHistory + " ignoreUndoRedoEvent[path]=" + JSON.stringify(ignoreUndoRedoEvent[path]) + " ev.order=" + ev.order + " Adding event to undo/redo history: " + JSON.stringify(ev, null, 2));
 		
 		if(path == undefined) throw new Error("path=" + path + " ev=" + JSON.stringify(ev, null, 2));
 		
@@ -2586,13 +2590,13 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 						removed = history.splice(i, 1);
 						i--;
 						history.index = i;
-						console.log("Removed history item: " + JSON.stringify(removed, null, 2));
+						//console.log("Removed history item: " + JSON.stringify(removed, null, 2));
 					}
 				}
-				console.log("Removed " + (oldHistoryLength-history.length) + " items from undoRedoHistory because edit in the middleof history! history.index=" + history.index + " history.length=" + history.length + " path=" + path);
+				//console.log("Removed " + (oldHistoryLength-history.length) + " items from undoRedoHistory because edit in the middleof history! history.index=" + history.index + " history.length=" + history.length + " path=" + path);
 			}
 		}
-		else console.log("Not resetting! ev.cId=" + ev.cId + " userConnectionId=" + userConnectionId + " history.index=" + history.index + " history.length=" + history.length);
+		//else console.log("Not resetting! ev.cId=" + ev.cId + " userConnectionId=" + userConnectionId + " history.index=" + history.index + " history.length=" + history.length);
 		
 		var index = history.push(ev) -1;
 		
@@ -2601,7 +2605,7 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 			history.index = index;
 		}
 		
-		console.log("history.index=" + history.index + " history.length=" + history.length);
+		//console.log("history.index=" + history.index + " history.length=" + history.length);
 		
 		//console.log("undoRedoHistory: " + JSON.stringify(undoRedoHistory, null, 2));
 		
@@ -2615,7 +2619,7 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 	
 	function collabHandleEcho(json) {
 		
-		console.log("collabHandleEcho: json=" + JSON.stringify(json, null, 2));
+		//console.log("collabHandleEcho: json=" + JSON.stringify(json, null, 2));
 		
 		if(!json.eventOrder == undefined) throw new Error("Echo without eventOrder: " + JSON.stringify(json));
 		if(!json.echoCounter == undefined) throw new Error("Echo without echoCounter: " + JSON.stringify(json));
@@ -2627,9 +2631,9 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 		if(eventOrderSynced) eventOrder++;
 		
 		if(json.ping) {
-			console.log("Server latency: " + ( (new Date()).getTime() - json.ping ) + "ms");
+			//console.log("Server latency: " + ( (new Date()).getTime() - json.ping ) + "ms");
 			eventOrder = json.echoCounter;
-			console.log("Set eventOrder=" + eventOrder);
+			//console.log("Set eventOrder=" + eventOrder);
 		}
 		else if(eventOrderSynced && json.eventOrder > eventOrder) {
 			throw new Error("Events are out of order, we have missed " + (json.eventOrder-eventOrder) + " events! json.eventOrder=" + json.eventOrder + " eventOrder=" + eventOrder);
@@ -2639,20 +2643,20 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 		}
 		else if(json.fileOpen) {
 			var file = EDITOR.files[json.fileOpen.path];
-			if(!file) console.log("File not opened: " + json.fileOpen.path);
-			else {
+
+			if(file) {
 				if(file.hash != json.fileOpen.hash) {
-					console.log("Syncing file because hash missmatch: " + file.path);
+					//console.log("Syncing file because hash missmatch: " + file.path);
 					syncFile(file);
 				}
 				else if(file.changed) {
-					console.log("Syncing file because it has changed: " + file.path);
+					//console.log("Syncing file because it has changed: " + file.path);
 					syncFile(file);
 				}
-				else {
-					console.log("No need to sync file because it's has the same hash and has not changed. (file.hash=" + file.hash + ", json.fileOpen.hash=" + json.fileOpen.hash + ", file.isSaved=" + file.isSaved + ")");
-				}
+				//else {console.log("No need to sync file because it's has the same hash and has not changed. (file.hash=" + file.hash + ", json.fileOpen.hash=" + json.fileOpen.hash + ", file.isSaved=" + file.isSaved + ")");}
+
 			}
+			//else console.log("File not opened: " + json.fileOpen.path);
 			
 		}
 		else if(json.sync && json.cId != userConnectionId) {
@@ -2660,16 +2664,16 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 			// ### Sync file
 			var sync = json.sync;
 			var file = EDITOR.files[sync.path];
-			if(!file) console.log("File not opened, no need to sync: path=" + sync.path);
-			else {
+			if(file) {
 				if(file.noCollaboration) {
-					console.warn("Not syncing because collaboration is disabled in " + file.path);
+					//console.warn("Not syncing because collaboration is disabled in " + file.path);
 					return;
 				}
 				
-				if(file.isSaved && file.hash == sync.hash) updateFileConent(file, sync.text);
-				else if(file.text == sync.text) console.log("No update needed, sync and file is the same!");
-				else {
+				if(file.isSaved && file.hash == sync.hash) {
+					updateFileConent(file, sync.text);
+				}
+				else if(file.text != sync.text) {
 					var update = "Just update";
 					var backup = "Save a backup"
 					confirmBox( json.alias  + " has made changes to:\n" + sync.path + "\n\nSave a backup before updating ?", [update, backup], function(answer) {
@@ -2689,8 +2693,10 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 						else throw new Error("Unknown answer=" + answer);
 					});
 				}
+				//else console.log("No update needed, sync and file is the same!");
 				
 			}
+			//else console.log("File not opened, no need to sync: path=" + sync.path);
 			
 		}
 		else if(json.fileChange) {
@@ -2704,12 +2710,12 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 			var file = EDITOR.files[ev.filePath];
 			
 			if(file == undefined) {
-				console.warn("Got change to a file that we do not have open: " + ev.filePath);
+				//console.warn("Got change to a file that we do not have open: " + ev.filePath);
 				return;
 			}
 			
 			if(file.noCollaboration) {
-				console.warn("Not updating because collaboration disabled in " + file.path);
+				//console.warn("Not updating because collaboration disabled in " + file.path);
 				return;
 			}
 			
@@ -2718,16 +2724,15 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 			var currentOrder = fileChangeEventOrderCounters[file.path];
 			if(ev.order > currentOrder) fileChangeEventOrderCounters[file.path]++;
 			
-			console.log("currentOrder=" + currentOrder + " ev.order=" + ev.order);
+			//console.log("currentOrder=" + currentOrder + " ev.order=" + ev.order);
 			
 			var arr = fileChangeEvents[file.path] && fileChangeEvents[file.path][ev.order];
 			
 			if(ev.order > currentOrder+1) {
 				throw new Error("File change events are out of order, we have missed " + (ev.order-fileChangeEventOrderCounters[file.path]) + " events!");
 			}
-			
 			else if(ev.order == currentOrder+1) {
-				console.log("ev.order=" + ev.order + " is the latest order! currentOder=" + currentOrder + ". No need to transform");
+				//console.log("ev.order=" + ev.order + " is the latest order! currentOder=" + currentOrder + ". No need to transform");
 			}
 			else if(ev.order == currentOrder ) {
 				
@@ -2752,7 +2757,7 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 						// Two different users who are not me, sent an event at the same time
 						// In my point of view, the event we have already recived came first!
 						// We have to transform from the previous event
-						console.log("Transforming with previous event: " + JSON.stringify(previousEvent));
+						//console.log("Transforming with previous event: " + JSON.stringify(previousEvent));
 						transformBackwards(ev, previousEvent);
 					}
 					
@@ -2760,7 +2765,7 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 				
 			}
 			else if(ev.order < currentOrder) {
-				console.log(json.alias +  " is behind! ev.order=" + ev.order + " currentOrder=" + currentOrder);
+				//console.log(json.alias +  " is behind! ev.order=" + ev.order + " currentOrder=" + currentOrder);
 				var order = ev.order;
 				var changeEvents = fileChangeEvents[file.path];
 				if(!changeEvents) throw new Error(  "file.path=" + file.path + " not in " + JSON.stringify( Object.keys(fileChangeEvents) )  );
@@ -2818,12 +2823,12 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 			
 			var selectEvent = json.select;
 			
-			console.log("selectEvent: " + JSON.stringify(selectEvent));
+			//console.log("selectEvent: " + JSON.stringify(selectEvent));
 			
 			var file = EDITOR.files[selectEvent.filePath];
 			
 			if(file == undefined) {
-				console.warn("Text was selected in a file that is not open: " + selectEvent.filePath);
+				//console.warn("Text was selected in a file that is not open: " + selectEvent.filePath);
 				return;
 			}
 			
@@ -2847,10 +2852,10 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 				
 				// Mark the file as saved
 				ignoreFileSave = file.path; // Ignore the save event we will get when the file is marked as saved - to prevent endless loop
-				console.log("Marking file as saved: file.path=" + file.path + " ignoreFileSave=" + ignoreFileSave);
+				//console.log("Marking file as saved: file.path=" + file.path + " ignoreFileSave=" + ignoreFileSave);
 				file.saved(function(err) {
 					if(ignoreFileSave==file.path) ignoreFileSave = "";
-					console.log("File now marked as saved! file.path=" + file.path + " ignoreFileSave=" + ignoreFileSave);
+					//console.log("File now marked as saved! file.path=" + file.path + " ignoreFileSave=" + ignoreFileSave);
 				});
 			}
 		}
@@ -2873,7 +2878,7 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 		
 		var textLength = prev.text.length;
 		
-		console.log("Transforming backwards from prev.type=" + prev.type + " prev.index=" + prev.index + " ev.index=" + ev.index + " prev.text=" + prev.text);
+		//console.log("Transforming backwards from prev.type=" + prev.type + " prev.index=" + prev.index + " ev.index=" + ev.index + " prev.text=" + prev.text);
 		
 		/*
 			We only need to know index and row
@@ -2922,22 +2927,22 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 		if(!file) return true;
 		if(!EDITOR.input) return true; // why? Because we might be in a DOM input element!
 		
-		console.log("collabRedo!");
+		//console.log("collabRedo!");
 		
 		if(!undoRedoHistory.hasOwnProperty(file.path)) {
-			console.warn("Unable to redo: " + file.path + " has no undo/redo history!");
+			//console.warn("Unable to redo: " + file.path + " has no undo/redo history!");
 			return PREVENT_DEFAULT;
 		}
 		
 		var history = undoRedoHistory[file.path];
 		
 		if(history.length == 0) {
-			console.warn("Unable to redo: No undo/redo history to undo! history.length=" + history.length + "");
+			//console.warn("Unable to redo: No undo/redo history to undo! history.length=" + history.length + "");
 			return PREVENT_DEFAULT;
 		}
 		
 		if(history.index == history.length-1) {
-			console.warn("Unable to redo: undo/redo history index=" + history.index + " has reached the top");
+			//console.warn("Unable to redo: undo/redo history index=" + history.index + " has reached the top");
 			return PREVENT_DEFAULT;
 		}
 		
@@ -2952,12 +2957,12 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 			if(history[i].cId == userConnectionId) break;
 			history.index++;
 		}
-		console.log("Redo: Moved history index from " + oldIndex + " to " + history.index + " history.length=" + history.length);
+		//console.log("Redo: Moved history index from " + oldIndex + " to " + history.index + " history.length=" + history.length);
 		
 		if(history.index > history.length) throw new Error("history.index=" + history.index + " history.length=" + history.length);
 		
 		if(history.index >= history.length) {
-			console.warn("Unable to redo: undo/redo history index=" + history.index + " has reached the top");
+			//console.warn("Unable to redo: undo/redo history index=" + history.index + " has reached the top");
 			
 			return PREVENT_DEFAULT;
 		}
@@ -2972,11 +2977,11 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 		
 		if(collabMode) {
 			
-			console.log("Transforming change=" + JSON.stringify(change));
+			//console.log("Transforming change=" + JSON.stringify(change));
 			for (var i=history.index+1; i<history.length; i++) {
 				if(history[i].cId != userConnectionId) transformBackwards(change, history[i]);
 			}
-			console.log("Transformed change=" + JSON.stringify(change));
+			//console.log("Transformed change=" + JSON.stringify(change));
 		}
 		
 		saveUndoRedoHistory = false;
@@ -2998,7 +3003,7 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 	}
 	
 	function collabUndo(file) {
-		console.log("collabUndo: file.path=" + (file && file.path) + " EDITOR.input=" + EDITOR.input);
+		//console.log("collabUndo: file.path=" + (file && file.path) + " EDITOR.input=" + EDITOR.input);
 		
 		if(!file) return true;
 		// Why explicitly check for EDITOR.input !? Does not work if undo via window menu
@@ -3006,21 +3011,21 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 		if(!EDITOR.input) return true; 
 		
 		if(!undoRedoHistory.hasOwnProperty(file.path)) {
-			console.warn("collabUndo: " + file.path + " has no undo/redo history!");
+			//console.warn("collabUndo: " + file.path + " has no undo/redo history!");
 			return PREVENT_DEFAULT;
 		}
 		
 		var history = undoRedoHistory[file.path];
 		
-		console.log("collabUndo: history.length=" + history.length + " history.index=" + history.index + " history=" + JSON.stringify(history, null, 2));
+		//console.log("collabUndo: history.length=" + history.length + " history.index=" + history.index + " history=" + JSON.stringify(history, null, 2));
 		
 		if(history.length == 0) {
-			console.warn("collabUndo: No undo/redo history to undo! history.length=" + history.length + "");
+			//console.warn("collabUndo: No undo/redo history to undo! history.length=" + history.length + "");
 			return PREVENT_DEFAULT;
 		}
 		
 		if(history.index < 0) {
-			console.warn("collabUndo: undo/redo history index=" + history.index + " has reached the bottom");
+			//console.warn("collabUndo: undo/redo history index=" + history.index + " has reached the bottom");
 			return PREVENT_DEFAULT;
 		}
 		
@@ -3041,16 +3046,16 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 			
 			// We have to tranform the change to the correct position
 			// Always transform with change events that came after (both for undo and redo)
-			console.log("collabUndo: Transforming change=" + JSON.stringify(change) + " from history.index=" + history.index);
+			//console.log("collabUndo: Transforming change=" + JSON.stringify(change) + " from history.index=" + history.index);
 			//for (var i=history.length-1; i>=history.index; i--) {
 			for (var i=history.index+1; i<history.length; i++) {
 				//console.log("collabUndo:  i=" + i + " history.length=" + history.length);
 				if(history[i].cId != userConnectionId) {
 					transformBackwards(change, history[i]);
-					console.log("collabUndo: Ended up with index=" + change.index + " and row=" + change.row);
+					//console.log("collabUndo: Ended up with index=" + change.index + " and row=" + change.row);
 				}
 			}
-			console.log("collabUndo: Transformed change=" + JSON.stringify(change));
+			//console.log("collabUndo: Transformed change=" + JSON.stringify(change));
 		}
 		
 		if(change == undefined) throw new Error("change=" + change + " history.index=" + history.index + " history:" + JSON.stringify(history, null, 2));
@@ -3063,7 +3068,7 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 			history.index--;
 		}
 		// If no change was found: history.index=-1
-		console.log("collabUndo: Moved history index from " + oldIndex + " to " + history.index + " change=" + JSON.stringify(history[history.index], 1) );
+		//console.log("collabUndo: Moved history index from " + oldIndex + " to " + history.index + " change=" + JSON.stringify(history[history.index], 1) );
 		
 		/*
 			Question: Should we ignore the file change event !?
@@ -3079,45 +3084,45 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 	function undo(file, ev, moveCaret) {
 		if(!ev.type) throw new Error("File change event without type: " + JSON.stringify(ev));
 		
-		console.log("Undoing file change: ev.type=" + ev.type + " ev.index=" + ev.index + " ev.text=" + ev.text);
+		//console.log("Undoing file change: ev.type=" + ev.type + " ev.index=" + ev.index + " ev.text=" + ev.text);
 		
 		if(ev.type == "removeRow") {
 			var caret = file.createCaret(ev.index);
-			console.log("Re-adding row on row=" + caret.row);
+			//console.log("Re-adding row on row=" + caret.row);
 			if(caret.row != ev.row) throw new Error("caret.row=" + caret.row + " does not match ev.row=" + ev.row + "\nev:" + JSON.stringify(ev, null, 2) + "\ncaret=" + JSON.stringify(caret));
 			file.insertTextRow(ev.row);
 		}
 		else if(ev.type == "text") { // Text was inserted
 			var caret = file.createCaret(ev.index, ev.row, ev.col);
-			console.log("Undoing insert text (" + ev.text.length + " chars) at caret=" + JSON.stringify(caret));
+			//console.log("Undoing insert text (" + ev.text.length + " chars) at caret=" + JSON.stringify(caret));
 			file.deleteTextRange(caret.index, caret.index + ev.text.length - 1);
 			if(file.grid[caret.row].length == caret.col) caret.eol = true; 
 		}
 		else if(ev.type == "insert") { // One character was inserted
 			var caret = file.createCaret(ev.index, ev.row, ev.col);
-			console.log("Undoing " + JSON.stringify(ev) + " at caret=" + JSON.stringify(caret));
+			//console.log("Undoing " + JSON.stringify(ev) + " at caret=" + JSON.stringify(caret));
 			file.deleteCharacter(caret);
 		}
 		else if(ev.type == "deleteTextRange") { // Deleted a bunch of text
 			var caret = file.createCaret(ev.index, ev.row, ev.col);
-			console.log("Undoing deleting of " + ev.text.length + " characters at index=" + ev.index);
+			//console.log("Undoing deleting of " + ev.text.length + " characters at index=" + ev.index);
 			file.insertText(ev.text, caret);
 		}
 		else if(ev.type == "linebreak") { // A line break was inserted
 			var caret = file.createCaret(ev.index, ev.row, ev.col);
-			console.log("Undoing inserting a line break at caret=" + JSON.stringify(caret));
+			//console.log("Undoing inserting a line break at caret=" + JSON.stringify(caret));
 			file.deleteCharacter(caret);
 		}
 		else if(ev.type == "delete") { // One character was deleted
 			var caret = file.createCaret(ev.index, ev.row, ev.col);
-			console.log("Undoing deleting character=" + UTIL.lbChars(ev.text) + " at caret=" + JSON.stringify(caret));
+			//console.log("Undoing deleting character=" + UTIL.lbChars(ev.text) + " at caret=" + JSON.stringify(caret));
 			
 			if(ev.text.indexOf("\n") != -1) file.insertLineBreak(caret);
 			else file.putCharacter(ev.text, caret);
 			
 		}
 		else if(ev.type == "reload") { // The file was reloaded with new text
-			console.log("Reloading text! ev.text.length=" + ev.text.length);
+			//console.log("Reloading text! ev.text.length=" + ev.text.length);
 			file.reload(ev.text);
 		}
 		else throw new Error("Unknown ev.type=" + ev.type);
@@ -3137,39 +3142,39 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 		
 		if(ev == undefined) throw new Error("ev=" + ev + " file.path=" + (file && file.path) + " moveCaret=" + JSON.stringify(moveCaret));
 		
-		console.log("Applying file change: ev.type=" + ev.type + " ev.index=" + ev.index + " ev.text=" + ev.text + " moveCaret=" + moveCaret);
+		//console.log("Applying file change: ev.type=" + ev.type + " ev.index=" + ev.index + " ev.text=" + ev.text + " moveCaret=" + moveCaret);
 		
 		if(ev.type == "removeRow") {
 			var caret = file.createCaret(ev.index);
-			console.log("Removing row on row=" + caret.row);
+			//console.log("Removing row on row=" + caret.row);
 			file.removeRow(ev.row);
 		}
 		else if(ev.type == "text") { // Text was inserted
 			var caret = file.createCaret(ev.index, ev.row, ev.col);
-			console.log("Inserting text at caret=" + JSON.stringify(caret));
+			//console.log("Inserting text at caret=" + JSON.stringify(caret));
 			file.insertText(ev.text, caret);
 		}
 		else if(ev.type == "insert") { // One character was inserted
 			var caret = file.createCaret(ev.index, ev.row, ev.col);
-			console.log("Putting character=" + ev.text + " at caret=" + JSON.stringify(caret));
+			//console.log("Putting character=" + ev.text + " at caret=" + JSON.stringify(caret));
 			file.putCharacter(ev.text, caret);
 		}
 		else if(ev.type == "deleteTextRange") { // Delete a bunch of text
-			console.log("Deleting " + ev.text.length + " characters at index=" + ev.index);
+			//console.log("Deleting " + ev.text.length + " characters at index=" + ev.index);
 			file.deleteTextRange(ev.index, ev.index + ev.text.length-1);
 		}
 		else if(ev.type == "linebreak") { // A line break was inserted
 			var caret = file.createCaret(ev.index, ev.row, ev.col);
-			console.log("Inserting a line break at caret=" + JSON.stringify(caret));
+			//console.log("Inserting a line break at caret=" + JSON.stringify(caret));
 			file.insertLineBreak(caret);
 		}
 		else if(ev.type == "delete") { // One character was deleted
 			var caret = file.createCaret(ev.index, ev.row, ev.col);
-			console.log("Deleting character=" + ev.text + " at caret=" + JSON.stringify(caret));
+			//console.log("Deleting character=" + ev.text + " at caret=" + JSON.stringify(caret));
 			file.deleteCharacter(caret);
 		}
 		else if(ev.type == "reload") { // The file was reloaded with new text
-			console.log("Reloading text! ev.text.length=" + ev.text.length);
+			//console.log("Reloading text! ev.text.length=" + ev.text.length);
 			file.reload(ev.text);
 		}
 		else throw new Error("Unknown ev.type=" + ev.type);
@@ -3521,7 +3526,7 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 			EDITOR.mock("typing", "åä");
 			if(file.text != "abåä\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
 			
-			console.log("Did history reset ? " + JSON.stringify(undoRedoHistory[file.path], null, 2));
+			//console.log("Did history reset ? " + JSON.stringify(undoRedoHistory[file.path], null, 2));
 			
 			EDITOR.mock("keydown", {char: "Z", ctrlKey: true});
 			if(file.text != "abå\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
@@ -3675,7 +3680,7 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 			
 			timeSerial([
 				function() {
-					console.log("timeSerial step 1");
+					//console.log("timeSerial step 1");
 					// Close any alert boxes that would prevent insert
 					if(EDITOR.openDialogs.length > 0) EDITOR.closeAllDialogs("TESTS");
 					
@@ -3737,7 +3742,7 @@ console.warn("Path already in playback folder: filePath=" + filePath);
 	EDITOR.addTest(6, false, testEditAtTheSameTime);
 	
 	function timeSerial(func) {
-		if(func.length >= 20) console.warn("Dialog might disable EDITOR.input!");
+		//if(func.length >= 20) console.warn("Dialog might disable EDITOR.input!");
 		
 		var timers = [];
 		// Wait between each step

@@ -41,7 +41,7 @@
 		var themeFromCss = window.getComputedStyle(themeDetector).getPropertyValue('content').replace(/"/g, '');
 		}
 		
-		console.log("dark_theme: themeFromCss=" + themeFromCss);
+		//console.log("dark_theme: themeFromCss=" + themeFromCss);
 		
 		if( themeFromCss == "dark") setDarkTheme();
 		
@@ -54,7 +54,7 @@ setDarkTheme(); // use ?darkTheme=true to force the darke theme
 		window.addEventListener("devicelight", function (event) {
 			// Read out the lux value
 			var lux = event.value;
-			console.log("dark_theme: lux=" + lux);
+			//console.log("dark_theme: lux=" + lux);
 			// Ask to change to dark theme if it's dark !?
 		});
 		}
@@ -83,11 +83,11 @@ setDarkTheme(); // use ?darkTheme=true to force the darke theme
 	
 	function setDarkTheme() {
 		if(themeLoaded) {
-			console.log("dark_theme: Dark theme already loaded!");
+			//console.log("dark_theme: Dark theme already loaded!");
 			return;
 		}
 		
-		console.log("dark_theme: Set dark theme! ...");
+		//console.log("dark_theme: Set dark theme! ...");
 		
 		
 		// Backgrounds
@@ -166,22 +166,22 @@ setDarkTheme(); // use ?darkTheme=true to force the darke theme
 				links[i].href = links[i].href  + "?date=" + new Date().getMilliseconds();
 			}
 		}
-		console.log("dark_theme: CSS refreshed!");
+		//console.log("dark_theme: CSS refreshed!");
 	}
 	
 	
 	function changeWebsiteTheme(scheme) {
 		// 'dark' or 'light' string is in scheme here
 		// so the website theme can be updated
-		console.log("dark_theme: changeWebsiteTheme: scheme=" + scheme);
+		//console.log("dark_theme: changeWebsiteTheme: scheme=" + scheme);
 		if(scheme == "dark") setDarkTheme();
 	}
 	
 	function detectColorScheme() {
-		console.log("dark_theme: Detecting platform color scheme ...");
+		//console.log("dark_theme: Detecting platform color scheme ...");
 		
 		if(!window.matchMedia) {
-			console.log("dark_theme: window.matchMedia not supported!");
+			//console.log("dark_theme: window.matchMedia not supported!");
 			return
 		}
 		

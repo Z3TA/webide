@@ -28,7 +28,7 @@
 			var filePath = target.getAttribute("path");
 		}
 		
-		console.log("copy_filepath: filePath=" + filePath);
+		//console.log("copy_filepath: filePath=" + filePath);
 		
 		if(!filePath) return;
 		

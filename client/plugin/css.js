@@ -116,14 +116,14 @@
 		var inDoubleQuote = false;
 		var inSingleQuote = false;
 
-		console.log("checkCssRules: file.path=" + file.path);
+		//console.log("checkCssRules: file.path=" + file.path);
 
 		//console.log("maxColumns=" + maxColumns);
 
 		for(var row=0; row<buffer.length; row++) {
 			//if(row == file.caret.row+bufferStartRow) continue;
 			
-			console.log("============ row=" + row + " ===============");
+			//console.log("============ row=" + row + " ===============");
 
 			if(col == maxColumns) {
 				// Assume proper line break when the line is cut off
@@ -191,7 +191,7 @@
 						}
 					}
 
-					console.log("word=" + word);
+					//console.log("word=" + word);
 
 					if(cssRule.indexOf( word.trim() ) == -1) {
 						for(var i=0; i<word.length && i < buffer[row].length; i++) {
@@ -216,7 +216,7 @@
 					word += char;
 				}
 				
-				console.log("col=" + col + " char=" + char + " inComment=" + inComment + " inSelector=" + inSelector + " inOptions=" + inOptions + " word=" + word);
+				//console.log("col=" + col + " char=" + char + " inComment=" + inComment + " inSelector=" + inSelector + " inOptions=" + inOptions + " word=" + word);
 
 			}
 		}
@@ -236,13 +236,13 @@
 		var reSpace = /\s/;
 		for(var i=file.caret.index-1; i>0; i--) {
 			char = file.text[i];
-			console.log("char=" + char);
+			//console.log("char=" + char);
 			if(char == ":" || char == " ") return;
 			if(char.match(reSpace)) break;
 			str = char + str;
 		}
 
-		console.log("str=" + str);
+		//console.log("str=" + str);
 
 		if(str.length > 0) {
 
@@ -251,12 +251,12 @@
 			for (var i=0; i<cssRule.length; i++) {
 				if(cssRule[i].indexOf(str) == 0) {
 					if(str.indexOf("-") != -1) {
-						console.log("str =" + str);
-						console.log("word=" + word);
-						console.log("rule=" + cssRule[i]);
+						//console.log("str =" + str);
+						//console.log("word=" + word);
+						//console.log("rule=" + cssRule[i]);
 
 						var sugg =  cssRule[i].slice( str.lastIndexOf("-") + 1 );
-						console.log("sugg=" + sugg);
+						//console.log("sugg=" + sugg);
 
 						matches.push( sugg  );
 					}
@@ -275,7 +275,7 @@
 
 		}
 
-		console.log("autoCompleteCssRules: str=" + str + " word=" + word + " matches=" + JSON.stringify(matches));
+		//console.log("autoCompleteCssRules: str=" + str + " word=" + word + " matches=" + JSON.stringify(matches));
 
 	}
 
