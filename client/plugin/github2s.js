@@ -36,7 +36,7 @@
 
 		if(dirs[0] == "") dirs.shift();
 
-		console.log("github2s: dirs=" + JSON.stringify(dirs));
+		//console.log("github2s: dirs=" + JSON.stringify(dirs));
 
 		var repoName = dirs[1];
 		var folder = EDITOR.user.homeDir + "repo/" + repoName;
@@ -44,8 +44,8 @@
 		var matchGithubFile = str.match(/(.*)\/(.*)\/blob\/([^/]*)\/(.*)/);
 		var matchGithubBranch = str.match(/(.*)\/(.*)\/tree\/([^/]*)/);
 
-		console.log("github2s: matchGithubFile=", matchGithubFile);
-		console.log("github2s: matchGithubBranch=", matchGithubBranch);
+		//console.log("github2s: matchGithubFile=", matchGithubFile);
+		//console.log("github2s: matchGithubBranch=", matchGithubBranch);
 
 		if(matchGithubFile) {
 			var repo = "https://github.com/" + matchGithubFile[1] +  "/" + matchGithubFile[2] +  ".git";
@@ -64,7 +64,7 @@
 			CLIENT.cmd("git.checkout", {directory: folder, rev: _commitId}, function cloned(err, resp) {
 				if(err) alertBox("Failed to checkout " + _commitId + ". Error: " + err.message);
 
-				console.log("github2s: git.checkout: _commitId=" + _commitId + " resp=" + JSON.stringify(resp, null, 2));
+				//console.log("github2s: git.checkout: _commitId=" + _commitId + " resp=" + JSON.stringify(resp, null, 2));
 
 				if(_showFile) showFile(_showFile);
 				else findReadme();
@@ -79,10 +79,10 @@
 
 
 		function showFile(filePathInRepo) {
-			console.log("github2s: showFile: " + filePathInRepo);
+			//console.log("github2s: showFile: " + filePathInRepo);
 			EDITOR.openFile( UTIL.joinPaths(folder, filePathInRepo), undefined, undefined, function(err) {
 				if(err) {
-					console.log("github2s: open file error: " + err.message);
+					//console.log("github2s: open file error: " + err.message);
 					findReadme();
 				}
 				else {
@@ -96,7 +96,7 @@
 			var maxRetry = 10;
 
 			// Show readme if one exist ...
-			console.log("github2s: findReadme! folder=" + folder + " retry=" + retry);
+			//console.log("github2s: findReadme! folder=" + folder + " retry=" + retry);
 			EDITOR.listFiles(folder, function(err, files) {
 				if(err) {
 
@@ -128,7 +128,7 @@
 
 				// No readme found
 
-				console.log("github2s: no README file found in files=" + JSON.stringify(files));
+				//console.log("github2s: no README file found in files=" + JSON.stringify(files));
 
 			});
 		}

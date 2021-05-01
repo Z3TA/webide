@@ -131,7 +131,7 @@ EDITOR.discoveryBar.remove(discoveryBarIcon);
 	}
 	
 	function pathKeyDown(keyDownEvent) {
-		console.log("pathKeyDown: inputPath.value=" + inputPath.value);
+		//console.log("pathKeyDown: inputPath.value=" + inputPath.value);
 		var keyTab = 9;
 		// Autocomplete the path when pressing tab
 		if(keyDownEvent.keyCode == keyTab) {
@@ -143,8 +143,8 @@ EDITOR.discoveryBar.remove(discoveryBarIcon);
 			if(caretPos != text.length) {
 				var afterCaret = text.slice(caretPos);
 				text = text.slice(0, caretPos);
-				console.log("afterCaret=" + afterCaret);
-				console.log("text=" + text);
+				//console.log("afterCaret=" + afterCaret);
+				//console.log("text=" + text);
 			}
 			
 			EDITOR.autoCompletePath({path: text, onlyDirectories: true}, function(err, path) {
@@ -167,7 +167,7 @@ EDITOR.discoveryBar.remove(discoveryBarIcon);
 	}
 	
 	function pathKeyInput(inputEvent) {
-		console.log("pathKeyInput: inputPath.value=" + inputPath.value);
+		//console.log("pathKeyInput: inputPath.value=" + inputPath.value);
 		
 		suggestFolders(inputPath.value);
 		return ALLOW_DEFAULT;
@@ -177,9 +177,9 @@ EDITOR.discoveryBar.remove(discoveryBarIcon);
 	function suggestFolders(pathValue) {
 		// Does the path match any of the path-pickers ?
 		
-		console.log("pathValue=" + pathValue);
+		//console.log("pathValue=" + pathValue);
 		if(!pathValue) {
-			console.warn("pathValue=" + pathValue);
+			//console.warn("pathValue=" + pathValue);
 			return;
 		}
 		
@@ -216,9 +216,9 @@ console.error(err);
 			
 			for (var i=0, part; i<suggestedFolders.length; i++) {
 				part = suggestedFolders[i].slice(0, pathValue.length)
-				console.log("(" + suggestedFolders[i] + ") " + part + " == " + pathValue + " ? " + (part==pathValue));
+				//console.log("(" + suggestedFolders[i] + ") " + part + " == " + pathValue + " ? " + (part==pathValue));
 				if(part == pathValue) {
-					console.log("Highlight: " + suggestedFolders[i]);
+					//console.log("Highlight: " + suggestedFolders[i]);
 					suggestedFolderButtons[suggestedFolders[i]].setAttribute("class", "highlighted");
 				}
 				else {
@@ -257,7 +257,7 @@ console.error(err);
 		return ALLOW_DEFAULT;
 	
 		function addFolder(name) {
-			console.log("Adding folder button name=" + name);
+			//console.log("Adding folder button name=" + name);
 			
 			var fullPath = UTIL.resolvePath(pathToFolder, name);
 			fullPath = UTIL.trailingSlash(fullPath);
@@ -279,7 +279,7 @@ console.error(err);
 	
 	function buildSaveDialog() {
 		
-		console.log("Building save dialog");
+		//console.log("Building save dialog");
 		
 		var footer = document.getElementById("footer");
 		
@@ -424,7 +424,7 @@ var buttonSaveAs = document.createElement("input");
 					//if(err.code == "ENOENT") alertBox("The file was <b>not saved</b> because the folder does not exist: " + inputPath.value);
 					
 					if(err.code == "CANCEL") {
-console.warn("The save was canceled: " + err.message);
+						//console.warn("The save was canceled: " + err.message);
 					return;
 					}
 					
@@ -464,7 +464,7 @@ console.warn("The save was canceled: " + err.message);
 	
 	function showSaveDialog() {
 		
-		console.log("Showing save dialog");
+		//console.log("Showing save dialog");
 		
 		if(!saveDialog) buildSaveDialog();
 		
@@ -480,7 +480,7 @@ console.warn("The save was canceled: " + err.message);
 		
 		EDITOR.resizeNeeded();
 		
-		console.log("After showing save dialog: EDITOR.input=" + EDITOR.input);
+		//console.log("After showing save dialog: EDITOR.input=" + EDITOR.input);
 		
 		return false;
 	}
@@ -534,9 +534,9 @@ originalFilePath = EDITOR.workingDirectory + originalFilePath;
 		
 		var size = Math.max(inputPathMinSize, inputPath.value.length + 10)
 		
-		console.log("size=" + size);
-		console.log("inputPathMinSize=" + inputPathMinSize);
-		console.log("inputPath.value.length=" + inputPath.value.length);
+		//console.log("size=" + size);
+		//console.log("inputPathMinSize=" + inputPathMinSize);
+		//console.log("inputPath.value.length=" + inputPath.value.length);
 		
 		inputPath.setAttribute("size", size);
 		

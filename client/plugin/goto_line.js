@@ -90,12 +90,12 @@
 	
 	function gotoLineVoice(text, file, match) {
 		
-		console.log(match);
+		//console.log(match);
 		
 		var line = parseInt(match[RE_SUB]);
 		
 		if(isNaN(line)) {
-console.warn("line=" + line + " is not a number! match=" + JSON.stringify(match) + " RE_SUB=" + RE_SUB); 
+			//console.warn("line=" + line + " is not a number! match=" + JSON.stringify(match) + " RE_SUB=" + RE_SUB); 
 			return false; // Did not capture it
 		}
 		
@@ -161,7 +161,7 @@ file.gotoLine(line);
 		
 		gotoInputIsVisible = true;
 		
-		console.log("built gotoInput!");
+		//console.log("built gotoInput!");
 
 	}
 	
@@ -191,15 +191,15 @@ return show_gotoInput(file, combo);
 	}
 	
 	function show_gotoInput(file, combo) {
-		console.log("gotoInputIsVisible=" + gotoInputIsVisible + " before showing");
+		//console.log("gotoInputIsVisible=" + gotoInputIsVisible + " before showing");
 
 		winMenuGotoLine.hide();
 		
 		if(!gotoInputIsVisible) {
 			
-			console.log("gotoDiv=" + gotoDiv);
+			//console.log("gotoDiv=" + gotoDiv);
 			
-			if(gotoDiv) console.log("gotoDiv.style.dipslay=" + gotoDiv.style.dipslay);
+			//if(gotoDiv) console.log("gotoDiv.style.dipslay=" + gotoDiv.style.dipslay);
 			
 			//if(!gotoDiv) build_gotoInput();
 			build_gotoInput(); // Always build!
@@ -237,7 +237,7 @@ return show_gotoInput(file, combo);
 
 	function hide_gotoLineInput() {
 		
-		console.log("gotoInputIsVisible=" + gotoInputIsVisible + " before hiding");
+		//console.log("gotoInputIsVisible=" + gotoInputIsVisible + " before hiding");
 		
 		if(gotoInputIsVisible) {
 			
@@ -293,13 +293,13 @@ return show_gotoInput(file, combo);
 				
 				if(line < 1) line = 1;
 				
-				console.log("file.totalRows=" + file.totalRows);
+				//console.log("file.totalRows=" + file.totalRows);
 				
 				var maxLine = Math.max(file.grid.length, (file.totalRows+1));
 				
 				if(line > maxLine) line = maxLine;
 				
-				console.log("Going to line " + line + ".");
+				//console.log("Going to line " + line + ".");
 				
 				file.gotoLine(line, function(err) {
 					if(err) return alertBox("Unable to go to line " + line + " Error: " + err.message);

@@ -61,10 +61,10 @@
 	
 	function downloadFontJustInCase(font) {
 
-		console.log("font_size: downloadFontJustInCase: font=" + font + " ");
+		//console.log("font_size: downloadFontJustInCase: font=" + font + " ");
 
 		if( loadedFonts.indexOf(font) != -1 ) {
-			console.log("font_size: downloadFontJustInCase: CSS file already loaded for font=" + font + " ");
+			//console.log("font_size: downloadFontJustInCase: CSS file already loaded for font=" + font + " ");
 			return;
 		}
 

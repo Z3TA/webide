@@ -38,7 +38,7 @@
 	});
 	
 	function virtualDisplayStatus(status) {
-		console.log("display: virtualDisplayStatus=" + status);
+		//console.log("display: virtualDisplayStatus=" + status);
 		if(status == "open") {
 windowMenu.activate();
 			if(discoveryBarIcon) discoveryBarIcon.classList.add("active");
@@ -54,21 +54,21 @@ windowMenu.activate();
 	}
 	
 	function toggleDisplayFromWindowMenu() {
-		console.log("display: toggleDisplayFromWindowMenu!");
+		//console.log("display: toggleDisplayFromWindowMenu!");
 		return toggleDisplay();
 	}
 	
 	function toggleDisplay() {
-		console.log("display: toggleDisplay!");
+		//console.log("display: toggleDisplay!");
 		if(EDITOR.virtualDisplay.open) {
-			console.log("display: Virtual display was open. Hiding!");
+			//console.log("display: Virtual display was open. Hiding!");
 			EDITOR.virtualDisplay.hide();
 		}
 		else if(!EDITOR.virtualDisplay.open) {
-			console.log("display: Virtual display was NOT open! Showing it...");
+			//console.log("display: Virtual display was NOT open! Showing it...");
 			EDITOR.virtualDisplay.show(desktopWidth, desktopHeight, function(err) {
 				if(err) alertBox("Unable to show the local desktop! Error: " + err.message);
-console.log("display: Virtual display should now be visible!");
+				//console.log("display: Virtual display should now be visible!");
 			});
 		}
 		

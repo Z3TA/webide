@@ -18,16 +18,16 @@
 			var key_N = 78;
 			var key_Enter = 13;
 			
-			console.log("createNewFile: DISPLAY_MODE=" + DISPLAY_MODE + " typeof Keyboard = " + (typeof Keyboard));
+			//console.log("createNewFile: DISPLAY_MODE=" + DISPLAY_MODE + " typeof Keyboard = " + (typeof Keyboard));
 			
 			if(DISPLAY_MODE == "standalone") {
 				EDITOR.bindKey({desc: "Create new file", charCode: key_N, combo: CTRL, fun: newFileFromKeyboardComboOnStandalone});
 			}
 			else if(typeof navigator.keyboard == "object") {
-				console.log("createNewFile: Acquiring lock on KeyN ...");
+				//console.log("createNewFile: Acquiring lock on KeyN ...");
 				navigator.keyboard.lock(["KeyN"]).then(function(obj) {
 					// note: Locked keys only works in fullscreen!
-					console.log("createNewFile: Allowed to bind to KeyN! obj=" + JSON.stringify(obj));
+					//console.log("createNewFile: Allowed to bind to KeyN! obj=" + JSON.stringify(obj));
 					EDITOR.bindKey({desc: "Create new file", key: "n", combo: CTRL, fun: newFileFromKeyboardComboViaKeyboardLock});
 				}).catch(function(err) {
 					console.log("createNewFile: Not allowed to use KeyN! " + (err.message || err));
@@ -123,7 +123,7 @@
 		
 		EDITOR.findFileReverseRecursive(".editorconfig", EDITOR.workingDirectory, function(err, files) {
 			
-			console.log("createNewFile: findFileReverseRecursive: err=" + (err && err.message) + " files=" + JSON.stringify(files));
+			//console.log("createNewFile: findFileReverseRecursive: err=" + (err && err.message) + " files=" + JSON.stringify(files));
 			
 			if(err) {
 				// Probably an EACCESS because we try to look in  /home/ on the cloud IDE
@@ -150,8 +150,8 @@
 				var ini = UTIL.ini(eof);
 				var editorConfig = ini.parse(text);
 				
-				console.log("createNewFile: text=" + text);
-				console.log("createNewFile: editorConfig=" + JSON.stringify(editorConfig, null, 2));
+				//console.log("createNewFile: text=" + text);
+				//console.log("createNewFile: editorConfig=" + JSON.stringify(editorConfig, null, 2));
 				
 				var settings = editorConfig["*"] || editorConfig["js"];
 				
@@ -191,12 +191,12 @@ var indentationCharacters = " ";
 			if(lineBreakCharacters) props.lineBreak = lineBreakCharacters;
 			if(indentationCharacters) props.indentation = indentationCharacters;
 			
-			console.log("createNewFile: props=" + JSON.stringify(props));
+			//console.log("createNewFile: props=" + JSON.stringify(props));
 			
 			EDITOR.openFile(path, content, {isSaved: false, savedAs: false, props: props}, function(err, file) {
 				if(err) return alertBox("Unable to create new file: " + err.message);
 		
-				console.log("createNewFile: lineBreak=" + JSON.stringify(file.lineBreak) + " indentation=" + props.indentation);
+				//console.log("createNewFile: lineBreak=" + JSON.stringify(file.lineBreak) + " indentation=" + props.indentation);
 				
 			});
 		}

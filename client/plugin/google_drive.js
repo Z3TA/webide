@@ -13,7 +13,7 @@ var menuItem;
 	var GD_MENU_CONNECTED = "Google Drive (logout)";
 	
 	if( window.location.hostname == "127.0.0.1" && !QUERY_STRING["googleDrive"] ) {
-console.warn("Disabling Google Drive integration when running locally");
+		//console.warn("Disabling Google Drive integration when running locally");
 	// Don't bother compiling gcsf for every platform (we might make it into a node module if Google Drive becomes a wanted feature)
 	return;
 	}
@@ -108,11 +108,11 @@ if(err) return alertBox(err.message);
 	}
 	
 function umountGoogleDrive() {
-		console.log("Logging out and unmounting Google Drive ...");
+		//console.log("Logging out and unmounting Google Drive ...");
 		
 	CLIENT.cmd("googleDrive", {umount: true}, function(err) {
 			if(err) console.warn(err.message);
-			else console.log("Successfully logged out and unmounted from Google Drive !");
+			//else console.log("Successfully logged out and unmounted from Google Drive !");
 			
 			// Even if we got an error, the folder has likely umount'ed
 			

@@ -31,7 +31,7 @@
 	});
 	
 	function functionListMain() {
-		console.log("Initiating functionlist");
+		//console.log("Initiating functionlist");
 		
 		EDITOR.on("fileParse", updateFunctionList); // Update existing function list if it already exist
 		
@@ -124,16 +124,12 @@
 		if(functionListWrap && functionListWrap.parentNode == leftColumn) {
 leftColumn.removeChild(functionListWrap);
 		}
-		else {
-			console.log("mobileFubarDetected: functionListWrap not in leftColumn!");
-		}
+		//else {console.log("mobileFubarDetected: functionListWrap not in leftColumn!")}
 		
 		if(functionListSelect && functionListSelect.parentNode == functionListWrap) {
 			functionListWrap.removeChild(functionListSelect);
 		}
-		else {
-			console.log("mobileFubarDetected: functionListSelect not in functionListWrap!");
-		}
+		//else {console.log("mobileFubarDetected: functionListSelect not in functionListWrap!");}
 		
 		var header = document.getElementById("header");
 		header.appendChild(functionListSelect);
@@ -256,7 +252,7 @@ leftColumn.removeChild(functionListWrap);
 			var height = wrapRect.height;
 			var scrollTop = functionListWrap.scrollTop;
 			var wrapperStart = wrapRect.top;
-			console.log("highlightCurrentFunction: wrapRect=" + JSON.stringify(wrapRect) + " scrollTo.parentElement.scrollTop=" + scrollTo.parentElement.scrollTop + " scrollTo.parentElement.parentElement.scrollTop=" + scrollTo.parentElement.parentElement.scrollTop + " scrollTo.parentElement.parentElement.parentElement.scrollTop=" + scrollTo.parentElement.parentElement.parentElement.scrollTop + " functionListSelect.scrollTop=" + functionListSelect.scrollTop + " functionListWrap.scrollTop=" + functionListWrap.scrollTop + " rect=" + JSON.stringify(rect));
+			//console.log("highlightCurrentFunction: wrapRect=" + JSON.stringify(wrapRect) + " scrollTo.parentElement.scrollTop=" + scrollTo.parentElement.scrollTop + " scrollTo.parentElement.parentElement.scrollTop=" + scrollTo.parentElement.parentElement.scrollTop + " scrollTo.parentElement.parentElement.parentElement.scrollTop=" + scrollTo.parentElement.parentElement.parentElement.scrollTop + " functionListSelect.scrollTop=" + functionListSelect.scrollTop + " functionListWrap.scrollTop=" + functionListWrap.scrollTop + " rect=" + JSON.stringify(rect));
 			
 			var alignToTop = true;
 			var alignToBottom = false;
@@ -271,25 +267,24 @@ leftColumn.removeChild(functionListWrap);
 			
 			// If function list has not been scrolled, center it on the current function
 			if(scrollTop == 0 || center === true) {
-				console.log("highlightCurrentFunction: Centering");
+				//console.log("highlightCurrentFunction: Centering");
 				scrollTo.scrollIntoView({block: "center"});
 			}
 			// Only scroll if needed
 			// Is it above the current view?
 			else if (rect.top < wrapperStart) {
-				console.log("highlightCurrentFunction: Aligning TOP because rect.top=" + rect.top + " is less then wrapperStart=" + wrapperStart);
+				//console.log("highlightCurrentFunction: Aligning TOP because rect.top=" + rect.top + " is less then wrapperStart=" + wrapperStart);
 				scrollTo.scrollIntoView(alignToTop);
 			}
 			// Is it below the current view?
 			else if (rect.bottom > (height + wrapperStart)) {
-				console.log("highlightCurrentFunction: Aligning BOTTOM because rect.bottom=" + rect.bottom + " is more then height=" + height + " plus wrapperStart=" + wrapperStart);
+				//console.log("highlightCurrentFunction: Aligning BOTTOM because rect.bottom=" + rect.bottom + " is more then height=" + height + " plus wrapperStart=" + wrapperStart);
 				scrollTo.scrollIntoView(alignToBottom);
 				//scrollTo.scrollIntoView({block: "end"});
 			}
 			// Else: don't scroll!
-			else {
-				console.log("highlightCurrentFunction: Not scrolling! rect.bottom=" + rect.bottom + " rect.top=" + rect.top + " height=" + height + " wrapperStart=" + wrapperStart);
-			}
+			//else {console.log("highlightCurrentFunction: Not scrolling! rect.bottom=" + rect.bottom + " rect.top=" + rect.top + " height=" + height + " wrapperStart=" + wrapperStart);}
+
 		}
 		
 		return true;
@@ -317,7 +312,7 @@ leftColumn.removeChild(functionListWrap);
 		if(!file.parsed) return;
 		
 		if(!file.parsed.functions) {
-			console.warn("No functions in file.parsed!");
+			//console.warn("No functions in file.parsed!");
 			hideFunctionList(file);
 			return;
 		}
@@ -325,12 +320,12 @@ leftColumn.removeChild(functionListWrap);
 		var objKeys = Object.keys(file.parsed.functions)
 		
 		if(objKeys.length == 0) {
-			console.warn("Zero functions in file.parsed!");
+			//console.warn("Zero functions in file.parsed!");
 			hideFunctionList(file);
 			return;
 		}
 		
-		console.time("updateFunctionList");
+		//console.time("updateFunctionList");
 		
 		var updatedDomModel = makeDomModel(file.parsed.functions);
 		
@@ -354,7 +349,7 @@ leftColumn.removeChild(functionListWrap);
 					if(updatedDomModel[i].lineNumber == domModel[i].lineNumber && updatedDomModel[i].arguments == domModel[i].arguments) {
 						// It did probably change name, so update it
 						
-						console.log("oldName=" + oldName);
+						//console.log("oldName=" + oldName);
 						
 						if(domModel[i].option) {
 							
@@ -365,14 +360,14 @@ leftColumn.removeChild(functionListWrap);
 							remakeFromScratch = false;
 						}
 						else {
-							console.warn("No option asociated with function " + functionName);
+							//console.warn("No option asociated with function " + functionName);
 							remakeFromScratch = true;
 							break;
 						}
 						
 					}
 					else {
-						console.log("Both name AND line number changed at the same time. It's safest to remake the whole list");
+						//console.log("Both name AND line number changed at the same time. It's safest to remake the whole list");
 						remakeFromScratch = true;
 						break;
 					};
@@ -386,7 +381,7 @@ leftColumn.removeChild(functionListWrap);
 					
 					if(!domModel[i].option) {
 						// Probably cause: Function was copied (same name, so only one option was created) and then renamed
-						console.warn("No option asociated with function " + functionName);
+						//console.warn("No option asociated with function " + functionName);
 						remakeFromScratch = true;
 						break;
 					}
@@ -422,12 +417,10 @@ leftColumn.removeChild(functionListWrap);
 				
 			}
 		}
-		else {
-			console.log("updatedDomModel.length=" + updatedDomModel.length + " domModel.length=" + domModel.length + "");
-		}
+		//else {console.log("updatedDomModel.length=" + updatedDomModel.length + " domModel.length=" + domModel.length + "");}
 		
 		if(remakeFromScratch) {
-			console.log("Creating the DOM for the function list from scratch!");
+			//console.log("Creating the DOM for the function list from scratch!");
 			loadFunctionList(file);
 		}
 		
@@ -437,7 +430,7 @@ leftColumn.removeChild(functionListWrap);
 		
 		
 		if(lengthOfLongestFunction > functionlistMaxCharacters) {
-			console.warn("There is a very long function name! The function list will not show all of it.");
+			//console.warn("There is a very long function name! The function list will not show all of it.");
 			lengthOfLongestFunction = functionlistMaxCharacters;
 		}
 		
@@ -450,7 +443,7 @@ leftColumn.removeChild(functionListWrap);
 			
 		}
 		
-		console.timeEnd("updateFunctionList");
+		//console.timeEnd("updateFunctionList");
 		
 		function updateName(option, newName) {
 			// Can't just set attribute name, need to remove the element and add it again! 
@@ -500,7 +493,7 @@ leftColumn.removeChild(functionListWrap);
 		
 		if(!file.parsed) return;
 		
-		console.log("Load functionlist for file.path=" + file.path);
+		//console.log("Load functionlist for file.path=" + file.path);
 		
 		if(file.parsed.functions) {
 			if(Object.keys(file.parsed.functions).length > 0) {
@@ -516,20 +509,18 @@ functionListSelect.setAttribute("filePath", file.path);
 				
 			}
 			else {
-				console.log("Hiding the function list because there are no functions parsed for file.path=" + file.path);
+				//console.log("Hiding the function list because there are no functions parsed for file.path=" + file.path);
 				hideFunctionList(file);
 			}
 		}
-		else {
-			console.log("No functions parsed for file.path=" + file.path);
-		}
+		//else {console.log("No functions parsed for file.path=" + file.path);}
 		
 	}
 	
 	function hideFunctionList(file) {
 		
-		if(file) console.log("Hiding the functionlist for file.path=" + file.path);
-		else console.log("Hiding the functionlist! file=" + file);
+		//if(file) console.log("Hiding the functionlist for file.path=" + file.path);
+		//else console.log("Hiding the functionlist! file=" + file);
 		
 		if(functionListWrap) {
 			if(functionListWrap.style.display != "none") {
@@ -539,8 +530,8 @@ functionListSelect.setAttribute("filePath", file.path);
 				functionListActive = false;
 				winMenuToggleFunctionlist.deactivate();
 				
-				console.log("Functionlist is now hidden");
-				console.log(UTIL.getStack("why hide function list?"));
+				//console.log("Functionlist is now hidden");
+				//console.log(UTIL.getStack("why hide function list?"));
 				
 			}
 		}
@@ -561,7 +552,7 @@ functionListSelect.setAttribute("filePath", file.path);
 	function showFunctionList(file) {
 		
 		if(!alwaysShowFunctionList) {
-			console.warn("Not showing function list because alwaysShowFunctionList=" + alwaysShowFunctionList);
+			//console.warn("Not showing function list because alwaysShowFunctionList=" + alwaysShowFunctionList);
 		return;
 		}
 		
@@ -575,11 +566,10 @@ functionListSelect.setAttribute("filePath", file.path);
 				
 				EDITOR.resizeNeeded();
 				
-				console.log("Functionlist is now visible");
+				//console.log("Functionlist is now visible");
 			}
-			else {
-				console.log("Functionlist was already visible!");
-			}
+			//else {console.log("Functionlist was already visible!");}
+
 		}
 	}
 	
@@ -591,10 +581,10 @@ functionListSelect.setAttribute("filePath", file.path);
 			
 		*/
 		
-		console.time("buildFunctionList");
+		//console.time("buildFunctionList");
 		
 		if(!functionListWrap && !forcedSingleRow) {
-console.warn("functionListWrap not available!");
+			//console.warn("functionListWrap not available!");
 		return;
 		}
 		
@@ -725,14 +715,14 @@ console.warn("functionListWrap not available!");
 		}
 		}
 		
-		console.timeEnd("buildFunctionList");
+		//console.timeEnd("buildFunctionList");
 		
 		
 		function addOption(func, thisIndex, array) {
 			
 			var functionName = func.name;
 			
-			console.log("build " + functionName);
+			//console.log("build " + functionName);
 			
 			var lastIndex = array.length-1;
 			var hasSubFunctions = thisIndex == lastIndex ? false : array[thisIndex+1].level > func.level;

@@ -123,7 +123,7 @@ unload: function unloadDictate() {
 				
 			}
 			recognition.onnomatch = function speechRecognitionNomatch(ev) {
-				console.log(ev);
+				//console.log(ev);
 				alertBox("Speech recognition (dictate) found no matching commands!");
 			}
 			
@@ -217,7 +217,7 @@ unload: function unloadDictate() {
 		
 		alertBox("Speech recognition (dictate) speechResult=" + speechResult);
 		
-		console.log ("Speech recognition (dictate) speechResult=" + speechResult);
+		//console.log ("Speech recognition (dictate) speechResult=" + speechResult);
 		
 		var file = EDITOR.currentFile;
 		var caret = file.caret;
@@ -227,7 +227,7 @@ unload: function unloadDictate() {
 		
 		file.insertText(speechResult);
 		
-		console.log(speechRecognitionEvent);
+		//console.log(speechRecognitionEvent);
 	}
 	
 	function isHTML(file) {

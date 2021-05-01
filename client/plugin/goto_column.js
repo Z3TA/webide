@@ -83,7 +83,7 @@
 			
 			var n = input.value;
 			
-			console.log("gotoColumn: n=" + n + " ...");
+			//console.log("gotoColumn: n=" + n + " ...");
 			
 			var file = EDITOR.currentFile;
 			
@@ -100,7 +100,7 @@
 				if(n < 1) n = 1;
 				if(n > file.grid[row].length) n = file.grid[row].length;
 				
-				console.log("gotoColumn: Placing caret on column " + n + " ...");
+				//console.log("gotoColumn: Placing caret on column " + n + " ...");
 				
 				file.moveCaretToCol(n-1);
 				

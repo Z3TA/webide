@@ -67,8 +67,8 @@ if(CHROMEBOOK) {
 	
 	function foundInFile(json) {
 		
-		console.log("foundInFile!!");
-		console.log(json);
+		//console.log("foundInFile!!");
+		//console.log(json);
 		
 		var fileId = json.id;
 		
@@ -80,10 +80,10 @@ if(CHROMEBOOK) {
 			append(file);
 		}
 		else {
-			console.log("Creating search report file: " + filePath + " fileId=" + fileId);
+			//console.log("Creating search report file: " + filePath + " fileId=" + fileId);
 			EDITOR.openFile(filePath, "", function(err, file) {
 				
-				console.log("Search report file creted: " + file.path + " fileId=" + fileId);
+				//console.log("Search report file creted: " + file.path + " fileId=" + fileId);
 				
 				if(err) throw err;
 				
@@ -94,7 +94,7 @@ if(CHROMEBOOK) {
 		
 		function append(reportFile) {
 			
-			console.log("Appending to search report file: " + reportFile.path + " grid.length=" + reportFile.grid.length + " text.length=" + reportFile.text.length + " fileId=" + fileId + " json.lineNr=" + json.lineNr);
+			//console.log("Appending to search report file: " + reportFile.path + " grid.length=" + reportFile.grid.length + " text.length=" + reportFile.text.length + " fileId=" + fileId + " json.lineNr=" + json.lineNr);
 			
 			// Make sure the second line of the report file has the regexp meta
 			// Even if there's only one row, grid length is 1
@@ -132,8 +132,8 @@ if(CHROMEBOOK) {
 			
 			var rowNr = json.lineNr-1;
 			
-			console.log("foundInFile!!");
-			console.log(json);
+			//console.log("foundInFile!!");
+			//console.log(json);
 			
 			// if the row is the same as last row, the line will be ignored (because it would look the same)
 			if(rowNr != lastRowNr) {
@@ -167,7 +167,7 @@ if(CHROMEBOOK) {
 		
 		var match = regExpString.match(new RegExp('^/(.*?)/([gimy]*)$'));
 		
-		console.log("regExpFromString match=" + JSON.stringify(match));
+		//console.log("regExpFromString match=" + JSON.stringify(match));
 		
 		return new RegExp(match[1], match[2]);
 	}
@@ -183,17 +183,17 @@ if(CHROMEBOOK) {
 		if(file.grid.length < 2) return false;
 		
 		if(file.rowText(1).slice(0,8) != "RegExp: ") {
-			console.log("isSearchReport: Second line does not start with RegExp: ");
+			//console.log("isSearchReport: Second line does not start with RegExp: ");
 			return false;
 		}
 		
 		if(text.search(/Line\s*?\d*:/) == -1) {
-			console.log("isSearchReport: Text does not contain Line ddd ");
+			//console.log("isSearchReport: Text does not contain Line ddd ");
 			return false;
 		}
 		
 		if(text.search(/^-*$/m) == -1) {
-			console.log("isSearchReport: Text does not contain -------- ");
+			//console.log("isSearchReport: Text does not contain -------- ");
 			return false;
 		}
 		
@@ -261,7 +261,7 @@ EDITOR.on("mouseMove", fifmousemove);
 			var arr = clickedRowText.match(reFifLine);
 			
 			if(arr == null) {
-				console.warn("Doesn't seem to be a line: " + clickedRowText);
+				//console.warn("Doesn't seem to be a line: " + clickedRowText);
 				return;
 			}
 			else if(arr.length != 2) throw new Error("arr.length=" + arr.length + " arr=" + JSON.stringify(arr) + "\nPattern doesn't match. Did you change how the line number is formatted?\nOr did the JavaScript engine update!? (then go write an angry message on the ECMAScript mailing list for changing the spec.)");
@@ -284,13 +284,13 @@ EDITOR.on("mouseMove", fifmousemove);
 			var matchSearchString = secondRowText.match(/RegExp: (.*)/);
 			
 			if(!matchSearchString) {
-console.warn("Could not find the search string that was used!");
+				//console.warn("Could not find the search string that was used!");
 			return;
 			}
 			
 			var regExpString = matchSearchString[1];
 			
-			console.log("regExpString=" + regExpString);
+			//console.log("regExpString=" + regExpString);
 			
 			
 			// Create a regEx to find the word(s) to highlight
@@ -303,31 +303,31 @@ console.warn("Could not find the search string that was used!");
 			var match = regExpString.match(new RegExp('^/(.*?)/([gimy]*)$'));
 			// sanity check here
 			
-			console.log("match=" + JSON.stringify(match));
+			//console.log("match=" + JSON.stringify(match));
 			
 			var regex = new RegExp(match[1], match[2]);
 			
-			console.log("regex=" + regex);
+			//console.log("regex=" + regex);
 			
-			console.log("flags=" + flags);
-			console.log("pattern=" + pattern);
-			console.log("regex.flags=" + regex.flags);
-			console.log("regex.source=" + regex.source);
+			//console.log("flags=" + flags);
+			//console.log("pattern=" + pattern);
+			//console.log("regex.flags=" + regex.flags);
+			//console.log("regex.source=" + regex.source);
 			
 			// Open the file, then go to the line, and highlight the search word
 			
-			console.log("line=" + lineNr);
-			console.log("path=" + path);
+			//console.log("line=" + lineNr);
+			//console.log("path=" + path);
 			
 			EDITOR.openFile(path, undefined, function highlightGoto(err, file) {
 				if(err) return alertBox("Failed to open file. Maybe it has moved?\npath=\n" + path + "\nError: " + err.message);
 				
-				console.log("file opened=" + file.path);
+				//console.log("file opened=" + file.path);
 				
 				// Scroll to and place the caret on the line
 				file.gotoLine(lineNr, function afterScrolled() {
 					
-					console.log("scrolled to the right place!?")
+					//console.log("scrolled to the right place!?")
 					
 					// Find all matches in the whole file (can be many!)
 					var result;
@@ -337,8 +337,8 @@ console.warn("Could not find the search string that was used!");
 					}
 					
 					// Highlight the matched words
-					console.log("words=" + words);
-					console.log("regex flags=" + regex.flags + " source=" + regex.source);
+					//console.log("words=" + words);
+					//console.log("regex flags=" + regex.flags + " source=" + regex.source);
 					for(var i=0; i<words.length; i++) {
 						file.highlightText(words[i]);						
 					}
@@ -351,7 +351,7 @@ console.warn("Could not find the search string that was used!");
 			
 			
 		}
-		else console.log("File is not a search report!");
+		//else console.log("File is not a search report!");
 		
 	}
 	
@@ -379,7 +379,7 @@ console.warn("Could not find the search string that was used!");
 				EDITOR.input = false;
 			}
 			
-			console.log("Search visible! EDITOR.input=" + EDITOR.input);
+			//console.log("Search visible! EDITOR.input=" + EDITOR.input);
 			
 			EDITOR.resizeNeeded();
 			EDITOR.renderNeeded();
@@ -398,7 +398,7 @@ return findInFiles(file);
 
 	function findInFiles(file) {
 		
-		console.log("divVisible=" + divVisible);
+		//console.log("divVisible=" + divVisible);
 			if(!divVisible) {
 				show_find_in_files();
 				var selectedText = file ? file.getSelectedText() : "";
@@ -489,7 +489,7 @@ if(typeof searchFolder != "string") throw new Error("searchFolder=" + searchFold
 		if(size > 40) size = 40;
 		if(size < 20) size = 20;
 		
-		console.log("EDITOR.currentFile.path=" + (EDITOR.currentFile ? EDITOR.currentFile.path : undefined) + " EDITOR.workingDirectory=" + EDITOR.workingDirectory + " size=" + size);
+		//console.log("EDITOR.currentFile.path=" + (EDITOR.currentFile ? EDITOR.currentFile.path : undefined) + " EDITOR.workingDirectory=" + EDITOR.workingDirectory + " size=" + size);
 		
 		progressBar = document.createElement("progress");
 		progressBar.setAttribute("class", "progress findFiles");
@@ -839,7 +839,7 @@ EDITOR.renderNeeded();
 					
 					// Highlight the matches
 					var matches = json.matches;
-					console.log("matches=" + matches);
+					//console.log("matches=" + matches);
 					for(var i=0; i<matches.length; i++) {
 						reportFile.highlightText(matches[i]);
 					}
@@ -887,7 +887,7 @@ EDITOR.renderNeeded();
 	}
 	
 	function findInFilesProgressStatus(status) {
-		console.log("findInFilesProgressStatus: " + JSON.stringify(status));
+		//console.log("findInFilesProgressStatus: " + JSON.stringify(status));
 		
 		// Whatever gives the highest percentage
 		progressBar.max = status.totalFoldersToSearch + status.totalFiles;

@@ -101,9 +101,8 @@
 		
 		for(var row = 0; row<file.grid.length; row++) {
 			if(file.grid[row].indentation != file.grid[row].indentationCharacters.length) {
-				console.warn("row=" + row + " indentation=" + file.grid[row].indentation + 
-				" indentationCharacters=" + UTIL.lbChars(file.grid[row].indentationCharacters) + 
-				" owned=" + file.grid[row].owned);
+				console.warn("row=" + row + " indentation=" + file.grid[row].indentation + " indentationCharacters=" + UTIL.lbChars(file.grid[row].indentationCharacters) + " owned=" + file.grid[row].owned);
+				
 				//if(showAlert) alertBox("Inconsistent indentation on line " + (row+1) + ". Expected " + file.grid[row].indentation + 
 					//" characters but there are " + file.grid[row].indentationCharacters.length + " (" + UTIL.lbChars(file.grid[row].indentationCharacters) + ")");
 				}
@@ -235,7 +234,7 @@
 		
 		// Only fix indentation if the parser has parsed the blocks so we know how much indentation to use
 		if(!file.parsed) {
-			console.log("File has not been parsed: " + file.path);
+			//console.log("File has not been parsed: " + file.path);
 			return done();
 		}
 		if(file.parsed.blockMatch !== true && file.parsed.blockMatch !== false) return done();
@@ -327,7 +326,7 @@
 	
 	function fixIndentation(file, row) {
 		
-		console.log("Fixing indentation on row=" + row);
+		//console.log("Fixing indentation on row=" + row);
 		
 		var grid = file.grid,
 		gridRow = grid[row],
@@ -348,20 +347,20 @@
 		}
 		
 		//console.log("defaultIndentationCharacters=" + defaultIndentationCharacters + " (" + defaultIndentationCharacters.length + ")");
-		console.log("fixIndentation: currentIndentationCharacters='" + currentIndentationCharacters + "' (" + currentIndentationCharacters.length + ")");
-		console.log("fixIndentation: shouldHaveIndentationCharacters='" + shouldHaveIndentationCharacters + "' (" + shouldHaveIndentationCharacters.length + ")");
+		//console.log("fixIndentation: currentIndentationCharacters='" + currentIndentationCharacters + "' (" + currentIndentationCharacters.length + ")");
+		//console.log("fixIndentation: shouldHaveIndentationCharacters='" + shouldHaveIndentationCharacters + "' (" + shouldHaveIndentationCharacters.length + ")");
 		
 		if(shouldHaveIndentationCharacters == currentIndentationCharacters) {
-			console.log("fixIndentation: Same characters!");
+			//console.log("fixIndentation: Same characters!");
 			return; // Do nothing 
 		}
 		else if(currentIndentationCharacters.length == shouldHaveIndentationCharacters.length) {
-			console.log("fixIndentation: Same character length! replacing.");
+			//console.log("fixIndentation: Same character length! replacing.");
 			// We only have to replace them!
 			gridRow.indentationCharacters = shouldHaveIndentationCharacters;
 		}
 		else {
-			console.log("fixIndentation: Updating characters...");
+			//console.log("fixIndentation: Updating characters...");
 			
 			// We'll remove the current characters and add the new ones
 			charactersToRemove = currentIndentationCharacters.length;

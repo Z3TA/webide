@@ -6,7 +6,7 @@
 		desc: "Shift+scroll to change emoji modifer",
 		load: function loadEmojiRoller() {
 			
-			console.log("Loading changeEmojiModifier:");
+			//console.log("Loading changeEmojiModifier:");
 			
 			EDITOR.on("mouseScroll", changeEmojiModifier);
 			
@@ -20,7 +20,7 @@
 	});
 	
 	function changeEmojiModifier(dir, steps, combo, scrollEvent) {
-		console.log("changeEmojiModifier: combo.sum=" + combo.sum + " dir=" + dir);
+		//console.log("changeEmojiModifier: combo.sum=" + combo.sum + " dir=" + dir);
 		if(combo.sum != SHIFT) return;
 		
 		var file = EDITOR.currentFile;
@@ -29,17 +29,17 @@
 		
 		if(caret.eol) {
 			if(file.grid[caret.row].length > 0) {
-				console.log("changeEmojiModifier: Caret on end of line. Stepping left...");
+				//console.log("changeEmojiModifier: Caret on end of line. Stepping left...");
 				file.moveCaretLeft(caret);
 			}
 			else {
-				console.log("changeEmojiModifier: On empty line!");
+				//console.log("changeEmojiModifier: On empty line!");
 				return;
 			}
 		}
 		
 		var char = file.getCharacterAt(caret);
-		console.log("changeEmojiModifier: dir=" + dir + " caret=" + JSON.stringify(caret) + " char=" + char);
+		//console.log("changeEmojiModifier: dir=" + dir + " caret=" + JSON.stringify(caret) + " char=" + char);
 		
 		if(dir != -1 && dir != 1) throw new Error("Expected dir=" + dir + " to be either one or minus one!");
 		
@@ -63,11 +63,11 @@
 		
 		for(var i=0; i<char.length; i++) {
 			if(skinTones.indexOf( char[i] ) != -1) {
-				console.log("changeEmojiModifier: Rotating skintones...");
+				//console.log("changeEmojiModifier: Rotating skintones...");
 				return rotate(skinTones, i);
 			}
 			else if(  UTIL.isSurrogateModifierStart( char[i] ) && UTIL.isSurrogateModifierEnd(char[i+1])  ) {
-				console.log("changeEmojiModifier: Rotating surrogateModifierEndings...");
+				//console.log("changeEmojiModifier: Rotating surrogateModifierEndings...");
 				return rotate(surrogateModifierEndings, i+1);
 			}
 		}
@@ -100,12 +100,12 @@
 			
 			var newChar = char.slice(0, charIndex) + comboArr[j] + char.slice(charIndex+1, char.length);
 			
-			console.log("changeEmojiModifier: char=" + char + " (" + JSON.stringify(charArr) + ") newChar=" + newChar + " (" + JSON.stringify(newChar.split('')) + ") charIndex=" + charIndex + " j=" + j + " comboArr[" + j + "]=" + comboArr[j] + " comboArr=" + JSON.stringify(comboArr) + "  i=" + i + "  ");
+			//console.log("changeEmojiModifier: char=" + char + " (" + JSON.stringify(charArr) + ") newChar=" + newChar + " (" + JSON.stringify(newChar.split('')) + ") charIndex=" + charIndex + " j=" + j + " comboArr[" + j + "]=" + comboArr[j] + " comboArr=" + JSON.stringify(comboArr) + "  i=" + i + "  ");
 			
-			console.log("changeEmojiModifier: caret=" + JSON.stringify(caret));
+			//console.log("changeEmojiModifier: caret=" + JSON.stringify(caret));
 			
 			file.deleteCharacter(caret);
-			console.log("changeEmojiModifier: After deletion caret=" + JSON.stringify(caret));
+			//console.log("changeEmojiModifier: After deletion caret=" + JSON.stringify(caret));
 			
 			file.putCharacter(newChar, caret);
 			

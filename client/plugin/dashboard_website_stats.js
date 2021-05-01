@@ -82,13 +82,13 @@
 			function readLines(err, resp) {
 				logsChecked++;
 				if(err) {
-					console.warn("requests_stat: " + err.message);
+					//console.warn("requests_stat: " + err.message);
 					logs[n] = 0;
 				}
 				else {
 					logs[n] = resp.totalLines;
 					totalHttpRequests += resp.totalLines;
-					console.log("requests_stat: n=" + n + " resp.totalLines=" + resp.totalLines);
+					//console.log("requests_stat: n=" + n + " resp.totalLines=" + resp.totalLines);
 				}
 				if(logsChecked == logsToCheck) {
 					
@@ -102,11 +102,11 @@
 					var last = 0;
 					for(var i=2; i<=6; i++) {
 						prev += logs[i];
-						console.log("requests_stat: logs[" + i + "]=" + logs[i] + " prev=" + prev);
+						//console.log("requests_stat: logs[" + i + "]=" + logs[i] + " prev=" + prev);
 					}
 					for(var i=7; i<=11; i++) {
 						last += logs[i];
-						console.log("requests_stat: logs[" + i + "]=" + logs[i] + " last=" + last);
+						//console.log("requests_stat: logs[" + i + "]=" + logs[i] + " last=" + last);
 					}
 					
 					previous.innerText = (prev).toLocaleString();
@@ -131,9 +131,8 @@ str = "+" + str;
 					logsChecked = 0;
 					
 				}
-				else {
-					console.log("requests_stat: n=" + n + " logsChecked=" + logsChecked + " logsToCheck=" + logsToCheck);
-				}
+				//else {console.log("requests_stat: n=" + n + " logsChecked=" + logsChecked + " logsToCheck=" + logsToCheck);}
+
 			}
 		}
 		
@@ -159,7 +158,7 @@ str = "+" + str;
 			
 			ctx.beginPath();
 			ctx.moveTo(x, y);
-			console.log("pageViewStat data="+ JSON.stringify(data));
+			//console.log("pageViewStat data="+ JSON.stringify(data));
 			for(var i=0; i<data.length; i++) {
 				x = canvasWidth / (data.length-1) * i;
 				y = canvasHeight - (canvasHeight / diff * (data[i]-min));

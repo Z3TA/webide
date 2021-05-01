@@ -40,7 +40,7 @@
 		if(!fileTabsActive) return;
 		if(winMenuToggleFileTabs) winMenuToggleFileTabs.activate();
 		
-		console.log("file_tabs: Loading file_tabs ...");
+		//console.log("file_tabs: Loading file_tabs ...");
 		
 		buildTabs();
 		
@@ -90,7 +90,7 @@
 		
 		setTimeout(function hideIfEmpty() {
 			if(Object.keys(EDITOR.files).length == 0) {
-				console.log("file_tabs: Hiding file tabs because no files are open!");
+				//console.log("file_tabs: Hiding file tabs because no files are open!");
 				hiddenBecauseEmty = true;
 				hideFileTabs();
 			}
@@ -163,7 +163,7 @@
 				//console.log(i + ": " + list[i].path);
 				if(list[i] == EDITOR.currentFile) break;
 			}
-			console.log("file_tabs:  i=" + i + " / " + (list.length-1));
+			//console.log("file_tabs:  i=" + i + " / " + (list.length-1));
 			EDITOR.showFile(list[i+1]); // Show the file to the right
 		}
 		return false;
@@ -197,7 +197,7 @@
 		
 		//orderFilesByFolder();
 		
-		console.log("file_tabs: Orderleft");
+		//console.log("file_tabs: Orderleft");
 		
 		EDITOR.currentFile.order-=1.5;
 		/*
@@ -220,7 +220,7 @@
 	}
 	
 	function orderTabRight() {
-		console.log("file_tabs: Orderright");
+		//console.log("file_tabs: Orderright");
 		
 		EDITOR.currentFile.order+=1.5;
 		/*
@@ -257,7 +257,7 @@ function switchTabInStandaloneMode() {
 		if(EDITOR.lastFileShowed == EDITOR.currentFile) throw new Error("EDITOR.lastFileShowed = EDITOR.currentFile = " + EDITOR.currentFile.path);
 		
 		if(EDITOR.lastFileShowed) EDITOR.showFile(EDITOR.lastFileShowed);
-		else console.warn("No file to switch to!");
+		//else console.warn("No file to switch to!");
 		
 		return PREVENT_DEFAULT;
 		
@@ -289,7 +289,7 @@ function switchTabInStandaloneMode() {
 		
 		if(!el) {
 			// Most likely the file was closed before the "finish saving" event listeners was called
-			console.warn("Saving '" + file.path + "', but it doesn't exist in file tabs!");
+			//console.warn("Saving '" + file.path + "', but it doesn't exist in file tabs!");
 			return true;
 		}
 		
@@ -339,11 +339,11 @@ function switchTabInStandaloneMode() {
 		EDITOR.dashboard.hide(); // Hide dashboard when switching to a file
 		
 		if(!EDITOR.files.hasOwnProperty(path)) {
-			console.warn("Trying to swith to a file that is not open! path=" + path + " EDITOR.files=" + JSON.stringify(Object.keys(EDITOR.files)));
+			//console.warn("Trying to swith to a file that is not open! path=" + path + " EDITOR.files=" + JSON.stringify(Object.keys(EDITOR.files)));
 			return;
 		}
 		
-		console.warn("Swithing to " + path);
+		//console.warn("Swithing to " + path);
 		
 		EDITOR.showFile(EDITOR.files[path]);
 		
@@ -353,7 +353,7 @@ function switchTabInStandaloneMode() {
 			EDITOR.resizeNeeded();
 			EDITOR.renderNeeded();
 		*/
-		console.log("file_tabs: Switched file to: " + path);
+		//console.log("file_tabs: Switched file to: " + path);
 		
 		
 	}
@@ -371,19 +371,19 @@ function switchTabInStandaloneMode() {
 		
 		var fileList = EDITOR.sortFileList(); // An array of files sorted by file.order
 		
-		console.warn("buildTabs: excludeFile=" + excludeFile + " fileList=" + JSON.stringify(fileList.map(function(f) {return f.path})));
+		//console.warn("buildTabs: excludeFile=" + excludeFile + " fileList=" + JSON.stringify(fileList.map(function(f) {return f.path})));
 		
 		if(excludeFile) {
 			if(fileList.indexOf(excludeFile) == -1) throw new Error("The file we want to exclude is not in the file list! excludeFile.path=" + excludeFile.path);
 			
 			var removed = fileList.splice(fileList.indexOf(excludeFile), 1);
 			
-			console.log("file_tabs: Excluded removed.path=" + removed.path);
+			//console.log("file_tabs: Excluded removed.path=" + removed.path);
 		}
 		
 		// Create tabs
 		for(var i=0; i<fileList.length; i++) {
-			console.log("file_tabs: file_tab_" + i + "=" + fileList[i].path);
+			//console.log("file_tabs: file_tab_" + i + "=" + fileList[i].path);
 			openTab(fileList[i].path);
 		}
 		
@@ -394,7 +394,7 @@ function switchTabInStandaloneMode() {
 		
 		if(path == undefined) throw new Error("Path is undefined!");
 		
-		console.log("file_tabs: openTab: " + path);
+		//console.log("file_tabs: openTab: " + path);
 		
 		var header = document.getElementById("header");
 		var tabList = document.getElementById("tabList");
@@ -408,7 +408,7 @@ function switchTabInStandaloneMode() {
 		var active = EDITOR.currentFile ? (EDITOR.currentFile.path==path) : false;
 		
 		
-		console.log("file_tabs: path=" + path + " active=" + active);
+		//console.log("file_tabs: path=" + path + " active=" + active);
 		
 		
 		if(!tabList) createTabList();
@@ -488,7 +488,7 @@ tabFileText.setAttribute("path", path);
 			
 			tabFolderItem.setAttribute("class", "tabFolderItem active" + single);
 			
-			console.log("file_tabs: tabFolderItem.class=" + tabFolderItem.getAttribute("class"));
+			//console.log("file_tabs: tabFolderItem.class=" + tabFolderItem.getAttribute("class"));
 			
 		}
 		else {
@@ -512,9 +512,9 @@ tabFileText.setAttribute("path", path);
 		
 		function keyPressOnFileTab(keydownEvent) {
 			var keyCodeDelete = 46;
-			console.log("file_tabs: keyPressOnFileTab: key=" + keydownEvent.key + " keyCode=" + keydownEvent.keyCode);
+			//console.log("file_tabs: keyPressOnFileTab: key=" + keydownEvent.key + " keyCode=" + keydownEvent.keyCode);
 			if(keydownEvent.key=="Delete" || keydownEvent.keyCode == keyCodeDelete) {
-				console.log("file_tabs: keyPressOnFileTab: Closing tab ...");
+				//console.log("file_tabs: keyPressOnFileTab: Closing tab ...");
 				closeTab(keydownEvent);
 				return false;
 			}
@@ -542,14 +542,14 @@ tabFileText.setAttribute("path", path);
 		function closeTab(ev) {
 			//var closeFileButton = ev.target;
 			
-			console.log("file_tabs: Closing tab for path=" + path);
+			//console.log("file_tabs: Closing tab for path=" + path);
 			
 			if(!EDITOR.files[path]) throw new Error("File path=" + path + " does not exist in EDITOR.files=" + JSON.stringify(Object.keys(EDITOR.files)));
 			
-			console.log("file_tabs: saved?" + (EDITOR.files[path].isSaved));
-			console.log("file_tabs: e.ctrlKey?" + ev.ctrlKey);
-			console.log("file_tabs: closeFileButton=" + closeFileButton);
-			console.log("file_tabs: closeFileButton.class=" + closeFileButton.getAttribute("class"));
+			//console.log("file_tabs: saved?" + (EDITOR.files[path].isSaved));
+			//console.log("file_tabs: e.ctrlKey?" + ev.ctrlKey);
+			//console.log("file_tabs: closeFileButton=" + closeFileButton);
+			//console.log("file_tabs: closeFileButton.class=" + closeFileButton.getAttribute("class"));
 			
 			
 			if(!EDITOR.files[path].isSaved && !ev.ctrlKey) {
@@ -573,7 +573,7 @@ tabFileText.setAttribute("path", path);
 				});
 				
 				//alertBox("File not saved.\nCtrl click to close without saving.");
-				console.log("file_tabs: closeFileButton.class=" + closeFileButton.getAttribute("class"));
+				//console.log("file_tabs: closeFileButton.class=" + closeFileButton.getAttribute("class"));
 				
 				closeFileButton.blur();
 				
@@ -593,7 +593,7 @@ tabFileText.setAttribute("path", path);
 			*/
 			
 			if(EDITOR.files.hasOwnProperty(path)) switchToFile(path);
-			else console.warn("File path=" + path + " does not exist in EDITOR.files=" + JSON.stringify(Object.keys(EDITOR.files)));
+			//else console.warn("File path=" + path + " does not exist in EDITOR.files=" + JSON.stringify(Object.keys(EDITOR.files)));
 			
 			clickEvent.preventDefault();
 			
@@ -615,7 +615,7 @@ tabFileText.setAttribute("path", path);
 		}
 		
 		function contextmenu(ev) {
-			console.log("file_tabs: Showing context menu... ev.target=", ev.target);
+			//console.log("file_tabs: Showing context menu... ev.target=", ev.target);
 			
 			if(MAC && ev.target.className=="closeFileTab") {
 
@@ -630,7 +630,7 @@ tabFileText.setAttribute("path", path);
 			function reopenFileTab() {
 				var filePath = closedTabs.pop();
 				
-				console.log("file_tabs: reopenFileTab: filePath=" + filePath);
+				//console.log("file_tabs: reopenFileTab: filePath=" + filePath);
 				
 				EDITOR.openFile(filePath, function(err, file) {
 if(err) alertBox(err.message);
@@ -640,12 +640,12 @@ if(err) alertBox(err.message);
 			
 			function closeAllOtherFiles(currentFile, combo) {
 				
-				console.log("file_tabs: contextmenu: combo=" + JSON.stringify(combo) + " path=" + path);
+				//console.log("file_tabs: contextmenu: combo=" + JSON.stringify(combo) + " path=" + path);
 				
 				EDITOR.ctxMenu.hide();
 				
 				for(var filePath in EDITOR.files) {
-					console.log("file_tabs: contextmenu: Attempting to close filePath=" + filePath + " path=" + path);
+					//console.log("file_tabs: contextmenu: Attempting to close filePath=" + filePath + " path=" + path);
 					if(filePath == path) continue;
 					if(!EDITOR.files[filePath].isSaved && !combo.ctrl) askBeforeClosing(filePath);
 					else EDITOR.closeFile(filePath);
@@ -693,11 +693,11 @@ if(err) alertBox(err.message);
 								var list = EDITOR.sortFileList();
 								for(var i=0; i<list.length; i++) {
 									if(list[i].path != testFiles[i]) {
-										console.log("file_tabs: Waiting for file to close: " + list[i].path);
+										//console.log("file_tabs: Waiting for file to close: " + list[i].path);
 										return setTimeout(wait, 100);
 									}
 								}
-								console.log("file_tabs: No unknown files found. Running test ...");
+								//console.log("file_tabs: No unknown files found. Running test ...");
 								return tryOrder();
 							}
 							
@@ -705,7 +705,7 @@ if(err) alertBox(err.message);
 								
 								EDITOR.currentFile = EDITOR.files["dirB/File4"];
 								
-								console.log("file_tabs: order=" + EDITOR.currentFile.order);
+								//console.log("file_tabs: order=" + EDITOR.currentFile.order);
 								
 								var list = EDITOR.sortFileList();
 								

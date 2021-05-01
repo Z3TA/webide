@@ -121,6 +121,7 @@
 			
 		}
 		else {console.warn("highlight: window.Worker=" + window.Worker + " not available!");}
+
 	}
 	
 	function highlightChangedFile(file) {

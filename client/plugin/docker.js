@@ -44,7 +44,7 @@ return;
 	});
 	
 	function toggleDocker() {
-		console.log("deamonAwake=" + deamonAwake);
+		//console.log("deamonAwake=" + deamonAwake);
 		if(deamonAwake) sleep();
 		else wakeup();
 		
@@ -55,7 +55,7 @@ windowMenu.hide();
 	
 	function checkDockerStatus(login) {
 		if(!login.tld) {
-			console.warn("Disabling Docker plugin");
+			//console.warn("Disabling Docker plugin");
 			EDITOR.disablePlugin("Docker", true);
 return;
 		}
@@ -63,7 +63,7 @@ return;
 		CLIENT.cmd("dockerDaemon", {command: "status"}, 120000, function dockerStatus(err, status) {
 			if(err) {
 				if(err.code == "ENOSUPPORT") {
-					console.warn("Disabling Docker plugin");
+					//console.warn("Disabling Docker plugin");
 					EDITOR.disablePlugin("Docker", true);
 					return;
 				}

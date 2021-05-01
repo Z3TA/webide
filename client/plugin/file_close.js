@@ -63,7 +63,7 @@
 	
 	function showCloseFileOptionMaybe(file, combo, caret, target) {
 		
-		console.log("file_close: target=", target, " target.path=" + target.path + " target.getAttribute('path')=" + target.getAttribute('path') + " target.id=" + target.id);
+		//console.log("file_close: target=", target, " target.path=" + target.path + " target.getAttribute('path')=" + target.getAttribute('path') + " target.id=" + target.id);
 		
 		if(target.className=="fileCanvas") {
 			var fileToBeClosed = file;

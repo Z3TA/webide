@@ -18,7 +18,7 @@
 			wmJsx = EDITOR.windowMenu.add(S("parse jsx"), [S("editor"), S("settings"), 50], toggleJsx);
 			wmJsx.domElement.title = "(can be buggy) enabled by default on .jsx and .tsx files";
 			EDITOR.loadSettings("jsx", EDITOR.settings.jsx, function connectionStatusSettingsLoaded(state) {
-				console.log("toggleJsx: loadSettings: state=" + JSON.stringify(state));
+				//console.log("toggleJsx: loadSettings: state=" + JSON.stringify(state));
 				if(state != EDITOR.settings.jsx) toggleJsx(state);
 			});
 			
@@ -42,7 +42,7 @@
 		}
 		else throw new Error("toState=" + JSON.stringify(toState) + " (" + (typeof toState) + ")");
 		
-		console.log("toggleJsx: toState=" + JSON.stringify(toState) + " state=" + state + " (" + (typeof state) + ")");
+		//console.log("toggleJsx: toState=" + JSON.stringify(toState) + " state=" + state + " (" + (typeof state) + ")");
 		
 		if(state === true) {
 			EDITOR.settings.jsx = false;
@@ -53,7 +53,7 @@
 			wmJsx.activate();
 		}
 		
-		console.log("toggleJsx: EDITOR.saveSettings: " + JSON.stringify(EDITOR.settings.jsx));
+		//console.log("toggleJsx: EDITOR.saveSettings: " + JSON.stringify(EDITOR.settings.jsx));
 		
 		EDITOR.saveSettings("jsx", EDITOR.settings.jsx);
 		

@@ -86,7 +86,7 @@
 			
 			var charNr = inputGoto.value;
 			
-			console.log("gotoChar " + charNr + " ...");
+			//console.log("gotoChar " + charNr + " ...");
 			
 			var file = EDITOR.currentFile;
 			
@@ -101,7 +101,7 @@
 				if(charNr < 1) charNr = 1;
 				if(charNr > file.text.length) charNr = file.text.length;
 				
-				console.log("Placing caret near character nr " + charNr + " ...");
+				//console.log("Placing caret near character nr " + charNr + " ...");
 				
 				file.moveCaretToIndex(charNr);
 				

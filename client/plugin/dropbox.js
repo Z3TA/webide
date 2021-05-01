@@ -184,7 +184,7 @@ alertBox(err.message);
 		//console.log("Dropbox: authWindow=" + authWindow);
 		
 		if(authWindow) {
-			console.warn("Dropbox: Already got an authWindow!");
+			//console.warn("Dropbox: Already got an authWindow!");
 			return;
 		}
 		

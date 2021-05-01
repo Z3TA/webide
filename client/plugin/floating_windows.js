@@ -76,10 +76,10 @@
 		
 		var isAtMaxWidth = screen.availWidth - window.innerWidth === 0; // Seems we can't resize a window that is maximized'
 		
-		console.log("splitScreen: browserWindowWidth=" + browserWindowWidth + " browserWindowHeight=" + browserWindowHeight + " isAtMaxWidth=" + isAtMaxWidth);
-		console.log("splitScreen: screenWidth=" + screenWidth + " screenHeight=" + screenHeight);
-		console.log("splitScreen: browserWindowPositionX=" + browserWindowPositionX + " browserWindowPositionY=" + browserWindowPositionY);
-		console.log("splitScreen: width1=" + width1 + " width2=" + width2 + " height=" + height);
+		//console.log("splitScreen: browserWindowWidth=" + browserWindowWidth + " browserWindowHeight=" + browserWindowHeight + " isAtMaxWidth=" + isAtMaxWidth);
+		//console.log("splitScreen: screenWidth=" + screenWidth + " screenHeight=" + screenHeight);
+		//console.log("splitScreen: browserWindowPositionX=" + browserWindowPositionX + " browserWindowPositionY=" + browserWindowPositionY);
+		//console.log("splitScreen: width1=" + width1 + " width2=" + width2 + " height=" + height);
 		
 		//editorCodeWindow.moveTo(0, 0);
 		editorCodeWindow.resizeTo(width1, height);
@@ -153,10 +153,10 @@
 			if(err) throw err;
 			
 			// Load the file in the other window
-			console.log("floatingWindow:openInNewWindow: browserWindow.window=", browserWindow.window);
+			//console.log("floatingWindow:openInNewWindow: browserWindow.window=", browserWindow.window);
 			var otherEditor = browserWindow.window.EDITOR;
 			
-			console.log("floatingWindow: otherEditor=", otherEditor);
+			//console.log("floatingWindow: otherEditor=", otherEditor);
 
 			var retryOpenCounter = 0;
 			var retryOpenMaxTries = 8;
@@ -165,14 +165,14 @@
 			else waitUntilLoggedIn();
 
 			function waitUntilLoggedIn() {
-				console.log("floatingWindow: waitUntilLoggedIn: retryOpenCounter=" + retryOpenCounter);
+				//console.log("floatingWindow: waitUntilLoggedIn: retryOpenCounter=" + retryOpenCounter);
 				otherEditor = browserWindow.window.EDITOR;
 				if(otherEditor == undefined) {
 					if(++retryOpenCounter > retryOpenMaxTries) throw new Error("Unable to talk to other window (after " + retryOpenCounter + " attempts)"); // Prevent eternal loop
 					setTimeout(waitUntilLoggedIn, 1000);
 					return;
 				}
-				console.log("floatingWindow: typeof otherEditor=" + (typeof otherEditor) + " otherEditor=", otherEditor);
+				//console.log("floatingWindow: typeof otherEditor=" + (typeof otherEditor) + " otherEditor=", otherEditor);
 				otherEditor.once("storageReady", openFileOnceConnected);
 			}
 

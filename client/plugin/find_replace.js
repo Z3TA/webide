@@ -335,7 +335,7 @@ regexOptionLabel.insertBefore(regexOption, regexOptionLabel.firstChild);
 			
 			if(EDITOR.currentFile.caret.index == caretIndex) shake(findButtonLeft);
 			
-			console.log("findReplace: findButtonLeft click: start=" + start + " var caretIndex=" + caretIndex + " EDITOR.currentFile.caret.index=" + EDITOR.currentFile.caret.index + " findButtonLeft.classList=" + findButtonLeft.classList);
+			//console.log("findReplace: findButtonLeft click: start=" + start + " var caretIndex=" + caretIndex + " EDITOR.currentFile.caret.index=" + EDITOR.currentFile.caret.index + " findButtonLeft.classList=" + findButtonLeft.classList);
 			
 		}, false);
 		
@@ -346,7 +346,7 @@ regexOptionLabel.insertBefore(regexOption, regexOptionLabel.firstChild);
 			if(EDITOR.currentFile.caret.index == caretIndex) shake(findButtonRight);
 			
 			
-			console.log("findReplace: findButtonRight click: start=" + start + " var caretIndex=" + caretIndex + " EDITOR.currentFile.caret.index=" + EDITOR.currentFile.caret.index + " findButtonRight.classList=" + findButtonRight.classList);
+			//console.log("findReplace: findButtonRight click: start=" + start + " var caretIndex=" + caretIndex + " EDITOR.currentFile.caret.index=" + EDITOR.currentFile.caret.index + " findButtonRight.classList=" + findButtonRight.classList);
 			// show an indicated that we looped!?
 		}, false);
 		
@@ -426,7 +426,7 @@ regexOptionLabel.insertBefore(regexOption, regexOptionLabel.firstChild);
 		var parentStyle = getComputedStyle(el.parentElement);
 		var originalParentOverflow = parentStyle.overflow;
 		
-		console.log("findReplace: shake: el.style.marginLeft=" + el.style.marginLeft + " style.marginLeft=" + style.marginLeft + " originalMargin=" + originalMargin);
+		//console.log("findReplace: shake: el.style.marginLeft=" + el.style.marginLeft + " style.marginLeft=" + style.marginLeft + " originalMargin=" + originalMargin);
 		
 		el.parentElement.style.overflow = "hidden"; // Prevent screwing with the layout
 		
@@ -498,7 +498,7 @@ regexOptionLabel.insertBefore(regexOption, regexOptionLabel.firstChild);
 			
 			if(discoveryBarIcon) discoveryBarIcon.classList.add("active");
 			
-			console.log("Search visible! EDITOR.input=" + EDITOR.input);
+			//console.log("Search visible! EDITOR.input=" + EDITOR.input);
 			
 			EDITOR.resizeNeeded();
 			EDITOR.renderNeeded();
@@ -536,7 +536,7 @@ regexOptionLabel.insertBefore(regexOption, regexOptionLabel.firstChild);
 	function findReplace(file) {
 		
 		if(file) {
-			console.log("searchVisible=" + searchVisible);
+			//console.log("searchVisible=" + searchVisible);
 			if(searchVisible) {
 				// Search right away
 				find(inputFind.value, file, regexOption.checked);
@@ -549,7 +549,7 @@ regexOptionLabel.insertBefore(regexOption, regexOptionLabel.firstChild);
 					// Put the selected text into the search box and make a search
 					inputFind.value = selectedText;
 					lastSearchEnd = file.selected[file.selected.length-1].index; // Begin search at the selected text
-					console.log("lastSearchEnd=" + lastSearchEnd);
+					//console.log("lastSearchEnd=" + lastSearchEnd);
 					EDITOR.resize(); // Recalculate height so that the highlight dont show outside the screen
 					find(inputFind.value, file, regexOption.checked);
 				}
@@ -589,7 +589,7 @@ regexOptionLabel.insertBefore(regexOption, regexOptionLabel.firstChild);
 		
 		lastSearchDirection = direction;
 		
-		console.log("search: useRegex=" + useRegex + " ignoreCase=" + ignoreCase);
+		//console.log("search: useRegex=" + useRegex + " ignoreCase=" + ignoreCase);
 		
 		if(useRegex) {
 			
@@ -643,7 +643,7 @@ regexOptionLabel.insertBefore(regexOption, regexOptionLabel.firstChild);
 				}
 				
 				if(index == -1) {
-					console.log("Search did not find anything!");
+					//console.log("Search did not find anything!");
 					return -1;
 				}
 				
@@ -661,14 +661,14 @@ regexOptionLabel.insertBefore(regexOption, regexOptionLabel.firstChild);
 				
 				if(result == null && !dontLoop) {
 					// Try again from the top
-					console.log("Trying again from the start");
+					//console.log("Trying again from the start");
 					re.lastIndex = 0;
 					result = re.exec(text);
 					
 				}
 				
 				if(result == null) {
-					console.log("Search did not find anything!");
+					//console.log("Search did not find anything!");
 					return -1;
 				}
 				
@@ -717,7 +717,7 @@ regexOptionLabel.insertBefore(regexOption, regexOptionLabel.firstChild);
 				
 				if(start == -1 && !dontLoop) {
 					// Try again from the top
-					console.log("Trying again from the start");
+					//console.log("Trying again from the start");
 					if(ignoreCase) start = text.toLowerCase().indexOf(str.toLowerCase())
 					else start = text.indexOf(str);
 				}
@@ -725,7 +725,7 @@ regexOptionLabel.insertBefore(regexOption, regexOptionLabel.firstChild);
 			
 			searchStrLenght = str.length;
 			
-			console.log("lastSearchStrLength=" + lastSearchStrLength);
+			//console.log("lastSearchStrLength=" + lastSearchStrLength);
 			
 			end = start + searchStrLenght;
 			
@@ -776,7 +776,7 @@ regexOptionLabel.insertBefore(regexOption, regexOptionLabel.firstChild);
 			if(start < lastStart) throw new Error("Find loop detected!");
 			lastStart = start;
 			start = find(str, file, useRegex, true, true, "right", ignoreCase);
-			console.log("start=" + start);
+			//console.log("start=" + start);
 
 		}
 		
@@ -790,7 +790,7 @@ regexOptionLabel.insertBefore(regexOption, regexOptionLabel.firstChild);
 	
 	function replace(newString, searchString, file, useRegex, dontLoop, ignoreCase) {
 		
-		console.log("Replacing '" + searchString + "' with '" + newString + "'");
+		//console.log("Replacing '" + searchString + "' with '" + newString + "'");
 		
 		lastSearchEnd = file.caret.index;
 		
@@ -812,9 +812,9 @@ regexOptionLabel.insertBefore(regexOption, regexOptionLabel.firstChild);
 			
 			var selectedText = file.getSelectedText();
 			
-			console.log("Replacing at start=" + start);
+			//console.log("Replacing at start=" + start);
 			
-			console.log("selectedText=" + selectedText + " searchString=" + searchString + " useRegex=" + useRegex);
+			//console.log("selectedText=" + selectedText + " searchString=" + searchString + " useRegex=" + useRegex);
 			
 			// we might be replacing new line characters
 			if(selectedText.length == 0) {
@@ -830,7 +830,7 @@ regexOptionLabel.insertBefore(regexOption, regexOptionLabel.firstChild);
 				}
 
 				if(text.length == 0) {
-					console.log("text.length=" + text.length + " start=" + start + " nextFind=" + nextFind);
+					//console.log("text.length=" + text.length + " start=" + start + " nextFind=" + nextFind);
 					shake(replaceButton);
 					return;
 				}
@@ -867,7 +867,7 @@ regexOptionLabel.insertBefore(regexOption, regexOptionLabel.firstChild);
 					var re = new RegExp(searchString, flags);
 					newString = selectedText.replace(re, newString);
 					
-					console.log("Regex replacing '" + selectedText + "' with '" + newString + "'");
+					//console.log("Regex replacing '" + selectedText + "' with '" + newString + "'");
 					
 					EDITOR.stat("replace_regexp");
 				}
@@ -893,7 +893,7 @@ regexOptionLabel.insertBefore(regexOption, regexOptionLabel.firstChild);
 		
 		lastSearchEnd = -1; // Begin from the start
 		
-		console.log("Replace all " + searchString + " width " + newString);
+		//console.log("Replace all " + searchString + " width " + newString);
 		
 		var flags = "g";
 		if(ignoreCase) flags += "i";

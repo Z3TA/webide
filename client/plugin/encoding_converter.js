@@ -18,7 +18,7 @@
 		if(file.text == undefined) return;
 		
 		if(!file.savedAs) {
-console.warn("encoding_converter.js currently do not suppor unsaved files!"); 
+			//console.warn("encoding_converter.js currently do not suppor unsaved files!"); 
 		return;
 		}
 		
@@ -91,7 +91,7 @@ console.warn("encoding_converter.js currently do not suppor unsaved files!");
 				b[i] = d;
 			else {
 				var c = s.charAt(i);
-				console.warn(c + ' is NOT an ASCII character');
+				//console.warn(c + ' is NOT an ASCII character');
 				b[i] = -1;
 			}
 		}
