@@ -73,7 +73,7 @@
 		var row = file.caret.row;
 		var col = file.caret.col;
 		
-		console.log("file.parsed.languag=" + file.parsed.languag);
+		//console.log("file.parsed.languag=" + file.parsed.languag);
 		
 		if(file.parsed.language=="VBScript") {
 			
@@ -82,7 +82,7 @@
 			var insideTag = isInsideRe(file.text, index, "<[^%]", "[^%]>");
 			var insideASP = isInside(file.text, index, "<%", "%>");
 			
-			console.log("insideASP=" + insideASP + " insideTag=" + insideTag);
+			//console.log("insideASP=" + insideASP + " insideTag=" + insideTag);
 			
 			if(insideASP && insideTag) {
 				file.insertText('""');
@@ -148,7 +148,7 @@
 			// Check if the quote has an ending quote
 			for(var i=col+1; i<rowText.length; i++) {
 				char = rowText.charAt(i);
-				console.log("char=" + char);
+				//console.log("char=" + char);
 				if(char == quote) {
 					openQuote = false; // It's closed
 					break;
@@ -159,17 +159,17 @@
 		var xor = ( ( openQuote|inQuote && !openQuote|inQuote ) || ( !openQuote|inQuote && openQuote|inQuote ) );
 		
 		
-		console.log("quote=" + quote);
-		console.log("dblQuote=" + dblQuote);
-		console.log("singleQuote=" + singleQuote);
-		console.log("inQuote=" + inQuote);
-		console.log("insideDbl=" + insideDbl);
-		console.log("insideSingle=" + insideSingle);
-		console.log("openQuote=" + openQuote);
-		console.log("lastCharacter=" + lastCharacter);
-		console.log("nextCharacter=" + nextCharacter);
-		console.log("xor=" + xor);
-		console.log("file.parsed.language=" + file.parsed.language);
+		//console.log("quote=" + quote);
+		//console.log("dblQuote=" + dblQuote);
+		//console.log("singleQuote=" + singleQuote);
+		//console.log("inQuote=" + inQuote);
+		//console.log("insideDbl=" + insideDbl);
+		//console.log("insideSingle=" + insideSingle);
+		//console.log("openQuote=" + openQuote);
+		//console.log("lastCharacter=" + lastCharacter);
+		//console.log("nextCharacter=" + nextCharacter);
+		//console.log("xor=" + xor);
+		//console.log("file.parsed.language=" + file.parsed.language);
 		
 		if(lastCharacter != "\\" && lastCharacter != quote && nextCharacter != quote) {
 			

@@ -67,7 +67,7 @@ EDITOR.discoveryBar.remove(discoveryBarIcon);
 		
 		var file = EDITOR.currentFile;
 		if(!file) {
-			console.warn("Unable to run preview: No file open!");
+			//console.warn("Unable to run preview: No file open!");
 			return;
 		}
 		

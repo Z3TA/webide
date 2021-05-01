@@ -2,7 +2,7 @@
 	"use strict";
 	
 	if(QUERY_STRING["disable_nodejsautocomplete"]) {
-		console.warn("autoCompleteNode: Disabled by query string");
+		//console.warn("autoCompleteNode: Disabled by query string");
 		return;
 	}
 	
@@ -107,7 +107,7 @@ prototype: {
 		var openCurlyBrackets = 0;
 		for(var i=caret.index-1, c; i>0; i--) {
 			c = file.text[i];
-			console.log("autoCompleteNode: insideFunctionCall: Searching left: i=" + i + " c=" + c + " foundLeftParenthesis=" + foundLeftParenthesis + " word=" + word + " commasLeft=" + commasLeft + " openParenthesis=" + openParenthesis);
+			//console.log("autoCompleteNode: insideFunctionCall: Searching left: i=" + i + " c=" + c + " foundLeftParenthesis=" + foundLeftParenthesis + " word=" + word + " commasLeft=" + commasLeft + " openParenthesis=" + openParenthesis);
 			if(foundLeftParenthesis) {
 				if(c=="}" || c=="]" || c==")" || c==";" || c=="=") {
 					break;
@@ -139,14 +139,14 @@ prototype: {
 		
 		word = word.replace(/\s/g, "").trim();
 		
-		console.log("autoCompleteNode: insideFunctionCall: word=" + word);
+		//console.log("autoCompleteNode: insideFunctionCall: word=" + word);
 		
 		if(!foundLeftParenthesis) {
-			console.log("autoCompleteNode: insideFunctionCall: Returning null because foundLeftParenthesis=" + foundLeftParenthesis);
+			//console.log("autoCompleteNode: insideFunctionCall: Returning null because foundLeftParenthesis=" + foundLeftParenthesis);
 			return null;
 		}
 		if(!word) {
-			console.log("autoCompleteNode: insideFunctionCall: Returning null because word=" + word);
+			//console.log("autoCompleteNode: insideFunctionCall: Returning null because word=" + word);
 			return null;
 		}
 		
@@ -162,9 +162,7 @@ prototype: {
 			}
 		}
 		
-		if(i==file.text.length) {
-			console.warn("autoCompleteNode: insideFunctionCall: i=" + i + " and file.text.length=" + file.text.length + " (did not find the right parenthesis) word=" + word);
-		}
+		//if(i==file.text.length) {console.warn("autoCompleteNode: insideFunctionCall: i=" + i + " and file.text.length=" + file.text.length + " (did not find the right parenthesis) word=" + word);}
 		
 		return {word: word, commasLeft: commasLeft, commasRight: commasRight};
 		
@@ -179,7 +177,7 @@ prototype: {
 		
 		var scope = UTIL.scope(file.caret.index, file.parsed.functions, file.parsed.globalVariables);
 		
-		console.log("autoCompleteNode: findModuleInScope: variableName=" + variableName);
+		//console.log("autoCompleteNode: findModuleInScope: variableName=" + variableName);
 		
 		if(scope.variables.hasOwnProperty(variableName)) {
 			if(scope.variables[variableName].value == "require") {
@@ -187,7 +185,7 @@ prototype: {
 				var requireArgs = scope.variables[variableName].args;
 				var moduleNameStr = requireArgs.replace("(", "").replace(")", "").replace(/'/g, "").replace(/"/g, "").trim();
 				
-				console.log("autoCompleteNode: findModuleInScope: variableName=" + variableName + " moduleNameStr=" + moduleNameStr);
+				//console.log("autoCompleteNode: findModuleInScope: variableName=" + variableName + " moduleNameStr=" + moduleNameStr);
 				
 				if( moduleInfoCache[moduleNameStr] ) {
 					callback(null, moduleInfoCache[moduleNameStr]);
@@ -209,9 +207,8 @@ prototype: {
 				});
 				return true;
 			}
-			else {
-				console.log("autoCompleteNode: findModuleInScope: scope.variables[" + variableName + "].value=" + scope.variables[variableName].value + " (not require)");
-			}
+			//else {console.log("autoCompleteNode: findModuleInScope: scope.variables[" + variableName + "].value=" + scope.variables[variableName].value + " (not require)");}
+
 		}
 		
 		callback(new Error("Did not find any variable named " + variableName + " in scope=" + JSON.stringify(scope, null, 2)));
@@ -223,7 +220,7 @@ prototype: {
 	function showArgumentHint(file, caret, argStr, argIndex) {
 		var args = argStr.split(",");
 		
-		console.log("autoCompleteNode: showArgumentHint: args.length=" + args.length + " argIndex=" + argIndex);
+		//console.log("autoCompleteNode: showArgumentHint: args.length=" + args.length + " argIndex=" + argIndex);
 		
 		if(argIndex < args.length) {
 			// Highlight the current parameter
@@ -235,7 +232,7 @@ prototype: {
 	
 	function autoCompleteNode(file, wordToComplete, wordLength, gotOptions, callback) {
 		
-		console.log("autoCompleteNode: wordToComplete=" + wordToComplete);
+		//console.log("autoCompleteNode: wordToComplete=" + wordToComplete);
 		
 		if(!file.parsed) return;
 		if(file.parsed.language != "JS") return;
@@ -245,7 +242,7 @@ prototype: {
 			var options = [];
 		for (var i=0, match; i<nodeGlobalFunctions.length; i++) {
 			match = (nodeGlobalFunctions[i].name.substr(0, wordLength) == wordToComplete);
-			console.warn("autoCompleteNode: Do wordToComplete=" + wordToComplete + " match function name=" + nodeGlobalFunctions[i].name + "? " + match);
+				//console.warn("autoCompleteNode: Do wordToComplete=" + wordToComplete + " match function name=" + nodeGlobalFunctions[i].name + "? " + match);
 			if(match) options.push([nodeGlobalFunctions[i].name + "()", 1]);
 		}
 		if(options.length > 0) return options;
@@ -255,10 +252,10 @@ prototype: {
 		var fc = insideFunctionCall(file, file.caret);
 		if(fc) {
 			
-			console.log("autoCompleteNode: fc.word=" + fc.word);
+			//console.log("autoCompleteNode: fc.word=" + fc.word);
 			
 			if(fc.word == "require") {
-				console.log("autoCompleteNode: Inside a require call!");
+				//console.log("autoCompleteNode: Inside a require call!");
 				// Autocomplete built-in Node.JS module names if inside require() call
 				
 				var strToCompleteStartsWithQuote = wordToComplete.charAt(0);
@@ -292,11 +289,11 @@ prototype: {
 				// Find module method fc.word
 				var found = findModuleInScope(file, fc.word, function(err, moduleInfo) {
 					if(err) {
-						console.log("autoCompleteNode: Unable to find module info about " + fc.word + " (inside function call) Error: " + err.message);
+						//console.log("autoCompleteNode: Unable to find module info about " + fc.word + " (inside function call) Error: " + err.message);
 						return;
 					}
 					
-					console.log("autoCompleteNode: fc=" + JSON.stringify(fc));
+					//console.log("autoCompleteNode: fc=" + JSON.stringify(fc));
 					
 					// Get mehod name chain
 					var words = fc.word.split(".");
@@ -304,16 +301,16 @@ prototype: {
 					words.unshift(moduleInfo.nameStr);
 					var fName = words.join(".");
 					
-					console.log("autoCompleteNode: fName=" + fName + "");
+					//console.log("autoCompleteNode: fName=" + fName + "");
 					
-					console.log("autoCompleteNode: moduleInfo.functions=" + JSON.stringify(moduleInfo.functions, null, 2));
+					//console.log("autoCompleteNode: moduleInfo.functions=" + JSON.stringify(moduleInfo.functions, null, 2));
 					
-					console.log("autoCompleteNode: moduleInfo.functions.length=" + moduleInfo.functions.length);
+					//console.log("autoCompleteNode: moduleInfo.functions.length=" + moduleInfo.functions.length);
 					
 					for(var i=0; i<moduleInfo.functions.length; i++) {
-						console.log("autoCompleteNode: function " + i + " name=" + moduleInfo.functions[i].name + " arguments=" + moduleInfo.functions[i].arguments);
+						//console.log("autoCompleteNode: function " + i + " name=" + moduleInfo.functions[i].name + " arguments=" + moduleInfo.functions[i].arguments);
 						if(moduleInfo.functions[i].name == fName) {
-							console.log("autoCompleteNode: Found fName=" + fName + " arguments=" + moduleInfo.functions[i].arguments);
+							//console.log("autoCompleteNode: Found fName=" + fName + " arguments=" + moduleInfo.functions[i].arguments);
 							return showArgumentHint(file, file.caret, moduleInfo.functions[i].arguments, fc.commasLeft);
 						}
 					}
@@ -321,19 +318,17 @@ prototype: {
 				});
 				
 				if(found) {
-					console.log("autoCompleteNode: Not autocompleting because we are maybe showing function argument helper");
+					//console.log("autoCompleteNode: Not autocompleting because we are maybe showing function argument helper");
 					return;
 				}
 			}
 		}
-		else {
-console.log("autoCompleteNode: Not inside a function call!");
-		}
+		//else {console.log("autoCompleteNode: Not inside a function call!");}
 		
 		// Check parsed variables from current file, check if value=="require", then check what the module returns
 		var found = findModuleInScope(file, wordToComplete, function(err, moduleInfo) {
 			if(err) {
-				console.log("autoCompleteNode: Unable to get info about the " + wordToComplete + " module: Error: " + err.message);
+				//console.log("autoCompleteNode: Unable to get info about the " + wordToComplete + " module: Error: " + err.message);
 				return callback();
 			}
 			
@@ -345,13 +340,13 @@ console.log("autoCompleteNode: Not inside a function call!");
 			
 			findin(moduleInfo.variables)
 			
-			console.log("autoCompleteNode: Calling back with opptions=" + JSON.stringify(options));
+			//console.log("autoCompleteNode: Calling back with opptions=" + JSON.stringify(options));
 			
 			callback(options);
 			
 			function findin(variables) {
 				
-				console.log("autoCompleteNode: findin: variables:" + JSON.stringify(  Object.keys(variables)  ) + " objectChain[" + i + "]=" + objectChain[i]);
+				//console.log("autoCompleteNode: findin: variables:" + JSON.stringify(  Object.keys(variables)  ) + " objectChain[" + i + "]=" + objectChain[i]);
 				
 				for(var name in variables) {
 					if(objectChain[i] == "") {

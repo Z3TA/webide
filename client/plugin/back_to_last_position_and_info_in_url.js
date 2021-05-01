@@ -86,12 +86,12 @@
 		var hash = window.location.hash;
 		var state = parseHash(hash);
 
-		console.warn("url-history: checkUrlParametersOnStart: hash=" + hash + " state=" + JSON.stringify(state));
+		//console.warn("url-history: checkUrlParametersOnStart: hash=" + hash + " state=" + JSON.stringify(state));
 
 		// Wait until the file has fully loaded
 		// The editor is probably re-opening a bunch of files...
 		setTimeout(function() {
-			console.warn("url-history: checkUrlParametersOnStart: Calling navigate()...");
+			//console.warn("url-history: checkUrlParametersOnStart: Calling navigate()...");
 			navigate(state, true);
 		}, 2000);
 		
@@ -193,7 +193,7 @@ if(last == undefined) return patchObj();
 		if(PROJECT_NAME == currentState.project && BRANCH_NAME == currentState.branch && PATH == currentState.path && LINE == currentState.line) return; // No need to push another history
 
 		if(LINE == ignoreMoveLine) {
-			console.log("url-history: setUrl: Ignoring LINE=" + LINE + " ignoreMoveLine=" + ignoreMoveLine + " ");
+			//console.log("url-history: setUrl: Ignoring LINE=" + LINE + " ignoreMoveLine=" + ignoreMoveLine + " ");
 			return;
 		}
 
@@ -209,18 +209,18 @@ if(last == undefined) return patchObj();
 		var hash = hashFromState(currentState);
 		
 		if( hash == ignoreHashChange) {
-			console.log("url-history: setUrl: Not doing a pushState because hash==ignoreHashChange=" + ignoreHashChange);
+			//console.log("url-history: setUrl: Not doing a pushState because hash==ignoreHashChange=" + ignoreHashChange);
 			return;
 		}
 
 		if(hash == window.location.hash) {
-			console.log("url-history: setUrl: Not doing a pushState because hash=" + hash + " is already what we where going to save!");
+			//console.log("url-history: setUrl: Not doing a pushState because hash=" + hash + " is already what we where going to save!");
 			return;
 		}
 
 		var url = window.location.search + hash;
 
-		console.warn("url-history: setUrl: (pushState) url= " + url + " ignoreHashChange=" + ignoreHashChange + " stack=" + UTIL.getStack("pushState") );
+		//console.warn("url-history: setUrl: (pushState) url= " + url + " ignoreHashChange=" + ignoreHashChange + " stack=" + UTIL.getStack("pushState") );
 
 		// error1: SecurityError: The operation is insecure.
 		// error2: Too many calls to Location or History APIs within a short timeframe.
@@ -256,7 +256,7 @@ if(last == undefined) return patchObj();
 			var lastLineJump = lastJump[file.path].row + file.partStartRow + 1;
 		}
 
-		console.log("url-history: changeFileInUrl (fileShow " + file.path + "): lastLineJump=" + lastLineJump + " currentLine=" + currentLine + " ");
+		//console.log("url-history: changeFileInUrl (fileShow " + file.path + "): lastLineJump=" + lastLineJump + " currentLine=" + currentLine + " ");
 
 		if(lastLineJump) LINE = lastLineJump;
 		else LINE = currentLine;
@@ -280,18 +280,18 @@ if(last == undefined) return patchObj();
 
 		var state = ev.state;
 
-		console.log("url-history: browserNavigation: state=", state);
+		//console.log("url-history: browserNavigation: state=", state);
 
 		if(!state) return;
 
 		var hash = hashFromState(state);
 		if(ignoreHashChange == hash) {
-			console.log("url-history: browserNavigation: Ignoring ignoreHashChange=" + ignoreHashChange + " hash=" + hash + "");
+			//console.log("url-history: browserNavigation: Ignoring ignoreHashChange=" + ignoreHashChange + " hash=" + hash + "");
 			return;
 		}
 		else {
 			ignoreHashChange = window.location.hash;
-			console.log("url-history: browserNavigation: Setting ignoreHashChange=" + ignoreHashChange);
+			//console.log("url-history: browserNavigation: Setting ignoreHashChange=" + ignoreHashChange);
 		}
 
 		navigate(state);
@@ -303,12 +303,12 @@ if(last == undefined) return patchObj();
 		var hash = window.location.hash;
 		
 		if(ignoreHashChange == hash) {
-			console.log("url-history: hashChange: Ignoring ignoreHashChange=" + ignoreHashChange + " hash=" + hash + "");
+			//console.log("url-history: hashChange: Ignoring ignoreHashChange=" + ignoreHashChange + " hash=" + hash + "");
 			return;
 		}
 		else {
 			ignoreHashChange = hash;
-			console.log("url-history: hashChange: Setting ignoreHashChange=" + ignoreHashChange);
+			//console.log("url-history: hashChange: Setting ignoreHashChange=" + ignoreHashChange);
 		}
 
 		var state = parseHash(hash);
@@ -317,26 +317,26 @@ if(last == undefined) return patchObj();
 
 	function navigate(state, openFileIfNotOpen) {
 
-		console.log("url-history: navigate: state=" + JSON.stringify(state));
+		//console.log("url-history: navigate: state=" + JSON.stringify(state));
 
 		if(state.project && state.project != EDITOR.project) EDITOR.changeProject(state.project);
 		if(state.branch && state.branch != EDITOR.branch) EDITOR.checkoutSCMBranch(state.branch);
 		if(state.path && EDITOR.currentFile && state.path != EDITOR.currentFile.path) {
 			if( EDITOR.files.hasOwnProperty(state.path) ) {
-				console.warn("url-history: navigate: Showing file path=" + state.path);
+				//console.warn("url-history: navigate: Showing file path=" + state.path);
 				EDITOR.showFile(state.path);
 				fileOpened();
 			}
 			else if( openFileIfNotOpen ) {
 				if( UTIL.isLocalPath(state.path) ) {
-					console.warn("url-history: navigate: Opening file path=" + state.path);
+					//console.warn("url-history: navigate: Opening file path=" + state.path);
 					EDITOR.openFile(state.path, fileOpened);
 				}
-				else console.log("url-history: navigate: Not opening " + state.path + " because it's not a local file-path");
+				//else console.log("url-history: navigate: Not opening " + state.path + " because it's not a local file-path");
 			}
-			else console.log("url-history: navigate: Not changing to " + state.path + " because it's not open and openFileIfNotOpen=" + openFileIfNotOpen + "");
+			//else console.log("url-history: navigate: Not changing to " + state.path + " because it's not open and openFileIfNotOpen=" + openFileIfNotOpen + "");
 		}
-		else console.log("url-history: navigate: Not changing to " + state.path + " because it's already the current file path=" + state.path);
+		//else console.log("url-history: navigate: Not changing to " + state.path + " because it's already the current file path=" + state.path);
 
 		checkLine();
 
@@ -354,10 +354,10 @@ if(last == undefined) return patchObj();
 			if(state.line && EDITOR.currentFile && state.path && EDITOR.currentFile.path == state.path && state.line != EDITOR.currentFile.currentLine()) {
 				// Moving to another line would trigger a pushstate!
 				ignoreMoveLine = state.line;
-				console.warn("url-history: navigate: checkLine: Switching to line=" + state.line + " and Setting ignoreMoveLine=" + ignoreMoveLine);
+				//console.warn("url-history: navigate: checkLine: Switching to line=" + state.line + " and Setting ignoreMoveLine=" + ignoreMoveLine);
 				EDITOR.currentFile.gotoLine(state.line);
 			}
-			else console.log("url-history: navigate: checkLine: Not switching line because current file is already on line=" + state.line);
+			//else console.log("url-history: navigate: checkLine: Not switching line because current file is already on line=" + state.line);
 		}
 	}
 
@@ -367,7 +367,7 @@ if(last == undefined) return patchObj();
 
 	function moveCaretBackToLastPosition(file) {
 
-		console.log("url-history: to_last_position: moveCaretBackToLastPosition! file.path=" + file.path + " ");
+		//console.log("url-history: to_last_position: moveCaretBackToLastPosition! file.path=" + file.path + " ");
 
 		if( lastJump.hasOwnProperty(file.path) ) {
 
@@ -382,7 +382,7 @@ if(last == undefined) return patchObj();
 			var row = lastJump[file.path].row;
 			var col = lastJump[file.path].col;
 
-			console.log("url-history: to_last_position: moveCaretBackToLastPosition: row=" + row + " lastCaretPos=", lastCaretPos[file.path]);
+			//console.log("url-history: to_last_position: moveCaretBackToLastPosition: row=" + row + " lastCaretPos=", lastCaretPos[file.path]);
 
 			file.moveCaret(undefined, row);
 
@@ -393,7 +393,7 @@ if(last == undefined) return patchObj();
 
 		}
 		else if(lastFile) {
-			console.log("url-history: to_last_position: moveCaretBackToLastPosition: Showing last file =" + lastFile.path);
+			//console.log("url-history: to_last_position: moveCaretBackToLastPosition: Showing last file =" + lastFile.path);
 			EDITOR.show(lastFile);
 		}
 		else {
@@ -407,7 +407,7 @@ if(last == undefined) return patchObj();
 
 		// Note: We want to save the caret postion we where on *before* the jump, not the new position!
 
-		console.log("url-history: rememberCaretPosition: file.path=" + file.path + " stack=" + UTIL.getStack("rememberCaretPosition"));
+		//console.log("url-history: rememberCaretPosition: file.path=" + file.path + " stack=" + UTIL.getStack("rememberCaretPosition"));
 
 		if( !lastJump.hasOwnProperty(file.path) ) {
 			lastJump[file.path] = {
@@ -422,7 +422,7 @@ if(last == undefined) return patchObj();
 				col: caret.col
 			};
 
-			console.log("url-history: rememberCaretPosition: init! file.path=" + file.path + " lastJump=", lastJump[file.path]);
+			//console.log("url-history: rememberCaretPosition: init! file.path=" + file.path + " lastJump=", lastJump[file.path]);
 
 		}
 		else {
@@ -430,7 +430,7 @@ if(last == undefined) return patchObj();
 			var jump = Math.abs(lastCaretPos[file.path].row - caret.row);
 			if( jump > EDITOR.view.visibleRows ) {
 
-				console.log("url-history: rememberCaretPosition: before-update file.path=" + file.path + " lastJump=", lastJump[file.path]);
+				//console.log("url-history: rememberCaretPosition: before-update file.path=" + file.path + " lastJump=", lastJump[file.path]);
 
 				// Moving more then visible rows counts as a big jump
 			
@@ -441,12 +441,12 @@ if(last == undefined) return patchObj();
 				lastJump[file.path].row = lastCaretPos[file.path].row;
 				lastJump[file.path].col = lastCaretPos[file.path].col;
 
-				console.log("url-history: rememberCaretPosition: update! file.path=" + file.path + " lastCaretPos=",  lastCaretPos[file.path]);
+				//console.log("url-history: rememberCaretPosition: update! file.path=" + file.path + " lastCaretPos=",  lastCaretPos[file.path]);
 			}
-			else {console.log("url-history: rememberCaretPosition: file.path=" + file.path + " Not long enough jump=" + jump + " EDITOR.view.visibleRows=" + EDITOR.view.visibleRows + " lastCaretPos=", lastCaretPos[file.path]);}
+			//else {console.log("url-history: rememberCaretPosition: file.path=" + file.path + " Not long enough jump=" + jump + " EDITOR.view.visibleRows=" + EDITOR.view.visibleRows + " lastCaretPos=", lastCaretPos[file.path]);}
 
 
-			console.log("url-history: file.path=" + file.path + " Set lastCaretPos=", lastCaretPos[file.path]);
+			//console.log("url-history: file.path=" + file.path + " Set lastCaretPos=", lastCaretPos[file.path]);
 			lastCaretPos[file.path].index = caret.index;
 			lastCaretPos[file.path].row = caret.row;
 			lastCaretPos[file.path].col = caret.col;

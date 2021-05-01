@@ -23,19 +23,19 @@
 		var tagStart = charBeforeWord == "<";
 		var tagEnd = charBeforeWord == "/";
 		
-		console.log("autoCompleteJSX: word=" + word + " charBeforeWord=" + charBeforeWord + " tagStart=" + tagStart + " tagEnd=" + tagEnd);
+		//console.log("autoCompleteJSX: word=" + word + " charBeforeWord=" + charBeforeWord + " tagStart=" + tagStart + " tagEnd=" + tagEnd);
 		
 		// Don't insert tag ending if we are inside a tag opening eg <foo ...
 		for (var i=file.caret.index; i>file.grid[file.caret.row].startIndex-1; i--) {
-			console.log("autoCompleteJSX: " + file.text.charAt(i));
+			//console.log("autoCompleteJSX: " + file.text.charAt(i));
 			if(file.text.charAt(i) == ">") break;
 			if(file.text.charAt(i) == "<") {
-				console.log("autoCompleteJSX: Not autocompleting tag ending because inside tag");
+				//console.log("autoCompleteJSX: Not autocompleting tag ending because inside tag");
 				return;
 			}
 
 		}
-		console.log("autoCompleteJSX: not inside tag");
+		//console.log("autoCompleteJSX: not inside tag");
 
 		var options = [];
 		var optionsToRemove = [];
@@ -44,7 +44,7 @@
 			
 			var scope = UTIL.scope(file.caret.index, file.parsed.functions, file.parsed.globalVariables);
 			
-			console.log(scope);
+			//console.log(scope);
 			
 			
 			var complStr = "";
@@ -52,7 +52,7 @@
 			
 			for(var fName in scope.functions) {
 				if(fName.slice(0,wordLength) == word) {
-					console.log("autoCompleteJSX: " + fName.slice(0,wordLength) + " == " + word + " => " + fName);
+					//console.log("autoCompleteJSX: " + fName.slice(0,wordLength) + " == " + word + " => " + fName);
 					
 					optionsToRemove.push(fName + "()");
 					
@@ -71,7 +71,7 @@
 			}
 		}
 		
-		console.log("autoCompleteJSX: options.length=" + options.length + " gotOptions=" + gotOptions + " word.length=" + word.length);
+		//console.log("autoCompleteJSX: options.length=" + options.length + " gotOptions=" + gotOptions + " word.length=" + word.length);
 		// Why only autocomplete when on an emty line!?  && word.length == 0
 		if(options.length == 0 && gotOptions == 0) {
 			// Close last opened tag
@@ -84,7 +84,7 @@
 			if(lastOpenXmlTag.length == 0) return;
 			if(lastOpenXmlTag == "<") return;
 			
-			console.log("autoCompleteJSX: lastOpenXmlTag=" + lastOpenXmlTag);
+			//console.log("autoCompleteJSX: lastOpenXmlTag=" + lastOpenXmlTag);
 			
 			if(lastOpenXmlTag.match(/script/i) && word.length > 0) return; // Avoid adding </script> when inside a script element
 			if( lastOpenXmlTag.match(/!DOCTYPE/i) ) return;
@@ -92,16 +92,14 @@
 			options.push(word + "</" + lastOpenXmlTag + ">");
 			
 		}
-		else {
-			console.log("autoCompleteJSX: options=" + JSON.stringify(options) + " gotOptions=" + gotOptions);
-		}
+		//else {console.log("autoCompleteJSX: options=" + JSON.stringify(options) + " gotOptions=" + gotOptions);}
 		
 		if(options.length > 0) return {add: options, remove: optionsToRemove};
 		
 	}
 	
 	function props(parameterStr) {
-		console.log("autoCompleteJSX:props: parameterStr=" + parameterStr);
+		//console.log("autoCompleteJSX:props: parameterStr=" + parameterStr);
 		var propsStr = ""
 		var arr = parameterStr.split(",");
 		

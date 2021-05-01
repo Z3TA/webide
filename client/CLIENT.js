@@ -242,7 +242,7 @@ throw new Error("Second argument json (" + (typeof json) + ") must be an object!
 		else if(requestThatDontCallBack.indexOf(req) == -1) {
 			// The following error will be thrown if the server call back with this id
 			noCallbackList[id] = new Error(req + " seems to want a callback function!");
-			console.warn("CLIENT: No callback defined for req=" + req);
+			//console.warn("CLIENT: No callback defined for req=" + req);
 		}
 		
 		//console.log("CLIENT: Sending: " + UTIL.shortString(string) + " to server ...");
@@ -356,17 +356,12 @@ throw new Error("Second argument json (" + (typeof json) + ") must be an object!
 		
 		//console.log("CLIENT: firing client event '" + ev + "' data=" + data + "");
 		
-		if(!eventListeners.hasOwnProperty(ev)) {
-			console.warn("CLIENT: No registered event listener for ev=" + ev)
-		}
-		else {
+		if(eventListeners.hasOwnProperty(ev)) {
 			// Call all event listeners
 			
 			var f = eventListeners[ev].slice(0);
 			
-			if(eventListeners[ev].length == 0) {
-				console.warn("CLIENT: No event listeners for event=" + ev);
-			}
+			//if(eventListeners[ev].length == 0) {console.warn("CLIENT: No event listeners for event=" + ev);}
 			
 			//console.log("CLIENT: Calling listeners: ", f.map(function(f) {return UTIL.getFunctionName(f)}));
 			
@@ -376,13 +371,15 @@ throw new Error("Second argument json (" + (typeof json) + ") must be an object!
 			}
 			
 		}
+		//else console.warn("CLIENT: No registered event listener for ev=" + ev)
+
 	}
 	
 	
 	CLIENT.removeEvent = function(eventName, fun) {
 		
 		if(!eventListeners.hasOwnProperty(eventName)) {
-			console.warn("CLIENT: Unknown event: eventName=" + eventName);
+			//console.warn("CLIENT: Unknown event: eventName=" + eventName);
 			return;
 		}
 		
@@ -433,13 +430,13 @@ throw new Error("Second argument json (" + (typeof json) + ") must be an object!
 			}
 			catch(err) {
 				serviceWorkerError = true;
-				console.warn("CLIENT: editorVersion: Failed to post message to server worker: " + err.message);
+				//console.warn("CLIENT: editorVersion: Failed to post message to server worker: " + err.message);
 			}
 		}
 		//else {console.log("CLIENT: editorVersion: ServiceWorker not supported on BROWSER=" + BROWSER);}
 		
 		if(EDITOR.version == 0 && EDITOR.settings.devMode) {
-			console.warn("CLIENT: editorVersion: Ignoring editor version upgrade from " + oldVersion + " to " + newVersion + " because we are in development mode!");
+			//console.warn("CLIENT: editorVersion: Ignoring editor version upgrade from " + oldVersion + " to " + newVersion + " because we are in development mode!");
 			return;
 		}
 		else if(newVersion != oldVersion && lastUsedserver && lastUsedserver.url.indexOf(window.location.hostname) == -1) {
@@ -447,10 +444,9 @@ throw new Error("Second argument json (" + (typeof json) + ") must be an object!
 		}
 		else if(newVersion > oldVersion) {
 			// Wait until serviceWorker has updated the cache ...
-			if(serviceWorkerError) {
-console.warn("CLIENT: editorVersion: Unable to talk to service worker! No point refreshing.");
-			}
-			else setTimeout(refresh, 10000); // The wait must be enough to make sure the service worker has refreshed the cache!
+			if(!serviceWorkerError) setTimeout(refresh, 10000); // The wait must be enough to make sure the service worker has refreshed the cache!
+			// else console.warn("CLIENT: editorVersion: Unable to talk to service worker! No point refreshing.");
+
 		}
 		
 		function refresh() {
@@ -467,7 +463,7 @@ console.warn("CLIENT: editorVersion: Unable to talk to service worker! No point 
 				//console.log("CLIENT: editorVersion: server=" + newVersion + " version.txt=" + version);
 				
 				if(version < newVersion && !serviceWorkerError) {
-					console.warn("CLIENT: editorVersion: Force refresh the cache!");
+					//console.warn("CLIENT: editorVersion: Force refresh the cache!");
 					navigator.serviceWorker.controller.postMessage("forceRefresh=" + newVersion);
 					setTimeout(refresh, 20000);
 				}
@@ -525,10 +521,7 @@ reconnectTimeoutTime += 10000;
 		
 		CLIENT.connected = true;
 		
-		if(msg.length == 0) {
-			console.warn("CLIENT: Recieved emty messsage from server");
-		}
-		else {
+		if(msg.length > 0) {
 			try {
 				var json = JSON.parse(msg)
 			}
@@ -537,14 +530,12 @@ reconnectTimeoutTime += 10000;
 				return;
 			}
 			
-CLIENT.lastMsgFromServer = json;
+			CLIENT.lastMsgFromServer = json;
 
-			if(json.error) {
-				console.warn("CLIENT: Server ERROR: " + json.error + " id=" + json.id + " error: code=" + json.error.code + " errorCode=" + json.error.errorCode);
-			}
+			//if(json.error) {console.warn("CLIENT: Server ERROR: " + json.error + " id=" + json.id + " error: code=" + json.error.code + " errorCode=" + json.error.errorCode);}
 			
 			if(json.code && json.code == "WORKER_CLOSE") {
-CLIENT.fireEvent("workerClose");
+				CLIENT.fireEvent("workerClose");
 				
 				/*
 					The user worker process closing means that all requests in flight will fail!
@@ -555,7 +546,7 @@ CLIENT.fireEvent("workerClose");
 			
 
 
-}
+			}
 			
 			if(json.resp) {
 				var resp = json.resp;
@@ -580,7 +571,7 @@ CLIENT.fireEvent("workerClose");
 					
 					if(json.error) {
 						var errMsg = "Server: " + json.error;
-						console.warn(errMsg + " code=" + json.errorCode);
+						//console.warn(errMsg + " code=" + json.errorCode);
 						err = properCallStackError[json.id] || new Error(errMsg);
 						err = UTIL.updateError(err, json.errorCode, errMsg);
 					}
@@ -593,7 +584,7 @@ CLIENT.fireEvent("workerClose");
 					delete callbackThrown[json.id];
 					//}
 					//catch(errorInCallback) {
-						//generalError = errorInCallback;
+					//generalError = errorInCallback;
 					//}
 					
 				}
@@ -619,7 +610,7 @@ CLIENT.fireEvent("workerClose");
 				
 			}
 			else if(json.msg) {
-				console.warn("CLIENT: " + json.msg);
+				//console.warn("CLIENT: " + json.msg);
 				alertBox(json.msg, json.code || "SERVER_MSG");
 			}
 			else if(!json.resp) {
@@ -629,21 +620,23 @@ CLIENT.fireEvent("workerClose");
 						CLIENT.fireEvent(method, json[method]);
 					}
 					else if(EDITOR.settings.devMode) {
-console.error(new Error("Unexpected server response. (No registered event listener for " + method + ")\n" + JSON.stringify(json, null, 2)));
-					// Might be an event without a listener!
+						console.error(new Error("Unexpected server response. (No registered event listener for " + method + ")\n" + JSON.stringify(json, null, 2)));
+						// Might be an event without a listener!
 					}
 				}
 				
 			}
 			
 		}
+		// else console.warn("CLIENT: Recieved emty messsage from server");
+
 	}
 	
 	function startPing() {
 		//console.log("CLIENT: ping! start sendingPings=" + sendingPings);
 		
 		if(sendingPings) {
-			console.warn("CLIENT: ping! Already sending pings!");
+			//console.warn("CLIENT: ping! Already sending pings!");
 			return;
 		}
 		
@@ -671,7 +664,7 @@ console.error(new Error("Unexpected server response. (No registered event listen
 			clearTimeout(pingTimeout);
 			
 			if(pingErr) {
-				console.log("CLIENT: ping! pingErr.code=" + pingErr.code);
+				//console.log("CLIENT: ping! pingErr.code=" + pingErr.code);
 				CLIENT.ping = Infinity;
 				
 				// Don't stop the ping due to pingErr, because we don't know when to start the ping again

@@ -11,7 +11,7 @@
 var windowMenu;
 	var discoveryBarIcon;
 	
-	console.log("android.js");
+	//console.log("android.js");
 	
 	EDITOR.plugin({
 		desc: "Android support",
@@ -24,7 +24,7 @@ CLIENT.on("androidEmulatorStatus", androidEmulatorStatus);
 
 			CLIENT.on("loginSuccess", disableAndroidSupportMaybe);
 			
-			console.log("android.js plugin loaded!");
+			//console.log("android.js plugin loaded!");
 			
 		},
 		unload: function unloadAndroid() {
@@ -41,7 +41,7 @@ EDITOR.discoveryBar.remove(discoveryBarIcon);
 	
 	function disableAndroidSupportMaybe(login) {
 		if(!login.tld) {
-console.warn("Disabling Android AVD plugin");
+			//console.warn("Disabling Android AVD plugin");
 EDITOR.disablePlugin("Android support", true);
 return;
 }
@@ -89,9 +89,7 @@ function startEmulator() {
 					
 					return;
 				}
-				else {
-					console.log("Android emulator started successfully!?");
-				}
+				//else {console.log("Android emulator started successfully!?");}
 
 				windowMenu.activate();
 				discoveryBarIcon.classList.add("active");

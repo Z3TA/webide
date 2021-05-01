@@ -14,7 +14,7 @@
 	var windowMenu;
 	
 if(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("docker") != -1) {
-console.warn("Docker disabled via query string!");
+		//console.warn("Docker disabled via query string!");
 return;
 }
 

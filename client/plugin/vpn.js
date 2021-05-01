@@ -24,7 +24,7 @@
 	var winMenuItem;
 	
 if(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("vpn") != -1) {
-console.warn("VPN disabled via query string!");
+		//console.warn("VPN disabled via query string!");
 return;
 }
 
@@ -63,7 +63,7 @@ unload: function unloadVpnSupport() {
 	
 	function checkVpnStatus(login) {
 if(!login.tld) {
-console.warn("Disabling VPN plugin");
+			//console.warn("Disabling VPN plugin");
 EDITOR.disablePlugin("Connect to VPN server", true);
 return;
 }
@@ -71,7 +71,7 @@ return;
 		CLIENT.cmd("vpn", {type: "wireguard", command: "status", conf: configPath}, function vpnStatus(err, status) {
 			if(err) {
 				if(err.code == "ENOSUPPORT") {
-					console.warn("Disabling VPN plugin");
+					//console.warn("Disabling VPN plugin");
 					EDITOR.disablePlugin("Connect to VPN server", true);
 					return;
 				}

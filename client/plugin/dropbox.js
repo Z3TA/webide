@@ -49,7 +49,7 @@
 	
 	function checkIfDropboxIsRunning(login) {
 if(!login.tld) {
-console.warn("Disabling Dropbox plugin");
+			//console.warn("Disabling Dropbox plugin");
 EDITOR.disablePlugin("Mount Dropbox", true);
 return;
 }

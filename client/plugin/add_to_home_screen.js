@@ -13,10 +13,10 @@
 
 (function() {
 	
-	console.log("A2HS: Loading ...");
+	//console.log("A2HS: Loading ...");
 	
 	if(DISPLAY_MODE == "standalone") {
-console.log('A2HS: Already running from "shelf" (DISPLAY_MODE=' + DISPLAY_MODE + '). Will not ask user to add to desktop/home screen"');
+		//console.log('A2HS: Already running from "shelf" (DISPLAY_MODE=' + DISPLAY_MODE + '). Will not ask user to add to desktop/home screen"');
 	return;
 	}
 	
@@ -31,7 +31,7 @@ console.log('A2HS: Already running from "shelf" (DISPLAY_MODE=' + DISPLAY_MODE +
 	
 	if(localhost) {
 		
-		console.warn("A2HS: Not asking to install because we are running on localhost!");
+		//console.warn("A2HS: Not asking to install because we are running on localhost!");
 		return;
 		
 		// Chrome added a huge white top bar when launching from desktop and http: (no SSL)
@@ -63,10 +63,10 @@ console.log('A2HS: Already running from "shelf" (DISPLAY_MODE=' + DISPLAY_MODE +
 	
 	
 	function appinstalled(evt) {
-		console.log('A2HS: Got appinstalled event!');
+		//console.log('A2HS: Got appinstalled event!');
 		
 		if(installed) {
-console.warn("A2HS: Already got appinstalled event!");
+			//console.warn("A2HS: Already got appinstalled event!");
 		return;
 		}
 		
@@ -108,12 +108,16 @@ EDITOR.windowMenu.remove(windowMenuAdd2HS);
 				deferredPrompt.prompt();
 				// Wait for the user to respond to the prompt
 				deferredPrompt.userChoice.then(function (choiceResult) {
-					if (choiceResult.outcome === 'accepted') {
+
+					/*
+						if (choiceResult.outcome === 'accepted') {
 						console.log('A2HS: User accepted the A2HS prompt');
-					}
-					else {
+						}
+						else {
 						console.log('A2HS: User dismissed the A2HS prompt');
-					}
+						}
+					*/
+
 					deferredPrompt = null;
 					});
 			}

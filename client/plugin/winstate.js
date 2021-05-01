@@ -3,7 +3,7 @@
 	//alert("RUNTIME=" + RUNTIME);
 	
 	if(RUNTIME != "nw.js") {
-		console.warn("Winstate only supported in nw.js!");
+		//console.warn("Winstate only supported in nw.js!");
 		return;
 	}
 	
@@ -134,7 +134,7 @@ else {
 			checkWindowSate();
 		}
 		catch(e) {
-			console.warn("The window state was reset from " + JSON.stringify(winState));
+			//console.warn("The window state was reset from " + JSON.stringify(winState));
 			
 			winState.x = 0;
 			winState.y = 0;
@@ -149,7 +149,7 @@ else {
 			winState.height = winState.height - deltaHeight
 		}
 		
-		console.log("winState=" + JSON.stringify(winState));
+		//console.log("winState=" + JSON.stringify(winState));
 		
 		win.resizeTo(winState.width, winState.height);
 		win.moveTo(winState.x, winState.y);

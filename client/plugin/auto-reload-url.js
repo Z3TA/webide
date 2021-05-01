@@ -42,13 +42,13 @@ var oldSource;
 							//console.log("auto-reload-url: checkURL: oldSource=", oldSource, "\n\nsource=" + source);
 
 							if(oldSource != source) {
-								console.log("auto-reload-url: checkURL: Source has been updated!");
+								//console.log("auto-reload-url: checkURL: Source has been updated!");
 								//win.location.reload(); // Permission denied to access property "reload" on cross-origin object (code=18)
 								win.location=url;
 								setTimeout(checkURL, 3000);
 							}
 							else {
-								console.log("auto-reload-url: checkURL: Source not changed!");
+								//console.log("auto-reload-url: checkURL: Source not changed!");
 								setTimeout(checkURL, 2000);
 							}
 

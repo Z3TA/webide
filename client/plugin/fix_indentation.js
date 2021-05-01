@@ -97,18 +97,18 @@
 		// Try to detect bugs in this plugin
 		if(!EDITOR.settings.devMode) return true; 
 		
-		console.time("Check indentation after fix on file update");
+		//console.time("Check indentation after fix on file update");
 		
 		for(var row = 0; row<file.grid.length; row++) {
 			if(file.grid[row].indentation != file.grid[row].indentationCharacters.length) {
-				console.warn("row=" + row + " indentation=" + file.grid[row].indentation + " indentationCharacters=" + UTIL.lbChars(file.grid[row].indentationCharacters) + " owned=" + file.grid[row].owned);
+				//console.warn("row=" + row + " indentation=" + file.grid[row].indentation + " indentationCharacters=" + UTIL.lbChars(file.grid[row].indentationCharacters) + " owned=" + file.grid[row].owned);
 				
 				//if(showAlert) alertBox("Inconsistent indentation on line " + (row+1) + ". Expected " + file.grid[row].indentation + 
 					//" characters but there are " + file.grid[row].indentationCharacters.length + " (" + UTIL.lbChars(file.grid[row].indentationCharacters) + ")");
 				}
 		}
 		
-		console.timeEnd("Check indentation after fix on file update");
+		//console.timeEnd("Check indentation after fix on file update");
 	}
 	
 	function checkIndentationOnBeforeParser(file, type, character, index, row, col) {
