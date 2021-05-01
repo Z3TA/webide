@@ -26,7 +26,7 @@ function Dialog(msg, options) {
 	
 	dialog.code = options.code || "MISC";
 	
-	console.log(UTIL.getStack("Creating dialog: code=" + dialog.code + " msg=" + msg));
+	//console.log(UTIL.getStack("Creating dialog: code=" + dialog.code + " msg=" + msg));
 	
 	if(msg == undefined) throw new Error("Dialog without a message! msg=" + msg);
 	
@@ -39,7 +39,7 @@ function Dialog(msg, options) {
 	var body = document.getElementById("body") || document.body;
 	
 	if(!body) {
-		console.warn("Dialog created before html body is available");
+		//console.warn("Dialog created before html body is available");
 		return 1;
 	}
 	
@@ -56,9 +56,8 @@ function Dialog(msg, options) {
 				dialog.repeat = EDITOR.openDialogs[i];
 				return 0;
 			}
-			else {
-				console.log("Not the same:\n" + msg + "\n" + EDITOR.openDialogs[i].message);
-			}
+			//else {console.log("Not the same:\n" + msg + "\n" + EDITOR.openDialogs[i].message);}
+
 		}
 	}
 	
@@ -115,7 +114,7 @@ function Dialog(msg, options) {
 		//alert(icon);
 		// If an icon is used adjust it's size
 		var messageHeight = parseInt(message.offsetHeight);
-		console.log("messageHeight=" + messageHeight);
+		//console.log("messageHeight=" + messageHeight);
 		img.setAttribute("height", Math.round(messageHeight / 2));
 		
 		if(message.childNodes.length == 1) {
@@ -189,7 +188,7 @@ function Dialog(msg, options) {
 			ref: https://www.w3.org/TR/wai-aria-practices/examples/dialog-modal/alertdialog.html
 		*/
 		var keyCodeEsc = 27;
-		console.log("dialogKeyDown: key=" + keydownEvent.key + " keyCode=" + keydownEvent.keyCode);
+		//console.log("dialogKeyDown: key=" + keydownEvent.key + " keyCode=" + keydownEvent.keyCode);
 		if(keydownEvent.key=="Escape" || keydownEvent.keyCode == keyCodeEsc) {
 			dialog.close();
 			return false;
@@ -200,7 +199,7 @@ function Dialog(msg, options) {
 	function focusDefaultElement(ev) {
 		// Give focus to the element with attribute focus:true
 		
-		console.warn("focusDefaultElement! ev.target.className=" + (ev && ev.target && ev.target.className) + " EDITOR.lastElementWithFocus=", EDITOR.lastElementWithFocus + " document.activeElement=", document.activeElement);
+		//console.warn("focusDefaultElement! ev.target.className=" + (ev && ev.target && ev.target.className) + " EDITOR.lastElementWithFocus=", EDITOR.lastElementWithFocus + " document.activeElement=", document.activeElement);
 
 		if( ev && ev.target && ev.target.className == "allowDefault") return true;
 		if( EDITOR.lastElementWithFocus && EDITOR.lastElementWithFocus.className == "allowDefault") return true;
@@ -224,7 +223,7 @@ Dialog.prototype.isOpen = function(someEvent, callback) {
 Dialog.prototype.close = function(someEvent, callback) {
 	var dialog = this;
 	
-	console.log("Dialog.prototype.close ...");
+	//console.log("Dialog.prototype.close ...");
 	
 CURRENTLY_OPEN_DIALOGS--;
 
@@ -240,7 +239,7 @@ CURRENTLY_OPEN_DIALOGS--;
 	}
 	
 	if(dialog.div.parentElement) dialog.div.parentElement.removeChild(dialog.div);
-	else console.warn("Parent element does not exist for div=", dialog.div);
+	//else console.warn("Parent element does not exist for div=", dialog.div);
 	
 	if(dialog.fullScreen) {
 		FULL_SCREEN_DIALOG_COUNT--;
@@ -261,7 +260,7 @@ CURRENTLY_OPEN_DIALOGS--;
 	if(dialog.editorHadInputFocus) {
 		
 		if(!EDITOR.input) {
-			console.log("Dialog.prototype.close: Giving focus/input back to the editor. EDITOR.input=" + EDITOR.input);
+			//console.log("Dialog.prototype.close: Giving focus/input back to the editor. EDITOR.input=" + EDITOR.input);
 			EDITOR.input = true;
 			EDITOR.canvas.focus();
 		}
@@ -272,13 +271,10 @@ CURRENTLY_OPEN_DIALOGS--;
 		
 		var waitTime = 10; 
 		
-		if(!someEvent) {
-			console.warn("Dialog.prototype.close: No event given! someEvent=" + someEvent);
-		}
-else {
+		if(someEvent) {
 			//console.log(someEvent);
 			
-			console.log("Dialog.prototype.close: someEvent.type=" + someEvent.type + " someEvent.screenX=" + someEvent.screenX + " someEvent.screenY=" + someEvent.screenY);
+			//console.log("Dialog.prototype.close: someEvent.type=" + someEvent.type + " someEvent.screenX=" + someEvent.screenX + " someEvent.screenY=" + someEvent.screenY);
 			// If the user closes the dialog using the keyboard, we don't want to give back focus too fast, or a bunch of spaces will be inserted (if the user used the space key)
 			if(someEvent.screenX == 0 && someEvent.screenY == 0) {
 				// It was probably a "keyboard click"
@@ -288,6 +284,7 @@ else {
 				waitTime = 10; // Probably a mouse click
 			}
 		}
+		//else console.warn("Dialog.prototype.close: No event given! someEvent=" + someEvent);
 		
 		/*
 			Issue: When in a html widget form, a Dialog comes up, 
@@ -299,7 +296,7 @@ else {
 		setTimeout(function() {
 			
 			if(typeof EDITOR != "undefined") {
-				console.log("Dialog.prototype.close: Giving back editor focus/input after waiting " + waitTime + "ms ... EDITOR.input=" + EDITOR.input + "")
+				//console.log("Dialog.prototype.close: Giving back editor focus/input after waiting " + waitTime + "ms ... EDITOR.input=" + EDITOR.input + "")
 			EDITOR.input = true;
 			EDITOR.canvas.focus();
 			}
@@ -310,7 +307,7 @@ else {
 		
 		}
 	else if(callback) {
-		console.log("Dialog.prototype.close: Calling callback without waiting!");
+		//console.log("Dialog.prototype.close: Calling callback without waiting!");
 		callback();
 	}
 }
@@ -351,7 +348,7 @@ function alertBox(msg, code, icon, recursionCount) {
 			if(recursionCount) recursionCount++;
 			else recursionCount = 1;
 			
-			if(recursionCount > 4) console.warn("Unable to show alertBox, probably because the editor has not fully loaded. msg=" + msg + "");
+			//if(recursionCount > 4) console.warn("Unable to show alertBox, probably because the editor has not fully loaded. msg=" + msg + "");
 			
 			alertBox(msg, code, icon, recursionCount);
 			
@@ -366,7 +363,7 @@ function alertBox(msg, code, icon, recursionCount) {
 	button.appendChild(document.createTextNode("OK"));
 
 	button.addEventListener("click", function(clickEvent) {
-		console.log("alertBox button click: EDITOR.input=" + ((typeof EDITOR != "undefined") && EDITOR.input) + "");
+		//console.log("alertBox button click: EDITOR.input=" + ((typeof EDITOR != "undefined") && EDITOR.input) + "");
 		dialog.close(clickEvent);
 	}, false);
 
@@ -433,7 +430,7 @@ function confirmBox(msg, userOptions, dialogSettings, callback, recursionCount) 
 			if(recursionCount) recursionCount++;
 			else recursionCount = 1;
 			
-			if(recursionCount > 4) console.warn("Unable to show confirmBox msg=" + msg + " userOptions=" + JSON.stringify(userOptions));
+			//if(recursionCount > 4) console.warn("Unable to show confirmBox msg=" + msg + " userOptions=" + JSON.stringify(userOptions));
 			
 			confirmBox(msg, userOptions, callback, recursionCount);
 		
@@ -468,7 +465,7 @@ function confirmBox(msg, userOptions, dialogSettings, callback, recursionCount) 
 
 function promptBox(msg, options, callback, recursionCount) {
 	
-	console.log("promptBox: typeof isPassword = " + (typeof isPassword));
+	//console.log("promptBox: typeof isPassword = " + (typeof isPassword));
 	
 	if(typeof options == "function" && callback == undefined) {
 		callback = options;
@@ -501,18 +498,18 @@ function promptBox(msg, options, callback, recursionCount) {
 	
 	if(typeof callback != "function") throw new Error("No callback function! callback=" + callback + " arguments=" + JSON.stringify(arguments));
 	
-	console.log("promptBox: msg=" + msg+ " isPassword=" + isPassword + " defaultValue=" + defaultValue + " dialogDelay=" + dialogDelay + " recursionCount=" + recursionCount);
+	//console.log("promptBox: msg=" + msg+ " isPassword=" + isPassword + " defaultValue=" + defaultValue + " dialogDelay=" + dialogDelay + " recursionCount=" + recursionCount);
 	
 	var dialog = new Dialog(msg, {icon: undefined, delay: dialogDelay, escapeAble: false});
 	
 	if(!dialog.div) {
-		console.log("promptBox: Waiting until the body element is available ...");
+		//console.log("promptBox: Waiting until the body element is available ...");
 		return setTimeout(function wait() {
 			
 			if(recursionCount) recursionCount++;
 			else recursionCount = 1;
 			
-			if(recursionCount > 4) console.warn("promptBox: Unable to show promptBox msg=" + msg + "");
+			//if(recursionCount > 4) console.warn("promptBox: Unable to show promptBox msg=" + msg + "");
 			
 			promptBox(msg, options, callback, recursionCount);
 			
@@ -560,9 +557,9 @@ function promptBox(msg, options, callback, recursionCount) {
 	ok.addEventListener("click", function(clickEvent) {
 		
 		var value = input.value || input.innerText;
-		console.log("promptBox: Closing dialog ...");
+		//console.log("promptBox: Closing dialog ...");
 		dialog.close(clickEvent, function() {
-			console.log("promptBox: Dialog closed. Calling back with value=" + value);
+			//console.log("promptBox: Dialog closed. Calling back with value=" + value);
 			callback(value);
 		});
 		

@@ -49,7 +49,7 @@ var UTIL = {
 		//console.log("Get trailing slash for folderPath=" + folderPath);
 		
 		if(folderPath == undefined) {
-			console.warn("folderPath=" + folderPath);
+			//console.warn("folderPath=" + folderPath);
 			return folderPath;
 		}
 		
@@ -122,7 +122,7 @@ var UTIL = {
 			// You might be tempted to return getDirectoryFromPath here, but an waRNING here means we are likely dealing with a file name, not a path, and very likely have a bug!
 		}
 		
-		console.log("getFolderName: path=" + path);
+		//console.log("getFolderName: path=" + path);
 		
 		var arr = path.split(delimiter);
 		
@@ -216,11 +216,11 @@ var UTIL = {
 		if(!UTIL.isDirectory(path)) {
 			// path is a file path
 			var filePath = UTIL.joinPaths(folder, UTIL.getFilenameFromPath(path));
-			console.log("prependDir: Returning a file path: " + filePath);
+			//console.log("prependDir: Returning a file path: " + filePath);
 			return filePath;
 		}
 		else {
-			console.log("prependDir: Returning a folder path: " + folder);
+			//console.log("prependDir: Returning a folder path: " + folder);
 			return folder;
 		}
 	},
@@ -309,13 +309,13 @@ var UTIL = {
 			
 			if(protocol) protocol = protocol.toLowerCase();
 			
-			console.log("protocol=" + protocol);
+			//console.log("protocol=" + protocol);
 			
 			if(EDITOR.remoteProtocols.indexOf(protocol) == -1) {
 				console.warn("protocol=" + protocol + " is not a supported protocol! If it's a Windows path, use " + protocol + ":\\ instead!"); // eg C:\\
 			}
 			
-			console.log("path=" + path);
+			//console.log("path=" + path);
 			
 			var path = fullPath.substr(protocol.length + 3); // Remote protocol part and the ://
 			var hostname = path.substr(0, path.indexOf("/") != -1 ? path.indexOf("/") : path.length); // Also include port nr if specified (hostname:port)
@@ -324,7 +324,7 @@ var UTIL = {
 			
 			path = path.substr(hostname.length); // Remove hostname part
 			
-			console.log("hostname=" + hostname + " path=" + path);
+			//console.log("hostname=" + hostname + " path=" + path);
 			
 			if(path.substr(0,1) != "/") {
 console.warn("Expected a slash after hostname=" + hostname + " fullPath=" + fullPath);
@@ -364,7 +364,7 @@ console.warn("Expected a slash after hostname=" + hostname + " fullPath=" + full
 				
 				var driveLetter = fullPath.substr(0, driveIndex);
 				
-				console.log("driveLetter=" + driveLetter);
+				//console.log("driveLetter=" + driveLetter);
 				
 				if(driveLetter.length == 0) throw new Error("Asuming Windows path, missing driveLetter! fullPath=" + fullPath);
 				
@@ -377,7 +377,7 @@ console.warn("Expected a slash after hostname=" + hostname + " fullPath=" + full
 				
 				if(path.substr(path.length-1) == "\\") path = path.substr(0, path.length-1); // Remove ending backslash if one exist
 				
-				console.log("windows path=" + path);
+				//console.log("windows path=" + path);
 				
 				var folders = path.split("\\");
 				
@@ -487,8 +487,8 @@ console.warn("Expected a slash after hostname=" + hostname + " fullPath=" + full
 		var editedRow = editedText.split(lbEditedText);
 		var originalRow = originalText.split(lbOriginalText);
 		
-		console.log("editedRow.length=" + editedRow.length);
-		console.log("originalRow.length=" + originalRow.length);
+		//console.log("editedRow.length=" + editedRow.length);
+		//console.log("originalRow.length=" + originalRow.length);
 		
 		/*
 			if(ignoreTransform) {
@@ -518,11 +518,11 @@ console.warn("Expected a slash after hostname=" + hostname + " fullPath=" + full
 		var extraLbAddedToEdited = false;
 		var extraLbAddedToOriginal = false;
 		if(editedRow[editedRow.length-1] != "") {
-editedRow.push("");
+			editedRow.push("");
 			extraLbAddedToEdited = true;
 		}
 		if(originalRow[originalRow.length-1] != "") {
-originalRow.push("");
+			originalRow.push("");
 			extraLbAddedToOriginal = true;
 		}
 		editedText = editedRow.join(lbEditedText);
@@ -533,7 +533,7 @@ originalRow.push("");
 		if(lastCharactersOriginalText != lbOriginalText) { 
 			// original text doesn't end with a line break!
 			// Each line must end with a line break, even the last line.
-			console.log("Original text last " + lbOriginalText.length + " chars are not a line break: " + UTIL.lbChars(lastCharactersOriginalText));
+			//console.log("Original text last " + lbOriginalText.length + " chars are not a line break: " + UTIL.lbChars(lastCharactersOriginalText));
 			//originalText += lbOriginalText;
 			//extraLbAdded = true;
 			
@@ -552,7 +552,7 @@ originalRow.push("");
 		var removedLines = 0; // Removed lines can be replaced with inserts
 		var row = 0;
 		
-		console.log("diff=" + JSON.stringify(diff, null, 2));
+		//console.log("diff=" + JSON.stringify(diff, null, 2));
 		
 		for (var i=0; i<diff.length; i++) {
 			line = diff[i].value.split(lb);
@@ -569,7 +569,7 @@ originalRow.push("");
 				// removed always comes before added
 				if(diff[i].added) {
 					// if(line[j].length > 0) 
-					console.log("j=" + j + " line.length-1=" + (line.length-1) + " text=" + line[j]);
+					//console.log("j=" + j + " line.length-1=" + (line.length-1) + " text=" + line[j]);
 					
 					if(removedLines > 0) {
 						// If lines where removed, added lines will replace them
@@ -581,7 +581,7 @@ originalRow.push("");
 					
 					inserted.push({text: line[j], row: row});
 					
-					console.log("++++ " + line[j] + " (row=" + row + ")");
+					//console.log("++++ " + line[j] + " (row=" + row + ")");
 					
 					if(lineBreakCount < 0) lineBreakCount++; // Keep replacing lines that have been removed
 					
@@ -592,7 +592,7 @@ originalRow.push("");
 					
 					removed.push({text: line[j], row: row});
 					
-					console.log("---- " + line[j] + "(row=" + row + ")");
+					//console.log("---- " + line[j] + "(row=" + row + ")");
 					
 					removedLines++;
 					lineBreakCount++;
@@ -602,33 +602,33 @@ originalRow.push("");
 					
 					row = totalLineBreaks + lineBreakCount;
 					
-					console.log("" + line[j] + "(row=" + row + ")");
+					//console.log("" + line[j] + "(row=" + row + ")");
 					
 					lineBreakCount++;
 					removedLines = 0;
 					
 				}
-				console.log("lineBreakCount=" + lineBreakCount);
+				//console.log("lineBreakCount=" + lineBreakCount);
 			}
 			
 			totalLineBreaks = totalLineBreaks + lineBreakCount;
-			console.log("totalLineBreaks=" + totalLineBreaks);
+			//console.log("totalLineBreaks=" + totalLineBreaks);
 		}
 		
-		console.log("extraLbAdded=" + extraLbAdded);
+		//console.log("extraLbAdded=" + extraLbAdded);
 		if(extraLbAdded) inserted.pop();
 		
 		if(extraLbAddedToEdited && !extraLbAddedToOriginal) {
 			if(line[line.length-1] != "") throw new Error("Expected last line line[" + (line.length-1) + "]=" + line[line.length-1] + " to be emty");
-			console.log("The last row was removed! line.length=" + line.length + " totalLineBreaks=" + totalLineBreaks + " lineBreakCount=" + lineBreakCount + "");
+			//console.log("The last row was removed! line.length=" + line.length + " totalLineBreaks=" + totalLineBreaks + " lineBreakCount=" + lineBreakCount + "");
 			removed.push({text: "", row: totalLineBreaks});
 			}
 		
-		console.log("inserted=" + JSON.stringify(inserted, null, 2));
-		console.log("removed=" + JSON.stringify(removed, null, 2));
+		//console.log("inserted=" + JSON.stringify(inserted, null, 2));
+		//console.log("removed=" + JSON.stringify(removed, null, 2));
 		
-		console.log("originalText=" + UTIL.debugWhiteSpace(originalText));
-		console.log("editedText=" + UTIL.debugWhiteSpace(editedText));
+		//console.log("originalText=" + UTIL.debugWhiteSpace(originalText));
+		//console.log("editedText=" + UTIL.debugWhiteSpace(editedText));
 		
 		return {inserted: inserted, removed: removed};
 		
@@ -682,7 +682,7 @@ originalRow.push("");
 
 	getFunctionName: function getFunctionName(fun) {
 		if(!fun) {
-console.warn("fun=" + fun);
+			//console.warn("fun=" + fun);
 			return fun;
 		}
 		
@@ -888,13 +888,13 @@ console.warn("fun=" + fun);
 		var fun;
 		var stack = [];
 		
-		console.log("parseErrorMessage: " + errorString);
+		//console.log("parseErrorMessage: " + errorString);
 		
 		errorString = errorString.trim();
 		
 		var rows = errorString.split(/\n|\r\n/);
 		
-		console.log("parseErrorMessage: rows=" + JSON.stringify(rows, null, 2));
+		//console.log("parseErrorMessage: rows=" + JSON.stringify(rows, null, 2));
 		
 		/*
 			
@@ -907,7 +907,7 @@ console.warn("fun=" + fun);
 		var match = errorString.match(reEdgeStack);
 		// prevent it from catching Nodejs v8 errors!
 		if(match && errorString.indexOf("^\n") == -1 && errorString.indexOf("\n    at") == -1) {
-			console.log("parseErrorMessage: Matched Edge error");
+			//console.log("parseErrorMessage: Matched Edge error");
 			
 			var message = errorString.slice(match.index);
 			
@@ -944,7 +944,7 @@ console.warn("fun=" + fun);
 		
 		else if( errorString.match(/[^@].*:\d+:\d+/) && errorString.indexOf("^\n") == -1 && errorString.indexOf("\n    at") == -1) {
 			
-			console.log("parseErrorMessage: Matched Safari error");
+			//console.log("parseErrorMessage: Matched Safari error");
 			
 			var rowstr, lastColumn, colMaybe, lineMaybe, lastAt, lastColonSpace;
 			
@@ -965,7 +965,7 @@ console.warn("fun=" + fun);
 					rowstr = rowstr.slice(0, lastColumn);
 				}
 				else if(UTIL.isNumeric(colMaybe)) {
-					console.warn("parseErrorMessage: Unable to find both line and col from rowstr=" + rowstr + " errorString=" + errorString);
+					//console.warn("parseErrorMessage: Unable to find both line and col from rowstr=" + rowstr + " errorString=" + errorString);
 					line = parseInt(colMaybe);
 					col = undefined;
 				}
@@ -998,7 +998,7 @@ rowstr = rowstr.slice(0, lastColonSpace);
 						
 						message = rowstr;
 						
-						console.log("parseErrorMessage: Message found on row=" + row + ": " + message);
+						//console.log("parseErrorMessage: Message found on row=" + row + ": " + message);
 					}
 				}
 				
@@ -1024,7 +1024,7 @@ rowstr = rowstr.slice(0, lastColonSpace);
 		
 		else if( errorString.match(/@.*:\d+:\d+$/) ) {
 			
-			console.log("parseErrorMessage: Matched Firefox error");
+			//console.log("parseErrorMessage: Matched Firefox error");
 			
 			var rowstr, lastColumn, colMaybe, lineMaybe, lastAt, lastColonSpace;
 			
@@ -1045,7 +1045,7 @@ rowstr = rowstr.slice(0, lastColonSpace);
 					rowstr = rowstr.slice(0, lastColumn);
 				}
 				else if(UTIL.isNumeric(colMaybe)) {
-					console.warn("parseErrorMessage: Unable to find both line and col from rowstr=" + rowstr + " errorString=" + errorString);
+					//console.warn("parseErrorMessage: Unable to find both line and col from rowstr=" + rowstr + " errorString=" + errorString);
 					line = parseInt(colMaybe);
 					col = undefined;
 				}
@@ -1076,7 +1076,7 @@ rowstr = rowstr.slice(0, lastColonSpace);
 						
 						message = rowstr;
 						
-						console.log("parseErrorMessage: Message found on row=" + row + ": " + message);
+						//console.log("parseErrorMessage: Message found on row=" + row + ": " + message);
 					}
 				}
 				else fun = "";
@@ -1111,7 +1111,7 @@ rowstr = rowstr.slice(0, lastColonSpace);
 		*/
 		else if( errorString.match(/at .*:\d+:\d+/) ) {
 			
-			console.log("parseErrorMessage: Matched Node.JS and Chromium (v8) error");
+			//console.log("parseErrorMessage: Matched Node.JS and Chromium (v8) error");
 			
 			var namedFunction = false;
 			var lastColumn, colMaybe, lineMaybe, lastSpaceAndLeftParenthese, firstAt
@@ -1121,7 +1121,7 @@ rowstr = rowstr.slice(0, lastColonSpace);
 				
 				if( ! rowstr.match(/^at .*\d+:\d+\)?$/  ) != 0) {
 					// Start of stack trace reached
-					if(stack.length == 0) console.warn("parseErrorMessage: No stack trace found! rowstr=" + rowstr + " errorString=" + errorString);
+					//if(stack.length == 0) console.warn("parseErrorMessage: No stack trace found! rowstr=" + rowstr + " errorString=" + errorString);
 					break;
 				}
 				
@@ -1148,7 +1148,7 @@ namedFunction = false;
 					rowstr = rowstr.slice(0, lastColumn);
 				}
 				else if(UTIL.isNumeric(colMaybe)) {
-					console.warn("parseErrorMessage: Unable to find both line and col from rowstr=" + rowstr + " errorString=" + errorString);
+					//console.warn("parseErrorMessage: Unable to find both line and col from rowstr=" + rowstr + " errorString=" + errorString);
 					line = parseInt(colMaybe);
 					col = undefined;
 				}
@@ -1189,7 +1189,7 @@ namedFunction = false;
 		*/
 		if( errorString.match(/.*:\d+/) && errorString.match(/ *?\^*/) ) {
 			
-			console.log("parseErrorMessage: Matched v8 throw string");
+			//console.log("parseErrorMessage: Matched v8 throw string");
 			
 			if(message) throw new Error("Message have already been found! message=" + message + " errorString=" + errorString);
 			
@@ -1203,7 +1203,7 @@ namedFunction = false;
 			for(var row=rows.length-stack.length-1; row>-1; row--) {
 				rowstr = rows[row];
 				
-				console.log("parseErrorMessage: row=" + row + " rowstr=" + rowstr + " ");
+				//console.log("parseErrorMessage: row=" + row + " rowstr=" + rowstr + " ");
 				
 				if( rowstr.match(/^ *?\^$/) ) {
 					col = rowstr.length;
@@ -1223,7 +1223,7 @@ namedFunction = false;
 						source = rowstr;
 					}
 					else {
-						console.warn("parseErrorMessage: Unable to find line-nr: rowstr=" + rowstr + " errorString=" + errorString);
+						//console.warn("parseErrorMessage: Unable to find line-nr: rowstr=" + rowstr + " errorString=" + errorString);
 						
 					}
 				}
@@ -1258,7 +1258,7 @@ namedFunction = false;
 			
 		*/
 		
-		console.log("parseStackTrace: stackTrace=" + stackTrace);
+		//console.log("parseStackTrace: stackTrace=" + stackTrace);
 		
 		
 		var stackLength = 0;
@@ -1274,7 +1274,7 @@ namedFunction = false;
 		
 		var reChromium = /at ([^ \n]*) ?\(?(.*):(\d*):(\d*)/g;
 		if(stackTrace.match(reChromium) ) {
-			console.log("parseStackTrace:Using Chromium");
+			//console.log("parseStackTrace:Using Chromium");
 			reStack = reChromium;
 		}
 		else {
@@ -1297,7 +1297,7 @@ namedFunction = false;
 		
 		
 		if(!reStack && stackTrace.match(reFirefoxA)) {
-			console.log("parseStackTrace:Using Firefox A");
+			//console.log("parseStackTrace:Using Firefox A");
 			reStack = reFirefoxA;
 		}
 		else {
@@ -1309,7 +1309,7 @@ namedFunction = false;
 		}
 		
 		if(!reStack && stackTrace.match(reFirefoxB)) {
-			console.log("parseStackTrace:Using Firefox B");
+			//console.log("parseStackTrace:Using Firefox B");
 			reStack = reFirefoxB;
 		}
 		else if(!reStack && stackTrace.match(/throw/)) {
@@ -1324,23 +1324,22 @@ namedFunction = false;
 			reStack = /(.*):(\d*)/;
 			var match = stackTrace.match(reStack);
 			if(match) {
-				console.log("parseStackTrace: Using (Node.JS throw) reStack=" + reStack + "");
+				//console.log("parseStackTrace: Using (Node.JS throw) reStack=" + reStack + "");
 				source = match[1];
 				lineno = match[2];
 				var rows = stackTrace.split(/\n|\r\n/);
-				console.log("parseStackTrace: rows=" + JSON.stringify(rows, null, 2));
+				//console.log("parseStackTrace: rows=" + JSON.stringify(rows, null, 2));
 				for (var i=0; i<rows.length; i++) {
 					if(rows[i].indexOf("^") != -1) {
 						colno = rows[i].length-1;
-						console.log("parseStackTrace: Found colno=" + colno);
+						//console.log("parseStackTrace: Found colno=" + colno);
 					}
 					else if(colno!=undefined && !rows[i].match(reStack) && rows[i].indexOf("throw") != 0 && rows[i].trim().length > 0) {
 						lines.message = rows[i];
-						console.log("parseStackTrace: Found message=" + lines.message);
+						//console.log("parseStackTrace: Found message=" + lines.message);
 					}
-					else {
-						console.log("parseStackTrace: Did not find anything interesting on row " + i + ": " + rows[i]);
-					}
+					//else {console.log("parseStackTrace: Did not find anything interesting on row " + i + ": " + rows[i]);}
+
 				}
 				obj = {};
 				if(fName) obj.fName = fName;
@@ -1354,13 +1353,13 @@ namedFunction = false;
 				
 			}
 			else {
-				console.warn("parseStackTrace:" + reStack + " does not match stackTrace=" + stackTrace );
+				//console.warn("parseStackTrace:" + reStack + " does not match stackTrace=" + stackTrace );
 				return null;
 			}
 		}
 		
 		if(reStack == undefined) {
-			console.warn("Unable to figure out a regexp for parsing stackTrace=" + stackTrace);
+			//console.warn("Unable to figure out a regexp for parsing stackTrace=" + stackTrace);
 			return null;
 		}
 		
@@ -1371,7 +1370,7 @@ namedFunction = false;
 			
 			if(!firstMatch) firstMatch = match[0];
 			
-			console.log("parseStackTrace: match.length=" + match.length + " match=" + JSON.stringify(match, null, 2));
+			//console.log("parseStackTrace: match.length=" + match.length + " match=" + JSON.stringify(match, null, 2));
 			
 			if(match.length == 5) {
 				fName = match[1];
@@ -1403,10 +1402,10 @@ namedFunction = false;
 			
 		}
 		
-		console.log("parseStackTrace: firstMatch=" + firstMatch);
+		//console.log("parseStackTrace: firstMatch=" + firstMatch);
 		
 		if(lines.length == 0) {
-			console.warn("parseStackTrace: " + reStack + " did not find any stack rows in stackTrace=" + stackTrace );
+			//console.warn("parseStackTrace: " + reStack + " did not find any stack rows in stackTrace=" + stackTrace );
 			return null;
 		}
 		
@@ -1415,17 +1414,17 @@ namedFunction = false;
 			// The error message should be right above the stack trace
 			var rows = stackTrace.split(/\n|\r\n/);
 			
-			console.log("parseStackTrace: rows=" + JSON.stringify(rows));
+			//console.log("parseStackTrace: rows=" + JSON.stringify(rows));
 			
 			if(rows.length == 0) {
 				throw new Error("No rows in stackTrace=" + stackTrace);
 			}
 			
-			console.log("parseStackTrace: Checking for message in rows=" + JSON.stringify(rows, null, 2));
+			//console.log("parseStackTrace: Checking for message in rows=" + JSON.stringify(rows, null, 2));
 			for (var i=0; i<rows.length; i++) {
 				if(rows[i].indexOf(firstMatch) != -1) {
 					lines.message = rows[--i];
-					console.log('Found message: "' + lines.message + '"');
+					//console.log('Found message: "' + lines.message + '"');
 					break;
 				}
 			}
@@ -1441,21 +1440,20 @@ namedFunction = false;
 			var reStack = /(.*):(\d+):?(\d+)?/;
 			if(i == rows.length) i--;
 			for (; i>-1; i--) {
-				console.log("rows[" + i + "]=" + rows[i]); 
+				//console.log("rows[" + i + "]=" + rows[i]); 
 				match = rows[i].match(reStack);
 				if(rows[i].indexOf("^") != -1) {
 					colno = rows[i].length-1;
-					console.log("parseStackTrace: Found colno=" + colno);
+					//console.log("parseStackTrace: Found colno=" + colno);
 				}
 				else if(match) {
 					source = match[1];
 					lineno = match[2];
 					colno = match[3];
-					console.log("parseStackTrace: Found source=" + source + " and lineno=" + lineno);
+					//console.log("parseStackTrace: Found source=" + source + " and lineno=" + lineno);
 				}
-				else {
-					console.log("parseStackTrace: Did not find anything interesting on row " + i + ": " + rows[i]);
-				}
+				//else {console.log("parseStackTrace: Did not find anything interesting on row " + i + ": " + rows[i]);}
+
 			}
 			if(source && lineno) {
 				obj = {};
@@ -1479,11 +1477,8 @@ namedFunction = false;
 		var instanceofString = (text instanceof String);
 		var objectToString = Object.prototype.toString.call(text);
 		
-		
-		if(typeOf != string && !instanceofString && objectToString != objectString) {
-			console.log("typeOf=" + typeOf);
-			console.log("objectToString=" + objectToString);
-		}
+		//if(typeOf != string && !instanceofString && objectToString != objectString) {console.log("typeOf=" + typeOf);console.log("objectToString=" + objectToString);}
+
 		return typeOf == string || instanceofString || objectToString == objectString;
 		
 	},
@@ -1607,14 +1602,14 @@ else {
 				url = url.substr(url.indexOf("://")+3);
 			}
 			
-			console.log("protocol=" + protocol);
-			console.log("url=" + url);
+			//console.log("protocol=" + protocol);
+			//console.log("url=" + url);
 			
 			if(protocol) {
 				while(url.indexOf("/") == 0) url = url.substr(1); // Remove all starting slashes from ex: file:///C:\users\...
 			}
 			
-			console.log("url=" + url);
+			//console.log("url=" + url);
 			
 			if(protocol.toLowerCase() != "file" && (url.indexOf("/") != -1)) {
 				filePath = url.substr(url.indexOf("/"));
@@ -1642,7 +1637,7 @@ console.warn("Unable to decodeURIComponent on filePath=" + filePath);
 		
 		// /foo/source/bar/file.htm => bar/file.htm (count the slashes)
 		var relativePath = path.replace(root, "");
-		console.log("relativePath=" + relativePath);
+		//console.log("relativePath=" + relativePath);
 		var folderLevels = UTIL.occurrences(relativePath, "/", false);
 		var relativePath = "";
 		for (var i=0; i<folderLevels; i++) {
@@ -1661,7 +1656,7 @@ console.warn("Unable to decodeURIComponent on filePath=" + filePath);
 		// Used in debugging, to get a stack trace of function being called
 		// ex: console.log(UTIL.getStack("foo"));
 		
-		console.log("UTIL.getStack: msg=" + msg);
+		//console.log("UTIL.getStack: msg=" + msg);
 		
 		if(msg == undefined) msg = "";
 		
@@ -1733,7 +1728,7 @@ console.warn("Unable to decodeURIComponent on filePath=" + filePath);
 		var timeoutTimer;
 		var timeoutTimeMs = 4000;
 		
-		console.log("HTTP GET url=" + url);
+		//console.log("HTTP GET url=" + url);
 		
 		xmlHttp.onreadystatechange = function httpReadyStateChange() {
 			if(xmlHttp.readyState == 4) {
@@ -1849,22 +1844,22 @@ console.warn("Unable to decodeURIComponent on filePath=" + filePath);
 			/foo/ + ../bar = /bar
 		*/
 		
-		console.log("resolvePath: base=" + base + " path=" + path);
+		//console.log("resolvePath: base=" + base + " path=" + path);
 		
 		if(base.indexOf("://") != -1) {
 			//console.log("resolvePath: Probably an url: base=" + base);
 if(base.slice(-1) != "/") {
-console.log("resolvePath: Adding a slash to the URL!");
+				//console.log("resolvePath: Adding a slash to the URL!");
 base += "/";
 }
 			var loc = UTIL.getLocation(base);
 			var url = base.slice(0, base.lastIndexOf(loc.pathname));
 			base = loc.pathname;
-			console.log("resolvePath: new base=" + base + " url=" + url);
+			//console.log("resolvePath: new base=" + base + " url=" + url);
 			
 			// Sanity check
 			if(url.indexOf("://") == -1) { 
-				console.warn("resolvePath: url lost it's protocol!");
+				//console.warn("resolvePath: url lost it's protocol!");
 				throw new Error("url=" + url + " (no protocol!) loc.pathname=" + loc.pathname);
 			}
 			if(url.slice(-1) == "/") {
@@ -2351,7 +2346,7 @@ else {
 		
 		var protocolIndex = url.indexOf("://");
 		if(protocolIndex == -1) {
-			console.warn("url=" + url + " is not formatted as a URL!");
+			//console.warn("url=" + url + " is not formatted as a URL!");
 			return "";
 		}
 		
@@ -2371,7 +2366,7 @@ else {
 		
 		// todo: Handle file:///C:/Users/Z/somefile.txt
 		
-		console.log("getLocation url=" + url);
+		//console.log("getLocation url=" + url);
 		
         var badCharater = [":", "@", "://"];
 
@@ -2672,7 +2667,7 @@ b = b.slice(8);
 			b = UTIL.resolvePath(root, b.replace(root, ""));
 		}
 		
-		console.log("isSamePath: Comparing\na=" + a + "\nb=" + b);
+		//console.log("isSamePath: Comparing\na=" + a + "\nb=" + b);
 		
 		return (a==b);
 		
@@ -2878,7 +2873,7 @@ b = b.slice(8);
 					
 					func = functions[i];
 					
-					console.log("Look: name=" + func.name + " start=" + func.start + " end=" + func.end + " subFunctions.length=" + func.subFunctions.length + "");
+					//console.log("Look: name=" + func.name + " start=" + func.start + " end=" + func.end + " subFunctions.length=" + func.subFunctions.length + "");
 					
 					cursorInside = (func.start <= charIndex && func.end >= charIndex);
 					
@@ -2888,12 +2883,12 @@ b = b.slice(8);
 					
 					if( cursorInside) {
 						
-						console.log("Function Scope name=" + func.name + " start=" + func.start + " end=" + func.end + " subFunctions.length=" + func.subFunctions.length + "");
+						//console.log("Function Scope name=" + func.name + " start=" + func.start + " end=" + func.end + " subFunctions.length=" + func.subFunctions.length + "");
 						
 						
 						// Local subfunctions can be called from here!
 						for(var j=0; j<func.subFunctions.length; j++) {
-							console.log("local: " + func.subFunctions[j].name);
+							//console.log("local: " + func.subFunctions[j].name);
 							if(func.subFunctions[j].name.length > 0) foundFunctions.push(func.subFunctions[j]);
 						}
 						
@@ -2935,17 +2930,17 @@ b = b.slice(8);
 	findLastOpenXmlTag: function findLastOpenXmlTag(file, charIndex) {
 		// Use parsed data
 		
-		console.log("findLastOpenXmlTag: charIndex=" + charIndex + " file.path=" + file.path);
+		//console.log("findLastOpenXmlTag: charIndex=" + charIndex + " file.path=" + file.path);
 		
 		if(!file.parsed) {
-			console.warn("findLastOpenXmlTag: File not parsed: " + file.path);
+			//console.warn("findLastOpenXmlTag: File not parsed: " + file.path);
 			return "";
 		}
 		
 		var tags = file.parsed.xmlTags;
 		
 		if(!tags) {
-			console.warn("findLastOpenXmlTag: No xml tags found in " + file.path);
+			//console.warn("findLastOpenXmlTag: No xml tags found in " + file.path);
 			return "";
 		}
 		
@@ -2964,7 +2959,7 @@ b = b.slice(8);
 			if(slashPos != -1) {
 				// Ending tag
 				tag = tag.substr(slashPos+1); // Remove the slash
-				console.log("findLastOpenXmlTag: Ending tag: *" + tag + "*");
+				//console.log("findLastOpenXmlTag: Ending tag: *" + tag + "*");
 				var index = openTags.lastIndexOf(tag);
 				if(index != -1) openTags.splice(index, 1);
 			}
@@ -2972,7 +2967,7 @@ b = b.slice(8);
 				tag = tag.substr(1); // Remove the left arrow
 				
 				if(tag != "br") {
-					console.log("findLastOpenXmlTag: Opening tag: *" + tag + "*");
+					//console.log("findLastOpenXmlTag: Opening tag: *" + tag + "*");
 					openTags.push(tag);
 				}
 			}
@@ -3053,30 +3048,30 @@ b = b.slice(8);
 	fixInconsistentLineBreaks: function fixInconsistentLineBreaks(text, lineBreak) {
 		
 		if(lineBreak == "\r\n") {
-			console.log("Searching for lonely (LF) \\n characters ... ");
+			//console.log("Searching for lonely (LF) \\n characters ... ");
 			
 			var fixed = false;
 			var index = text.indexOf("\n");
 			var rowCount = 0;
 			while(index > -1) {
 				if(text.charAt(index-1) != "\r") {
-					if(!fixed) console.log("text:\n" + text.replace(/ /g, "~").replace(/\r/g, "CR").replace(/\n/g, "LF\n"));
+					//if(!fixed) console.log("text:\n" + text.replace(/ /g, "~").replace(/\r/g, "CR").replace(/\n/g, "LF\n"));
 					text = text.substring(0, index) + "\r" + text.substring(index);
-					console.log("Inserted (CR) on index=" + index);
+					//console.log("Inserted (CR) on index=" + index);
 					fixed = true;
 				}
 				rowCount++;
 				index = text.indexOf("\n", index+1);
 			}
 			
-			console.log("Searching for lonely (CR) \\r characters ... ");
+			//console.log("Searching for lonely (CR) \\r characters ... ");
 			index = text.indexOf("\r");
 			rowCount = 0;
 			while(index > -1) {
 				if(text.charAt(index+1) != "\n") {
-					if(!fixed) console.log("text:\n" + text.replace(/ /g, "~").replace(/\r/g, "CR").replace(/\n/g, "LF\n"));
+					//if(!fixed) console.log("text:\n" + text.replace(/ /g, "~").replace(/\r/g, "CR").replace(/\n/g, "LF\n"));
 					text = text.substring(0, index+1) + "\n" + text.substring(index+1);
-					console.log("Inserted (LF) on index=" + (index+1));
+					//console.log("Inserted (LF) on index=" + (index+1));
 					fixed = true;
 				}
 				rowCount++;
@@ -3084,9 +3079,8 @@ b = b.slice(8);
 			}
 			
 			
-			if(fixed) {
-				console.warn("Fixed inconsitent line breaks! (line: " + (rowCount+1) + ")");
-			}
+			//if(fixed) {console.warn("Fixed inconsitent line breaks! (line: " + (rowCount+1) + ")");}
+
 		}
 		
 		return text;
@@ -3124,7 +3118,7 @@ b = b.slice(8);
 			
 		*/
 		
-		console.log("determineIndentationConvention: text.length=" + text.length + " lineBreak=" + UTIL.lbChars(lineBreak));
+		//console.log("determineIndentationConvention: text.length=" + text.length + " lineBreak=" + UTIL.lbChars(lineBreak));
 		
 		var maxCheckLength = 500,
 		char = "",
@@ -3186,8 +3180,8 @@ b = b.slice(8);
 			
 		}
 		
-		console.log("determineIndentationConvention: voteTabs:" + voteTabs);
-		console.log("determineIndentationConvention: voteSpaces:" + voteSpaces);
+		//console.log("determineIndentationConvention: voteTabs:" + voteTabs);
+		//console.log("determineIndentationConvention: voteSpaces:" + voteSpaces);
 		
 		
 		if(voteTabs >= voteSpaces) {
@@ -3207,7 +3201,7 @@ b = b.slice(8);
 			
 		}
 		
-		console.log("determineIndentationConvention: returnString=" + UTIL.lbChars(returnString));
+		//console.log("determineIndentationConvention: returnString=" + UTIL.lbChars(returnString));
 		
 		return returnString;
 		

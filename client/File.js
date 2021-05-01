@@ -63,7 +63,7 @@ var File; // File object is global
 		file.fileExtension = UTIL.getFileExtension(file.path); // Without the dot
 		file.disableParsing = (stateProps && stateProps.disableParsing != undefined) ? stateProps.disableParsing : false;
 		var fullAutoIndentation = file.checkFullAutoIndentationSupport();
-		console.warn("Set file.fullAutoIndentation=" + fullAutoIndentation);
+		//console.warn("Set file.fullAutoIndentation=" + fullAutoIndentation);
 		file.fullAutoIndentation = fullAutoIndentation;
 
 		if( QUERY_STRING["plainTextOnly"] ) {
@@ -124,7 +124,7 @@ var File; // File object is global
 			checkCaretError = err;
 			// We failed to create the caret, so create a caret manually
 			if(checkGridError) {
-				console.warn("Problem creating grid and placing caret in file.path=" + path);
+				//console.warn("Problem creating grid and placing caret in file.path=" + path);
 				file.text = file.text.trim();
 				if(file.text.length == 0) file.caret = {index: 0, row: 0, col: 0, eol: true, eof: true};
 				else file.caret = {index: 0, row: 0, col: 0, eol: false, eof: false};
@@ -281,7 +281,7 @@ var File; // File object is global
 		if(caret == undefined) caret = file.caret;
 		
 		if(caret.index == index && caret.row == row && caret.col == col) {
-			console.warn("Caret already at " + JSON.stringify(file.caret));
+			//console.warn("Caret already at " + JSON.stringify(file.caret));
 			return caret;
 		}
 		
@@ -334,7 +334,7 @@ var File; // File object is global
 		}
 		
 		if(grid.length == 0) {
-			console.lo("File:createCaret: The file has no rows! grid.length=" + grid.length);
+			//console.log("File:createCaret: The file has no rows! grid.length=" + grid.length);
 			// The file has no rows! But it can still have text, like white space
 			// Caret can only be at index=file.text.length, row=0, col=0
 			
@@ -1017,7 +1017,7 @@ file.sanityCheck();
 		if(text == undefined) throw new Error("File.insertTextOnRow: First parameter text is undefined!");
 		if(text.length == 0) {
 //throw new Error("File.insertTextOnRow: First parameter text has zero length!");
-			console.warn("File.insertTextOnRow doing nothing because text.length=" + text.length);
+			//console.warn("File.insertTextOnRow doing nothing because text.length=" + text.length);
 			return;
 		}
 		if(row == undefined) throw new Error("File.insertTextOnRow: Second parameter row is undefined!");
@@ -1045,7 +1045,7 @@ file.sanityCheck();
 		if(row == undefined) throw new Error("Argument row is undefined!");
 
 		if(row >= grid.length) {
-			console.warn("row=" + row + " is above grid.length=" + grid.length + " text will be inserted at EOL");
+			//console.warn("row=" + row + " is above grid.length=" + grid.length + " text will be inserted at EOL");
 			file.writeLine(text);
 			return true;
 		}
@@ -1148,7 +1148,7 @@ file.sanityCheck();
 		if(row < 0) throw new Error("row=" + row + " is below zero!");
 		
 		if(file.grid[row].length === 0) {
-			console.warn("The row=" + row + " do not contain any text!");
+			//console.warn("The row=" + row + " do not contain any text!");
 			return "";
 		}
 		
@@ -1221,7 +1221,7 @@ file.sanityCheck();
 			throw new Error("insertText: text=" + text + " need to be a string!\n" + text);
 		}
 		else if(text.length === 0) {
-			console.warn("insertText: No text to insert! (text.length=" + text.length + ")");
+			//console.warn("insertText: No text to insert! (text.length=" + text.length + ")");
 			return;
 		}
 		
@@ -1229,7 +1229,7 @@ file.sanityCheck();
 		
 		//console.log("insertText: Inserting '" + text + "' (text.length=" + text.length + ") on " + JSON.stringify(caret) + " (file.text.length=" + file.text.length + ")");
 		
-		console.time("insertText");
+		//console.time("insertText");
 		
 		var index = caret.index;
 		
@@ -1318,7 +1318,7 @@ file.sanityCheck();
 		
 		if(caret != file.caret) file.fixCaret(file.caret);
 		
-		console.timeEnd("insertText");
+		//console.timeEnd("insertText");
 		
 		
 		file.sanityCheck();
@@ -1356,7 +1356,7 @@ file.sanityCheck();
 		var file = this;
 		
 		if(character.length > 1) {
-			console.warn("Multiple characters are going to be inserted!");
+			//console.warn("Multiple characters are going to be inserted!");
 			for(var i=0; i<character.length; i++) {
 				file.putCharacter(character[i], caret);
 			}
@@ -1407,7 +1407,7 @@ file.sanityCheck();
 		
 		//console.log("Inserting character: " + character);
 		
-		console.time("putCharacter");
+		//console.time("putCharacter");
 		//console.time("putCharacterCore");
 		// Insert the character in the text string
 		file.text = file.text.substr(0, index) + character + file.text.substring(index+EDITOR.settings.insert, file.text.length);
@@ -1467,7 +1467,7 @@ file.sanityCheck();
 		// Call file edit listeners
 		file.change("insert", character, index, row, col) // change, text, index, row, col
 		
-		console.timeEnd("putCharacter");
+		//console.timeEnd("putCharacter");
 		
 		file.sanityCheck();
 		
@@ -1516,7 +1516,7 @@ file.sanityCheck();
 		var start = 0;
 		
 		if(box == undefined) {
-			console.warn("Nothing to select!");
+			//console.warn("Nothing to select!");
 			return;
 		}
 		
@@ -1644,7 +1644,7 @@ file.sanityCheck();
 		
 		//console.log("++++++++ deleteTextRange ++++++++");
 		
-		console.time("deleteTextRange");
+		//console.time("deleteTextRange");
 		
 		var removedText = file.text.substring(firstIndex, lastIndex+1); // Second argument in String.substring is "up to, but not including"
 		
@@ -1787,7 +1787,7 @@ file.sanityCheck();
 		if(  file.startRow >= (file.grid.length - EDITOR.view.visibleRows / 2)  ) file.scrollToCaret();
 		
 		
-		console.timeEnd("deleteTextRange");
+		//console.timeEnd("deleteTextRange");
 		
 		file.sanityCheck();
 		
@@ -1804,7 +1804,7 @@ file.sanityCheck();
 			
 		*/
 		
-		console.time("deleteSelection");
+		//console.time("deleteSelection");
 		
 		var file = this;
 		var box;
@@ -1816,7 +1816,7 @@ file.sanityCheck();
 		file.checkSelection(); // Sanity check
 		
 		if(selection.length == 0) {
-			console.warn("Nothing is selected!");
+			//console.warn("Nothing is selected!");
 			return;
 		}
 		
@@ -1848,7 +1848,7 @@ file.sanityCheck();
 		
 		if(!optimized) {
 			
-			console.warn("There are multiple selections"); 
+			//console.warn("There are multiple selections"); 
 			// Although not possible atm but probably will in the future
 			
 			// We'll have to delete the characters one by one ...
@@ -1901,7 +1901,7 @@ file.sanityCheck();
 		}
 		else file.fixCaret(file.caret);
 		
-		console.timeEnd("deleteSelection");
+		//console.timeEnd("deleteSelection");
 		
 		EDITOR.renderNeeded();
 		
@@ -1972,7 +1972,7 @@ file.sanityCheck();
 		var file = this;
 
 		if(typeof Blob == "undefined") {
-			console.warn("Unable to get file size of file.path=" + file.path + " typeof Blob=" + (typeof Blob));
+			//console.warn("Unable to get file size of file.path=" + file.path + " typeof Blob=" + (typeof Blob));
 			return "";
 		}
 
@@ -1992,7 +1992,7 @@ file.sanityCheck();
 		}
 		
 		
-		console.warn("Inserting line break at caret=" + JSON.stringify(caret) + " grid.length=" + file.grid.length);
+		//console.warn("Inserting line break at caret=" + JSON.stringify(caret) + " grid.length=" + file.grid.length);
 		
 		//if(caret != file.caret) console.warn("caret=" + JSON.stringify(caret) + " is not file.caret=" + JSON.stringify(file.caret) + "");
 
@@ -2563,11 +2563,11 @@ file.sanityCheck();
 		//file.debugGrid();
 		
 		if(caret.eof) {
-			console.warn("deleteCharacter: Can not delete at EOF!");
+			//console.warn("deleteCharacter: Can not delete at EOF!");
 			return;
 		}
 		
-		console.time("deleteCharacter");
+		//console.time("deleteCharacter");
 		
 		if(caret.eol) {
 			/*
@@ -2683,7 +2683,7 @@ file.sanityCheck();
 			file.change("deleteTextRange", character, index, row, col, startColIndentationCharCount, endRow, endCol, endColIndentCharCount);
 		}
 		
-		console.timeEnd("deleteCharacter");
+		//console.timeEnd("deleteCharacter");
 		
 		//file.debugGrid();
 		
@@ -2904,7 +2904,7 @@ file.sanityCheck();
 	File.prototype.moveCaretToStartOfLine = function(caret) {
 		var file = this;
 		
-		console.warn("File:moveCaretToStartOfLine");
+		//console.warn("File:moveCaretToStartOfLine");
 		
 		if(caret == undefined) caret = file.caret;
 		
@@ -3080,7 +3080,7 @@ file.sanityCheck();
 		
 		if(start > end) {
 			// Switch places
-			console.warn("start-position is over end-position. They will be switched!")
+			//console.warn("start-position is over end-position. They will be switched!")
 			var oldStart = start;
 			start = end;
 			end = oldStart;
@@ -3146,7 +3146,7 @@ file.sanityCheck();
 		}
 		
 		var fullAutoIndentation = file.checkFullAutoIndentationSupport();
-		console.warn("Set file.fullAutoIndentation=" + fullAutoIndentation);
+		//console.warn("Set file.fullAutoIndentation=" + fullAutoIndentation);
 		file.fullAutoIndentation = fullAutoIndentation;
 
 		var index = 0, row = 0, col = 0, startColIndentationCharCount = 0, 
@@ -3185,7 +3185,7 @@ file.sanityCheck();
 			
 		*/
 		
-		console.time("createGrid");
+		//console.time("createGrid");
 		
 		var file = this,
 		text = file.text,
@@ -3239,7 +3239,7 @@ file.sanityCheck();
 		
 		file.parsed = null; // Reset the parsed data to force another parse after the grid has been (re)created
 		
-		console.timeEnd("createGrid");
+		//console.timeEnd("createGrid");
 		
 		//console.log("grid created");
 		
@@ -3345,7 +3345,7 @@ file.sanityCheck();
 		
 		var maxCharsToDebug = 500;
 		if(file.text.length > maxCharsToDebug) {
-			console.warn("File too big to debug");
+			//console.warn("File too big to debug");
 			return;
 		}
 		
@@ -3649,7 +3649,7 @@ file.sanityCheck();
 		
 		
 		if(file.grid.length == 0) {
-			console.warn("scrollToCaret: The grid is zero");
+			//console.warn("scrollToCaret: The grid is zero");
 			if(caret.row != 0) throw new Error("Can't scroll to caret.row=" + caret.row + " because zero grid");
 			return file.scrollTo(0, 0);
 		}
@@ -3763,9 +3763,8 @@ if(startColumn-indentationWidth > minIndentation*EDITOR.settings.tabSpace) {
 		// The afterSave event listeners need to take a callback or return something, so we can know when they're done'
 		EDITOR.callEventListeners("afterSave", file, function allListenersCalled(errors) {
 			
-			if(errors.length > 0) {
-				console.warn("Some afterSave event listeners failed:");
-			}
+			//if(errors.length > 0) {console.warn("Some afterSave event listeners failed:");}
+
 			// see error stacktraces in dev tools!
 			for (var i=0; i<errors.length; i++) {
 				console.error(errors[i]);
@@ -3918,11 +3917,11 @@ if(startColumn-indentationWidth > minIndentation*EDITOR.settings.tabSpace) {
 			throw new Error("File.gotoLine: line=" + line + " is not a number!");
 		}
 		else if(line < 1) {
-			console.warn("Can't go to line=" + line + " because it's below 1!");
+			//console.warn("Can't go to line=" + line + " because it's below 1!");
 			line = 1;
 		}
 		else if(!file.isBig && line > Math.max(file.grid.length, (file.totalRows+1))) {
-			console.warn("Can't go to line=" + line + " because it's above file.totalRows=" + file.totalRows + "");
+			//console.warn("Can't go to line=" + line + " because it's above file.totalRows=" + file.totalRows + "");
 			line = file.totalRows+1;
 		}
 		
@@ -4099,7 +4098,7 @@ if(startColumn-indentationWidth > minIndentation*EDITOR.settings.tabSpace) {
 			startRow = Math.min(y, maxY);
 			
 			if(startRow < 0) {
-				console.warn("y=" + y + " maxY=" + maxY + " file.grid.length=" + file.grid.length);
+				//console.warn("y=" + y + " maxY=" + maxY + " file.grid.length=" + file.grid.length);
 				startRow = 0;
 			}
 		}
@@ -4349,7 +4348,7 @@ if(startColumn-indentationWidth > minIndentation*EDITOR.settings.tabSpace) {
 			}
 		}
 		
-		if(callback == undefined) console.warn("File.loadFilePart: loadFilePart with no callback!");
+		//if(callback == undefined) console.warn("File.loadFilePart: loadFilePart with no callback!");
 		
 		var endRow = partStartRow + EDITOR.settings.bigFileLoadRows;
 		

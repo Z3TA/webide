@@ -87,15 +87,14 @@ var WysiwygEditor;
 		var height = options.height;
 		
 		if(newWindow == window) throw new Error("The window can not be the main window!");
-		console.log("newWindow:");
-		console.log(newWindow);
+		//console.log("newWindow:");
+		//console.log(newWindow);
 		
 		if(!url) throw new Error("The preview/WYSIWYG needs an URL or it will not be able to load CSS and JavaScript files! url=" + url);
 		
 		if(!sourceFile) throw new Error("Expected sourceFile when calling WysiwygEditor");
 		
-		console.log("new WysiwygEditor! onlyPreview=" + onlyPreview + " sourceFile.path=" + sourceFile.path + " url=" + url + 
-		" top=" + top + " left=" + left + " width=" + width + " height=" + height);
+		//console.log("new WysiwygEditor! onlyPreview=" + onlyPreview + " sourceFile.path=" + sourceFile.path + " url=" + url + " top=" + top + " left=" + left + " width=" + width + " height=" + height);
 		
 		if(wysiwygEditor == undefined || wysiwygEditor == window) throw new Error("Call WysiwygEditor with the new keyword! Example: var foo = new WysiwygEditor()");
 		
@@ -199,17 +198,17 @@ alertBox(wysiwygEditor.sourceFile.path + " contains SSG scripts which is not yet
 				var lbCountSrcBeforeDiff = UTIL.occurrences(srcHTML, lbSrc);
 				var lbCountMainBeforeDiff = UTIL.occurrences(rawMainHtml, lbMain);
 				
-				console.log("lbCountSrcBeforeDiff=" + lbCountSrcBeforeDiff);
-				console.log("lbCountMainBeforeDiff=" + lbCountMainBeforeDiff);
+				//console.log("lbCountSrcBeforeDiff=" + lbCountSrcBeforeDiff);
+				//console.log("lbCountMainBeforeDiff=" + lbCountMainBeforeDiff);
 				
-				console.log("wysiwygEditor.lineBreak=" + UTIL.lbChars(wysiwygEditor.lineBreak));
+				//console.log("wysiwygEditor.lineBreak=" + UTIL.lbChars(wysiwygEditor.lineBreak));
 				
-				console.log("srcHTML=" + UTIL.lbChars(srcHTML));
-				console.log("rawMainHtml=" + UTIL.lbChars(rawMainHtml));
+				//console.log("srcHTML=" + UTIL.lbChars(srcHTML));
+				//console.log("rawMainHtml=" + UTIL.lbChars(rawMainHtml));
 				throw new Error("Not same amount of rows! lbCountSrc=" + lbCountSrc + " (" + UTIL.lbChars(lbSrc) + ") lbCountMain=" + lbCountMain + " (" + UTIL.lbChars(lbMain) + ") removed=" + removed + " inserted=" + inserted + "  diff=" + JSON.stringify(wysiwygEditor.ignoreTransform, null, 2));
 			}
 			
-			console.log("wysiwygEditor.ignoreTransform=" + JSON.stringify(wysiwygEditor.ignoreTransform, null, 2));
+			//console.log("wysiwygEditor.ignoreTransform=" + JSON.stringify(wysiwygEditor.ignoreTransform, null, 2));
 			
 			wysiwygEditor.setStartRow();
 			
@@ -223,8 +222,8 @@ alertBox(wysiwygEditor.sourceFile.path + " contains SSG scripts which is not yet
 					else msg += "Inserted: " + UTIL.escapeHtml(wysiwygEditor.ignoreTransform.inserted[i].text) + "\n";
 				}
 				alertBox(msg);
-				console.log("srcHTML=" + UTIL.lbChars(srcHTML));
-				console.log("rawMainHtml=" + UTIL.lbChars(rawMainHtml));
+					//console.log("srcHTML=" + UTIL.lbChars(srcHTML));
+					//console.log("rawMainHtml=" + UTIL.lbChars(rawMainHtml));
 				return wysiwygEditor.close();
 			}
 			else if(wysiwygEditor.ignoreTransform.removed.length > 0) {
@@ -255,8 +254,8 @@ alertBox(wysiwygEditor.sourceFile.path + " contains SSG scripts which is not yet
 		// Sanity check
 		// Note that line breaks are always added as padding around the source!
 		var theSource = wysiwygEditor.getSourceCodeBody();
-		console.log("theSource=" + UTIL.lbChars(theSource));
-		console.log("sourceFile.text=" + UTIL.lbChars(sourceFile.text));
+		//console.log("theSource=" + UTIL.lbChars(theSource));
+		//console.log("sourceFile.text=" + UTIL.lbChars(sourceFile.text));
 		if(sourceFile.text.indexOf(theSource) == -1) {
 			throw new Error("The source's body element can't be found in the source file!");
 		}
@@ -268,7 +267,7 @@ alertBox(wysiwygEditor.sourceFile.path + " contains SSG scripts which is not yet
 		wysiwygEditor.setStartRow();
 		
 		if(!newWindow) {
-			console.warn("Creating a new window newWindow=" + newWindow + "...");
+			//console.warn("Creating a new window newWindow=" + newWindow + "...");
 			
 			// We need to create the window right away to prevent it being blocked ...
 			EDITOR.createWindow({url: url}, windowCreated);
@@ -276,7 +275,7 @@ alertBox(wysiwygEditor.sourceFile.path + " contains SSG scripts which is not yet
 		else windowCreated(null, newWindow);
 		
 		function windowCreated(err, newWindow) {
-			console.log("wysiwygEditor windowCreated!");
+			//console.log("wysiwygEditor windowCreated!");
 			if(err) throw err;
 			
 			wysiwygEditor.previewWin = newWindow;
@@ -289,7 +288,7 @@ alertBox(wysiwygEditor.sourceFile.path + " contains SSG scripts which is not yet
 			
 			if(newWindow.isBlankUrl) {
 				if(wysiwygEditor.url) {
-					console.log("Attempting reload to load correct window url=" + wysiwygEditor.url + " ...");
+					//console.log("Attempting reload to load correct window url=" + wysiwygEditor.url + " ...");
 					wysiwygEditor.reload(firstLoad);
 				}
 				else throw new Error("url=" + url + " The window need to have an URL!");
@@ -301,7 +300,7 @@ alertBox(wysiwygEditor.sourceFile.path + " contains SSG scripts which is not yet
 		
 		function firstLoad(err) {
 			
-			console.log("wysiwygEditor firstLoad!"); // why is it never called !?
+			//console.log("wysiwygEditor firstLoad!"); // why is it never called !?
 			
 			if(err) {
 				if(wysiwygEditor.whenLoaded) {
@@ -319,7 +318,7 @@ alertBox(wysiwygEditor.sourceFile.path + " contains SSG scripts which is not yet
 			if(wysiwygEditor.onLoad) wysiwygEditor.onLoad();
 			
 			// Find "sources"
-			console.log("Finding sources ...");
+			//console.log("Finding sources ...");
 			var html = wysiwygEditor.getPreviewWindowHtml();
 			var reSource = /(src|sources?)\s*=\s*(['"])([^'"]+)\2/ig // Very important with the g flag or there will be an endless loop
 			var match;
@@ -327,24 +326,24 @@ alertBox(wysiwygEditor.sourceFile.path + " contains SSG scripts which is not yet
 			var fileName = "";
 			while ((match = reSource.exec(html)) != null) {
 				fileName = UTIL.getFilenameFromPath(match[3]);
-				console.log("Found source: ", match);
+				//console.log("Found source: ", match);
 				wysiwygEditor.sources.push( fileName );
 				if(sourcesFound > 100) { // Prevent endless loop
-					console.warn("Found " + sourcesFound + " sources: ", wysiwygEditor.sources);
+					//console.warn("Found " + sourcesFound + " sources: ", wysiwygEditor.sources);
 					break;
 				}
 			}
-			console.log("wysiwygEditor.sources=" + JSON.stringify(wysiwygEditor.sources));
+			//console.log("wysiwygEditor.sources=" + JSON.stringify(wysiwygEditor.sources));
 			
 			if(wysiwygEditor.whenLoaded) {
 				/*
 					When calling whenLoaded the constructor might not have returned the new WysiwygEditor object!!
 					So make sure it's async.
 				*/
-				console.log("About to call whenLoaded function for wysiwygEditor" + wysiwygEditor.id);
+				//console.log("About to call whenLoaded function for wysiwygEditor" + wysiwygEditor.id);
 				setTimeout(function makeitAsync() {
 					if(!wysiwygEditor.whenLoaded) throw new Error("wysiwygEditor.whenLoaded has gone away!");
-					console.log("Calling whenLoaded function for wysiwygEditor" + wysiwygEditor.id);
+					//console.log("Calling whenLoaded function for wysiwygEditor" + wysiwygEditor.id);
 					wysiwygEditor.whenLoaded(null, wysiwygEditor.sourceFile, wysiwygEditor.previewWin);
 					wysiwygEditor.whenLoaded = null;
 				}, 1);
@@ -358,12 +357,12 @@ alertBox(wysiwygEditor.sourceFile.path + " contains SSG scripts which is not yet
 		// Figure out on what row the code starts ()
 		var sourceFile = wysiwygEditor.sourceFile;
 		var srcMatchBody = sourceFile.text.match(/<body.*>(\n|\r\n)/i);
-		console.log("srcMatchBody=" + JSON.stringify(srcMatchBody, null, 2));
+		//console.log("srcMatchBody=" + JSON.stringify(srcMatchBody, null, 2));
 		
 		if(srcMatchBody === null) throw new Error("Can not find body tag in source file=" + sourceFile.path + "\n(The body tag needs to be followed by a line break)");
 		
 		var srcStartIndex = srcMatchBody.index + srcMatchBody[0].length;
-		console.log("srcStartIndex=" + srcStartIndex + " srcMatchBody.index=" + srcMatchBody.index + " srcMatchBody[0].length=" + srcMatchBody[0].length + " srcMatchBody[0]=" + srcMatchBody[0]);
+		//console.log("srcStartIndex=" + srcStartIndex + " srcMatchBody.index=" + srcMatchBody.index + " srcMatchBody[0].length=" + srcMatchBody[0].length + " srcMatchBody[0]=" + srcMatchBody[0]);
 		var tmpCaret = sourceFile.createCaret(srcStartIndex);
 		wysiwygEditor.startRow = tmpCaret.row;
 		
@@ -378,16 +377,16 @@ alertBox(wysiwygEditor.sourceFile.path + " contains SSG scripts which is not yet
 				rowText = sourceFile.rowText(wysiwygEditor.startRow + row)
 				if(srcBodyRows[row] != rowText) {
 					
-					console.log("Problem with setting wysiwygEditor.startRow=" + wysiwygEditor.startRow + " in source:");
+					//console.log("Problem with setting wysiwygEditor.startRow=" + wysiwygEditor.startRow + " in source:");
 					for(var j = 0; j<sourceFile.grid.length; j++) console.log(j + ": " + sourceFile.rowText(j));
 					
-					console.log("sourceCodeBody=" + UTIL.lbChars(sourceCodeBody));
+					//console.log("sourceCodeBody=" + UTIL.lbChars(sourceCodeBody));
 					
-					console.log("source body html:");
+					//console.log("source body html:");
 					for (var j=0; j<srcBodyRows.length; j++) console.log(j + ": " + srcBodyRows[j]);
 					
-					console.log("rowText: " + rowText);
-					console.log("srcBodyRows[" + row + "]: " + srcBodyRows[row]);
+					//console.log("rowText: " + rowText);
+					//console.log("srcBodyRows[" + row + "]: " + srcBodyRows[row]);
 					throw new Error("Source's body (row=" + row + " of body element) does not match row=" + (wysiwygEditor.startRow + row) + 
 					" (wysiwygEditor.startRow=" + wysiwygEditor.startRow + " + row=" + row + " = " + (wysiwygEditor.startRow + row) + " of the source");
 				}
@@ -398,7 +397,7 @@ alertBox(wysiwygEditor.sourceFile.path + " contains SSG scripts which is not yet
 	WysiwygEditor.prototype.positionate = function positionate(top, left, width, height) {
 		var wysiwygEditor = this;
 		
-		console.log("WysiwygEditor.positionate: top=" + top + " left=" + left + " width=" + width + " height=" + height);
+		//console.log("WysiwygEditor.positionate: top=" + top + " left=" + left + " width=" + width + " height=" + height);
 		
 		// Decide window width, height and placement ...
 		var windowPadding = 0;
@@ -438,21 +437,21 @@ alertBox(wysiwygEditor.sourceFile.path + " contains SSG scripts which is not yet
 			// Resize the editor
 			var editorCodeWindow = window; // gui.Window.get();
 			
-			console.log("oldCodeWindowPosition=", oldCodeWindowPosition);
+			//console.log("oldCodeWindowPosition=", oldCodeWindowPosition);
 			if(oldCodeWindowPosition) editorCodeWindow.moveTo(oldCodeWindowPosition.x, oldCodeWindowPosition.y);
 			else editorCodeWindow.moveTo(0, 0);
 			
-			console.log("oldCodeWindowSize=", oldCodeWindowSize);
+			//console.log("oldCodeWindowSize=", oldCodeWindowSize);
 			if(oldCodeWindowSize) editorCodeWindow.resizeTo(oldCodeWindowSize.x, oldCodeWindowSize.y);
 			else editorCodeWindow.resizeTo(screen.width - previeWidth - windowPadding * 2 - unityLeftThingy, screen.height);
 		
 		}
-		else console.warn("previewWin not available when positionateing!")
+		//else console.warn("previewWin not available when positionateing!")
 	}
 	
 	
 	WysiwygEditor.prototype.getCaretPosition = function getCaretPosition() {
-		console.warn("WysiwygEditor.getCaretPosition");
+		//console.warn("WysiwygEditor.getCaretPosition");
 		
 		var wysiwygEditor = this;
 		
@@ -476,10 +475,10 @@ alertBox(wysiwygEditor.sourceFile.path + " contains SSG scripts which is not yet
 		var baseNode = selection.baseNode ? selection.baseNode : selection.anchorNode
 		
 		if(!baseNode) {
-			console.log("selection:");
-			console.log(selection);
-			console.log(selection.baseNode);
-			console.log(selection.anchorNode);
+			//console.log("selection:");
+			//console.log(selection);
+			//console.log(selection.baseNode);
+			//console.log(selection.anchorNode);
 			//We get no baseNode in Safari when clicking on buttons!!
 			//Chromium also gets no baseNode the first time you click on a button. (it works afterwards)
 			var error = new Error("no baseNode! baseNode=" + baseNode + " selection.baseNode=" + selection.baseNode + " selection.anchorNode=" + selection.anchorNode);
@@ -524,7 +523,7 @@ alertBox(wysiwygEditor.sourceFile.path + " contains SSG scripts which is not yet
 			y = Math.round(pos.top + 1);
 		}
 		
-		console.log("Got caret position: x=" + x + " y=" + y + " char=" + caretPos + " text=" + (text || baseNode.innerText) + " ");
+		//console.log("Got caret position: x=" + x + " y=" + y + " char=" + caretPos + " text=" + (text || baseNode.innerText) + " ");
 		
 		// Use top left corner + 1. just in case the node contains child elements (centering could target a child element)
 		return {x: x, y: y, char: caretPos, text: text || baseNode.innerText };
@@ -537,19 +536,19 @@ alertBox(wysiwygEditor.sourceFile.path + " contains SSG scripts which is not yet
 				var parentNode = baseNode.parentNode; // The basenode is a text node, select the parent node
 				if(scrollIntoView) parentNode.scrollIntoView();
 				var pos = parentNode.getBoundingClientRect();
-				console.log("parentNode:");
-				console.log(parentNode);
-				console.log("parentNode nodeType=" + parentNode.nodeType);
+				//console.log("parentNode:");
+				//console.log(parentNode);
+				//console.log("parentNode nodeType=" + parentNode.nodeType);
 			}
 			else if(baseNode.nodeType == Node.ELEMENT_NODE) {
 				// The node probably don't have any text yet
 				if(scrollIntoView) baseNode.scrollIntoView();
 				var pos = baseNode.getBoundingClientRect();
-				console.log("baseNode:");
-				console.log(baseNode);
+				//console.log("baseNode:");
+				//console.log(baseNode);
 			}
 			else {
-				console.log(baseNode);
+				//console.log(baseNode);
 				throw new Error("Unexpected baseNode nodeType=" + baseNode.nodeType);
 			}
 			
@@ -569,18 +568,17 @@ alertBox(wysiwygEditor.sourceFile.path + " contains SSG scripts which is not yet
 		var innerText = elementFromContentEditable.innerText;
 		
 		if(!innerText) {
-console.warn("Unable to get innerText property from elementFromContentEditable=" + elementFromContentEditable);
+			//console.warn("Unable to get innerText property from elementFromContentEditable=" + elementFromContentEditable);
 		return;
 		}
 		
-		if(innerText.length == 0) console.log("Element in content-editable does not contain text.");
-		else {
+		if(innerText.length > 0) {
 			
 			var caretPos = wysiwygEditor.getCaretPosition();
 			
 			if(!caretPos) {
-console.warn("Unable to get caret position!");
-			return;
+//console.warn("Unable to get caret position!");
+				return;
 			}
 			
 			var index = sourceFile.text.indexOf(innerText);
@@ -592,17 +590,13 @@ console.warn("Unable to get caret position!");
 				index = sourceFile.text.indexOf(innerText);
 			}
 			
-			if(index == -1) {
-				// Probably because you clicked on the body element
-				console.log("Unable to find the string innerText='" + UTIL.lbChars(innerText) + "' in the source file: " + sourceFile.path);
-			}
-			else {
+			if(index != -1) {
 				
 				if(sourceFile.text.indexOf(innerText, index + 1) != -1) console.log("Source file contains more then one occurencies of innerText='" + innerText + "'");
 				else {
 					// The source file only contains one instance of the text string, it's safe to assume that's where the caret should be placed!
 					
-					console.log("index=" + index + " caretPos.char=" + caretPos.char + " ");
+					//console.log("index=" + index + " caretPos.char=" + caretPos.char + " ");
 					
 					index += caretPos.char;
 					
@@ -610,24 +604,28 @@ console.warn("Unable to get caret position!");
 					
 				}
 			}
+			// else console.log("Unable to find the string innerText='" + UTIL.lbChars(innerText) + "' in the source file: " + sourceFile.path); // Probably because you clicked on the body element
+
 		}
-		
+		// else console.log("Element in content-editable does not contain text.");
+
+
 		// Failed to get position based on text, try outerHTML
 		var outerHTML = elementFromContentEditable.outerHTML;
 		var index = sourceFile.text.indexOf(outerHTML);
 		
-		if(index == -1) console.log("Unable to find outerHTML='" + outerHTML + "' in the source file: " + sourceFile.path);
-		else {
+		if(index != -1) {
 			
-			if(sourceFile.text.indexOf(outerHTML, index + 1) != -1) console.log("Source file contains more then one occurencies of outerHTML='" + outerHTML + "'");
-			else return sourceFile.moveCaretToIndex(index);
-			
+			if(sourceFile.text.indexOf(outerHTML, index + 1) == -1) return sourceFile.moveCaretToIndex(index);
+			//else console.log("Source file contains more then one occurencies of outerHTML='" + outerHTML + "'");
+
 		}
+		// else console.log("Unable to find outerHTML='" + outerHTML + "' in the source file: " + sourceFile.path);
 	}
 	
 	WysiwygEditor.prototype.placeCaret = function placeCaret(x, y, charPos) {
 		var wysiwygEditor = this;
-		console.log("placeCaret: x=" + x + " y=" + y + " charPos=" + charPos);
+		//console.log("placeCaret: x=" + x + " y=" + y + " charPos=" + charPos);
 		
 		var previewWin = wysiwygEditor.previewWin;
 		
@@ -636,7 +634,7 @@ console.warn("Unable to get caret position!");
 		
 		if(element == null) { // Will probably cause the caret to be placed at the top of the document which is very annoying!
 			
-			console.warn("Unable to get element on x=" + x + " y=" + y);
+			//console.warn("Unable to get element on x=" + x + " y=" + y);
 			alertBox("Unable to get element on x=" + x + " y=" + y + " in order to place caret in contentEditable!");
 			
 			// Take focus away from the contentEditable
@@ -662,8 +660,8 @@ console.warn("Unable to get caret position!");
 			var childNode = element.childNodes[0]; // The text node
 			}
 			else {
-				console.warn("Unable to find text node !?");
-				console.log(element);
+				//console.warn("Unable to find text node !?");
+				//console.log(element);
 				var childNode = element;
 			}
 			
@@ -676,8 +674,8 @@ console.warn("Unable to get caret position!");
 		var wysiwygEditor = this;
 		var previewWin = wysiwygEditor.previewWin;
 		
-		console.warn("placing caret on index " + charPos + " on (node ? " + !!node + "):");
-		console.log(node);
+		//console.warn("placing caret on index " + charPos + " on (node ? " + !!node + "):");
+		//console.log(node);
 		
 		var doc = previewWin.window.document;
 		var range = doc.createRange();
@@ -704,7 +702,7 @@ console.warn("Unable to get caret position!");
 		sel.removeAllRanges();
 		sel.addRange(range);
 		}
-		else console.warn("sel=" + sel);
+		//else console.warn("sel=" + sel);
 		
 		return true;
 		
@@ -713,7 +711,7 @@ console.warn("Unable to get caret position!");
 	WysiwygEditor.prototype.sourceFileChange = function sourceFileChange(file, type, characters, caretIndex, row, col) {
 		var wysiwygEditor = this;
 		
-		console.log("WysiwygEditor.sourceFileChange type=" + type + " ignoreSourceFileChange=" + wysiwygEditor.ignoreSourceFileChange + " row=" + row + " wysiwygEditor.startRow=" + wysiwygEditor.startRow);
+		//console.log("WysiwygEditor.sourceFileChange type=" + type + " ignoreSourceFileChange=" + wysiwygEditor.ignoreSourceFileChange + " row=" + row + " wysiwygEditor.startRow=" + wysiwygEditor.startRow);
 		
 		/*
 			Problem: Can not change the file in a fileChange event or it would create an endless loop
@@ -771,12 +769,12 @@ console.warn("Unable to get caret position!");
 			
 			//wysiwygEditor.reload();
 			wysiwygEditor.reloadAfterSave = true;
-			console.log("Will reload after next save ...");
+			//console.log("Will reload after next save ...");
 			
 			return;
 		}
 		
-		console.log("Update wysiwyg for file.path=" + file.path);
+		//console.log("Update wysiwyg for file.path=" + file.path);
 		
 		// if type==reload need to redo dance
 		
@@ -800,41 +798,39 @@ console.warn("Unable to get caret position!");
 		
 		var regexText = /[^\r\n<>"']/;
 		
-		console.log("Attempting to place caret on WYSIWYG ...");
-		if(leftChar.match(regexText) ==  null && rightChar.match(regexText) == null) console.log("No text next to file.caret. leftChar=" + leftChar + " rightChar=" + rightChar + "");
-		else {
+		//console.log("Attempting to place caret on WYSIWYG ...");
+		if(leftChar.match(regexText) !=  null || rightChar.match(regexText) != null) {
 			
 			var leftLeftTag = file.text.lastIndexOf("<", index-1);
-			if(leftLeftTag == -1) console.log("No left <tag found left of the file.caret");
-			else {
+			
+			if(leftLeftTag != -1) {
 				
 				var firstSpaceAfterLeftTag = file.text.indexOf(" ", leftLeftTag);
 				var firstRightTagAfterLeftTag = file.text.indexOf(">", leftLeftTag);
 				
-				if(firstRightTagAfterLeftTag == -1) console.log("No right> tag found after left tag, left of file.caret");
-				else {
+				if(firstRightTagAfterLeftTag != -1) {
 					
-					console.log("leftLeftTag=" + leftLeftTag + " (" + file.text.substring(leftLeftTag, index) + ")");
-					console.log("firstRightTagAfterLeftTag=" + firstRightTagAfterLeftTag + " (" + file.text.substring(leftLeftTag, firstRightTagAfterLeftTag+1) + ")");
+					//console.log("leftLeftTag=" + leftLeftTag + " (" + file.text.substring(leftLeftTag, index) + ")");
+					//onsole.log("firstRightTagAfterLeftTag=" + firstRightTagAfterLeftTag + " (" + file.text.substring(leftLeftTag, firstRightTagAfterLeftTag+1) + ")");
 					
 					if(firstSpaceAfterLeftTag != -1 && firstSpaceAfterLeftTag < firstRightTagAfterLeftTag) var elementName = file.text.substring(leftLeftTag+1, firstSpaceAfterLeftTag);
 					else if(firstRightTagAfterLeftTag != -1) var elementName = file.text.substring(leftLeftTag+1, firstRightTagAfterLeftTag);
 					else throw new Error("firstSpaceAfterLeftTag=" + firstSpaceAfterLeftTag + " firstRightTagAfterLeftTag=" + firstRightTagAfterLeftTag);
 					
-					console.log("elementName=" + elementName);
+					//console.log("elementName=" + elementName);
 					
 					var rightLeftTag = file.text.indexOf("<", index);
-					if(rightLeftTag == -1) console.log("No <left tag on the right side of the file.caret");
-					else {
+
+					if(rightLeftTag != -1) {
 						var text = file.text.substring(firstRightTagAfterLeftTag+1, rightLeftTag);
 						
-						console.log("rightLeftTag=" + rightLeftTag + " (" + file.text.substring(index, rightLeftTag) + ")");
+						//console.log("rightLeftTag=" + rightLeftTag + " (" + file.text.substring(index, rightLeftTag) + ")");
 						
-						console.log("text=" + text);
+						//console.log("text=" + text);
 						
 						var charPosInText = index - firstRightTagAfterLeftTag - 1;
 						
-						console.log("debug charPos: " + text.substr(0, charPosInText) + "|" + text.substr(charPosInText));
+						//console.log("debug charPos: " + text.substr(0, charPosInText) + "|" + text.substr(charPosInText));
 						
 						var elements = doc.getElementsByTagName(elementName);
 						
@@ -845,21 +841,30 @@ console.warn("Unable to get caret position!");
 								break;
 							}
 						}
-						if(!node) console.log("Unable to find element " + elementName + " containing text:" + text);
-						else {
+						if(node) {
 							var textNode = node.childNodes[0];
 							
-							console.log("Placing caret in node:");
-							console.log(textNode);
+							//console.log("Placing caret in node:");
+							//console.log(textNode);
 							
 							wysiwygEditor.placeCaretOnTextNode(textNode, charPosInText);
 							
 						}
+						// else console.log("Unable to find element " + elementName + " containing text:" + text);
+
 					}
+					// else console.log("No <left tag on the right side of the file.caret");
+
 				}
+				// else console.log("No right> tag found after left tag, left of file.caret");
+
 			}
+			// else console.log("No left <tag found left of the file.caret");
+
 		}
-		
+		// else console.log("No text next to file.caret. leftChar=" + leftChar + " rightChar=" + rightChar + "");
+
+
 		return true;
 	}
 	
@@ -870,12 +875,12 @@ console.warn("Unable to get caret position!");
 		
 		if(!file) return saveEventCallback(new Error("file=" + file));
 		
-		console.log("WysiwygEditor.anyFileSaved: " + file.path);
+		//console.log("WysiwygEditor.anyFileSaved: " + file.path);
 		
 		if(file == wysiwygEditor.sourceFile) wysiwygEditor.sourceFileIsSaved = true;
 		
-		console.log("WysiwygEditor.anyFileSaved: knowsAboutIgnoreTransformNotYetImplemented=" + JSON.stringify(knowsAboutIgnoreTransformNotYetImplemented));
-		console.log("WysiwygEditor.anyFileSaved: wysiwygEditor.sourceFile.path=" + wysiwygEditor.sourceFile.path);
+		//console.log("WysiwygEditor.anyFileSaved: knowsAboutIgnoreTransformNotYetImplemented=" + JSON.stringify(knowsAboutIgnoreTransformNotYetImplemented));
+		//console.log("WysiwygEditor.anyFileSaved: wysiwygEditor.sourceFile.path=" + wysiwygEditor.sourceFile.path);
 
 		if(knowsAboutIgnoreTransformNotYetImplemented.indexOf(wysiwygEditor.sourceFile.path) != -1 ) {
 			wysiwygEditor.reload(function(err) {
@@ -888,7 +893,7 @@ console.warn("Unable to get caret position!");
 			
 			wysiwygEditor.reload(function(err) {
 				return saveEventCallback(err);
-});
+			});
 			return;
 		}
 		
@@ -942,7 +947,7 @@ console.warn("Unable to get caret position!");
 			return saveEventCallback(null)
 		}
 		else if( wysiwygEditor.sources.indexOf(fileName) != -1 ) {
-			console.log("Found fileName=" + fileName + " in wysiwygEditor.sources");
+			//console.log("Found fileName=" + fileName + " in wysiwygEditor.sources");
 			// Some source file was saved, so reload the preview page
 			wysiwygEditor.reload(function(err) {
 				if(err) alertBox(err.message);
@@ -989,7 +994,7 @@ console.warn("Unable to get caret position!");
 					parent.insertBefore(style, links[i]);
 					parent.removeChild(links[i]);
 					
-					console.log("Replaced link css with style for " + fileName);
+					//console.log("Replaced link css with style for " + fileName);
 					
 					
 					if(callback) callback(null);
@@ -1005,14 +1010,14 @@ console.warn("Unable to get caret position!");
 			if(href) {
 				if(href.indexOf(fileName) != -1) {
 					style[i].innerText = cssContent;
-					console.log("Replaced style content for " + fileName);
+					//console.log("Replaced style content for " + fileName);
 					if(callback) callback(null);
 					return;
 				}
 			}
 		}
 		
-		console.warn("Stylesheet not found: fileName=" + fileName);
+		//console.warn("Stylesheet not found: fileName=" + fileName);
 		
 		if(callback) callback(null);
 	}
@@ -1020,7 +1025,7 @@ console.warn("Unable to get caret position!");
 	WysiwygEditor.prototype.previewKeyDown = function previewKeyDown(keyDownEvent) {
 		var wysiwygEditor = this;
 		
-		console.log("previewKeyDown! EDITOR.input=" + EDITOR.input + " keyDownEvent.keyCode=" + keyDownEvent.keyCode + " keyDownEvent.ctrlKey=" + keyDownEvent.ctrlKey);
+		//console.log("previewKeyDown! EDITOR.input=" + EDITOR.input + " keyDownEvent.keyCode=" + keyDownEvent.keyCode + " keyDownEvent.ctrlKey=" + keyDownEvent.ctrlKey);
 		var key_S = 83;
 		
 		// It seems you can only know if Ctrl was pressed on keydown (not on keyup) !
@@ -1039,7 +1044,7 @@ console.warn("Unable to get caret position!");
 	
 	WysiwygEditor.prototype.previewKeyup = function previewKeyup(keyUpEvent) {
 		var wysiwygEditor = this;
-		console.log("previewKeyup! EDITOR.input=" + EDITOR.input + " previewInputFired=" + previewInputFired + " keyUpEvent.keyCode=" + keyUpEvent.keyCode + "");
+		//console.log("previewKeyup! EDITOR.input=" + EDITOR.input + " previewInputFired=" + previewInputFired + " keyUpEvent.keyCode=" + keyUpEvent.keyCode + "");
 		
 		//keyUpEvent = keyUpEvent || window.event;
 		
@@ -1047,7 +1052,7 @@ console.warn("Unable to get caret position!");
 		
 		// Do not place caret in source code now if text was inserted (we'll do that later)
 		// Only place caret if keyboard arrow keys was used to move the caret
-		console.log("(keyUpEvent.keyCode=" + keyUpEvent.keyCode);
+		//console.log("(keyUpEvent.keyCode=" + keyUpEvent.keyCode);
 		if(!EDITOR.input && (keyUpEvent.keyCode == 37 || keyUpEvent.keyCode == 38 || keyUpEvent.keyCode == 39 || keyUpEvent.keyCode == 40)) {
 			wysiwygEditor.placeCaretInSourceCode(keyUpEvent.target);
 		}
@@ -1063,7 +1068,7 @@ console.warn("Unable to get caret position!");
 	WysiwygEditor.prototype.previewMouseup = function previewMouseup(mouseUpEvent) {
 		var wysiwygEditor = this;
 		
-		console.log("previewMouseup!");
+		//console.log("previewMouseup!");
 		
 		//UTIL.objInfo(mouseUpEvent.target);
 		
@@ -1075,7 +1080,7 @@ console.warn("Unable to get caret position!");
 		//else console.log("EDITOR.input=" + EDITOR.input + " file==wysiwygEditor.sourceFile?" + (file==wysiwygEditor.sourceFile) + "");
 		
 		if(mouseUpEvent.ctrlKey && file.path.slice(-3) == "css") {
-			console.log("Current file is a CSS file!");
+			//console.log("Current file is a CSS file!");
 			var fileName = UTIL.getFilenameFromPath(file.path);
 			var reStyle = new RegExp('<link.*href=.*' + fileName, "i");
 			var win = wysiwygEditor.previewWin.window;
@@ -1100,8 +1105,8 @@ console.warn("Unable to get caret position!");
 			}
 			
 			if(!styleSheetFound) {
-				console.log("fileName=" + fileName + " doesn't seem to be part of any stylesheet!");
-				console.log(styleSheets);
+				//console.log("fileName=" + fileName + " doesn't seem to be part of any stylesheet!");
+				//console.log(styleSheets);
 				return;
 			}
 			
@@ -1110,11 +1115,11 @@ console.warn("Unable to get caret position!");
 			// The currently opened css file is in the web document!
 			// Go to the related place in the css file
 			
-			console.log("Current file is a stylesheet to the file in preview!");
+			//console.log("Current file is a stylesheet to the file in preview!");
 			
 			var cssRules = css(mouseUpEvent.target);
 			
-			console.log("cssRules: " + cssRules);
+			//console.log("cssRules: " + cssRules);
 			
 			var rule = "";
 			var index = 0;
@@ -1182,14 +1187,14 @@ console.warn("Unable to get caret position!");
 	
 	WysiwygEditor.prototype.previewSelectionchange = function previewSelectionchange(selectionchangeEvent) {
 		var wysiwygEditor = this;
-		console.log("previewSelectionchange!");
+		//console.log("previewSelectionchange!");
 		if(!EDITOR.input) wysiwygEditor.placeCaretInSourceCode(selectionchangeEvent.target);
 	}
 	
 	WysiwygEditor.prototype.previewPaste = function previewPaste(e, doc) {
 		var wysiwygEditor = this;
 		
-		console.log("previewPaste!");
+		//console.log("previewPaste!");
 		
 		var html = e.clipboardData.getData('text/html');
 		
@@ -1207,13 +1212,13 @@ console.warn("Unable to get caret position!");
 	}
 	
 	WysiwygEditor.prototype.previewInput = function previewInput(inputEvent) {
-		console.time("previewInput");
+		//console.time("previewInput");
 		var wysiwygEditor = this;
 		
 		// Called every time the contenteditable is updated
 		// If nothing happends, check the debug/console for the wysiwyg window! (set "toolbar": true, in package.json)
 		
-		console.warn("previewInput!");
+		//console.warn("previewInput!");
 		
 		
 		previewInputFired = true;
@@ -1262,12 +1267,11 @@ console.warn("Unable to get caret position!");
 			var sanitized = sanitize(prevBodyHtml, wysiwygEditor.lineBreak);
 			// note: We want to make as little sanitation as possible, 
 			// as resetting the whole content-editable content at every key-stroke will feel laggy.
-			if(sanitized == prevBodyHtml) console.log("No white space sanitiaztion needed"); 
-			else {
+			if(sanitized != prevBodyHtml) {
 				
-				console.log("prevBodyHtml=\n" + UTIL.debugWhiteSpace(prevBodyHtml) + "\n");
-				console.log("sanitized=\n" + UTIL.debugWhiteSpace(sanitized) + "\n");
-				console.log("diff=" + JSON.stringify(UTIL.textDiff(prevBodyHtml, sanitized)));
+				//console.log("prevBodyHtml=\n" + UTIL.debugWhiteSpace(prevBodyHtml) + "\n");
+				//console.log("sanitized=\n" + UTIL.debugWhiteSpace(sanitized) + "\n");
+				//console.log("diff=" + JSON.stringify(UTIL.textDiff(prevBodyHtml, sanitized)));
 				
 				/*
 					Problem: contenteditable will lose the caret when the html is updated, 
@@ -1282,16 +1286,17 @@ console.warn("Unable to get caret position!");
 				
 				prevBodyHtml = wysiwygEditor.getContentEditableCode();
 				
-				console.log("caretPosition: " + JSON.stringify(caretPosition));
+				//console.log("caretPosition: " + JSON.stringify(caretPosition));
 				
 				if(caretPosition) {
 					placeCaretSuccess = wysiwygEditor.placeCaret(caretPosition.x, caretPosition.y, caretPosition.char);
-					console.log("placeCaretSuccess=" + placeCaretSuccess);
+					//console.log("placeCaretSuccess=" + placeCaretSuccess);
 				}
 				
-				console.log("Sanitized garbage from WYSIWYG");
+				//console.log("Sanitized garbage from WYSIWYG");
 				
 			}
+			// else console.log("No white space sanitiaztion needed");
 			
 			//console.log("srcBodyHtml=" + UTIL.lbChars(srcBodyHtml));
 			//console.log("prevBodyHtml=" + UTIL.lbChars(prevBodyHtml));
@@ -1305,23 +1310,22 @@ console.warn("Unable to get caret position!");
 			*/
 			
 			var ignored = 0;
-			if(!ignoreTransform) console.log("Nothing in ignoreTransform");
-			else {
-				console.log("ignoreTransform:");
-				console.log(ignoreTransform);
+			if(ignoreTransform) {
+				//console.log("ignoreTransform:");
+				//console.log(ignoreTransform);
 				if(ignoreTransform.inserted.length > 0) {
 					for(var i=ignoreTransform.inserted.length-1; i>=0; i--) { // Reverse for loop to not mess up array indexes
 						for(var j=0; j<diff.inserted.length; j++) {
 							if(diff.inserted[j].text == ignoreTransform.inserted[i].text) {
 								//if(diff.inserted[j].text != ignoreTransform.inserted[i].text) throw new Error("ignoreTransform edited text on row=" + diff.inserted[j].text + " doesn't match! diff=" + diff.inserted[j].text + " ignore=" + ignoreTransform.inserted[i].text);
 								diff.inserted.splice(j, 1);
-								console.log("Ignoring edited text: row=" + ignoreTransform.inserted[i].row + " text=" + ignoreTransform.inserted[i].text + "");
+								//console.log("Ignoring edited text: row=" + ignoreTransform.inserted[i].row + " text=" + ignoreTransform.inserted[i].text + "");
 								ignored++;
 								break;
 							}
 						}
 					}
-					if(ignored != (ignoreTransform.inserted.length-1)) console.warn("Only ignored " + ignored + " out of " + (ignoreTransform.inserted.length-1) + " ignoreTransform.inserted=" + JSON.stringify(ignoreTransform.inserted, null, 2) + " diff.inserted=" + JSON.stringify(diff.inserted, null, 2));
+					//if(ignored != (ignoreTransform.inserted.length-1)) console.warn("Only ignored " + ignored + " out of " + (ignoreTransform.inserted.length-1) + " ignoreTransform.inserted=" + JSON.stringify(ignoreTransform.inserted, null, 2) + " diff.inserted=" + JSON.stringify(diff.inserted, null, 2));
 				}
 				
 				if(ignoreTransform.removed.length > 0) {
@@ -1331,19 +1335,19 @@ console.warn("Unable to get caret position!");
 							if(diff.removed[j].text == ignoreTransform.removed[i].text) {
 								//if(diff.removed[j].text != ignoreTransform.removed[i].text) throw new Error("ignoreTransform original text on row=" + diff.removed[j].text + " doesn't match! diff=" + diff.removed[j].text + " ignore=" + ignoreTransform.removed[i].text);
 								diff.removed.splice(j, 1);
-								console.log("Ignoring original text: row=" + ignoreTransform.removed[i].row + " text=" + ignoreTransform.removed[i].text + "");
+								//console.log("Ignoring original text: row=" + ignoreTransform.removed[i].row + " text=" + ignoreTransform.removed[i].text + "");
 								break;
 							}
 						}
 					}
-					if(ignored != (ignoreTransform.removed.length-1)) console.warn("Only ignored " + ignored + " out of " + (ignoreTransform.removed.length-1) + " ignoreTransform.removed=" + JSON.stringify(ignoreTransform.inserted, null, 2) + " diff.removed=" + JSON.stringify(diff.inserted, null, 2));
+					//if(ignored != (ignoreTransform.removed.length-1)) console.warn("Only ignored " + ignored + " out of " + (ignoreTransform.removed.length-1) + " ignoreTransform.removed=" + JSON.stringify(ignoreTransform.inserted, null, 2) + " diff.removed=" + JSON.stringify(diff.inserted, null, 2));
 				}
 			}
-			
+			// else console.log("Nothing in ignoreTransform");
 			
 			var startRow = wysiwygEditor.startRow;
 			
-			console.log("source startRow=" + startRow + "");
+			//console.log("source startRow=" + startRow + "");
 			
 			var replacedLine = false;
 			var linesToBeRemoved = [];
@@ -1364,7 +1368,7 @@ console.warn("Unable to get caret position!");
 			// Apply the transformation to the source code ...
 			var removedText = "";
 			for(var i=0; i<diff.removed.length; i++) {
-				console.log("i=" + i + " diff.removed.length=" + diff.removed.length);
+				//console.log("i=" + i + " diff.removed.length=" + diff.removed.length);
 				// Remove the text on the line, but do not remove the line (yet)
 				row = diff.removed[i].row + startRow;
 				
@@ -1375,23 +1379,23 @@ console.warn("Unable to get caret position!");
 				if(sourceFile.rowText(row).trim() != diff.removed[i].text.trim()) {
 					
 					// startRow wrong !?
-					console.log("startRow=" + startRow);
+					//console.log("startRow=" + startRow);
 					
-					for(var j = 0; j<sourceFile.grid.length; j++) console.log(j + ": " + sourceFile.rowText(j));
+					//for(var j = 0; j<sourceFile.grid.length; j++) console.log(j + ": " + sourceFile.rowText(j));
 					
-					var rowsPrewBodyHtml = prevBodyHtml.split(/\n|\r\n/);
-					console.log("prevBodyHtml:");
-					for(var j = 0; j<rowsPrewBodyHtml.length; j++) console.log(j + ": " + rowsPrewBodyHtml[j]);
-					console.log("sourceFile:");
-					for(var j = 0; j<sourceFile.grid.length; j++) console.log(j + ": " + sourceFile.rowText(j));
+					//var rowsPrewBodyHtml = prevBodyHtml.split(/\n|\r\n/);
+					//console.log("prevBodyHtml:");
+					//for(var j = 0; j<rowsPrewBodyHtml.length; j++) console.log(j + ": " + rowsPrewBodyHtml[j]);
+					//console.log("sourceFile:");
+					//for(var j = 0; j<sourceFile.grid.length; j++) console.log(j + ": " + sourceFile.rowText(j));
 					
-					console.log("source (row=" + row + ")=" + sourceFile.rowText(row).trim());
-					console.log("remove=" + diff.removed[i].text.trim());
-					console.log("source code body before:" + UTIL.lbChars(srcBodyHtml));
-					console.log("source code body after:" + wysiwygEditor.getSourceCodeBody());
-					console.log("prevBodyHtml=" + UTIL.lbChars(prevBodyHtml));
-					console.log("diff=" + JSON.stringify(diff, null, 2));
-					console.log("ignoreTransform=" + JSON.stringify(wysiwygEditor.ignoreTransform, null, 2));
+					//console.log("source (row=" + row + ")=" + sourceFile.rowText(row).trim());
+					//console.log("remove=" + diff.removed[i].text.trim());
+					//console.log("source code body before:" + UTIL.lbChars(srcBodyHtml));
+					//console.log("source code body after:" + wysiwygEditor.getSourceCodeBody());
+					//console.log("prevBodyHtml=" + UTIL.lbChars(prevBodyHtml));
+					//console.log("diff=" + JSON.stringify(diff, null, 2));
+					//console.log("ignoreTransform=" + JSON.stringify(wysiwygEditor.ignoreTransform, null, 2));
 					
 					
 					
@@ -1405,12 +1409,12 @@ console.warn("Unable to get caret position!");
 				
 				if(removedText.trim() != diff.removed[i].text) throw new Error("Text missmatch!\n" + UTIL.lbChars(removedText) + " = removedText\n" + UTIL.lbChars(diff.removed[i].text) + " = diff.removed[" + i + "].text");
 				
-				console.log("Removed all text on row=" + row + ": " + diff.removed[i].text);
+				//console.log("Removed all text on row=" + row + ": " + diff.removed[i].text);
 				
 				// Is there a line that will replace it?
 				replacedLine = false;
 				for(var j=diff.inserted.length-1; j>=0; j--) { // There can be many inserts on the same line
-					console.log("i=" + i + " j=" + j + " diff.inserted.length=" + diff.inserted.length);
+					//console.log("i=" + i + " j=" + j + " diff.inserted.length=" + diff.inserted.length);
 					if(diff.inserted[j].row == diff.removed[i].row) {
 						
 						// Insert the replacing line
@@ -1419,7 +1423,7 @@ console.warn("Unable to get caret position!");
 						if(!replacedLine) sourceFile.insertTextOnRow(text, row)
 						else sourceFile.insertTextRow(text, row);
 						
-						console.log("Inserting (replacing) row=" + row + " text=" + text);
+						//console.log("Inserting (replacing) row=" + row + " text=" + text);
 						
 						// textLineDiff
 						col= UTIL.textDiffCol(diff.removed[i].text, diff.inserted[j].text);
@@ -1454,7 +1458,7 @@ console.warn("Unable to get caret position!");
 				text = diff.inserted[i].text;
 				sourceFile.insertTextRow(text, row);
 				
-				console.log("Inserted text on row=" + row + " text=" + text);
+				//console.log("Inserted text on row=" + row + " text=" + text);
 				
 				// Increment rows in linesToBeRemoved because this insert pushed them down
 				for(var j=0; j<linesToBeRemoved.length; j++) {
@@ -1468,7 +1472,7 @@ console.warn("Unable to get caret position!");
 			for(var i=linesToBeRemoved.length-1; i>-1; i--) {
 				row = linesToBeRemoved[i] + startRow;
 				text = sourceFile.removeRow(row);
-				console.log("Removed row=" + row + " text=" + text);
+				//console.log("Removed row=" + row + " text=" + text);
 			}
 			
 			//console.log("source after:" + UTIL.lbChars(wysiwygEditor.sourceFile.text));
@@ -1495,7 +1499,7 @@ console.warn("Unable to get caret position!");
 			// We don't want to take away focus from the content-editable
 		}
 		
-		console.log("WysiwygEditor.previewInput: placeCaretSuccess=" + placeCaretSuccess);
+		//console.log("WysiwygEditor.previewInput: placeCaretSuccess=" + placeCaretSuccess);
 		
 		if(placeCaretSuccess) {
 		// Focus the content-edit window
@@ -1503,7 +1507,7 @@ console.warn("Unable to get caret position!");
 			EDITOR.input = false;
 		}
 		
-		console.timeEnd("previewInput");
+		//console.timeEnd("previewInput");
 		
 		sourceFile.checkGrid();
 		
@@ -1515,10 +1519,10 @@ console.warn("Unable to get caret position!");
 		
 		var wysiwygEditor = this;
 		
-		console.log("About to close wysiwygEditor" + wysiwygEditor.id + " wysiwygEditor.closed=" + wysiwygEditor.closed);
+		//console.log("About to close wysiwygEditor" + wysiwygEditor.id + " wysiwygEditor.closed=" + wysiwygEditor.closed);
 		
 		if(wysiwygEditor.closed) {
-console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
+			//console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 		return;
 		}
 		
@@ -1545,7 +1549,7 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 			wysiwygEditor.onClose = null;
 		}
 		
-		console.warn("WysiwygEditor" + wysiwygEditor.id + " closed!");
+		//console.warn("WysiwygEditor" + wysiwygEditor.id + " closed!");
 	}
 	
 	WysiwygEditor.prototype.isOpen = function isOpen() {
@@ -1569,7 +1573,7 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 		
 		var prewHtml = doc.innerHTML;
 		
-		console.log("prewHtml:" + prewHtml);
+		//console.log("prewHtml:" + prewHtml);
 		
 		return prewHtml;
 	}
@@ -1591,8 +1595,8 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 		//console.log(body);
 		
 		if(!body) {
-			console.log(win);
-			console.log(doc);
+			//console.log(win);
+			//console.log(doc);
 			throw new Error("Unable to find body element bodyTagPreview=" + wysiwygEditor.bodyTagPreview + " in doc.innerHTML=" + doc.innerHTML);
 		}
 		
@@ -1614,11 +1618,11 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 		function removeHeadLineBreak(prewHTML) {
 			if(prewHTML.charAt(0) == "\r" && prewHTML.charAt(1) == "\n") {
 				prewHTML = prewHTML.substr(2); // Remove the CR+LF
-				console.log("Removed heading CRLF when retrieved content-editable body");
+				//console.log("Removed heading CRLF when retrieved content-editable body");
 			}
 			else if(prewHTML.charAt(0) == "\n") {
 				prewHTML = prewHTML.substr(1); // Remove the LF
-				console.log("Removed heading LF when retrieved content-editable body");
+				//console.log("Removed heading LF when retrieved content-editable body");
 			}
 			return prewHTML;
 		}
@@ -1626,26 +1630,24 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 		function removeTailLineBreak(prewHTML) {
 			if(prewHTML.charAt(prewHTML.length-2) == "\r" && prewHTML.charAt(prewHTML.length-1) == "\n") {
 				prewHTML = prewHTML.substr(0, prewHTML.length-2); // Remove the CR+LF
-				console.log("Removed tailing CRLF when retrieved content-editable body");
+				//console.log("Removed tailing CRLF when retrieved content-editable body");
 			}
 			else if(prewHTML.charAt(prewHTML.length-1) == "\n") {
 				prewHTML = prewHTML.substr(0, prewHTML.length - 1); // Remove the LF
-				console.log("Removed tailing LF when retrieved content-editable body");
+				//console.log("Removed tailing LF when retrieved content-editable body");
 			}
-			else {
-				console.log("last char: " + UTIL.lbChars(prewHTML.charAt(prewHTML.length-1)));
-			}
+			//else {console.log("last char: " + UTIL.lbChars(prewHTML.charAt(prewHTML.length-1)));}
+
 			return prewHTML;
 		}
 		
 		function removeTailTab(prewHTML) {
 			if(prewHTML.charAt(prewHTML.length-1) == "\t") {
 				prewHTML = prewHTML.substr(0, prewHTML.length - 1); // Remove the tab
-				console.log("Removed tailing TAB when retrieved content-editable body");
+				//console.log("Removed tailing TAB when retrieved content-editable body");
 			}
-			else {
-				console.log("last char: " + UTIL.lbChars(prewHTML.charAt(prewHTML.length-1)));
-			}
+			//else {console.log("last char: " + UTIL.lbChars(prewHTML.charAt(prewHTML.length-1)));}
+
 			return prewHTML;
 		}
 		
@@ -1708,7 +1710,7 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 			
 		*/
 		
-		console.warn("(re)loading preview window ...");
+		//console.warn("(re)loading preview window ...");
 		
 		oldPreviewWindowPosition = {
 			x: wysiwygEditor.previewWin.screenX || wysiwygEditor.previewWin.screenLeft, 
@@ -1729,8 +1731,8 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 			y: editorCodeWindow.innerHeight
 		};
 		
-		console.log("Set oldCodeWindowPosition=", oldCodeWindowPosition);
-		console.log("Set oldCodeWindowSize=", oldCodeWindowSize);
+		//console.log("Set oldCodeWindowPosition=", oldCodeWindowPosition);
+		//console.log("Set oldCodeWindowSize=", oldCodeWindowSize);
 		
 		if(wysiwygEditor.hasLoaded) {
 			
@@ -1780,7 +1782,7 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 			
 			if(wysiwygEditor.previewWin) wysiwygEditor.previewWin.close();
 			
-			console.log("Waiting for new window with url=" + wysiwygEditor.url + " to be created ...");
+			//console.log("Waiting for new window with url=" + wysiwygEditor.url + " to be created ...");
 			EDITOR.createWindow({
 				url: wysiwygEditor.url, 
 				width: oldPreviewWindowSize.x,
@@ -1790,7 +1792,7 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 			}, windowCreated);
 			
 			function windowCreated(err, newWindow) {
-				console.log("WysiwygEditor reload windowCreated!");
+				//console.log("WysiwygEditor reload windowCreated!");
 				
 				wysiwygEditor.isReloading = false;
 				
@@ -1800,15 +1802,15 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 				}
 				
 				wysiwygEditor.attachTo(newWindow, function attached(err) {
-					console.log("WysiwygEditor reload attached!");
+					//console.log("WysiwygEditor reload attached!");
 					if(err) {
 						if(reloadCallback) return reloadCallback(err);
 						else throw err;
 					}
 					else {
-						console.log("Successfully attached WysiwygetEdtior to new window");
+						//console.log("Successfully attached WysiwygetEdtior to new window");
 						
-						console.log("Done (re)loading preview window");
+						//console.log("Done (re)loading preview window");
 						
 						if(reloadCallback) reloadCallback(null);
 						
@@ -1820,11 +1822,11 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 	}
 	
 	WysiwygEditor.prototype.attachTo = function attach(newWindow, callback) {
-		console.log("WysiwygEditor attachTo!");
+		//console.log("WysiwygEditor attachTo!");
 		
 		if(typeof callback != "function") throw new Error("callback=" + callback);
 		
-		console.log("Attaching event listeners etc to " + newWindow);
+		//console.log("Attaching event listeners etc to " + newWindow);
 		var wysiwygEditor = this;
 		
 		if(newWindow == undefined) throw new Error("newWindow=" + newWindow);
@@ -1835,7 +1837,7 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 		
 		var previewWin = wysiwygEditor.previewWin;
 		
-		console.log("previewWin.document.readyState=" + previewWin.document.readyState);
+		//console.log("previewWin.document.readyState=" + previewWin.document.readyState);
 		
 		/*
 			We want to overload the console.log as fast as possible so we can capture early console.log's
@@ -1850,12 +1852,11 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 			if(previewWin.loadedByWebideYo === false) {
 				previewWin.addEventListener("load", function checkConsoleLogOverloaded() {
 					if(previewWin.window.console.log != consoleLogCapturer) throw new Error("Failed to overload console.log!");
-					else console.log("consoleLogCapturer attached successfully!? (it attached before load) " + UTIL.timeStamp());
+					//else console.log("consoleLogCapturer attached successfully!? (it attached before load) " + UTIL.timeStamp());
 				});
 			}
-			else if(previewWin.loadedByWebideYo === true) {
-				console.log("consoleLogCapturer attached successfully!? (it attached after load) " + UTIL.timeStamp());
-			}
+			//else if(previewWin.loadedByWebideYo === true) {console.log("consoleLogCapturer attached successfully!? (it attached after load) " + UTIL.timeStamp());}
+
 			/*
 				1522935134102 attached
 				1522935134322 console.log hi
@@ -1925,8 +1926,8 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 			var bodyTags = doc.documentElement.getElementsByTagName(wysiwygEditor.bodyTagPreview);
 			
 			if(bodyTags.length == 0) {
-				console.log((new Date()).getTime() + " unable to get " + wysiwygEditor.bodyTagPreview + " element! doc.readyState=" + doc.readyState +
-				" doc.documentElement.readyState=" + doc.documentElement.readyState);
+				//console.log((new Date()).getTime() + " unable to get " + wysiwygEditor.bodyTagPreview + " element! doc.readyState=" + doc.readyState + " doc.documentElement.readyState=" + doc.documentElement.readyState);
+				
 				return callback(new Error("Unable to find wysiwygEditor.bodyTagPreview=" + wysiwygEditor.bodyTagPreview +
 				" in preview window! doc.documentElement.innerHTML=" + doc.documentElement.innerHTML + " doc.innerHTML=" + doc.innerHTML + ""));
 			}
@@ -1955,7 +1956,7 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 				body.oninput = function(e) {wysiwygEditor.previewInput(e)};
 				//win.addEventListener("input", function(e) {wysiwygEditor.previewInput(e)});
 			}
-			else console.log("wysiwygEditor.onlyPreview=" + wysiwygEditor.onlyPreview);
+			//else console.log("wysiwygEditor.onlyPreview=" + wysiwygEditor.onlyPreview);
 			
 			body.onmouseup = function(e) {wysiwygEditor.previewMouseup(e);}
 			
@@ -1984,11 +1985,11 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 			
 			setTimeout(function afterWeirdStuff() {
 				previewWin.window.onbeforeunload = function onbeforeunload() {
-					console.warn("onbeforeunload called!");
+					//console.warn("onbeforeunload called!");
 					// We don't want the preview window to close when clicking on a link (in the preview window)
 					// We however want the "preview" to unload so that it doesn't pop open again
 					if(!wysiwygEditor.isReloading) wysiwygEditor.close(false);
-					else console.log("wysiwygEditor.isReloading=" + wysiwygEditor.isReloading + " wysiwygEditor.onlyPreview=" + wysiwygEditor.onlyPreview);
+					//else console.log("wysiwygEditor.isReloading=" + wysiwygEditor.isReloading + " wysiwygEditor.onlyPreview=" + wysiwygEditor.onlyPreview);
 					//return true; // Shows a "are you sure" message
 				};
 				
@@ -2038,7 +2039,7 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 			
 			var srcHtmlBeforeDance = wysiwygEditor.getSourceCodeBody();
 			
-			console.log("srcHtmlBeforeDance=" + UTIL.lbChars(srcHtmlBeforeDance));
+		//console.log("srcHtmlBeforeDance=" + UTIL.lbChars(srcHtmlBeforeDance));
 			
 			var bodyTags = doc.documentElement.getElementsByTagName(wysiwygEditor.bodyTagPreview);
 			
@@ -2052,15 +2053,15 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 			var body = bodyTags[0];
 			
 			// Need to know line break convention before getting the content-editable code!
-			console.log("WYSIWYG determine line break convention:");
+		//console.log("WYSIWYG determine line break convention:");
 			wysiwygEditor.lineBreak = UTIL.determineLineBreakCharacters(body.innerHTML);
 			
 			// Get the html from content-editable, (tbody, and other html "fixes" might have been inserted)
 			var prevBodyHtml = wysiwygEditor.getContentEditableCode();
-			console.log("(after write) prevBodyHtml=" + UTIL.lbChars(prevBodyHtml));
+		//console.log("(after write) prevBodyHtml=" + UTIL.lbChars(prevBodyHtml));
 			
 			if(srcHtmlBeforeDance == prevBodyHtml) {
-				console.warn("No dance needed !?");
+			//console.warn("No dance needed !?");
 				return;
 			}
 			
@@ -2072,7 +2073,7 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 			if(sanitazed != prevBodyHtml) {
 				wysiwygEditor.setContentEditableBody(sanitazed);
 				prevBodyHtml = wysiwygEditor.getContentEditableCode();
-				console.log("(after sanitation) prevBodyHtml=" + UTIL.lbChars(prevBodyHtml));
+			//console.log("(after sanitation) prevBodyHtml=" + UTIL.lbChars(prevBodyHtml));
 			}
 			
 			var sourceFile = wysiwygEditor.sourceFile;
@@ -2082,13 +2083,13 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 			if(wysiwygEditor.lineBreak != sourceFile.lineBreak) {
 				var regCurrentLineBreaks = new RegExp(sourceFile.lineBreak, "g");
 				allSourceHtml = allSourceHtml.replace(regCurrentLineBreaks, wysiwygEditor.lineBreak);
-				console.log("Replaced line breaks in source code: allSourceHtml=" + UTIL.lbChars(allSourceHtml));
+			//console.log("Replaced line breaks in source code: allSourceHtml=" + UTIL.lbChars(allSourceHtml));
 			}
 			
 			// Replace the the content of the body element with the content-editable code
 			allSourceHtml = changeCodeInBody(prevBodyHtml, allSourceHtml, wysiwygEditor.bodyTagSource, wysiwygEditor.lineBreak);
 			
-			console.log("(after setting) allSourceHtml=" + UTIL.lbChars(allSourceHtml));
+		//console.log("(after setting) allSourceHtml=" + UTIL.lbChars(allSourceHtml));
 			
 			sourceFile.reload(allSourceHtml);
 			
@@ -2099,7 +2100,7 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 			
 			// The source code and content-editable should now have the same line breaks!
 			
-			console.log("(after) sourceBody=" + UTIL.lbChars(sourceBody));
+		//console.log("(after) sourceBody=" + UTIL.lbChars(sourceBody));
 			
 			// The source code and content editable code should now be the same!
 			if(wysiwygEditor.getContentEditableCode() != sourceBody) {
@@ -2115,7 +2116,7 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 			// Solution: .... ???
 			
 			var danceDiff = UTIL.textDiff(srcHtmlBeforeDance, sourceBody);
-			console.log("danceDiff=" + JSON.stringify(danceDiff, null, 2));
+		//console.log("danceDiff=" + JSON.stringify(danceDiff, null, 2));
 			
 			// It's ok to add new lines, but not OK to add new content
 			
@@ -2138,7 +2139,7 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 		WysiwygEditor.prototype.disableEdit = function disableEdit(callback) {
 			var wysiwygEditor = this;
 			
-			console.log("Disabling WYSIWYG editing of " + wysiwygEditor.sourceFile.path);
+		//console.log("Disabling WYSIWYG editing of " + wysiwygEditor.sourceFile.path);
 			
 			// Disable content editable, but keep the window open for preview
 			
@@ -2179,10 +2180,10 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 			var wysiwygEditor = this;
 			
 			// Console log takes many arguments and concatenates them
-		console.log("Console log detected! arg.length=" + arg.length + " stack=" + stack);
+		//console.log("Console log detected! arg.length=" + arg.length + " stack=" + stack);
 			var msg = "";
 			for (var i=0; i<arg.length; i++) {
-				console.log("typeof arg[" + i + "]=" + (typeof typeof arg[i]));
+			//console.log("typeof arg[" + i + "]=" + (typeof typeof arg[i]));
 				if(typeof arg[i] == "string") msg = msg + " " + arg[i];
 				else if(typeof arg[i] == "object") {
 					var stringifyError = false;
@@ -2213,7 +2214,7 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 		// Gives eligal invocation error in nw.js
 		if(RUNTIME != "nw.js") consoleLogOriginal.apply(undefined, arg);
 		
-		console.log("Captured console.log (" + arg.length + " argument(s)): " + msg);
+		//console.log("Captured console.log (" + arg.length + " argument(s)): " + msg);
 		
 		var inlinedMessage = EDITOR.showMessageFromStackTrace({
 			message: msg, 
@@ -2236,7 +2237,7 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 		*/
 		var wysiwygEditor = this;
 		
-		console.log("Captured error: message=" + message + " line=" + lineno + "");
+		//console.log("Captured error: message=" + message + " line=" + lineno + "");
 		
 		var inlinedMessage = EDITOR.showMessageFromStackTrace({
 			errorEvent: errorEvent, 
@@ -2254,8 +2255,7 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 			var urlPath = UTIL.getDirectoryFromPath(wysiwygEditor.url);
 			var folder = UTIL.getDirectoryFromPath(wysiwygEditor.sourceFile.path);
 			
-			console.log("error: source=" + source + " lineno=" + lineno + " message=" + message +
-			" urlPath=" + urlPath + " folder=" + folder + " stack=" + (errorEvent.error && errorEvent.error.stack));
+			//console.log("error: source=" + source + " lineno=" + lineno + " message=" + message + " urlPath=" + urlPath + " folder=" + folder + " stack=" + (errorEvent.error && errorEvent.error.stack));
 			
 			var filePath = folder + source.replace(urlPath, "");
 			
@@ -2277,7 +2277,7 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 		
 		var theWindow = wysiwygEditor.previewWin;
 		
-		console.log("WysiwygEditor.autoComplete: word=" + word + " theWindow?" + (!!theWindow) + " wordLength=" + wordLength);
+		//console.log("WysiwygEditor.autoComplete: word=" + word + " theWindow?" + (!!theWindow) + " wordLength=" + wordLength);
 		
 		if(!theWindow) throw new Error("The preview window has been closed!?"); // Sanity check
 		
@@ -2300,32 +2300,32 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 		
 		var options = [];
 		
-		console.log("dingdong");
+		//console.log("dingdong");
 		
 		var words = word.split(".");
 		var obj = theWindow;
 		var before = "";
 		for (var i=0; i<words.length-1; i++) {
 			before += words[i] + ".";
-			console.log("before=" + before);
+			//console.log("before=" + before);
 			if(words[i].match(/\(|\)|\[|\]/)) {
 				// It calls a function or access's a property
 				// so it needs to be evaulated
 				// this could have some interesting side effects :P
 				obj = theWindow.eval(  before.slice(0,-1)  );
-				console.log("Evaulated: " + before.slice(0,-1) + " = " + obj);
+				//console.log("Evaulated: " + before.slice(0,-1) + " = " + obj);
 			}
 			else obj = obj[words[i]];
 			if(!obj) {
-				console.log("Object does not exist: " + before.slice(0,-1) + " (" + words[i] + ")");
+				//console.log("Object does not exist: " + before.slice(0,-1) + " (" + words[i] + ")");
 				return;
 			}
 		}
 		
-		console.log(obj);
+		//console.log(obj);
 		
 		if(obj == null) {
-			console.warn("Unable to get window object. Has the window been closed!?");
+			//console.warn("Unable to get window object. Has the window been closed!?");
 			return;
 		}
 		
@@ -2334,41 +2334,44 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 		var beforeNoDot = before.slice(0,-1);
 		
 		if(typeof Object.getOwnPropertyNames != "undefined") {
-			console.log("Object.getOwnPropertyNames(" + beforeNoDot + ")");
+			//console.log("Object.getOwnPropertyNames(" + beforeNoDot + ")");
 			addNamesFromArray(Object.getOwnPropertyNames(obj));
-		} else console.warn("Object.getOwnPropertyNames not supported by your browser!");
+		} 
+		//else console.warn("Object.getOwnPropertyNames not supported by your browser!");
 		
 		if(typeof Object.keys == "undefined") console.warn("Object.keys not supported by your browser!");
 		else if(typeof obj.__proto__ == "undefined") console.warn("obj.__proto__ not supported by your browser!");
 		else {
-			console.log("Object.keys(" + beforeNoDot + ".__proto__)");
+			//console.log("Object.keys(" + beforeNoDot + ".__proto__)");
 			addNamesFromArray(Object.keys(obj.__proto__));
 		}
 		
 		if(typeof Object.getPrototypeOf != "undefined") {
-			console.log("Object.getPrototypeOf(" + beforeNoDot + "))");
+			//console.log("Object.getPrototypeOf(" + beforeNoDot + "))");
 			addNamesFromObject(Object.getPrototypeOf(obj));
 			
 			if(typeof obj.__proto__ == "undefined") console.warn("obj.__proto__ not supported by your browser!");
 			else {
-				console.log("Object.getPrototypeOf(" + beforeNoDot + ".__proto__)");
+				//console.log("Object.getPrototypeOf(" + beforeNoDot + ".__proto__)");
 				addNamesFromObject(Object.getPrototypeOf(obj.__proto__));
 			}
-		} else console.warn("Object.getPrototypeOf not supported by your browser!");
+
+		} 
+		//else console.warn("Object.getPrototypeOf not supported by your browser!");
 		
 		
 		var nameLength = wordLength - before.length;
 		var lookFor = word.slice(before.length);
 		for(var i=0, short; i<names.length; i++) {
 			short = names[i].slice(0,nameLength);
-			console.log(short + "=" + lookFor + " ? " + (short==lookFor) + " name=" + names[i]);
+			//console.log(short + "=" + lookFor + " ? " + (short==lookFor) + " name=" + names[i]);
 			if(short == lookFor) {
 				if(typeof obj[names[i]] == "function") options.push([before + names[i] + "()", 1, args(obj[names[i]])]);
 				else options.push(before + names[i]);
 			}
 		}
 		
-		console.log("Found " + options.length + " results: " + JSON.stringify(options));
+		//console.log("Found " + options.length + " results: " + JSON.stringify(options));
 		
 		return options;
 		
@@ -2378,7 +2381,7 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 				if(names.indexOf(arr[i]) == -1) names.push(arr[i]);
 				else dup++;
 			}
-			console.log("Added " + (arr.length-dup) + " of " + arr.length + " properties");
+			//console.log("Added " + (arr.length-dup) + " of " + arr.length + " properties");
 		}
 		
 		function addNamesFromObject(obj) {
@@ -2389,7 +2392,7 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 				if(names.indexOf(name) == -1) names.push(name);
 				else dup++;
 			}
-			console.log("Added " + (tot-dup) + " of " + tot + " properties");
+			//console.log("Added " + (tot-dup) + " of " + tot + " properties");
 		}
 		
 		
@@ -2416,7 +2419,7 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 		
 		if(!body) throw new Error("Unable to find bodyTagPreview=" + wysiwygEditor.bodyTagPreview + " element!");
 		
-		console.log("Setting content editable body ( " + srcBodyHtml.length + " characters)");
+		//console.log("Setting content editable body ( " + srcBodyHtml.length + " characters)");
 		
 		body.innerHTML = srcBodyHtml;
 		// note: after HTML have been reset, variable body points to the *old* body. So we need to re-reference the body variable to the *new* body!
@@ -2442,7 +2445,7 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 	function attachFileChangeListener(wysiwygEditor) {
 		// fileChange wants an uniqe function name ...
 		var name = "wysiwygEditorFileChange" + wysiwygEditor.id;
-		console.log("Unique function name for fileChange event: " + name);
+		//console.log("Unique function name for fileChange event: " + name);
 		var customAction = function(file, type, characters, caretIndex, row, col) {
 			wysiwygEditor.sourceFileChange(file, type, characters, caretIndex, row, col);
 		}
@@ -2468,7 +2471,7 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 	function attachFileSaveListener(wysiwygEditor) {
 		// All EDITOR events wants an uniqe function name ...
 		var name = "wysiwygEditorFileSave" + wysiwygEditor.id;
-		console.log("Unique function name for afterSave event: " + name);
+		//console.log("Unique function name for afterSave event: " + name);
 		var customAction = function(file, saveCallback) {
 			wysiwygEditor.anyFileSaved(file, saveCallback);
 		}
@@ -2493,7 +2496,7 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 	function attachAutoCompleteListener(wysiwygEditor) {
 		// All EDITOR events wants an uniqe function name ...
 		var name = "wysiwygEditorAutoComplete" + wysiwygEditor.id;
-		console.log("Unique function name for autoComplete event: " + name);
+		//console.log("Unique function name for autoComplete event: " + name);
 		var customAction = function(file, word, wordLength, gotOptions) {
 			return wysiwygEditor.autoComplete(file, word, wordLength, gotOptions);
 		}
@@ -2571,7 +2574,7 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 	
 	function sanitizeOfficeDoc(html) {
 		
-		console.log("Before sanitizeOfficeDoc:" + html);
+			//console.log("Before sanitizeOfficeDoc:" + html);
 		
 		html = html.replace(/\n|\r\n/ig, " "); // Prevent line breaks in the middle of html tag
 		
@@ -2671,9 +2674,9 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 		var lbBefore = checkStartingLineBreaks();
 		
 		
-		console.log("inserting (sanitizing) line breaks. LB=" + UTIL.lbChars(LB));
+			//console.log("inserting (sanitizing) line breaks. LB=" + UTIL.lbChars(LB));
 		
-		console.time("insertLineBreaks");
+			//console.time("insertLineBreaks");
 		
 		// Remove space between tags
 		//html = html.replace(/>\s*</gi, "><");
@@ -2745,19 +2748,19 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 		
 		var lbAfter = checkStartingLineBreaks();
 		
-		console.log("lbBefore=" + lbBefore + " lbAfter=" + lbAfter);
+			//console.log("lbBefore=" + lbBefore + " lbAfter=" + lbAfter);
 		
 		if(lbBefore > lbAfter) {
 			var add = lbBefore - lbAfter;
-			console.log("Gonna add=" + add + " line breaks ...");
+				//console.log("Gonna add=" + add + " line breaks ...");
 			for(var i=0; i<add; i++) {
 				html = LB + html;
-				console.log("line break added");
+					//console.log("line break added");
 			}
 		}
 		else if(lbBefore < lbAfter) {
 			var remove = lbAfter - lbBefore;
-			console.log("Gonna remove=" + remove + " line breaks ...");
+				//console.log("Gonna remove=" + remove + " line breaks ...");
 			var start = 0;
 			for(var i=0; i<remove; i++) {
 				start = html.indexOf(LB, start) + 1;
@@ -2765,10 +2768,10 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 			var removed = html.substr(0, start-1);
 			html = html.substr(start);
 			
-			console.log("Removed " + UTIL.occurrences(removed, LB) + " line breaks");
+				//console.log("Removed " + UTIL.occurrences(removed, LB) + " line breaks");
 		}
 		
-		console.timeEnd("insertLineBreaks");
+			//console.timeEnd("insertLineBreaks");
 		
 		return html;
 		
@@ -2803,11 +2806,11 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 		
 		if(bodyTag == undefined) {
 			bodyTag = "body";
-			console.warn("Using bodyTag=" + bodyTag);
+				//console.warn("Using bodyTag=" + bodyTag);
 		}
 		
 		if(lineBreak == undefined) {
-			console.log("getElementContent: lineBreak=" + lineBreak + " Figuring out lineBreak from fileText.length=" + fileText.length);
+				//console.log("getElementContent: lineBreak=" + lineBreak + " Figuring out lineBreak from fileText.length=" + fileText.length);
 			lineBreak = UTIL.determineLineBreakCharacters(fileText);
 		}
 		else {
@@ -2829,7 +2832,7 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 		if(srcMatchBody.length != 2) throw new Error("Unexpeced match: srcMatchBody=" + JSON.stringify(srcMatchBody));
 		
 		var bodyHtml = srcMatchBody[1];
-		console.log("srcMatchBody=" + JSON.stringify(srcMatchBody));
+			//console.log("srcMatchBody=" + JSON.stringify(srcMatchBody));
 		
 		
 		//bodyHtml = removeHeadWhiteSpace(bodyHtml, lineBreak);
@@ -2842,7 +2845,7 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 		
 			if(lineBreakText && lineBreakText != lineBreak) {
 			//alertBox("Replacing lineBreakText=" + UTIL.lbChars(lineBreakText) + " with lineBreak=" + UTIL.lbChars(lineBreak));
-			console.warn("lineBreak=" + UTIL.lbChars(lineBreak) + " was specified. But text has lineBreakText=" + UTIL.lbChars(lineBreakText) + " Replacing lineBreakText=" + UTIL.lbChars(lineBreakText) + " with lineBreak=" + UTIL.lbChars(lineBreak));
+				//console.warn("lineBreak=" + UTIL.lbChars(lineBreak) + " was specified. But text has lineBreakText=" + UTIL.lbChars(lineBreakText) + " Replacing lineBreakText=" + UTIL.lbChars(lineBreakText) + " with lineBreak=" + UTIL.lbChars(lineBreak));
 			bodyHtml = bodyHtml.replace(new RegExp(lineBreakText, "g"), lineBreak);
 			}
 		
@@ -2853,7 +2856,7 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 	
 	function regexBody(bodyTag, lineBreak) {
 		if(bodyTag == undefined) throw new Error("No bodyTag=" + bodyTag + " defined!")
-		console.log("Returning regexp for bodyTag=" + bodyTag);
+			//console.log("Returning regexp for bodyTag=" + bodyTag);
 		
 		if(lineBreak == "\r\n") {
 			return new RegExp("<" + bodyTag + "[^>]*>[\\t ]*\\r\\n([\\s\\S]*)\\r\\n[\\t ]*<\\/" + bodyTag + ">", "i");
@@ -2893,18 +2896,18 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 			var wysiwygEditor = {
 				lineBreak: "\n",
 				bodyTagSource: "body",
-				sourceFile: file
-			};
-			wysiwygEditor.getSourceCodeBody = WysiwygEditor.prototype.getSourceCodeBody;
+					sourceFile: file
+				};
+				wysiwygEditor.getSourceCodeBody = WysiwygEditor.prototype.getSourceCodeBody;
 			
-			WysiwygEditor.prototype.setStartRow.call(wysiwygEditor);
-			if(wysiwygEditor.startRow != 2) throw new Error("Expected wysiwygEditor.startRow=" + wysiwygEditor.startRow + " to be 2");
+				WysiwygEditor.prototype.setStartRow.call(wysiwygEditor);
+				if(wysiwygEditor.startRow != 2) throw new Error("Expected wysiwygEditor.startRow=" + wysiwygEditor.startRow + " to be 2");
 			
-			var sourceBodyHtml = WysiwygEditor.prototype.getSourceCodeBody.call(wysiwygEditor);
-			var sourceBodyHtmlRows = sourceBodyHtml.split(/\n/);
-			if(sourceBodyHtmlRows.length != 2) {
-				console.log("testStartRowN sourceBodyHtml:");
-				console.log(sourceBodyHtml);
+				var sourceBodyHtml = WysiwygEditor.prototype.getSourceCodeBody.call(wysiwygEditor);
+				var sourceBodyHtmlRows = sourceBodyHtml.split(/\n/);
+				if(sourceBodyHtmlRows.length != 2) {
+					console.log("testStartRowN sourceBodyHtml:");
+					console.log(sourceBodyHtml);
 				throw new Error("Expected sourceBodyHtmlRows.length=" + sourceBodyHtmlRows.length + " to be 2");
 			}
 			EDITOR.closeFile(file.path);
@@ -2983,7 +2986,7 @@ console.warn("wysiwygEditor" + wysiwygEditor.id + " has already been closed!");
 			wysiwygEditor.getSourceCodeBody = WysiwygEditor.prototype.getSourceCodeBody;
 			
 			var source = WysiwygEditor.prototype.getSourceCodeBody.call(wysiwygEditor);
-			console.log("source=" + UTIL.lbChars(source));
+				//console.log("source=" + UTIL.lbChars(source));
 			
 			// Throw !?!?!
 			

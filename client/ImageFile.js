@@ -33,7 +33,7 @@ var ImageFile;
 		var image = new Image();
 		image.onload = function() {
 			
-			console.log("ImageFile: Got onload event for path=" + path);
+			//console.log("ImageFile: Got onload event for path=" + path);
 			
 			// Same width/height as the image
 			file.canvas.width = image.width;
@@ -55,15 +55,15 @@ var ImageFile;
 			loadCallback = null;
 		};
 		
-		console.log("ImageFile: Loading image data... ext=" + ext + " data.length=" + data.length);
-		console.log("ImageFile: Image data starts with: " + data.slice(0, 100) + " and ends with " + data.slice(-100));
+		//console.log("ImageFile: Loading image data... ext=" + ext + " data.length=" + data.length);
+		//console.log("ImageFile: Image data starts with: " + data.slice(0, 100) + " and ends with " + data.slice(-100));
 		
 		if(data.indexOf("blob:") != 0 && data.indexOf("data:") != 0) {
 			var extra = "data:image/" + ext + ";base64,";
 }
 		
 		if(extra) {
-			console.log("ImageFile: Putting " + extra + " infront of data");
+			//console.log("ImageFile: Putting " + extra + " infront of data");
 			data = extra + data;
 		}
 		
@@ -123,7 +123,7 @@ file.original = file.canvas;
 		scaledCanvas.width = origCanvas.width * file.scaled;
 		scaledCanvas.height = origCanvas.height * file.scaled;
 		
-		console.log("ImageFile.scale: scaled=" + file.scaled + " origCanvas.width=" + origCanvas.width + " origCanvas.height=" + origCanvas.height + " scaledCanvas.width=" + scaledCanvas.width + " scaledCanvas.height=" + scaledCanvas.height);
+		//console.log("ImageFile.scale: scaled=" + file.scaled + " origCanvas.width=" + origCanvas.width + " origCanvas.height=" + origCanvas.height + " scaledCanvas.width=" + scaledCanvas.width + " scaledCanvas.height=" + scaledCanvas.height);
 		
 		file.sWidth = scaledCanvas.width;
 		file.sHeight = scaledCanvas.height;
@@ -162,7 +162,7 @@ file.dHeight = scaledCanvas.height;
 		// Where on the image is the mouse?
 		var mouseImageX = dCenterX - file.dx;
 		var mouseImageY = dCenterY - file.dy;
-		console.log("ImageFile.zoom: mouseImageX=" + mouseImageX);
+		//console.log("ImageFile.zoom: mouseImageX=" + mouseImageX);
 		
 		
 		
@@ -197,7 +197,7 @@ file.dHeight = scaledCanvas.height;
 		//file.dx = file.dx - Math.round((width - oldWidth)/2 + dCenterX);
 		//file.dy = file.dy - Math.round((height - oldHeight)/2 + dCenterY);
 		
-		console.log("ImageFile.zoom: zoomLevel=" + zoomLevel + " sWidth=" + file.sWidth + " width=" + width + " deltaX=" + deltaX + " sHeight=" + file.sHeight + " height=" + height);
+		//console.log("ImageFile.zoom: zoomLevel=" + zoomLevel + " sWidth=" + file.sWidth + " width=" + width + " deltaX=" + deltaX + " sHeight=" + file.sHeight + " height=" + height);
 		
 		// Centralize the image
 		
