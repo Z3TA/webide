@@ -984,7 +984,7 @@
 							
 						}
 					}
-
+				}
 					//else {console.log("Variable does not have a keys property: " + properties[0]);}
 				
 				}
