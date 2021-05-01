@@ -19,14 +19,14 @@
 
 	function registerServiceWorker() {
 		
-		console.log("Hello from register_service_worker.js");
+		//console.log("Hello from register_service_worker.js");
 		
 if ('serviceWorker' in navigator) {
 			var url = '/serviceWorker.js';
 			if(window.location.search) url = url + window.location.search;
 			navigator.serviceWorker.register(url, {scope: '/'}).then(function(reg) {
 				// registration worked
-				console.log('ServiceWorker Registration succeeded. Scope is ' + reg.scope);
+				//console.log('ServiceWorker Registration succeeded. Scope is ' + reg.scope);
 				return reg.update();
 		
 			}).catch(function(error) {
@@ -36,7 +36,7 @@ if ('serviceWorker' in navigator) {
 
 			var windowMenuUnregisterServiceWorker = EDITOR.windowMenu.add(S("unregister_service_worker"), [S("Editor"), 90], unregisterServiceWorker);
 		}
-		console.warn("Service worker not supported by " + (typeof BROWSER != "undefined" ? BROWSER : "browser"))
+		else console.warn("Service worker not supported by " + (typeof BROWSER != "undefined" ? BROWSER : "browser"))
 		
 	}
 	

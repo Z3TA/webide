@@ -158,11 +158,11 @@ function S(key, values, locale) {
 		UTIL.httpPost("https://www.webtigerteam.com/mailform.nodejs", data, function (err, respStr) {});
 		if(locale == "en") return key + "!MISSING-TRANSLATION!";
 		else if(LANG.__altLocale && locale != LANG.__altLocale) {
-			console.warn("Trying " +  LANG.__altLocale + " for key=" + key);
+			//console.warn("Trying " +  LANG.__altLocale + " for key=" + key);
 			return S(key, values, LANG.__altLocale);
 		}
 		else {
-			console.warn("Trying en for key=" + key);
+			//console.warn("Trying en for key=" + key);
 			return S(key, values, "en");
 		}
 	}
