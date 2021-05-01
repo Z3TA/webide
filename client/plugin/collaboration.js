@@ -2515,8 +2515,10 @@ isPlaying = true;
 			
 			CLIENT.cmd("echo", {eventOrder: ++eventOrder, fileChange: fileChangeEvent});
 			
+			// TEST-CODE-START
 			if(EDITOR.settings.devMode) detectHoles(fileChangeEvents[file.path]); // Sanity check
-			
+			// TEST-CODE-END
+
 		}
 		else if(saveUndoRedoHistory) {
 			saveUndoRedoHistoryEvent(fileChangeEvent);
@@ -2795,8 +2797,10 @@ isPlaying = true;
 			
 			fileChangeEvents[file.path][ev.order].push(ev);
 			
+			// TEST-CODE-START
 			if(EDITOR.settings.devMode) detectHoles(fileChangeEvents[file.path]); // Sanity check
-			
+			// TEST-CODE-END
+
 			if(json.cId != userConnectionId) {
 				// ### Apply file change
 				

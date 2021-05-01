@@ -97,12 +97,14 @@ function Dialog(msg, options) {
 	
 	div.appendChild(message);
 	
+	// TEST-CODE-START
 	if(EDITOR.settings.devMode) {
 		var errCode = document.createElement("div");
 		errCode.classList.add("errCode");
 		errCode.appendChild( document.createTextNode("code=" + dialog.code) );
 		div.appendChild( errCode );
 	}
+	// TEST-CODE-END
 
 	body.appendChild(div);
 	

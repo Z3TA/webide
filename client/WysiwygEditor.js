@@ -366,6 +366,7 @@ alertBox(wysiwygEditor.sourceFile.path + " contains SSG scripts which is not yet
 		var tmpCaret = sourceFile.createCaret(srcStartIndex);
 		wysiwygEditor.startRow = tmpCaret.row;
 		
+		// TEST-CODE-START
 		if(EDITOR.settings.devMode) {
 			
 			var sourceCodeBody = wysiwygEditor.getSourceCodeBody();
@@ -392,6 +393,8 @@ alertBox(wysiwygEditor.sourceFile.path + " contains SSG scripts which is not yet
 				}
 			}
 		}
+		// TEST-CODE-END
+
 	}
 	
 	WysiwygEditor.prototype.positionate = function positionate(top, left, width, height) {

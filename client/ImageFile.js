@@ -241,12 +241,14 @@ file.dHeight = scaledCanvas.height;
 		EDITOR.renderNeeded();
 		
 		
-		
+		// TEST-CODE-START
 		if(EDITOR.settings.devMode) {
 			EDITOR.canvasContext.beginPath();
 			EDITOR.canvasContext.arc(dCenterX, dCenterY, 20, 0, 2 * Math.PI); // Debug
 			EDITOR.canvasContext.stroke(); 
 		}
+		// TEST-CODE-END
+
 	}
 	
 	ImageFile.prototype.saved = function(callback) {

@@ -97,6 +97,8 @@
 		// Try to detect bugs in this plugin
 		if(!EDITOR.settings.devMode) return true; 
 		
+		// TEST-CODE-START
+
 		//console.time("Check indentation after fix on file update");
 		
 		for(var row = 0; row<file.grid.length; row++) {
@@ -109,6 +111,9 @@
 		}
 		
 		//console.timeEnd("Check indentation after fix on file update");
+
+		// TEST-CODE-END
+
 	}
 	
 	function checkIndentationOnBeforeParser(file, type, character, index, row, col) {

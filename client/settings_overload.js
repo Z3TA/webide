@@ -434,7 +434,7 @@ webFontLoading = "DejaVuSansMono";
 
 	function debug(msg) {
 		
-		if(!EDITOR.settings.devMode) return;
+		if(!EDITOR.settings.devMode && !QUERY_STRING["debugFont"]) return;
 
 		console.log("settings_overload: debug: " + msg);
 		
@@ -451,7 +451,7 @@ webFontLoading = "DejaVuSansMono";
 	
 	
 	function detectAntialias() {
-var canvasNode = document.createElement("canvas");
+		var canvasNode = document.createElement("canvas");
 		canvasNode.width = "35";
 		canvasNode.height = "35";
 		

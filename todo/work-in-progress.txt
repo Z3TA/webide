@@ -5,7 +5,16 @@ node server/server.js --port=/home/johan/sock/test --domain=test.johan.webide.se
 What I'm working on
 -------------------
 
-optimizing startup time
+1076523 May  2 00:47 client/bundle.htm
+1063211 May  2 01:58 client/bundle.htm
+
+get bundle size below 1MB
+
+if\(.*EDITOR.settings.devMode
+
+// TEST-CODE-START
+
+// TEST-CODE-END
 
 ---
 

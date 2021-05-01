@@ -774,8 +774,10 @@
 							
 							//console.timeEnd("parseOnlyFunctionOptimizer");
 							
+							// TEST-CODE-START
 							if(EDITOR.settings.devMode && newParse.blockMatch) {
 								
+
 								// Make a full parse and compare to see if there are any bugs
 								//console.log("fullParse to check for errors:");
 								
@@ -818,7 +820,7 @@
 									}
 								}
 							}
-							
+							// TEST-CODE-END
 							
 							file.haveParsed(oldParse);
 							
@@ -888,6 +890,7 @@
 					func.endRow += endRowDiff;
 				}
 				
+				// TEST-CODE-START
 				if(EDITOR.settings.devMode && (isBelow || isParent)) {
 					//console.log("Checking func=" + func.name + " ... start=" + func.start + " (" + UTIL.lbChars(file.text.charAt(func.start)) + ") end=" + func.end + " (" + UTIL.lbChars(file.text.charAt(func.end)) + ")");
 					// Make sure the function starts with an { and ends with an }
@@ -903,6 +906,8 @@
 						alertBox("Expected func.name=" + func.name + " end=" + func.end + " character=" + UTIL.lbChars(file.text.charAt(func.end)) + " to be a } in file.path=" + file.path, "parser", "warning");
 					}
 				}
+				// TEST-CODE-END
+
 			}
 		}
 		

@@ -3146,11 +3146,13 @@ ca 20ms to render, ca 13ms to render without creating new objects
 			(gotcha: if we call window.requestAnimationFrame 1000 times in a row it will also run 1000 times! eg. it doesn't buffer calls )
 		*/
 
-
+		// TEST-CODE-START
 		if(EDITOR.settings.devMode && EDITOR.shouldRender == false) {
 			// For debugging, so we know why a render was needed
 			//console.log(UTIL.getStack("renderNeeded"));
 		}
+		// TEST-CODE-END
+
 		EDITOR.shouldRender = true;
 		
 		clearTimeout(renderTimer);
@@ -9498,7 +9500,7 @@ EDITOR.closeAllDialogs = function closeAllDialogs(dialogCode, retryCount) {
 			t.setAttribute("selStart", selStart);
 			t.setAttribute("selEnd", selStart);
 			
-			
+			// TEST-CODE-START
 			if(EDITOR.settings.devMode) {
 				// Sanity check
 				var sTop = t.scrollTop || parseInt(t.getAttribute("sTop"));
@@ -9515,7 +9517,8 @@ EDITOR.closeAllDialogs = function closeAllDialogs(dialogCode, retryCount) {
 					throw new Error("Nuked scroll position for element id=" + t.id + " scrollTop=" + t.scrollTop + " attribute sTop=" + t.getAttribute("sTop") );
 				}
 			}
-			
+			// TEST-CODE-END
+
 		}
 	}
 	

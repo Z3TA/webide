@@ -582,6 +582,8 @@ var File; // File object is global
 			return;
 		}
 		
+		// TEST-CODE-START
+
 		var file = this;
 		var row = 0;
 		var col = 0;
@@ -718,6 +720,8 @@ var File; // File object is global
 		}
 		}
 		
+		// TEST-CODE-END
+
 	}
 	
 	File.prototype.checkCaret = function(caret) {
@@ -727,6 +731,8 @@ var File; // File object is global
 			return;
 		}
 		
+		// TEST-CODE-START
+
 		var file = this,
 		char;
 		
@@ -826,7 +832,7 @@ var File; // File object is global
 			}
 		}
 		
-		
+		// TEST-CODE-END
 	}
 	
 	File.prototype.sanityCheck = function() {
@@ -836,11 +842,14 @@ var File; // File object is global
 			return;
 		}
 		
+		// TEST-CODE-START
 		file.checkGrid();
 		file.checkCaret();
 		
 		//file.debugGrid();
 		
+		// TEST-CODE-END
+
 	}
 	
 	File.prototype.write = function(text, addLineBreak) {
@@ -1483,6 +1492,8 @@ file.sanityCheck();
 		
 		if(EDITOR.settings.devMode == false) return; // Do not check in production
 		
+		// TEST-CODE-START
+
 		var file = this;
 		
 		if(selection == undefined) selection = file.selected;
@@ -1508,6 +1519,9 @@ file.sanityCheck();
 		}
 		
 		//console.log("checkSelection passed!");
+
+		// TEST-CODE-END
+
 	}
 	
 	File.prototype.select = function(box, direction) {
@@ -3336,7 +3350,8 @@ file.sanityCheck();
 			return;
 		}
 		
-		
+		// TEST-CODE-START
+
 		var file = this,
 		grid = this.grid,
 		text = this.text,
@@ -3414,7 +3429,8 @@ file.sanityCheck();
 			return arr;
 			
 		}
-		
+		// TEST-CODE-END
+
 	}
 	
 	
