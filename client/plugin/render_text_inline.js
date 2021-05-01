@@ -44,6 +44,8 @@
 
 		//console.log("EDITOR.view.endingColumn=" + EDITOR.view.endingColumn);
 
+		//console.log("textRender: ctx.font=" + ctx.font);
+
 		if(startRow == undefined) startRow = 0;
 
 		var left = 0,

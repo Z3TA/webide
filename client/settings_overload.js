@@ -411,6 +411,7 @@ webFontLoading = "DejaVuSansMono";
 	}
 
 	function makeGlyphWidthDetector() {
+		EDITOR.fontLoaded = true;
 		EDITOR.glyphWidth = EDITOR.makeGlyphWidthDetector();
 
 		/*
@@ -418,7 +419,16 @@ webFontLoading = "DejaVuSansMono";
 			If we did load the font, it should now have finished loaded,
 		*/
 
-		EDITOR.resize(true); // Only way to set the canvas context font it seems, is to force/destroy the context by resizing the canvas!
+		/*
+			Issue in Chrome: Even though the font is set on the canvas context font prop, it wont use the font unless we do a full render...
+			tried running canvasContextReset, tried changing canvas width/height, running ctx.fillTex etc, but it still uses some standard font, not even our fallback font!
+			So therefore we must force full re-render (in Chrome) after we have loaded the custom font
+
+			Unfortunately this means that the editor will resize/rerender twice during startup, once now, then once again when resizing because beforeload classes are removed
+		*/
+
+		EDITOR.resize(true);
+		
 		
 	}
 

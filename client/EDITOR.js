@@ -2493,6 +2493,8 @@ callback(error);
 		
 	}
 	
+	//EDITOR.resetCanvasContext = canvasContextReset;
+
 	EDITOR.render = function render(file, fileStartRow, fileEndRow, screenStartRow, canvas, ctx, renderOverride, background) {
 		
 		//console.warn("EDITOR.render! renderOverride=" + renderOverride + " EDITOR.shouldRender=" + EDITOR.shouldRender + " Editor canvas ? " + (canvas == undefined || canvas == EDITOR.canvas) + " EDITOR.canvasContext.font=" + EDITOR.canvasContext.font);
@@ -3130,7 +3132,7 @@ ca 20ms to render, ca 13ms to render without creating new objects
 	EDITOR.renderNeeded = function renderNeeded() {
 		// Tell the editor that it needs to render
 		
-		//console.warn("Render needed!");
+		console.warn("Render needed!");
 		
 		if(EDITOR.settings.devMode && EDITOR.shouldRender == false) {
 			// For debugging, so we know why a render was needed
@@ -6120,13 +6122,17 @@ console.warn(err.message);
 	EDITOR.interact = function(interaction, options) {
 		// This function will be called on every interaction
 		
+		// Calling render here (efter each key event) seems to be the fastest (faster then waiting for requestAnimationFrame)
+		if(EDITOR.fontLoaded) resizeAndRender();
+
+
 		nextInteractionFunctions();
 		
 		if(afk) {
 			afk = false;
 EDITOR.fireEvent("btk");
 			//console.log("Setting mainLoopInterval because btk!");
-			mainLoopInterval = setInterval(resizeAndRender, 16); // Start main loop
+			mainLoopInterval = setInterval(resizeAndRender, 1000); // Start main loop
 		}
 		
 		EDITOR.lastTimeInteraction = new Date();
@@ -6139,8 +6145,7 @@ EDITOR.fireEvent("btk");
 			}
 		}
 		
-		// Calling render here (efter each key event) seems to be the fastest (faster then requestAnimationFrame)
-		resizeAndRender();
+		
 		
 		function nextInteractionFunctions() {
 			for(var i=0, ret; i<executeOnNextInteraction.length; i++) {
@@ -9864,15 +9869,15 @@ if(RUNTIME == "nw.js") {
 	window.ondrop = function(dropEvent) { dropEvent.preventDefault(); console.log("window.ondrop"); return false };
 	window.ondragdrop = function(dragDropEvent) { dragDropEvent.preventDefault(); console.log("window.ondragdrop"); return false };
 	window.ondragleave = function(dragLeaveEvent) { dragLeaveEvent.preventDefault(); console.log("window.ondragleave"); return false };
-	window.ondragover = function(dragOver) { dragOver.preventDefault(); console.log("window.ondragover"); return false };
-*/
+		window.ondragover = function(dragOver) { dragOver.preventDefault(); console.log("window.ondragover"); return false };
+	*/
 
-window.addEventListener("dblclick", dblclick);
+	window.addEventListener("dblclick", dblclick);
 
 
-window.addEventListener("load", main, false);
-window.addEventListener("resize", function resizeAndRenderOnInteraction(resizeEvent) {
-		console.log("EVENT RESIZE!");
+	window.addEventListener("load", main, false);
+	window.addEventListener("resize", function resizeAndRenderOnInteraction(resizeEvent) {
+		//console.log("EVENT RESIZE!");
 	EDITOR.resizeNeeded();
 	EDITOR.renderNeeded();
 	
@@ -10533,33 +10538,9 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 	
 	
 		//console.log("Setting mainLoopInterval because first load!");
-		//mainLoopInterval = setInterval(resizeAndRender, 16); // So that we always see the latest and greatest
-		// The interval above uses about 1% CPU while idle just for the function call overhead
-
-		// note to self: Just temorary, dont forget to remove:
-		//if(EDITOR.settings.devMode == true) EDITOR.openFile(testfile);
-	
-		/*
-			// Problem: There seems to be a magic reizie or the runtime need time to calculate stuff
-			//setTimeout(display, 500);
-			//display();
+		mainLoopInterval = setInterval(resizeAndRender, 1000); // So that we always see the latest and greatest
+		// note: resizeAndRender will be called on each interaction, but we also need to call it on regular interval in case something changes that was not caused by a user interaction!
 		
-		
-			// Prevent the void from ruling the earth the first 500ms
-			EDITOR.resizeNeeded();
-			EDITOR.resize();
-			EDITOR.renderNeeded();
-			EDITOR.render();
-		
-		
-			function display() {
-		
-			EDITOR.resizeNeeded();
-			EDITOR.resize(); // Will also force a render
-		
-		
-			}
-		*/
 		
 		showDisoveryBarWindowMenuItem = EDITOR.windowMenu.add(S("discovery_bar"), [S("View"), 130], EDITOR.discoveryBar.toggle);
 		showDisoveryBarCaptions = EDITOR.windowMenu.add(S("discovery_bar_captions"), [S("View"), 135], EDITOR.discoveryBar.toggleCaptions);
@@ -10608,6 +10589,7 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 			document.getElementById("editorCanvas").classList.remove("beforeload");
 
 			EDITOR.resize();
+
 		}
 	}
 	
@@ -11099,8 +11081,8 @@ function chooseSaveAsPath(saveAsDialogEvent) {
 	}
 	
 	if (!file) {
-		console.warn("No file selected!");
-		EDITOR.filesaveAsCallback(undefined);
+		//console.warn("No file selected!");
+			EDITOR.filesaveAsCallback(undefined);
 		return;
 	}
 	
@@ -11336,7 +11318,7 @@ if(!EDITOR.user) return alertBox("Need to be logged in to upload files!");
 				//console.log("fileDrop:uploadComplete: filesToSave=" + filesToSave + " filesSaved=" + filesSaved + " items.length=" + items.length);
 			
 			if(done) {
-				console.warn("fileDrop:uploadComplete: Already done!"); // Might happen on rare ocations, actually should never happen! But it did, once (unable to repeat)
+					//console.warn("fileDrop:uploadComplete: Already done!"); // Might happen on rare ocations, actually should never happen! But it did, once (unable to repeat)
 				return;
 			}
 			
@@ -11589,14 +11571,10 @@ function copy(copyEvent) {
 		
 		if(EDITOR.currentFile) {
 				if(EDITOR.currentFile instanceof File) textToPutOnClipboard = EDITOR.currentFile.getSelectedText();
-		}
-		
-		if(textToPutOnClipboard == "") {
-
-				console.warn("Prevented clearing the clipboard!");
-				
 			}
-			else {
+		
+			if(textToPutOnClipboard.length > 0) {
+
 				if (BROWSER.indexOf("MSIE") == 0) {
 			window.clipboardData.setData('Text', textToPutOnClipboard);    
 		} else {
@@ -11614,27 +11592,27 @@ function copy(copyEvent) {
 			EDITOR.pseudoClipboard = textToPutOnClipboard;
 				//console.log("copy: Put " + textToPutOnClipboard.length + " characters into EDITOR.pseudoClipboard");
 			}
+			// else console.warn("Prevented clearing the clipboard!");
+
+
 		}
-		else {
-			// Do the default action (enable copying outside the canvas)
-			console.warn("Copying outside the canvas! EDITOR.input=" + EDITOR.input);
-		}
+		//else {/* Do the default action (enable copying outside the canvas) */ console.warn("Copying outside the canvas! EDITOR.input=" + EDITOR.input); }
 		
-	//console.log("textToPutOnClipboard=" + textToPutOnClipboard);
+		//console.log("textToPutOnClipboard=" + textToPutOnClipboard);
 	
 		EDITOR.interact("copy", copyEvent);
 	
-	return textToPutOnClipboard;
-}
+		return textToPutOnClipboard;
+	}
 
-function cut(cutEvent) {
+	function cut(cutEvent) {
 	
 		//console.log("cutEvent EDITOR.input=" + EDITOR.input + " EDITOR.settings.useCliboardcatcher=" + EDITOR.settings.useCliboardcatcher + " giveBackFocusAfterClipboardEvent=" + giveBackFocusAfterClipboardEvent);
 	
 		nativeCut = false; // Allow next key press to register
 		
-	if(EDITOR.settings.useCliboardcatcher && giveBackFocusAfterClipboardEvent) {
-		// Give focus back to the editor/canvas
+		if(EDITOR.settings.useCliboardcatcher && giveBackFocusAfterClipboardEvent) {
+			// Give focus back to the editor/canvas
 		EDITOR.input = true;
 			EDITOR.canvas.focus();
 		giveBackFocusAfterClipboardEvent = false;
@@ -11651,7 +11629,7 @@ function cut(cutEvent) {
 			EDITOR.currentFile.deleteSelection();
 		}
 		
-		if(textToPutOnClipboard == "") console.warn("Nothing copied to clipboard!");
+		//if(textToPutOnClipboard == "") console.warn("Nothing copied to clipboard!");
 		
 		if (BROWSER.indexOf("MSIE") == 0) {
 			window.clipboardData.setData('Text', textToPutOnClipboard);    
@@ -12171,38 +12149,35 @@ function resizeAndRender(afterResize) {
 		//if(EDITOR.isScrolling) console.timeEnd("Scrolling optimization");
 		}
 	
-	
-		//window.requestAnimationFrame(resizeAndRender); // Keep calling this function
-	
-		// Using requestAnimationFrame feels slightly slower then rendering on each interaction!
-	
-		if((new Date() - EDITOR.lastTimeInteraction) > afkTimeout) {
+	if((new Date() - EDITOR.lastTimeInteraction) > afkTimeout) {
 			afk = true;
-		EDITOR.fireEvent("afk");
-		// Try do do as little as possible to save power
-		clearInterval(mainLoopInterval);
-	}
+			EDITOR.fireEvent("afk");
+			// Try do do as little as possible to save power
+			clearInterval(mainLoopInterval);
+		}
 	
-}
+		// note: We can't use window.requestAnimationFrame on Chrome or it will use 70% of CPU to just spin the loop!!!
 
-function keyboardCatcherKey(keyEvent) {
-	keyEvent = keyEvent || window.event;
+	}
+
+	function keyboardCatcherKey(keyEvent) {
+		keyEvent = keyEvent || window.event;
 	
-	var charCode = keyEvent.charCode; // Deprected, non-standard.  Unicode value of the character key that was pressed
-	var keyCode = keyEvent.keyCode; //  Deprecated. A system and implementation dependent numerical code identifying the unmodified value of the pressed key
-	var key = keyEvent.key; // value of the key pressed by the user, taking into consideration the state of modifier keys such as Shift as well as the keyboard locale and layout. 
-	var code = keyEvent.code; // physical positions on the input device
-	var which = keyEvent.which; //  Deprecated. numeric keyCode of the key pressed, or the character code
+		var charCode = keyEvent.charCode; // Deprected, non-standard.  Unicode value of the character key that was pressed
+		var keyCode = keyEvent.keyCode; //  Deprecated. A system and implementation dependent numerical code identifying the unmodified value of the pressed key
+		var key = keyEvent.key; // value of the key pressed by the user, taking into consideration the state of modifier keys such as Shift as well as the keyboard locale and layout. 
+		var code = keyEvent.code; // physical positions on the input device
+		var which = keyEvent.which; //  Deprecated. numeric keyCode of the key pressed, or the character code
 	
-	var shiftKey = keyEvent.shiftKey; // if the shift key was pressed 
+		var shiftKey = keyEvent.shiftKey; // if the shift key was pressed 
 	
-	var keyboardCatcher = document.getElementById("keyboardCatcher");
-	var inputValue = keyboardCatcher.value;
+		var keyboardCatcher = document.getElementById("keyboardCatcher");
+		var inputValue = keyboardCatcher.value;
 	
 		//console.log("keyboardCatcherKey: inputValue=" + inputValue + " key=" + key + " charCode=" + charCode + " keyCode=" + keyCode + " code=" + code + " which=" + which + " shiftKey=" + shiftKey);
 	
-	/*
-		Android don't want to give us key (key=Unidentified). And it wont give us keyPress events ...
+		/*
+			Android don't want to give us key (key=Unidentified). And it wont give us keyPress events ...
 		So we have to check what was entered into the input box
 	*/
 	
@@ -12400,9 +12375,7 @@ function keyboardCatcherKey(keyEvent) {
 			captured = true;
 			capturedBy.push(f[i]);
 			
-				if(!EDITOR.currentFile) {
-					console.warn("keyIsDown: No file open!");
-				}
+				//if(!EDITOR.currentFile) {console.warn("keyIsDown: No file open!");}
 
 				funReturn = f[i](EDITOR.currentFile, combo, character, charCode, "down", targetElementClass, keyDownEvent);
 			
@@ -12563,7 +12536,7 @@ function getCombo(eventObject) {
 	var combo = {shift: false, alt: false, ctrl: false, meta: false, sum: 0};
 	
 		if(eventObject == undefined) {
-			console.warn("getCombo: eventObject=" + eventObject + " returning zeroed combo!");
+			//console.warn("getCombo: eventObject=" + eventObject + " returning zeroed combo!");
 			return combo;
 		}
 		
@@ -13128,7 +13101,7 @@ function getMousePosition(mouseEvent) {
 			mouseX = EDITOR.mouseX;
 			mouseY = EDITOR.mouseY;
 		}
-		console.warn("Unable to find mouse position. Using last know position mouseX=" + mouseX + " mouseY=" + mouseY);
+			//console.warn("Unable to find mouse position. Using last know position mouseX=" + mouseX + " mouseY=" + mouseY);
 	}
 	
 	//console.log("mouseX=" + mouseX);
@@ -13409,9 +13382,8 @@ function getFile(url, callback) {
 				callback(img);
 				callback = null;
 			}
-			else {
-				console.warn("htmlToImage: Already called back because it took too long for the image to load.");
-			}
+			//else {console.warn("htmlToImage: Already called back because it took too long for the image to load.");}
+
 		}
 		
 		if( domurl.createObjectURL && BROWSER != "Safari") { // Safari ends up with a zero width image

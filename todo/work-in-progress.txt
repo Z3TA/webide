@@ -5,7 +5,7 @@ node server/server.js --port=/home/johan/sock/test --domain=test.johan.webide.se
 What I'm working on
 -------------------
 
-removing console.log debug messages
+optimizing startup time
 
 ---
 
@@ -17,7 +17,7 @@ bug: Stuck on green "reconnecting..." (after changing from jzedit to webide serv
 
 ---
 
-optimizing startup time
+
 
 
 ---

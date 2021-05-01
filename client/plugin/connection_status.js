@@ -28,15 +28,15 @@ enabled = !!setting;
 					setTimeout(enable, 1000);
 				}
 else if(setting === false) {
-disable();
-}
+disable(false);
+				}
 
 			});
 			
 		},
 		unload: function unloadConnectionStatus() {
 			
-			disable();
+			disable(enabled);
 			
 			EDITOR.windowMenu.remove(winMenuItem);
 			
@@ -60,7 +60,7 @@ disable();
 		winMenuItem.activate();
 	}
 	
-	function disable() {
+	function disable(wasEnabled) {
 		//console.log("connectionStatus: disable!");
 		
 		CLIENT.removeEvent("pingChange", pingChange);
@@ -71,7 +71,7 @@ disable();
 		
 		EDITOR.removeRender(renderConnectionStatus);
 		
-		EDITOR.renderNeeded();
+		if(wasEnabled) EDITOR.renderNeeded();
 		
 		winMenuItem.deactivate();
 	}
@@ -84,7 +84,7 @@ disable();
 		EDITOR.saveSettings("show_ping", enabled);
 		
 		if(enabled) enable();
-		else disable();
+		else disable(true);
 	}
 	
 	function connectionConnected() {
@@ -156,7 +156,7 @@ disable();
 		ctx.fillStyle = EDITOR.settings.style.bgColor;
 		ctx.fillRect(lastX, Math.ceil(y-height/2), lastWidth+rightPadding, height);
 		
-// Fill background for new message
+		// Fill background for new message
 		ctx.fillStyle = bgColor;
 		ctx.fillRect(x, Math.ceil(y-height/2), width+rightPadding, height);
 		
