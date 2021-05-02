@@ -699,6 +699,8 @@ text = text.replace(reNetnsIP, "$2$3$4." + username + "." + TLD);
 			return ALLOW_DEFAULT;
 		}
 		
+		if(!window.JsDiff) EDITOR.loadScript("/JsDiff.js"); // Hope it loads before we needed it :)
+
 		var filePath = file.path;
 		
 		//console.log("Run nodejs script: " + filePath);

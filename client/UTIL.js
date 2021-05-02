@@ -468,18 +468,16 @@ console.warn("Expected a slash after hostname=" + hostname + " fullPath=" + full
 	
 	textDiff: function textDiff(originalText, editedText) {
 		/*
-			return {inserted: inserted, removed: removed};
+			returns {inserted: inserted, removed: removed};
 			
-			{text: text, row: row}
-			
-			Problems: 
-			* Text might have been both deleted and inserted
-			
-			Strategy: Find the inserts and removals needed to turn originalText into editedText
-			
-			Solution: Use a node module :P
+			ALERT! ALERT! ALERT!
+			Code depending on window.JsDiff needs to make sure it's loaded!
+
 		*/
-		
+
+		if(!window.JsDiff) throw new Error("Use EDITOR.loadScript to load JsDiff before calling UTIL.textDiff!");
+
+
 		var lb = /\r\n|\n/;
 		var lbOriginalText = originalText.indexOf("\r\n") != -1 ? "\r\n" : "\n";
 		var lbEditedText = editedText.indexOf("\r\n") != -1 ? "\r\n" : "\n";

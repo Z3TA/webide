@@ -73,6 +73,8 @@ var WysiwygEditor;
 		
 		if(arguments.length != 1) throw new Error("Expected one argument (options object) got " + arguments.length + " arguments/parameters !");
 		
+		if(!window.JsDiff) EDITOR.loadScript("/JsDiff.js"); // Hope it loads before we needed it :)
+
 		var sourceFile = options.sourceFile;
 		var bodyTagSource = options.bodyTagSource;
 		var onlyPreview = options.onlyPreview;

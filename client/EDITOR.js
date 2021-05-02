@@ -8837,23 +8837,26 @@ EDITOR.loadScript = function loadScript(src, dontAsk, callback) {
 		var no = "No";
 		confirmBox("Do you trust " + loc.host + " to load the following script:\n" + src, [yes, no], function(answer) {
 			if(answer == yes) load();
-			else callback(new Error("User declined loading the script!"));
-		});
-	}
-	else load();
+				else if(callback) callback(new Error("User declined loading the script!"));
+			});
+		}
+		else load();
 	
-	function load() {
-		var script = document.createElement('script');
-		script.onload = function () {
-			callback(null);
+		function load() {
+			var script = document.createElement('script');
+			
+			if(callback) {
+				script.onload = function () {
+					callback(null);
 			callback = null;
 		};
 		script.onerror  = function (err) {
 			callback(err || new Error("Unable to load " + src));
 			callback = null;
 		};
-		
-		script.src = src;
+			}
+
+			script.src = src;
 		
 		document.head.appendChild(script);
 	}
