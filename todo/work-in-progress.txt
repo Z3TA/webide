@@ -5,10 +5,9 @@ node server/server.js --port=/home/johan/sock/test --domain=test.johan.webide.se
 What I'm working on
 -------------------
 
-Lazy load JsDiff
 
 There are a lot of "guards" with debug info, like if(badState) throw new Error("badState=" + badState)
-1000325 May  2 15:33 client/bundle-without-guards.htm
+1000325 May  2 15:33 client/bundle-without-guards.htm (would save 63kb)
 1063211 May  2 01:58 client/bundle.htm
 
 removing the guards would save 62886 b (about 6%)
