@@ -7802,7 +7802,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 			date - Date - The last modified date of the entry.
 		*/
 		
-		if(pathToFolder == undefined) throw new Error("pathToFolder=" + pathToFolder);
+		if(pathToFolder == undefined) throw new Error("EDITOR.listFiles: pathToFolder=" + pathToFolder);
 		
 		pathToFolder = UTIL.trailingSlash(pathToFolder);
 		
