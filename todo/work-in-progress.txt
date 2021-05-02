@@ -5,6 +5,16 @@ node server/server.js --port=/home/johan/sock/test --domain=test.johan.webide.se
 What I'm working on
 -------------------
 
+Lazy loading vim keybinding support would probably save 30 kB
+Make a plugin that just puts "Activate VIM keybinding support" in Editor menu ?
+
+Should we minify files that might be lazy loaded !? eg. JsDiff, and vim keybinding 
+
+Mercurial plugin could be lazy loaded
+terminal emulator could be lazy loaded
+virtual keyboard could be lazy loaded (or automatically on mobile/touchscreen devices)
+sqldb plugin could be lazy loaded
+
 
 
 There are a lot of "guards" with debug info, like if(badState) throw new Error("badState=" + badState)
