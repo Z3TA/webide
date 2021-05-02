@@ -58,7 +58,7 @@ function makeFolderPicker(inputPath, options) {
  }
  
  function pathKeyDown(keyDownEvent) {
-  console.log("makeFolderPicker: pathKeyDown: inputPath.value=" + inputPath.value);
+  //console.log("makeFolderPicker: pathKeyDown: inputPath.value=" + inputPath.value);
   var keyTab = 9;
   // Autocomplete the path when pressing tab
   // Allow user to go to previous input element using shift+tab,
@@ -74,8 +74,8 @@ function makeFolderPicker(inputPath, options) {
    if(caretPos != text.length) {
     var afterCaret = text.slice(caretPos);
     text = text.slice(0, caretPos);
-    console.log("makeFolderPicker: pathKeyDown: afterCaret=" + afterCaret);
-    console.log("makeFolderPicker: pathKeyDown: text=" + text);
+    //console.log("makeFolderPicker: pathKeyDown: afterCaret=" + afterCaret);
+    //console.log("makeFolderPicker: pathKeyDown: text=" + text);
    }
    
    if(text == "") return ALLOW_DEFAULT;
@@ -107,7 +107,7 @@ inputPath.value = path;
  }
  
  function pathKeyInput(inputEvent) {
-  console.log("makeFolderPicker: pathKeyInput: inputPath.value=" + inputPath.value);
+  //console.log("makeFolderPicker: pathKeyInput: inputPath.value=" + inputPath.value);
   
   suggestFolders(inputPath.value);
   return ALLOW_DEFAULT;
@@ -117,9 +117,9 @@ inputPath.value = path;
  function suggestFolders(pathValue) {
   // Does the path match any of the path-pickers ?
   
-  console.log("makeFolderPicker: suggestFolders: pathValue=" + pathValue);
+  //console.log("makeFolderPicker: suggestFolders: pathValue=" + pathValue);
   if(!pathValue) {
-   console.warn("makeFolderPicker: suggestFolders: pathValue=" + pathValue);
+   //console.warn("makeFolderPicker: suggestFolders: pathValue=" + pathValue);
    return;
   }
   
@@ -158,9 +158,9 @@ inputPath.value = path;
    
    for (var i=0, part; i<suggestedFolders.length; i++) {
     part = suggestedFolders[i].slice(0, pathValue.length)
-    console.log("makeFolderPicker: highLight: (" + suggestedFolders[i] + ") " + part + " == " + pathValue + " ? " + (part==pathValue));
+    //console.log("makeFolderPicker: highLight: (" + suggestedFolders[i] + ") " + part + " == " + pathValue + " ? " + (part==pathValue));
     if(part == pathValue) {
-     console.log("makeFolderPicker: highLight: Highlight: " + suggestedFolders[i]);
+     //console.log("makeFolderPicker: highLight: Highlight: " + suggestedFolders[i]);
      suggestedFolderButtons[suggestedFolders[i]].classList.add("highlighted");
     }
     else {
@@ -207,7 +207,7 @@ inputPath.value = path;
   return ALLOW_DEFAULT;
   
   function addFolder(name) {
-   console.log("makeFolderPicker: addFolder: Adding folder button name=" + name);
+   //console.log("makeFolderPicker: addFolder: Adding folder button name=" + name);
    
    var fullPath = UTIL.resolvePath(pathToFolder, name);
    fullPath = UTIL.trailingSlash(fullPath);
