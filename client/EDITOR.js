@@ -8878,9 +8878,911 @@ EDITOR.reload = function reload(url) {
 			}
 
 function reloadNow() {
-				//console.log("Reloading!"
+				//console.log("Reloading!");
 
-// More Event listeners ...
+				window.onbeforeunload = null;
+				if(url) window.location=url;
+				else location.reload();
+
+				// Note that each reload will spawn another chrome debugger! And the old will just linger until the main program is closed.
+			}
+
+		});
+	}
+
+	var waitingForFileToBeParsed = {};
+	EDITOR.parse = function parse(fileOrString, lang, path, callback) {
+		/*
+			Useful for when you want to parse a file, but not open it. Returns:
+			{functions, quotes, comments, globalVariables, blockMatch, xmlTags}
+		*/
+
+		if(!(fileOrString instanceof File) && typeof fileOrString != "string") throw new Error("First parameter needs to be a File object or a string!");
+
+		if(callback == undefined && typeof lang == "function") {
+			callback = lang;
+			lang = undefined;
+		}
+		else if(callback == undefined && typeof path == "function") {
+			callback = path;
+			path = undefined;
+		}
+
+		if(path == undefined && (fileOrString instanceof File)) path = fileOrString.path;
+
+		if(path == undefined) path = UTIL.hash(fileOrString);
+
+		// Prevent race conditions
+		var wait = waitingForFileToBeParsed.hasOwnProperty(path);
+
+		if(!waitingForFileToBeParsed.hasOwnProperty(path)) waitingForFileToBeParsed[path] = [];
+
+		waitingForFileToBeParsed[path].push(callback);
+
+		if(typeof callback != "function" && callback != undefined) throw new Error("Parameter callback needs to be a callback function!");
+
+		var f = EDITOR.eventListeners.parse.map(function(f) {return f});
+		for(var i=0, ret=false; i<f.length; i++) {
+			//console.log("parse: typeof f[" + i + "]=" + (typeof f[i]) + " (" + f[i] + ") f.length=" + f.length + " f=", f + " EDITOR.eventListeners.parse=", EDITOR.eventListeners.parse);
+
+			if(callback) ret = f[i](fileOrString, lang, path, parseDone); // async
+			else ret = f[i](fileOrString, lang, path); // sync
+			if(ret) return ret; // Only let one parser parse it
+		}
+
+		function parseDone(err, parseResult) {
+			if(!waitingForFileToBeParsed.hasOwnProperty(path)) throw new Error("path=" + path + " not in waitingForFileToBeParsed=" + JSON.stringify(waitingForFileToBeParsed, null, 2) + "\nfileOrString=" + fileOrString+ " lang=" + lang + " err?" + (!!err) + " parseResult?" + (!!parseResult) + ". How did this happen!?");
+
+			for (var i=0; i<waitingForFileToBeParsed[path].length; i++) {
+				waitingForFileToBeParsed[path][i](err, parseResult);
+			}
+			delete waitingForFileToBeParsed[path];
+		}
+	}
+
+	EDITOR.registerAltKey = function registerAltKey(options) {
+		// Alternate keys for virtual keyboard
+
+		if(typeof options != "object") throw new Error("First argument need to be an option object!");
+		if(typeof options.char != "string") throw new Error("The option object need to have a char string!");
+		if(typeof options.fun != "function") throw new Error("The option object need to have a fun function! options keys: " + Object.keys(options));
+		if(typeof options.label != "string") throw new Error("The option object need to have a label string!");
+		if(typeof options.alt != "number" && typeof options.alt != "undefined") throw new Error("The alt option need to be a number!");
+
+		if(options.alt == undefined) options.alt = 1; // One button can have many alternatives
+
+		var key;
+		for (var i=0; i<EDITOR.registeredAltKeys.length; i++) {
+			key = EDITOR.registeredAltKeys[i];
+			if(key.char==options.char && key.alt == options.alt) throw new Error(UTIL.getFunctionName(key.fun) + " is already registered for char=" + options.char + " on alt=" + options.alt);
+		}
+
+		EDITOR.registeredAltKeys.push(options);
+
+		var reg = false;
+		var regSuccess = false;
+		var f = EDITOR.eventListeners.registerAltKey.map(funMap);
+		for (var j=0; j<f.length; j++) {
+			reg = f[j](options);
+			if(reg==true) regSuccess = true;
+		}
+		// Note: The keybard plugin might not yet have loaded!
+		//if(!regSuccess) throw new Error(UTIL.getFunctionName(options.fun) + " did not register for char=" + options.char + " on alt=" + options.alt + " on any of the keyboards!");
+
+	}
+
+	EDITOR.unregisterAltKey = function unregisterAltKey(fun) {
+		if(typeof fun != "function") throw new Error("The first argument needs to be a function!");
+
+		var key;
+		for (var i=0; i<EDITOR.registeredAltKeys.length; i++) {
+			key = EDITOR.registeredAltKeys[i];
+			if(key.fun == fun) {
+				EDITOR.registeredAltKeys.splice(i, 1);
+				notifyListeners();
+				return;
+			}
+		}
+
+		console.warn("Did not find " + UTIL.getFunctionName(fun) + " in registeredAltKeys!");
+
+		function notifyListeners() {
+			var f = EDITOR.eventListeners.unregisterAltKey.map(funMap);
+			for (var j=0; j<f.length; j++) {
+				f[j](fun);
+			}
+		}
+	}
+
+
+
+
+	EDITOR.hideVirtualKeyboard = function hideVirtualKeyboard(keyboards) {
+		if(keyboards == undefined) keyboards = []; // An empty array hides all keyboards
+		var returns = [];
+		var f = EDITOR.eventListeners.hideVirtualKeyboard.map(funMap);
+		for (var j=0, ret; j<f.length; j++) {
+			ret = f[j](keyboards);
+			// Should return an array of virtual keyboards hidden, or false
+			if(!Array.isArray(ret)) throw new Error("ret=" + ret + " expected an array of keyboard names!");
+			returns.concat(ret);
+		}
+		return returns;
+	}
+
+	EDITOR.showVirtualKeyboard = function showVirtualKeyboard(keyboards) {
+		if(keyboards == undefined) keyboards = []; // An empty array hides all keyboards
+		//console.log("showVirtualKeyboard: keyboards=" + JSON.stringify(keyboards));
+		var returns = [];
+		var f = EDITOR.eventListeners.showVirtualKeyboard.map(funMap);
+		for (var j=0, ret; j<f; j++) {
+			ret = f[j](keyboards);
+			// Should return an array of virtual keyboards that was turned on.
+			if(!Array.isArray(ret)) throw new Error("ret=" + ret + " expected a list of keyboard names! (list can be empty)");
+			returns.concat(ret);
+		}
+		return returns;
+	}
+
+	EDITOR.showMessageFromStackTrace = function showMessageFromStackTrace(options) {
+		// Finds a currently opened file from the stack trace, and shows the message on the line from the stack trace
+
+		// Edge will throw SCRIPT28: SCRIPT28: Out of stack space
+		// When trying to stringify the options!
+		//console.log("EDITOR.showMessageFromStackTrace: options=" + JSON.stringify(Object.keys(options)));
+
+		if(options.message) {
+			//console.log("showMessageFromStackTrace: message=options.message=" + options.message);
+			var message = options.message;
+		}
+		else if(options.error) {
+			//console.log("showMessageFromStackTrace: options.error! message=options.error.message=" + options.error.message);
+			var message = options.error.message;
+		}
+		else if(options.errorEvent) {
+			if(!options.errorEvent.error) {
+				//console.log("showMessageFromStackTrace: options.errorEvent: ", options.errorEvent);
+				return FAIL;
+			}
+			//console.log("showMessageFromStackTrace: options.errorEvent! message=options.errorEvent.error.message=" + options.errorEvent.error.message);
+			var message = options.errorEvent.error.message;
+		}
+
+		if(options.stackTrace) {
+			//console.log("showMessageFromStackTrace: options.stackTrace!");
+			var errorStack = options.stackTrace;
+		}
+		else if(options.error) {
+			//console.log("showMessageFromStackTrace: options.error!");
+			var errorStack = options.error.stack;
+		}
+		else if(options.errorEvent) {
+			//console.log("showMessageFromStackTrace: options.errorEvent!");
+			var errorStack = options.errorEvent.error.stack;
+
+			if(!errorStack) {
+				//console.log("showMessageFromStackTrace: options.errorEvent: " + JSON.stringify(options.errorEvent, null, 2));
+				//Firefox browser wont give access to the error event, because it's in another window !?
+
+				//console.log("showMessageFromStackTrace: options.errorEvent.filename=" + options.errorEvent.filename);
+				// It seems we can still extract some data out of it! ...
+
+				errorStack = options.errorEvent.filename + ":" + options.errorEvent.lineno + ":" + options.errorEvent.colno
+			}
+
+		}
+		else {
+			//console.log("showMessageFromStackTrace: Generating stack!");
+			var errorStack = UTIL.getStack(message);
+		}
+
+		if(!errorStack) {
+			return new Error("Specify either a stackTrace, error or errorEvent in options!");
+		}
+
+		var parsedError = UTIL.parseErrorMessage(errorStack);
+		//var stackLines = UTIL.parseStackTrace(errorStack);
+
+		//console.log("parsedError: " + JSON.stringify(parsedError, null, 2));
+
+		if(!parsedError) {
+			console.warn("showMessageFromStackTrace: Failed to parse errorStack: " + errorStack);
+			//alertBox(message || errorStack, "ERROR_PARSING", "error");
+			return FAIL;
+		}
+
+		if(parsedError && !message && parsedError.message) message = parsedError.message;
+
+		if(!message) {
+			return new Error( "Unable to find message from options=" + JSON.stringify(options, null, 2) + " It does not appear to be an error message!" );
+		}
+
+		if(options.url) {
+			var urlPath = UTIL.getDirectoryFromPath(options.url);
+		}
+
+		if(options.path) {
+			var folder = UTIL.getDirectoryFromPath(options.path);
+		}
+
+		if(options.level) {
+			var level = options.level;
+		}
+		else {
+			var level = 3; // 1=Err 2=Warn 3=Info
+		}
+
+		var sourcePath = "";
+		var stackLines = parsedError.stack || parsedError;
+
+		if(stackLines == undefined) {
+			return new Error( "Unable to find stackLines from options=" + JSON.stringify(options, null, 2) + "\nparsedError=" + JSON.stringify(parsedError, null, 2) );
+		}
+
+
+		var lineno, colno;
+
+		var file = findFile(stackLines);
+
+		function findFile(stackLines) {
+			if(!Array.isArray(stackLines)) throw new Error("Not an array: stackLines=" + stackLines + " (" + stackLines + "==undefined?" + (stackLines == undefined) + ")"    );
+
+			stackLoop: for (var i=0; i<stackLines.length; i++) {
+				for(var filePath in EDITOR.files) {
+
+					if(urlPath && folder) sourcePath = stackLines[i].source.replace(urlPath, folder);
+					else if(urlPath) sourcePath = stackLines[i].source.replace(urlPath, "");
+					else sourcePath = UTIL.getPathFromUrl(stackLines[i].source);
+
+					if(sourcePath.charAt(0) == "/") sourcePath = sourcePath.slice(1);
+
+					//console.log("showMessageFromStackTrace: sourcePath=" + sourcePath + " in filePath=" + filePath + " ?");
+					if(filePath.indexOf(sourcePath) != -1) {
+						var fileExt = UTIL.getFileExtension(filePath);
+						if(fileExt == "stdout") {
+							//console.log("showMessageFromStackTrace: sourcePath in filePath: Yes, but it's a " + fileExt + " file!");
+							continue;
+						}
+
+
+						var file = EDITOR.files[filePath];
+						lineno = stackLines[i].line || stackLines[i].lineno;
+						colno = stackLines[i].col || stackLines[i].colno;
+						//console.log("showMessageFromStackTrace: sourcePath in filePath: yes! ");
+
+						break stackLoop;
+					}
+					//else console.log("showMessageFromStackTrace: sourcePath in filePath: nope");
+				}
+			}
+
+			return file;
+		}
+
+		if(!file || !lineno) {
+			stackLines = UTIL.parseStackTrace(errorStack)
+			//console.log("showMessageFromStackTrace: Trying UTIL.parseStackTrace: " + (!!stackLines));
+			if(stackLines) {
+				var file = findFile(stackLines);
+			}
+			else {
+				console.warn("showMessageFromStackTrace: Failed to get file from errorStack=", errorStack);
+			}
+		}
+
+		if(file && lineno) {
+			var row = lineno - 1;
+			var gridRow = file.grid[row];
+			if(!gridRow) { // Sanity check
+				return new Error("Error found on row=" + row + " but the file only has file.grid.length=" + file.grid.length);
+			}
+			var indentationCharacters = file.grid[row].indentationCharacters.length;
+			var col = colno - indentationCharacters;
+
+			if(level == 1) file.scrollToLine(lineno); // Only scroll there if it's an error
+
+			EDITOR.addInfo(row, col, message, file, level);
+
+			if(EDITOR.currentFile != file) EDITOR.showFile(file);
+
+			return SUCCESS;
+
+		}
+		else console.warn("showMessageFromStackTrace: file=" + file + " lineno=" + lineno + " Unable to locate an open file from stackLines=" + JSON.stringify(stackLines, null, 2));
+
+		return FAIL;
+	}
+
+	EDITOR.getSSHPublicKey = function getSSHPublicKey(callback) {
+		var pubKeyPath = ".ssh/id_rsa.pub";
+
+		var homeDir = (EDITOR.user && EDITOR.user.homeDir) || UTIL.homeDir(EDITOR.workingDirectory);
+		if(homeDir) pubKeyPath = UTIL.trailingSlash(homeDir) + pubKeyPath;
+
+		EDITOR.readFromDisk(pubKeyPath, gotPubKeyMaybe);
+
+		function gotPubKeyMaybe(err, path, pubkey, hash) {
+			if(err) {
+				var yes = "Yes";
+				var no = "No";
+				confirmBox("Unable to find public key in " + pubKeyPath + " Do you want to generate a new SSH key ?", [yes, no], function(answer) {
+					if(answer == yes) {
+						CLIENT.cmd("run", {command: 'ssh-keygen -f /.ssh/id_rsa -N ""'}, function(err, channels) {
+							if(err) return callback(err);
+							//console.log("ssh-keygen: channels=" + JSON.stringify(channels, null, 2));
+							EDITOR.readFromDisk(pubKeyPath, gotPubKeyMaybe);
+						});
+					}
+					else {
+						callback(err);
+					}
+				});
+			}
+			else {
+				callback(null, pubkey);
+			}
+		}
+	}
+
+
+	var fullScreenWidgetParent;
+	var oldFullScreenWidget;
+	EDITOR.fullScreenWidget = function fullScreen(widgetElement) {
+
+		if(oldFullScreenWidget) {
+			// There can only be one element in full screen mode
+			if(oldFullScreenWidget == widgetElement) {
+				console.warn("Element already in full screen: ", widgetElement);
+				return;
+			}
+
+			EDITOR.exitFullScreenWidget(oldFullScreenWidget, fullScreenWidgetParent);
+		}
+
+		fullScreenWidgetParent = widgetElement.parentElement;
+
+		var body = document.getElementById('body');
+
+		if(fullScreenWidgetParent != body) {
+			// Move the widget from it's current position in the DOM,
+			// And place it directly under the body element
+			fullScreenWidgetParent.removeChild(widgetElement);
+			body.appendChild(widgetElement);
+		}
+
+		// Hide everything besides the widget
+		var wireframe = document.getElementById("wireframe");
+		wireframe.style.display = "none";
+
+		// Give the widget free roam over the entire screen
+		widgetElement.style.position="relative";
+		widgetElement.style.top = "0px";
+		widgetElement.style.left = "0px";
+		widgetElement.style.border="0px solid red";
+		widgetElement.style.width="100%";
+		widgetElement.style.maxWidth="100%";
+		widgetElement.style.height="100%";
+		widgetElement.style.maxHeight="100%"; // This is that magically allows scrolling on the wrapper
+
+
+		// Enable scrolling on the editor window
+		EDITOR.scrollingEnabled = true;
+
+		oldFullScreenWidget = widgetElement;
+
+	}
+
+	EDITOR.exitFullScreenWidget = function exitFullScreen(widgetElement, oldParent) {
+
+		if(widgetElement != oldFullScreenWidget) {
+			console.warn("Widget was not the last widget to be put in full screen! oldFullScreenWidget=", oldFullScreenWidget, " widgetElement=", widgetElement);
+			return;
+		}
+
+		var wireframe = document.getElementById("wireframe");
+		wireframe.style.display = "block";
+
+		widgetElement.style.position="";
+		widgetElement.style.top = "";
+		widgetElement.style.left = "";
+		widgetElement.style.border="";
+		widgetElement.style.width="";
+		widgetElement.style.maxWidth="";
+		widgetElement.style.height="";
+		widgetElement.style.maxHeight="";
+
+
+		EDITOR.scrollingEnabled = false;
+
+		if(!oldParent) oldParent = fullScreenWidgetParent;
+		// Move the widget back to where it was
+		var body = document.getElementById('body');
+		body.removeChild(widgetElement);
+		oldParent.appendChild(widgetElement);
+
+		oldFullScreenWidget = null;
+		fullScreenWidgetParent = null;
+
+		EDITOR.resizeNeeded();
+	}
+
+	EDITOR.openDialogs = []; // dialog-code: [Dialog, Dialog, ...]
+
+	EDITOR.closeAllDialogs = function closeAllDialogs(dialogCode, retryCount) {
+
+		if(!dialogCode) throw new Error("No dialogCode given to closeAllDialogs! Use MISC to close all unspecified dialog, or close dialog specificly! Closing the wrong dialog(s) can be very confusing.");
+
+		var closedCount = 0;
+
+		//console.log("EDITOR.closeAllDialogs: " + EDITOR.openDialogs.length + " open dialogs... dialogCode=" + dialogCode);
+		for (var i=0; i<EDITOR.openDialogs.length; i++) {
+
+			if(dialogCode && dialogCode != EDITOR.openDialogs[i].code) {
+				//console.log("EDITOR.closeAllDialogs: Not closing (code=" + EDITOR.openDialogs[i].code + " is not dialogCode=" + dialogCode + "): " + EDITOR.openDialogs[i].div.innerText);
+				continue;
+			}
+			//console.log("EDITOR.closeAllDialogs: Closing dialog: " + EDITOR.openDialogs[i].div.innerText);
+			closedCount++;
+			EDITOR.openDialogs[i].close();
+
+			if(i == EDITOR.openDialogs.length) break;
+			else i--; // Check all dialogs (don't skip one if one is closed)
+		}
+
+		if(closedCount == 0) {
+			var codes = EDITOR.openDialogs.map(function(dialog) { return dialog.code + " = " + UTIL.shortString(dialog.div.innerText, 50) });
+			throw new Error( "No dialogs where closed! dialogCode=" + dialogCode + " EDITOR.openDialogs.length=" + EDITOR.openDialogs.length + " codes=" + JSON.stringify(codes) );
+		}
+	}
+
+	EDITOR.isTextInputElement = function isTextInputElement(el) {
+		return el &&   (( el.nodeName == "INPUT" &&  (el.type == "text" || el.type == "password") ) || el.nodeName == "TEXTAREA")
+	}
+
+	EDITOR.typeIntoElement = function typeIntoElement(el, text) {
+		// Inserts text into an DOM text input element, useful for virtual keyboard or playback
+
+		var characters = [];
+
+		if(typeof text == "string") {
+			for(var i=0; i<text.length; i++) {
+				characters.push({
+					key: text[i],
+					code: text.charCodeAt(i)
+				});
+			}
+		}
+		else if(typeof text == "number") {
+			// Assume it's a character code
+			characters.push({
+				key: String.fromCharCode(text),
+				code: text
+			});
+			text = characters[0].key;
+		}
+		else {
+			throw new Error('Expected second argument "text" to be a string or character code!');
+		}
+
+		if(EDITOR.isTextInputElement(el)) {
+			insertAtCaret(el, text);
+		}
+
+		el.focus();
+
+		// Fire events
+		characters.forEach(function fireEvent(str) {
+
+			var ev = {
+				charCode: str.code,
+				key: str.key,
+				shiftKey: false,
+				altKey: false,
+				ctrlKey: false
+			}
+
+			// note: KeyCode is *not* the same as charCode!
+			var keyCode;
+
+			if(str.key == "\r") keyCode = 13;
+
+
+			if(keyCode) ev.keyCode = keyCode;
+
+
+
+			var keydown = new Event('keydown');
+			var keyup = new Event('keyup');
+			var keypress = new Event('keyup');
+
+			UTIL.addProps(ev, keydown);
+			UTIL.addProps(ev, keyup);
+			UTIL.addProps(ev, keypress);
+
+			el.dispatchEvent(keydown);
+			el.dispatchEvent(keyup);
+			el.dispatchEvent(keypress);
+		});
+
+		function insertAtCaret(t, text) {
+			/*
+				The caret is lost when the element is blurred, eg when you push a button on the virtual keyboard.
+				Solution: Save the caret position every time the element blurs
+			*/
+
+			if(text == undefined) throw new Error("text=" + text + " t=", t);
+
+			var sTop = t.scrollTop || parseInt(t.getAttribute("sTop")) || 0;
+			var selStart = t.selectionStart || parseInt(t.getAttribute("selStart")) || 0;
+			var selEnd = t.selectionEnd || parseInt(t.getAttribute("selEnd")) || 0;
+
+			//console.log("insertAtCaret: text=" + text + " Element: id=" + t.id + " sTop=" + sTop + " selStart=" + selStart + " selEnd=" + selEnd);
+
+			if( typeof selStart != "number" || isNaN(selStart) ){
+				throw new Error("Unable to get caret position (selStart=" + selStart + ") for element id=" + t.id + " selectionStart=" + t.selectionStart + " attribute selStart=" + t.getAttribute("selStart") + " value=" + t.value );
+			}
+			if( typeof selEnd != "number" || isNaN(selEnd) ){
+				throw new Error("Unable to get selection end (selEnd=" + selEnd + ") for element id=" + t.id + " selectionEnd=" + t.selectionEnd + " attribute selEnd=" + t.getAttribute("selEnd") + " value=" + t.value );
+			}
+			if( typeof sTop != "number" || isNaN(sTop) ) {
+				throw new Error("Unable to get scroll position (sTop=" + sTop + ") for element id=" + t.id + " scrollTop=" + t.scrollTop + " attribute sTop=" + t.getAttribute("sTop") + " value=" + t.value );
+			}
+
+			//console.log("selStart=" + selStart + " (" + t.getAttribute("sTop") + ")");
+
+			var front = (t.value).substring(0, selStart);
+			var back = (t.value).substring(selEnd, t.value.length);
+
+
+			if(text == "←") {
+				if(selStart>0) selStart--;
+			}
+			else if(text == "→") {
+				if(selStart<t.value.length) selStart++;
+			}
+			else if(text == "↑") {
+				if(sTop>0) sTop--;
+			}
+			else if(text == "↓") {
+				sTop++;
+			}
+			else if(text == "\b") {
+				//console.log("Deleting character: " + front.slice(-1) + " at selStart=" + selStart);
+				t.value = front.slice(0, -1) + back;
+				selStart = selStart - 1;
+			}
+			else {
+				//console.log("Adding character(s): " + text + " at selStart=" + selStart);
+				t.value = front + text + back;
+				selStart = selStart + text.length;
+			}
+
+			t.selectionStart = selStart;
+			t.selectionEnd = selStart;
+			t.focus();
+			t.scrollTop = sTop;
+
+			t.setAttribute("sTop", sTop);
+			t.setAttribute("selStart", selStart);
+			t.setAttribute("selEnd", selStart);
+
+			// TEST-CODE-START
+			if(EDITOR.settings.devMode) {
+				// Sanity check
+				var sTop = t.scrollTop || parseInt(t.getAttribute("sTop"));
+				var selStart = t.selectionStart || parseInt(t.getAttribute("selStart"));
+				var selEnd = t.selectionEnd || parseInt(t.getAttribute("selEnd"));
+
+				if( typeof selStart != "number" || isNaN(selStart) ){
+					throw new Error("Nuked selectionStart for element id=" + t.id + " selectionStart=" + t.selectionStart + " attribute selStart=" + t.getAttribute("selStart") );
+				}
+				if( typeof selEnd != "number" || isNaN(selEnd) ){
+					throw new Error("Nuked selection end for element id=" + t.id + " selectionEnd=" + t.selectionEnd + " attribute selEnd=" + t.getAttribute("selEnd") );
+				}
+				if( typeof sTop != "number" || isNaN(sTop) ) {
+					throw new Error("Nuked scroll position for element id=" + t.id + " scrollTop=" + t.scrollTop + " attribute sTop=" + t.getAttribute("sTop") );
+				}
+			}
+			// TEST-CODE-END
+
+		}
+	}
+
+	if('speechSynthesis' in window) {
+		EDITOR.say = function say(text, rate) {
+
+			//console.log("EDITOR.say: text=" + text + " rate=" + rate);
+
+			if(rate == undefined) rate = EDITOR.speechRate;
+
+			window.speechSynthesis.cancel(); // Stop ongoing speach
+
+			//clearTimeout(sayingTimer);
+
+			// Prevent current text from canceling
+			var sayingTimer = setTimeout(function() {
+
+				if(text == undefined) throw new Error("No text! text=" + text);
+
+				if(rate !== undefined) {
+					if(rate < 0.1) throw new Error("Lowest rate is 0.1");
+					if(rate > 10) throw new Error("Highest rate is 10");
+				}
+
+				//console.log("EDITOR.say:Speaking: text=" + text);
+
+				var msg = new SpeechSynthesisUtterance(text);
+
+				msg.volume = 1; // 0 to 1
+				msg.rate = rate || 1; // 0.1 to 10
+				msg.pitch = 2; //0 to 2
+				msg.text = text;
+				msg.lang = 'en-US';
+
+				//msg.onend = function(e) {console.log('EDITOR.say: Finished speak in ' + e.elapsedTime + ' seconds.');};
+
+				//msg.onerror = function(event) {console.log("EDITOR.say: " + event.error);};
+
+				window.speechSynthesis.speak(msg);
+
+			}, 10);
+
+		}
+	}
+	else {
+		console.warn("Speech Synthesis not available! browser=" + BROWSER + "");
+	}
+
+
+	/*
+		Encrypting sounds like a good idea, but it depens on what you want to protect from.
+		For example:
+		* Laptop get stolen
+		* Server get hacked
+
+		What happens when you forget the password for the key or lose the key?
+		All encrypted data, inluding backups of encrypted data will be useless.
+
+		When the key is changed, the editor need to remember everything it encrypted with that key
+		and re-encrypt it with the new key...
+	*/
+	EDITOR.encrypt = function encrypt(str) {
+		console.warn("EDITOR.encryp not yet implemented!");
+		return str;
+	}
+	EDITOR.decrypt = function decryot(str) {
+		return str;
+	}
+
+	EDITOR.sendFeedback = function sendFeedback(feedback, subject, silent) {
+		UTIL.httpPost("https://www.webtigerteam.com/mailform.nodejs", { meddelande: feedback, namn: 'WebIDE', subject: subject ? subject: "WebIDE feedback", robot: "42" }, function (err, respStr) {
+			if(silent) return;
+
+			if(err) {
+				alertBox("Problem sending feedback! Error: " + err.message + "\n");
+				EDITOR.putIntoClipboard(feedback, "Copy feedback to clipboard");
+				throw err;
+			}
+			else if(respStr.indexOf("Bad Gateway") != -1 || respStr.indexOf("Meddelande mottaget") == -1) {
+				alertBox("Problem sending feedback. Please e-mail it it to editor@webtigerteam.com (it will be copied to clipboard) Error: " + respStr + "");
+				//console.log("respStr=" + respStr);
+
+				EDITOR.putIntoClipboard(feedback, "Copy feedback to clipboard");
+
+			}
+			else {
+				alertBox('Thanks for your invaluable feedback! ' +
+				' Don\'t hesitate to <a href="mailto: editor@webtigerteam.com">contact support</a> if you have more feedback, questions or issues.' +
+				' ');
+			}
+		});
+	}
+
+	EDITOR.findFileReverseRecursive = function findFiles(names, startDir, callback) {
+		/*
+			Searches down towards the root, looking for file names
+		*/
+		if(typeof names == "string") names = [names];
+
+		var filesFound = [];
+		var folders = UTIL.getFolders(startDir, true);
+
+		search(folders.pop()); // Search down recursively
+
+		return true;
+
+		function search(currentFolder) {
+			EDITOR.listFiles(currentFolder, function listedFiles(err, files) {
+
+				//console.log("findFileReverseRecursive: startDir=" + startDir + " currentFolder= " + currentFolder + " err=" + (err && err.message));
+
+				if(err) {
+					// File/folder has probably been deleted! Or we have been disconnected Or we don't have access
+					callback(err);
+					callback = null;
+					return;
+				}
+
+				for (var i=0; i<files.length; i++) {
+					if(names.indexOf(files[i].name) != -1) {
+						//console.log("findFileReverseRecursive: Found " + files[i].name + " in " + JSON.stringify(names));
+						filesFound.push(UTIL.trailingSlash(currentFolder) + files[i].name);
+					}
+				}
+
+				if(folders.length > 0) search(folders.pop());
+				else {
+					callback(null, filesFound);
+					callback = null;
+					return;
+				}
+
+			});
+		}
+	}
+
+	// ## Eval worker
+	try {
+		var evalWorker = new Worker("safeEval.js");
+	}
+	catch(err) {
+		console.error(err);
+		var workerInitError = err;
+	}
+	var evalWorkerCounter = 0;
+	var evalWorkerCallbacks = {};
+	if(evalWorker) {
+		evalWorker.addEventListener('message', function(msg) {
+
+			var obj = msg.data;
+
+			//console.log("from evalWorker: obj=", obj);
+
+			var id = obj.id;
+
+			if(!evalWorkerCallbacks.hasOwnProperty(id)) throw new Error("evalWorker: No callback for answer with id=" + id);
+
+			var callback = evalWorkerCallbacks[id];
+			callback(obj.error, obj.result);
+		});
+	}
+	EDITOR.eval = function evaluate(str, callback) {
+		if(!evalWorker) return callback(new Error("Web Workers not supported by browser=" + BROWSER + "! (" + workerInitError.message + ")"));
+
+		if(typeof callback != "function") throw new Error("Second argument to EDITOR.eval needs to be a callback function!");
+
+		var id = ++evalWorkerCounter;
+
+		//console.log("EDITOR.eval: id=" + id + " evalWorkerCounter=" + evalWorkerCounter);
+
+		evalWorkerCallbacks[id] = callback;
+
+		evalWorker.postMessage({
+			id: id,
+			str: str
+		});
+
+	}
+
+	EDITOR.humanReadableNumber = function humanReadableNumber(n) {
+		var prefix;
+
+		if(n > 1000000000000) {n=n/1000000000000; prefix = "T"}
+		else if(n > 1000000000) {n=n/1000000000; prefix = "G"}
+		else if(n > 1000000) {n=n/1000000; prefix = "M"}
+		else if(n > 1000) {n=n/1000; prefix = "K"}
+		else prefix = "";
+
+		var decimals;
+
+		if(n > 100) decimals = 1;
+		else if(n > 10) decimals = 2;
+		else decimals = 3;
+
+		//console.log("humanReadableNumber: n=" + n + " prefix=" + prefix + " decimals=" + decimals);
+
+		n = n.toFixed(decimals);
+
+		n = n.toString();
+		//if(n.charAt(n.length-1) == "0" && n.charAt(n.length-2) != ".") n = n.slice(0, -1);
+		//if(n.charAt(n.length-1) == "0" && n.charAt(n.length-2) != ".") n = n.slice(0, -1);
+		//if(n.charAt(n.length-1) == "0" && n.charAt(n.length-2) != ".") n = n.slice(0, -1);
+
+		return n + " " + prefix;
+	}
+
+	EDITOR.checkoutSCMBranch = function(branchName) {
+		// Can be called by any plugin,
+		// SCM plugins should listen for checkoutSCMBranch and change the branch
+
+		var f = EDITOR.eventListeners.checkoutSCMBranch.map(funMap);
+		//console.log("Calling checkoutSCMBranch listeners (" + f.length + ") branchName=" + branchName);
+		for(var i=0; i<f.length; i++) {
+			//console.log("function " + UTIL.getFunctionName(f[i]));
+			f[i](branchName); // Call function
+		}
+	}
+
+	EDITOR.changeProject = function(projectName) {
+
+		// Leave it up to the plugins what to do when a project changes, just notify about the project change!
+
+		var oldProject = _project;
+
+		_project = projectName;
+
+		var f = EDITOR.eventListeners.changeProject.map(funMap);
+		//console.log("Calling changeProject listeners (" + f.length + ") _project=" + _project);
+		for(var i=0; i<f.length; i++) {
+			//console.log("function " + UTIL.getFunctionName(f[i]));
+			f[i](_project, oldProject); // Call function
+		}
+
+	}
+
+	CLIENT.on("connectionClosed", function connectionClosed(protocol, serverAddress) {
+
+		var connectedFiles = filesOnServer();
+
+		if(connectedFiles.length > 0) {
+			if(confirm("Close all opened files on " + serverAddress + " ?")) {
+
+				connectedFiles.forEach(function(path) {
+					EDITOR.closeFile(path);
+				});
+
+			}
+		}
+
+		delete EDITOR.connections[serverAddress]; // Remove the connection
+
+
+		function filesOnServer() {
+			// Returns an array of currently opened files connected to this server
+			var list = [];
+			for(var path in EDITOR.files) {
+				//console.log("path=" + path);
+				if(protocol == "ftp") { // protocol is always lower case!
+					if(path.indexOf("ftp://" + serverAddress) != -1) list.push(path);
+				}
+				else if(protocol == "ssh") {
+					if(path.indexOf("ssh://" + serverAddress) != -1 || path.indexOf("sftp://" + serverAddress) != -1) list.push(path);
+				}
+			}
+
+			return list;
+		}
+
+	});
+
+	CLIENT.on("changeSCMBranch", function changeBranch(branchName) {
+
+		_scmBranch = branchName;
+
+		var f = EDITOR.eventListeners.changeBranch.map(funMap);
+		//console.log("Calling changeBranch listeners (" + f.length + ") branchName=" + branchName);
+		for(var i=0; i<f.length; i++) {
+			//console.log("function " + UTIL.getFunctionName(f[i]));
+			f[i](branchName); // Call function
+		}
+
+	});
+
+	function removeFrom(list, fun) {
+		// Removes an object from an array of objects
+		for(var i=0; i<list.length; i++) {
+			if(list[i] == fun) {
+				//console.log("removeFrom: list length before: " + list.length);
+				list.splice(i, 1);
+				//console.log("removeFrom: list length after: " + list.length);
+				removeFrom(list, fun); // Remove dublicates
+				return true;
+			}
+		}
+		return false; // Function not found in list
+	}
+
+	// More Event listeners ...
 
 /*
 	window.addEventListener("drop", fileDrop, false);
@@ -10067,7 +10969,7 @@ function readSingleFile(fileOpenDialogEvent) {
 	var filePath = file.path;
 	var fileContent = undefined;
 	
-					filePath = fileName; // filePath is undefined in the browser
+		filePath = fileName; // filePath is undefined in the browser
 		
 		// Read the file
 		var reader = new FileReader();
@@ -12439,7 +13341,7 @@ function getFile(url, callback) {
 		// Make a HTTP get request to the url located in file bootstrap.url to get boostrap info like credentials etc
 		//console.log("Editor version: " + EDITOR.version);
 
-					var bootstrapFile = EDITOR.user.homeDir + "/bootstrap.url"
+		var bootstrapFile = EDITOR.user.homeDir + "/bootstrap.url"
 		
 
 		EDITOR.readFromDisk(bootstrapFile, function bootstrap(err, path, url) {

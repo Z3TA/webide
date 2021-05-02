@@ -60,8 +60,8 @@ var BROWSER = UTIL.checkBrowser();
 
 // Browsers work differently depending on which platofrm they are running ...
 var MSIE = (BROWSER.indexOf("MSIE") == 0); // If we are on Internet Explorer
-var MSWIN = (process.platform == "win32"); // If we are on Windows (any version)
-var LINUX = (process.platform == "linux"); // If we are on Linux
+var MSWIN = (navigator.platform == "Win32"); // If we are on Windows (any version)
+var LINUX = (navigator.platform.indexOf("Linux") != -1); // If we are on Linux
 var MAC = (navigator.platform.indexOf("Mac") != -1); // If we are on a Mac(book)
 var CHROMEBOOK = (navigator.userAgent.indexOf("CrOS") != -1);
 var FIREFOX = (navigator.userAgent.toLowerCase().indexOf('firefox') > -1);

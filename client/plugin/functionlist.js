@@ -657,7 +657,7 @@ functionListSelect.setAttribute("filePath", file.path);
 		domModel.forEach(addOption);
 		
 		
-		if(BROWSER == "Firefox" && process.platform == "win32") {
+		if(BROWSER == "Firefox" && navigator.platform == "Win32") {
 			/*
 				Both the wrapper div and the select box have a scroll bar.
 				It would be best if the select alement only had a scrollbar,

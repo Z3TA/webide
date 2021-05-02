@@ -79,7 +79,7 @@
 		//console.warn("settings_overload: Browser is VERY slow");
 	}, 1000 );
 	
-	//console.log("settings_overload: browser=" + browser + " process.platform=" + process.platform + " ligatures=" + ligatures + " window.devicePixelRatio=" + window.devicePixelRatio);
+	//console.log("settings_overload: browser=" + browser + " ligatures=" + ligatures + " window.devicePixelRatio=" + window.devicePixelRatio);
 
 	if(ligatures && (browser == "Chrome" || browser == "Safari" || browser == "Firefox")) {
 		/*
@@ -167,7 +167,7 @@ EDITOR.settings.style.font = "Fira Code";
 			Font's seem to work nice on localhost/127.0.0.1 in IE, but not when using a domain ...
 		*/
 		
-		debug("Deciding what font to use considering LCD=" + EDITOR.settings.sub_pixel_antialias + " platform=" + process.platform);
+		debug("Deciding what font to use considering LCD=" + EDITOR.settings.sub_pixel_antialias + " ");
 		
 		if(MSWIN) {
 			// Windows fonts are rendered more hard and slightly smaller then on Linux and Mac, so use a more roundish font
@@ -400,7 +400,7 @@ EDITOR.settings.style.font = "Fira Code";
 		if(! QUERY_STRING["debugFont"] ) return;
 		
 		// We can't access the console on some browsers, to use ye old alert...
-		alert(msg + "\nBROWSER=" + BROWSER + "\nprocess.platform=" + process.platform + "\n" +
+		alert(msg + "\nBROWSER=" + BROWSER + "\n" +
 "MSWIN=" + MSWIN + " LINUX=" + LINUX + " MAC=" + MAC + " MSIE=" + MSIE + "\n" +
 		"ligatures=" + ligatures + "\nwindow.devicePixelRatio=" + window.devicePixelRatio + "\n" +
 		"slowBrowser=" + slowBrowser + " verySlowBrowser=" + verySlowBrowser + "\n" +
