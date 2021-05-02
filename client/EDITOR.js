@@ -10715,6 +10715,8 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 	
 	function runTests_5616458984153156(onlyOne, allInSync) { // Random numbers to make sure it's unique
 		
+		// TEST-CODE-START
+
 		if(EDITOR.openDialogs.length > 0) return alert("Close all open dialogs before running tests!"); // Tests that try to close dialogs could otherwise fail
 		
 		EDITOR.dashboard.hide(true);
@@ -10962,6 +10964,8 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 		}
 	}
 	
+		// TEST-CODE-END
+
 	return false;
 	
 }
