@@ -328,9 +328,10 @@
 		var folders = UTIL.getFolders(fullPath, true);
 		
 		// But if the path includes the homeDir we want to use the homeDir as root!
-		if(EDITOR.user && fullPath.indexOf(EDITOR.user.homeDir) != -1) {
+		if(EDITOR.user && EDITOR.user.domain && fullPath.indexOf(EDITOR.user.homeDir) != -1) {
 			var homeFolderCount = UTIL.getFolders(EDITOR.user.homeDir, true).length;
 			folders.splice(0, homeFolderCount);
+			if(folders.length == 0) folders = [EDITOR.user.homeDir];
 		}
 		
 		//console.log("File explorer: fullPath=" + fullPath + " homeFolderCount=" + homeFolderCount + " folders=" + JSON.stringify(folders));
