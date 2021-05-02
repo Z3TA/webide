@@ -295,20 +295,18 @@ sendit();
 			if(document && document.body && document.body.contains(death)) document.body.removeChild(death);
 			
 			if(answer == yes) {
-				if(RUNTIME == "browser") {
-
-					if ('serviceWorker' in navigator) {
-						//console.log("selfDebug: Unregister service worker ...");
-						navigator.serviceWorker.getRegistrations().then(function(registrations) {
+				if ('serviceWorker' in navigator) {
+					//console.log("selfDebug: Unregister service worker ...");
+					navigator.serviceWorker.getRegistrations().then(function(registrations) {
 							
-							for(var registration in registrations) {
-								registrations[registration].unregister()
-							}
+						for(var registration in registrations) {
+							registrations[registration].unregister()
+						}
 							
-						}).catch(function(err) {
-							console.warn("selfDebug: Failed to unregister service workers: " + err.message)
-						});
-					}
+					}).catch(function(err) {
+						console.warn("selfDebug: Failed to unregister service workers: " + err.message)
+					});
+				}
 					
 					//console.log("selfDebug: Forcing reload ...");
 					if(document.location.href.indexOf('#') != -1) {
@@ -319,41 +317,32 @@ sendit();
 					else {
 						document.location = document.location.href;
 					}
-				}
-				else if(RUNTIME=="nw.js") process.exit(1); // Exit code=1 should make the batch/bash script restart the editor
-			}
-			else {
-				if(EDITOR.settings.devMode && RUNTIME == "nw.js") {
-					// Show the chrome dev tools
-					var gui = require('nw.gui').Window.get();
-					gui.showDevTools();
-				}
 			}
 			
 		});
 
-if(dialog) {
-// We need editor errors to look different to other dialogs.
-// Or the user will think all dialogs are editor errors, especially if it's a JavaScript error.
-var death = document.createElement("div");
-death.setAttribute("id", "errorOverlay");
-death.style.width = window.innerWidth + "px";
-death.style.height = window.innerHeight + "px";
-death.style.zIndex = "2";
-death.style.position = "absolute";
-death.style.top = "0px";
-death.style.left = "0px";
-death.style.backgroundColor = "darkred";
-death.style.opacity = "0.5";
+		if(dialog) {
+			// We need editor errors to look different to other dialogs.
+			// Or the user will think all dialogs are editor errors, especially if it's a JavaScript error.
+			var death = document.createElement("div");
+			death.setAttribute("id", "errorOverlay");
+			death.style.width = window.innerWidth + "px";
+			death.style.height = window.innerHeight + "px";
+			death.style.zIndex = "2";
+			death.style.position = "absolute";
+			death.style.top = "0px";
+			death.style.left = "0px";
+			death.style.backgroundColor = "darkred";
+			death.style.opacity = "0.5";
 
-var deathText = document.createElement("span");
-deathText.style.fontSize = "20px";
-deathText.innerText = "EDITOR ERROR (CRASH): WARNING! THE EDITOR MIGHT BE IN A BAD STATE! Restarting the editor is adviced. A bug report would be helpful.";
+			var deathText = document.createElement("span");
+			deathText.style.fontSize = "20px";
+			deathText.innerText = "EDITOR ERROR (CRASH): WARNING! THE EDITOR MIGHT BE IN A BAD STATE! Restarting the editor is adviced. A bug report would be helpful.";
 
-death.appendChild(deathText);
+			death.appendChild(deathText);
 
-if(document && document.body) document.body.appendChild(death);
-}
+			if(document && document.body) document.body.appendChild(death);
+		}
 
 
 	}
@@ -362,7 +351,7 @@ if(document && document.body) document.body.appendChild(death);
 	function reportTemplate(errMessage, source, lineno, colno, error, lastMsgFromServer) {
 		// Create a template used to report bugs
 		
-		var editorArgs = RUNTIME == "nw.js" ? require('nw.gui').App.argv : " (browser url) " + document.location.href;
+		var editorArgs = "(browser url) " + document.location.href;
 		
 		var message = 'To: "Editor bug report" <zeta@zetafiles.org>\n' +
 		'Subject: WebIDE ' + source + ' (line ' + lineno + ' col ' + colno + ')\n' +

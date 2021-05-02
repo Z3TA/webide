@@ -419,15 +419,6 @@
 		inputKey.setAttribute("placeholder", "/.ssh/id_rsa");
 		inputKey.setAttribute("size", Math.max(30, selectedConnection.key.length+1));
 		editView.appendChild(inputKey);
-		if(RUNTIME == "nw.js") {
-			var buttonBrowseKey = document.createElement("input");
-			buttonBrowseKey.setAttribute("type", "button");
-			buttonBrowseKey.setAttribute("class", "button half");
-			buttonBrowseKey.setAttribute("value", "Browse");
-			buttonBrowseKey.addEventListener("click", browseKey, false);
-			editView.appendChild(buttonBrowseKey);
-		}
-		
 		
 		var buttonSave = document.createElement("input");
 		buttonSave.setAttribute("type", "button");

@@ -26,7 +26,7 @@
 	function loadTutorial() {
 		EDITOR.on("storageReady", loadAchievements);
 		
-		if(isChrome() && !(isInWebAppiOS || isInWebAppChrome) && RUNTIME == "browser") {
+		if( isChrome() && !(isInWebAppiOS || isInWebAppChrome) ) {
 			tutorialMessages.appMode = function() {
 				alertBox("<i>Friendly tip:</i><br>Run (install) the editor in application mode in Chrome menu (upper right corner): More Tools => Add to desktop (or home screen)");
 				delete tutorialMessages.appMode;

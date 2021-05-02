@@ -70,8 +70,6 @@ var CLIENT = {}; // Client object is global
 		
 		if(protocol.toLowerCase() == "file") {
 			defaultURL = "http://localhost:8099/webide";
-			
-			if(RUNTIME == "browser") console.warn("CLIENT: It's recommended to access the editor via a HTTP server!");
 		}
 		else if(protocol.toLowerCase() == "chrome-extension") {
 			// We are running as *the* chromeos app !?

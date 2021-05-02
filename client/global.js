@@ -12,13 +12,6 @@
 
 "use strict";
 
-var RUNTIME = (function getRuntime() {
-	if(typeof require != "undefined" && typeof require('nw.gui') !== "undefined") return "nw.js";
-	else return "browser";
-})();
-
-console.log("RUNTIME=" + RUNTIME);
-
 // With a web-app-manifest, users can add the app to home screen!
 // https://developers.google.com/web/fundamentals/web-app-manifest/
 var DISPLAY_MODE = "browser";
@@ -34,50 +27,11 @@ if (window.navigator.standalone === true) {
 	DISPLAY_MODE = "standalone";
 }
 
-
 if('connection' in navigator && navigator.connection.saveData) {
-		var SAVE_BANDWIDTH = true;
+	var SAVE_BANDWIDTH = true;
 }
 else {
 var SAVE_BANDWIDTH = false;
-}
-
-var __dirname;
-if(RUNTIME != "nw.js") {
-	//alert("RUNTIME=" + RUNTIME);
-	var process = {
-		platform: (function findPlatForm() {
-			var platform = "win32";
-			if(navigator.platform == "Win32") platform = "win32";
-			if(navigator.platform.indexOf("Linux") != -1) platform = "linux";
-			if(navigator.platform.indexOf("Mac") != -1) platform = "darwin";
-			return platform;
-		})(),
-		cwd: function getWorkingDirectory() {
-			return UTIL.getDirectoryFromPath(document.location.href);
-		},
-		nextTick: function(cb) {
-			setTimeout(cb, 0);
-		},
-		argv: (function getArguments() {
-			var query = window.location.search.substring(1);
-			var arr = query.split('&');
-			
-			arr.unshift(document.location.href);
-			
-			return arr;
-			
-		})()
-		
-	};
-	__dirname = UTIL.getDirectoryFromPath(document.location.href).replace(/(\/|\\)$/, ""); 
-	// __dirname in nodejs doesn't have a trailing slash, 
-	// but in the editor we want all directories to have a trailing slash, except __dirname
-	
-}
-else if(RUNTIME == "nw.js") {
-	// Hack to make nw.js return the correct __dirname
-	__dirname = require("dirname");
 }
 
 var QUERY_STRING = function () {

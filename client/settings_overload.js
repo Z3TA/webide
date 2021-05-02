@@ -79,7 +79,7 @@
 		//console.warn("settings_overload: Browser is VERY slow");
 	}, 1000 );
 	
-	//console.log("settings_overload: RUNTIME=" + RUNTIME + " browser=" + browser + " process.platform=" + process.platform + " ligatures=" + ligatures + " window.devicePixelRatio=" + window.devicePixelRatio);
+	//console.log("settings_overload: browser=" + browser + " process.platform=" + process.platform + " ligatures=" + ligatures + " window.devicePixelRatio=" + window.devicePixelRatio);
 
 	if(ligatures && (browser == "Chrome" || browser == "Safari" || browser == "Firefox")) {
 		/*
@@ -124,89 +124,48 @@ EDITOR.settings.style.font = "Fira Code";
 		
 		
 	}
-	else if(MSWIN && (RUNTIME == "nw.js" || browser == "Chrome" || browser == "Firefox") && window.devicePixelRatio == 1) {
+	else if(MSWIN && ( browser == "Chrome" || browser == "Firefox") && window.devicePixelRatio == 1) {
 		/*
 			IE and Edge does not suppport sub-pixel-antialias in the Canvas!
 			Consolas needs sub-pixel antialias to look good.
 			
 			In Windows with "Smooth edges of screen fonts" turned off, these font's look good:
 		
-		* DejaVu Sans Mono 14px
-		* ProggyCleanTT <=16px (very small)
-		* Ubuntu Mono (many sizes look good!)
-		* Luculent 14px (many sizes look good!)
-		* Lucida Console 13px
-		* Courier New 16-17px
-		* Liberation Mono 12px
+			* DejaVu Sans Mono 14px
+			* ProggyCleanTT <=16px (very small)
+			* Ubuntu Mono (many sizes look good!)
+			* Luculent 14px (many sizes look good!)
+			* Lucida Console 13px
+			* Courier New 16-17px
+			* Liberation Mono 12px
 		
 			otherwise Consolas looks best ;)
 		
-	*/
+		*/
 		
 		debug("Using Consolas with LCD sub pixel antialias!");
 		
 		// Tested in Firefox on Windows 10
 		
 		EDITOR.settings.sub_pixel_antialias = true; // Consolas requires LCD text or it will look ugly!
-	EDITOR.settings.style.font = "Consolas";
-	EDITOR.settings.style.highlightMatchFont = "bold 15px Consolas";
-	EDITOR.settings.style.fontSize = 15;
-	EDITOR.settings.gridHeight = 23;
+		EDITOR.settings.style.font = "Consolas";
+		EDITOR.settings.style.highlightMatchFont = "bold 15px Consolas";
+		EDITOR.settings.style.fontSize = 15;
+		EDITOR.settings.gridHeight = 23;
 		EDITOR.settings.gridWidth = 8;
 		
 		if(MSWIN && browser == "Chrome") {
 			EDITOR.settings.gridWidth = 8.25;
 		}
 		
-}
-	else if(LINUX && RUNTIME == "nw.js") {
-	
-		debug("nw.js on Linux!");
-		
-	/*
-			Linux does not have Consolas (see README.txt on how to download it if you are desperate)
-			
-		Tested fonts: 
-		* Inconsolata
-		* Ubuntu Mono
-		* Nimbus Mono L
-		* Droid Sans Mono
-		* Source Code Pro
-		* Liberation Mono
-		
-		Ended up using Liberation Mono and the following font settings (Linux, Ubuntu) 
-		Font manager (sudo apt-get install font-manager): (aB icon) "Set font preferences" --> Advanced settings
-		* Antialias: Yes
-		* Auto-Hint: No
-		* Hinting: Medium
-		* LCD Filter: Default
-		
-	*/
-	
-	
-	/*
-		EDITOR.settings.gridHeight = 17;
-		EDITOR.settings.gridWidth = 8;
-		EDITOR.settings.leftMargin = 30;
-		EDITOR.settings.style.fontSize = 12;
-		EDITOR.settings.style.font = "Liberation Mono";
-		EDITOR.settings.style.highlightMatchFont = "bold 12px Liberation Mono";
-	*/
-	
-	EDITOR.settings.style.font = "DejaVu Sans Mono";
-	EDITOR.settings.style.highlightMatchFont = "bold 14px DejaVu Sans Mono";
-	EDITOR.settings.style.fontSize = 13;
-	EDITOR.settings.gridHeight = 22;
-	EDITOR.settings.gridWidth = 7.83;
-		
-}
-	else if(    RUNTIME=="browser" && (   browser=="Firefox" || browser == "Chrome" || ( MSIE && (location.host == "127.0.0.1" || location.host == "localhost") )   )    ) {
+	}
+	else if(   browser=="Firefox" || browser == "Chrome" || ( MSIE && (location.host == "127.0.0.1" || location.host == "localhost") )   ) {
 		
 		/*
 			Try to load a web font (most browsers should now support them)
 			
 			Font's seem to work nice on localhost/127.0.0.1 in IE, but not when using a domain ...
-*/
+		*/
 		
 		debug("Deciding what font to use considering LCD=" + EDITOR.settings.sub_pixel_antialias + " platform=" + process.platform);
 		
@@ -214,12 +173,12 @@ EDITOR.settings.style.font = "Fira Code";
 			// Windows fonts are rendered more hard and slightly smaller then on Linux and Mac, so use a more roundish font
 			
 			// LiberationMono looks nice in Edge!
-webFontLoading = "liberationMono";
+			webFontLoading = "liberationMono";
 			loadFont = function() {
 				UTIL.loadCSS("gfx/font/liberation-fonts-ttf-2.00.1/liberationMono.css", cssLoadedMaybe);
 			};
 			whenFontLoaded = function() {
-EDITOR.settings.style.font = "LiberationMono";
+				EDITOR.settings.style.font = "LiberationMono";
 				EDITOR.settings.style.highlightMatchFont = "bold 14px LiberationMono";
 				EDITOR.settings.style.fontSize = 14;
 				EDITOR.settings.gridHeight = 22;
@@ -246,10 +205,10 @@ EDITOR.settings.style.font = "LiberationMono";
 					var antialias = detectAntialias();
 					if(antialias) {
 						debug("Antialias detected! Updating grid width");
-EDITOR.settings.gridWidth = 7.5;
-}
+						EDITOR.settings.gridWidth = 7.5;
+					}
 					
-var isAndroid = /(android)/i.test(navigator.userAgent);
+					var isAndroid = /(android)/i.test(navigator.userAgent);
 					if(BROWSER == "Chrome" && DISPLAY_MODE == "standalone" && isAndroid) {
 						// Weird bug when added to desktop from Chrome on Android where we get different kerning...
 						EDITOR.settings.style.highlightMatchFont = "bold 16px ubuntu";
@@ -266,12 +225,12 @@ var isAndroid = /(android)/i.test(navigator.userAgent);
 			/*
 				
 				
-webFontLoading = "DejaVuSansMono";
-			loadFont = function() {
+				webFontLoading = "DejaVuSansMono";
+				loadFont = function() {
 				UTIL.loadCSS("gfx/font/DejaVuSansMono/DejaVuSansMono.css", cssLoadedMaybe);
 				};
-			whenFontLoaded = function() {
-			if(webFontLoading == "DejaVuSansMono") {
+				whenFontLoaded = function() {
+				if(webFontLoading == "DejaVuSansMono") {
 				EDITOR.settings.style.font = "DejaVuSansMono";
 				EDITOR.settings.style.highlightMatchFont = "bold 13px DejaVuSansMono";
 				EDITOR.settings.style.fontSize = 13;
@@ -279,13 +238,13 @@ webFontLoading = "DejaVuSansMono";
 				EDITOR.settings.gridWidth = 7.83;
 				
 				if(browser == "Firefox") {
-					// Hmm, this worked fine until I reinstalled ... Why do I have to adjust this !?
-						// And now suddenly it's no longer needed!? Nothing changed ...
+				// Hmm, this worked fine until I reinstalled ... Why do I have to adjust this !?
+				// And now suddenly it's no longer needed!? Nothing changed ...
 				//EDITOR.settings.gridWidth = 8;
 				// mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmoxx
-			}
-			}
-			};
+				}
+				}
+				};
 				
 			*/
 
@@ -294,7 +253,7 @@ webFontLoading = "DejaVuSansMono";
 		
 		
 	}
-	else if(RUNTIME=="browser") {
+	else {
 		
 		// Internet Explorer doesn't support sub-pixel rendering / LCD-text in the Canvas!
 		// So Consolas wont look that good ...
@@ -441,7 +400,7 @@ webFontLoading = "DejaVuSansMono";
 		if(! QUERY_STRING["debugFont"] ) return;
 		
 		// We can't access the console on some browsers, to use ye old alert...
-		alert(msg + "\nRUNTIME=" + RUNTIME + "\nBROWSER=" + BROWSER + "\nprocess.platform=" + process.platform + "\n" +
+		alert(msg + "\nBROWSER=" + BROWSER + "\nprocess.platform=" + process.platform + "\n" +
 "MSWIN=" + MSWIN + " LINUX=" + LINUX + " MAC=" + MAC + " MSIE=" + MSIE + "\n" +
 		"ligatures=" + ligatures + "\nwindow.devicePixelRatio=" + window.devicePixelRatio + "\n" +
 		"slowBrowser=" + slowBrowser + " verySlowBrowser=" + verySlowBrowser + "\n" +

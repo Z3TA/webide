@@ -18,7 +18,6 @@
 			
 			winMenuFullScreen = EDITOR.windowMenu.add(S("full_screen"), [S("View"), 10], toggleTullScreen);
 			
-			
 		},
 		unload: function unloadFullScreen() {
 
@@ -28,19 +27,8 @@
 		},
 	});
 	
-	
-	
 	function toggleTullScreen() {
-		
-		if(RUNTIME == "nw.js") { 
-			var GUI = require('nw.gui').Window.get();
-			GUI.toggleKioskMode();
-			
-			winMenuFullScreen.toggle();
-			}
-		else {
-			// Asume browser
-			if ((document.fullScreenElement && document.fullScreenElement !== null) ||
+		if ((document.fullScreenElement && document.fullScreenElement !== null) ||
 			(!document.mozFullScreen && !document.webkitIsFullScreen)) {
 				if (document.documentElement.requestFullScreen) {
 					document.documentElement.requestFullScreen();
@@ -64,7 +52,6 @@
 				winMenuFullScreen.deactivate();
 				
 			}
-		}
 		
 		return false;
 	}

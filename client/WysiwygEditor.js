@@ -1493,17 +1493,6 @@ alertBox(wysiwygEditor.sourceFile.path + " contains SSG scripts which is not yet
 		wysiwygEditor.ignoreSourceFileChange = false;
 		
 		
-		
-		if(RUNTIME == "nw.js") {
-			// Show the editor window
-			var gui = require('nw.gui');
-			var win = gui.Window.get();
-			win.show();
-		}
-		else {
-			// We don't want to take away focus from the content-editable
-		}
-		
 		//console.log("WysiwygEditor.previewInput: placeCaretSuccess=" + placeCaretSuccess);
 		
 		if(placeCaretSuccess) {
@@ -2216,8 +2205,8 @@ alertBox(wysiwygEditor.sourceFile.path + " contains SSG scripts which is not yet
 		if(msg.length > 1) msg = msg.slice(1, msg.length); // Remove the first space
 		
 		//consoleLogOriginal(msg);
-		// Gives eligal invocation error in nw.js
-		if(RUNTIME != "nw.js") consoleLogOriginal.apply(undefined, arg);
+		
+		consoleLogOriginal.apply(undefined, arg);
 		
 		//console.log("Captured console.log (" + arg.length + " argument(s)): " + msg);
 		

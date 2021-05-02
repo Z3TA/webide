@@ -1840,7 +1840,7 @@ for(var i=0; i<options.length; i++) {
 								
 								if(previewWin) previewWin.close();
 								
-								//console.log("SSG url=" + url + " RUNTIME=" + RUNTIME + " newWindow=" + newWindow);
+								//console.log("SSG url=" + url + " newWindow=" + newWindow);
 								previewWin = new WysiwygEditor({
 									sourceFile: sourceFile,
 									bodyTagSource: bodyTag, 

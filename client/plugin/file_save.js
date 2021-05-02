@@ -307,8 +307,8 @@ var buttonSaveAs = document.createElement("input");
 		saveDialog.appendChild(buttonSaveAs);
 		//buttonSaveAs.addEventListener("click", saveFileInPath, false);
 		
-		if(RUNTIME == "browser") {
-			var buttonDownload = document.createElement("input");
+		
+		var buttonDownload = document.createElement("input");
 			buttonDownload.setAttribute("type", "button");
 			buttonDownload.setAttribute("class", "button");
 			buttonDownload.setAttribute("value", "Download file");
@@ -320,15 +320,8 @@ var buttonSaveAs = document.createElement("input");
 				downloadFile(EDITOR.currentFile, name)
 				
 			}, false);
-		}
-		else {
-			var buttonBrowse = document.createElement("input");
-			buttonBrowse.setAttribute("type", "button");
-			buttonBrowse.setAttribute("class", "button half");
-			buttonBrowse.setAttribute("value", "Browse local file-system");
-			saveDialog.appendChild(buttonBrowse);
-			buttonBrowse.addEventListener("click", browsePath, false);
-		}
+		
+		
 		
 		var cancel = document.createElement("button");
 		cancel.setAttribute("class", "button");
@@ -439,31 +432,6 @@ var buttonSaveAs = document.createElement("input");
 			hideSaveDialog();
 		}
 	}
-	
-	
-	
-	function browsePath() {
-		var defaultPath = "";
-		
-		if(EDITOR.currentFile.path.match(/\/|\\/)) defaultPath = EDITOR.currentFile.path
-		else defaultPath = EDITOR.workingDirectory;
-		
-		//alertBox(defaultPath);
-		
-		EDITOR.fileSaveDialog(defaultPath, function(path) {
-			
-			if(path) {
-				// Save the file right away
-				EDITOR.saveFile(EDITOR.currentFile, path);
-				
-				hideSaveDialog();
-				
-			}
-			// else: user clicked cancel!?
-			
-		});
-	}
-	
 	
 	function showSaveDialog() {
 		

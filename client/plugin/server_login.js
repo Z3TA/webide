@@ -136,7 +136,7 @@
 						pwValue = obj["editorServerPw"] || pwValue;
 					}
 					
-					//else {console.log("EDITOR.startedCounter=" + EDITOR.startedCounter + " RUNTIME=" + RUNTIME + " window.location.hostname=" + window.location.hostname);}
+					//else {console.log("EDITOR.startedCounter=" + EDITOR.startedCounter + " window.location.hostname=" + window.location.hostname);}
 					
 					attemptLogin();
 				});
@@ -284,12 +284,7 @@
 		var form = document.createElement("form");
 		form.onsubmit = connectToServer;
 		
-		
-		
-		if(RUNTIME == "nw.js") {
-			var defaultUrl =  "http://localhost:8099/webide";
-		}
-		else if(window.location.protocol == "file:") { // Firefox (chrome-less)
+		if(window.location.protocol == "file:") { // Firefox (chrome-less)
 			var defaultUrl = "http://localhost:8099/webide";
 		}
 		else { // Browser (other)

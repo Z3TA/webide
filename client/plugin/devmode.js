@@ -8,7 +8,7 @@
 	var consoleErrorOriginal = console.error;
 	var devModeManuallOffOnce = false;
 	
-	var toggleDevmodeMenuItem, showDevToolsMenuItem;
+	var toggleDevmodeMenuItem;
 	var toggleDevmodeMenuItemPosition = 0;
 	
 	var runTestsMenuItem;
@@ -23,7 +23,7 @@
 	*/
 	
 	EDITOR.plugin({
-		desc: "Manage console logs, devTools and toggle devMode",
+		desc: "Manage console logs and toggle devMode",
 		order: 10000, // Show far down in the menu
 		load:function devModeLoad() {
 			
@@ -42,8 +42,6 @@
 			
 			// Test how the editor handles errors
 			EDITOR.bindKey({desc: "Throw a test error", charCode: keyE, fun: testErrorHandler, combo: SHIFT + CTRL + ALT});
-			
-			if(RUNTIME == "nw.js") showDevToolsMenuItem = EDITOR.ctxMenu.add(S("show_dev_tools"), showDevTools, 21); // Built in Chromium dev tools
 			
 			//console.log("QUERY_STRING.debug=" + QUERY_STRING.debug);
 			
@@ -76,8 +74,6 @@
 			
 			EDITOR.ctxMenu.remove(toggleDevmodeMenuItem);
 			if(runTestsMenuItem) EDITOR.ctxMenu.remove(runTestsMenuItem);
-			
-			if(showDevToolsMenuItem) EDITOR.ctxMenu.remove(showDevToolsMenuItem);
 			
 			EDITOR.unbindKey(reloadEditor);
 			EDITOR.unbindKey(toggleDevMode);
@@ -134,8 +130,6 @@ console.time = console.timeEnd = function() {};
 		}
 		// Use for example ?dev=false&time=true to turn off console.logs but show console.time
 		
-		if(RUNTIME == "nw.js") require('nw.gui').Window.get().closeDevTools();
-		
 		/*
 			The console.error(new Error("custom error")) way of *handling* errors has been depricated in favor for the self_debug.js plugin.
 			The self_debug plugin will however not catch errors if the Chrome dev tools are open!
@@ -160,8 +154,6 @@ console.time = console.timeEnd = function() {};
 		
 		var keyT = 84;
 		EDITOR.bindKey({desc: "Run latest test", charCode: keyT, fun: runOneTest, combo: CTRL});
-		
-		showDevTools();
 		
 		// todo: How can I show the menu item further down !? So it does not annoy end users
 		
@@ -252,14 +244,6 @@ alert("Debug mode enabled!");
 		
 		return false;
 		}
-	
-	function showDevTools() {
-		if(RUNTIME=="nw.js") {
-			require('nw.gui').Window.get().showDevTools();
-		}
-		EDITOR.ctxMenu.hide();
-		
-	}
 	
 	function reloadEditor() {
 		
