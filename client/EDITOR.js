@@ -6414,7 +6414,7 @@ EDITOR.fireEvent("btk");
 			//console.log("mousePositionToCaret: mouseRow=" + mouseRow);
 			
 			if(mouseRow >= grid.length) {
-				console.warn("mousePositionToCaret: Mouse position, mouseRow=" + mouseRow + " >= grid.length=" + grid.length + ". file.partStartRow=" + file.partStartRow + " file.totalRows=" + file.totalRows);
+				//console.warn("mousePositionToCaret: Mouse position, mouseRow=" + mouseRow + " >= grid.length=" + grid.length + ". file.partStartRow=" + file.partStartRow + " file.totalRows=" + file.totalRows);
 				
 				// For example when clicking under the text when scrolled down so only half the screen contains text
 				
@@ -6422,7 +6422,7 @@ EDITOR.fireEvent("btk");
 				
 			}
 			else if(mouseRow < 0) {
-				console.warn("mousePositionToCaret: Mouse position above the grid!");
+				//console.warn("mousePositionToCaret: Mouse position above the grid!");
 				return file.createCaret(0, 0, 0);
 			}
 			else {
