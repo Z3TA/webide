@@ -100,6 +100,7 @@
 	function parseHash(hash) {
 
 		hash = decodeURI(hash);
+		hash = hash.replace(/\+/g, " ");
 
 		var arr = hash.split("#");
 
@@ -166,26 +167,6 @@ if(last == undefined) return patchObj();
 		}
 	}
 	
-	// TEST-CODE-START
-
-	EDITOR.addTest(1, function parseUrlHash(callback) {
-
-		test("#/foo/bar#1337", {path:"/foo/bar", line: 1337});
-		test("#new+file#123", {path:"new file", line: 123});
-		test("#new%20file#123", {path:"new file", line: 123});
-
-		function test(hash, obj) {
-			var ret = parseHash(hash)
-			for(var prop in obj) {
-				if(ret[prop] == undefined || ret[prop] != obj[prop]) throw new Error(prop + " in " + JSON.stringify(ret) + " does not match!");
-			}
-		}
-
-	});
-
-	// TEST-CODE-END
-
-
 	function setUrl() {
 
 		if(DISPLAY_MODE == "standalone") return; // Don't bother if we can't see the URL or back/forward buttons
@@ -458,5 +439,25 @@ if(last == undefined) return patchObj();
 		return null;
 	}
 
+	// TEST-CODE-START
+
+	EDITOR.addTest(1, function parseUrlHash(callback) {
+
+		test("#/foo/bar#1337", {path:"/foo/bar", line: 1337});
+		test("#new+file#123", {path:"new file", line: 123});
+		test("#new%20file#123", {path:"new file", line: 123});
+
+		callback(true);
+
+		function test(hash, obj) {
+			var ret = parseHash(hash)
+			for(var prop in obj) {
+				if(ret[prop] == undefined || ret[prop] != obj[prop]) throw new Error(prop + " in " + JSON.stringify(ret) + " does not match!");
+			}
+		}
+
+	});
+
+	// TEST-CODE-END
 
 })();
