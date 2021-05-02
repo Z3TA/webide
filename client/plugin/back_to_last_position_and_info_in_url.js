@@ -441,7 +441,7 @@ if(last == undefined) return patchObj();
 
 	// TEST-CODE-START
 
-	EDITOR.addTest(1, function parseUrlHash(callback) {
+	EDITOR.addTest(function parseUrlHash(callback) {
 
 		test("#/foo/bar#1337", {path:"/foo/bar", line: 1337});
 		test("#new+file#123", {path:"new file", line: 123});
