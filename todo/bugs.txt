@@ -45,6 +45,11 @@ False positive indexOf warning:
 else if( ( nextChar == '"' && (selectedText.indexOf('"') == -1 ) ) {
 }
 
+
+---
+
+bug: Stuck on green "reconnecting..." (after changing from jzedit to webide server url!)
+
 ---
 
 Open local desktop from Macbook. The VNC screen is too large. Able to zoom!? on Safari

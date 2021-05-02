@@ -5,59 +5,10 @@ node server/server.js --port=/home/johan/sock/test --domain=test.johan.webide.se
 What I'm working on
 -------------------
 
-Lazy loading vim keybinding support would probably save 30 kB
-Make a plugin that just puts "Activate VIM keybinding support" in Editor menu ?
+Fixing Errors from users! ...
 
-Should we minify files that might be lazy loaded !? eg. JsDiff, and vim keybinding 
+github2s, send a manual clone suggestion from the server when auto clone fails because of username/auth needed!?
 
-Mercurial plugin could be lazy loaded
-terminal emulator could be lazy loaded
-virtual keyboard could be lazy loaded (or automatically on mobile/touchscreen devices)
-sqldb plugin could be lazy loaded
-
-
-
-There are a lot of "guards" with debug info, like if(badState) throw new Error("badState=" + badState)
-1000325 May  2 15:33 client/bundle-without-guards.htm (would save 63kb)
-1063211 May  2 01:58 client/bundle.htm
-
-removing the guards would save 62886 b (about 6%)
-
-
-1076523 May  2 00:47 client/bundle.htm
-1063211 May  2 01:58 client/bundle.htm
-
-get bundle size below 1MB
-
-if\(.*EDITOR.settings.devMode
-
-// TEST-CODE-START
-
-// TEST-CODE-END
-
----
-
-todo: Issue opening image files!!
-
----
-
-bug: Stuck on green "reconnecting..." (after changing from jzedit to webide server url!)
-
----
-
-
-
-
----
-
-back_to_last_position_and_info_in_url.js
-unable to determina what "terminal1", "new file" etc means in hash!
-todo: Add tests to the parse function!
-
-
----
-
-Crypto miners...
 
 ---
 
