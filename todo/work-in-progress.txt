@@ -24,40 +24,6 @@ Please supply the message using either -m or -F option.
 
 ---
 
-It's good to have console.logs to more easily spot if the editor does something stupid
-But the slowness of dev tools and junk in the bundle overweight the pros.
-
-Still some console.log's lingering in the bundle. Comment out all console.logs ?
-Dev tools also grinds to an halt because of all the console logs.
-
-Example of junk created by jsuglify when console.log is set as a pure function:
-
-source version:
-function removeIndentation(file, rowStartIndex) {
-if(rowStartIndex == undefined) throw new Error("index=" + index);
-
-var characters = file.indentation;
-var caret = file.createCaret(rowStartIndex);
-
-console.log("indentate:removeIndentation: row=" + caret.row + " index=" + rowStartIndex + " characters=" + UTIL.lbChars(characters));
-
-for (var i=0; i<characters.length; i++) {
-if(file.text.charAt(rowStartIndex) != characters[i]) break;
-file.deleteCharacter(caret);
-}
-}
-
-minified version:
-function removeIndentation(e,t){
-if(null==t)throw new Error("index="+index);
-var n=e.indentation,i=e.createCaret(t);
-i.row,UTIL.lbChars(n);
-for(var r=0;r<n.length&&e.text.charAt(t)==n[r];r++)e.deleteCharacter(i)
-}
-
-
-
----
 
 How to implement projects!?
 What to do with open terminals ?
