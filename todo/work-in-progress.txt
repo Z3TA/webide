@@ -96,16 +96,6 @@ Able to test/run the editor in Docker container (within the Cloud IDE itself)
 
 ---
 
-Inline assertion
-
----
-
-Minecraft modding
-
-
-
----
-
 in URL-auto-reloader, check every time we save a file!
 
 ---
