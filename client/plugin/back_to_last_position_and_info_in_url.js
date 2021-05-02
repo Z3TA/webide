@@ -229,18 +229,23 @@ if(last == undefined) return patchObj();
 
 		PATH = file.path;
 
-		ignoreMoveLine = -1;
+		if(file instanceof File) {
+			ignoreMoveLine = -1;
 
-		var currentLine = file.currentLine();
+			var currentLine = file.currentLine();
 
-		if(lastJump.hasOwnProperty(file.path)) {
-			var lastLineJump = lastJump[file.path].row + file.partStartRow + 1;
+			if(lastJump.hasOwnProperty(file.path)) {
+				var lastLineJump = lastJump[file.path].row + file.partStartRow + 1;
+			}
+
+			//console.log("url-history: changeFileInUrl (fileShow " + file.path + "): lastLineJump=" + lastLineJump + " currentLine=" + currentLine + " ");
+
+			if(lastLineJump) LINE = lastLineJump;
+			else LINE = currentLine;
 		}
-
-		//console.log("url-history: changeFileInUrl (fileShow " + file.path + "): lastLineJump=" + lastLineJump + " currentLine=" + currentLine + " ");
-
-		if(lastLineJump) LINE = lastLineJump;
-		else LINE = currentLine;
+		else {
+			LINE = 0;
+		}
 
 		setUrl();
 
