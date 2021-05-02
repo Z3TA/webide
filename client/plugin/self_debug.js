@@ -369,7 +369,7 @@ sendit();
 		'Date:' + (new Date()) + '\n' +
 		'Commit: ' + EDITOR.version + '\n' +
 		'Dist: ' + EDITOR.dist + '\n' +
-		'Platform: ' + process.platform + '\n' +
+		'Platform: ' + navigator.platform + '\n' +
 		'Browser: ' + BROWSER + '\n' +
 		'Arguments: ' + editorArgs + '\n' +
 		'\n' +
