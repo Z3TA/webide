@@ -6,12 +6,16 @@
 	EDITOR.plugin({
 		desc: "Show web site stats on dashboard",
 		load: function loadWebsiteStats() {
-			pageViewsStat = EDITOR.dashboard.addWidget(createPageViewStatWidget());
+			CLIENT.on("loginSuccess", function loggedInToServer(login) {
+				if(login.tld) {
+					pageViewsStat = EDITOR.dashboard.addWidget(createPageViewStatWidget());
+				}
+			});
 		},
 		unload: function unloadWebsiteStats() {
-			EDITOR.dashboard.removeWidget(pageViewsStat);
+			if(pageViewsStat) EDITOR.dashboard.removeWidget(pageViewsStat);
 		},
-		});
+	});
 	
 	function createPageViewStatWidget() {
 		
@@ -67,11 +71,11 @@
 		var logsChecked = 0;
 		var logs = [];
 		var totalHttpRequests = 0;
-		CLIENT.on("loginSuccess", function loggedInToServer(login) {
-			checkLog(0);
-			for(var i=1; i<=12; i++) checkLog(i);
-		});
 		
+		
+		checkLog(0);
+		for(var i=1; i<=12; i++) checkLog(i);
+
 		return pageViewStat;
 		
 		function checkLog(n) {
