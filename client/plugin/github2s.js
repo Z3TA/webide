@@ -43,6 +43,7 @@
 
 		var matchGithubFile = str.match(/(.*)\/(.*)\/blob\/([^/]*)\/(.*)/);
 		var matchGithubBranch = str.match(/(.*)\/(.*)\/tree\/([^/]*)/);
+		var matchGithubWiki = str.match(/(.*)\/(.*)\/wiki\/(.*)/);
 
 		//console.log("github2s: matchGithubFile=", matchGithubFile);
 		//console.log("github2s: matchGithubBranch=", matchGithubBranch);
@@ -56,7 +57,12 @@
 			var repo = "https://github.com/" + matchGithubFile[1] +  "/" + matchGithubFile[2] +  ".git";
 			var _commitId = matchGithubFile[3];
 		}
+		else if(matchGithubWiki) {
+			var _showFile = matchGithubWiki[3];
+		}
 		
+		//console.log("github2s: matchGithubWiki=" + matchGithubWiki + " _showFile=" + _showFile);
+
 		// Show the files in file explorer
 		EDITOR.fileExplorer(folder);
 
@@ -80,7 +86,11 @@
 
 		function showFile(filePathInRepo) {
 			//console.log("github2s: showFile: " + filePathInRepo);
-			EDITOR.openFile( UTIL.joinPaths(folder, filePathInRepo), undefined, undefined, function(err) {
+
+			var fileExt = UTIL.getFileExtension(filePathInRepo);
+			if(fileExt == "") filePathInRepo = filePathInRepo + ".md"; // Assume it's a markdown file if file extension is missing
+
+			EDITOR.openFile( UTIL.joinPaths(folder, filePathInRepo), undefined, {show: true}, function(err) {
 				if(err) {
 					//console.log("github2s: open file error: " + err.message);
 					findReadme();

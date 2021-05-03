@@ -4668,6 +4668,7 @@ function cloneGitRepo(dirs, IP) {
 			Z3TA/dbo/blob/gh-pages/design1/style.css
 			https://github.com/Z3TA/dbo
 			https://github.com/Z3TA/dbo/tree/gh-pages
+			https://github.com/redhat-developer/vscode-java/wiki/JDK-Requirements
 
 	*/
 		var branch = ""; // default no branch
@@ -4686,6 +4687,11 @@ function cloneGitRepo(dirs, IP) {
 			var githubUser = dirs[0];
 			var githubRepoName = dirs[1];
 		}
+		else if(dirs[2] == "wiki") {
+			var githubUser = dirs[0];
+			var githubRepoName = dirs[1];
+			var repo = "https://github.com/" + githubUser + "/" + githubRepoName + ".wiki.git";
+		}
 		else if(dirs.length == 2) {
 			var githubUser = dirs[0];
 			var githubRepoName = dirs[1];
@@ -4697,7 +4703,9 @@ function cloneGitRepo(dirs, IP) {
 
 		if(branch == "HEAD") branch = "";
 
-		var repo = "https://github.com/" + githubUser + "/" + githubRepoName + ".git";
+		if(repo == undefined) {
+			var repo = "https://github.com/" + githubUser + "/" + githubRepoName + ".git";
+		}
 
 		var repoBranch = repo + "/" + branch
 
