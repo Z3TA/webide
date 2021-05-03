@@ -197,6 +197,7 @@ body {
 
 .dashboard .pageViewStat {
 	font-size: 1em;
+	min-width: 250px;
 }
 
 
