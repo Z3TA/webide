@@ -35,9 +35,12 @@ var oldSource;
 				function checkURL() {
 					if(!win || win.closed) return;
 
-					CLIENT.cmd("httpGet", {url: url}, function(err, source) {
+					CLIENT.cmd("httpGet", {url: url}, function(err, resp) {
+
 						if(err) alertBox("Unable to retreive page source or url=" + url + " Error given: " + err.message);
 						else {
+
+							var source = resp.body;
 
 							//console.log("auto-reload-url: checkURL: oldSource=", oldSource, "\n\nsource=" + source);
 

@@ -26,7 +26,7 @@ EDITOR.plugin({
 				catch(err) {
 					console.error(err);
 				}
-			}
+				}
 			}
 			
 		},
@@ -88,13 +88,15 @@ EDITOR.plugin({
 		
 		function fetchFile(url, path) {
 			// Only download one file, do not save it
-			CLIENT.cmd("httpGet", {url: url}, function (err, text) {
+			CLIENT.cmd("httpGet", {url: url}, function (err, resp) {
 				
 				if(err) {
 					alertBox("Failed to get " + url);
 					return downloadErrors.push({url: url, err: err, code: err.code});
 				}
 				
+				var text = resp.body;
+
 				EDITOR.openFile(path, text, function(err, file) {
 					if(err) {
 						return alertBox("Failed to create new file (" + path + "): " + err.message);

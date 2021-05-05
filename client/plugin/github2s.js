@@ -32,6 +32,13 @@
 
 		if(!str) return ALLOW_DEFAULT;
 
+		/*
+
+			Check if the repo is public
+			If it's not public it means the clone failed...
+
+		*/
+		
 		var dirs = str.split("/");
 
 		if(dirs[0] == "") dirs.shift();
@@ -54,8 +61,8 @@
 			var _showFile = matchGithubFile[4];
 		}
 		else if(matchGithubBranch) {
-			var repo = "https://github.com/" + matchGithubFile[1] +  "/" + matchGithubFile[2] +  ".git";
-			var _commitId = matchGithubFile[3];
+			var repo = "https://github.com/" + matchGithubBranch[1] +  "/" + matchGithubBranch[2] +  ".git";
+			var _commitId = matchGithubBranch[3];
 		}
 		else if(matchGithubWiki) {
 			var _showFile = matchGithubWiki[3];
@@ -63,18 +70,49 @@
 		
 		//console.log("github2s: matchGithubWiki=" + matchGithubWiki + " _showFile=" + _showFile);
 
-		// Show the files in file explorer
-		EDITOR.fileExplorer(folder);
+		
+
+		var abort = false;
+
+		CLIENT.cmd("httpGet", {url: "https://github.com/" + str, method:"HEAD"}, function(err, resp) {
+			if(err) throw err;
+
+			var statusCode = resp.status;
+
+			if(statusCode == 404) {
+				// The repo is either private or it doesn't exist
+
+				abort = true;
+
+
+
+
+			}
+			else if(statusCode == 200) {
+
+				if(_commitId && _commitId != "HEAD") {
+					CLIENT.cmd("git.checkout", {directory: folder, rev: _commitId}, function cloned(err, resp) {
+						if(abort) return;
+						if(err) alertBox("Failed to checkout " + _commitId + ". Error: " + err.message);
+
+						//console.log("github2s: git.checkout: _commitId=" + _commitId + " resp=" + JSON.stringify(resp, null, 2));
+
+						if(_showFile) showFile(_showFile);
+						else findReadme();
+					
+						EDITOR.fileExplorer(folder);
+
+					});
+				}
+				else {
+					EDITOR.fileExplorer(folder);
+				}
+
+			}
+		});
 
 		if(_commitId && _commitId != "HEAD") {
-			CLIENT.cmd("git.checkout", {directory: folder, rev: _commitId}, function cloned(err, resp) {
-				if(err) alertBox("Failed to checkout " + _commitId + ". Error: " + err.message);
-
-				//console.log("github2s: git.checkout: _commitId=" + _commitId + " resp=" + JSON.stringify(resp, null, 2));
-
-				if(_showFile) showFile(_showFile);
-				else findReadme();
-			});
+			// Waiting to see if the repo is public...
 		}
 		else if(_showFile) {
 			showFile(_showFile);
@@ -91,6 +129,7 @@
 			if(fileExt == "") filePathInRepo = filePathInRepo + ".md"; // Assume it's a markdown file if file extension is missing
 
 			EDITOR.openFile( UTIL.joinPaths(folder, filePathInRepo), undefined, {show: true}, function(err) {
+				if(abort) return;
 				if(err) {
 					//console.log("github2s: open file error: " + err.message);
 					findReadme();
@@ -102,17 +141,22 @@
 		}
 
 		function findReadme(retry) {
+			if(abort) return;
+
 			if(retry == undefined) retry = 0;
 			var maxRetry = 10;
 
 			// Show readme if one exist ...
 			//console.log("github2s: findReadme! folder=" + folder + " retry=" + retry);
 			EDITOR.listFiles(folder, function(err, files) {
+				if(abort) return;
+
 				if(err) {
 
 					if(err.code == "ENOENT") {
 						// It might take a while to clone...
 						if(retry < maxRetry) return setTimeout(function() {
+							if(abort) return;
 							findReadme(++retry);
 						}, 1000);
 					}

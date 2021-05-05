@@ -5,6 +5,12 @@ node server/server.js --port=/home/johan/sock/test --domain=test.johan.webide.se
 What I'm working on
 -------------------
 
+
+
+
+Unknown git error: stderr=fatal: could not read Username for
+
+
 Fixing Errors from users! ...
 
 github2s, send a manual clone suggestion from the server when auto clone fails because of username/auth needed!?

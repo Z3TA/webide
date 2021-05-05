@@ -315,11 +315,16 @@ API.httpGet = function httpGet(user, options, callback) {
 	var gotError = null;
 	var redirects = 0;
 	var maxRedirects = 10;
-	
+	var method = options.method || "GET";
+
+	var httpOptions = {
+		method: method
+	};
+
 	makeReq(url);
 	
 	function makeReq(url) {
-		req = reqModule.request(url, gotResp);
+		req = reqModule.request(url, httpOptions, gotResp);
 		
 		req.on("error", function(err) {
 			callback(err);
@@ -412,7 +417,7 @@ callback(new Error("Too many redirects! redirects=" + redirects));
 					body = module_iconv.decode(buffer, charset);
 				}
 			}
-			callback(null, body);
+			callback(null, {body:body, status: resp.statusCode} );
 			callback = null;
 		}
 	}
