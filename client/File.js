@@ -1597,6 +1597,14 @@ file.sanityCheck();
 		
 	}
 	
+	/*
+		File.prototype.selectRow = function(row) {
+		// Selects an entire row
+		var file = this;
+		file.select(file.grid[row]);
+		}
+	*/
+
 	File.prototype.deselect = function(box) {
 		var file = this;
 		var selected = file.selected;
@@ -4611,6 +4619,28 @@ if(startColumn-indentationWidth > minIndentation*EDITOR.settings.tabSpace) {
 		
 	}
 	
+	File.prototype.rowIndentationLevel = function getRowIndentation(row) {
+		// Returns the level of indentation on a row, for both code and plain text
+		var file = this;
+
+		if(row == undefined) row = file.caret.row;
+
+		if(file.fullAutoIndentation) {
+			return file.grid[row].indentation;
+		}
+		else {
+			var indentation = "";
+			var gridRow = file.grid[row];
+			var char = "";
+			for(var col=0; col<gridRow.length; col++) {
+				char = gridRow[col].char;
+				if( char == " " || char == "\t" ) indentation += char;
+				else break;
+			}
+			return Math.floor(indentation.length / file.indentation.length);
+		}
+	}
+
 	File.prototype.measureText = function measureText(row, endCol, includeEndCol) {
 		// Returns the total monospace (glyph) width from first column until and including endCol
 		if(typeof row != "number") throw new Error("measureText: First argument row=" + row + " should be a number!");

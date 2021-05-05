@@ -408,17 +408,62 @@ return keyboard_arrows_moveRight(file, combo);
 	
 	// ## Key down
 	
-	EDITOR.bindKey({desc: "Move caret down", charCode: key_DOWN, fun: 
+	EDITOR.bindKey({desc: "Select block below", charCode: key_DOWN, combo: SHIFT + CTRL, fun:selectBlockBelow});
+
+	function selectBlockBelow(file) {
+		var startRow = file.caret.row;
+		var startLevel = file.rowIndentationLevel(startRow);
+		var stepping = false;
+		for(var row=startRow; row<file.grid.length; row++) {
+			if( file.grid[row].length == 0 ) continue;
+			
+			file.select(file.grid[row]);
+
+			if( stepping && file.rowIndentationLevel(row) == startLevel) break;
+
+			if( file.rowIndentationLevel(row) > startLevel ) {
+				stepping = true;
+			}
+		}
+
+		return PREVENT_DEFAULT;
+	}
+
+	
+	
+	EDITOR.bindKey({desc: "Select block above", charCode: key_UP, combo: SHIFT + CTRL, fun:selectBlockAbove});
+
+	function selectBlockAbove(file) {
+		var startRow = file.caret.row;
+		var startLevel = file.rowIndentationLevel(startRow);
+		var stepping = false;
+		for(var row=startRow; row>0; row--) {
+			if( file.grid[row].length == 0 ) continue;
+
+			file.select(file.grid[row]);
+
+			if( stepping && file.rowIndentationLevel(row) == startLevel) break;
+
+			if( file.rowIndentationLevel(row) > startLevel ) {
+				stepping = true;
+			}
+		}
+
+		return PREVENT_DEFAULT;
+	}
+
+	EDITOR.bindKey({desc: "Move caret down", charCode: key_DOWN, fun:
 		function moveCaretDown(file, combo) {
 			return keyboard_arrows_moveDown(file, combo);
-}
+		}
 	});
+
 	EDITOR.bindKey({desc: "Move caret down while selecting", charCode: key_DOWN, combo: SHIFT, fun:
 		function moveCaretDownWhileSelecting(file, combo) {
 			return keyboard_arrows_moveDown(file, combo);
 		}
 	});
-	
+
 	function keyboard_arrows_moveDown(file, combo) {
 		
 		if(!EDITOR.input) return true;

@@ -6,6 +6,10 @@ What I'm working on
 -------------------
 
 
+Create a new line without breaking current line using Shift+Enter
+
+
+Cloning a private github repo...
 
 
 Unknown git error: stderr=fatal: could not read Username for
