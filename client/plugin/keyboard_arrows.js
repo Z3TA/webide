@@ -440,7 +440,7 @@ return keyboard_arrows_moveRight(file, combo);
 		for(var row=startRow; row>0; row--) {
 			if( file.grid[row].length == 0 ) continue;
 
-			file.select(file.grid[row]);
+			file.select(file.grid[row], "left");
 
 			if( stepping && file.rowIndentationLevel(row) == startLevel) break;
 

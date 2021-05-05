@@ -1597,14 +1597,6 @@ file.sanityCheck();
 		
 	}
 	
-	/*
-		File.prototype.selectRow = function(row) {
-		// Selects an entire row
-		var file = this;
-		file.select(file.grid[row]);
-		}
-	*/
-
 	File.prototype.deselect = function(box) {
 		var file = this;
 		var selected = file.selected;
