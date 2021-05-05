@@ -9,15 +9,28 @@
 	});
 	
 	EDITOR.bindKey({
-		desc: "Also makes a line break",
+		desc: "Enter new line without breaking current line",
 		charCode: 13,
 		combo: SHIFT,
-		fun: keyboard_enter2,
+		fun: keyboard_shift_enter,
 		order: 10000
 	});
 
-	function keyboard_enter2(file) {
-		return keyboard_enter(file);
+	function keyboard_shift_enter(file) {
+		
+		/*
+			Pressing Shift+Enter should create a new line then go to that line without breaking the current line
+
+			(make sure it also works when in plain text mode!)
+		*/
+
+		if(!EDITOR.input) return ALLOW_DEFAULT;
+
+		var caret = file.createCaret(undefined, file.caret.row+1, 0);
+		file.insertLineBreak(caret);
+		file.moveCaret(undefined, file.caret.row+1);
+
+		return PREVENT_DEFAULT;
 	}
 
 	function keyboard_enter(file) {

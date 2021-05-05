@@ -5,10 +5,6 @@ node server/server.js --port=/home/johan/sock/test --domain=test.johan.webide.se
 What I'm working on
 -------------------
 
-
-Create a new line without breaking current line using Shift+Enter
-
-
 Cloning a private github repo...
 
 
