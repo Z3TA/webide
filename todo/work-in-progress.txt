@@ -8,6 +8,13 @@ What I'm working on
 Cloning a private github repo...
 
 
+github releases. ex:
+https://github.com/alibaba/nacos/releases
+
+github pull request, ex:
+https://github.com/FernandoRCandiani/Projeto-Integrador-Front-End/pull/19/files
+
+
 Unknown git error: stderr=fatal: could not read Username for
 
 

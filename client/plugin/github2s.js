@@ -16,6 +16,8 @@
 (function() {
 	"use strict";
 
+	var githubLogin;
+
 	EDITOR.plugin({
 		order: 3000, // Run after reopen_files.js so that the file opened will get focus
 		desc: "Open a github repo quickly by appending 2s behind github",
@@ -24,8 +26,12 @@
 		},
 		unload: function unloadGithub2s() {
 			CLIENT.removeEvent("loginSuccess", openGithubRepoMaybe);
+
+			if(githubLogin) githubLogin.unload();
+
 		}
 	});
+
 
 	function openGithubRepoMaybe() {
 		var str = QUERY_STRING.github;
@@ -44,6 +50,8 @@
 		if(dirs[0] == "") dirs.shift();
 
 		//console.log("github2s: dirs=" + JSON.stringify(dirs));
+
+		var githubUrl = "https://github.com/" + str;
 
 		var repoName = dirs[1];
 		var folder = EDITOR.user.homeDir + "repo/" + repoName;
@@ -65,14 +73,19 @@
 			var _commitId = matchGithubBranch[3];
 		}
 		else if(matchGithubWiki) {
+			var repo = "https://github.com/" + matchGithubWiki[1] + "/" + matchGithubWiki[2] + ".wiki.git";
 			var _showFile = matchGithubWiki[3];
+		}
+		
+		if(repo == undefined) {
+			var repo = "https://github.com/" + dirs[0] + "/" + dirs[1] + ".git";
 		}
 		
 		//console.log("github2s: matchGithubWiki=" + matchGithubWiki + " _showFile=" + _showFile);
 
-		
-
 		var abort = false;
+
+		
 
 		CLIENT.cmd("httpGet", {url: "https://github.com/" + str, method:"HEAD"}, function(err, resp) {
 			if(err) throw err;
@@ -81,46 +94,47 @@
 
 			if(statusCode == 404) {
 				// The repo is either private or it doesn't exist
-
 				abort = true;
 
-
-
-
+				githubLogin = EDITOR.createWidget(buildGithubLogin);
+				githubLogin.show();
+				
 			}
 			else if(statusCode == 200) {
 
-				if(_commitId && _commitId != "HEAD") {
-					CLIENT.cmd("git.checkout", {directory: folder, rev: _commitId}, function cloned(err, resp) {
-						if(abort) return;
-						if(err) alertBox("Failed to checkout " + _commitId + ". Error: " + err.message);
-
-						//console.log("github2s: git.checkout: _commitId=" + _commitId + " resp=" + JSON.stringify(resp, null, 2));
-
-						if(_showFile) showFile(_showFile);
-						else findReadme();
-					
-						EDITOR.fileExplorer(folder);
-
-					});
-				}
-				else {
-					EDITOR.fileExplorer(folder);
-				}
+				gotRepoHopefully();
 
 			}
 		});
 
-		if(_commitId && _commitId != "HEAD") {
-			// Waiting to see if the repo is public...
-		}
-		else if(_showFile) {
-			showFile(_showFile);
-		}
-		else {
-			findReadme();
-		}
 
+		function gotRepoHopefully() {
+			if(_commitId && _commitId != "HEAD") {
+				CLIENT.cmd("git.checkout", {directory: folder, rev: _commitId}, function cloned(err, resp) {
+					if(abort) return;
+					if(err) alertBox("Failed to checkout " + _commitId + ". Error: " + err.message);
+
+					//console.log("github2s: git.checkout: _commitId=" + _commitId + " resp=" + JSON.stringify(resp, null, 2));
+
+					if(_showFile) showFile(_showFile);
+					else findReadme();
+
+					EDITOR.fileExplorer(folder);
+
+				});
+			}
+			else {
+				EDITOR.fileExplorer(folder);
+
+				if(_showFile) {
+					showFile(_showFile);
+				}
+				else {
+					findReadme();
+				}
+
+			}
+		}
 
 		function showFile(filePathInRepo) {
 			//console.log("github2s: showFile: " + filePathInRepo);
@@ -185,6 +199,87 @@
 				//console.log("github2s: no README file found in files=" + JSON.stringify(files));
 
 			});
+		}
+
+		function buildGithubLogin(widget) {
+
+			var wrap = document.createElement("div");
+
+			var text = document.createElement("div");
+			var repoLink = document.createElement("a");
+			repoLink.setAttribute("href", githubUrl);
+			repoLink.appendChild( document.createTextNode(repo) )
+
+			text.appendChild( document.createTextNode("Authorization needed to access private repository: ") );
+			text.appendChild( repoLink );
+			text.classList.add("text");
+
+			var login = document.createElement("input");
+			login.setAttribute("type", "text");
+			login.setAttribute("id", "githubUsername");
+
+			var loginLabel = document.createElement("label")
+			loginLabel.setAttribute("for", "githubUsername");
+			loginLabel.appendChild( document.createTextNode("Github username:") );
+			loginLabel.appendChild(login);
+
+			var pw = document.createElement("input")
+			pw.setAttribute("type", "password");
+			pw.setAttribute("id", "githubPw");
+
+			var pwLabel = document.createElement("label");
+			pwLabel.setAttribute("for", "githubPw");
+			pwLabel.appendChild( document.createTextNode("Password or access token:") );
+			pwLabel.appendChild(pw);
+
+			var cloneButton = document.createElement("button");
+			cloneButton.classList.add("button");
+			cloneButton.appendChild( document.createTextNode("Clone repo") );
+			cloneButton.setAttribute("title", "Clone " + repo);
+			cloneButton.onclick = function cloneButtonClick() {
+				var cloneOptions = {
+					repo: repo,
+					username: login.value,
+					password: pw.value
+				};
+				CLIENT.cmd("git.clone", cloneOptions, function(err) {
+					if(err) return alertBox("Cloning failed! Error: " + err.message);
+					
+					abort = false;
+
+					gotRepoHopefully();
+
+				});
+			};
+
+			var copyPubKey = document.createElement("button");
+			copyPubKey.appendChild( document.createTextNode("Copy public ssh key") );
+			copyPubKey.classList.add("button");
+			copyPubKey.onclick = function() {
+				EDITOR.readFromDisk(UTIL.joinPaths(EDITOR.user.homeDir, ".ssh", "id_rsa.pub"), function(err, path, pubKey) {
+					if(err) throw err;
+
+					EDITOR.putIntoClipboard(pubKey, 'Public SSH key to add to <a href="https://github.com/settings/keys">settings/keys</a>');
+
+				});
+			}
+
+			var cancel = document.createElement("button")
+			cancel.classList.add("button");
+			cancel.appendChild( document.createTextNode("cancel") );
+			cancel.onclick = function() {
+				widget.hide();
+			}
+
+
+			wrap.appendChild(text);
+			wrap.appendChild(loginLabel);
+			wrap.appendChild(pwLabel);
+			wrap.appendChild(cloneButton);
+			wrap.appendChild(copyPubKey);
+
+			return wrap;
+
 		}
 
 	}
