@@ -93,6 +93,8 @@ GIT.clone = function gitClone(user, json, callback) {
 
 	// Using spawn instead of exec because clone might take a long time...
 
+	var messageLog = [];
+
 	var gitArg = ["clone", repo, "--progress"];
 	var gitOptions = {
 		cwd: directory, 
@@ -110,7 +112,7 @@ GIT.clone = function gitClone(user, json, callback) {
 		if(!callback) return;
 
 		if(code == 0) callback(null);
-		else if(lastMsg.length > 0) callback( new Error( lastMsg ) );
+		else if(messageLog.length > 0) callback(   new Error( messageLog.reverse().join("\n") )   );
 		else callback(new Error("Unknown clone error: Exit code=" + code));
 
 		callback = null;
@@ -258,8 +260,11 @@ GIT.clone = function gitClone(user, json, callback) {
 
 		}
 
-		if(msg != undefined && msg.length > 0) lastMsg = msg;
+		if(msg != undefined && msg.length > 0) {
+			messageLog.unshift(msg);
+			if(messageLog.length > 10) messageLog.length = 10;
 
+		}
 	}
 
 	function sendProgress() {

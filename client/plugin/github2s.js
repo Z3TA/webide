@@ -17,7 +17,7 @@
 	"use strict";
 
 	var githubLogin;
-
+	
 	EDITOR.plugin({
 		order: 3000, // Run after reopen_files.js so that the file opened will get focus
 		desc: "Open a github repo quickly by appending 2s behind github",
@@ -37,6 +37,8 @@
 		var str = QUERY_STRING.github;
 
 		if(!str) return ALLOW_DEFAULT;
+
+		CLIENT.removeEvent("loginSuccess", openGithubRepoMaybe); // Don't re-run aftert logout/re-login (disconnect)
 
 		/*
 
@@ -83,35 +85,45 @@
 		
 		//console.log("github2s: matchGithubWiki=" + matchGithubWiki + " _showFile=" + _showFile);
 
-		var abort = false;
+		var directory = UTIL.joinPaths(EDITOR.user.homeDir, "repo/");
 
-		
+		var cloneTimeout = 3600 * 1000; // one hour
 
-		CLIENT.cmd("httpGet", {url: "https://github.com/" + str, method:"HEAD"}, function(err, resp) {
+		// note: folder might exist, and the repo is private (it was cloned somtime before)
+		EDITOR.folderExist(folder, function(err, path) {
 			if(err) throw err;
 
-			var statusCode = resp.status;
+			if(path) return gotRepoHopefully();
 
-			if(statusCode == 404) {
-				// The repo is either private or it doesn't exist
-				abort = true;
+			// user might have configured ssh key, so try cloning, and only ask for credentials it cloning fails
+			var sshRepo = "git@github.com:" + dirs.join("/") + ".git";
 
-				githubLogin = EDITOR.createWidget(buildGithubLogin);
-				githubLogin.show();
-				
-			}
-			else if(statusCode == 200) {
+			console.log("github2s: Attempting to clone sshRepo=" + sshRepo + " ...");
 
-				gotRepoHopefully();
+			EDITOR.createPath(directory, function(err) {
+				if(err) throw err;
 
-			}
+				CLIENT.cmd("git.clone", {repo: sshRepo, directory: directory}, cloneTimeout, function(err) {
+					if(err) {
+						if(err.message.indexOf("Permission denied") != -1) {
+
+							githubLogin = EDITOR.createWidget(buildGithubLogin);
+							githubLogin.show();
+
+						}
+						else alertBox("Cloning failed! Error: " + err.message);
+
+						return;
+					}
+
+					gotRepoHopefully();
+				});
+			});
 		});
-
 
 		function gotRepoHopefully() {
 			if(_commitId && _commitId != "HEAD") {
 				CLIENT.cmd("git.checkout", {directory: folder, rev: _commitId}, function cloned(err, resp) {
-					if(abort) return;
 					if(err) alertBox("Failed to checkout " + _commitId + ". Error: " + err.message);
 
 					//console.log("github2s: git.checkout: _commitId=" + _commitId + " resp=" + JSON.stringify(resp, null, 2));
@@ -143,7 +155,6 @@
 			if(fileExt == "") filePathInRepo = filePathInRepo + ".md"; // Assume it's a markdown file if file extension is missing
 
 			EDITOR.openFile( UTIL.joinPaths(folder, filePathInRepo), undefined, {show: true}, function(err) {
-				if(abort) return;
 				if(err) {
 					//console.log("github2s: open file error: " + err.message);
 					findReadme();
@@ -155,22 +166,16 @@
 		}
 
 		function findReadme(retry) {
-			if(abort) return;
-
 			if(retry == undefined) retry = 0;
 			var maxRetry = 10;
 
 			// Show readme if one exist ...
 			//console.log("github2s: findReadme! folder=" + folder + " retry=" + retry);
 			EDITOR.listFiles(folder, function(err, files) {
-				if(abort) return;
-
 				if(err) {
-
 					if(err.code == "ENOENT") {
 						// It might take a while to clone...
 						if(retry < maxRetry) return setTimeout(function() {
-							if(abort) return;
 							findReadme(++retry);
 						}, 1000);
 					}
@@ -202,7 +207,6 @@
 		}
 
 		function buildGithubLogin(widget) {
-
 			var wrap = document.createElement("div");
 
 			var text = document.createElement("div");
@@ -238,7 +242,7 @@
 			cloneButton.setAttribute("title", "Clone " + repo);
 			cloneButton.onclick = function cloneButtonClick() {
 
-				var directory = UTIL.joinPaths(EDITOR.user.homeDir, "repo/");
+				cloneButton.disabled = true;
 
 				var cloneOptions = {
 					repo: repo,
@@ -247,21 +251,17 @@
 					directory: directory
 				};
 
-				EDITOR.createPath(directory, function(err) {
-					if(err) throw err;
+				CLIENT.cmd("git.clone", cloneOptions, cloneTimeout, function(err) {
+					if(err) {
+						alertBox("Cloning failed! Error: " + err.message);
+						cloneButton.disabled = false;
 
-					var cloneTimeout = 3600 * 1000; // one hour
-					CLIENT.cmd("git.clone", cloneOptions, cloneTimeout, function(err) {
+						return;
+					}
 
-						if(err) return alertBox("Cloning failed! Error: " + err.message);
-					
-						abort = false;
-
-						gotRepoHopefully();
-
-					});
+					widget.hide();
+					gotRepoHopefully();
 				});
-
 			};
 
 			var copyPubKey = document.createElement("button");
@@ -270,9 +270,7 @@
 			copyPubKey.onclick = function() {
 				EDITOR.readFromDisk(UTIL.joinPaths(EDITOR.user.homeDir, ".ssh", "id_rsa.pub"), function(err, path, pubKey) {
 					if(err) throw err;
-
 					EDITOR.putIntoClipboard(pubKey, 'Public SSH key to add to <a href="https://github.com/settings/keys">settings/keys</a>');
-
 				});
 			}
 
@@ -283,7 +281,6 @@
 				widget.hide();
 			}
 
-
 			wrap.appendChild(text);
 			wrap.appendChild(loginLabel);
 			wrap.appendChild(pwLabel);
@@ -292,7 +289,6 @@
 			wrap.appendChild(cancel);
 
 			return wrap;
-
 		}
 
 	}
