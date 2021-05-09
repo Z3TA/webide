@@ -87,6 +87,10 @@ GIT.clone = function gitClone(user, json, callback) {
 		repo = matchHttp[1] + "://" + json.username + ":" + json.password + "@" + matchHttp[2];
 	}
 
+	console.log(json.password);
+
+	var progressInterval = setInterval(sendProgress, 500);
+
 	// Using spawn instead of exec because clone might take a long time...
 
 	var gitArg = ["clone", repo, "--progress"];
@@ -110,6 +114,9 @@ GIT.clone = function gitClone(user, json, callback) {
 		else callback(new Error("Unknown clone error: Exit code=" + code));
 
 		callback = null;
+
+		clearInterval(progressInterval);
+
 	});
 
 	gitClone.on("disconnect", function () {
@@ -128,7 +135,7 @@ GIT.clone = function gitClone(user, json, callback) {
 	// note: Moste messages will be in stderr!
 
 	gitClone.stdout.on("data", function(data) {
-		console.log(" gitClone stdout: " + data);
+		//console.log(" gitClone stdout: " + data);
 		bufferData(data, "stdout");
 	});
 
@@ -140,7 +147,7 @@ GIT.clone = function gitClone(user, json, callback) {
 	var lastMsg = "";
 
 	gitClone.stderr.on("data", function (data) {
-		console.log(" gitClone stderr: " + data);
+		//console.log(" gitClone stderr: " + data);
 
 		bufferData(data, "stderr");
 
@@ -169,18 +176,18 @@ GIT.clone = function gitClone(user, json, callback) {
 
 	function bufferData(data, type, end) {
 
-		console.log(" gitClone bufferData type=" + type + " end=" + end + " data.length=" + (data && data.length) + " dataBuffer.length=" + dataBuffer[type].length);
+		//console.log(" gitClone bufferData type=" + type + " end=" + end + " data.length=" + (data && data.length) + " dataBuffer.length=" + dataBuffer[type].length);
 
 		if(data != undefined) {
 			var str = data.toString();
 			dataBuffer[type] += str;
-		}
 
-		console.log(UTIL.lbChars(str));
+			//console.log(UTIL.lbChars(str));
+		}
 
 		var lineIndex = indexOfLineBreak(dataBuffer[type]);
 
-		console.log("lineIndex=" + JSON.stringify(lineIndex));
+		//console.log("lineIndex=" + JSON.stringify(lineIndex));
 
 		var counter = 0;
 
@@ -209,6 +216,9 @@ GIT.clone = function gitClone(user, json, callback) {
 	var reProgress = /^(.*):\ *(\d+)% \((\d+)\/(\d+)\)/;
 	var progressTypes = {};
 
+	var progressInc = 0;
+	var progressTotalInc = 0;
+
 	function checkMsg(msg) {
 
 		console.log("gitClone checkMsg: msg=" + msg);
@@ -216,20 +226,34 @@ GIT.clone = function gitClone(user, json, callback) {
 		var matchProgress = msg.match(reProgress);
 		if(matchProgress) {
 
-			console.log(matchProgress);
+			//console.log(matchProgress);
 
 			var pType = matchProgress[1];
-			var pPerc = matchProgress[2];
-			var pAcc = matchProgress[3];
-			var pTot = matchProgress[4];
+			var pPerc = UTIL.numberOrError(matchProgress[2]);
+			var pAcc =  UTIL.numberOrError(matchProgress[3]);
+			var pTot =  UTIL.numberOrError(matchProgress[4]);
 
 			if( !progressTypes.hasOwnProperty(pType) ) {
 				progressTypes[pType] = {acc: pAcc, tot: pTot}
-				user.send({progress: [pAcc, pTot]});
+				
+				progressInc += pAcc;
+				progressTotalInc += pTot;
+
+				console.log("progressInc=" + progressInc + " pAcc=" + pAcc + " progressTotalInc=" + progressTotalInc + " pType=" + pType);
+
 			}
 			else {
 				var pInc = pAcc - progressTypes[pType].acc;
-				user.send({progress: pInc});
+				var ptInc = pTot - progressTypes[pType].tot;
+
+				progressTypes[pType].acc = pAcc;
+
+				if(ptInc > 0) throw new Error("ptInc=" + ptInc + " pTot=" + pTot + " pInc=" + pInc + " progressTypes[" + pType + "]=" + JSON.stringify(progressTypes[pType])  );
+
+				progressInc += pInc;
+				
+				console.log("progressInc=" + progressInc + " pInc=" + pInc + " pType=" + pType);
+
 			}
 
 		}
@@ -237,6 +261,14 @@ GIT.clone = function gitClone(user, json, callback) {
 		if(msg != undefined && msg.length > 0) lastMsg = msg;
 
 	}
+
+	function sendProgress() {
+		if(progressInc == 0) return;
+		user.send({ progress: [progressInc, progressTotalInc] });
+		progressInc = 0;
+		progressTotalInc = 0;
+	}
+
 }
 
 

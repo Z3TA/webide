@@ -237,21 +237,31 @@
 			cloneButton.appendChild( document.createTextNode("Clone repo") );
 			cloneButton.setAttribute("title", "Clone " + repo);
 			cloneButton.onclick = function cloneButtonClick() {
+
+				var directory = UTIL.joinPaths(EDITOR.user.homeDir, "repo/");
+
 				var cloneOptions = {
 					repo: repo,
 					username: login.value,
-					password: pw.value
+					password: pw.value,
+					directory: directory
 				};
-				var cloneTimeout = 3600 * 1000; // one hour
-				CLIENT.cmd("git.clone", cloneOptions, cloneTimeout, function(err) {
 
-					if(err) return alertBox("Cloning failed! Error: " + err.message);
+				EDITOR.createPath(directory, function(err) {
+					if(err) throw err;
+
+					var cloneTimeout = 3600 * 1000; // one hour
+					CLIENT.cmd("git.clone", cloneOptions, cloneTimeout, function(err) {
+
+						if(err) return alertBox("Cloning failed! Error: " + err.message);
 					
-					abort = false;
+						abort = false;
 
-					gotRepoHopefully();
+						gotRepoHopefully();
 
+					});
 				});
+
 			};
 
 			var copyPubKey = document.createElement("button");

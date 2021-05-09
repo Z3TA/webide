@@ -726,6 +726,19 @@ console.warn("Expected a slash after hostname=" + hostname + " fullPath=" + full
 		return fun;
 	},
 	
+	numberOrError: function numberOrError(n) {
+		if(typeof n == "number") return n;
+		if(!UTIL.isNumeric(n)) throw new Error("n=" + n + " is not a number!");
+		if(typeof n == "string") {
+			if(n.indexOf(".") != -1) return parseFloat(n);
+			if(n.indexOf(",") != -1) {
+				// Some systems use , for decimals
+				return parseFloat(n.replace(",", "."));
+			}
+		}
+		return parseInt(n);
+	},
+
 	determineLineBreakCharacters: function determineLineBreakCharacters(text) {
 		/*
 			What line break character is used !??

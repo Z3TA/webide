@@ -7795,7 +7795,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		
 		var lastCharOfPath = directoryPathToCreate.substr(directoryPathToCreate.length-1);
 		if(lastCharOfPath != "/" && lastCharOfPath != "\\") {
-			var err =  new Error("Last character of a directoryPathToCreate=" + directoryPathToCreate + " needs to have a path delimiter (slash or backslash): " + directoryPathToCreate);
+			var err =  new Error("EDITOR.createPath: Last character of a directoryPathToCreate=" + directoryPathToCreate + " needs to have a path delimiter (slash or backslash): " + directoryPathToCreate);
 			if(createPathCallback) return createPathCallback(err);
 			else throw err;
 		}
@@ -10343,7 +10343,8 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 			var progress = document.getElementById("progress");
 		
 			if(!Array.isArray(increment)) {
-				console.warn("Not an array: progress: " + JSON.stringify(increment));
+				increment = [ UTIL.numberOrError(increment) ];
+				//console.warn("Not an array: progress: " + JSON.stringify(increment));
 			};
 		
 			if(progressValue == 0 && increment.length > 0) {
