@@ -242,7 +242,9 @@
 					username: login.value,
 					password: pw.value
 				};
-				CLIENT.cmd("git.clone", cloneOptions, function(err) {
+				var cloneTimeout = 3600 * 1000; // one hour
+				CLIENT.cmd("git.clone", cloneOptions, cloneTimeout, function(err) {
+
 					if(err) return alertBox("Cloning failed! Error: " + err.message);
 					
 					abort = false;
@@ -277,6 +279,7 @@
 			wrap.appendChild(pwLabel);
 			wrap.appendChild(cloneButton);
 			wrap.appendChild(copyPubKey);
+			wrap.appendChild(cancel);
 
 			return wrap;
 
