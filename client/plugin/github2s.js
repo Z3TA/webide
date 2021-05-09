@@ -98,7 +98,7 @@
 			// user might have configured ssh key, so try cloning, and only ask for credentials it cloning fails
 			var sshRepo = "git@github.com:" + dirs.join("/") + ".git";
 
-			console.log("github2s: Attempting to clone sshRepo=" + sshRepo + " ...");
+			//console.log("github2s: Attempting to clone sshRepo=" + sshRepo + " ...");
 
 			EDITOR.createPath(directory, function(err) {
 				if(err) throw err;

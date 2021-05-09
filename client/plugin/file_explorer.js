@@ -330,7 +330,7 @@
 		// But if the path includes the homeDir we want to use the homeDir as root!
 		if(EDITOR.user && EDITOR.user.domain && fullPath.indexOf(EDITOR.user.homeDir) != -1) {
 			var homeFolderCount = UTIL.getFolders(EDITOR.user.homeDir, true).length;
-			folders.splice(0, homeFolderCount);
+			folders.splice(0, homeFolderCount-1); // note: /home/user = / + /home + /home/user 
 			if(folders.length == 0) folders = [EDITOR.user.homeDir];
 		}
 		

@@ -5,8 +5,6 @@ node server/server.js --port=/home/johan/sock/test --domain=test.johan.webide.se
 What I'm working on
 -------------------
 
-Cloning a private github repo...
-
 
 github releases. ex:
 https://github.com/alibaba/nacos/releases
