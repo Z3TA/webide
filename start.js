@@ -489,13 +489,20 @@ function startClient(ip, port, proto) {
 		//tryPrograms.push([nwRuntime, ["."]]); // The included nw.js runtime
 		
 		// We prefer the chromium/chrome browser!
-		tryPrograms.push(["chrome", ["--app=" + url, "--disable-gpu-vsync "]]);
-		tryPrograms.push(["chromium-browser", ["--app=" + url, "--disable-gpu-vsync "]]);
+		tryPrograms.push(["chrome", ["--app=" + url, "--disable-gpu-vsync", "--disable-frame-rate-limit"]]);
+		tryPrograms.push(["chromium-browser", ["--app=" + url, "--disable-gpu-vsync", "--disable-frame-rate-limit"]]);
 		
 		// It seems Firefox doesn't want to open URL's in chromeless mode (-chrome), only files
 		// We want to open files via http/https though! Using file:// protocol will cause issues.
 		tryPrograms.push(["firefox", ["-new-tab", url]]); // We can open a url in a new tab though
 		//tryPrograms.push(["firefox", ["-chrome", "client/index.htm"]]);
+
+		/*
+			Unlimited FPS in Firefox:
+			Enter "about:config" in the URL search bar, nothing else.
+			Now search for "layout.frame_rate" and change this value from -1, which is default to 0.
+		*/
+
 	}
 	
 	
