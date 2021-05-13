@@ -77,6 +77,7 @@ var languageMap = {
   cmd: 'dos',
   coffee: 'coffeescript',
   cson: 'coffescript',
+  css: 'css',
   diff: 'patch',
   erl: 'erlang',
   fs: 'fsharp',
@@ -93,6 +94,7 @@ var languageMap = {
   iced: 'coffescript',
   icl: 'haskell',
   jinja: 'django',
+  js: 'javascript',
   jsp: 'java',
   mak: 'makefile',
   md: 'markdown',
@@ -153,6 +155,8 @@ onmessage = function onmessage(ev) {
   else {
     var language = fileExt;
   }
+
+  //console.log("highlight:worker: language=" + language);
 
   if( self.hljs.getLanguage(language) == undefined ) {
     console.warn("highlight:worker: What language is this? language=" + language + " path=" + obj.path);

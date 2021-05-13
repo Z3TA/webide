@@ -94,11 +94,11 @@
 	
 	function highlightLazyLoad(file) {
 		
-		//console.log("highlight: highlightLazyLoad! file.path=" + file.path + " file.disableParsing=" + file.disableParsing + " initiated=" + initiated);
+		//console.log("highlight: highlightLazyLoad! file.path=" + file.path + " file.disableParsing=" + file.disableParsing + " file.noChangeEvents=" + file.noChangeEvents + " initiated=" + initiated);
 		
 		if(!(file instanceof File)) return; // Can also be ImageFile
 
-		if(!file.disableParsing && !file.fullAutoIndentation && file.fileExtension != "txt") {
+		if(!file.noChangeEvents && !file.fullAutoIndentation && file.fileExtension != "txt") {
 			if(!initiated) init();
 			
 			worker.postMessage({text: file.text, path: file.path});
@@ -129,8 +129,10 @@
 	
 	function highlightChangedFile(file) {
 		
-		//console.log("highlight: highlightChangedFile: file.path=" + file.path);
+		//console.log("highlight: highlightChangedFile: file.noChangeEvents=" + file.noChangeEvents + " file.path=" + file.path);
 		
+		if(file.noChangeEvents) return;
+
 		worker.postMessage({text: file.text, path: file.path});
 	}
 	

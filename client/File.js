@@ -3150,6 +3150,8 @@ file.sanityCheck();
 		
 		var file = this;
 		
+		var isCurrentFile = (EDITOR.currentFile == file);
+
 		//console.log("Reloading file.path=" + file.path + " file.fullAutoIndentation=" + file.fullAutoIndentation + " file.fileExtension=" + file.fileExtension);
 		
 		if(text == undefined) throw new Error("No text!");
@@ -3191,6 +3193,7 @@ file.sanityCheck();
 		EDITOR.fireEvent("fileClose", [file]);
 		EDITOR.fireEvent("fileOpen", [file]);
 
+		if(isCurrentFile) EDITOR.fireEvent("fileShow", [file]);
 	}
 	
 	File.prototype.addToGrid = function() {

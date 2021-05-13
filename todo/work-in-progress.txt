@@ -5,7 +5,9 @@ node server/server.js --port=/home/johan/sock/test --domain=test.johan.webide.se
 What I'm working on
 -------------------
 
-Need to have opened at least one valid file before highlightjs will work...
+highlightjs refuses to highlight javascript file because it starts with #!/bin/sh shebang
+
+testing dark theme
 
 
 Could not run "previewTool" on welcome.css.
