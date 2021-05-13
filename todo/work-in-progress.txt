@@ -5,6 +5,10 @@ node server/server.js --port=/home/johan/sock/test --domain=test.johan.webide.se
 What I'm working on
 -------------------
 
+Need to have opened at least one valid file before highlightjs will work...
+
+
+Could not run "previewTool" on welcome.css.
 
 github releases. ex:
 https://github.com/alibaba/nacos/releases
@@ -13,7 +17,7 @@ github pull request, ex:
 https://github.com/FernandoRCandiani/Projeto-Integrador-Front-End/pull/19/files
 
 
-Unknown git error: stderr=fatal: could not read Username for
+
 
 
 Fixing Errors from users! ...

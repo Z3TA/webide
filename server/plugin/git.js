@@ -87,8 +87,6 @@ GIT.clone = function gitClone(user, json, callback) {
 		repo = matchHttp[1] + "://" + json.username + ":" + json.password + "@" + matchHttp[2];
 	}
 
-	console.log(json.password);
-
 	var progressInterval = setInterval(sendProgress, 500);
 
 	// Using spawn instead of exec because clone might take a long time...
@@ -223,11 +221,10 @@ GIT.clone = function gitClone(user, json, callback) {
 
 	function checkMsg(msg) {
 
-		console.log("gitClone checkMsg: msg=" + msg);
+		//console.log("gitClone checkMsg: msg=" + msg);
 
 		var matchProgress = msg.match(reProgress);
 		if(matchProgress) {
-
 			//console.log(matchProgress);
 
 			var pType = matchProgress[1];
@@ -241,7 +238,7 @@ GIT.clone = function gitClone(user, json, callback) {
 				progressInc += pAcc;
 				progressTotalInc += pTot;
 
-				console.log("progressInc=" + progressInc + " pAcc=" + pAcc + " progressTotalInc=" + progressTotalInc + " pType=" + pType);
+				//console.log("progressInc=" + progressInc + " pAcc=" + pAcc + " progressTotalInc=" + progressTotalInc + " pType=" + pType);
 
 			}
 			else {
@@ -254,10 +251,8 @@ GIT.clone = function gitClone(user, json, callback) {
 
 				progressInc += pInc;
 				
-				console.log("progressInc=" + progressInc + " pInc=" + pInc + " pType=" + pType);
-
+				//console.log("progressInc=" + progressInc + " pInc=" + pInc + " pType=" + pType);
 			}
-
 		}
 
 		if(msg != undefined && msg.length > 0) {

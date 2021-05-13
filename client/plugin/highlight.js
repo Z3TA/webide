@@ -80,13 +80,16 @@
 		},
 		unload: function unloadHighlight() {
 			
+			EDITOR.removeEvent("fileOpen", highlightLazyLoad);
+
 			if(initiated) {
 				EDITOR.removeEvent("fileChange", highlightChangedFile);
 				
 				EDITOR.removePreRender(highlightPreRender);
 			}
 			
-		}
+		},
+		order: 1000 // Load after themes
 	});
 	
 	function highlightLazyLoad(file) {

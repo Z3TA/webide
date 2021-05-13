@@ -1693,7 +1693,6 @@ file.writeLine("\n" + file.path + " session closed " + (new Date()) + "\n");
 		// but if the terminal is the only file open, we will not get a fileshow event!
 	
 		if(terminalFiles.length == 0 && Object.keys(EDITOR.files).length <= 1) removeTerminalEvents();
-
 	}
 	
 	function exitAllTerminals(reason) {

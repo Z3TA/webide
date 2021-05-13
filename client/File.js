@@ -3184,6 +3184,13 @@ file.sanityCheck();
 		file.change("reload", text, index, row, col, startColIndentationCharCount, endRowBeforeChange, endColBeforeChange, endColIndentCharCount); // Fire events
 		
 		//console.log("After Reloading file.path=" + file.path + " file.fullAutoIndentation=" + file.fullAutoIndentation + " file.fileExtension=" + file.fileExtension);
+	
+		// Should we call fileClose and fileOpen events!?
+		// For example highlight listens for fileOpen before deciding if it should parse or not
+
+		EDITOR.fireEvent("fileClose", [file]);
+		EDITOR.fireEvent("fileOpen", [file]);
+
 	}
 	
 	File.prototype.addToGrid = function() {

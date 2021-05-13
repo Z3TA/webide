@@ -49,7 +49,6 @@ Test in bash:
 		}
 	}
 	
-	
 	function stdinChannelFileClose(file) {
 		if(watchFiles.indexOf(file.path) != -1) notofyEdit(file.path);
 	}

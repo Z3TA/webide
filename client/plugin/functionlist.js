@@ -518,7 +518,6 @@ functionListSelect.setAttribute("filePath", file.path);
 	}
 	
 	function hideFunctionList(file) {
-		
 		//if(file) console.log("Hiding the functionlist for file.path=" + file.path);
 		//else console.log("Hiding the functionlist! file=" + file);
 		
@@ -535,8 +534,6 @@ functionListSelect.setAttribute("filePath", file.path);
 				
 			}
 		}
-		
-		
 	}
 	
 	function toggleFunctionList() {

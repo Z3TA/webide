@@ -6223,16 +6223,16 @@ EDITOR.fireEvent("btk");
 			//console.log("waitingForEventListenerCallbacks=" + waitingForEventListenerCallbacks + " Still waiting for " + JSON.stringify(waitingForFunction));
 			if(++waitCounter >= maxWaitTimes) {
 				clearTimeout(waitInterval);
-				throw new Error("The following " + waitingForEventListenerCallbacks + " " + eventName + " event listeners never returned or called back: " + JSON.stringify(waitingForFunction));
+				if(callback) throw new Error("The following " + waitingForEventListenerCallbacks + " " + eventName + " event listeners never returned or called back: " + JSON.stringify(waitingForFunction));
 			}
 		}
 		
 		function runFunc(func) {
 			
 			var fName = UTIL.getFunctionName(func);
-				if(func == undefined) throw new Error("Undefined function in " + eventName + " listener!");
+			if(func == undefined) throw new Error("Undefined function in " + eventName + " listener!");
 				
-				//fun.apply(this, Array.prototype.shift.call(arguments)); // Remove eventName from arguments
+			//fun.apply(this, Array.prototype.shift.call(arguments)); // Remove eventName from arguments
 				
 			// Add callback function
 			var fargs = args.concat(function(err, ret) {
@@ -12266,12 +12266,11 @@ function resizeAndRender(afterResize) {
 		for(var i=0; i<f.length; i++) {
 				//console.log("keyIsDown: Calling function: " + UTIL.getFunctionName(f[i]) + "...");
 			
-			if(captured) {
-					console.warn("keyIsDown: Key combo has already been captured by " + capturedBy.map(UTIL.getFunctionName).join(",") + " : ");
-			}
+			//if(captured) console.warn("keyIsDown: Key combo has already been captured by " + capturedBy.map(UTIL.getFunctionName).join(",") + " : ");
+			
 			
 			captured = true;
-			capturedBy.push(f[i]);
+			//capturedBy.push(f[i]);
 			
 				//if(!EDITOR.currentFile) {console.warn("keyIsDown: No file open!");}
 

@@ -141,7 +141,7 @@
 		order: 100,
 		load:function jsParserMain() {
 			
-			EDITOR.on("fileOpen", onFileOpen);
+			EDITOR.on("fileOpen", parseJsOnFileOpen);
 			EDITOR.on("fileChange", parseJsOnChange, 100);
 			
 			EDITOR.addParser(parserControl);
@@ -149,7 +149,7 @@
 		},
 		unload: function unloadJsParser() {
 			
-			EDITOR.removeEvent("fileOpen", onFileOpen);
+			EDITOR.removeEvent("fileOpen", parseJsOnFileOpen);
 			EDITOR.removeEvent("fileChange", parseJsOnChange);
 			
 			EDITOR.removeParser(parserControl);
@@ -265,7 +265,7 @@
 		parseWorker.onmessage = messageFromParseWorker;
 	}
 	
-	function onFileOpen(file) {
+	function parseJsOnFileOpen(file) {
 		if(shouldParse(file)) {
 			var options = {jsx: EDITOR.settings.jsx};
 			var ext = file.fileExtension;
