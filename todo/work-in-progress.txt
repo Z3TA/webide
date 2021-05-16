@@ -1,4 +1,22 @@
 
+Mesuring typing Latency using typometer:
+gvim 60hz: avg 1.6
+gvim 144hz: avg 1.5 SD 0.2
+ubuntu terminal 60hz: avg 27
+ubuntu terminal 144hz: avg 28.4 SD 0.4
+html textarea 60hz vsync: 15.7 with 
+html textarea 144hz without vsync: avg 4.4 SD 0.5
+html textarea 144hz with vsync: avg 8.7
+
+
+webide 60hz: avg 9
+webide using desynchronized:true 144hz: avg 5.1 SD 2.0
+webide without desynchronized 144hz: avg 8.8 SD 2.5
+
+GPU Gsync maybe adds 0.2ms latency!? But it seems to make the webide latency lower and more stable !?
+
+
+
 testing on webide: 
 node server/server.js --port=/home/johan/sock/test --domain=test.johan.webide.se --username=test --password=123 --home=/home/johan/
 
