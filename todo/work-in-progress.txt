@@ -1,4 +1,11 @@
 
+
+
+
+
+color in save-file input!
+
+
 Mesuring typing Latency using typometer:
 gvim 60hz: avg 1.6
 gvim 144hz: avg 1.5 SD 0.2

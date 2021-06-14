@@ -4,6 +4,13 @@ This file contains a list of things we can do to improve already implemented fea
 Polishing (only existing features)
 ==================================
 
+
+
+Error: Terminal file not open: terminal1
+at parseBuffer (
+
+Could not run "previewTool" on terminal1.
+
 When trying to commit after a merge it says (mercurial) "We need to reslove the merge conflict manually."
 when clicking "check for problems" it says "you need to commit" ...
 I could however commit via command line! hg commit -m "merge??"
