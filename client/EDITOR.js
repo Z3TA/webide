@@ -10106,6 +10106,9 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 							});
 						}
 
+						CLIENT.fireEvent("saveLogin", {user: userValue, pw: pwValue});
+
+
 					}
 				});
 			}

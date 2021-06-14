@@ -87,11 +87,11 @@
 			UTIL.assert(at.left, "b");
 			UTIL.assert(at.right, "ar");
 			
-var caret = file.createCaret(9);
-var at = file.wordAtCaret(caret);
-UTIL.assert(at.word, "baz");
-UTIL.assert(at.left, "b");
-UTIL.assert(at.right, "az");
+			var caret = file.createCaret(9);
+			var at = file.wordAtCaret(caret);
+			UTIL.assert(at.word, "baz");
+			UTIL.assert(at.left, "b");
+			UTIL.assert(at.right, "az");
 			
 			EDITOR.closeFile(file.path);
 			
@@ -2261,7 +2261,7 @@ UTIL.assert(at.right, "az");
 		
 		function testDoubleLoginConnectionConnected(err) {
 			// Try to login twice
-			CLIENT.cmd("identify", {username: userValue, password: pwValue, sessionId: "abc"}, function loggedInMaybe(err, resp) {
+			CLIENT.cmd("identify", {username: userValue, password: pwValue, sessionId: "abc", editorVersion: EDITOR.version}, function loggedInMaybe(err, resp) {
 				loginAttempts++;
 				if(err) {
 					console.log("testDoubleLogin: First login attempt failed! Error: " + err.message);
@@ -2271,7 +2271,7 @@ UTIL.assert(at.right, "az");
 				}
 			});
 			
-			CLIENT.cmd("identify", {username: userValue, password: pwValue, sessionId: "def"}, function loggedInMaybe(err, resp) {
+			CLIENT.cmd("identify", {username: userValue, password: pwValue, sessionId: "def", editorVersion: EDITOR.version}, function loggedInMaybe(err, resp) {
 				loginAttempts++;
 				if(err) {
 					console.log("testDoubleLogin: Second login attempt failed! Error: " + err.message);
