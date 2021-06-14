@@ -21,6 +21,16 @@ iptables -A INPUT -s 18.130.178.39 -j DROP
 iptables -A INPUT -s 51.79.220.193 -j DROP
 iptables -A FORWARD -d 18.130.178.39 -j DROP
 iptables -A FORWARD -d 51.79.220.193 -j DROP
+# pool.hashvault.pro
+iptables -A OUTPUT -d 49.12.130.173 -j REJECT
+iptables -A OUTPUT -d 168.119.38.182 -j REJECT
+iptables -A INPUT -s 49.12.130.173 -j DROP
+iptables -A INPUT -s 168.119.38.182 -j DROP
+iptables -A FORWARD -d 49.12.130.173 -j DROP
+iptables -A FORWARD -d 168.119.38.182 -j DROP
+
+
+
 
 # iptables -I FORWARD 1 -d 51.79.220.193 -j DROP
 
