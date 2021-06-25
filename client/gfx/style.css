@@ -608,7 +608,7 @@ li ul {
 	margin-left: 1em;
 }
 
-label, .footer span, .footer p, .footer legend, .footer .text {
+label, .footer span, .footer p, .footer legend {
 	color: #f6f6f3;
 	text-shadow: 0px -1px 0px #1f2020;
 	font-weight: normal;

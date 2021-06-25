@@ -23,6 +23,7 @@
 		desc: "Open a github repo quickly by appending 2s behind github",
 		load: function loadGithub2s() {
 			CLIENT.on("loginSuccess", openGithubRepoMaybe);
+
 		},
 		unload: function unloadGithub2s() {
 			CLIENT.removeEvent("loginSuccess", openGithubRepoMaybe);
@@ -34,6 +35,8 @@
 
 
 	function openGithubRepoMaybe() {
+		console.log("github2s: openGithubRepoMaybe!");
+
 		var str = QUERY_STRING.github;
 
 		if(!str) return ALLOW_DEFAULT;
@@ -51,7 +54,7 @@
 
 		if(dirs[0] == "") dirs.shift();
 
-		//console.log("github2s: dirs=" + JSON.stringify(dirs));
+		console.log("github2s: dirs=" + JSON.stringify(dirs));
 
 		var githubUrl = "https://github.com/" + str;
 
@@ -62,8 +65,8 @@
 		var matchGithubBranch = str.match(/(.*)\/(.*)\/tree\/([^/]*)/);
 		var matchGithubWiki = str.match(/(.*)\/(.*)\/wiki\/(.*)/);
 
-		//console.log("github2s: matchGithubFile=", matchGithubFile);
-		//console.log("github2s: matchGithubBranch=", matchGithubBranch);
+		console.log("github2s: matchGithubFile=", matchGithubFile);
+		console.log("github2s: matchGithubBranch=", matchGithubBranch);
 
 		if(matchGithubFile) {
 			var repo = "https://github.com/" + matchGithubFile[1] +  "/" + matchGithubFile[2] +  ".git";
@@ -83,7 +86,7 @@
 			var repo = "https://github.com/" + dirs[0] + "/" + dirs[1] + ".git";
 		}
 		
-		//console.log("github2s: matchGithubWiki=" + matchGithubWiki + " _showFile=" + _showFile);
+		console.log("github2s: matchGithubWiki=" + matchGithubWiki + " _showFile=" + _showFile);
 
 		var directory = UTIL.joinPaths(EDITOR.user.homeDir, "repo/");
 
@@ -98,7 +101,7 @@
 			// user might have configured ssh key, so try cloning, and only ask for credentials it cloning fails
 			var sshRepo = "git@github.com:" + dirs.join("/") + ".git";
 
-			//console.log("github2s: Attempting to clone sshRepo=" + sshRepo + " ...");
+			console.log("github2s: Attempting to clone sshRepo=" + sshRepo + " ...");
 
 			EDITOR.createPath(directory, function(err) {
 				if(err) throw err;
@@ -209,15 +212,14 @@
 		function buildGithubLogin(widget) {
 			var wrap = document.createElement("div");
 
-			var text = document.createElement("div");
+			var text = document.createElement("p");
 			var repoLink = document.createElement("a");
 			repoLink.setAttribute("href", githubUrl);
 			repoLink.appendChild( document.createTextNode(repo) )
 
 			text.appendChild( document.createTextNode("Authorization needed to access private repository: ") );
 			text.appendChild( repoLink );
-			text.classList.add("text");
-
+			
 			var login = document.createElement("input");
 			login.setAttribute("type", "text");
 			login.setAttribute("id", "githubUsername");
