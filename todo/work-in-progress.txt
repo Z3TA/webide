@@ -1,4 +1,5 @@
-When saving a file the text in the text input is white...
+
+Possible bug in github2s: When someone else has cloned a repo - anyone can access it!? (its in cache)?
 
 When opening a image file you get an error, then the image file is saved in opened files, but you can't close it,
 resulting in an error every time you open the editor...

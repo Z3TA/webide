@@ -316,7 +316,7 @@
 			natCodeInput.setAttribute("title", "Code generated from the server behind NAT you want to connec to");
 			natCodeInput.setAttribute("size", "30");
 			natCodeInput.setAttribute("value", nat_code);
-			form.appendChild(natCodeInput);
+			labelNat.appendChild(natCodeInput);
 			
 		}
 		else {
@@ -335,7 +335,7 @@
 			url.setAttribute("size", "30");
 			url.setAttribute("value", urlValue);
 			url.onchange = saveUserPw;
-			form.appendChild(url);
+			labelUrl.appendChild(url);
 		}
 
 		// ### user
@@ -351,7 +351,7 @@
 		user.setAttribute("size", "10");
 		if(userValue) user.setAttribute("value", userValue);
 		user.onchange = saveUserPw;
-		form.appendChild(user);
+		labelUser.appendChild(user);
 		
 		// ### password
 		var labelPw = document.createElement("label");
@@ -366,13 +366,14 @@
 		pw.setAttribute("size", "10");
 		if(pwValue) pw.setAttribute("value", pwValue);
 		pw.onchange = saveUserPw;
-		form.appendChild(pw);
+		labelPw.appendChild(pw);
 		
 		// ### Connect button
-		loginButton = document.createElement("input");
+		loginButton = document.createElement("button");
 		loginButton.setAttribute("type", "submit");
 		loginButton.setAttribute("class", "button");
-		loginButton.setAttribute("value", "Login");
+		loginButton.innerText = "Login";
+		
 		//loginButton.onclick = form.submit();
 		form.appendChild(loginButton);
 		
@@ -386,8 +387,10 @@
 			checkDefUrl.setAttribute("id", "checkDefUrl");
 			var labelCheckDefUrl = document.createElement("label");
 			labelCheckDefUrl.setAttribute("for", "checkDefUrl");
+
 			labelCheckDefUrl.appendChild(checkDefUrl);
 			labelCheckDefUrl.appendChild(document.createTextNode("Use default URL"));
+			
 			form.appendChild(labelCheckDefUrl);
 		}
 
