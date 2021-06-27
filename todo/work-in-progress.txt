@@ -1,6 +1,4 @@
 
-svg zoom widget doesn't hide when closing or switching away from svg file...
-
 Possible bug in github2s: When someone else has cloned a repo - anyone can access it!? (its in cache)?
 
 When opening a image file you get an error, then the image file is saved in opened files, but you can't close it,

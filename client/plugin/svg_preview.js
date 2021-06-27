@@ -31,7 +31,7 @@ widget.unload();
 		}
 	});
 	
-	function buildSvgPreviewWidget() {
+	function buildSvgPreviewWidget(widget) {
 		/*
 			A range slider for zooming in out which will resize the preview window
 		*/
@@ -45,6 +45,18 @@ widget.unload();
 		label.innerText = "SVG Zoom: "
 		wrap.appendChild(label);
 		
+		var hideButton = document.createElement("button");
+		hideButton.innerText = "hide";
+		hideButton.style.float = "right";
+		hideButton.classList.add("button");
+		hideButton.classList.add("half");
+		hideButton.style.marginTop = "0px";
+		hideButton.style.marginBottom= "0px";
+		hideButton.onclick = function hideWidget() {
+			widget.hide();
+		};
+		wrap.appendChild(hideButton);
+
 		var svgZoomSliderHolder = document.createElement("div")
 		svgZoomSliderHolder.classList.add("svgZoomSliderHolder");
 		wrap.appendChild(svgZoomSliderHolder);
@@ -59,6 +71,8 @@ widget.unload();
 		onRangeChange(zoomSlider, zoomSliderChange);
 		svgZoomSliderHolder.appendChild(zoomSlider);
 		
+		
+
 		return wrap;
 		
 		function onRangeChange(inputRange, callback) {
