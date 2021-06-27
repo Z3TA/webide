@@ -47,6 +47,7 @@ widget.unload();
 		
 		var hideButton = document.createElement("button");
 		hideButton.innerText = "hide";
+		hideButton.title = "Hide the zoom widget";
 		hideButton.style.float = "right";
 		hideButton.classList.add("button");
 		hideButton.classList.add("half");
