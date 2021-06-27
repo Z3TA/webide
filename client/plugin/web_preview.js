@@ -15,7 +15,7 @@
 			EDITOR.on("ctxMenu", maybeShowPreviewInMenu);
 			EDITOR.on("previewTool", webPreviewTool, 2000); // Run after Static Site generator
 			
-			discoveryBarIcon = EDITOR.discoveryBar.addIcon("gfx/multimedia.svg", 40,  "Live Preview/Run", "run", webPreviewFromDiscovery);
+			discoveryBarIcon = EDITOR.discoveryBar.addIcon("gfx/play.svg", 40,  "Live Preview/Run", "run", webPreviewFromDiscovery);
 			// Icon created by: https://www.flaticon.com/authors/phatplus
 			
 			winMenuWysiwygHtml = EDITOR.windowMenu.add(S("wysiwyg"), [S("Edit"), 120], startHtmlWysiwyg);

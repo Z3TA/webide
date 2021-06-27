@@ -140,7 +140,7 @@ var CACHE_DISCOVERY_ICONS = [
 	'/gfx/add-file.svg',
 	'/gfx/disk.svg',
 	'/gfx/data.svg',
-	'/gfx/multimedia.svg',
+	'/gfx/play.svg',
 	'/gfx/folder.svg',
 	'/gfx/board.svg',
 	'/gfx/icon/dropbox.svg',

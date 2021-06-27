@@ -417,7 +417,16 @@ Go into settings... Look for browser bar (General settings: Toolbar).. Select to
 
 
 
+Developing the editor using webide.se
+=====================================
+Self hosted development using the editor to edit itself...
 
+Start the backend:
+````
+node server/server.js --port=/home/$(whoami)/sock/test --domain=test.$(whoami).webide.se --username=test --password=pleaseuseapassword --home=/$(whoami)/johan/
+````
+
+For running a test environment inside Docker - see indstructions in Dockerfile
 
 
 
