@@ -59,7 +59,7 @@
 		var githubUrl = "https://github.com/" + str;
 
 		var repoName = dirs[1];
-		var folder = EDITOR.user.homeDir + "repo/" + repoName;
+		var userRepoContentFolder = EDITOR.user.homeDir + "repo/" + repoName;
 
 		var matchGithubFile = str.match(/(.*)\/(.*)\/blob\/([^/]*)\/(.*)/);
 		var matchGithubBranch = str.match(/(.*)\/(.*)\/tree\/([^/]*)/);
@@ -88,25 +88,25 @@
 		
 		console.log("github2s: matchGithubWiki=" + matchGithubWiki + " _showFile=" + _showFile);
 
-		var directory = UTIL.joinPaths(EDITOR.user.homeDir, "repo/");
+		var userRepoDir = UTIL.joinPaths(EDITOR.user.homeDir, "repo/");
 
 		var cloneTimeout = 3600 * 1000; // one hour
 
-		// note: folder might exist, and the repo is private (it was cloned somtime before)
-		EDITOR.folderExist(folder, function(err, path) {
+		// note: userRepoContentFolder might exist, and the repo is private (it was cloned somtime before)
+		EDITOR.folderExist(userRepoContentFolder, function(err, path) {
 			if(err) throw err;
 
 			if(path) return gotRepoHopefully();
 
-			// user might have configured ssh key, so try cloning, and only ask for credentials it cloning fails
+			// user might have configured ssh key, so try cloning, and only ask for credentials if cloning fails
 			var sshRepo = "git@github.com:" + dirs.join("/") + ".git";
 
 			console.log("github2s: Attempting to clone sshRepo=" + sshRepo + " ...");
 
-			EDITOR.createPath(directory, function(err) {
+			EDITOR.createPath(userRepoDir, function(err) {
 				if(err) throw err;
 
-				CLIENT.cmd("git.clone", {repo: sshRepo, directory: directory}, cloneTimeout, function(err) {
+				CLIENT.cmd("git.clone", {repo: sshRepo, directory: userRepoDir}, cloneTimeout, function(err) {
 					if(err) {
 						if(err.message.indexOf("Permission denied") != -1) {
 
@@ -126,7 +126,7 @@
 
 		function gotRepoHopefully() {
 			if(_commitId && _commitId != "HEAD") {
-				CLIENT.cmd("git.checkout", {directory: folder, rev: _commitId}, function cloned(err, resp) {
+				CLIENT.cmd("git.checkout", {directory: userRepoContentFolder, rev: _commitId}, function cloned(err, resp) {
 					if(err) alertBox("Failed to checkout " + _commitId + ". Error: " + err.message);
 
 					//console.log("github2s: git.checkout: _commitId=" + _commitId + " resp=" + JSON.stringify(resp, null, 2));
@@ -134,12 +134,12 @@
 					if(_showFile) showFile(_showFile);
 					else findReadme();
 
-					EDITOR.fileExplorer(folder);
+					EDITOR.fileExplorer(userRepoContentFolder);
 
 				});
 			}
 			else {
-				EDITOR.fileExplorer(folder);
+				EDITOR.fileExplorer(userRepoContentFolder);
 
 				if(_showFile) {
 					showFile(_showFile);
@@ -157,7 +157,7 @@
 			var fileExt = UTIL.getFileExtension(filePathInRepo);
 			if(fileExt == "") filePathInRepo = filePathInRepo + ".md"; // Assume it's a markdown file if file extension is missing
 
-			EDITOR.openFile( UTIL.joinPaths(folder, filePathInRepo), undefined, {show: true}, function(err) {
+			EDITOR.openFile( UTIL.joinPaths(userRepoContentFolder, filePathInRepo), undefined, {show: true}, function(err) {
 				if(err) {
 					//console.log("github2s: open file error: " + err.message);
 					findReadme();
@@ -173,8 +173,8 @@
 			var maxRetry = 10;
 
 			// Show readme if one exist ...
-			//console.log("github2s: findReadme! folder=" + folder + " retry=" + retry);
-			EDITOR.listFiles(folder, function(err, files) {
+			//console.log("github2s: findReadme! userRepoContentFolder=" + userRepoContentFolder + " retry=" + retry);
+			EDITOR.listFiles(userRepoContentFolder, function(err, files) {
 				if(err) {
 					if(err.code == "ENOENT") {
 						// It might take a while to clone...
@@ -183,15 +183,15 @@
 						}, 1000);
 					}
 
-					EDITOR.sendFeedback("Unable to read folder=" + folder + " after retry=" + retry, "github2s", true);
+					EDITOR.sendFeedback("Unable to read userRepoContentFolder=" + userRepoContentFolder + " after retry=" + retry, "github2s", true);
 
 					console.error(err);
 					return alertBox(err.message);
 				}
 
 				if(retry > 0) {
-					// The folder is not listed because the file explored opened before it existed... so re-open the file explorer
-					EDITOR.fileExplorer(folder);
+					// The userRepoContentFolder is not listed because the file explorer opened before the folder existed... so re-open the file explorer
+					EDITOR.fileExplorer(userRepoContentFolder);
 				}
 
 				for(var i=0; i<files.length; i++) {
@@ -250,7 +250,7 @@
 					repo: repo,
 					username: login.value,
 					password: pw.value,
-					directory: directory
+					directory: userRepoDir
 				};
 
 				CLIENT.cmd("git.clone", cloneOptions, cloneTimeout, function(err) {
