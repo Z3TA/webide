@@ -5,6 +5,9 @@ Polishing (only existing features)
 ==================================
 
 
+Total lines should show up somewhere when scrolling so you can have an overlook on where in the file you are...
+
+---
 
 Error: Terminal file not open: terminal1
 at parseBuffer (
