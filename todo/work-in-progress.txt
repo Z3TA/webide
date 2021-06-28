@@ -9,6 +9,7 @@ then run lesskey command to generate .less file
 
 Server worker crashes when closing a terminal file...
 
+Sometimes when pushing using Merucrial you get "Server: API error: abort: error: Name or service not known"
 
 When opening a image file you get an error, then the image file is saved in opened files, but you can't close it,
 resulting in an error every time you open the editor...

@@ -43,6 +43,8 @@ var File; // File object is global
 		
 		file.noCollaboration = false; // Disable collaboration on this file if set to true
 
+		file.disallowScrollingBeyondEof = false;
+
 		file.text = text;
 		file.path = path;
 		file.isBig = bigFile ? true : false;
