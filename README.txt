@@ -23,7 +23,7 @@ Assuming you already have node.js installed. Open cmd or terminal:
 Then type `webide [path to file]` to edit any file.
 
 
-### Staring server/client manually on localhost
+### Starting server/client manually on localhost
 
 ```
 cd node_modules/webide.se

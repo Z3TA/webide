@@ -4122,6 +4122,9 @@ if(startColumn-indentationWidth > minIndentation*EDITOR.settings.tabSpace) {
 			
 			// Allow user to scroll so that the last line appears at the middle, but not so that the text get invisible
 			var maxY = Math.floor(file.grid.length - EDITOR.view.visibleRows / 2);
+			if(file.disallowScrollingBeyondEof) {
+				var maxY = Math.floor(file.grid.length - EDITOR.view.visibleRows);
+			}
 			
 			startRow = Math.min(y, maxY);
 			

@@ -37,7 +37,8 @@ todo: Run vttest
 		lineBreak: "\n",
 		disableParsing: true,
 		noChangeEvents: true,
-		noCollaboration: true
+		noCollaboration: true,
+		disallowScrollingBeyondEof: true
 	};
 	var waitForReopen = true; // Buffer terminal messages for two seconds so that the last session get a chance to load
 	var BUFFER = {}; // termid: [data]
@@ -810,7 +811,7 @@ EDITOR.unbindKey(startTerminalFromKeyboard);
 				inNumber = "";
 				inText = true;
 			}
-			else if((inEsc && char == "H") || (inBracket && (char == "H" || char == "f"))) {
+			else if((inEsc && char == "H") || (inBracket && (char == "H" || char == "f"))) { // [H
 				if(charBuffer) print();
 				
 				//console.log("Move cursor to upper left corner");
@@ -908,7 +909,7 @@ EDITOR.unbindKey(startTerminalFromKeyboard);
 				inNumber = "";
 				inText = true;
 			}
-			else if( (inEsc || inNumber) && char == "M") {
+			else if( (inEsc || inNumber) && char == "M") { // ESC+M
 				if(charBuffer) print();
 				
 				if(inNumber) var times = parseInt(inNumber);
@@ -922,6 +923,9 @@ EDITOR.unbindKey(startTerminalFromKeyboard);
 				
 				//console.log("Move/scroll window DOWN " + times + " line(s) startRow=" + startRow + " topLine=" + terminalState.topLine +" bottomLine=" + terminalState.bottomLine + " topRow=" + topRow + " bottomRow=" + bottomRow);
 				
+				// Should bottomRow always be -2 !?
+				if(bottomRow >= file.grid.length) bottomRow = file.grid.length-1;
+
 				var bottomLineText = "";
 				var topLineText = "";
 				for(var j=0; j<times; j++) {
@@ -1443,7 +1447,7 @@ file.writeLine("\n" + file.path + " session closed " + (new Date()) + "\n");
 	function terminalKeyDown(file, character, combo, keyDownEvent) {
 		/*
 			
-			Sending alt-combois: First send Esc, then the letter!?
+			Sending alt-combos: First send Esc, then the letter!?
 			Example: Alt+A = Esc+A
 			
 		*/
@@ -1540,8 +1544,11 @@ file.writeLine("\n" + file.path + " session closed " + (new Date()) + "\n");
 		else if(code == 27 && combo.sum == 0) { // Esc
 			data = ESC;
 		}
+		else if(code == 33 && combo.sum == 0) { // Page up
+			data = ESC + "[5~";
+		}
 		else if(code == 34 && combo.sum == 0) { // Page down
-			data = ESC + String.fromCharCode(81); // hmm?
+			data = ESC + "[6~";
 		}
 		else if(code == 35 && combo.sum == 0) { // End
 			data = ESC + "[F";

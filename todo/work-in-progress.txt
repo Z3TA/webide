@@ -1,8 +1,14 @@
-
-bug: When a terminal has been closed and the editor is repopened the terminal# file is parsed...
-bug: terminal reuses an already open terminal# file...(and it's colored)
+Problem scrolling in terminal emulator. EDITOR.view.visibleRows=35 but only 34 rows are visible, making the scroll function think that file.startRow + EDITOR.view.visibleRows is the last row - but it's above grid.length!
+You can scroll down so that the end of file is in the middle of the canvas... Then the file.startRow + EDITOR.view.visibleRows calculation is wrong!
 
 bug: home, end, page up/down doesn't work in the terminal (using less)
+it works in babash, but special keybindings need to be defined for less...
+https://man7.org/linux/man-pages/man1/lesskey.1.html
+/home/user/.lesskey
+then run lesskey command to generate .less file
+
+Server worker crashes when closing a terminal file...
+
 
 When opening a image file you get an error, then the image file is saved in opened files, but you can't close it,
 resulting in an error every time you open the editor...
