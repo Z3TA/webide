@@ -41,6 +41,8 @@ var File; // File object is global
 		
 		file.isCallingChangeEventListeners = undefined; // Prevent fileChange event listeners from changing the file. Will point to the offending function
 		
+		file.noCollaboration = false; // Disable collaboration on this file if set to true
+
 		file.text = text;
 		file.path = path;
 		file.isBig = bigFile ? true : false;

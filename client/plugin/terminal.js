@@ -418,10 +418,11 @@ EDITOR.unbindKey(startTerminalFromKeyboard);
 			//console.log("terminal: File already open! name=" + name);
 			// Make sure it's a proper terminal file
 			var file = EDITOR.files[name];
-terminalFiles.push(file);
-			for(var prop in terminalFileStateProps) {
-				file[prop] = terminalFileStateProps[prop];
-			}
+
+			file.reload(file.text, terminalFileStateProps);
+
+			terminalFiles.push(file);
+			
 			if(!terminalActive) addTerminalEvents();
 			
 			file.writeLineBreak();
