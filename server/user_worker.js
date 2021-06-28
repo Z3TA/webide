@@ -663,21 +663,13 @@ user.removeStorageItem = function removeStorageItem(itemName, callback) {
 		if(err) {
 			
 			callback(err);
-			throw err;
 			
-			/*
-				if(err.code == "ENOENT") {
-				console.warn(err.message);
-				
-				user.isSavingStorage.splice(user.isSavingStorage.indexOf(itemName), 1);
-				callback(null);
-				
-				}
-				else {
-				callback(err);
-				throw err;
-				}
-			*/
+			console.error(err);
+			
+			console.log("err.code=" + err.code + " filePath=" + filePath + " itemName=" + itemName + " user.isSavingStorage=" + JSON.stringify(user.isSavingStorage));
+
+			// Error most likely ENOENT due to a bug in the client, so don't crash the user worker because of it
+
 		}
 		else {
 			
