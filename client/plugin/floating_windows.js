@@ -167,7 +167,7 @@
 			function waitUntilLoggedIn() {
 				//console.log("floatingWindow: waitUntilLoggedIn: retryOpenCounter=" + retryOpenCounter);
 				otherEditor = browserWindow.window.EDITOR;
-				if(otherEditor == undefined) {
+				if(otherEditor == undefined || otherEditor.once == undefined) { // Sometimes EDITOR has been defined (loaded) but not the methods...
 					if(++retryOpenCounter > retryOpenMaxTries) throw new Error("Unable to talk to other window (after " + retryOpenCounter + " attempts)"); // Prevent eternal loop
 					setTimeout(waitUntilLoggedIn, 1000);
 					return;
@@ -191,7 +191,6 @@
 						}
 					});
 				
-				
 					var checkOpenInterval = setInterval(checkIfOpen, 1);
 					/*
 						Callbacks from the other window will refer to the other window!??!?
@@ -209,6 +208,9 @@
 							checkCloseInterval = setInterval(checkIfClosed, 1);
 							return undefined; // Will not warn about unsaved changes
 						}
+
+						otherEditor.resizeNeeded(); // Because the discovery bar has dedicated space, and when we don*t open it, that space is not occupied
+
 					}, 1000);
 				
 					if(typeof callback == "function") callback(null, browserWindow);

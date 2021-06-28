@@ -425,6 +425,7 @@ Start the backend:
 ````
 node server/server.js --port=/home/$(whoami)/sock/test --domain=test.$(whoami).webide.se --username=test --password=pleaseuseapassword --home=/$(whoami)/johan/
 ````
+You might have to delete the socket (/home/$(whoami)/sock/test) before re-run. eg. when you get this error: Error: listen EADDRINUSE: address already in use
 
 For running a test environment inside Docker - see indstructions in Dockerfile
 

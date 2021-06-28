@@ -10307,10 +10307,12 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 			
 				_serverStorage = json.storage;
 			
+				var discoveryBarDisabledByQueryString = QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("discoveryBar") != -1;
+
 				if(_serverStorage.showDiscoveryBar == "false") {
 					EDITOR.discoveryBar.hide();
 				}
-				else if(_serverStorage.showDiscoveryBar == "true") {
+				else if(_serverStorage.showDiscoveryBar == "true" && !discoveryBarDisabledByQueryString) {
 					EDITOR.discoveryBar.show();
 				}
 				
