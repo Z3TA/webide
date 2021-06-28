@@ -1620,7 +1620,7 @@ Unable to repeat bugs (happens rarely)
 ---------------------------------------
 
 Sometimes when pushing using Merucrial you get "Server: API error: abort: error: Name or service not known"
-And when we get that error /etc/resolv.conf doesn't exist... But it exists usually... Why does it dissappear!?
+/etc/resolv.conf do exist!
 
 ---
 
