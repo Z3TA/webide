@@ -2,6 +2,8 @@
 bug: When a terminal has been closed and the editor is repopened the terminal# file is parsed...
 bug: terminal reuses an already open terminal# file...(and it's colored)
 
+bug: home, end, page up/down doesn't work in the terminal (using less)
+
 When opening a image file you get an error, then the image file is saved in opened files, but you can't close it,
 resulting in an error every time you open the editor...
 

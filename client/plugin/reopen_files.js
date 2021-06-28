@@ -1048,6 +1048,8 @@
 		state.caret = file.caret;
 		state.order = file.order;
 		state.disableParsing = file.disableParsing;
+		//state.noChangeEvents = file.noChangeEvents;
+		//state.noCollaboration = file.noCollaboration;
 		state.hash = file.hash;
 		
 		// For loading big files as streams
