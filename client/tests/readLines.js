@@ -214,7 +214,7 @@
 				if(lines[1999] != "L2000_abcdefghijklmnopqrstuvwxyzåäöABCDEFGHIJKL") throw new Error("lines[1999]=" + lines[1999]);
 				if(lines[3999] != "L4000_abcdefghijklmnopqrstuvwxyzåäöABCDEFGHIJKLMNOPQRSTUVWXYZÅÄ") throw new Error("lines[3999]=" + lines[3999]);
 				
-				CLIENT.cmd("writeLines", {start: 1, end: 4001, overwrite: true, path: testFile, content: lines.join(lb)}, function(err, json) {
+				CLIENT.cmd("writeLines", {start: 1, end: 4001, overwrite: true, path: testFile, content: lines.join(lb)}, 120000, function(err, json) {
 					console.log("testReadLines6: Got callback from writeLines! err=" + (err && err.message));
 					if(err) throw err;
 					

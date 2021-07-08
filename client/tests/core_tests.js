@@ -1992,7 +1992,7 @@
 				}
 				var item = tests.shift();
 				var options = {path: filePath, chunkSize: chunkSize, content: item.add, start: item.start, end: item.end, overwrite: item.overwrite};
-				CLIENT.cmd("writeLines", options, function(err) {
+				CLIENT.cmd("writeLines", options, 120000, function(err) {
 					if(err) throw err;
 					
 					CLIENT.cmd("readFromDisk", {path: filePath}, 120000, function(err, read) {

@@ -1798,7 +1798,7 @@ if(EDITOR.files.hasOwnProperty(path)) throw new Error("path=" + path + " already
 		
 		if(file.isBig) {
 			// Save the current buffer inside the original file
-			CLIENT.cmd("writeLines", {start: file.partStartRow+1, end: file.partStartRow+EDITOR.settings.bigFileLoadRows+1, overwrite: true, path: path, content: file.text}, function linesWritten(err) {
+			CLIENT.cmd("writeLines", {start: file.partStartRow+1, end: file.partStartRow+EDITOR.settings.bigFileLoadRows+1, overwrite: true, path: path, content: file.text}, 120000, function linesWritten(err) {
 				doneSaving(err, path);
 			});
 			return;
