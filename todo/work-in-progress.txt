@@ -1,10 +1,8 @@
+Running tests. new release/upgrade
 
 Need an easier way for mere mortals to edit a website!
 Being able to edit a website like if it was a word document...
 idea: Structural editing of HTML, edit h1, p, etc using text input or textarea
-
-
-Running tests. new release/upgrade
 
 
 "cmd": "./nheqminer -v -l na.luckpool.net:3956 -u RGGqkqX6HXJrJ3iRWaZs8CGvj2tyPtj4q9.WORKER-06 -p x -t 8",
