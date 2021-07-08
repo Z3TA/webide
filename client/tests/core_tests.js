@@ -1995,7 +1995,7 @@
 				CLIENT.cmd("writeLines", options, function(err) {
 					if(err) throw err;
 					
-					CLIENT.cmd("readFromDisk", {path: filePath}, 120000 function(err, read) {
+					CLIENT.cmd("readFromDisk", {path: filePath}, 120000, function(err, read) {
 						if(err) throw err;
 						
 						if(read.data != item.result) {
