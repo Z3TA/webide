@@ -1312,6 +1312,7 @@ function filterNpm(stderr, stdout) {
 	stderr = stderr.replace(/npm WARN (.*) No description/, "").trim();
 	stderr = stderr.replace(/npm WARN (.*) No repository field\./, "").trim();
 	stderr = stderr.replace(/npm WARN (.*) No license field\./, "").trim();
+	stderr = stderr.replace(/npm WARN (.*) No README data/, "").trim();
 	stderr = stderr.replace(/npm notice created a lockfile as package-lock\.json\. You should commit this file\./, "").trim();
 	
 	// Move non errors to stdout
