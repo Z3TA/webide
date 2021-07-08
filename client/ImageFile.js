@@ -278,9 +278,17 @@ file.dHeight = scaledCanvas.height;
 	}
 
 	ImageFile.prototype.getFileSize = function(humanReadable) {
-		// todo: Implement!
+		var file = this;
 
-		return 0;
+		var data_url= file.canvas.toDataURL("image/png");
+
+		// https://stackoverflow.com/questions/18557497/how-to-get-html5-canvas-todataurl-file-size-in-javascript
+
+		var content_without_mime = data_url.split(",")[1];
+		var size_in_bytes = window.atob(content_without_mime).length;
+
+		if(!humanReadable) return size_in_bytes;
+		else return EDITOR.humanReadableNumber(size_in_bytes) + "B";
 	}
 	
 	

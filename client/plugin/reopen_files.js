@@ -585,16 +585,10 @@
 					console.log("reopenFiles: ", openFileError.stack);
 					alertBox("Unable to reopen file:\n" + path + "\nError: " + openFileError.message);
 					
-					// Remove from opened files
-					EDITOR.localStorage.getItem("openedFiles", function(err, openedFilesString) {
+					removeFromOpenedFiles(path, function(err) {
 						if(err) throw err;
-						openedFilesString = removeFromStringList(openedFilesString, path, fileDelimiter);
-						EDITOR.localStorage.setItem("openedFiles", openedFilesString, function(err) {
-							if(err) throw err;
-							callback(openFileError, file, false);
-						});
-						
 					});
+
 					return;
 				}
 				
@@ -741,13 +735,13 @@
 			//console.log(UTIL.getStack("reopenFiles: Adding file to openedFiles path='" + file.path + "'"));
 				
 			//console.log("reopenFiles: List before=" + openedFilesString);
-				openedFilesString = addToStringList(openedFilesString, file.path, fileDelimiter)
+			openedFilesString = addToStringList(openedFilesString, file.path, fileDelimiter)
 			//console.log("reopenFiles: List after=" + openedFilesString);
 				
-				EDITOR.localStorage.setItem("openedFiles", openedFilesString, function(err) {
-					if(err) throw err;
-					findBugs();
-				});
+			EDITOR.localStorage.setItem("openedFiles", openedFilesString, function(err) {
+				if(err) throw err;
+				findBugs();
+			});
 			
 		});
 	}
@@ -822,7 +816,11 @@
 		
 		EDITOR.localStorage.getItem("openedFiles", function gotItemFromLocalStorage(err, openedFilesString) {
 			if(err) {
-				if(callback) return callback(err);
+				if(callback) {
+					callback(err);
+					callback = null;
+					return;
+				}
 				else throw err;
 			}
 			
@@ -839,36 +837,58 @@
 			
 			EDITOR.localStorage.setItem("openedFiles", openedFilesString, function(err) {
 				if(err) {
-					if(callback) return callback(err);
+					if(callback) {
+						callback(err);
+						callback = null;
+						return;
+					}
 					else throw err;
 				}
 				
 				// Remove state
 				EDITOR.localStorage.removeItem("state_" + filePath, function(err) {
 					if(err) {
-						if(callback) return callback(err);
+						if(callback) {
+							callback(err);
+							callback = null;
+							return;
+						}
 						else throw err;
 					}
-					findBugs(false, function(err) {
-						if(err) {
-							if(callback) return callback(err);
-							else throw err;
+
+					// Also remove from file list
+					var list = EDITOR.sortFileList(); // Array sorted by file.order
+					var key;
+					for(var i=0; i<list.length; i++) {
+						if(list[i].path == filePath) {
+							key = "__openFile" + i;
 						}
-						//console.log("reopenFiles: File removed from opened files: path=" + filePath);
-						if(callback) callback(null);
+					}
+
+					//console.log("key=" + key);
+
+					EDITOR.storage.removeItem(key, function(err) {
+						// ignore error. key dont need to exist (deleted manually)
+						if(err) console.error(err);
+						findBugs(false, function(err) {
+							if(err) {
+								if(callback) {
+									callback(err);
+									callback = null;
+									return;
+								}
+								else throw err;
+							}
+							//console.log("reopenFiles: File removed from opened files: path=" + filePath);
+							if(callback) callback(null);
+						});
+
 					});
+
 				});
 				
 				delete oldServerState[filePath];
 				delete changedstate[filePath];
-				
-				EDITOR.storage.removeItem("state_" + filePath, function(err) {
-					//alertBox("done: EDITOR.storage.removeItem: state_" + filePath + " err.message=" + (err && err.message) + " err.code=" + (err & err.code));
-					if(err) {
-						console.log("err.code=" + err.code);
-						console.error(err);
-					}
-				});
 				
 			});
 		});
@@ -922,7 +942,7 @@
 				if( EDITOR.storage.getItem(key) != filePath ) {
 					EDITOR.storage.setItem(key, filePath, true, function(err) {
 						// It's annoying that when we lose connection we get an error for each open file...
-// So swallow the error here
+						// So swallow the error here
 						if(err) console.error(err);
 					});
 				}
@@ -1081,9 +1101,9 @@
 				
 				if(stateChanged(oldServerState[path], serverState)) {
 					EDITOR.storage.setItem("state_" + path, JSON.stringify(state), function(err) {
-// Swallow this error because it's too annoying when you get spammed lots of these if we lose connection to the server'
-if(err) console.error(err);
-});
+						// Swallow this error because it's too annoying when you get spammed lots of these if we lose connection to the server'
+						if(err) console.error(err);
+					});
 					oldServerState[path] = serverState;
 				}
 			}

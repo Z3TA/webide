@@ -1,7 +1,4 @@
 
-When opening a image file you get an error, then the image file is saved in opened files, but you can't close it,
-resulting in an error every time you open the editor...
-
 When logging in on webide.se (for the second time)
 Error: Unable to get node version! Error: Server: API error: spawn /bin/dash ENOENT err.code=ENOENT (code=undefined)
 
@@ -46,6 +43,10 @@ What I'm working on
 highlightjs refuses to highlight javascript file because it starts with #!/bin/sh shebang
 
 testing dark theme
+
+dark theme insipiration:
+--base00:#232a2f;--base01:#444267;--base02:#32374d;--base03:#707a84;--base04:#8796b0;--base05:#939da5;--base06:#939da5;--base07:#fff;--base08:#ff6a80;--base09:#ffa763;--base0A:#ffea6b;--base0B:#5bec95;--base0C:#89ddff;--base0D:#82aaff;--base0E:#ba8ef7;--base0F:#ff8ad1;--base0G:#1a2023}
+
 
 
 Could not run "previewTool" on welcome.css.
