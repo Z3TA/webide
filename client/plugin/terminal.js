@@ -30,6 +30,7 @@ todo: Run vttest
 	var terminalActive = false;
 	var discoveryBarIcon;
 	var reNetnsIP;
+	var re127unixSocket = /http:\/\/127\.0\.0\.1:\/home\/(\w*)\/sock\/(\w*)\/?/;
 	var TLD = window.location.hostname;
 	var netnsIP;
 	var username;
@@ -484,6 +485,8 @@ EDITOR.unbindKey(startTerminalFromKeyboard);
 				}
 				}
 			*/
+
+			data = data.replace(re127unixSocket, "http://$2.$1." + TLD);
 		}
 		
 		
