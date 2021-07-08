@@ -1,7 +1,4 @@
 
-When logging in on webide.se (for the second time)
-Error: Unable to get node version! Error: Server: API error: spawn /bin/dash ENOENT err.code=ENOENT (code=undefined)
-
 Need an easier way for mere mortals to edit a website!
 Being able to edit a website like if it was a word document...
 idea: Structural editing of HTML, edit h1, p, etc using text input or textarea

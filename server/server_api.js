@@ -3477,18 +3477,42 @@ options.cwd = json.cwd;
 	
 	console.log("API.run: Running command=" + command + " ...");
 	console.log("API.run: env=" + JSON.stringify(options.env, null, 2));
-	exec(command, options, function (err, stdout, stderr) {
+
+	retry(0);
+
+	function retry(counter) {
+		var maxRetry = 1;
+
+		exec(command, options, function (err, stdout, stderr) {
 		
-		console.log("API.run: " + command + " => err=" + (err ? err.message : null) + " stdout=" + stdout + " stderr=" + stderr);
+			console.log("API.run: " + command + " => err=" + (err ? err.message : null) + " stdout=" + stdout + " stderr=" + stderr);
 		
-		if(err) {
-			console.log("API.run: err.code=" + err.code);
-			console.log("API.run: options=" + JSON.stringify(options, null, 2));
-			return callback(err);
-		}
-		else return callback(null, {stdout: stdout, stderr: stderr});
+			if(err) {
+				console.log("API.run: err.code=" + err.code);
+				console.log("API.run: options=" + JSON.stringify(options, null, 2));
+				
+				if(err.code == "ENOENT" && err.message.match("spawn (.*) ENOENT")) {
+					/*
+						bullshit error: spawn /bin/dash ENOENT
+						/bin/dash exist! And one minute earlier it worked fine...
+					*/
+				
+					if(typeof counter == "undefined") counter = 0;
+
+					if( counter > maxRetry ) return callback(err);
+
+					setTimeout(function() {
+						console.log("Retrying command=" + command);
+						retry(++counter);
+					}, 1000);
+
+				}
+
+			}
+			else return callback(null, {stdout: stdout, stderr: stderr});
 		
-	});
+		});
+	}
 }
 
 
@@ -3501,21 +3525,21 @@ options.cwd = json.cwd;
 	var commandToRun = json.command;
 	
 	var execOptions = {
-		encoding: 'utf8',
-		timeout: 2000,
-		maxBuffer: 200*1024,
-		killSignal: 'SIGTERM',
-		cwd: null,
-		env: null,
-shell: EXEC_OPTIONS.shell
+	encoding: 'utf8',
+	timeout: 2000,
+	maxBuffer: 200*1024,
+	killSignal: 'SIGTERM',
+	cwd: null,
+	env: null,
+	shell: EXEC_OPTIONS.shell
 	}
 	
 	exec(commandToRun, execOptions, function(err, stdout, stderr) {
-		var output = stdout + stderr;
+	var output = stdout + stderr;
 		
-		if(typeof output == "string") output = output.replace(/\r/g, "");
+	if(typeof output == "string") output = output.replace(/\r/g, "");
 		
-		shellCommandCallback(err, {output: output});
+	shellCommandCallback(err, {output: output});
 		
 	});
 	}
