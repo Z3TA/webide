@@ -1,8 +1,8 @@
-The command '/bin/sh -c curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -' returned a non-zero code: 127
 
-Running tests. new release/upgrade
+new release/upgrade
 
 Upgrade to and test node12... and then node14 while we are at it...
+can't reinstall spellchecker module in node12!
 
 When re-opening the editor in another browser:
 Uncaught Error: Terminal file not open: terminal1

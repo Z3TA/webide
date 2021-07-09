@@ -83,7 +83,7 @@ fi
 #ssh -t $SERVER /bin/bash << EOF
 #cd /srv/webide/
 #cp /tmp/GUEST_COUNTER server/GUEST_COUNTER
-#sudo nodejs update.js -headless
+#sudo node update.js -headless
 #
 #EOF
 
@@ -95,7 +95,7 @@ if [[ "$@" =~ "-noupdate" ]]
 then
   echo "Not updating webide configuration!"
 else
-  ssh -t $SERVER "cd /srv/webide/ && sudo nodejs update.js -headless"
+  ssh -t $SERVER "cd /srv/webide/ && sudo node update.js -headless"
 fi
 
 
