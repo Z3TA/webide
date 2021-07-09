@@ -72,7 +72,7 @@ sed -i -e 's/"toolbar": true/"toolbar": false/g' temp/release/linux/package.json
 
 # Build the documentation/guides
 mkdir temp/release/linux/documentation/
-nodejs temp/release/linux/server/plugin/static_site_generator/ssg-build.js temp/release/linux/guides/src/ temp/release/linux/documentation/ true
+node temp/release/linux/server/plugin/static_site_generator/ssg-build.js temp/release/linux/guides/src/ temp/release/linux/documentation/ true
 
 mkdir temp/release/linux/client/about/
 cp temp/release/linux/documentation/about.htm temp/release/linux/client/about/
@@ -82,7 +82,7 @@ cp temp/release/linux/documentation/about.htm temp/release/linux/client/about/
 # Generate bundle
 # Make sure the bundle is generated *after* any scripts has been modified!
 cd temp/release/linux/
-nodejs dev-scripts/makebundle.js
+node dev-scripts/makebundle.js
 gzip client/bundle.htm --best --keep
 cd ../../../
 
