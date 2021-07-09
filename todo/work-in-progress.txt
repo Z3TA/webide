@@ -1,4 +1,10 @@
+The command '/bin/sh -c curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -' returned a non-zero code: 127
+
 Running tests. new release/upgrade
+
+When re-opening the editor in another browser:
+Uncaught Error: Terminal file not open: terminal1
+(file is named terminal3)
 
 Need an easier way for mere mortals to edit a website!
 Being able to edit a website like if it was a word document...

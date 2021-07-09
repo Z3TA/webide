@@ -477,6 +477,9 @@ API.readLines = function readLines(user, json, callback) {
 		
 	*/
 	
+	var nodeMajorVersion = parseInt(process.version.match(/^v(\d+\.\d+)/)[1]);
+	if(nodeMajorVersion < 10) return callback(new Error("Streams is Node.js is buggy on versions prior to version 10. So please upgrade to Node.js version 10 or highter!"));
+
 	//console.log("readLines: json=" + JSON.stringify(json)); 
 	
 	if(json.path == undefined) return callback(new Error("No path property in options: " + JSON.stringify(json)));

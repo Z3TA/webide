@@ -1780,9 +1780,11 @@ file.writeLine("\n" + file.path + " session closed " + (new Date()) + "\n");
 						
 						setTimeout(function() {
 							EDITOR.closeAllDialogs("UNKNOWN_TERMINAL_ID");
-						}, 10000);
+							callback(true);
+
+						}, 8000); // There will be many (one for each shell command?) dialogs
 						
-						callback(true);
+						
 					}
 					
 				}, 1000);

@@ -131,18 +131,21 @@ if(err) throw err;
 							if(err) throw err
 							else {
 								// Don't disconnect right away because other tests might depend on the connection
-								callback(true);
-								
+								// which tests!?
+
 								// Cleanup
 								setTimeout(function disconnectFromSftp() {
 									CLIENT.cmd("disconnect", {protocol: protocol, serverAddress: serverAddress}, function(err, json) {
 										
 										setTimeout(function() {
-											EDITOR.closeAllDialogs("REMOTE_CONNECTION_CLOSE")
-										}, 10000);
+											EDITOR.closeAllDialogs("REMOTE_CONNECTION_CLOSE");
+
+											callback(true);
+
+										}, 1000);
 
 									});
-								}, 10000);
+								}, 1000);
 							}
 						});
 					});

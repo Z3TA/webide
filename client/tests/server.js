@@ -98,7 +98,7 @@
 		var moduleName = "iconv";
 		EDITOR.createPath(testFolder, function folderCreated(err, path) {
 			if(err) throw err;
-			CLIENT.cmd("install_nodejs_module", {name: moduleName, filePath: testFolder}, function(err, resp) {
+			CLIENT.cmd("install_nodejs_module", {name: moduleName, filePath: testFolder}, 120000, function(err, resp) {
 				if(err) throw err;
 				
 				if(resp.name != moduleName) throw new Error("Unexpected module name=" + resp.name);
@@ -107,10 +107,10 @@
 				CLIENT.cmd("deleteDirectory", {directory: testFolder, recursive: true}, function(err, json) {
 					if(err) throw err
 					
-// stdout file opens async, so wait to make sure it has opened
-setTimeout(function() {
+					// stdout file opens async, so wait to make sure it has opened
+					setTimeout(function() {
 						EDITOR.closeFile(UTIL.joinPaths(EDITOR.user.homeDir, "/testInstallNodejsModule/.stdout"));
-callback(true);
+						callback(true);
 					}, 200);
 					
 				});

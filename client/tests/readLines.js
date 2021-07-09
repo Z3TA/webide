@@ -82,7 +82,7 @@
 	});
 	
 	
-	EDITOR.addTest(function testReadLines5(callback) {
+	EDITOR.addTest(true, function testReadLines5(callback) {
 		var filePath = UTIL.joinPaths(EDITOR.user.homeDir, "/tmp/readLinesTest.txt");
 		
 		var tests = [
@@ -122,20 +122,20 @@
 		EDITOR.createPath(UTIL.joinPaths(EDITOR.user.homeDir, "/tmp/"), function(err, path) {
 			if(err) throw err;
 			
-		// Run the tests with different chunk sizes
-		run(tests, 1, function(err) {
-			if(err) throw err;
-			run(tests, 8, function(err) {
+			// Run the tests with different chunk sizes
+			run(tests, 1, function(err) {
 				if(err) throw err;
-				run(tests, 12, function(err) {
+				run(tests, 8, function(err) {
 					if(err) throw err;
-					run(tests, 1024, function(err) {
+					run(tests, 12, function(err) {
 						if(err) throw err;
-						callback(true);
+						run(tests, 1024, function(err) {
+							if(err) throw err;
+							callback(true);
+						});
 					});
 				});
 			});
-		});
 		});
 		
 		function run(originalTests, chunkSize, callback) {

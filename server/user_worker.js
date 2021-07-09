@@ -1869,12 +1869,14 @@ if(user.tld) {
 			
 			if(debugit) {
 				
+				stderr = stderr.trim(); // Some node.js versions add a LF while others dont!?
+
 				// Ignore debugger messages
-				if(stderr == "Debugger attached.\n") return; 
+				if(stderr == "Debugger attached.") return; 
 				if(stderr == "For help see https://nodejs.org/en/docs/inspector") return; // node 8
 				if(stderr == "For help, see: https://nodejs.org/en/docs/inspector") return; // node 14
 
-				if(stderr == "Waiting for the debugger to disconnect...\n") {
+				if(stderr == "Waiting for the debugger to disconnect...") {
 					if( user.runningNodeJsScripts[filePath].inspector ) user.runningNodeJsScripts[filePath].inspector.stop();
 					return;
 				}

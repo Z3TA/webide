@@ -10626,7 +10626,7 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 		
 		EDITOR.dashboard.hide(true);
 		
-		var maxParallel = 5; // Running too many tests at once will cause timeout issues
+		var maxParallel = 1; // Running too many tests at once will cause timeout issues
 		var abortOnError = false;
 		
 		if(onlyOne) testFirstTest = true;
@@ -10719,8 +10719,12 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 		}
 		
 		function testLoop() {
+
+				console.warn("testLoop!");
+
 			if(waitingForSync) {
 					//console.log("testInfo: Waiting for " + currentRunningTest + " ...");
+					setTimeout(testLoop, 1000);
 				return;
 			}
 			
@@ -10752,6 +10756,9 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 					console.log("testInfo: Not finished: " + stillRunning.join(", "));
 				
 			}
+
+				setTimeout(testLoop, 1000);
+
 		}
 		
 		function asyncInitTest(test) {
@@ -10787,9 +10794,6 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 				testFail(test.text, err.message + "\n" + err.stack);
 			}
 			
-			testLoop();
-			
-			
 			function testResult(result) {
 				currentlyInParallel--;
 				
@@ -10817,15 +10821,13 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 				
 				if(finished == testsToRun) allTestsDone();
 				
-				testLoop();
-				
+				}
 			}
-		}
 		
-		function allTestsDone() {
+			function allTestsDone() {
 			
-			if(allDone) {
-				console.warn("testInfo: allDone() already called!");
+				if(allDone) {
+					console.warn("testInfo: allDone() already called!");
 				return;
 			}
 			

@@ -92,6 +92,8 @@
 					UTIL.assert(file.rowText(2, false), "function () {");
 					UTIL.assert(file.caret.col, 9);
 
+					EDITOR.closeFile(file);
+
 					callback(true);
 
 				});
