@@ -27,9 +27,13 @@ ENV DOMAIN=${DOMAIN}
 ARG EMAIL=editor@webtigerteam.com
 ENV EMAIL=${EMAIL}
 
-RUN curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
 RUN apt-get update
-RUN apt-get install nodejs npm nano -y
+RUN apt-get install nano curl -y
+RUN apt-get install gcc g++ make -y
+
+RUN curl -fsSL https://deb.nodesource.com/setup_12.x | bash -
+RUN apt-get install -y nodejs
+
 
 ADD . /srv/webide/
 
