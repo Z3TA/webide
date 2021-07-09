@@ -2,6 +2,8 @@ The command '/bin/sh -c curl -sL https://deb.nodesource.com/setup_12.x | sudo -E
 
 Running tests. new release/upgrade
 
+Upgrade to and test node12... and then node14 while we are at it...
+
 When re-opening the editor in another browser:
 Uncaught Error: Terminal file not open: terminal1
 (file is named terminal3)

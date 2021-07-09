@@ -10626,7 +10626,7 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 		
 		EDITOR.dashboard.hide(true);
 		
-		var maxParallel = 1; // Running too many tests at once will cause timeout issues
+		var maxParallel = 5; // Running too many tests at once will cause timeout issues
 		var abortOnError = false;
 		
 		if(onlyOne) testFirstTest = true;

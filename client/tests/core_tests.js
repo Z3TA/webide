@@ -2151,12 +2151,13 @@
 										CLIENT.cmd("deleteFile", {filePath: testFile}, function(err) {
 											if(err) throw err;
 											
-											callback(true);
-											
 											setTimeout(function() {
 												var dialogCodes = EDITOR.openDialogs.map(function(dialog) { return dialog.code });
 												if(dialogCodes.indexOf("BIG_FILE") != -1) EDITOR.closeAllDialogs("BIG_FILE");
-											}, 1000);
+											
+												callback(true);
+
+											}, 3000);
 											
 										});
 									}
