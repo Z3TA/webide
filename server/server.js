@@ -4789,6 +4789,9 @@ setTimeout(function() {
 						else if(stderr.indexOf("Already up to date") != -1) {
 							log("github2s: " + stderr);
 						}
+						else if(stderr.indexOf("Checking out files:") != -1) {
+							log("github2s: " + stderr);
+						}
 						else if(stderr) {
 
 							log("github2s: Unknown error: " + stderr);
