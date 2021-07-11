@@ -99,7 +99,7 @@
 			if(path) return gotRepoHopefully();
 
 			// user might have configured ssh key, so try cloning, and only ask for credentials if cloning fails
-			var sshRepo = "git@github.com:" + dirs.join("/") + ".git";
+			var sshRepo = repo.replace("https://github.com/", "git@github.com:");
 
 			console.log("github2s: Attempting to clone sshRepo=" + sshRepo + " ...");
 
@@ -123,6 +123,16 @@
 				});
 			});
 		});
+
+		function isSHA1hash(str) {
+			if(str.length != 40) return false;
+
+			var reHex = /[a-f][0-9]+/;
+
+			if( str.match(reHex) == null) return false;
+
+			return true;
+		}
 
 		function gotRepoHopefully() {
 			if(_commitId && _commitId != "HEAD") {

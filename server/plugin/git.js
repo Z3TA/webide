@@ -53,18 +53,33 @@ GIT.checkout = function gitCheckout(user, json, callback) {
 	var directory = UTIL.trailingSlash(json.directory);
 	if(directory == undefined) directory = user.workingDirectory;
 
-	var branchCommitOrPath = [json.name];
+	var branchCommitOrPath = json.name || json.branch || json.rev || json.commit;
+	if(branchCommitOrPath == undefined) return callback(new Error("Need to specify branch/name or commit/rev to checkout! Request: " + JSON.stringify(json)));
 
-	execFile(GIT_PATH, ["checkout"].concat(branchCommitOrPath), { cwd: directory, env: execFileOptions.env }, function (err, stdout, stderr) {
+	var argv = ["checkout"].concat([branchCommitOrPath]);
+	var options = { cwd: directory, env: execFileOptions.env };
+
+	console.log("GIT_PATH=" + GIT_PATH + " argv=" + JSON.stringify(argv) + " branchCommitOrPath=" + branchCommitOrPath + " options=" + JSON.stringify(options));
+
+	execFile(GIT_PATH, argv, options, function (err, stdout, stderr) {
+		
+		console.log("argv=" + JSON.stringify(argv) + " err?" + (err && err.message) + " stderr=" + stderr + " stdout=" + stdout);
+
 		if(err) callback(err);
-		else if(stderr) callback(stderr);
+		else if(stderr) {
+
+			if(stderr.indexOf("HEAD is now at") != -1) {
+				// So the checkout was successful, but the msg was in stderr... why!?
+				return callback(null, {msg: stdout});
+			}
+
+			callback(new Error(stderr));
+		}
 		else {
 
 			// git diff --name-status HEAD@{1} HEAD
 
-
-
-			if(stdout != "") callback(stdout);
+			if(stdout != "") callback(null, {msg: stdout});
 			else callback(null, {});
 
 		}

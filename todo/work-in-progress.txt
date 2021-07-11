@@ -1,5 +1,4 @@
 
-new release/upgrade
 
 Upgrade to and test node12... and then node14 while we are at it...
 can't reinstall spellchecker module in node12!

@@ -4659,13 +4659,24 @@ setTimeout(function() {
 	
 }
 
-function cloneGitRepo(dirs, IP) {
+	function isSHA1hash(str) {
+		if(str.length != 40) return false;
+
+		var reHex = /[a-f][0-9]+/;
+
+		if( str.match(reHex) == null) return false;
+
+		return true;
+	}
+
+	function cloneGitRepo(dirs, IP) {
 
 	/*
 		git clone --single-branch --branch <branchname> <remote-repo>
 
 		Examples: 
-			Z3TA/dbo/blob/gh-pages/design1/style.css
+			https://github.com/Z3TA/dbo/blob/gh-pages/design1/style.css
+			https://github.com/Z3TA/dbo/blob/1c4135ccc10131343117a465385c67a1a5a00d50/dbo.js
 			https://github.com/Z3TA/dbo
 			https://github.com/Z3TA/dbo/tree/gh-pages
 			https://github.com/redhat-developer/vscode-java/wiki/JDK-Requirements
@@ -4745,7 +4756,7 @@ function cloneGitRepo(dirs, IP) {
 
 				var gitArg = ["clone"];
 
-				if(branch) {
+				if(branch && !isSHA1hash(branch)) {
 					gitArg = gitArg.concat( ["--single-branch", "--branch", branch] );
 				}
 
