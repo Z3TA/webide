@@ -3367,7 +3367,7 @@ abortFindFilesCallback(null, {foldersBeingSearched: FIND_FILES_IN_FLIGHT});
 
 API.abortFindInFiles = function abortFindInFiles(user, json, callback) {
 	FIND_IN_FILES_ABORTED = true;
-	callback(null);
+	callback(null, {});
 }
 
 API.startProcess = function startProcess(user, json, callback) {
