@@ -49,7 +49,7 @@ todo: Run vttest
 		desc: "Terminal emulator",
 		load: function loadTerminal() {
 			
-			EDITOR.bindKey({desc: S("terminal_emulator"), key: "t", combo: ALT, fun: startTerminalFromKeyboard});
+			EDITOR.bindKey({desc: S("terminal_emulator_description"), key: "t", combo: ALT, fun: startTerminalFromKeyboard});
 			
 			menuItem = EDITOR.ctxMenu.add(S("terminal_emulator"), startTerminalFromMenu, 16);
 			
@@ -73,7 +73,7 @@ todo: Run vttest
 			EDITOR.registerAltKey({char: "=", alt:2, label: "Alt", fun: altKey});
 			EDITOR.registerAltKey({char: "t", alt:1, label: "term", fun: startTerminalFromMenu});
 			
-			discoveryBarIcon = EDITOR.discoveryBar.addIcon("gfx/board.svg", 60,  S("terminal_emulator") + " (" + EDITOR.getKeyFor(startTerminalFromKeyboard) + ")", "term", startTerminalFromMenu);
+			discoveryBarIcon = EDITOR.discoveryBar.addIcon("gfx/board.svg", 60,  S("terminal_emulator_description") + " (" + EDITOR.getKeyFor(startTerminalFromKeyboard) + ")", "cmd", startTerminalFromMenu);
 			// Icon created by: https://www.flaticon.com/authors/phatplus
 			
 			// Wait for last terminal sessions to be reopened...

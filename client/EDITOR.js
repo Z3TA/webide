@@ -8619,6 +8619,12 @@ var loaded = !!theWindow.location.href;
 
 			var message = "Could not run \"" + eventListenerName + "\" on " + fileName + ". None of the " + f.length + " plugins listening for " + eventListenerName + " could handle the request!";
 
+			if( eventListenerName == "previewTool" && EDITOR.currentFile && EDITOR.currentFile.path.match(/^terminal\d*/) ) {
+				return alertBox("No " + eventListenerName + " found for " + EDITOR.currentFile.path + "... <ol><li>Place the cursor right side of the $ (bash command prompt).</li><li>Type the command (example: ping google.com)</li><li>then press Enter to run the command.</li></ol> Use Alt instead of Ctrl for control sequences. eg. Alt+c instead of Ctrl+c to stop the command");
+			}
+			
+			if( eventListenerName == "previewTool" ) message = message + "\n(you could try running via cmd/terminal: Alt+t)";
+
 			promptBox(message + "\nWhat would you like the editor to do?", {
 				placeholder: "I was expecting that running " + eventListenerName + " on " + fileName + " the editor should..."
 			}, function(answer) {
