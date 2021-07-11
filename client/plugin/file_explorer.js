@@ -334,6 +334,8 @@
 			if(folders.length == 0) folders = [EDITOR.user.homeDir];
 		}
 		
+		if(folders.length == 0) throw new Error("No folders in fullPath=" + fullPath);
+
 		//console.log("File explorer: fullPath=" + fullPath + " homeFolderCount=" + homeFolderCount + " folders=" + JSON.stringify(folders));
 		
 		// Recursive 
@@ -341,6 +343,9 @@
 		
 		function lookUpPath(folders, index, parent) {
 			var dir = folders[index];
+
+			if(dir == undefined) throw new Error("lookUpPath: folders=" + JSON.stringify(folders) + " index=" + index + " parent=" + parent);
+
 			//console.log("File explorer: Looking up path dir=" + dir);
 			var findDir = index < (folders.length-1) ? folders[index+1] : null;
 			

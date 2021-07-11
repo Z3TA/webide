@@ -1,4 +1,9 @@
 
+Test github2s with private repos...
+
+Buffer() is deprecated due to security and usability issues... Find deps tha tuse Buffer() and see if there are updates...
+
+test android emulator (make an automatic test!?)
 
 Upgrade to and test node12... and then node14 while we are at it...
 can't reinstall spellchecker module in node12!
