@@ -28,11 +28,14 @@ iptables -A INPUT -s 49.12.130.173 -j DROP
 iptables -A INPUT -s 168.119.38.182 -j DROP
 iptables -A FORWARD -d 49.12.130.173 -j DROP
 iptables -A FORWARD -d 168.119.38.182 -j DROP
+# randomxmonero.usa-west.nicehash.com
+ip6tables -A FORWARD -d 2606:4700:90:0:b61f:a5b7:e5e2:4342 -j DROP
+ip6tables -A INPUT -s 2606:4700:90:0:b61f:a5b7:e5e2:4342 -j DROP
+ip6tables -A OUTPUT -d 2606:4700:90:0:b61f:a5b7:e5e2:4342 -j REJECT
+iptables -A FORWARD -d 172.65.247.93 -j DROP
+iptables -A INPUT -s 172.65.247.93 -j DROP
+iptables -A OUTPUT -d 172.65.247.93 -j REJECT
 
-
-
-
-# iptables -I FORWARD 1 -d 51.79.220.193 -j DROP
 
 
 # Prevent sending spam
