@@ -657,7 +657,8 @@ reconnectTimeoutTime += 10000;
 	function sendPing() {
 		var start = timer();
 		//console.log("CLIENT: ping! send: sendingPings=" + sendingPings + " start=" + start);
-		CLIENT.cmd("ping", {data: ++pingCounter}, function(pingErr, resp) {
+		var send = ++pingCounter;
+		CLIENT.cmd("ping", {data: send}, function(pingErr, resp) {
 			
 			clearTimeout(pingTimeout);
 			
@@ -677,7 +678,7 @@ reconnectTimeoutTime += 10000;
 				
 				//console.log("CLIENT: ping! Response: resp=" + resp + " ping=" + CLIENT.ping);
 				
-				if(resp != pingCounter) var error = new Error("resp=" + JSON.stringify(resp) + " pingCounter=" + pingCounter + "");
+				if(resp != send) var error = new Error("Sent ping " + send + " but got pong resp=" + JSON.stringify(resp) + " pingCounter=" + pingCounter + "");
 				
 				// Don't throw before we have set the next timeout!
 			}

@@ -1,4 +1,16 @@
 
+mining programs: 
+xlarig
+nheqminer
+
+mining pools:
+na.luckpool.net
+monero.herominers.com
+
+
+
+
+
 Test github2s with private repos...
 
 Buffer() is deprecated due to security and usability issues... Find deps tha tuse Buffer() and see if there are updates...
