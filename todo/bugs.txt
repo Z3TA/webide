@@ -41,6 +41,140 @@ BUGS (and issues)
 
 ---
 
+Stacktrace:
+Error: gridRow=undefined row=6
+at columnMinusIndention (https://webide.se/:79:3336)
+at Array.nodejsDebugMsg (https://webide.se/:79:3513)
+at Object.fireEvent (https://webide.se/:9:6529)
+at v.serverMessage [as onmessage] (https://webide.se/:9:2002)
+at v.E.dispatchEvent (https://webide.se/:8:3543)
+at v._dispatchMessage (https://webide.se/:8:16458)
+at v._didMessage (https://webide.se/:8:17339)
+at WebSocket.n.ws.onmessage (https://webide.se/:8:19267)
+
+Current file: /home/coder1403/nodejs/main.js
+Browser: Mozilla/5.0 (X11; CrOS x86_64 13505.73.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.109 Safari/537.36 (Chrome)
+Version: 6182
+Dist: repo
+Last server msg: {
+"nodejsDebug": {
+"console": {
+"type": "log",
+"msg": "\"hello\"",
+"stack": {
+"callFrames": [
+{
+"functionName": "",
+"scriptId": "70",
+"url": "file:///home/coder1403/nodejs/main.js",
+"lineNumber": 6,
+"columnNumber": 8
+},
+{
+"functionName": "Module._compile",
+"scriptId": "65",
+"url": "internal/modules/cjs/loader.js",
+"lineNumber": 774,
+... (2078 characters)
+
+
+
+---
+
+line numbers are off!! (in high res screen, fractal scaling) 
+
+---
+
+false positive red circle warning when "if" if inside string!
+
+var error = new Error("Unable to check if folder=" + folderName + " exist in pathToParentFolder=" + pathToParentFolder + "\n" + err.message);
+
+
+---
+
+annoying: Unable to scroll up/down in textarea using mouse scrollwheel (when leaving feedback)
+
+---
+
+Stacktrace:
+Error: First argument to makeFolderPicker (inputPath=undefined) needs to be a input element!
+at makeFolderPicker (https://webide.se/:23:83)
+at renameFile (https://webide.se/:144:514)
+at Object.renameFileViaCtxMenu [as callback] (https://webide.se/:144:309)
+at ctxItemClickAction (https://webide.se/:20:71165)
+at HTMLLIElement.mouseupOnCtxItem (https://webide.se/:20:70609)
+
+Current file: new file
+
+---
+
+following JSX should not deindent:
+return <div><h1>Test</h1><List data={testData} /></div>
+
+---
+
+JSX parsing/indentation:
+
+<TextInput name="livingArea">
+<span>Foo km<sup>2</sup>)</span>
+</TextInput>
+
+---
+
+JSX parsing/indentation:
+
+return (
+<div className="App">
+{error && <p>{error}</p>}
+{file && <p>{progress}% uploaded</p>}
+{url && <img src={url}></img>}
+</div>
+);
+
+---
+
+Stacktrace:
+Error: Failed to execute 'drawImage' on 'CanvasRenderingContext2D': The image argument is a canvas element with a width or height of 0.
+at Array.paintLineNumbers (https://webide.se/:33:1309)
+at Object.EDITOR.renderRow (https://webide.se/:20:37177)
+at keyPressed (https://webide.se/:20:159762)
+
+Current file: /tmp/collaboration_instructions.txt
+Browser: Mozilla/5.0 (X11; CrOS x86_64 13421.102.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.199 Safari/537.36 (Chrome)
+Version: 6285
+Dist: repo
+Last server msg: {
+"resp": {
+"saved": "state_/tmp/collaboration_instructions.txt"
+},
+"id": 145
+}
+
+Stacktrace:
+Error: Failed to execute 'drawImage' on 'CanvasRenderingContext2D': The image argument is a canvas element with a width or height of 0.
+at Array.paintLineNumbers (https://webide.se/:33:1309)
+at Object.EDITOR.renderRow (https://webide.se/:20:37177)
+at keyPressed (https://webide.se/:20:159762)
+at Object.mockSomeUserInput [as mock] (https://webide.se/:20:107907)
+at fireKey (https://webide.se/:95:15791)
+at Object.normalButton [as fun] (https://webide.se/:95:15365)
+at clickButton (https://webide.se/:95:14914)
+at HTMLCanvasElement.canvasMouseUp [as ontouchend] (https://webide.se/:95:9260)
+
+Current file: bugreport.txt
+Browser: Mozilla/5.0 (X11; CrOS x86_64 13421.102.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.199 Safari/537.36 (Chrome)
+Version: 6285
+Dist: repo
+Last server msg: {
+"resp": {
+"saved": "state_/tmp/collaboration_instructions.txt"
+},
+"id": 146
+}
+
+
+---
+
 Error: File change events are out of order, we have missed 2 events!
 
 Stacktrace:

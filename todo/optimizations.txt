@@ -4,6 +4,14 @@ This file contains a list of things that should be optimized...
 Optimization
 ============
 
+
+
+---
+
+slow typing feedback in terminal
+
+---
+
 Optimization ? Don't show/render all files when the editor starts! (only the file that should be open)
 
 Optemize for large files,

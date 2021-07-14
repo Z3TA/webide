@@ -3,6 +3,60 @@
 
 ---
 
+php files should be loaded as plain text files!!!
+
+When saving a new file as .php it doesn't seem to be plain text!?
+when pasting content containing indentation into it, the indentation is removed!
+
+---
+
+When saving a new file as .php it was not highlighted by highlightjs !
+
+---
+
+Stacktrace:
+Error: remove='new file' not in array=[]
+at removeFromStringList (https://webide.se/:68:8831)
+at gotItemFromLocalStorage (https://webide.se/:68:9441)
+at Object.localStorageGetItem [as getItem] (https://webide.se/:20:8968)
+at Array.removeFromOpenedFiles (https://webide.se/:68:9283)
+at Object.EDITOR.closeFile (https://webide.se/:20:21926)
+at confirmClose (https://webide.se/:46:7160)
+at HTMLButtonElement.<anonymous> (https://webide.se/:17:4160)
+
+Current file: new file
+
+---
+
+fix issues: https://github.com/styfle/awesome-online-ide/issues/83#issuecomment-792371852
+
+when there is no preview tool, ask the user what he/she expects to happen! "what would you like the editor to do?"
+
+save the file before running it: Which file? Explain how to save it!
+unable to login as guest, user no longer exist ... detect the error and say that the guest account has expired and that you need to create a new (guest) account.
+
+Hide window menus when opening context menu and vice versa
+
+--
+
+smile faces for feedback, happy face is smaller then sad face
+
+in leave feedback menu, don't use faces, use thumbs up or down instead !? 
+
+Feedback icon should spell out the options (not just show smilie icons)
+Leave feedback, make a suggestion, report a problem, report wrong behavior
+
+---
+
+Communicate to users that it's possible to use the webide/app on iOS and Android devices!!
+iOS/Android users might acctually be the right user grup as if you are on a PC you will likely want to run the IDE on that computer - not in the cloud. Note: With Webide you can connect to the editor runnon on your laptop/PC from your phone!
+
+---
+
+test fork-site feature. Does it use UTIL.getFolders!? try https protocol...
+
+---
+
 Unable to find body ...
 
 https://webide.se/?github=aysha2502%2FResponsive-Sidenav-%2Fblob%2FHEAD%2FSidenav.html:82:8350

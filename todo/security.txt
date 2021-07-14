@@ -4,6 +4,11 @@ This file contains a list of things about security that needs attention...
 Security
 ========
 
+Force users to use a password (not the default admin/admin) (and remove all documentation about the default being admin/admin) or better don't use any default user/pw!
+as there are tools that shares localhost/127.1 to the internet... security in depth!
+
+---
+
 Encrypt/decrypt .jzeditStorage using the login password !?
 Hold the content in memory, encrypt on write.
 

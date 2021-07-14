@@ -38,6 +38,75 @@ Feature list (Not ordered/prioritized)
 
 
 
+https://eloquentjavascript.net/05_higher_order.html
+You get a sandbox/editor when you click on the code. Would be nice for Node.js tutorials to integrate the editor/IDE
+
+---
+
+idea: Look for errors in terminal, eg php/Wordpress errors and highlight them in the editor!
+example, when running docker-compose logs -f in the terminal
+
+---
+
+Able to switch between different project so you can get back to the same state of opened files/tabs etc? 
+
+---
+
+when auto-completing JSON.stringify( and there seem to be a variable , capsulate the variable eg console.log(JSON.strfoo) => console.log(JSON.stringify(foo)) and select the last parentesis or highlight it 
+
+---
+
+check on regular intervals if a file/files has been deleted or changed !? 
+
+---
+
+firebase
+.auth()
+.currentUser
+.getIdToken(/* forceRefresh */ true)
+.then(function(idToken) {
+return axios
+.post('/listUsers', { token: idToken })
+.then(resp => {
+console.log(resp);
+const { data: users } = resp;
+
+setUsers(users);
+setLoading(false);
+});
+})
+.catch((err) => {
+console.log(err);
+setLoading(false);
+});
+};
+
+---
+
+auto indent parentheses!
+
+(
+	(
+		
+	)
+)
+	
+
+---
+
+when pasting inside empty string in .json file, auto insert : "[move caret here]" or , [and place caret at eol]
+
+---
+
+try to JSON.parse() .json files after saving and highlight any parsing error!
+
+---
+
+when in ssg preview mode: Auto try .htm and .html if links doesn't contain file file extension like in a href="/foo/" 
+
+---
+
+feature request: Button which auto-removes all unused CSS rules 
 
 ---
 

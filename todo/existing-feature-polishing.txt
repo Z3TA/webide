@@ -8,6 +8,131 @@ Polishing (only existing features)
 
 ---
 
+annoying when Docker does not have read writes to a file ... use same chmod as the directory when creating new files!! (editor default seems to be to not give read perm) 
+
+---
+
+Unable to use the editor itself when writing git commit messages...
+
+$ git commit hint: Waiting for your editor to close the file... Connection error: connect ECONNREFUSED 8103.johan.webide.se
+Edit /home/johan//.webide/webider.json or try connecting to another host using -host and -port flags
+error: There was a problem with the editor 'webide'.
+Please supply the message using either -m or -F option.
+
+---
+
+for example when logging in to firebase...
+Teach users they can access local ports via https://9005.johan.webide.se/?state=
+
+Have a listener for new sockets on local IP !? Tell user how to access it...
+
+---
+
+plain text mode, when moving up/down and there is a line with only white space or empty, go to the same position as the caret was on prior line 
+
+
+---
+
+up/down arrows not working in terminal when using git diff / less !? (might be fixed)
+
+åäö not working in terminal !?
+
+---
+
+terminal:
+
+when trying to write git commit -m " another quote is inserted by the editor, (but not actually sent to the pty!?) 
+
+---
+
+autocomplete of function mame should place caret before parenthesis!??
+
+
+function autocomplete should place caret before parentheses (not inside)
+
+---
+
+when autocompleting a function name, and when inside (parenteses) dont add foo(bar()) parentheses to function, because we are most likely passing it first class 
+
+---
+
+autocomplete variables used in import eg. '
+import React, { useEffect, useState } from "react";
+
+---
+
+SSG, dont insert meta author if none present
+
+---
+
+selecting using shift+ctrl: should stop at <> html tags (at least i html files)!?
+
+When using Ctrl+arrow to step words, stop at camel|Case !
+
+when selecting/stepping using ctrl stop at " double quote so you can select words withing a JS string 
+
+---
+
+JSX parsing:
+
+variable can be a react component:
+function App() {
+return (
+<Suspense fallback={<Loader />}>
+<Page />
+</Suspense>
+);
+}
+
+---
+
+ask server if it's possible to create "guest" accounts! remove "login as guest" button if not possible 
+
+---
+
+Breaking up an img element tag screws up the indentation!
+<div>
+<img
+src="foo">
+</div>
+
+---
+
+TL;DR. Don't use keypress, it's deprecated. Don't use 'keyCode', 'which', 'char' which are all deprecated. Do use 'key'
+
+Another issue I run into is forms that dismiss via keydown and escape. I type in Japanese which means I'm using an IME. An IME, or at least the Japanese IME, you type characters and they appear with possible completions. They haven't actually been given to the app yet. Pressing Escape cancels the completions. But webpages that cancel some model form dialog via escape means that if I press ESC to cancel IME completion (which is common) I also cancel the dialog and lose all input had previously entered into the form.
+
+I'd think this would been solved at the browser level, if the IME is active then don't pass keys to the app but for probably valid reasons that's not what happens.
+
+TL;DR don't use escape to cancel a model form!
+
+edit: apparently there's the 'isComposting' property on the KeyboardEvent to find out if the user is currently using the IME
+
+https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEve...
+
+---
+
+wyswygEditor: would also be nice if I could share an URL and have the page automatically reload on another device when I save 
+
+---
+
+wyswygEditor: would be nice if I where still in preview after navigating to another page .... 
+(if you click on a link, you will navigate away and the editor wont refresh the page when you make changes in the source file)
+
+---
+
+wyswygEditor optimization: replacing the whole css is very laggy if it's large... can we replace only the diff !? 
+
+---
+
+in wysiwyg/preview - refresh when editing footer.htm or header.htm !!
+
+---
+
+When replacing text, you sometimes forget the "replace with", but sometmes you want to replace with empty string... show a warning triangle or something when "replace with" is empty!?
+
+---
+
 Could not run "previewTool" on BaseUrlConfiguration.cs
 
 ---
