@@ -41,7 +41,7 @@
 		if(file.fileExtension.toLowerCase().indexOf("css") != -1) {
 			
 			if(isCssFile) {
-				console.log("checkIfCss: isCssFile=" + isCssFile + " Event listeners already attached!? file.path=" + file.path);
+				//console.log("checkIfCss: isCssFile=" + isCssFile + " Event listeners already attached!? file.path=" + file.path);
 				return;
 			}
 
@@ -50,7 +50,7 @@
 			EDITOR.addPreRender(checkCssRules);
 			EDITOR.on("keyPressed", pxToRem);
 
-			console.log("css: checkIfCss: Found a CSS file! file.path=" + file.path);
+			//console.log("css: checkIfCss: Found a CSS file! file.path=" + file.path);
 
 		}
 		else {
@@ -60,13 +60,13 @@
 			EDITOR.removePreRender(checkCssRules);
 			EDITOR.removeEvent("keyPressed", pxToRem);
 
-			console.log("css: checkIfCss: Not a CSS file! file.path=" + file.path);
+			//console.log("css: checkIfCss: Not a CSS file! file.path=" + file.path);
 		}
 	}
 
 	function pxToRem(file, character) {
 
-		console.log("css: pxToRem: character=" + character);
+		//console.log("css: pxToRem: character=" + character);
 
 		if(character != "m") return true;
 		if(file.caret.col == 0) return true;
@@ -92,7 +92,7 @@
 		var rootElementTextSize = 16;
 		var rem = Math.round( nr/rootElementTextSize * 1000 ) / 1000 ;
 
-		console.log("css: pxToRem: goback=" + goback + " nrStr=" + nrStr + " nr=" + nr + " rem=" + rem);
+		//console.log("css: pxToRem: goback=" + goback + " nrStr=" + nrStr + " nr=" + nr + " rem=" + rem);
 
 		// Remove p or px
 		for(var i=0; i<goback-1; i++) {
