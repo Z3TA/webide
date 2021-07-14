@@ -2232,7 +2232,7 @@ callback(error);
 			file = EDITOR.currentFile;
 		}
 		
-		if(! file instanceof File) throw new Error("file should be a File object: filke=" + file);
+		if(! file instanceof File) throw new Error("file should be a File object: file=" + file);
 		
 		if(file == undefined) throw new Error("How can file be " + file + " ???");
 		
@@ -11672,7 +11672,7 @@ function paste(pasteEvent) {
 			
 				ret = f[i](EDITOR.currentFile, text, pasteEvent);
 			
-			//if(EDITOR.settings.devMode) console.log("Paste listener: " + UTIL.getFunctionName(f[i]) + " returned: (" + (typeof ret) + ") \n" + ret);
+			//console.log("Paste listener: " + UTIL.getFunctionName(f[i]) + " returned: (" + (typeof ret) + ") \n" + ret);
 			
 			if(typeof ret == "string") {
 				if(textChanged) {
@@ -11693,8 +11693,11 @@ function paste(pasteEvent) {
 		if(EDITOR.currentFile && EDITOR.currentFile instanceof File) {
 			var file = EDITOR.currentFile;
 			
+				//console.log("text: " + text);
+
 			text = EDITOR.sanitizeText(file, text);
 			
+				//console.log("after sanitizeText: text: " + text);
 				
 				/*
 					// Make sure the copied text has the wanted line-break convention before inserting it
