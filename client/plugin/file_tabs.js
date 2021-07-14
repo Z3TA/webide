@@ -295,9 +295,7 @@ function switchTabInStandaloneMode() {
 		
 		// What will happen when the file is saved:
 		el.style.fontWeight = "normal";
-		
-		var fileSize = EDITOR.files[file.path] && EDITOR.files[file.path].getFileSize(true);
-		el.setAttribute("title", file.path + " (" + fileSize + ")");
+		el.setAttribute("title", file.path + " (" + file.getFileSize(true) + ")");
 		
 		var closeFileButton = document.getElementById("close_" + file.path);
 		
