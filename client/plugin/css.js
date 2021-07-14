@@ -40,12 +40,17 @@
 		// Also include .scss (Sass)
 		if(file.fileExtension.toLowerCase().indexOf("css") != -1) {
 			
-			if(isCssFile) return;
+			if(isCssFile) {
+				console.log("checkIfCss: isCssFile=" + isCssFile + " Event listeners already attached!? file.path=" + file.path);
+				return;
+			}
 
 			isCssFile = true;
 
 			EDITOR.addPreRender(checkCssRules);
 			EDITOR.on("keyPressed", pxToRem);
+
+			console.log("css: checkIfCss: Found a CSS file! file.path=" + file.path);
 
 		}
 		else {
@@ -54,43 +59,54 @@
 
 			EDITOR.removePreRender(checkCssRules);
 			EDITOR.removeEvent("keyPressed", pxToRem);
+
+			console.log("css: checkIfCss: Not a CSS file! file.path=" + file.path);
 		}
 	}
 
 	function pxToRem(file, character) {
 
-		var rootElementTextSize = 16;
+		console.log("css: pxToRem: character=" + character);
 
-		if(character == "m" && file.caret.col > 0) {
-			if(file.grid[file.caret.row][file.caret.col-1].char == "p") {
-				var nrStr = "";
-				var reNr = /\d|\.|\,/;
-				for(var i=file.caret.col-2, char=""; i>0; i--) {
-					char = file.grid[file.caret.row][i].char;
-					if(char.match(reNr)) {
-						nrStr = char + nrStr;
-					}
-					else break;
-				}
-				if(nrStr.length > 0) {
-					var nr = parseFloat(nrStr);
-					var rem = Math.round( nr/rootElementTextSize * 1000 ) / 1000 ;
+		if(character != "m") return true;
+		if(file.caret.col == 0) return true;
 
-					// Remove p
-					file.moveCaretLeft();
-					file.deleteCharacter();
+		var leftChar = file.grid[file.caret.row][file.caret.col-1].char;
+		if(leftChar == "p") var goback = 2;
+		else if(leftChar == "x") var goback = 3;
+		else return true;
 
-					for(var i=0; i<nrStr.length; i++) {
-						file.moveCaretLeft();
-						file.deleteCharacter();
-					}
-					file.insertText(rem + "rem");
-					return false;
-				}
+		var nrStr = "";
+		var reNr = /\d|\.|\,/;
+		for(var i=file.caret.col-goback, char=""; i>0; i--) {
+			char = file.grid[file.caret.row][i].char;
+			if(char.match(reNr)) {
+				nrStr = char + nrStr;
 			}
+			else break;
 		}
 
-		return true;
+		if(nrStr.length == 0) return true;
+
+		var nr = parseFloat(nrStr);
+		var rootElementTextSize = 16;
+		var rem = Math.round( nr/rootElementTextSize * 1000 ) / 1000 ;
+
+		console.log("css: pxToRem: goback=" + goback + " nrStr=" + nrStr + " nr=" + nr + " rem=" + rem);
+
+		// Remove p or px
+		for(var i=0; i<goback-1; i++) {
+			file.moveCaretLeft();
+			file.deleteCharacter();
+		}
+
+		for(var i=0; i<nrStr.length; i++) {
+			file.moveCaretLeft();
+			file.deleteCharacter();
+		}
+		file.insertText(rem + "rem");
+
+		return false;
 	}
 
 
@@ -544,6 +560,41 @@
 			var buffer = checkCssRules(file.grid, file, startRow, maxColumns);
 
 			if(buffer[2][0].wave !== true) throw new Error("Expected line 3 to have invalid CSS!\n" + JSON.stringify(buffer, null, 2));
+
+			EDITOR.closeFile(file);
+			callback(true);
+		});
+	});
+
+	EDITOR.addTest(function testConvertPxToRem1(callback) {
+		EDITOR.openFile("testConvertPxToRem1.css", 'div {\nwidth: 100;\n}\n', function (err, file) {
+			if(err) throw err;
+
+			file.moveCaretToIndex(16);
+
+			EDITOR.mock("keypress", {charCode: 112}) // p
+			EDITOR.mock("keypress", {charCode: 109}) // m
+
+			var word = file.wordAtCaret(file.caret, " ;");
+
+			if(word.word != "6.25rem") throw new Error("pm did not convert px to rem! word=" + JSON.stringify(word));
+
+			EDITOR.closeFile(file);
+			callback(true);
+		});
+	});
+
+	EDITOR.addTest(function testConvertPxToRem2(callback) {
+		EDITOR.openFile("testConvertPxToRem2.css", 'div {\nwidth: 100px;\n}\n', function (err, file) {
+			if(err) throw err;
+
+			file.moveCaretToIndex(18);
+
+			EDITOR.mock("keypress", {charCode: 109}) // m
+
+			var word = file.wordAtCaret(file.caret, " ;");
+
+			if(word.word != "6.25rem") throw new Error("pxm did not convert px to rem! word=" + JSON.stringify(word));
 
 			EDITOR.closeFile(file);
 			callback(true);
