@@ -1675,7 +1675,7 @@ else if(protocol == "sftp:") {
 			//console.log("Attempting saving to local file system: " + path + " ...");
 			
 			if(err) {
-				console.warn("Unable to save " + path + "!");
+				console.warn("Unable to save " + path + "! Error: " + (err.message || err ) + " code=" + err.code);
 				
 				if(err.code == "EISDIR") saveToDiskCallback(new Error("Make sure " + path + " is not a directory! " + err.message));
 				else saveToDiskCallback(err);
