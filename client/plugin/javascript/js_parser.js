@@ -115,21 +115,21 @@
 			"ts",
 			"jsx",
 			"tsx",
-			"java",
+			//"java",
 			"htm",
 			"html",
-			"php",
-			"asp",
-			"vbs", // Visual Basic Script
-			"vb", // Visual Basic
+			//"php",
+			//"asp",
+			//"vbs", // Visual Basic Script
+			//"vb", // Visual Basic
 			"xml",
 			"json",
 			"css",
 			"webmanifest",
 			"qml",
 			"qrc",
-			"c",
-			"cpp",
+			//"c",
+			//"cpp",
 			"gs", // Google Script
 			"swift"
 		]
