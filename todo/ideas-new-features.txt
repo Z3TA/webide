@@ -38,6 +38,11 @@ Feature list (Not ordered/prioritized)
 
 
 
+
+---
+
+automatically reload files when they change on disk if they are saved! and mark the tab, useful when you get new log entries or error messages in in log files, so that you dont have to manually reload from disk!
+
 ---
 
 Make it possible to add custom domains that is proxied to the user ns or docker container port !?

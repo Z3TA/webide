@@ -5,6 +5,58 @@ Polishing (only existing features)
 ==================================
 
 
+
+---
+
+Could not run "previewTool" on BaseUrlConfiguration.cs
+
+---
+
+Could not run "previewTool" on App.razor
+
+---
+
+Could not run "previewTool" on new file
+
+---
+
+Could not run "previewTool" on AndroidManifest.xml.
+
+---
+
+when pressing delete (in plain text mode) en an empty line do delete the white space on the line below so the entire line is deleted! 
+
+---
+
+Using the terminal when in collaborate editing mode...
+
+---
+
+sugg: Highlight matching parenthesis or angelbracket when one is selected! 
+
+---
+
+some projects uses auto formatting when saving, which causes the hash check to fail next time you save... able to disable hash checks, or h ave the server check for changes and automatically reload if the client have not yet changed the file 
+
+---
+
+Could not run "previewTool" on welcome.css
+
+---
+
+can't ctrl+tab between terminal file and other file
+
+---
+
+don't resize/scroll the file explorer when opening/closing folders!
+
+---
+
+when adding a space next to a parentheses add the same amount of space on the other side matching parenthesis 
+example: ( |) also add a space on the right side!
+
+---
+
 Total lines should show up somewhere when scrolling so you can have an overlook on where in the file you are...
 
 ---

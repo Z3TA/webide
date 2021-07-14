@@ -36,6 +36,147 @@ Run all tests! (to make sure you did not break anything else)
 BUGS (and issues)
 =================
 
+
+
+
+---
+
+Error: File change events are out of order, we have missed 2 events!
+
+Stacktrace:
+collabHandleEcho@https://webide.se/:107:36337
+fireEvent@https://webide.se/:16:6560
+
+---
+
+root@ssh-tunnel:/srv/jzedit# node server/server.js --nat-type=server --username=johan --password=Tbz4WCvK --nat-port=1337 --port=1338 --nat-host=ssh.snajd.se --hostname=ssh.snajd.se --ip=104.248.26.78
+/srv/jzedit/node_modules/fs-extra/lib/mkdirs/make-dir.js:85
+} catch {
+^
+
+SyntaxError: Unexpected token {
+at createScript (vm.js:80:10)
+at Object.runInThisContext (vm.js:139:10)
+at Module._compile (module.js:616:28)
+at Object.Module._extensions..js (module.js:663:10)
+at Module.load (module.js:565:32)
+at tryModuleLoad (module.js:505:12)
+at Function.Module._load (module.js:497:3)
+at Module.require (module.js:596:17)
+at require (internal/module.js:11:18)
+at Object.<anonymous> (/srv/jzedit/node_modules/fs-extra/lib/mkdirs/index.js:3:44)
+root@ssh-tunnel:/srv/jzedit# node -v
+v8.10.0
+
+
+---
+
+XML parser is parsing even though file has been reloaded as plain text!  !?!?
+
+---
+
+Stacktrace:
+Error: EDITOR.saveFile: /home/LaCrocsFrancaise/wwwpub/welcome.htm was successfully saved. Some "afterSave" event listeners (eg. one or more plugins listening for "afterSave" event) did however fail. This is not a critical error, but should be reported nonetheless... Errors: The following event listeners failed to return something trueish or call back in a timely fashion: ["wysiwygEditorFileSave4"] And these functions did succeed: ["tabFileSave","callabFileSaved","autoCompleteJS_fileSave","updateWorkingDirectory","checkForCommonJsErrors","configurationMaybe","saveStateOfFile","wysiwygEditorFileSave1","wysiwygEditorFileSave2","wysiwygEditorFileSave3"]
+at updatedSavedState (https://webide.se/:20:28324)
+at allListenersCalled (https://webide.se/:18:46687)
+at checkIfReturnedOrCalledCallback (https://webide.se/:20:123089)
+
+Current file: /home/LaCrocsFrancaise/wwwpub/welcome.htm
+Browser: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36 (Chrome)
+Version: 6350
+Dist: repo
+Last server msg: {
+"resp": 43,
+"id": "391"
+}
+
+
+---
+
+Stacktrace:
+Error: EDITOR.saveFile: /home/LaCrocsFrancaise/wwwpub/welcome.htm was successfully saved. Some "afterSave" event listeners (eg. one or more plugins listening for "afterSave" event) did however fail. This is not a critical error, but should be reported nonetheless... Errors: The following event listeners failed to return something trueish or call back in a timely fashion: ["wysiwygEditorFileSave2"] And these functions did succeed: ["tabFileSave","callabFileSaved","autoCompleteJS_fileSave","updateWorkingDirectory","checkForCommonJsErrors","configurationMaybe","saveStateOfFile","wysiwygEditorFileSave1","wysiwygEditorFileSave3","wysiwygEditorFileSave4"]
+at updatedSavedState (https://webide.se/:20:28324)
+at allListenersCalled (https://webide.se/:18:46687)
+at checkIfReturnedOrCalledCallback (https://webide.se/:20:123089)
+
+---
+
+There are some bugs in collaborate editing! ...
+
+Stacktrace:
+Error: Last index can not be between line-break characters CRLF
+at File.deleteTextRange (https://webide.se/:18:25762)
+at redo (https://webide.se/:107:43398)
+at Array.collabHandleEcho (https://webide.se/:107:37711)
+at Object.fireEvent (https://webide.se/:16:6560)
+at v.serverMessage [as onmessage] (https://webide.se/:16:2008)
+at v.E.dispatchEvent (https://webide.se/:15:3543)
+at v._dispatchMessage (https://webide.se/:15:16458)
+at v._didMessage (https://webide.se/:15:17339)
+at WebSocket.n.ws.onmessage (https://webide.se/:15:19267)
+
+Current file: /home/LaCrocsFrancaise/wwwpub/welcome.htm
+Browser: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.85 Safari/537.36 Edg/90.0.818.46 (Chrome)
+Version: 6350
+Dist: repo
+Last server msg: {
+"echo": {
+"eventOrder": 465,
+"fileChange": {
+"filePath": "/home/LaCrocsFrancaise/wwwpub/histoire.htm",
+"type": "deleteTextRange",
+"text": "\r\n",
+"index": 129,
+"row": 7,
+"col": 0,
+"order": 22,
+"cId": 1
+},
+"echoCounter": 592,
+"cId": 1,
+"alias": "Chrome(90.120.7.171)"
+}
+}
+
+Stacktrace:
+Error: Last index can not be between line-break characters CRLF
+at File.deleteTextRange (https://webide.se/:18:25762)
+at redo (https://webide.se/:107:43398)
+at Array.collabHandleEcho (https://webide.se/:107:37711)
+at Object.fireEvent (https://webide.se/:16:6560)
+at v.serverMessage [as onmessage] (https://webide.se/:16:2008)
+at v.E.dispatchEvent (https://webide.se/:15:3543)
+at v._dispatchMessage (https://webide.se/:15:16458)
+at v._didMessage (https://webide.se/:15:17339)
+at WebSocket.n.ws.onmessage (https://webide.se/:15:19267)
+
+Current file: /home/LaCrocsFrancaise/wwwpub/welcome.htm
+Browser: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.85 Safari/537.36 Edg/90.0.818.46 (Chrome)
+Version: 6350
+Dist: repo
+Last server msg: {
+"echo": {
+"eventOrder": 466,
+"fileChange": {
+"filePath": "/home/LaCrocsFrancaise/wwwpub/histoire.htm",
+"type": "deleteTextRange",
+"text": "\r\n",
+"index": 127,
+"row": 6,
+"col": 6,
+"order": 23,
+"cId": 1
+},
+"echoCounter": 593,
+"cId": 1,
+"alias": "Chrome(90.120.7.171)"
+}
+}
+
+
+
+---
+
 false posetive warning about single = in if statement
 //console.warn("Checking if word=" + word + " matches function name=" + functionName + "");
 

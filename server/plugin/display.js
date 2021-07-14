@@ -74,7 +74,7 @@ var DISPLAY = {
 		
 		function start() {
 			
-			if(SCREEN.hasOwnProperty(displayId)) throw new Error("SCREEN[" + displayId + "]=" + JSON.stringify(SCREEN[displayId]));
+			if(SCREEN.hasOwnProperty(displayId)) throw new Error("ALREADY have displayId=" + displayId + " SCREEN[" + displayId + "]=" + JSON.stringify(SCREEN[displayId]));
 			
 		SCREEN[displayId] = {
 			vnc: {},
