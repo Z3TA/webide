@@ -1,4 +1,58 @@
 
+---
+
+
+not helpful alert: 服务器：API 错误：连接 ECONNREFUSED 127.0.0.1:22
+好的
+
+
+original: Server: API error: connect ECONNREFUSED 127.0.0.1:22
+
+---
+
+Try using the editor with automatic translation!
+
+---
+
+https://webide.se/?github=nguyenvanvy1999%2FCamera_WebService:20:8060
+
+Stacktrace:
+TypeError: Cannot read property 'hasOwnProperty' of null
+at Object.storageRemoveItem [as removeItem] (https://webide.se/?github=nguyenvanvy1999%2FCamera_WebService:20:8060)
+at https://webide.se/?github=nguyenvanvy1999%2FCamera_WebService:68:9790
+at Object.localStorageSetItem [as setItem] (https://webide.se/?github=nguyenvanvy1999%2FCamera_WebService:20:8912)
+at gotItemFromLocalStorage (https://webide.se/?github=nguyenvanvy1999%2FCamera_WebService:68:9529)
+at Object.localStorageGetItem [as getItem] (https://webide.se/?github=nguyenvanvy1999%2FCamera_WebService:20:9360)
+at Array.removeFromOpenedFiles (https://webide.se/?github=nguyenvanvy1999%2FCamera_WebService:68:9323)
+at Object.EDITOR.closeFile (https://webide.se/?github=nguyenvanvy1999%2FCamera_WebService:20:22247)
+at confirmClose (https://webide.se/?github=nguyenvanvy1999%2FCamera_WebService:46:7341)
+at HTMLButtonElement.<anonymous> (https://webide.se/?github=nguyenvanvy1999%2FCamera_WebService:17:5096)
+
+Current file: /home/guest1285/nodejs/main.js
+Browser: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.77 Safari/537.36 Edg/91.0.864.37 (Chrome)
+Version: 6439
+Dist: repo
+Last server msg: {
+"clientJoin": {
+"ip": "14.238.135.230",
+"cId": 1,
+"connectedClientIds": [
+1
+],
+"alias": "Chrome(14.238.135.230)",
+"connectionCLientAliases": {
+"1": "Chrome(14.238.135.230)"
+}
+}
+}
+
+---
+
+test "npx webide.se" on Arch and other operating systems
+
+test "npm run server" on Arch and Windows
+
+
 mining programs: 
 xlarig
 nheqminer
@@ -8,6 +62,16 @@ na.luckpool.net
 monero.herominers.com
 
 
+
+github2s pull requests... example: https://github.com/Marak/faker.js/pull/559/files
+
+clone the original repo. 
+Make a copy of the original/upstream repo
+clone the repo to be pulled
+checkout the branch to be pulled, 
+merge with the copy of the upstream/original,
+
+github2s: how to handle "issues" !? example: https://github.com/jsierles/react-native-audio/issues/335
 
 
 
