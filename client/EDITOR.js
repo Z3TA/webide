@@ -1134,6 +1134,7 @@ usePseudoClipboard = false;
 			}, 5000);
 		}
 		
+		//console.log("EDITOR.openFile: path=" + path + " text=" + text + " state=" + JSON.stringify(state) + ", callback=" + callback + " " + UTIL.getStack("openFile"));
 
 		//console.log("EDITOR.openFile: path=" + path + " state=" + JSON.stringify(state) + " " + UTIL.getStack("openFile"));
 
@@ -1959,7 +1960,7 @@ else if(err.code == "ENETDOWN") {
 							else throw err;
 						}
 						else {
-							console.log("err.code=" + err.code);
+							console.log("EDITOR.saveFile: hash: err.code=" + err.code);
 							throw err;
 						}
 					}

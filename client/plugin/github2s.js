@@ -35,7 +35,7 @@
 
 
 	function openGithubRepoMaybe() {
-		console.log("github2s: openGithubRepoMaybe!");
+		//console.log("github2s: openGithubRepoMaybe!");
 
 		var str = QUERY_STRING.github;
 
@@ -54,7 +54,7 @@
 
 		if(dirs[0] == "") dirs.shift();
 
-		console.log("github2s: dirs=" + JSON.stringify(dirs));
+		//console.log("github2s: dirs=" + JSON.stringify(dirs));
 
 		var githubUrl = "https://github.com/" + str;
 
@@ -65,8 +65,8 @@
 		var matchGithubBranch = str.match(/(.*)\/(.*)\/tree\/([^/]*)/);
 		var matchGithubWiki = str.match(/(.*)\/(.*)\/wiki\/(.*)/);
 
-		console.log("github2s: matchGithubFile=", matchGithubFile);
-		console.log("github2s: matchGithubBranch=", matchGithubBranch);
+		//console.log("github2s: matchGithubFile=", matchGithubFile);
+		//console.log("github2s: matchGithubBranch=", matchGithubBranch);
 
 		if(matchGithubFile) {
 			var repo = "https://github.com/" + matchGithubFile[1] +  "/" + matchGithubFile[2] +  ".git";
@@ -86,7 +86,7 @@
 			var repo = "https://github.com/" + dirs[0] + "/" + dirs[1] + ".git";
 		}
 		
-		console.log("github2s: matchGithubWiki=" + matchGithubWiki + " _showFile=" + _showFile);
+		//console.log("github2s: matchGithubWiki=" + matchGithubWiki + " _showFile=" + _showFile);
 
 		var userRepoDir = UTIL.joinPaths(EDITOR.user.homeDir, "repo/");
 
@@ -101,7 +101,7 @@
 			// user might have configured ssh key, so try cloning, and only ask for credentials if cloning fails
 			var sshRepo = repo.replace("https://github.com/", "git@github.com:");
 
-			console.log("github2s: Attempting to clone sshRepo=" + sshRepo + " ...");
+			//console.log("github2s: Attempting to clone sshRepo=" + sshRepo + " ...");
 
 			EDITOR.createPath(userRepoDir, function(err) {
 				if(err) throw err;
@@ -173,7 +173,13 @@
 					findReadme();
 				}
 				else {
-					EDITOR.dashboard.hide();
+
+					setTimeout(function() {
+						EDITOR.dashboard.hide();
+						EDITOR.showFile(file);
+					}, 1000);
+
+					//console.log("github2s: successfully opened " + filePathInRepo);
 				}
 			});
 		}
@@ -206,8 +212,18 @@
 
 				for(var i=0; i<files.length; i++) {
 					if( files[i].type == "-" && files[i].name.match(/readme/i) ) {
-						EDITOR.openFile(files[i].path);
-						EDITOR.dashboard.hide();
+						EDITOR.openFile(files[i].path, undefined, {show: true}, function(err, file) {
+							if(err) console.error(err);
+							else {
+								//console.log("github2s: successfully opened README: " + files[i].path);
+
+								setTimeout(function() {
+									EDITOR.dashboard.hide();
+									EDITOR.showFile(file);
+								}, 1000);
+
+							}
+						});
 						return;
 					}
 				}
