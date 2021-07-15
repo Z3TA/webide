@@ -98,7 +98,7 @@
 		
 		if(!(file instanceof File)) return; // Can also be ImageFile
 
-		if(!file.noChangeEvents && !file.fullAutoIndentation && file.fileExtension != "txt") {
+		if(!file.noChangeEvents && !file.fullAutoIndentation && file.fileExtension != "txt" && file.fileExtension != "stdout") {
 			if(!initiated) init();
 			
 			worker.postMessage({text: file.text, path: file.path});
