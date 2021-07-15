@@ -330,6 +330,8 @@ API.httpGet = function httpGet(user, options, callback) {
 			callback(err);
 			callback = null;
 			gotError = true;
+
+			console.warn("url=" + url + " error: " + err.message);
 		});
 		
 		req.end();
