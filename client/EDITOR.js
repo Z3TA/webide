@@ -8617,15 +8617,15 @@ var loaded = !!theWindow.location.href;
 			
 			var fileName = UTIL.getFilenameFromPath(file.path);
 
-			var message = "Could not run \"" + eventListenerName + "\" on " + fileName + ". None of the " + f.length + " plugins listening for " + eventListenerName + " could handle the request!";
+			var message = "None of the " + f.length + " " + eventListenerName + "(s) could figure out what to do with <i>" + fileName + "</i>.";
 
 			if( eventListenerName == "previewTool" && EDITOR.currentFile && EDITOR.currentFile.path.match(/^terminal\d*/) ) {
-				return alertBox("No " + eventListenerName + " found for " + EDITOR.currentFile.path + "... <ol><li>Place the cursor right side of the $ (bash command prompt).</li><li>Type the command (example: ping google.com)</li><li>then press Enter to run the command.</li></ol> Use Alt instead of Ctrl for control sequences. eg. Alt+c instead of Ctrl+c to stop the command");
+				return alertBox("To run a bash/shell command in the cmd/terminal, place the cursor right side of the $ (bash command prompt), type the command (example: ping google.com), and press Enter\n\nUse Alt instead of Ctrl for control sequences. eg. Alt+c instead of Ctrl+c to stop the command");
 			}
+			else if(!file.savedAs) message = message + '\nPS. Try saving ("save as" ' + EDITOR.getKeyFor("saveFileFromKeyboardCombo") + ' ) the file first!';
+			else if( eventListenerName == "previewTool" ) message = message + "\nPS. Try running " + fileName + "  in the bash/shell/cmd/terminal (" + EDITOR.getKeyFor("startTerminalFromKeyboard") + ")";
 			
-			if( eventListenerName == "previewTool" ) message = message + "\n(you could try running via cmd/terminal: Alt+t)";
-
-			promptBox(message + "\nWhat would you like the editor to do?", {
+			promptBox(message + "\n\n<i>What would you like the editor to do?</i>", {
 				placeholder: "I was expecting that running " + eventListenerName + " on " + fileName + " the editor should..."
 			}, function(answer) {
 				message = message + "\n\nFeedback: " + answer + "\n\nBROWSER=" + BROWSER;
