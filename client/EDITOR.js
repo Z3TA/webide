@@ -4276,6 +4276,8 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 		
 		menu.visible = true;
 		
+		EDITOR.ctxMenu.hide();
+
 		// Safari wont give focus to the element when clicking on it, so do it manually
 		var item = menu.parentMenuItem;
 		//var item = menu.firstItem;
@@ -5417,6 +5419,8 @@ if(menuItem.parentMenu) {
 			
 			EDITOR.input = false;
 			
+			EDITOR.windowMenu.hide();
+
 			clearSelection();
 			
 			// Clear temorary menu items
