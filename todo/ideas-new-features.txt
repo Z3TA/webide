@@ -38,6 +38,37 @@ Feature list (Not ordered/prioritized)
 
 
 
+---
+
+idea: able to re-open recently closed files
+
+---
+
+idea: Reach functionality via URL's, ignore all /app/ url's and let the editor handle them. For example edit a certain web page, make a new blog post, make a new diary entry, edit a post/entry
+
+
+---
+
+idea: Via the URL be able to change any part of a web page, for example a p element, and show only the contents of that p element in the editor!
+
+
+---
+
+idea: on mobile, change the caret position by holding down from the space bar on mobile keyboard 
+
+---
+
+Should highlight misspelled property!
+
+const lastIndex = ['a', 'b', 'c'].elngth - 1;
+const middleIndex = Math.floor(lastIndex / 2);
+middleIndex;
+
+var arr = [1,0]
+arr.lenngt 
+
+---
+
 https://eloquentjavascript.net/05_higher_order.html
 You get a sandbox/editor when you click on the code. Would be nice for Node.js tutorials to integrate the editor/IDE
 

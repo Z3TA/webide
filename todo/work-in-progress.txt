@@ -1,4 +1,42 @@
 
+Focus on editing web sites with SSG... 
+
+---
+
+when saving a "new file" as foo.php the highlightjs is removed/reset and it doesn't get highlighted!
+
+---
+
+feedback:
+I started modifying the default HTML doc and there was no intellisense/autocomplete.
+
+Then I switched to a different browser tab and switched back which caused an error.
+
+---
+
+Make it so that you can use the bookmarklet on pages where there are *many* input elements. Add the toolbar to the currently focused element 
+
+---
+
+Check out what https://github.com/mdn/content/ uses and see if webide can be used to edit articles and the road the a pull request...
+
+---
+
+Test googleDrive
+Add automatic test maybe
+
+---
+
+Try connecting to an FTP and SFTP site and see if nvmrc checker module gives any error...
+Add automatic test if we find a bug!
+
+---
+
+Check the Icons in ChromeOS and iOS!
+Icon on Chrome OS is black with black text. Make bg yellow! 
+
+---
+
 sh <(curl -L https://nixos.org/nix/install) --daemon
 
 

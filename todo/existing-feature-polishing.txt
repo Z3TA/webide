@@ -6,6 +6,66 @@ Polishing (only existing features)
 
 
 
+
+---
+
+Open new file on Safari
+key=n
+combo={"shift":false,"alt":false,"ctrl":true,"meta":false,"sum":2}
+comboStr=CTRL
+BROWSER=Safari 
+
+---
+
+Expected to find a paste option when long clicking on mobile 
+
+---
+
+woulk like to find on a big/streamed file! (auto load/search chunks) 
+
+---
+
+When disconnected from server, there should be a "offline" indicator!
+When finding left/right you get an alert: "We might have lost the connection. Or the server is busy! Unable to send cmd: req=echo"
+
+---
+
+show keyboard shortcut in title for buttons in sgg manager, eg what is the keyboard combo for preview!?
+
+---
+
+wysiwygeditor:
+When in Preview mode and navigated away, it's annoying when updates doesn't show (and I have to close the window and hit preview again) 
+
+---
+
+PHP parser bug:
+
+<?php
+'{'
+foo
+
+The { inside the string indentates next row 
+
+---
+
+When searching in a BIG file, search all chunks!
+
+---
+
+terminal:
+
+when placing the mouse in the terminal it does wierd stuff...
+
+when selecting text in the terminal, and pressing delete or any key while the text is selected, send delete command!
+
+When using the built in terminal emulator and doing some git stuff that starts EDITOR, a new instance of the editor wants to start. We need to detect if we are using the build in terminal emulator and open the file in the already running editor!
+
+
+---
+
+some kind of warning or auto update if file has changed on disk eg from another device. auto update ? 
+
 ---
 
 annoying when Docker does not have read writes to a file ... use same chmod as the directory when creating new files!! (editor default seems to be to not give read perm) 
