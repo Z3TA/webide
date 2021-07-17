@@ -3,7 +3,8 @@
 	Question: Should terminals be reopened when the file re-opens !?
 	Answer: No! Because we wouln't be able to get back to the old state (bash session)
 	
-	Problem: The terminal's shell have it's own key-bindings which overlaps the editor's key bindings! Example Ctrl+C to copy, is used to exit a program in bash shell.
+	Problem: The terminal's shell have it's own key-bindings which overlaps the editor's key bindings! 
+	Example Ctrl+C to copy, is used to exit a program in bash shell.
 	Solution 1: Use Alt for Ctrl and Shift+Alt for Alt !?  (AltGr doesn't seem to work)
 	
 What terminal should we emulate ?
@@ -1415,9 +1416,6 @@ file.writeLine("\n" + file.path + " session closed " + (new Date()) + "\n");
 	function terminalKeyPressed(file, character, combo, keyPressEvent) {
 		
 		var isTerminal = terminalFiles.indexOf(file) != -1;
-		
-		
-		
 		if(!isTerminal) return ALLOW_DEFAULT;
 		
 		var terminalId = file.path.match(reTerm)[1];
@@ -1470,6 +1468,15 @@ file.writeLine("\n" + file.path + " session closed " + (new Date()) + "\n");
 		//console.log("terminalKeyDown: character=" + character + " code=" + code + " combo=" + JSON.stringify(combo) +" key=" + keyDownEvent.key);
 		
 		if(!EDITOR.input) {
+			return ALLOW_DEFAULT;
+		}
+
+		/*
+			problem: we want to be able to tab out from the terminal file, for example to the previous file/tab using Ctrl+Shift+Backspace
+
+		*/
+		if( EDITOR.ctrlKeyIsDown ) {
+			// So many editor key bindings on Ctrl, and we want them to still work while on the terminal!?
 			return ALLOW_DEFAULT;
 		}
 		

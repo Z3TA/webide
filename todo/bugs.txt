@@ -40,6 +40,10 @@ BUGS (and issues)
 
 ---
 
+backgrounds (in terminal) are fixed when scrolling (they don't scroll) ...
+
+---
+
 idea: In the server log, whenever we see "enter passphrase/password" star out the password until we see data":"\r" via the terminal emulator
 
 
