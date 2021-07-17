@@ -101,7 +101,7 @@ return;
 	}
 	
 	function wakeup() {
-		var timeout = 60000;
+		var timeout = 120000;
 		var patientAlert = undefined;
 		CLIENT.cmd("dockerDaemon", {command: "start"}, timeout, function dockerDeamonAwakenMaybe(err, status) {
 			

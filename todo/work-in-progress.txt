@@ -1,24 +1,26 @@
 
 Focus on editing web sites with SSG... 
 
+can't tab back from terminal!
+
+---
+
+Check out what https://github.com/mdn/content/ uses and see if webide can be used to edit articles and the road to the a pull request...
+
+run npm install ?
+
+npm start
+
+yarn should be in user skeleton ? 
+npm install -g yarn
+
 ---
 
 when saving a "new file" as foo.php the highlightjs is removed/reset and it doesn't get highlighted!
 
 ---
 
-feedback:
-I started modifying the default HTML doc and there was no intellisense/autocomplete.
-
-Then I switched to a different browser tab and switched back which caused an error.
-
----
-
 Make it so that you can use the bookmarklet on pages where there are *many* input elements. Add the toolbar to the currently focused element 
-
----
-
-Check out what https://github.com/mdn/content/ uses and see if webide can be used to edit articles and the road the a pull request...
 
 ---
 
