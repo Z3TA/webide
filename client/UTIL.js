@@ -1494,7 +1494,7 @@ namedFunction = false;
 		
 	},
 	
-	
+	// The returned string is assumed to be used in new RegExp(escapeRegExp)
 	escapeRegExp: function escapeRegExp(str) {
 		return str.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
 	},

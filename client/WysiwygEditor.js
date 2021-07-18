@@ -65,9 +65,13 @@ var WysiwygEditor;
 	var oldPreviewWindowSize;
 	var oldCodeWindowPosition;
 	var oldCodeWindowSize;
-	
+	var jsDiffLoaded = false;
+
 	var knowsAboutIgnoreTransformNotYetImplemented = []; // Only tell the user once per file
 	
+	/*
+		note: jsDiff.js needs to be loaded before calling WysiwygEditor!
+	*/
 	WysiwygEditor = function WysiwygEditor(options) {
 		var wysiwygEditor = this;
 		
@@ -177,55 +181,90 @@ alertBox(wysiwygEditor.sourceFile.path + " contains SSG scripts which is not yet
 				" rawMainHtml=" + UTIL.lbChars(rawMainHtml) + "");
 			}
 			
-			
-			
-			
 			/*
 				
-				Optimally we want to support stuff being different inside the main content. For example removed script tags.
-				But it has not yet been implemented. Is it even possible !? 
+				
 				
 			*/
-			wysiwygEditor.ignoreTransform = UTIL.textDiff(srcHTML, rawMainHtml);
-			
-			// Make sure there are no errors
-			
-			var lbCountSrc = UTIL.occurrences(srcHTML, lbSrc);
-			var lbCountMain = UTIL.occurrences(rawMainHtml, lbMain);
-			
-			var removed = wysiwygEditor.ignoreTransform.removed.length;
-			var inserted = wysiwygEditor.ignoreTransform.inserted.length;
-			
-			if( (lbCountSrc - removed) != (lbCountMain - inserted) ) {
-				var lbCountSrcBeforeDiff = UTIL.occurrences(srcHTML, lbSrc);
-				var lbCountMainBeforeDiff = UTIL.occurrences(rawMainHtml, lbMain);
-				
-				//console.log("lbCountSrcBeforeDiff=" + lbCountSrcBeforeDiff);
-				//console.log("lbCountMainBeforeDiff=" + lbCountMainBeforeDiff);
-				
-				//console.log("wysiwygEditor.lineBreak=" + UTIL.lbChars(wysiwygEditor.lineBreak));
-				
-				//console.log("srcHTML=" + UTIL.lbChars(srcHTML));
-				//console.log("rawMainHtml=" + UTIL.lbChars(rawMainHtml));
-				throw new Error("Not same amount of rows! lbCountSrc=" + lbCountSrc + " (" + UTIL.lbChars(lbSrc) + ") lbCountMain=" + lbCountMain + " (" + UTIL.lbChars(lbMain) + ") removed=" + removed + " inserted=" + inserted + "  diff=" + JSON.stringify(wysiwygEditor.ignoreTransform, null, 2));
+
+			wysiwygEditor.snippetCodeStart = option.snippetCodeStart || "<?JS";
+			wysiwygEditor.snippetCodeEnd = option.snippetCodeEnd || "?>";
+
+			var reSnippetCode = new RegExp(UTIL.escapeRegExp(wysiwygEditor.snippetCodeStart) + ".*" + wysiwygEditor.snippetCodeEnd, "g");
+			var compiledSnippetsRegexString = "";
+			wysiwygEditor.compiledSnippets = [];
+			var start = 0;
+			var compiledSnippetsIndex = 0;
+			while(match = reSnippetCode.exec(srcHTML) != null) {
+				compiledSnippetsRegexString = compiledSnippetsRegexString + UTIL.escapeRegExp(srcHTML.slice(start, match.index));
+				start = match.index + match[0].length;
+				wysiwygEditor.compiledSnippets.push({
+					source: match[0],
+					start: match.index;
+					end: match.index + match[0].length;
+				});
+				compiledSnippetsRegexString = compiledSnippetsRegexString + "(.*)";
 			}
+			if(start > 0) {
+				compiledSnippetsRegexString = compiledSnippetsRegexString + UTIL.escapeRegExp(srcHTML.slice(start));
+			}
+
+			// Don't escape line breaks and tabs!
+			compiledSnippetsRegexString = compiledSnippetsRegexString.replace(/\\\r/g, "\r");
+			compiledSnippetsRegexString = compiledSnippetsRegexString.replace(/\\\n/g, "\n");
+			compiledSnippetsRegexString = compiledSnippetsRegexString.replace(/\\\t/g, "\t");
+
+			var reCompiledSnippets = new RegExp(compiledSnippetsRegexString);
+
+			var match = rawMainHtml.match(reCompiledSnippets);
+
+			for (var i=0; i<wysiwygEditor.compiledSnippets.length; i++) {
+				wysiwygEditor.compiledSnippets[i].compiled = match[i+1];
+			}
+
+
+		} // if compiledSource
+
+		wysiwygEditor.ignoreTransform = UTIL.textDiff(srcHTML, rawMainHtml);
 			
-			//console.log("wysiwygEditor.ignoreTransform=" + JSON.stringify(wysiwygEditor.ignoreTransform, null, 2));
+		// Make sure there are no errors
 			
-			wysiwygEditor.setStartRow();
+		var lbCountSrc = UTIL.occurrences(srcHTML, lbSrc);
+		var lbCountMain = UTIL.occurrences(rawMainHtml, lbMain);
 			
-			if(!wysiwygEditor.onlyPreview) {
+		var removed = wysiwygEditor.ignoreTransform.removed.length;
+		var inserted = wysiwygEditor.ignoreTransform.inserted.length;
+			
+		if( (lbCountSrc - removed) != (lbCountMain - inserted) ) {
+			var lbCountSrcBeforeDiff = UTIL.occurrences(srcHTML, lbSrc);
+			var lbCountMainBeforeDiff = UTIL.occurrences(rawMainHtml, lbMain);
+				
+			//console.log("lbCountSrcBeforeDiff=" + lbCountSrcBeforeDiff);
+			//console.log("lbCountMainBeforeDiff=" + lbCountMainBeforeDiff);
+				
+			//console.log("wysiwygEditor.lineBreak=" + UTIL.lbChars(wysiwygEditor.lineBreak));
+				
+			//console.log("srcHTML=" + UTIL.lbChars(srcHTML));
+			//console.log("rawMainHtml=" + UTIL.lbChars(rawMainHtml));
+			throw new Error("Not same amount of rows! lbCountSrc=" + lbCountSrc + " (" + UTIL.lbChars(lbSrc) + ") lbCountMain=" + lbCountMain + " (" + UTIL.lbChars(lbMain) + ") removed=" + removed + " inserted=" + inserted + "  diff=" + JSON.stringify(wysiwygEditor.ignoreTransform, null, 2));
+		}
+			
+		//console.log("wysiwygEditor.ignoreTransform=" + JSON.stringify(wysiwygEditor.ignoreTransform, null, 2));
+			
+		wysiwygEditor.setStartRow();
+			
+		if(!wysiwygEditor.onlyPreview) {
 			// Because "ignoreTransform" is not yet supported:
-				if(wysiwygEditor.ignoreTransform.inserted.length > 0) {
-					var msg = "Can not edit the page in WYSIWYG mode (wysiwygEditor.onlyPreview=" + wysiwygEditor.onlyPreview + ") because the HTML does not match the source:\n";
+			if(wysiwygEditor.ignoreTransform.inserted.length > 0) {
+				var msg = "Can not edit the page in WYSIWYG mode (wysiwygEditor.onlyPreview=" + wysiwygEditor.onlyPreview + ") because the HTML does not match the source:\n";
 				for(var i=0; i< wysiwygEditor.ignoreTransform.inserted.length; i++) {
 					msg += "Line " + (wysiwygEditor.ignoreTransform.inserted[i].row + 1 + wysiwygEditor.startRow) + ": ";
 					if(wysiwygEditor.ignoreTransform.inserted[i].text == "") msg += " Inserted New line\n"
 					else msg += "Inserted: " + UTIL.escapeHtml(wysiwygEditor.ignoreTransform.inserted[i].text) + "\n";
 				}
 				alertBox(msg);
-					//console.log("srcHTML=" + UTIL.lbChars(srcHTML));
-					//console.log("rawMainHtml=" + UTIL.lbChars(rawMainHtml));
+				//console.log("srcHTML=" + UTIL.lbChars(srcHTML));
+				//console.log("rawMainHtml=" + UTIL.lbChars(rawMainHtml));
 				return wysiwygEditor.close();
 			}
 			else if(wysiwygEditor.ignoreTransform.removed.length > 0) {
@@ -240,7 +279,7 @@ alertBox(wysiwygEditor.sourceFile.path + " contains SSG scripts which is not yet
 			}
 		}
 			
-		}
+	}
 		else wysiwygEditor.ignoreTransform = null; // Not compiled
 		
 		
@@ -744,7 +783,7 @@ alertBox(wysiwygEditor.sourceFile.path + " contains SSG scripts which is not yet
 			// Most likely the user has closed the preview window
 			wysiwygEditor.close();
 			return;
-		}sourceFile
+	}
 		
 		var fileExt = UTIL.getFileExtension(file.path);
 		
@@ -790,6 +829,11 @@ alertBox(wysiwygEditor.sourceFile.path + " contains SSG scripts which is not yet
 		
 		var srcHTML = wysiwygEditor.getSourceCodeBody();
 		
+	if( wysiwygEditor.compiledSnippets.length > 0 ) {
+		wysiwygEditor.compiledSnippets.forEach(function(obj) {
+
+		});
+	}
 		
 		wysiwygEditor.setContentEditableBody(srcHTML);
 		

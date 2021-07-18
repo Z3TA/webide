@@ -1810,10 +1810,15 @@ for(var i=0; i<options.length; i++) {
 								
 								if(err) throw err;
 								
-								var compiledSource = txt;
-								var compliedSourceBodyTag = "main";
-								
-								loadWysiwygEditor(compiledSource, compliedSourceBodyTag);
+								// note: we might not need jsDiff?!
+								loadScript("/jsDiff.js", function(err) {
+									if(err) throw err;
+
+									var compiledSource = txt;
+									var compliedSourceBodyTag = "main";
+									loadWysiwygEditor(compiledSource, compliedSourceBodyTag);
+
+								});
 								
 							});
 							

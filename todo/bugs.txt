@@ -38,6 +38,31 @@ BUGS (and issues)
 
 ---
 
+
+Error message: Error: functionListSelect=[object HTMLSelectElement] functionListSelect.selectedIndex=-1 functionListSelect.options=[object HTMLOptionsCollection] functionListSelect.options.length=41
+Error code: undefined
+
+buildFunctionList/u.onchange@https://webide.se/?github=mdn%2Fcontent#/home/johan/repo/jzedit/client/WysiwygEditor.js#69:58:3319
+
+---
+
+when a SSG site is open in preview and you save *another* file the wysiwygEditor wants to reload the preview window!!
+note: the preview window has to be open
+
+---
+
+When clicking "Canvel" on "The new window was most likely blocked by ..."
+
+updatedSavedState@https://webide.se/?github=mdn%2Fcontent#/home/johan/repo/jzedit/client/WysiwygEditor.js#69:20:28069
+allListenersCalled@https://webide.se/?github=mdn%2Fcontent#/home/johan/repo/jzedit/client/WysiwygEditor.js#69:18:35465
+evCallback@https://webide.se/?github=mdn%2Fcontent#/home/johan/repo/jzedit/client/WysiwygEditor.js#69:20:117859
+anyFileSaved/<@https://webide.se/?github=mdn%2Fcontent#/home/johan/repo/jzedit/client/WysiwygEditor.js#69:22:13383
+windowCreated@https://webide.se/?github=mdn%2Fcontent#/home/johan/repo/jzedit/client/WysiwygEditor.js#69:22:21597
+confirmOpenWindow@https://webide.se/?github=mdn%2Fcontent#/home/johan/repo/jzedit/client/WysiwygEditor.js#69:20:110875
+makeButton/<@https://webide.se/?github=mdn%2Fcontent#/home/johan/repo/jzedit/client/WysiwygEditor.js#69:17:4723
+
+---
+
 When clicking anywhere in Firefox, the function on the function list is deselected after about 1500ms.
 this was because a message was inserted into the termin1 file!!
 

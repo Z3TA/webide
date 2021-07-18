@@ -3,16 +3,25 @@ Focus on editing web sites with SSG...
 
 ---
 
+working on adding support for snippets/code in wysiwygEditor...
+todo: check if the source change was inside a code/snippet - then don't update the preview (wait for save)
+when editing outside a code/snippet we can replace the code/snippets with its compiled version when updating the preview!
+we however need to listen for changes so we can update the index/location of the code/snippets!
+
 WysiwygEditor needs to work with snippets and varaibles inside the HTML!
-For example <?JS console.log("foo"); ?JS> and <div>{snippet.foo}</div>
+For example <?JS console.log("foo"); ?> and <div>{snippet.foo}</div>
 pass snippetStartCode={ and snippetEndCode=} and requreBodyTags?
 
+possible solution:
 put the raw source into contenteditable, let contenteditable inserts extra stuff and mess it up,
 clean up the contenteditable, let contenteditable mess it up again, then make the contenteditable the new source
 compile using the new source, build a Regexp for finding the variables/code -blocks ...
 surround the code blocks with comments to make them easier to filter out...
 <!-- start-snippet=1 -->rendered code<!-- end-snippet=1 -->
 codeBlock[i] = {code, renderedCode}
+then re-render with the comments, and then we can easily filter out the code snippets!
+
+---
 
 Check out what https://github.com/mdn/content/ uses and see if webide can be used to edit articles and the road to the a pull request...
 
