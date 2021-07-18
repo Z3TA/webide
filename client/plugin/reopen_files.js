@@ -167,8 +167,12 @@
 		
 		reopenFilesMain(function allFilesHaveReopened() {
 			// Save state when exiting the editor
+
+			// problem: Sometimes there is already an exit event called saveStateOfOpenFiles!
+			console.log("reopen_file:  reopenFilesMain: Adding exit event: saveStateOfOpenFiles! EDITOR.files=" + EDITOR.sortFileList);
 			EDITOR.on("exit", saveStateOfOpenFiles);
 			
+
 			// Save state on regular intervals in case the editor crashes (or refresh)
 			//console.log("reopenFiles: Started saveStateIntervalTimer");
 			saveStateIntervalTimer = setInterval(saveStateOfOpenFiles, saveStateInterval);
