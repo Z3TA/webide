@@ -40,7 +40,8 @@ todo: Run vttest
 		disableParsing: true,
 		noChangeEvents: true,
 		noCollaboration: true,
-		disallowScrollingBeyondEof: true
+		disallowScrollingBeyondEof: true,
+		fullAutoIndentation: false
 	};
 	var waitForReopen = true; // Buffer terminal messages for two seconds so that the last session get a chance to load
 	var BUFFER = {}; // termid: [data]

@@ -4,7 +4,8 @@ This file contains a list of things that should be optimized...
 Optimization
 ============
 
-
+When the terminal file becomes 6k lines long, it lags every time a message is added to the terminal!
+solution? Only have EDITOR.bigFileLoadRows in the terminal and store the rest on termin1.log on disk!?
 
 ---
 

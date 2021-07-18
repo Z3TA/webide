@@ -36,7 +36,15 @@ Run all tests! (to make sure you did not break anything else)
 BUGS (and issues)
 =================
 
+---
 
+When clicking anywhere in Firefox, the function on the function list is deselected after about 1500ms.
+this was because a message was inserted into the termin1 file!!
+
+---
+
+When scrolling horizontally, the text sometimes dissappears...
+If you use the arrow keys to go right, the text dissapears after 1500ms
 
 ---
 

@@ -30,7 +30,7 @@ var File; // File object is global
 		
 		if(!UTIL.isString(path)) throw new Error("path is not a string! path=" + path);
 		
-		file.hash == ""; // For storing the file hash for convenient access. Only the last saved state! To prevent overwriting changed files
+		file.hash = ""; // For storing the file hash for convenient access. Only the last saved state! To prevent overwriting changed files
 		
 		file.changed = false; // If the file has changed from last save
 		file.isSaved = false; // file.isSaved is the opposit of file.changed, but can only be true if the file is also saved as!
@@ -66,7 +66,14 @@ var File; // File object is global
 
 		file.fileExtension = UTIL.getFileExtension(file.path); // Without the dot
 		file.disableParsing = (stateProps && stateProps.disableParsing != undefined) ? stateProps.disableParsing : false;
-		var fullAutoIndentation = file.checkFullAutoIndentationSupport();
+		
+		if(!stateProps || stateProps.disableParsing == undefined) {
+			var fullAutoIndentation = file.checkFullAutoIndentationSupport();
+		}
+		else {
+			var fullAutoIndentation = stateProps.fullAutoIndentation;
+		}
+
 		//console.warn("Set file.fullAutoIndentation=" + fullAutoIndentation);
 		file.fullAutoIndentation = fullAutoIndentation;
 

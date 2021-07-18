@@ -5,8 +5,7 @@ Polishing (only existing features)
 ==================================
 
 
-
-
+Detect bugs where an extra = has sneaked in, like in file.hash == "" eg. when there is no if() or ? 
 ---
 
 Open new file on Safari

@@ -1,9 +1,18 @@
 
 Focus on editing web sites with SSG... 
 
-can't tab back from terminal!
-
 ---
+
+WysiwygEditor needs to work with snippets and varaibles inside the HTML!
+For example <?JS console.log("foo"); ?JS> and <div>{snippet.foo}</div>
+pass snippetStartCode={ and snippetEndCode=} and requreBodyTags?
+
+put the raw source into contenteditable, let contenteditable inserts extra stuff and mess it up,
+clean up the contenteditable, let contenteditable mess it up again, then make the contenteditable the new source
+compile using the new source, build a Regexp for finding the variables/code -blocks ...
+surround the code blocks with comments to make them easier to filter out...
+<!-- start-snippet=1 -->rendered code<!-- end-snippet=1 -->
+codeBlock[i] = {code, renderedCode}
 
 Check out what https://github.com/mdn/content/ uses and see if webide can be used to edit articles and the road to the a pull request...
 
@@ -13,6 +22,11 @@ npm start
 
 yarn should be in user skeleton ? 
 npm install -g yarn
+
+watch "start" ouput for "Listening on port 5000" ?
+
+could then use the auto-reload URL function...
+
 
 ---
 

@@ -98,7 +98,14 @@
 		
 		if(!(file instanceof File)) return; // Can also be ImageFile
 
-		if(!file.noChangeEvents && !file.fullAutoIndentation && file.fileExtension != "txt" && file.fileExtension != "stdout") {
+		/*
+			problem: terminal output is highlighted
+			solution: use file.disableParsing=true
+
+
+		*/
+
+		if(!file.noChangeEvents && !file.fullAutoIndentation && file.fileExtension != "txt" && !file.disableParsing) {
 			if(!initiated) init();
 			
 			worker.postMessage({text: file.text, path: file.path});

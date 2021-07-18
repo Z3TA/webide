@@ -169,7 +169,7 @@
 			// Save state when exiting the editor
 
 			// problem: Sometimes there is already an exit event called saveStateOfOpenFiles!
-			console.log("reopen_file:  reopenFilesMain: Adding exit event: saveStateOfOpenFiles! EDITOR.files=" + EDITOR.sortFileList);
+			console.log("reopen_file:  reopenFilesMain: Adding exit event: saveStateOfOpenFiles! EDITOR.files=" + EDITOR.sortFileList());
 			EDITOR.on("exit", saveStateOfOpenFiles);
 			
 
@@ -675,27 +675,37 @@
 		}
 	}
 	
+
+	var fileStateProps = ["isSaved", "savedAs", "startRow", "startColumn", "caret", "order", "disableParsing", "fullAutoIndentation", "hash", "isBig", "totalRows", "partStartRow"];
 	function getStateProps(lastFileState) {
 		// Some state need to be set when opening the file (not after)
 		
 		var stateprops = {};
 		
-		if(lastFileState.order !== undefined) stateprops.order = lastFileState.order;
-		if(lastFileState.parse !== undefined) stateprops.parse = lastFileState.parse;
-		if(lastFileState.savedAs !== undefined) stateprops.savedAs = lastFileState.savedAs;
-		if(lastFileState.hash !== undefined) stateprops.hash = lastFileState.hash;
-		
-		if(lastFileState.isBig !== undefined) stateprops.isBig = lastFileState.isBig;
-		if(lastFileState.totalRows !== undefined) stateprops.totalRows = lastFileState.totalRows;
-		if(lastFileState.partStartRow !== undefined) stateprops.partStartRow = lastFileState.partStartRow;
-		
+		fileStateProps.forEach(function(prop) {
+			if(lastFileState.hasOwnProperty(prop)) stateprops[prop] = lastFileState[prop];
+		});
+
 		if(lastFileState.isSaved !== undefined && lastFileState.text) {
 			stateprops.isSaved = lastFileState.isSaved;
 		}
 		
+		//console.log("getStateProps: return stateprops=" + JSON.stringify(stateprops));
 		return stateprops;
 	}
 	
+	function getFileState(file, state) {
+		if(state == undefined) state = {};
+
+		fileStateProps.forEach(function(prop) {
+			if(!file.hasOwnProperty(prop)) throw new Error("Unknown file property: " + prop + " fileStateProps=" + JSON.stringify(fileStateProps) + " file[" + prop + "]=" + file[prop] + " typeof file=" + (typeof file) + " file instanceof File ? " + (file instanceof File) + " file=", file);
+			state[prop] = file[prop];
+		});
+
+		//console.log("getFileState: return state=" + JSON.stringify(state));
+		return state;
+	}
+
 	function addToStringList(text, add, delimiter) {
 		
 		if(!UTIL.isString(text)) throw new Error("text is not a string!");
@@ -1040,7 +1050,7 @@
 			return;
 		}
 		
-		var state = {};
+		
 		
 		var file = EDITOR.files[path];
 		
@@ -1058,6 +1068,8 @@
 			return callback(err, path);
 		}
 		
+		var state = getFileState(file);
+
 		if(file == EDITOR.currentFile) {
 			state.currentFile = true;
 		}
@@ -1065,25 +1077,7 @@
 			state.currentFile = false;
 		}
 		
-		state.isSaved = file.isSaved;
-		state.savedAs = file.savedAs;
-		state.startRow = file.startRow;
-		state.startColumn = file.startColumn;
-		state.caret = file.caret;
-		state.order = file.order;
-		state.disableParsing = file.disableParsing;
-		//state.noChangeEvents = file.noChangeEvents;
-		//state.noCollaboration = file.noCollaboration;
-		state.hash = file.hash;
-		
-		// For loading big files as streams
-		state.isBig = file.isBig;
-		state.totalRows = file.totalRows;
-		state.partStartRow = file.partStartRow; 
-		
-		
 		var sizeLimit = 2551000; // Max size for localStorage in Chrome is 2,551,000 characters (5 MB)
-		
 		
 		if(file.text.length < sizeLimit) {
 			// Always save the text, even if it's saved to disk. (it can be deleted, or disk space limit truncated it)
