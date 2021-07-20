@@ -6,7 +6,7 @@
 	var oldURL;
 	var saveEventListenerAdded = false;
 	var watch = []; // {url, win}
-	var intervalTime = 30000;
+	var intervalTime = 3000;
 
 	EDITOR.plugin({
 		desc: "Auto reload URL when content changes",
