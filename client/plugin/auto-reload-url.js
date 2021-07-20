@@ -23,7 +23,7 @@
 	});
 
 	function unload(watcher) {
-		console.log("auto-reload-url: unload: url=" + watcher.url);
+		//console.log("auto-reload-url: unload: url=" + watcher.url);
 		clearTimeout(watcher.timer);
 		watcher.win.close();
 		var index = watch.indexOf(watcher);
@@ -76,7 +76,7 @@
 	}
 
 	function reloadAfterSave(file) {
-		console.log("auto-reload-url: reloadAfterSave: watch.length=" + watch.length);
+		//console.log("auto-reload-url: reloadAfterSave: watch.length=" + watch.length);
 		watch.forEach(function (watcher) {
 			clearTimeout(watcher.timer);
 			checkURL(watcher, function() {
@@ -92,7 +92,7 @@
 	}
 
 	function checkURL(watcher, callback) {
-		console.log("auto-reload-url: checkURL: intervalTime=" + intervalTime + " url=" + watcher.url);
+		//console.log("auto-reload-url: checkURL: intervalTime=" + intervalTime + " url=" + watcher.url);
 
 		if(!watcher.win || watcher.win.closed) {
 			console.error("watcher.win=", watcher.win);
@@ -110,13 +110,13 @@
 
 				var hash = resp.hash;
 
-				console.log("auto-reload-url: checkURL: oldHash=" + watcher.oldHash + " hash=" + hash);
+				//console.log("auto-reload-url: checkURL: oldHash=" + watcher.oldHash + " hash=" + hash);
 
 				if(watcher.oldHash == "") {
 					watcher.oldHash = hash;
 				}
 				else if(watcher.oldHash != hash) {
-					console.log("auto-reload-url: checkURL: Source has been updated!");
+					//console.log("auto-reload-url: checkURL: Source has been updated!");
 					//win.location.reload(); // Permission denied to access property "reload" on cross-origin object (code=18)
 					watcher.win.location = cacheBust(watcher.url);
 
