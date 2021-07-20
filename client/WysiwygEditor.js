@@ -200,8 +200,8 @@ alertBox(wysiwygEditor.sourceFile.path + " contains SSG scripts which is not yet
 				start = match.index + match[0].length;
 				wysiwygEditor.compiledSnippets.push({
 					source: match[0],
-					start: match.index;
-					end: match.index + match[0].length;
+					start: match.index,
+					end: match.index + match[0].length
 				});
 				compiledSnippetsRegexString = compiledSnippetsRegexString + "(.*)";
 			}
@@ -278,10 +278,9 @@ alertBox(wysiwygEditor.sourceFile.path + " contains SSG scripts which is not yet
 				return wysiwygEditor.close();
 			}
 		}
-			
-	}
-		else wysiwygEditor.ignoreTransform = null; // Not compiled
-		
+			else {
+			wysiwygEditor.ignoreTransform = null; // Not compiled
+		}
 		
 		
 		

@@ -419,7 +419,18 @@ callback(new Error("Too many redirects! redirects=" + redirects));
 					body = module_iconv.decode(buffer, charset);
 				}
 			}
-			callback(null, {body:body, status: resp.statusCode} );
+
+			if(options.onlyHash) {
+				// Only send the hash in order to save bandwith
+				var crypto = require('crypto');
+				var shasum = crypto.createHash('sha256');
+				shasum.update(body);
+
+				callback(null, {hash: shasum.digest('hex')} );
+			}
+			else {
+				callback(null, {body:body, status: resp.statusCode} );
+			}
 			callback = null;
 		}
 	}

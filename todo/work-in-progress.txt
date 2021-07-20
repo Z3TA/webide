@@ -1,6 +1,9 @@
 
 Focus on editing web sites with SSG... 
 
+The MDN dev server re-compiles upon http requests! (rather then after file save/change)
+that is better because then you will always get the updated page when refreshing!
+
 ---
 
 working on adding support for snippets/code in wysiwygEditor...

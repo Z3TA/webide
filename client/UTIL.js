@@ -259,6 +259,16 @@ var UTIL = {
 		return folders[0];
 	},
 	
+	randomNumbers: function randomNumbers(n) {
+
+		var nr = "";
+		for (var i=0; i<n; i++) {
+			nr = nr + Math.floor(Math.random() * 10);
+		}
+
+		return nr;
+	},
+
 	getFolders: function getFolders(fullPath, includeHostInfo) {
 		/* 
 			Returns each folder in the path. Can take an url or a local filesystem path
