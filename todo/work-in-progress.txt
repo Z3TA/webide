@@ -1,6 +1,19 @@
 
 Focus on editing web sites with SSG... 
 
+---
+
+http://webide-dev.se/?github=AlexanderC/nestjs-iacry/blob/1d4d56ef2e69894c955a07d7710f59dc66191a38/lib/decorators/helper.ts#terminal3#1
+
+Upgrade server!
+
+---
+
+"subject": "Error: htmlToImage: It seems we also failed to create a text based image! html=\"derivedKey: �~m\\u0019��[;�g&w\\u0007G�t'-���\\u0017p\\u001b��r����&lt;\"  ",
+
+
+---
+
 The MDN dev server re-compiles upon http requests! (rather then after file save/change)
 that is better because then you will always get the updated page when refreshing!
 

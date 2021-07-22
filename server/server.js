@@ -364,7 +364,7 @@ var mysqlConnection;
 
 //console.log("INSIDE_DOCKER ? " + !!INSIDE_DOCKER);
 //console.log("NO_NETNS ? " + !!NO_NETNS);
-//console.log("IPTABLES ? " + !!IPTABLES);
+console.log("IPTABLES ? " + !!IPTABLES);
 
 
 // # Polyfills in case you are using an older Node.js version
@@ -1343,7 +1343,7 @@ function main() {
 		
 		// Some other process might reset iptables, so also check if the nat:ing is enabled for user netns
 		if(IPTABLES) {
-		module_child_process.exec("iptables -S -t nat | grep -q -A POSTROUTING -s 10.0.0.0/16 -j MASQUERADE", EXEC_OPTIONS, function(error, stdout, stderr) {
+			module_child_process.exec("iptables -S -t nat | grep -qe '-A POSTROUTING -s 10.0.0.0/16 -j MASQUERADE'", EXEC_OPTIONS, function(error, stdout, stderr) {
 			if(error) {
 				log("nat POSTROUTING does Not exist for user netns. Adding it...", DEBUG);
 				module_child_process.exec("iptables -t nat -A POSTROUTING -s 10.0.0.0/16 -j MASQUERADE", EXEC_OPTIONS, function(error, stdout, stderr) {
@@ -1356,6 +1356,12 @@ function main() {
 			}
 		});
 		}
+		else {
+			log("IPTABLES=" + IPTABLES);
+		}
+	}
+	else {
+		log("NO_NETNS=" + NO_NETNS + " USERNAME=" + USERNAME + " process.platform=" + process.platform);
 	}
 	
 	if(info.uid == 0 && process.platform=="linux" && (!CRAZY && !INSIDE_DOCKER)) {
