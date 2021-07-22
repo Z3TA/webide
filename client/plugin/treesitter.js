@@ -13,7 +13,7 @@
 
 	If it doesn't work, wget the files from https://tree-sitter.github.io/tree-sitter/playground
 
-	Gotach: Content-Security-Policy prevents running wasm in Chrome !?
+	Gotcha: Content-Security-Policy prevents running wasm in Chrome !?
 
 */
 (function() {
