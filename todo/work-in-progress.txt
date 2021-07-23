@@ -3,7 +3,9 @@ Focus on editing web sites with SSG...
 
 ---
 
-http://webide-dev.se/?github=AlexanderC/nestjs-iacry/blob/1d4d56ef2e69894c955a07d7710f59dc66191a38/lib/decorators/helper.ts#terminal3#1
+cant get ip forwarding to work on local dev
+
+test: http://webide-dev.se/?github=AlexanderC/nestjs-iacry/blob/1d4d56ef2e69894c955a07d7710f59dc66191a38/lib/decorators/helper.ts#terminal3#1
 
 Upgrade server!
 
