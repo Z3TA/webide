@@ -293,9 +293,13 @@ var UTIL = {
 		
 		var lastChar = fullPath.substr(fullPath.length-1);
 		
+		var slashes = UTIL.occurrences(fullPath, "/");
+
 		var protocolIndex = fullPath.indexOf("://");
-		
-		if(lastChar != "/" && lastChar != "\\" && protocolIndex == -1) {
+
+		if(protocolIndex != -1) slashes = slashes - 2;
+
+		if(lastChar != "/" && lastChar != "\\" && slashes > 0) {
 			//console.warn("getFolders: getFolders: Path does not end with a slash! lastChar=" + lastChar + " fullPath=" + fullPath);
 			// Check if the path contains a file, and remove it
 			//console.log("getFolders: lastChar=" + lastChar + " fullPath=" + fullPath);
@@ -310,7 +314,7 @@ var UTIL = {
 				if(fullPath == "/") return ["/"];
 			}
 			//else console.warn("getFolders: Assuming " + filePart + " is a directory!");
-			}
+		}
 		
 		if(protocolIndex != -1) {
 			// It's probably an URL ...
@@ -336,10 +340,8 @@ var UTIL = {
 			
 			//console.log("hostname=" + hostname + " path=" + path);
 			
-			if(path.substr(0,1) != "/") {
-console.warn("Expected a slash after hostname=" + hostname + " fullPath=" + fullPath);
-			}
-			else path = path.substr(1); // Remove first slash
+			if(path.substr(0,1) == "/") path = path.substr(1); // Remove first slash
+			//else {console.warn("Expected a slash after hostname=" + hostname + " fullPath=" + fullPath);}
 			
 			if(path.substr(path.length-1) == "/") path = path.substr(0, path.length-1); // Remove ending slash if one exist
 			
@@ -362,7 +364,7 @@ console.warn("Expected a slash after hostname=" + hostname + " fullPath=" + full
 			
 		}
 		else {
-			// It's a file-system path
+			//console.log("It's a file-system path");
 			
 			// Windows driveIndex can be both C:\ and C:\\
 			var driveIndex = fullPath.indexOf(":\\");
@@ -408,7 +410,7 @@ console.warn("Expected a slash after hostname=" + hostname + " fullPath=" + full
 				
 			}
 			else {
-				// Asume unix-like path
+				//console.log("Asume unix-like path");
 				
 				var path = fullPath;
 				

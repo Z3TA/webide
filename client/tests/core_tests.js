@@ -133,6 +133,9 @@
 		// Make sure the folder path ends with a slash!
 		if(folders[0].charAt(folders[0].length-1) != "/") throw new Error("Unexpected: " + JSON.stringify(folders));
 		
+		var filePath = UTIL.getFolders("sftp://foo.bar/image.jpg");
+		if(folders[1].charAt(folders[1].length-1) == "/") throw new Error("Unexpected slash because last part was a file, not a folder: " + JSON.stringify(folders));
+
 		callback(true);
 		
 	});
