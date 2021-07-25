@@ -5,34 +5,6 @@ Focus on editing web sites with SSG...
 
 Trying to upload *many* images using SSG...
 
----
-
-Why is it using the share API and not just saving to the server !??? UNABLE TO REPEAT!
-
-2021-07-24 (22:11:29) HTTP-req 192.168.0.3: /share (server.js:4192:3)
-2021-07-24 (22:11:30) File upload: request.headers={"host":"192.168.0.3:8099","connection":"keep-alive","content-length":"11328429","user-agent":"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.101 Safari/537.36","content-type":"multipart/form-data; boundary=----WebKitFormBoundaryCzFfvAMvIb7DXVqS","accept":"*/*","origin":"http://192.168.0.3:8099","referer":"http://192.168.0.3:8099/","accept-encoding":"gzip, deflate","accept-language":"sv,en-US;q=0.9,en;q=0.8","cookie":"user=zeta; startedCounter=10"} (server.js:4329:4)
-2021-07-24 (22:11:30) File upload: Found sendToUser=zeta in cookies! (server.js:4335:5)
-2021-07-24 (22:11:30) File upload: File []: filename: , encoding: 7bit, mimetype: base64 (server.js:4363:5)
-2021-07-24 (22:11:30) File upload: File [] got 65416 bytes (server.js:4365:6)
-(node:16226) [DEP0022] DeprecationWarning: os.tmpDir() is deprecated. Use os.tmpdir() instead.
-2021-07-24 (22:11:30) File upload: File [] got 49125 bytes (server.js:4365:6)
-2021-07-24 (22:11:30) File upload: File [] got 65536 bytes (server.js:4365:6)
-2021-07-24 (22:11:30) Program exit
-                      
-                       
-events.js:174
-      throw er; // Unhandled 'error' event
-      ^
-
-Error: EISDIR: illegal operation on a directory, open '/tmp'
-Emitted 'error' event at:
-    at errorOrDestroy (internal/streams/destroy.js:107:12)
-    at WriteStream.onerror (_stream_readable.js:734:7)
-    at WriteStream.emit (events.js:198:13)
-    at lazyFs.open (internal/fs/streams.js:277:12)
-    at FSReqWrap.args [as oncomplete] (fs.js:140:20)
-2021-07-24 (22:11:30) IPC channel is closed! (user_worker.js:787:2)
-
 
 ---
 

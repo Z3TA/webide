@@ -4436,7 +4436,7 @@ console.error(err);
 						
 						function folderCreated(uploadFolder) {
 							
-							log("CFile upload: opying file: " + fromPath + " to " + toPath, DEBUG);
+							log("File upload: Copying file: " + fromPath + " to " + toPath, DEBUG);
 							module_fs.copyFile(fromPath, toPath, fileCopied);
 						}
 						

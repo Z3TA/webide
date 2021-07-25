@@ -2066,8 +2066,9 @@ else if(err.code == "ENETDOWN") {
 		
 		// SockJS can not handle large messages! Server disconnects if you send 50MB in one message
 		var lengthLimit = 5592408; // Ca 40 MB
+		//var lengthLimit = 55924; // Ca 400 kb for testing the uploadBigFile path...
 		if(text.length > lengthLimit) return uploadBigFile(path, text, inputBuffer, encoding, saveToDiskCallback);
-		// Posting to /share also seem to work when running as a desktop editor (not a cloud IDE) !
+		// Posting to /share also seem to work when running as a desktop editor (eg. not a cloud IDE, so it works on both the cloud IDE and desktop!) !
 		
 		//console.log("EDITOR.uploadSpeed=" + EDITOR.uploadSpeed + " text.length=" + text.length);
 		if(EDITOR.uploadSpeed && text.length / EDITOR.uploadSpeed > 1024) {
