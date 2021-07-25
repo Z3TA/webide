@@ -1259,7 +1259,7 @@ str = decoder.write(data);
 			
 		// If no encoding is specified in fs.readFile, then the raw buffer is returned.
 				
-		console.log("Read from disk: path=" + path);
+		console.log("Read from local file system: path=" + path);
 		
 				fs.readFile(path, function(err, buffer) {
 			if(err) {
@@ -1427,6 +1427,13 @@ API.move = function move(user, json, callback) {
 	newPath = user.translatePath(newPath);
 	if(newPath instanceof Error) return callback(newPath);
 	
+	if(newPath == oldPath) {
+		// When moving to the same path Nodejs will delete the file!!? :P
+		var error = new Error("oldPath is same as newPath=" + newPath);
+		error.code == "SAME_NAME";
+		return callback(error);
+	}
+
 	// Figure out if it's a directory or a file
 	var lastChar = oldPath.charAt(oldPath.length-1);
 	if(lastChar == "/" || lastChar == "\\") {
@@ -1682,10 +1689,10 @@ else if(protocol == "sftp:") {
 			// note: The file permissions wont change if the file already exists!
 		}
 		
-		console.log("saveToDisk: path=" + path + " options=" + JSON.stringify(options) + " json.public=" + json.public);
+		console.log("saveToDisk: path=" + path + " options=" + JSON.stringify(options) + " json.public=" + json.public + " text.length=" + text.length);
 		
 		fs.writeFile(path, text, options, function(err) {
-			//console.log("Attempting saving to local file system: " + path + " ...");
+			console.log("Attempting saving to local file system: " + path + " ...");
 			
 			if(err) {
 				console.warn("Unable to save " + path + "! Error: " + (err.message || err ) + " code=" + err.code);
@@ -1694,7 +1701,7 @@ else if(protocol == "sftp:") {
 				else saveToDiskCallback(err);
 			}
 			else {
-				//console.log("The file was successfully saved: " + path + "");
+				console.log("The file was successfully saved: " + path + "");
 				saveToDiskCallback(null, {path: user.toVirtualPath(path), hash: hash});
 			}
 		});

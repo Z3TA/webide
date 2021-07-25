@@ -2153,14 +2153,10 @@ else if(err.code == "ENETDOWN") {
 				//console.log("uploadBigFile: status=" + x.status);
 				if(x.status == 200) {
 					//console.log("uploadBigFile: Upload success!");
-					CLIENT.cmd("move", {oldPath: uploadPath, newPath: path}, function(err, hash) {
-						if(err) return error(new Error("Unable to move file after uploading! Error: " + err.message), err.code)
-						CLIENT.cmd("hash", {path: path}, function(err, hash) {
-							if(err) return error(new Error("Unable to hash file after uploading! Error: " + err.message), err.code)
-							
-							callback(null, path, hash);
-						});
-					});
+
+					if(uploadPath == path) moved(null);
+					else CLIENT.cmd("move", {oldPath: uploadPath, newPath: path}, moved);
+
 					if(progress) {
 						progress.style.display="none";
 						EDITOR.resizeNeeded();
@@ -2172,7 +2168,16 @@ else if(err.code == "ENETDOWN") {
 					error(new Error("Upload failed! path=" + path + " x.status=" + x.status + " text=" + UTIL.shortString(text) ));
 				}
 			}
-		};
+		}
+
+		function moved(err) {
+			if(err) return error(new Error("Unable to move file after uploading! Error: " + err.message), err.code)
+			CLIENT.cmd("hash", {path: path}, function(err, hash) {
+				if(err) return error(new Error("Unable to hash file after uploading! Error: " + err.message), err.code)
+
+				callback(null, path, hash);
+			});
+		}
 		
 		x.open('POST', '/share');
 		x.send(formData);
@@ -2180,7 +2185,7 @@ else if(err.code == "ENETDOWN") {
 		function error(error, code) {
 			if(code) error.code = code;
 			if(callback) {
-callback(error);
+				callback(error);
 				callback = null;
 			}
 			else {
@@ -11128,7 +11133,7 @@ function fileDrop(fileDropEvent) {
 		var items = fileDropEvent.dataTransfer.items;
 		var files = fileDropEvent.dataTransfer.files;
 		
-		//console.log("items.length=" + items.length + " files.length=" + files.length);
+		console.log("fileDrop: items.length=" + items.length + " files.length=" + files.length);
 		
 		var filesToSave = 0;
 		var filesSaved = 0;
@@ -11140,7 +11145,7 @@ function fileDrop(fileDropEvent) {
 		var done = false;
 		
 		if(items && items.length > 1) {
-			//console.log("fileDrop: Dropped " + items.length + " items ...");
+			console.log("fileDrop: Dropped " + items.length + " items ...");
 			var progressBar = document.createElement("progress");
 			progressBar.max = items.length;
 			progressBar.value = 0;
@@ -11209,6 +11214,7 @@ function fileDrop(fileDropEvent) {
 	
 	
 	function traverseFileTree(item, path) {
+			// When several files has been dropped into the editor...
 			console.log("fileDrop: traverseFileTree: item=" + item + " path=" + path);
 
 if(!EDITOR.user) return alertBox("Need to be logged in to upload files!");
@@ -11220,12 +11226,13 @@ if(!EDITOR.user) return alertBox("Need to be logged in to upload files!");
 			
 			item.file(function(file) {
 				var filePath = path + file.name;
-					//console.log("fileDrop:item.file: filePath=", filePath);
-				if(filePath.match(/(readme)|(main)|(index)/i) && !fileToOpen) fileToOpen = filePath;
+					console.log("fileDrop:item.file: filePath=", filePath);
+					if(filePath.match(/(readme)|(main)|(index)/i) && !fileToOpen) fileToOpen = filePath;
 				saveFile(file, path + file.name, true, fileSaved);
 			});
 		} else if (item.isDirectory) {
 			// Get folder contents
+				console.log("fileDrop: A directory was dropped! item.isDirectory=" + item.isDirectory);
 			var dirReader = item.createReader();
 			foldersToRead++;
 			dirReader.readEntries(function(entries) {
@@ -11301,6 +11308,8 @@ if(!EDITOR.user) return alertBox("Need to be logged in to upload files!");
 	
 	function saveFile(file, filePath, createPath, callback) {
 		
+			console.log("fileDrop: saveFile: filePath=" + filePath + " createPath=" + createPath + " file=", file);
+
 		if(typeof createPath == "function" && callback == undefined) {
 			callback = createPath;
 			createPath = false;
@@ -11343,6 +11352,7 @@ if(!EDITOR.user) return alertBox("Need to be logged in to upload files!");
 			else saveToDisk();
 			
 			function saveToDisk() {
+					console.log("fileDrop: saveFile: saveToDisk: filePath=" + filePath);
 				EDITOR.saveToDisk(filePath, data, false, "base64", callback);
 			}
 		};
