@@ -11208,7 +11208,7 @@ function fileDrop(fileDropEvent) {
 	
 	
 	function traverseFileTree(item, path) {
-			//console.log("fileDrop: traverseFileTree: item=" + item + " path=" + path);
+			console.log("fileDrop: traverseFileTree: item=" + item + " path=" + path);
 
 if(!EDITOR.user) return alertBox("Need to be logged in to upload files!");
 

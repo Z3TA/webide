@@ -4370,8 +4370,9 @@ function createHttpEndpoint(username, folder, callback) {
 				});
 				
 				// Save file in temp dir, then move it to the user home dir.
-				var saveTo = module_path.join(module_os.tmpDir(), module_path.basename(filename || fieldname));
-				file.pipe(module_fs.createWriteStream(saveTo));
+					var saveTo = module_path.join(module_os.tmpdir(), module_path.basename(filename || fieldname));
+					log("File upload: piping to write stream: saveTo=" + saveTo);
+					file.pipe(module_fs.createWriteStream(saveTo));
 				files.push(saveTo);
 				
 			});
