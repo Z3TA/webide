@@ -41,9 +41,12 @@
 		
 		var defaultPath;
 		var rootFolder = EDITOR.workingDirectory;
+		var currentFileFolder = UTIL.getDirectoryFromPath(currentFile.path);
 		if(filePath.match(/\/\\/)) defaultPath = filePath;
-		else defaultPath = UTIL.joinPaths(rootFolder, filePath);
+		else defaultPath = UTIL.joinPaths(currentFileFolder, filePath);
 		
+		console.log("insert_dropped_file: rootFolder=" + rootFolder + " currentFileFolder=" + currentFileFolder + " filePath=" + filePath + " defaultPath=" + defaultPath);
+
 		if(isImage) var whereToSaveMessage = "Where to save the image ?"
 		else var whereToSaveMessage = "Where to save the file ?";
 		
