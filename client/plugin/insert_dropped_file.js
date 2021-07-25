@@ -70,10 +70,13 @@
 							// In the static site generator plugin, header and footer files need to have absolute media paths 
 							var fileSrc = path.replace(rootFolder, "/"); 
 						}
-						else {
+						else if(currentFileFolder != UTIL.getDirectoryFromPath(path) ) {
 							// File paths needs to be relative!
 							var relativePath = UTIL.getRelativeRootDots(currentFile.path, rootFolder);
 							var fileSrc = relativePath + path.replace(rootFolder, "");
+						}
+						else {
+							var fileSrc = UTIL.getFilenameFromPath(path);
 						}
 						
 						if(isImage) {
