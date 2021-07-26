@@ -3,8 +3,11 @@ Focus on editing web sites with SSG...
 
 ---
 
-Trying to upload *many* images using SSG...
-
+When dropping a single image into the editor, and it's not a text file, fileDrop event listeners are called, and the fileDrop listener handles uplading/saving
+But when dropping many files, fileDrop event listeners are not called, the files are saved in the uploads folder...
+Save logic would have to be implemented in all fileDrop event listeners... So should we first save the files, then call the fileDrop listeners with the path to the file(s) !?
+Or add a new event "filesDropped" !?
+Or should there be a EDITOR.saveDroppedFiles() function!?
 
 ---
 

@@ -11359,14 +11359,6 @@ if(!EDITOR.user) return alertBox("Need to be logged in to upload files!");
 		reader.readAsDataURL(file); // For binary files (will be base64 encoded)
 	}
 	
-	function notSupported(fileType) {
-		return fileType && // Some files will have fileType=="" (most of them we want to open)
-		fileType.indexOf("text") == -1 && 
-		fileType.indexOf("javascript") == -1 && 
-		fileType.indexOf("xml") == -1 && 
-		fileType.indexOf("json") == -1;
-	}
-	
 	function supported(fileType) {
 		// Return true if the file is supported by the editor. Or false if it's not supported.
 		// Example: fileType=text/plain
