@@ -11135,7 +11135,7 @@ function fileDrop(fileDropEvent) {
 		var files = fileDropEvent.dataTransfer.files;
 		var caret = EDITOR.mousePositionToCaret(); // Where in the current file/code the files was dropped
 
-		console.log("fileDrop: items.length=" + items.length + " files.length=" + files.length);
+		//console.log("fileDrop: items.length=" + items.length + " files.length=" + files.length);
 		
 		var filesToSave = 0;
 		var filesSaved = 0;
@@ -11148,7 +11148,7 @@ function fileDrop(fileDropEvent) {
 		var filesUploadedSuccessfully = []; // When dropping many files
 
 		if(items && items.length > 1) {
-			console.log("fileDrop: Dropped " + items.length + " items ...");
+			//console.log("fileDrop: Dropped " + items.length + " items ...");
 			var progressBar = document.createElement("progress");
 			progressBar.max = items.length;
 			progressBar.value = 0;
@@ -11218,7 +11218,7 @@ function fileDrop(fileDropEvent) {
 	
 	function traverseFileTree(item, path) {
 			// When several files has been dropped into the editor...
-			console.log("fileDrop: traverseFileTree: item=" + item + " path=" + path);
+			//console.log("fileDrop: traverseFileTree: item=" + item + " path=" + path);
 
 if(!EDITOR.user) return alertBox("Need to be logged in to upload files!");
 
@@ -11229,7 +11229,7 @@ if(!EDITOR.user) return alertBox("Need to be logged in to upload files!");
 			
 			item.file(function(file) {
 				var filePath = path + file.name;
-				console.log("fileDrop:item.file: filePath=", filePath);
+					//console.log("fileDrop:item.file: filePath=", filePath);
 				if(filePath.match(/(readme)|(main)|(index)/i) && !fileToOpen) fileToOpen = filePath;
 				saveFile(file, path + file.name, true, function(err, path) {
 					fileSaved(err, path, file.type);
@@ -11238,7 +11238,7 @@ if(!EDITOR.user) return alertBox("Need to be logged in to upload files!");
 				
 		} else if (item.isDirectory) {
 					// Get folder contents
-					console.log("fileDrop: A directory was dropped! item.isDirectory=" + item.isDirectory);
+				//console.log("fileDrop: A directory was dropped! item.isDirectory=" + item.isDirectory);
 					var dirReader = item.createReader();
 					foldersToRead++;
 					dirReader.readEntries(function(entries) {
@@ -11332,7 +11332,7 @@ if(!EDITOR.user) return alertBox("Need to be logged in to upload files!");
 	
 	function saveFile(file, filePath, createPath, callback) {
 		
-			console.log("fileDrop: saveFile: filePath=" + filePath + " createPath=" + createPath + " file=", file);
+			//console.log("fileDrop: saveFile: filePath=" + filePath + " createPath=" + createPath + " file=", file);
 
 		if(typeof createPath == "function" && callback == undefined) {
 			callback = createPath;
@@ -11376,7 +11376,7 @@ if(!EDITOR.user) return alertBox("Need to be logged in to upload files!");
 			else saveToDisk();
 			
 			function saveToDisk() {
-					console.log("fileDrop: saveFile: saveToDisk: filePath=" + filePath);
+					//console.log("fileDrop: saveFile: saveToDisk: filePath=" + filePath);
 				EDITOR.saveToDisk(filePath, data, false, "base64", callback);
 			}
 		};

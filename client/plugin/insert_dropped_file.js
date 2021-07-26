@@ -17,7 +17,7 @@
 	
 	function insertDroppedFiles(files, caret) {
 
-		console.log("insert_dropped_file: insertDroppedFiles: files=", files);
+		//console.log("insert_dropped_file: insertDroppedFiles: files=", files);
 
 		var currentFile = EDITOR.currentFile;
 
@@ -31,7 +31,7 @@
 
 		var handled = false;
 		for (var i=0; i<files.length; i++) {
-			console.log("insert_dropped_file: insertDroppedFiles forEach files[" + i + "]=", files[i]);
+			//console.log("insert_dropped_file: insertDroppedFiles forEach files[" + i + "]=", files[i]);
 			if(files[i].type.indexOf("image") != -1) {
 				handled = true;
 				break;
@@ -78,7 +78,7 @@
 		
 		function insertImages() {
 			for (var i=0; i<files.length; i++) {
-				console.log("insert_dropped_file: insertDroppedFiles forEach files[" + i + "]=", files[i]);
+				//console.log("insert_dropped_file: insertDroppedFiles forEach files[" + i + "]=", files[i]);
 				if(files[i].type.indexOf("image") != -1) {
 					insertImage(files[i].path, currentFile);
 				}
@@ -89,7 +89,7 @@
 	}
 
 	function insertImage(path, currentFile) {
-		console.log("insert_dropped_file: insertImage: path=" + path);
+		//console.log("insert_dropped_file: insertImage: path=" + path);
 		currentFile.insertText('<img src="' + relativeOrAbsolutePath(path) + '" />');
 		currentFile.insertLineBreak();
 	}
@@ -146,7 +146,7 @@
 		if(filePath.match(/\/\\/)) defaultPath = filePath;
 		else defaultPath = UTIL.joinPaths(currentFileFolder, filePath);
 		
-		console.log("insert_dropped_file: currentFileFolder=" + currentFileFolder + " filePath=" + filePath + " defaultPath=" + defaultPath);
+		//console.log("insert_dropped_file: currentFileFolder=" + currentFileFolder + " filePath=" + filePath + " defaultPath=" + defaultPath);
 
 		if(isImage) var whereToSaveMessage = "Where to save the image ?"
 		else var whereToSaveMessage = "Where to save the file ?";
@@ -158,11 +158,11 @@
 		function askWhereToSave() {
 			promptBox(whereToSaveMessage, {defaultValue: defaultPath}, function(filePath) {
 				if(filePath) {
-					console.log("insert_dropped_file: Saving file: filePath=" + filePath);
+					//console.log("insert_dropped_file: Saving file: filePath=" + filePath);
 					saveFile(filePath, function fileSaved(err, path) {
 						if(err) return alertBox(err.message);
 						
-						console.log("insert_dropped_file: Saved file: " + path);
+						//console.log("insert_dropped_file: Saved file: " + path);
 						
 						var fileSrc = relativeOrAbsolutePath(path);
 
@@ -192,7 +192,7 @@
 						
 						function imageLoaded(width, height) {
 
-							console.log("insert_dropped_file: imageLoaded: width=" + width + " height=" + height);
+							//console.log("insert_dropped_file: imageLoaded: width=" + width + " height=" + height);
 
 							currentFile.moveCaretToIndex(caret.index);
 
@@ -216,7 +216,7 @@
 			
 			var folders = UTIL.getFolders(filePath);
 			
-			console.log("insert_dropped_file: saveFile: filePath=" + filePath + " folders=" + JSON.stringify(folders));
+			//console.log("insert_dropped_file: saveFile: filePath=" + filePath + " folders=" + JSON.stringify(folders));
 
 			if(folders.length > 1) {
 				EDITOR.folderExistIn(folders[folders.length-2], UTIL.getFolderName(folders[folders.length-1]), function (err, path) {
@@ -247,7 +247,7 @@ if(err) return alertBox(err.message);
 						
 					}
 					else {
-						console.log("insert_dropped_file: Path exist!");
+						//console.log("insert_dropped_file: Path exist!");
 						readFile();
 					}
 				});
@@ -256,7 +256,7 @@ if(err) return alertBox(err.message);
 			
 			function readFile() {
 
-				console.log("insert_dropped_file: Reading file..");
+				//console.log("insert_dropped_file: Reading file..");
 
 				var reader = new FileReader();
 				reader.onload = function (event) {
@@ -267,7 +267,7 @@ if(err) return alertBox(err.message);
 					data = data.replace("data:" + fileType + ";base64,", "");
 
 
-					console.log("insert_dropped_file: Saving file... filePath=" + filePath);
+					//console.log("insert_dropped_file: Saving file... filePath=" + filePath);
 					EDITOR.saveToDisk(filePath, data, false, "base64", callback);
 				};
 				reader.readAsDataURL(dataFile); // For binary files (will be base64 encoded)
