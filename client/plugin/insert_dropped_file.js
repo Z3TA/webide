@@ -5,16 +5,116 @@
 		load: function loadInsertDroppedFile() {
 			
 			EDITOR.on("fileDrop", insertDroppedFile);
-			
+			EDITOR.on("filesDropped", insertDroppedFiles);
+
 		},
 		unload: function unloadInsertDroppedFile() {
 			
 			EDITOR.removeEvent("fileDrop", insertDroppedFile);
-
+			EDITOR.removeEvent("filesDropped", insertDroppedFiles);
 		}
 	});
 	
-	
+	function insertDroppedFiles(files, caret) {
+
+		console.log("insert_dropped_file: insertDroppedFiles: files=", files);
+
+		var currentFile = EDITOR.currentFile;
+
+		if(!currentFile) return PASS;
+
+		var currentFileExt = UTIL.getFileExtension(currentFile.path);
+		if(!currentFileExt.match(/html?/i)) return PASS;
+
+		// Side effect: Move caret to where the files where dropped
+		currentFile.moveCaretToIndex(caret.index);
+
+		var handled = false;
+		for (var i=0; i<files.length; i++) {
+			console.log("insert_dropped_file: insertDroppedFiles forEach files[" + i + "]=", files[i]);
+			if(files[i].type.indexOf("image") != -1) {
+				handled = true;
+				break;
+			}
+		}
+
+		if(!handled) return PASS;
+		
+		var fileNames = files.map(function(file) {
+			return UTIL.getFilenameFromPath(file.path);
+		});
+
+		var currentFileDir = UTIL.getDirectoryFromPath(currentFile.path);
+		var firstFileDir = UTIL.getDirectoryFromPath(files[0].path);
+
+		if(currentFileDir != firstFileDir) {
+			EDITOR.pathPickerTool({
+				defaultPath: currentFileDir,
+				directory: true,
+				instruction: "Move the dropped files (" + fileNames.join(",") + ") to the following location? " 
+			}, function(err, newDir) {
+				if(err) {
+					if(err.code == "CANCEL") return insertImages();
+					else throw err;
+				}
+
+				var filesMoved = 0;
+				files.forEach(function(file, i) {
+					EDITOR.move(file.path, UTIL.joinPaths(newDir, fileNames[i]), function fileMoved(err, newPath) {
+						if(err) throw err;
+						filesMoved++;
+
+						if(file.type.indexOf("image") != -1) {
+							insertImage(newPath, currentFile);
+						}
+
+					});
+				});
+
+			});
+		}
+		else insertImages();
+
+		
+		function insertImages() {
+			for (var i=0; i<files.length; i++) {
+				console.log("insert_dropped_file: insertDroppedFiles forEach files[" + i + "]=", files[i]);
+				if(files[i].type.indexOf("image") != -1) {
+					insertImage(files[i].path, currentFile);
+				}
+			}
+		}
+
+		return HANDLED;
+	}
+
+	function insertImage(path, currentFile) {
+		console.log("insert_dropped_file: insertImage: path=" + path);
+		currentFile.insertText('<img src="' + relativeOrAbsolutePath(path) + '" />');
+		currentFile.insertLineBreak();
+	}
+
+	function relativeOrAbsolutePath(path) {
+
+		var currentFile = EDITOR.currentFile;
+		var currentFileName = UTIL.getFilenameFromPath(currentFile.path);
+		var currentFileFolder = UTIL.getDirectoryFromPath(currentFile.path);
+		var rootFolder = EDITOR.workingDirectory;
+
+		if(currentFileName.match(/^(header|footer).html?/)) {
+			// In the static site generator plugin, header and footer files need to have absolute media paths
+			return path.replace(rootFolder, "/");
+		}
+		else if(currentFileFolder != UTIL.getDirectoryFromPath(path) ) {
+			// File paths needs to be relative!
+			var relativePath = UTIL.getRelativeRootDots(currentFile.path, rootFolder);
+			return relativePath + path.replace(rootFolder, "");
+		}
+		else {
+			return UTIL.getFilenameFromPath(path);
+		}
+	}
+
 	function insertDroppedFile(dataFile) {
 		// When a file is dropped into the editor
 		
@@ -41,12 +141,12 @@
 		}
 		
 		var defaultPath;
-		var rootFolder = EDITOR.workingDirectory;
 		var currentFileFolder = UTIL.getDirectoryFromPath(currentFile.path);
+		
 		if(filePath.match(/\/\\/)) defaultPath = filePath;
 		else defaultPath = UTIL.joinPaths(currentFileFolder, filePath);
 		
-		console.log("insert_dropped_file: rootFolder=" + rootFolder + " currentFileFolder=" + currentFileFolder + " filePath=" + filePath + " defaultPath=" + defaultPath);
+		console.log("insert_dropped_file: currentFileFolder=" + currentFileFolder + " filePath=" + filePath + " defaultPath=" + defaultPath);
 
 		if(isImage) var whereToSaveMessage = "Where to save the image ?"
 		else var whereToSaveMessage = "Where to save the file ?";
@@ -64,21 +164,8 @@
 						
 						console.log("insert_dropped_file: Saved file: " + path);
 						
-						var currentFileName = UTIL.getFilenameFromPath(currentFile.path);
-						
-						if(currentFileName.match(/^(header|footer).html?/)) {
-							// In the static site generator plugin, header and footer files need to have absolute media paths 
-							var fileSrc = path.replace(rootFolder, "/"); 
-						}
-						else if(currentFileFolder != UTIL.getDirectoryFromPath(path) ) {
-							// File paths needs to be relative!
-							var relativePath = UTIL.getRelativeRootDots(currentFile.path, rootFolder);
-							var fileSrc = relativePath + path.replace(rootFolder, "");
-						}
-						else {
-							var fileSrc = UTIL.getFilenameFromPath(path);
-						}
-						
+						var fileSrc = relativeOrAbsolutePath(path);
+
 						if(isImage) {
 							// todo: Some sort of crop and resize tool
 							

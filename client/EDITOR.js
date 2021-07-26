@@ -196,7 +196,8 @@ EDITOR.eventListeners = { // Use EDITOR.on to add listeners to these events:
 		commitTool: [],
 		resolveTool: [],
 		mergeTool: [],
-		fileDrop: [],
+		fileDrop: [], // Needs to handle drop event
+	filesDropped: [], // Gives a list of uploaded files
 		openFileTool: [],
 	ctxMenu: [],
 		voiceCommand: [],
@@ -11132,7 +11133,8 @@ function fileDrop(fileDropEvent) {
 		
 		var items = fileDropEvent.dataTransfer.items;
 		var files = fileDropEvent.dataTransfer.files;
-		
+		var caret = EDITOR.mousePositionToCaret(); // Where in the current file/code the files was dropped
+
 		console.log("fileDrop: items.length=" + items.length + " files.length=" + files.length);
 		
 		var filesToSave = 0;
@@ -11143,7 +11145,8 @@ function fileDrop(fileDropEvent) {
 		var foldersToRead = 0;
 		var foldersRead = 0;
 		var done = false;
-		
+		var filesUploadedSuccessfully = []; // When dropping many files
+
 		if(items && items.length > 1) {
 			console.log("fileDrop: Dropped " + items.length + " items ...");
 			var progressBar = document.createElement("progress");
@@ -11226,17 +11229,20 @@ if(!EDITOR.user) return alertBox("Need to be logged in to upload files!");
 			
 			item.file(function(file) {
 				var filePath = path + file.name;
-					console.log("fileDrop:item.file: filePath=", filePath);
-					if(filePath.match(/(readme)|(main)|(index)/i) && !fileToOpen) fileToOpen = filePath;
-				saveFile(file, path + file.name, true, fileSaved);
+				console.log("fileDrop:item.file: filePath=", filePath);
+				if(filePath.match(/(readme)|(main)|(index)/i) && !fileToOpen) fileToOpen = filePath;
+				saveFile(file, path + file.name, true, function(err, path) {
+					fileSaved(err, path, file.type);
+				});
 			});
+				
 		} else if (item.isDirectory) {
-			// Get folder contents
-				console.log("fileDrop: A directory was dropped! item.isDirectory=" + item.isDirectory);
-			var dirReader = item.createReader();
-			foldersToRead++;
-			dirReader.readEntries(function(entries) {
-				foldersRead++;
+					// Get folder contents
+					console.log("fileDrop: A directory was dropped! item.isDirectory=" + item.isDirectory);
+					var dirReader = item.createReader();
+					foldersToRead++;
+					dirReader.readEntries(function(entries) {
+						foldersRead++;
 				progressBar.value = filesSaved+foldersRead;
 				for (var i=0; i<entries.length; i++) {
 					traverseFileTree(entries[i], path + item.name + "/");
@@ -11247,22 +11253,27 @@ if(!EDITOR.user) return alertBox("Need to be logged in to upload files!");
 		}
 		progressBar.max = Math.max(progressBar.max, filesToSave+foldersToRead);
 		
-		function fileSaved(err, path) {
-			if(err) {
-				console.error(err);
-				uploadErrors.push(err);
-			}
-			filesSaved++;
-			progressBar.value = filesSaved+foldersRead;
-			if(path) lastPath = path;
+				function fileSaved(err, path, type) {
+					if(err) {
+						console.error(err);
+						uploadErrors.push(err);
+					}
+					else {
+					filesUploadedSuccessfully.push({type: type, path: path});
+				}
+
+				filesSaved++;
+				progressBar.value = filesSaved+foldersRead;
+				if(path) lastPath = path;
 				//console.log("fileDrop:fileSaved: path=" + path + " filesToSave=" + filesToSave + " filesSaved=" + filesSaved + " foldersRead=" + foldersRead + " foldersToRead=" + foldersToRead);
-			if(filesToSave == filesSaved && foldersRead == foldersToRead) uploadComplete();
-		}
+			
+				if(filesToSave == filesSaved && foldersRead == foldersToRead) uploadComplete();
+			}
 		
-		function uploadComplete() {
+			function uploadComplete() {
 				//console.log("fileDrop:uploadComplete: filesToSave=" + filesToSave + " filesSaved=" + filesSaved + " items.length=" + items.length);
 			
-			if(done) {
+				if(done) {
 					//console.warn("fileDrop:uploadComplete: Already done!"); // Might happen on rare ocations, actually should never happen! But it did, once (unable to repeat)
 				return;
 			}
@@ -11274,19 +11285,32 @@ if(!EDITOR.user) return alertBox("Need to be logged in to upload files!");
 				for (var i=0; i<uploadErrors.length; i++) failMsg += "\n" + uploadErrors[i];
 				return alertBox(failMsg);
 			}
-			var folder = UTIL.getDirectoryFromPath(lastPath);
-			var folders = UTIL.getFolders(folder);
-			var baseFolder = folders.length > 0 ? folders[folders.length-1] : "/upload/";
+
+				footer.removeChild(progressBar);
+				EDITOR.resizeNeeded(); // To get rid of progress bar
+
+				var f = EDITOR.eventListeners.filesDropped.map(funMap);
+				var handledByPlugin = false;
+				//console.log("fileDrop: File is not supported. Calling fileDrop listeners (" +f.length + ")");
+				for(var i=0, h=false; i<f.length; i++) {
+					h = f[i](filesUploadedSuccessfully, caret);
+					if(h) handledByPlugin = true;
+				}
+
+				if(handledByPlugin) return;
+
+
+				var folder = UTIL.getDirectoryFromPath(lastPath);
+				var folders = UTIL.getFolders(folder);
+				var baseFolder = folders.length > 0 ? folders[folders.length-1] : "/upload/";
 			
 				//console.log("baseFolder=" + baseFolder + " folders=" + JSON.stringify(folders));
 			
-			footer.removeChild(progressBar);
+				if(filesSaved > 1) EDITOR.fileExplorer(baseFolder);
+				else if(filesSaved == 1 && lastPath) fileToOpen = lastPath;
 			
-			if(filesSaved > 1) EDITOR.fileExplorer(baseFolder);
-			else if(filesSaved == 1 && lastPath) fileToOpen = lastPath;
-			
-			if(fileToOpen) {
-				var fileExtension = UTIL.getFileExtension(fileToOpen);
+				if(fileToOpen) {
+					var fileExtension = UTIL.getFileExtension(fileToOpen);
 					//console.log("fileDrop: fileToOpen=" + fileToOpen + " fileExtension=" + fileExtension);
 				// Open right away if it's a supported file
 				if(EDITOR.parseFileExtensionAsCode.indexOf(fileExtension) != -1 || EDITOR.plainTextFileExtensions.indexOf(fileExtension) != -1) {
@@ -11301,7 +11325,7 @@ if(!EDITOR.user) return alertBox("Need to be logged in to upload files!");
 				}
 			}
 			
-			EDITOR.resizeNeeded(); // To get rid of progress bar
+			
 			
 		}
 	}
