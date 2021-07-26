@@ -3,7 +3,7 @@ Focus on editing web sites with SSG...
 
 ---
 
-
+I want to preview the html file on the SFTP drive ...
 
 ---
 
