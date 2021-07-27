@@ -148,6 +148,8 @@ alertBox(wysiwygEditor.sourceFile.path + " contains SSG scripts which is not yet
 		
 		wysiwygEditor.sources = [];
 		
+		wysiwygEditor.compiledSnippets = [];
+
 		if(compiledSource) {
 			/*
 				If the source code has been "compiled". For example in case of the built in Static Site Generator (SSG) the 
@@ -192,7 +194,7 @@ alertBox(wysiwygEditor.sourceFile.path + " contains SSG scripts which is not yet
 
 			var reSnippetCode = new RegExp(UTIL.escapeRegExp(wysiwygEditor.snippetCodeStart) + ".*" + wysiwygEditor.snippetCodeEnd, "g");
 			var compiledSnippetsRegexString = "";
-			wysiwygEditor.compiledSnippets = [];
+			
 			var start = 0;
 			var compiledSnippetsIndex = 0;
 			while(match = reSnippetCode.exec(srcHTML) != null) {
@@ -1752,6 +1754,18 @@ alertBox(wysiwygEditor.sourceFile.path + " contains SSG scripts which is not yet
 		
 		//console.warn("(re)loading preview window ...");
 		
+		try {
+			var x = wysiwygEditor.previewWin.screenX;
+		}
+		catch(err) {
+			if( UTIL.sameOrigin(wysiwygEditor.url, document.location.href) ) {
+				return alertBox(BROWSER + " has trouble accessing the preview window. Try another browser! Error: " + err.message);
+			}
+			else { 
+				return alertBox("Unable to access " + wysiwygEditor.url + " from " + document.location.href + " (not same origin)");
+			}
+		}
+
 		oldPreviewWindowPosition = {
 			x: wysiwygEditor.previewWin.screenX || wysiwygEditor.previewWin.screenLeft, 
 			y: wysiwygEditor.previewWin.screenY || wysiwygEditor.previewWin.screenTop

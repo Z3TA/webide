@@ -2637,6 +2637,22 @@ else {
 		else return "/";
 	},
 	
+	sameOrigin: function isSameOrigin(urlA, urlB) {
+		// schemes, hostname and port needs to be the same!
+		var a = UTIL.getLocation(urlA);
+		var b = UTIL.getLocation(urlB);
+
+		if(a.origin == b.origin) return true;
+
+		var errors = [];
+		if( a.protocol != b.protocol ) errors.push("protocol: " + a.protocol + " != " + b.protocol);
+		if( a.host != b.host ) errors.push("host: " + a.host + " != " + b.host);
+		if( a.port != b.port ) errors.push("port: " + a.port + " != " + b.port);
+
+		console.error(errors.join("\n"));
+		return false;
+	},
+
 	isSamePath: function isSamePath(a, b) {
 		// Compares two paths
 		
