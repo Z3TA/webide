@@ -239,30 +239,34 @@ EDITOR.discoveryBar.remove(discoveryBarIcon);
 			}
 			var fileName = UTIL.getFilenameFromPath(file.path);
 			
-			//console.log("web_preview: urlPath=" + urlPath + " paths=" + JSON.stringify(paths) + " fileName=" + fileName);
+			console.log("web_preview: urlPath=" + urlPath + " paths=" + JSON.stringify(paths) + " fileName=" + fileName + " json.url=" + json.url);
 			
 			var url = UTIL.joinPaths(urlPath, paths, fileName);
 			
 			//console.log("web_preview: url=" + url);
 			
-			var wEditor = new WysiwygEditor({
-				sourceFile: file,
-				onlyPreview: !!!wysiwyg,
-				url: url,
-			});
-			
-			wEditor.onClose = function() {
-				CLIENT.cmd("stop_serve", {folder: folder}, function httpServerStopped(err, json) {
-					if(err) console.warn(err.message);
+			// note: we might not need jsDiff?!
+			EDITOR.loadScript("/JsDiff.js", function(err) {
+				if(err) throw err;
+
+				var wEditor = new WysiwygEditor({
+					sourceFile: file,
+					onlyPreview: !!!wysiwyg,
+					url: url,
 				});
-			}
-			
-			
-			if(wysiwyg) EDITOR.stat("web_wysiwyg");
-			else EDITOR.stat("web_preview");
-			
+
+				wEditor.onClose = function() {
+					CLIENT.cmd("stop_serve", {folder: folder}, function httpServerStopped(err, json) {
+						if(err) console.warn(err.message);
+					});
+				}
+
+
+				if(wysiwyg) EDITOR.stat("web_wysiwyg");
+				else EDITOR.stat("web_preview");
+
+			});
 		});
 	}
-	
 	
 })();

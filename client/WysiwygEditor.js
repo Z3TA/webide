@@ -223,33 +223,36 @@ alertBox(wysiwygEditor.sourceFile.path + " contains SSG scripts which is not yet
 			}
 
 
+			wysiwygEditor.ignoreTransform = UTIL.textDiff(srcHTML, rawMainHtml);
+
+			// Make sure there are no errors
+
+			var lbCountSrc = UTIL.occurrences(srcHTML, lbSrc);
+			var lbCountMain = UTIL.occurrences(rawMainHtml, lbMain);
+
+			var removed = wysiwygEditor.ignoreTransform.removed.length;
+			var inserted = wysiwygEditor.ignoreTransform.inserted.length;
+
+			if( (lbCountSrc - removed) != (lbCountMain - inserted) ) {
+				var lbCountSrcBeforeDiff = UTIL.occurrences(srcHTML, lbSrc);
+				var lbCountMainBeforeDiff = UTIL.occurrences(rawMainHtml, lbMain);
+
+				//console.log("lbCountSrcBeforeDiff=" + lbCountSrcBeforeDiff);
+				//console.log("lbCountMainBeforeDiff=" + lbCountMainBeforeDiff);
+
+				//console.log("wysiwygEditor.lineBreak=" + UTIL.lbChars(wysiwygEditor.lineBreak));
+
+				//console.log("srcHTML=" + UTIL.lbChars(srcHTML));
+				//console.log("rawMainHtml=" + UTIL.lbChars(rawMainHtml));
+				throw new Error("Not same amount of rows! lbCountSrc=" + lbCountSrc + " (" + UTIL.lbChars(lbSrc) + ") lbCountMain=" + lbCountMain + " (" + UTIL.lbChars(lbMain) + ") removed=" + removed + " inserted=" + inserted + "  diff=" + JSON.stringify(wysiwygEditor.ignoreTransform, null, 2));
+			}
+
+			//console.log("wysiwygEditor.ignoreTransform=" + JSON.stringify(wysiwygEditor.ignoreTransform, null, 2));
+
+
 		} // if compiledSource
 
-		wysiwygEditor.ignoreTransform = UTIL.textDiff(srcHTML, rawMainHtml);
-			
-		// Make sure there are no errors
-			
-		var lbCountSrc = UTIL.occurrences(srcHTML, lbSrc);
-		var lbCountMain = UTIL.occurrences(rawMainHtml, lbMain);
-			
-		var removed = wysiwygEditor.ignoreTransform.removed.length;
-		var inserted = wysiwygEditor.ignoreTransform.inserted.length;
-			
-		if( (lbCountSrc - removed) != (lbCountMain - inserted) ) {
-			var lbCountSrcBeforeDiff = UTIL.occurrences(srcHTML, lbSrc);
-			var lbCountMainBeforeDiff = UTIL.occurrences(rawMainHtml, lbMain);
-				
-			//console.log("lbCountSrcBeforeDiff=" + lbCountSrcBeforeDiff);
-			//console.log("lbCountMainBeforeDiff=" + lbCountMainBeforeDiff);
-				
-			//console.log("wysiwygEditor.lineBreak=" + UTIL.lbChars(wysiwygEditor.lineBreak));
-				
-			//console.log("srcHTML=" + UTIL.lbChars(srcHTML));
-			//console.log("rawMainHtml=" + UTIL.lbChars(rawMainHtml));
-			throw new Error("Not same amount of rows! lbCountSrc=" + lbCountSrc + " (" + UTIL.lbChars(lbSrc) + ") lbCountMain=" + lbCountMain + " (" + UTIL.lbChars(lbMain) + ") removed=" + removed + " inserted=" + inserted + "  diff=" + JSON.stringify(wysiwygEditor.ignoreTransform, null, 2));
-		}
-			
-		//console.log("wysiwygEditor.ignoreTransform=" + JSON.stringify(wysiwygEditor.ignoreTransform, null, 2));
+		
 			
 		wysiwygEditor.setStartRow();
 			

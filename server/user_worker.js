@@ -737,6 +737,10 @@ process.on('message', function commandMessage(message) {
 			send({error: "API error: Unknown command: " + command});
 		}
 		else {
+
+			var msgResp = {};
+			if(message.internal) msgResp.internal = true;
+
 			funToRun(user, json, function ranApi(err, answer) {
 				if(err) {
 					
@@ -747,27 +751,27 @@ process.on('message', function commandMessage(message) {
 						log("err.stack=" + JSON.stringify(err.stack));
 					}
 					
-					var msg = {
-						error: "API error: " + (err.message ? err.message : err) + ""
-					}
-					
+					msgResp.error = "API error: " + (err.message ? err.message : err) + "";
+
 					if(err.code) {
 						console.log("err.code=" + err.code);
-						msg.errorCode = err.code;
+						msgResp.errorCode = err.code;
 					}
 					
-					if(answer) msg.resp = answer;
-					
-					send(msg);
-					
+					if(answer) msgResp.resp = answer;
+					else msgResp.resp = 1; // Always send a resp prop so the server.js know what to do
+
 				}
 				else {
 					if(!answer) {
 						log("No data in answer from command=" + command + " json=" + JSON.stringify(json), WARN);
 						answer = {};
 					}
-					send({resp: answer});
+
+					msgResp.resp = answer;
 				}
+
+				send(msgResp);
 			});
 		}
 	}
@@ -821,13 +825,13 @@ API.run_nodejs = function run_nodejs(user, json, callback) {
 	}
 	
 	function run() {
-	if(user.runningNodeJsScripts.hasOwnProperty(filePath)) {
-		// Stop the current running script before starting the same script again
-		stopNodeJsScript(filePath, function nodeJsScriptKilled() {
+		if(user.runningNodeJsScripts.hasOwnProperty(filePath)) {
+			// Stop the current running script before starting the same script again
+			stopNodeJsScript(filePath, function nodeJsScriptKilled() {
 				runNodeJsScript(filePath, json.args, json.installAllModules, debugit, nodePath, callback);
-		});
-	}
-	else runNodeJsScript(filePath, json.args, json.installAllModules, debugit, nodePath, callback);
+			});
+		}
+		else runNodeJsScript(filePath, json.args, json.installAllModules, debugit, nodePath, callback);
 	}
 }
 

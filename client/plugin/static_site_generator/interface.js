@@ -1811,7 +1811,7 @@ for(var i=0; i<options.length; i++) {
 								if(err) throw err;
 								
 								// note: we might not need jsDiff?!
-								loadScript("/jsDiff.js", function(err) {
+								EDITOR.loadScript("/JsDiff.js", function(err) {
 									if(err) throw err;
 
 									var compiledSource = txt;

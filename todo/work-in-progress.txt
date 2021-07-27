@@ -5,6 +5,8 @@ Focus on editing web sites with SSG...
 
 I want to preview the html file on the SFTP drive ...
 
+http endpoints serve local file, ask the user worker to read the file so it can access remote file systemes such as sftp!
+
 ---
 
 cant get ip forwarding to work on local dev

@@ -259,6 +259,9 @@ var APC = String.fromCharCode(159);
 
 var USER_CONNECTIONS = {}; // username: {connections: {id: connection}, ...}
 
+var INTERNAL_USERWORKER_REQ = {}; // id: callback : For sending internal requests to the server worker
+var INTERNAL_USERWORKER_REQ_ID = 0;
+
 var HTTP_SERVER;
 
 var USE_HTTPS = !!(getArg(["ssl", "https"]) || false); // Only use for local development! Run a HTTPS proxy in production (nginx) because Node.JS is too slow!
@@ -4068,80 +4071,115 @@ function mountFollowSymlink(binaryFile, homeDir, mountFollowSymlinkActualCallbac
 					
 					callback(null, links, binaryFile, targetRelative);
 				}
-				else callback(err);
-			});
+					else callback(err);
+				});
+			}
 		}
 	}
-}
 
 
 
-// Overload console.log 
-console.log = function() {
-	var msg = arguments[0];
-	for (var i = 1; i < arguments.length; i++) msg += " " + arguments[i];
-	log(msg, 7);
-}
-
-// Overload console.warn
-console.warn = function() {
-	var msg = arguments[0];
-	for (var i = 1; i < arguments.length; i++) msg += " " + arguments[i];
-	log(msg, 4, 3);
-}
-
-
-function isObject(obj) {
-	return obj === Object(obj);
-}
-
-/*
-	API.serve = function serve(user, json, callback) {
-	
-	// Serve a folder via HTTP
-	
-	var folder = user.translatePath(json.folder);
-	
-	console.log("user.name=" + user.name + " serving folder=" + folder);
-	
-	createHttpEndpoint(folder, function(err, url) {
-	if(err) throw err;
-	callback(err, {url: url});
-	});
-	
+	// Overload console.log 
+	console.log = function() {
+		var msg = arguments[0];
+		for (var i = 1; i < arguments.length; i++) msg += " " + arguments[i];
+		log(msg, 7);
 	}
-*/
 
-
-function createHttpEndpoint(username, folder, callback) {
-	
-	log("Creating HTTP endpoint to folder=" + folder + " ...");
-	
-	if(HOME_DIR && !USERNAME) {
-		if(folder.indexOf(HOME_DIR + username) !== 0) return callback( new Error("Can not create an http-endpoint outside HOME_DIR=" + HOME_DIR + username) );
+	// Overload console.warn
+	console.warn = function() {
+		var msg = arguments[0];
+		for (var i = 1; i < arguments.length; i++) msg += " " + arguments[i];
+		log(msg, 4, 3);
 	}
+
+
+	function isObject(obj) {
+		return obj === Object(obj);
+	}
+
+	/*
+		API.serve = function serve(user, json, callback) {
 	
-	// Make sure the path exist
-	module_fs.stat(folder, function statResult(err, stats) {
-		if(err) return callback(err);
-		
-		for(var endPoint in HTTP_ENDPOINTS) {
-			if(HTTP_ENDPOINTS[endPoint] == folder) {
-					return callback(null, makeUrl(endPoint));
-				}
-			}
-		
-			var endPoint = randomString(10).toLowerCase(); // JavaScript is case sensitive while the www is not
-		
-			HTTP_ENDPOINTS[endPoint] = folder;
-		
-			log("Created HTTP endPoint=" + endPoint + " to folder=" + folder);
-		
-			callback(null, makeUrl(endPoint));
-		
-		
+		// Serve a folder via HTTP
+	
+		var folder = user.translatePath(json.folder);
+	
+		console.log("user.name=" + user.name + " serving folder=" + folder);
+	
+		createHttpEndpoint(folder, function(err, url) {
+		if(err) throw err;
+		callback(err, {url: url});
 		});
 	
+		}
+	*/
+
+
+	function createHttpEndpoint(username, folder, callback) {
+	
+		log("Creating HTTP endpoint to folder=" + folder + " ...");
+	
+		if(HOME_DIR && !USERNAME) {
+			if(folder.indexOf(HOME_DIR + username) !== 0) return callback( new Error("Can not create an http-endpoint outside HOME_DIR=" + HOME_DIR + username) );
+		}
+	
+		for(var endPoint in HTTP_ENDPOINTS) {
+			if(HTTP_ENDPOINTS[endPoint].dir == folder) {
+				return callback(null, makeUrl(endPoint));
+			}
+		}
+		
+		var endPoint = randomString(10).toLowerCase(); // JavaScript is case sensitive while the www is not
+		
+		HTTP_ENDPOINTS[endPoint] = {
+			dir: folder,
+			req: function(path, response) {
+				var id = ++INTERNAL_USERWORKER_REQ_ID;
+				INTERNAL_USERWORKER_REQ[id] = function(err, answer) {
+					var responseHeaders = {};
+					responseHeaders["Cache-Control"] = 'no-cache';
+
+					if(err) {
+						response.writeHead(400, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
+						response.end(err.message);
+					}
+					else {
+
+						var fileExtension = UTIL.getFileExtension(path);
+
+						var buffer = Buffer.from(answer.data);
+
+						responseHeaders["Content-Type"] = module_mimeMap[fileExtension];
+						responseHeaders["Content-Length"] = buffer.length;
+
+						// Some browsers (like IE11) doesn't use utf8 by default
+						if(fileExtension == "js" || fileExtension == "svg" || fileExtension == "htm" || fileExtension == "html" || fileExtension == "css") {
+							responseHeaders["Content-Type"] += "; charset=utf-8";
+						}
+
+						response.writeHead(200, responseHeaders);
+
+						response.end(buffer);
+
+					}
+
+					delete INTERNAL_USERWORKER_REQ[id];
+
+				}
+
+				var userPath = UTIL.joinPaths(this.dir, path);
+
+				var command = "readFromDisk";
+				var json = {path: userPath, returnBuffer: true};
+				USER_WORKERS[username].send({commands: {command: command, json: json, id: id}, internal: true});
+
+			}
+		};
+		
+		log("Created HTTP endPoint=" + endPoint + " to folder=" + folder);
+		
+		callback(null, makeUrl(endPoint));
 	}
 
 	function removeHttpEndpoint(username, folder, callback) {
@@ -4273,7 +4311,7 @@ function createHttpEndpoint(username, folder, callback) {
 		else if(firstDir == "inspector") {
 			if(INSPECTOR.hasOwnProperty(secondDir)) {
 				if(request.url.indexOf("/json")) {
-				console.log("Proxying request to inspector " + secondDir + " using http? " + request.protocol);
+					console.log("Proxying request to inspector " + secondDir + " using http? " + request.protocol);
 				INSPECTOR[secondDir].proxy.web(request, response);
 			}
 			else {
@@ -4545,27 +4583,29 @@ setTimeout(function() {
 	}
 	else if(HTTP_ENDPOINTS.hasOwnProperty(firstDir)) {
 		
-		localFolder = HTTP_ENDPOINTS[firstDir];
+			if(!HTTP_ENDPOINTS.hasOwnProperty(firstDir)) {
+				response.writeHead(400, { Connection: 'close', 'Content-Type': 'text/plain; charset=utf-8' });
+				response.end('Unable to find endpoint: ' + firstDir);
+				return;
+			}
+
+			urlPath = urlPath.replace(firstDir + "/", "");
 		
-		localFolder = UTIL.toSystemPathDelimiters(localFolder);
+			log("Serving from http-endpoint=" + firstDir + " localFolder=" + localFolder + "", INFO);
+
+			return HTTP_ENDPOINTS[firstDir].req(urlPath, response);
+
+		}
+		else {
 		
-		urlPath = urlPath.replace(firstDir + "/", "");
+			//console.log("firstDir=" + firstDir + " not in endpoints: " + JSON.stringify(HTTP_ENDPOINTS));
 		
-		responseHeaders['Cache-Control'] = 'no-cache';
+			localFolder = module_path.resolve("../client/");
 		
-		log("Serving from http-endpoint=" + firstDir + " localFolder=" + localFolder + "", INFO);
+			//console.log("Serving from the webide client folder: " + localFolder);
 		
-	}
-	else {
-		
-		//console.log("firstDir=" + firstDir + " not in endpoints: " + JSON.stringify(HTTP_ENDPOINTS));
-		
-		localFolder = module_path.resolve("../client/");
-		
-		//console.log("Serving from the webide client folder: " + localFolder);
-		
-		/*
-			response.writeHead(400, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
+			/*
+				response.writeHead(400, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
 			response.end("Unknown endpoint: '" + firstDir + "' of " + urlPath);
 			return;
 		*/
@@ -4824,8 +4864,6 @@ setTimeout(function() {
 		}
 	
 		var address = HTTP_SERVER.address();
-	
-	
 		var port = HTTP_PORT;
 	
 		if(address) { // Sanity check
@@ -4834,7 +4872,6 @@ setTimeout(function() {
 			}
 		
 		}
-	
 	
 		var ip = HTTP_IP;
 		if(ip == "0.0.0.0" || ip == "::") {
@@ -4874,15 +4911,21 @@ setTimeout(function() {
 	
 		var url = ""; // "http://";
 	
-		if(HOSTNAME) url += HOSTNAME;
+		if(DOMAIN || HOSTNAME) url += (DOMAIN || HOSTNAME);
 		else url += ip;
 	
-		if(PUBLIC_PORT != 80) url += ":" + PUBLIC_PORT;
+		if(PUBLIC_PORT.charAt(0) == "/") {
+			// Port is a unix socket!
+			// Assume default port
+		}
+		else if(PUBLIC_PORT != 80) url += ":" + PUBLIC_PORT;
 	
 		url += "/";
 	
 		if(endPoint) url += endPoint + "/";
 	
+		//log("makeUrl: url=" + url + " endPoint=" + endPoint + " PUBLIC_PORT=" + PUBLIC_PORT + " USERNAME=" + USERNAME + " DOMAIN=" + DOMAIN + " HOSTNAME=" + HOSTNAME + " ip=" + ip);
+
 		return url;
 	}
 
@@ -5098,7 +5141,12 @@ setTimeout(function() {
 		function messageFromWorker(workerMessage, handle) {
 			//console.log("Worker message from " + username + ": " + UTIL.shortString(workerMessage) + " handle=" + handle);
 		
-			if(workerMessage.resp || workerMessage.error) {
+			if(workerMessage.internal) {
+				var cb = INTERNAL_USERWORKER_REQ[workerMessage.id];
+				if(cb == undefined) throw new Error("Internal answer from user worker had no callback! workerMessage=" + JSON.stringify(workerMessage));
+				cb(workerMessage.error ? {message: workerMessage.error, code: workerMessage.errorCode} : null, workerMessage.resp);
+			}
+			else if(workerMessage.resp) {
 			
 				//log("workerMessage.id=" + workerMessage.id, DEBUG);
 			
@@ -5195,182 +5243,182 @@ setTimeout(function() {
 						if(!GCSF[username]) return workerResp(new Error("No active GCSF sessions for " + username));
 						GCSF[username].enterCode(req.googleDrive.code, function(err, resp) {
 							workerResp(err, resp);
-					});
-				}
-				else if(req.googleDrive.umount) {
-					// Both gcsfUmount and gcsfLogout will call gcsfCleanup() which closes any GCSF login or mount session
-					gcsfUmount(username, function(umountError) {
-						gcsfLogout(username, function(logoutErr) {
-							var errMsg = "";
-							if(umountError) errMsg += "Failed to umount!"; // Don't give too much info (might be sensitive)
-							if(logoutErr) errMsg += "Failed to logout: " + logoutErr.message;
-							
-							workerResp(errMsg || null);
 						});
+					}
+					else if(req.googleDrive.umount) {
+						// Both gcsfUmount and gcsfLogout will call gcsfCleanup() which closes any GCSF login or mount session
+						gcsfUmount(username, function(umountError) {
+							gcsfLogout(username, function(logoutErr) {
+								var errMsg = "";
+								if(umountError) errMsg += "Failed to umount!"; // Don't give too much info (might be sensitive)
+								if(logoutErr) errMsg += "Failed to logout: " + logoutErr.message;
+							
+								workerResp(errMsg || null);
+							});
+						});
+					}
+					else if(req.googleDrive.cancelLogin) {
+						if(!GCSF[username]) return workerResp(new Error("No active GCSF sessions for " + username));
+					
+						gcsfCleanup(username);
+					
+						return workerResp(null);
+					
+					}
+					else {
+						gcsfLogin(username, 0, function(err, resp) {
+							workerResp(err, resp);
+						});
+					}
+				}
+			
+				else if(req.tcpPort) {
+					// Find a free TCP port
+					var tcpPort = parseInt(req.tcpPort);
+					if(isNaN(tcpPort)) tcpPort = 1024;
+					// Make sure the port is not used
+					getTcpPort(tcpPort, function(err, port) {
+						if(err) workerResp(err);
+						else workerResp(null, port);
 					});
 				}
-				else if(req.googleDrive.cancelLogin) {
-					if(!GCSF[username]) return workerResp(new Error("No active GCSF sessions for " + username));
-					
-					gcsfCleanup(username);
-					
-					return workerResp(null);
-					
+			
+				else if(req.proxy) {
+					// So the editor client can access another url from the current server URL to avoid CORS-errors
+					// only works for http(s)!? Not Websockets!?
+				
+					var proxyName = req.proxy.name;
+					var proxyUrl = req.proxy.url;
+					var proxyWs = req.proxy.ws;
+				
+					for(var name in PROXY) {
+						if(name == proxyName) return workerResp(new Error("There's already a proxy named " + proxyName));
+					}
+				
+					PROXY[proxyName] = {
+						startedBy: username,
+						proxy: new module_httpProxy.createProxyServer({
+							target: proxyUrl,
+							ws: proxyWs
+						})
+					};
+				
+					PROXY[proxyName].proxy.on('error', function (err, req, res) {
+						res.writeHead(502, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
+						res.end("Proxy failed: " + err.message);
+					});
+				
+					PROXY[proxyName].proxy.on('proxyReq', function(proxyReq, req, res, options){
+						var rewritedPath = req.url.replace('/proxy/' + proxyName, '');
+						proxyReq.path = rewritedPath;
+					});
+				
+					var resp = {
+						name: proxyName,
+						url: proxyUrl
+					};
+				
+					workerResp(null, resp);
+				
 				}
-				else {
-					gcsfLogin(username, 0, function(err, resp) {
+				else if(req.stopProxy) {
+					var proxyName = req.proxy.name;
+				
+					if(!PROXY.hasOwnProperty(proxyName)) {
+						return workerResp(new Error("There's no proxy named " + proxyName));
+					}
+				
+					if(PROXY[proxyName].startedBy != username) {
+						return workerResp(new Error("The proxy named " + proxyName + " was not started by you!"));
+					}
+				
+					if(PROXY[proxyName].proxy) PROXY[proxyName].proxy.close();
+				
+					delete PROXY[proxyName]
+				}
+			
+				else if(req.createMysqlDb) {
+					createMysqlDb(username, req.createMysqlDb, workerResp);
+				}
+			
+				else if(req.remoteFile) {
+					var fileName = req.remoteFile.name;
+				
+					if( !REMOTE_FILE_SOCKETS.hasOwnProperty(username) ) {
+						workerResp("No remote file sockets found for username=" + username);
+						log( "Users with remote file sockets: " + Object.keys(REMOTE_FILE_SOCKETS) );
+						return;
+					}
+					else if( !REMOTE_FILE_SOCKETS[username].hasOwnProperty(fileName) ) {
+						workerResp("No remote file socket found for fileName= " + fileName + "");
+						log( "Remote file sockets: " + Object.keys(REMOTE_FILE_SOCKETS[username]) );
+						return;
+					}
+					else {
+						var socket = REMOTE_FILE_SOCKETS[username][fileName];
+						if(req.remoteFile.content) {
+							// File saved
+							socket.write(req.remoteFile.content + EOF);
+						}
+						if(req.remoteFile.close) {
+							// File closed
+							socket.destroy();
+						}
+						workerResp(null);
+					}
+				}
+			
+				else if(req.pipe) {
+					if( !REMOTE_FILE_SOCKETS.hasOwnProperty(username) ) {
+						workerResp("No remote pipe sockets found for username=" + username);
+						log( "Users with pipe sockets: " + Object.keys(REMOTE_FILE_SOCKETS) );
+						return;
+					}
+					else if( !REMOTE_FILE_SOCKETS[username].hasOwnProperty("pipe" + req.pipe.id) ) {
+						workerResp("No remote pipe socket found for id= " + req.pipe.id + "");
+						log( "Remote sockets: " + Object.keys(REMOTE_FILE_SOCKETS[username]) );
+						return;
+					}
+					else {
+						var socket = REMOTE_FILE_SOCKETS[username]["pipe" + req.pipe.id];
+						if(req.pipe.content) {
+							log("Sending " + req.pipe.content.length + " characters through remote pipe " + req.pipe.id)
+							socket.write(req.pipe.content);
+						}
+						if(req.pipe.close) {
+							socket.destroy();
+						}
+						workerResp(null);
+					}
+				
+				}
+			
+				// ### Dropbox worker requests
+				else if(req.startDropboxDaemon) {
+					startDropboxDaemon(username, uid, gid, homeDir, function(err, resp) {
 						workerResp(err, resp);
 					});
 				}
-			}
-			
-			else if(req.tcpPort) {
-				// Find a free TCP port
-				var tcpPort = parseInt(req.tcpPort);
-				if(isNaN(tcpPort)) tcpPort = 1024;
-				// Make sure the port is not used
-				getTcpPort(tcpPort, function(err, port) {
-					if(err) workerResp(err);
-					else workerResp(null, port);
-				});
-			}
-			
-			else if(req.proxy) {
-				// So the editor client can access another url from the current server URL to avoid CORS-errors
-				// only works for http(s)!? Not Websockets!?
-				
-				var proxyName = req.proxy.name;
-				var proxyUrl = req.proxy.url;
-				var proxyWs = req.proxy.ws;
-				
-				for(var name in PROXY) {
-					if(name == proxyName) return workerResp(new Error("There's already a proxy named " + proxyName));
+				else if(req.checkDropboxDaemon) {
+					checkDropboxDaemon(username, function(err, resp) {
+						workerResp(err, resp);
+					});
 				}
-				
-				PROXY[proxyName] = {
-					startedBy: username,
-					proxy: new module_httpProxy.createProxyServer({
-						target: proxyUrl,
-						ws: proxyWs
-					})
-				};
-				
-				PROXY[proxyName].proxy.on('error', function (err, req, res) {
-					res.writeHead(502, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
-					res.end("Proxy failed: " + err.message);
-				});
-				
-				PROXY[proxyName].proxy.on('proxyReq', function(proxyReq, req, res, options){
-					var rewritedPath = req.url.replace('/proxy/' + proxyName, '');
-					proxyReq.path = rewritedPath;
-				});
-				
-				var resp = {
-					name: proxyName,
-					url: proxyUrl
-				};
-				
-				workerResp(null, resp);
-				
-			}
-			else if(req.stopProxy) {
-				var proxyName = req.proxy.name;
-				
-				if(!PROXY.hasOwnProperty(proxyName)) {
-					return workerResp(new Error("There's no proxy named " + proxyName));
+				else if(req.stopDropboxDaemon) {
+					stopDropboxDaemon(username, function(err, resp) {
+						workerResp(err, resp);
+					});
 				}
-				
-				if(PROXY[proxyName].startedBy != username) {
-					return workerResp(new Error("The proxy named " + proxyName + " was not started by you!"));
+				else if(req.vpn) {
+					vpnCommand(username, homeDir, req.vpn, workerResp);
 				}
-				
-				if(PROXY[proxyName].proxy) PROXY[proxyName].proxy.close();
-				
-				delete PROXY[proxyName]
-			}
-			
-			else if(req.createMysqlDb) {
-				createMysqlDb(username, req.createMysqlDb, workerResp);
-			}
-			
-			else if(req.remoteFile) {
-				var fileName = req.remoteFile.name;
-				
-				if( !REMOTE_FILE_SOCKETS.hasOwnProperty(username) ) {
-					workerResp("No remote file sockets found for username=" + username);
-					log( "Users with remote file sockets: " + Object.keys(REMOTE_FILE_SOCKETS) );
-					return;
+				else if(req.dockerDaemon) {
+					dockerDaemon(username, homeDir, uid, gid, req.dockerDaemon, workerResp);
 				}
-				else if( !REMOTE_FILE_SOCKETS[username].hasOwnProperty(fileName) ) {
-					workerResp("No remote file socket found for fileName= " + fileName + "");
-					log( "Remote file sockets: " + Object.keys(REMOTE_FILE_SOCKETS[username]) );
-					return;
-				}
-				else {
-					var socket = REMOTE_FILE_SOCKETS[username][fileName];
-					if(req.remoteFile.content) {
-						// File saved
-						socket.write(req.remoteFile.content + EOF);
-					}
-					if(req.remoteFile.close) {
-						// File closed
-						socket.destroy();
-					}
-					workerResp(null);
-				}
-			}
-			
-			else if(req.pipe) {
-				if( !REMOTE_FILE_SOCKETS.hasOwnProperty(username) ) {
-					workerResp("No remote pipe sockets found for username=" + username);
-					log( "Users with pipe sockets: " + Object.keys(REMOTE_FILE_SOCKETS) );
-					return;
-				}
-				else if( !REMOTE_FILE_SOCKETS[username].hasOwnProperty("pipe" + req.pipe.id) ) {
-					workerResp("No remote pipe socket found for id= " + req.pipe.id + "");
-					log( "Remote sockets: " + Object.keys(REMOTE_FILE_SOCKETS[username]) );
-					return;
-				}
-				else {
-					var socket = REMOTE_FILE_SOCKETS[username]["pipe" + req.pipe.id];
-					if(req.pipe.content) {
-						log("Sending " + req.pipe.content.length + " characters through remote pipe " + req.pipe.id)
-						socket.write(req.pipe.content);
-					}
-					if(req.pipe.close) {
-						socket.destroy();
-					}
-					workerResp(null);
-				}
-				
-			}
-			
-			// ### Dropbox worker requests
-			else if(req.startDropboxDaemon) {
-				startDropboxDaemon(username, uid, gid, homeDir, function(err, resp) {
-					workerResp(err, resp);
-				});
-			}
-			else if(req.checkDropboxDaemon) {
-				checkDropboxDaemon(username, function(err, resp) {
-					workerResp(err, resp);
-				});
-			}
-			else if(req.stopDropboxDaemon) {
-				stopDropboxDaemon(username, function(err, resp) {
-					workerResp(err, resp);
-				});
-			}
-			else if(req.vpn) {
-				vpnCommand(username, homeDir, req.vpn, workerResp);
-			}
-			else if(req.dockerDaemon) {
-				dockerDaemon(username, homeDir, uid, gid, req.dockerDaemon, workerResp);
-			}
 			
 			
-			else throw new Error("Unknown request from worker: " + JSON.stringify(req, null, 2));
-		}
+				else throw new Error("Unknown request from worker: " + JSON.stringify(req, null, 2));
+			}
 		else throw new Error("Bad message from worker: workerMessage=" + JSON.stringify(workerMessage, null, 2));
 		
 		

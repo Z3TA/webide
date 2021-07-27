@@ -38,6 +38,9 @@ BUGS (and issues)
 
 ---
 
+About 5 seconds after navigating in a file (server.js) the function lists higlights another function...
+
+---
 
 Error message: Error: functionListSelect=[object HTMLSelectElement] functionListSelect.selectedIndex=-1 functionListSelect.options=[object HTMLOptionsCollection] functionListSelect.options.length=41
 Error code: undefined
