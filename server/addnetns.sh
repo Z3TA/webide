@@ -23,7 +23,7 @@ if [[ $* != *--unattended ]]; then
     read -p "Press enter to continue"
 fi
 
-USERID=$(id -u $1)
+USERID=$(id -u $1) || exit 1
 echo USERID=$USERID
 
 dec2ip () {
@@ -61,7 +61,7 @@ sudo ip netns exec $1 ip link set lo up
 # Enable the "cable" on both ends
 sudo ip link set br-$1 up
 sudo ip netns exec $1 ip link set $1 up
-# Give the device inside the namespace and IP address
+# Give the device inside the namespace an IP address
 sudo ip netns exec $1 ip addr add $IP/16 dev $1
 # Attach the cable to the "router"
 sudo ip link set br-$1 master netnsbridge

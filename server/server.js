@@ -4985,6 +4985,8 @@ setTimeout(function() {
 			var stdioPipe = true;
 		}
 		else {
+			log("NO_NETNS=" + NO_NETNS + " uid=" + uid + " process.platform=" + process.platform);
+
 			var command = workerNode;
 			var args = [workerScript].concat(workerArgs);
 			spawnOptions.stdio = ['inherit', 'inherit', 'inherit', "ipc"]; // ipc needed for sending messages to the worker
