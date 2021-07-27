@@ -3,12 +3,6 @@ Focus on editing web sites with SSG...
 
 ---
 
-I want to preview the html file on the SFTP drive ...
-
-http endpoints serve local file, ask the user worker to read the file so it can access remote file systemes such as sftp!
-
----
-
 cant get ip forwarding to work on local dev
 
 test: http://webide-dev.se/?github=AlexanderC/nestjs-iacry/blob/1d4d56ef2e69894c955a07d7710f59dc66191a38/lib/decorators/helper.ts#terminal3#1

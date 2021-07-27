@@ -4192,7 +4192,7 @@ function mountFollowSymlink(binaryFile, homeDir, mountFollowSymlinkActualCallbac
 	
 		var endpointDeleted = false;
 		for(var endPoint in HTTP_ENDPOINTS) {
-			if(HTTP_ENDPOINTS[endPoint] == folder) {
+			if(HTTP_ENDPOINTS[endPoint].dir == folder) {
 				delete HTTP_ENDPOINTS[endPoint];
 				endpointDeleted = true;
 			}
