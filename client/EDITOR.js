@@ -13356,7 +13356,7 @@ function getFile(url, callback) {
 			}
 			
 			// Make sure we do not end up in a recursive loop
-			if(textOnly == true) throw new Error("htmlToImage: It seems we also failed to create a text based image! html=" + html);
+			if(textOnly == true) throw new Error("htmlToImage: It seems we also failed to create a text based image! html=" + html + " BROWSER=" + BROWSER);
 			
 			htmlToImage(html, true, callback);
 			callback = null; // JS pass references by-val, so pointing it to null here wont change the value passed into htmlToImage

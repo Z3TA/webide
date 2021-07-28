@@ -1,21 +1,12 @@
 
 Focus on editing web sites with SSG... 
 
-failing tests:
-
-
 
 ---
 
-cant get ip forwarding to work on local dev
+cant get ip forwarding to work on local dev...
 
-test: http://webide-dev.se/?github=AlexanderC/nestjs-iacry/blob/1d4d56ef2e69894c955a07d7710f59dc66191a38/lib/decorators/helper.ts#terminal3#1
-
-Upgrade server!
-
----
-
-"subject": "Error: htmlToImage: It seems we also failed to create a text based image! html=\"derivedKey: �~m\\u0019��[;�g&w\\u0007G�t'-���\\u0017p\\u001b��r����&lt;\"  ",
+don't send error notifications for github2s when the repo is private!
 
 
 ---
