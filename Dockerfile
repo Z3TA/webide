@@ -17,6 +17,9 @@
 # node server/server.js --hostname=d80.johan.webide.se -noguest -insidedocker -nonginx -pp 80 --port=80 -ip 172.17.0.2
 # Access from: https://d80.johan.webide.se/
 #
+# Before running tests: Run ssh-keygen in the terminal and cat /home/ltest1/.ssh/id_rsa.pub - then add the ssh public key to the Github test account
+# Alsop enable JSX parsing via Editor > Settings menu!
+#
 
 # FROM must be the first instruction!
 FROM ubuntu:18.04

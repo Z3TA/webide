@@ -4,6 +4,13 @@ This file contains a list of things we can do to improve already implemented fea
 Polishing (only existing features)
 ==================================
 
+
+---
+
+When selecting and then deleting many lines, the editor should scroll back up ! (scrollToCaret)
+
+---
+
 Some characters can't be inserted, like ^ on a swedish keyboard which will only come up when the succeeding key is pressed, or turn into an â if the succeeding key is a ... 
 
 Pressing Esc wont hide widgets when in terminal

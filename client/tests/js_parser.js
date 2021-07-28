@@ -460,32 +460,6 @@ EDITOR.addTest(function varPointAtAnonFunction(callback) {
 	});
 });
 
-	EDITOR.addTest(function aspVarInScript(callback) {
-	// Parser can't find start of baz
-	EDITOR.openFile("aspVarInScript.asp", '<%\nIF foo THEN\n%>\n<script>\nalert("Hi <% =name %>");\n</script>\n<%\nEND IF\n%>\n', function(err, file) {
-	
-	// Last row should have zero indentation
-	if(file.grid[file.grid.length-1].indentation !== 0) throw new Error("Wrong indentation on last row!");
-	
-	EDITOR.closeFile(file.path);
-	callback(true);
-	
-	});
-	});
-	
-	EDITOR.addTest(function aspVarInHtml(callback) {
-	EDITOR.openFile("aspVarInHtml.asp", '<img src="<% =foo %>">', function(err, file) {
-	
-	// Temp fix! Best case scenario would be if the xml tag worked
-	
-	if(file.parsed.xmlTags.length > 0) throw new Error("Did not expect an xml tag");
-	
-	EDITOR.closeFile(file.path);
-	callback(true);
-	
-	});
-	});
-	
 	EDITOR.addTest(function funInJson(callback) {
 	// Parser can't find start of baz
 	EDITOR.openFile("funInJson.js", 'foo({\nbar: "123",\nbaz: function() {\n\n}\n});\n', function(err, file) {

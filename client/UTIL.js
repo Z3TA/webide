@@ -294,10 +294,12 @@ var UTIL = {
 		var lastChar = fullPath.substr(fullPath.length-1);
 		
 		var slashes = UTIL.occurrences(fullPath, "/");
+		var backSlashes = UTIL.occurrences(fullPath, "\\");
+
+		slashes = Math.max(slashes, backSlashes);
 
 		var protocolIndex = fullPath.indexOf("://");
-
-		if(protocolIndex != -1) slashes = slashes - 2;
+if(protocolIndex != -1) slashes = slashes - 2;
 
 		if(lastChar != "/" && lastChar != "\\" && slashes > 0) {
 			//console.warn("getFolders: getFolders: Path does not end with a slash! lastChar=" + lastChar + " fullPath=" + fullPath);
@@ -1746,10 +1748,15 @@ console.warn("Unable to decodeURIComponent on filePath=" + filePath);
 		
 	},
 
-	httpGet: function httpGet(url, callback) {
+	httpGet: function httpGet(url, options, callback) {
+		if(callback == undefined && typeof options == "function") {
+			callback = options;
+			options = {};
+		}
+
 		var xmlHttp = new XMLHttpRequest();
 		var timeoutTimer;
-		var timeoutTimeMs = 4000;
+		var timeoutTimeMs = options.timeout || 4000;
 		
 		//console.log("HTTP GET url=" + url);
 		

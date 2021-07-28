@@ -312,42 +312,6 @@
 				insideDbl = insideDbl ? false : true;
 			}
 		}
-		
-		
 	}
-	
-	
-	/*
-	 *  When do we want to do " &  & " ? and when not ?
-	 * 
-	 * not: "<span class="
-	 * not: "<span class=""foo"">"
-	 * 
-	 * do: "<span class=""foo" & bar & "
-	 * do: " hello <b>" & name & "</b>."
-	 * 
-	 * 
-	 */
-	
-	// TEST-CODE-START
-	
-	EDITOR.addTest(function classic_asp_concat(callback) {
-		EDITOR.openFile("classic_asp_concat.asp", '<% Response.Write "<span class= </span>" %>', function(err, file) {
-			
-			var index = 31;
-			file.moveCaret(index);
-			
-			var quote = 34; // "
-			EDITOR.mock("keypress", {charCode: quote}); // Simulate "
-			
-			if(file.text != '<% Response.Write "<span class="" </span>" %>') throw new Error("Did not expect a concatenation");
-			
-			EDITOR.closeFile(file.path);
-			callback(true);
-			
-		});
-	});
-	
-	// TEST-CODE-END
 	
 })();

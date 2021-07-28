@@ -148,6 +148,13 @@ function terminalResize(user, json, callback) {
 	var term = TERMINALS[termId];
 	if(cols == undefined) return callback(new Error("cols=" + cols));
 	if(rows == undefined) return callback(new Error("rows=" + rows));
+
+	if( !UTIL.isNumeric(cols) ) return callback(new Error("cols=" + rows + " is not a number!"));
+	if( !UTIL.isNumeric(rows) ) return callback(new Error("rows=" + rows + " is not a number!"));
+
+	if(cols < 1) return callback(new Error("cols=" + cols + " can not be zero or negative!"));
+	if(rows < 1) return callback(new Error("rows=" + rows + " can not be zero or negative!"));
+
 	if(!term) {
 		var error = new Error("Unknown terminal id=" + termId);
 		error.code = "UNKNOWN_TERMINAL_ID";

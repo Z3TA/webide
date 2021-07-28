@@ -61,9 +61,8 @@
 					if(err) console.warn("Failed to disconnect from " + protocol + "! err=" + (err ? err.msg : err) + " json=" + JSON.stringify(json));
 					
 					setTimeout(function() {
-						var dialogCodes = EDITOR.openDialogs.map(function(dialog) { return dialog.code });
-						if(dialogCodes.indexOf("REMOTE_CONNECTION_CLOSE") != -1) EDITOR.closeAllDialogs("REMOTE_CONNECTION_CLOSE");
-					
+						closeDialogs();
+
 						callback(true);
 						
 					}, 1000);
@@ -272,7 +271,7 @@
 		var pathToCreate = UTIL.toSystemPathDelimiters(tempPath);
 		var json = {pathToCreate: pathToCreate};
 		
-		CLIENT.cmd("createPath", json, function(err, json) {
+		CLIENT.cmd("createPath", json, 30000, function(err, json) {
 			if(err) throw err
 			else {
 				
@@ -281,17 +280,17 @@
 				if(fullPath.indexOf("foo") == -1) throw new Error("Full path=" + fullPath + " does not include foo! pathToCreate=" + pathToCreate);
 				
 				// Cleanup
-				CLIENT.cmd("deleteDirectory", {directory: UTIL.joinPaths(EDITOR.user.homeDir, "/testCreatePathUniqueName/foo/bar/")}, function(err, json) {
+				CLIENT.cmd("deleteDirectory", {directory: UTIL.joinPaths(EDITOR.user.homeDir, "/testCreatePathUniqueName/foo/bar/")}, 30000, function(err, json) {
 					if(err) throw err
 					else {
 						
 						// Cleanup
-						CLIENT.cmd("deleteDirectory", {directory: UTIL.joinPaths(EDITOR.user.homeDir, "/testCreatePathUniqueName/foo/")}, function(err, json) {
+						CLIENT.cmd("deleteDirectory", {directory: UTIL.joinPaths(EDITOR.user.homeDir, "/testCreatePathUniqueName/foo/")}, 30000, function(err, json) {
 							if(err) throw err
 							else {
 								
 								// Cleanup
-								CLIENT.cmd("deleteDirectory", {directory: UTIL.joinPaths(EDITOR.user.homeDir, "/testCreatePathUniqueName/")}, function(err, json) {
+								CLIENT.cmd("deleteDirectory", {directory: UTIL.joinPaths(EDITOR.user.homeDir, "/testCreatePathUniqueName/")}, 30000, function(err, json) {
 									if(err) throw err
 									else {
 										
@@ -315,7 +314,7 @@
 		
 		var connJson = {protocol: "ftp", serverAddress: "ftp.sunet.se", user: "anonymous", passw: ""};
 		
-		CLIENT.cmd("connect", connJson, function(err, json) {
+		CLIENT.cmd("connect", connJson, 30000, function(err, json) {
 			if(err) throw err;
 			
 			var url = connJson.protocol + "://" + connJson.serverAddress + "/";
@@ -327,8 +326,7 @@
 				if(err) throw new Error("Failed to disconnect from ftp! err=" + (err.msg ? err.msg : err) + " json=" + JSON.stringify(json));
 				
 				setTimeout(function() {
-					var dialogCodes = EDITOR.openDialogs.map(function(dialog) { return dialog.code });
-					if(dialogCodes.indexOf("REMOTE_CONNECTION_CLOSE") != -1) EDITOR.closeAllDialogs("REMOTE_CONNECTION_CLOSE");
+					closeDialogs();
 					
 					callback(true);
 				}, 1000);
@@ -368,7 +366,7 @@
 				
 				// Launch http request
 				
-				UTIL.httpGet(fileUrl, function httpGetResult(err, text) {
+				UTIL.httpGet(fileUrl, {timeout: 25000}, function httpGetResult(err, text) {
 					
 					if(err) throw new Error(err.message + " fileUrl=" + fileUrl);
 					
@@ -381,17 +379,17 @@
 						if(err) throw err
 						else {
 					
-					// Cleanup
-					CLIENT.cmd("deleteFile", {filePath: testFolder + testFile}, function(err, json) {
-						if(err) throw err
-						else {
-							
 							// Cleanup
-							CLIENT.cmd("deleteDirectory", {directory: testFolder}, function(err, json) {
+							CLIENT.cmd("deleteFile", {filePath: testFolder + testFile}, function(err, json) {
 								if(err) throw err
 								else {
+							
+									// Cleanup
+									CLIENT.cmd("deleteDirectory", {directory: testFolder}, function(err, json) {
+										if(err) throw err
+										else {
 									
-									callback(true);
+											callback(true);
 									
 										}
 										
@@ -432,9 +430,9 @@ var didReadString = false;
 		function fileCreated(err, path) {
 			if(err) throw err;
 			
-			CLIENT.cmd("readFromDisk", {path: path, returnBuffer: true}, readBuffer);
-			CLIENT.cmd("readFromDisk", {path: path, returnBuffer: false, encoding: "utf8"}, readString);
-			CLIENT.cmd("hash", {path: path}, readHash);
+			CLIENT.cmd("readFromDisk", {path: path, returnBuffer: true}, 30000, readBuffer);
+			CLIENT.cmd("readFromDisk", {path: path, returnBuffer: false, encoding: "utf8"}, 30000, readString);
+			CLIENT.cmd("hash", {path: path}, 30000, readHash);
 		}
 		
 		function readBuffer(err, json) {
@@ -517,7 +515,7 @@ var didReadString = false;
 for (var i=0; i<1000; i++) testText = testText + i + ". " + testRow;
 		var correctHash = "91f8cbc3be52354a9387d2e32348e529c71d2b8aa77656f63d7815d3959a9de0"; // sha256
 
-		CLIENT.cmd("connect", connJson, function(err, json) {
+		CLIENT.cmd("connect", connJson, 30000, function(err, json) {
 			if(err) throw err;
 			
 			EDITOR.createPath(testFolder, function folderCreated(err, path) {
@@ -581,10 +579,7 @@ for (var i=0; i<1000; i++) testText = testText + i + ". " + testRow;
 CLIENT.cmd("disconnect", connJson, function(err, json) {
 									console.warn("Failed to disconnect from " + protocol + "! err=" + (err ? err.msg : err) + " json=" + JSON.stringify(json));
 									
-									setTimeout(function() {
-										var dialogCodes = EDITOR.openDialogs.map(function(dialog) { return dialog.code });
-										if(dialogCodes.indexOf("REMOTE_CONNECTION_CLOSE") != -1) EDITOR.closeAllDialogs("REMOTE_CONNECTION_CLOSE");
-									}, 1000);
+									setTimeout(closeDialogs, 1000);
 								
 								});
 							}, 10000);
@@ -669,5 +664,9 @@ CLIENT.cmd("disconnect", connJson, function(err, json) {
 		}
 	});
 	
-	
+	function closeDialogs() {
+		var dialogCodes = EDITOR.openDialogs.map(function(dialog) { return dialog.code });
+		if(dialogCodes.indexOf("REMOTE_CONNECTION_CLOSE") != -1) EDITOR.closeAllDialogs("REMOTE_CONNECTION_CLOSE");
+	}
+
 })();

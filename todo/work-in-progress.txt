@@ -1,6 +1,10 @@
 
 Focus on editing web sites with SSG... 
 
+failing tests:
+
+
+
 ---
 
 cant get ip forwarding to work on local dev

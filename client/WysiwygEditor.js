@@ -189,8 +189,8 @@ alertBox(wysiwygEditor.sourceFile.path + " contains SSG scripts which is not yet
 				
 			*/
 
-			wysiwygEditor.snippetCodeStart = option.snippetCodeStart || "<?JS";
-			wysiwygEditor.snippetCodeEnd = option.snippetCodeEnd || "?>";
+			wysiwygEditor.snippetCodeStart = options.snippetCodeStart || "<?JS";
+			wysiwygEditor.snippetCodeEnd = options.snippetCodeEnd || "?>";
 
 			var reSnippetCode = new RegExp(UTIL.escapeRegExp(wysiwygEditor.snippetCodeStart) + ".*" + wysiwygEditor.snippetCodeEnd, "g");
 			var compiledSnippetsRegexString = "";

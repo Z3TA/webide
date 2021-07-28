@@ -3703,7 +3703,7 @@ toggleVim();
 	
 	// These can not run in parallel as it would affect other tests when we're in "vim" mode
 	
-	EDITOR.addTest(5001, false, vimTest1);
+	EDITOR.addTest(5001, false, vimTest1); // 5001
 	EDITOR.addTest(5002, false, vimTest2);
 	
 	

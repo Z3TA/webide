@@ -486,41 +486,41 @@
 			
 			setTimeout(function() {
 				
-			var win = wEditor.previewWin;
-			var doc = win.document;
-			var main = doc.getElementsByTagName("main")[0];
+				var win = wEditor.previewWin;
+				var doc = win.document;
+				var main = doc.getElementsByTagName("main")[0];
 			
-			console.log(win);
-			console.log(doc);
-			
-			var firstParagraph = doc.getElementById("ppp");
-			
-			if(!firstParagraph) {
+				console.log(win);
 				console.log(doc);
-				throw new Error("Can't find firstParagraph=" + firstParagraph + " win=" + win + " doc=" + doc + " doc.innerHTML=" + doc.innerHTML);
-			}
 			
-			setTimeout(function firstLine() {
-				var newParagraph = doc.createElement("p");
-				newParagraph.innerText = "Line 1";
 				var firstParagraph = doc.getElementById("ppp");
-				main.insertBefore(newParagraph, firstParagraph);
-				main.focus(); // Need focus, or it can't get caret position inside contenteditable!
-				wEditor.previewInput();
-				
-				setTimeout(function secondLine() {
+			
+				if(!firstParagraph) {
+					console.log(doc);
+					throw new Error("Can't find firstParagraph=" + firstParagraph + " win=" + win + " doc=" + doc + " doc.innerHTML=" + doc.innerHTML);
+				}
+			
+				setTimeout(function firstLine() {
 					var newParagraph = doc.createElement("p");
-					newParagraph.innerText = "Line 2";
+					newParagraph.innerText = "Line 1";
 					var firstParagraph = doc.getElementById("ppp");
 					main.insertBefore(newParagraph, firstParagraph);
-					main.focus();
+					main.focus(); // Need focus, or it can't get caret position inside contenteditable!
 					wEditor.previewInput();
+				
+					setTimeout(function secondLine() {
+						var newParagraph = doc.createElement("p");
+						newParagraph.innerText = "Line 2";
+						var firstParagraph = doc.getElementById("ppp");
+						main.insertBefore(newParagraph, firstParagraph);
+						main.focus();
+						wEditor.previewInput();
 					
-					cleanup();
-					callback(true);
+						cleanup();
+						callback(true);
 					
-				}, 500); // Simulate user interaction
-			}, 500);
+					}, 500); // Simulate user interaction
+				}, 500);
 			
 			}, 1000); // Wait for window to load
 		});
