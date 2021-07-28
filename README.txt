@@ -430,6 +430,13 @@ You might have to delete the socket (/home/$(whoami)/sock/test) before re-run. e
 For running a test environment inside Docker - see indstructions in Dockerfile
 
 
+Running tests when developing on the editor itself
+--------------------------------------------------
+Setup the test inveroment using cloudide_install.sh or setting it up in a Docker container (see instructions in Dockerfile)
+The editor will detect if it's in a "cloud" editor by checking if wwwroot exist, so your working directory needs to be somewhere in wwwroot
+( try opening a file inside wwwroot, or open the browser dev console and use EDITOR.changeWorkingDir() )
+
+
 
 <a id="cloudIDE"></a>
 Running as a cloud editor
