@@ -189,7 +189,7 @@ throw new Error("Second argument json (" + (typeof json) + ") must be an object!
 			error.code = "ENETDOWN";
 		}
 		else if(CLIENT.ping == Infinity) {
-			var error = new Error("We might have lost the connection. Or the server is busy! Unable to send cmd: req=" + req);
+			var error = new Error("We might have lost the connection. Or the server is busy! Unable to send cmd: req=" + req + " (navigator.onLine=" + window.navigator.onLine + ")");
 			error.code = "ENETUNREACH";
 		}
 		else if(connection.readyState!=WEBSOCK_OPEN) {
