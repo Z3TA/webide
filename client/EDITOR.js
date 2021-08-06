@@ -1882,7 +1882,7 @@ error.code = fName;
 			
 			if(file.nativeFileSystemFileHandle) {
 				
-				file.nativeFileSystemFileHandle.createWriter().then(function(writer) {
+				file.nativeFileSystemFileHandle.createWritable().then(function(writer) {
 					// Make sure we start with an empty file
 					writer.truncate(0).then(function() {
 						// Write the full length of the contents
@@ -2264,10 +2264,10 @@ else if(err.code == "ENETDOWN") {
 		
 		//console.log("Bringing up the file open dialog ...");
 		
-		if(typeof window.chooseFileSystemEntries == "function") {
+		if(typeof window.showOpenFilePicker == "function") {
 			//console.log("Using native file system API!");
 			
-			window.chooseFileSystemEntries().then(function(fileHandle) {
+			window.showOpenFilePicker().then(function(fileHandle) {
 				fileHandle.getFile().then(function readText(localFile) {
 					localFile.text().then(function(fileContent) {
 						var filePath = "/local/file";

@@ -1,5 +1,24 @@
 
+Open file from device and then be able to save it!!
+
+https://web.dev/file-system-access/
+
+---
+
 Focus on editing web sites with SSG... 
+
+issue: After upgrading, files already opened will have fullAutoIndentation set to false!
+
+worker proscess dies when git is not installed on the system!
+
+Use chome first, not IE, on Windows! in start.js
+
+recurring bug: terminal files are being highlighted by jsHighlight!
+
+Install all libraries on the server!?
+
+Caret fading no longer works!
+
 
 
 ---
