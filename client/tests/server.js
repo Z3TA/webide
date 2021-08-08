@@ -97,7 +97,7 @@
 		var moduleName = "iconv";
 		EDITOR.createPath(testFolder, function folderCreated(err, path) {
 			if(err) throw err;
-			CLIENT.cmd("install_nodejs_module", {name: moduleName, filePath: testFolder}, 120000, function(err, resp) {
+			CLIENT.cmd("install_nodejs_module", {name: moduleName, filePath: testFolder}, 250000, function(err, resp) {
 				if(err) throw err;
 				
 				if(resp.name != moduleName) throw new Error("Unexpected module name=" + resp.name);
