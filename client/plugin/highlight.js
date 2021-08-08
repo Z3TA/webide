@@ -92,6 +92,10 @@
 		order: 1000 // Load after themes
 	});
 	
+	function shouldHighlight(file) {
+		return (file instanceof File) && !file.noChangeEvents && !file.fullAutoIndentation && file.fileExtension != "txt" && !file.disableParsing;
+	}
+
 	function highlightLazyLoad(file) {
 		
 		//console.log("highlight: highlightLazyLoad! file.path=" + file.path + " file.disableParsing=" + file.disableParsing + " file.noChangeEvents=" + file.noChangeEvents + " initiated=" + initiated);
@@ -105,7 +109,7 @@
 
 		*/
 
-		if(!file.noChangeEvents && !file.fullAutoIndentation && file.fileExtension != "txt" && !file.disableParsing) {
+		if(!shouldHighlight(file)) {
 			if(!initiated) init();
 			
 			worker.postMessage({text: file.text, path: file.path});
@@ -138,7 +142,7 @@
 		
 		//console.log("highlight: highlightChangedFile: file.noChangeEvents=" + file.noChangeEvents + " file.path=" + file.path);
 		
-		if(file.noChangeEvents) return;
+		if(!shouldHighlight(file)) return;
 
 		worker.postMessage({text: file.text, path: file.path});
 	}

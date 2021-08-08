@@ -5,6 +5,7 @@ https://web.dev/file-system-access/
 
 ---
 
+Unknown github url format: rancher/rancher/blame/f9beaf4f6482c52542dbad06f42ea90bdc5d5564/go.mod dirs.length=5
 Unknown github url format: ContinualAI/avalanche/ dirs.length=3
 
 Focus on editing web sites with SSG... 
@@ -15,9 +16,8 @@ worker proscess dies when git is not installed on the system!
 
 Use chome first, not IE, on Windows! in start.js
 
-recurring bug: terminal files are being highlighted by jsHighlight!
-
-Install all libraries on the server!?
+Install *all* (Ubuntu) libraries on the server!?
+So that you can compile just about anything!?
 
 Caret fading no longer works!
 
