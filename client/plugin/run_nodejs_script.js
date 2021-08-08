@@ -611,7 +611,10 @@ text = text.replace(reNetnsIP, "$2$3$4." + username + "." + TLD);
 			firstRunMsg + "\n\n" + (new Date()) + ":\nRunning " + msg.scriptName + " ...\n\n", 
 			{
 				show: false, 
-				props: {noCollaboration: true}
+				props: {
+					noCollaboration: true,
+					disableParsing: true
+				}
 			}, function fileOpened(err, file) {
 				if(err) {
 					if(err.code == "IN_QUEUE") {
