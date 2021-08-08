@@ -167,7 +167,9 @@
 			var fileExt = UTIL.getFileExtension(filePathInRepo);
 			if(fileExt == "") filePathInRepo = filePathInRepo + ".md"; // Assume it's a markdown file if file extension is missing
 
-			EDITOR.openFile( UTIL.joinPaths(userRepoContentFolder, filePathInRepo), undefined, {show: true}, function(err) {
+			var filePathOnDisk = UTIL.joinPaths(userRepoContentFolder, filePathInRepo);
+
+			EDITOR.openFile(filePathOnDisk , undefined, {show: true}, function(err) {
 				if(err) {
 					//console.log("github2s: open file error: " + err.message);
 					findReadme();
@@ -176,7 +178,7 @@
 
 					setTimeout(function() {
 						EDITOR.dashboard.hide();
-						EDITOR.showFile(file);
+						EDITOR.showFile(filePathOnDisk);
 					}, 1000);
 
 					//console.log("github2s: successfully opened " + filePathInRepo);
