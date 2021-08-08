@@ -5,6 +5,12 @@ Polishing (only existing features)
 ==================================
 
 
+
+---
+
+Annoying when you get the message that you are in collaboration mode with Chrome, but have no idea why...
+should show some more, like Chrome on Macbook or something...
+
 ---
 
 When selecting and then deleting many lines, the editor should scroll back up ! (scrollToCaret)

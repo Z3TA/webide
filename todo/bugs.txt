@@ -36,6 +36,8 @@ Run all tests! (to make sure you did not break anything else)
 BUGS (and issues)
 =================
 
+
+
 ---
 
 After rebooting computer and opening webide again... Error: Terminal file not open: terminal1
@@ -45,6 +47,7 @@ terminal.js wants to open terminal3, terminal4 etc (where termina1 and terminal2
 ---
 
 About 5 seconds after navigating in a file (server.js) the function lists higlights another function...
+probably because we get new messages in a termin...
 
 ---
 

@@ -213,6 +213,8 @@ EDITOR.unbindKey(show_gotoFileInput2);
 				
 				if(fileHandle) file.nativeFileSystemFileHandle = fileHandle;
 				
+				EDITOR.showFile(file); // Hide the dashboard
+
 				EDITOR.renderNeeded();
 				
 				//console.log("goto_file: File ready for editing");

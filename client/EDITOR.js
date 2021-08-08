@@ -1884,25 +1884,30 @@ error.code = fName;
 				
 				file.nativeFileSystemFileHandle.createWritable().then(function(writer) {
 					// Make sure we start with an empty file
-					writer.truncate(0).then(function() {
-						// Write the full length of the contents
-						writer.write(0, text).then(function() {
-							// Close the file and write the contents to disk
-							writer.close().then(function() {
+					//writer.truncate(0).then(function() {
+					// Write the full length of the contents
+					//writer.write(0, text).then(function() {
+					writer.write(text).then(function() {
+						// Close the file and write the contents to disk
+						writer.close().then(function() {
 								
-								if(typeof window.crypto == "object") {
-									crypto.subtle.digest('SHA-256', text).then(function(hash) {
-										doneSaving(null, path, hash);
-									}, function(err) {
-										console.error(new Error("EDITOR.saveFile: Failed to hash the text using crypty API after saving the file using native file system API"));
-										doneSaving(null, path, null);
-									});;
-								}
-								else doneSaving(null, path, null);
+							if(typeof window.crypto == "object" && "TextEncoder" in window) {
+								var enc = new TextEncoder();
+								// TypeError: Failed to execute 'digest' on 'SubtleCrypto': The provided value is not of type '(ArrayBuffer or ArrayBufferView)
+								var buff = enc.encode(text);
+								crypto.subtle.digest('SHA-256', buff).then(function(hash) {
+									doneSaving(null, path, hash);
+								}, function(err) {
+									console.error(err);
+									console.warn("EDITOR.saveFile: Failed to hash the text using crypty API after saving the file using native file system API");
+									doneSaving(null, path, null);
+								});;
+							}
+							else doneSaving(null, path, null);
 								
-							});
 						});
 					});
+					//});
 				}).catch(function(err) {
 					if(callback) callback(err);
 					else alertBox(err.message); // Can't throw inside a promise chain
@@ -2262,15 +2267,26 @@ else if(err.code == "ENETDOWN") {
 			File path is then passed to the callback function.
 		*/
 		
-		//console.log("Bringing up the file open dialog ...");
+		console.log("EDITOR.localFileDialog: Bringing up the file open dialog ...");
 		
 		if(typeof window.showOpenFilePicker == "function") {
-			//console.log("Using native file system API!");
+			console.log("EDITOR.localFileDialog: Using native file system API!");
 			
 			window.showOpenFilePicker().then(function(fileHandle) {
+
+				// todo: Handle many files
+				fileHandle = fileHandle[0];
+
+				console.log("EDITOR.localFileDialog: fileHandle=", fileHandle);
+
+				console.log("EDITOR.localFileDialog: typeof fileHandle.getFile=" + (typeof fileHandle.getFile) + "");
+
 				fileHandle.getFile().then(function readText(localFile) {
+
+					console.log("EDITOR.localFileDialog: localFile=", localFile);
+
 					localFile.text().then(function(fileContent) {
-						var filePath = "/local/file";
+						var filePath = "/local/" + fileHandle.name;
 						callback(filePath, fileContent, fileHandle);
 					});
 				});
@@ -2282,6 +2298,7 @@ else if(err.code == "ENETDOWN") {
 			
 			return;
 		}
+		//else console.warn("Local file system API not supported in " + BROWSER);
 		
 		
 		EDITOR.fileOpenCallback = callback;
