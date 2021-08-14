@@ -186,8 +186,8 @@ for example adding it to your .bashrc so that the server starts every time you s
 And/or use Tasker or other app to make the both the server and the client start at the same time, in one click.
 
 
-Run the editor on a computer/server that is behind a firewall NAT/router or does not have a public IP
------------------------------------------------------------------------------------------------------
+Run the editor on a computer/server that is behind a firewall NAT/router or without a public IP
+-----------------------------------------------------------------------------------------------
 When starting the server from command line/prompt, specify a code/name in -nat-code argument/flag. Example:
 ```
 node server/server.js -nat-code mysecret --username=myuser --password=123
@@ -197,8 +197,8 @@ Then you can access your computer/server via https://webide.se/?nat_code=mysecre
 
 
 
-Able to type webide via "unix" terminal without installing via npm --global
-----------------------------------------------------------------------------
+Able to type "webide" to start the editor via "unix" terminal without installing globally (npm --global)
+--------------------------------------------------------------------------------------------------------
 In a unix like environment it's possible to open files and even pipe to bin/webide,
 in order to send streams of text to the editor,
 just add the bin folder to your PATH environment variable:
@@ -208,8 +208,8 @@ export PATH="$PATH:/path/to/node_modules/webide.se/bin"
 Put it in ~/.bashrc to make the PATH update permanent.
 
 
-Able to type webide in Windows command prompt without installing via npm --global
------------------------------------------------------------------------------------
+Able to type webide in Windows command prompt without installing globally (npm --global)
+----------------------------------------------------------------------------------------
 Add the webide/bin folder to the Path environment variable:
 (Windows 10) Start > Settings > System > About > System info > Advanced system settings > Environment variables ...
 Select: Path, then click Edit, then New, and write:
@@ -314,19 +314,30 @@ If you installed using npm:
 `npm update -g webide.se`
 
 If you are using a hosted web app (PWA):
-The service worker might have cached an old version of the editor client,
-Go to Editor in the WebIDE top menu, and click "Unregister Service Worker". Then reload the page.
+Most likely the editor will tell you there is a new version and ask if you want to upgrade,
+but if that for some reason doesn't work - do the following:
+* 0Go to Editor in the WebIDE top menu, and click "Unregister Service Worker". Then reload the page.
 
-If it still looks weird, hit Ctrl+Shift+I in to start your browser's developer tools,
+If that didn't work, hit Ctrl+Shift+I in to start your browser's developer tools,
 then find the Application tab, click on service worker, then force the service worker to (un)register/update.
 
 
 Reporting bugs
 ==============
 
-Open a new file, and write down instructions on how to repeat the bug.
-Save the file with "bugreport" in the file name (without the quotes)
-Then hit Ctrl + Shift + S to post it. (There will be a confirmation box). 
+Users in general do not report bugs, 
+so if you discover a bug, it has likely *not* been reported already,
+even if it's a very common bug!
+So it is very appreciated if you do send a bug report!
+
+There are a lot of "bug traps" in the editor source code, 
+and if something goes wrong the editor will "crash", and open a "bugreport" file.
+You can however send any file as a bug report by having "bugreport" in the file name,
+then right clicking to bring up the context menu and clicking on "send bug report", 
+You can also hit Alt + Shift + S on any file 
+and you will get a dialog asking if you want to send the file as a bug report.
+
+In the bug report file, try to give instructions on how to repeat the bug.
 
 
 Editing files on remote computers
@@ -334,7 +345,7 @@ Editing files on remote computers
 The editor opens TCP port 8080 (configured via remote-file-port) for receiving remote files.
 You can install bin/webider on any remote computer, and then use webider as an editor replacement.
 (webider will connect to a WebIDE server and the files will be opened in the local client,
-there is no enctryption, so only use on LAN for now, eg. not over the Internet)
+there is no encryption, so only use on LAN for now, eg. not over the Internet)
 
 installing webider on a remote computer (it also need to have nodejs installed!):
 ```
@@ -358,7 +369,7 @@ Each user can make their own customizations using Editor > Customization scripts
 
 For the optimal text experience, try different system/OS font settings on your local machine, like hinting etc.
 
-Example: Turn off anti-alias in Windows: Control Panel > Performance Options Visual Effects. Uncheck "Smooth edges of screen fonts"
+Example: Turn off anti-alias in Windows: Control Panel > Performance Options Visual Effects. Un-check "Smooth edges of screen fonts"
 
 You can find 'DejaVu Sans Mono' and 'Liberation Mono' in gfx/font, which should look good both with and without anti-alias. 
 (You might have to install the fonts to your system to make them work in the editor!)
