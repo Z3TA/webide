@@ -796,8 +796,9 @@ if(typeof searchFolder != "string") throw new Error("searchFolder=" + searchFold
 var stateProps = {
 isSaved: false,
 savedAs: false,
-			disableParsing: true
-};
+			disableParsing: true,
+			fullAutoIndentation: false
+		};
 		EDITOR.openFile(reportFilePath, content, {props: stateProps}, function(err, file) {
 			
 			if(err) throw err;

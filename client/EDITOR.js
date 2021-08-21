@@ -10639,9 +10639,23 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 	}
 	
 	EDITOR.animationFrame = 0;
+	EDITOR.DEFAULT_FPS = 60;
+	EDITOR.fps = EDITOR.DEFAULT_FPS;
 	var isAnimating = false;
+	var lastFrame = -1;
 	function animate() {
 		
+		if(lastFrame === -1) lastFrame = (new Date()).getTime();
+		else {
+			// time * fps = 1000 : 1000/time = fps
+			var diff = (new Date()).getTime() - lastFrame
+			EDITOR.fps = Math.round(1000 / diff);
+			//console.log("diff=" + diff + " EDITOR.fps=" + EDITOR.fps);
+
+			lastFrame = (new Date()).getTime();
+		}
+
+
 		runAnimations(++EDITOR.animationFrame);
 		
 		// The animation loop will go on until there are no more animation functions. Then it has to be restarted by EDITOR.renderNeeded()
@@ -10649,11 +10663,14 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 			isAnimating = true;
 			window.requestAnimationFrame(animate);
 		}
-		else isAnimating = false;
+		else {
+			isAnimating = false;
+			lastFrame = -1;
+		}
 	}
 	
 	function runAnimations(animationFrame) {
-		for (var i=0; i<EDITOR.animationFunctions.length; i++) EDITOR.animationFunctions[i](EDITOR.canvasContext, animationFrame);
+		for (var i=0; i<EDITOR.animationFunctions.length; i++) EDITOR.animationFunctions[i](EDITOR.canvasContext, animationFrame, EDITOR.fps);
 	}
 	
 	function runTests_5616458984153156(onlyOne, allInSync) { // Random numbers to make sure it's unique
@@ -11059,8 +11076,12 @@ function chooseSaveAsPath(saveAsDialogEvent) {
 }
 
 function fadeInCaretAnimation() {
-	var c = UTIL.parseColor(EDITOR.settings.caret.color);
-	var transparentColor = "rgba(" + c[0] + "," + c[1] + "," + c[2] + ",0.005)";
+		var c = UTIL.parseColor(EDITOR.settings.caret.color);
+		// We want the animation to last for X seconds and the caret to be compleatly filled after that X seconds...
+		var transparencyDelta = 0.005; // Good on 60 FPS
+		transparencyDelta = transparencyDelta * EDITOR.DEFAULT_FPS / EDITOR.fps; // Adjust for actual FPS
+
+		var transparentColor = "rgba(" + c[0] + "," + c[1] + "," + c[2] + "," + transparencyDelta.toString() + ")";
 	if(EDITOR.currentFile) {
 		EDITOR.renderCaret(EDITOR.currentFile.caret, 0, transparentColor);
 	}
