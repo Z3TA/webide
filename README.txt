@@ -432,7 +432,7 @@ Developing the editor using webide.se
 =====================================
 Self hosted development using the editor to edit itself...
 
-Start the backend:
+Start the backend in the cmd/terminal:
 ````
 node server/server.js --port=/home/$(whoami)/sock/test --domain=test.$(whoami).webide.se --username=test --password=pleaseuseapassword --home=/$(whoami)/johan/
 ````

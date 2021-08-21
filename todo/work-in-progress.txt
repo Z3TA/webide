@@ -1,4 +1,15 @@
 
+todo: mark find inf file files as non parsable so jshighlight don't highlight it
+
+tutorial doesn't work!
+
+put fading mouse caret in view -> effects so you can turn it off
+(issue with fading mouse caret on high fps monitors!? eg it uses frame counts instead of time!?)
+
+also need the editor to re-connect! it cant reconnect atm!
+
+can't click enter when in dir field when opening a file
+
 Open file from device and then be able to save it!!
 
 https://web.dev/file-system-access/

@@ -36,7 +36,7 @@ Firefox dev tools sometimes hide console log messages!!
 
 About design: We had a VHS video that for some reason was black and white, I don't know if it was the cassette, cable or the video player that was making the video black and white,
 I had tried everything. Then one day suddenly the video had color! This was my sons favorite video, but now that it had color HE HATED IT!
-The video was displayed as origionally intendens, it had been improved with colors. But by son felt the colors was now wrong and the movie was thus ruined.
+The video was displayed as origionally intended, it had been improved with colors. But by son felt the colors was now wrong and the movie was thus ruined.
 
 The user might have a picture in their head how they want the program to look and behave, if possibe, we should make it possible for the user to tweak the 
 program so that it looks like the picture in their head!?
@@ -54,7 +54,7 @@ Always follow happy path when demoing! Unless you want to find new bugs and issu
 
 Know issues that can't or wont be fixed
 ---------------------------------------
-Know issue: On gaming keyboard (n key rollover) Gnome will freeze if you press to many keys at once (so not an editor issue)
+Know issue: On gaming keyboard (n key rollover) Gnome will freeze if you press too many keys at once (so it's a issue in Gnome, not the editor itself)
 
 
 Happy path
