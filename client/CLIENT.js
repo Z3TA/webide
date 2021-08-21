@@ -88,6 +88,8 @@ var CLIENT = {}; // Client object is global
 		var sockJsReservedQuirk = '';
 		var sockJsOptions = {debug: true};
 		
+		CLIENT.ping = -1;
+
 		connection = new SockJS(url, sockJsReservedQuirk, sockJsOptions); 
 		connection.onopen = function serverConnected() {
 			//console.log("CLIENT: connected to server=" + JSON.stringify(server));
@@ -161,6 +163,7 @@ var CLIENT = {}; // Client object is global
 	CLIENT.cmd = function cmd(req, json, timeout, callback) {
 		// Sends a request to the server.
 		
+		//console.log("CLIENT.cmd: req=" + req + " json=" + JSON.stringify(json) + " callback=" + UTIL.getFunctionName(callback));
 
 		// Uncomment below to get a stack trace and can find out where the request was made while debugging}
 		//if(req != "log") { console.log("CLIENT: CLIENT.cmd id=" + id + " req=" + req); } 

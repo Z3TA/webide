@@ -6156,7 +6156,8 @@ console.warn(err.message);
 		
 		if(afk) {
 			afk = false;
-EDITOR.fireEvent("btk");
+			//console.log("EDITOR: afk=" + afk);
+			EDITOR.fireEvent("btk");
 			//console.log("Setting mainLoopInterval because btk!");
 			mainLoopInterval = setInterval(resizeAndRender, 1000); // Start main loop
 		}
@@ -10007,6 +10008,8 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 				var elUser = document.getElementById("username");
 				var elPw = document.getElementById("password");
 				if(elUser && elPw) {
+					elUser.value = elUser.value.trim(); // Can't have spaces in the username. Annying if you accidentally add a space and get a "wrong password" message
+
 					attemptLogin(elUser.value, elPw.value);
 				}
 				
@@ -12114,6 +12117,7 @@ function resizeAndRender(afterResize) {
 	
 	if((new Date() - EDITOR.lastTimeInteraction) > afkTimeout) {
 			afk = true;
+			//console.log("EDITOR: afk=" + afk);
 			EDITOR.fireEvent("afk");
 			// Try do do as little as possible to save power
 			clearInterval(mainLoopInterval);
