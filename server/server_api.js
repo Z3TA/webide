@@ -1691,7 +1691,7 @@ else if(protocol == "sftp:") {
 		
 		console.log("saveToDisk: path=" + path + " options=" + JSON.stringify(options) + " json.public=" + json.public + " text.length=" + text.length);
 		
-		fs.writeFile(path, text, options, function(err) {
+		fs.writeFile(path, text, options, function savedToLocalFs(err) {
 			console.log("Attempting saving to local file system: " + path + " ...");
 			
 			if(err) {
