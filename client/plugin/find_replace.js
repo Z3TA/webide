@@ -580,7 +580,7 @@ regexOptionLabel.insertBefore(regexOption, regexOptionLabel.firstChild);
 		var end = 0;
 		var searchStrLenght = str.length;
 		var loopCounter = 0;
-		var loopMax = 100;
+		var loopMax = 2000;
 
 		if(useRegex == undefined) useRegex = false;
 		if(keepSelection == undefined) keepSelection = false;
@@ -627,7 +627,7 @@ regexOptionLabel.insertBefore(regexOption, regexOptionLabel.firstChild);
 					searchStrLenght = result[0].length;
 
 					loopCounter++;
-					if(loopCounter > loopMax) throw new Error("Infinitive loop detected! result=" + JSON.stringify(result, null, 2));
+					if(loopCounter > loopMax) throw new Error("Infinitive loop detected! result=" + JSON.stringify(result, null, 2) + " lastSearchStrLength=" + lastSearchStrLength + " start=" + start + " tempText=" + tempText);
 				}
 				
 				if( index==-1 && !dontLoop) {
