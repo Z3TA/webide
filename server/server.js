@@ -4750,7 +4750,7 @@ setTimeout(function() {
 			var githubRepoName = dirs[1];
 			var repo = "https://github.com/" + githubUser + "/" + githubRepoName + ".wiki.git";
 		}
-		else if(dirs.length == 2 || dirs.length == 3 && dirs[1] == "") {
+		else if(dirs.length == 2 || (dirs.length == 3 && dirs[2] == "")) { // Sometimes it ends with a slash. eg. foo/bar/ => [ 'foo', 'bar', '' ]
 			var githubUser = dirs[0];
 			var githubRepoName = dirs[1];
 		}
