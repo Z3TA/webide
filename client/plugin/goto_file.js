@@ -202,7 +202,7 @@ EDITOR.unbindKey(show_gotoFileInput2);
 			
 			//console.log("goto_file: File was selected from file dialog: " + filePath + "\nTelling the editor to open it up for editing ...")
 			
-			EDITOR.openFile(filePath, content, function after_open_file(err, file) {  // path, content, callback
+			EDITOR.openFile(filePath, content, {show: true}, function after_open_file(err, file) {  // path, content, callback
 				
 				if(err) throw err;
 				
@@ -213,7 +213,9 @@ EDITOR.unbindKey(show_gotoFileInput2);
 				
 				if(fileHandle) file.nativeFileSystemFileHandle = fileHandle;
 				
-				EDITOR.showFile(file); // Hide the dashboard
+				hide_gotoFileInput();
+
+				EDITOR.dashboard.hide();
 
 				EDITOR.renderNeeded();
 				

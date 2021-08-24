@@ -4,6 +4,20 @@ tutorial doesn't work!
 put fading mouse caret in view -> effects so you can turn it off
 (issue with fading mouse caret on high fps monitors!? eg it uses frame counts instead of time!?)
 
+
+---
+
+On Safari modals covers the whole screen! And it's scrolled down so you don't see the text or the buttons...
+
+Scrolling is wierd on mobile Safari as it also tries to Move the whole app while dragging -making it all blurry, and it also scrolls super fast
+
+Zooming kinda works on Safari mobile, but the app menu and tabs goes outside the "scree" when zoomed in...
+
+Text looks bad when zoomed out but OK when zoomed in on Mobile Safari...
+
+---
+
+
 can't click enter when in dir field when opening a file
 
 https://web.dev/file-system-access/

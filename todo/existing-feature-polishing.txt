@@ -8,6 +8,10 @@ Polishing (only existing features)
 
 ---
 
+Save permission to edit local file between browser refreshes (needs to be stored/serialized to indexedDb)
+
+---
+
 Annoying when you get the message that you are in collaboration mode with Chrome, but have no idea why...
 should show some more, like Chrome on Macbook or something...
 

@@ -40,6 +40,11 @@ Feature list (Not ordered/prioritized)
 
 ---
 
+ide: funktion som visar alla todos med en checkbox (på högrer sida), och när man kryssar i checkboxen ändras todo: till done:
+
+
+---
+
 idea: able to re-open recently closed files
 
 ---
