@@ -8659,7 +8659,7 @@ var loaded = !!theWindow.location.href;
 				placeholder: "I was expecting that running " + eventListenerName + " on " + fileName + " the editor should..."
 			}, function(answer) {
 				message = message + "\n\nFeedback: " + answer + "\n\nBROWSER=" + BROWSER;
-				EDITOR.sendFeedback(message, "No handler for " + eventListenerName, true);
+				EDITOR.sendFeedback(message + "\npath: " + file.path, "No handler for " + eventListenerName, true);
 			});
 
 			EDITOR.statInfo("tool_" + eventListenerName + "_enoext", UTIL.getFileExtension(file.path));
