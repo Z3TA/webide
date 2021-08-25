@@ -78,6 +78,7 @@ EDITOR.settings = {
 		color: "rgb(0,0,0)"
 	},
 	defaultEventOrder: 1000,
+	fadingCaretTimeout: 3000,
 	showLineNumbers: true, // Can be used to toggle line-numbers on/off
 	leftMargin: 50,
 	rightMargin: 50,
@@ -11077,9 +11078,21 @@ function chooseSaveAsPath(saveAsDialogEvent) {
 
 function fadeInCaretAnimation() {
 		var c = UTIL.parseColor(EDITOR.settings.caret.color);
-		// We want the animation to last for X seconds and the caret to be compleatly filled after that X seconds...
-		var transparencyDelta = 0.005; // Good on 60 FPS
+		// We want the animation to last for X seconds and the caret to be compleatly filled after that X seconds... EDITOR.settings.fadingCaretTimeout
+		var transparencyDelta = 0.005; // Good on 60 FPS with 3000ms timeout
 		transparencyDelta = transparencyDelta * EDITOR.DEFAULT_FPS / EDITOR.fps; // Adjust for actual FPS
+
+		//console.log("date: " + (new Date()).getTime() + " transparencyDelta=" + transparencyDelta + " EDITOR.fps=" + EDITOR.fps + " EDITOR.DEFAULT_FPS=" + EDITOR.DEFAULT_FPS);
+
+		// 3000ms at 60fps = 60*3=90 frames
+		// 3000ms / 250fps = 250*3=750 frames
+
+		// todo: adjust formula so that it starts slowly! curve!
+
+		var transparencyDelta = 1.25 / (EDITOR.fps * EDITOR.settings.fadingCaretTimeout / 1000);
+
+
+		console.log("count");
 
 		var transparentColor = "rgba(" + c[0] + "," + c[1] + "," + c[2] + "," + transparencyDelta.toString() + ")";
 	if(EDITOR.currentFile) {
@@ -12001,7 +12014,7 @@ function keyPressed(keyPressEvent) {
 						if(file==EDITOR.currenctFile) EDITOR.renderCaret(file.caret);
 						EDITOR.canvas.style.cursor = 'text';
 						cursorHidden = false;
-					}, 3000);
+					}, EDITOR.settings.fadingCaretTimeout);
 				}
 			}
 			else {
