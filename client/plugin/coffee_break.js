@@ -1,18 +1,24 @@
 (function() {
 	"use strict";
 
-	var winMenu;
-	
+	var winMenu = [];
+	var interval;
+
 	EDITOR.plugin({
 		desc: "Take a break from work",
 		load: function loadCoffeeBreak() {
 
-			winMenu = EDITOR.windowMenu.add(S("min10"), ["Node.js", S("coffee_break"), 40], makeTakeBreak(10));
+			winMenu[0] = EDITOR.windowMenu.add(S("min10"), ["Node.js", S("coffee_break"), 1], makeTakeBreak(10));
+			winMenu[1] = EDITOR.windowMenu.add(S("min15"), ["Node.js", S("coffee_break"), 2], makeTakeBreak(15));
+			winMenu[2] = EDITOR.windowMenu.add(S("min20"), ["Node.js", S("coffee_break"), 3], makeTakeBreak(20));
+
 
 		},
 		unload: function unloadCoffeeBreak() {
 
-			EDITOR.windowMenu.remove(winMenu);
+			winMenu.forEach(function(menu) {
+				EDITOR.windowMenu.remove(menu);
+			});
 
 		}
 	});
@@ -20,20 +26,34 @@
 	function makeTakeBreak(minutes) {
 		
 		function takeBreak() {
+			var progress = document.getElementById("coffeeBreakProgress");
+			if(progress) {
+				clearInterval(interval);
+				progress.max = (minutes*60*1000);
+				waitForAlert();
+				return;
+			}
 
-			alertBox('<center><b>Compiling...</b><br><br><progress id="coffeeBreakProgress" value="0" max="' + (minutes*60*1000) + ' width="100%" height="40">');
+			alertBox('<center><b>Compiling...</b></center><br><br><progress class="progress" id="coffeeBreakProgress" value="0" min="0" max="' + (minutes*60*1000) + '" style="height:20px">hello</progress><br><span id="coffeeBreakText"></span>');
 
-			setTimeout(waitForAlert, 1000); 
+			setTimeout(waitForAlert, 1000);
 
 			function waitForAlert() {
 				var progress = document.getElementById("coffeeBreakProgress");
-				var interval = setInterval(tick, 100);
+				var text = document.getElementById("coffeeBreakText");
+				var counter = 0;
+				var fileIndex = 0;
+
+				// todo: show files in folder and subfolders...
+
+				interval = setInterval(tick, 100);
 
 				progress.style.display = 'block'; // Reset display:none
 
 				function tick() {
-					progress.value = (parseInt(progress.value) + 10);
-					console.log(progress.value, parseInt(progress.value), parseInt(progress.value) + 10, progress);
+					counter = counter + Math.floor(Math.random() * 201);
+					progress.value = counter;
+					//console.log(progress.value, parseInt(progress.value), parseInt(progress.value) + 10, progress);
 				}
 			
 			}
