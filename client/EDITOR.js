@@ -343,6 +343,8 @@ EDITOR.env = {}; // Plugins can set custom env values that will be passed to ter
 var connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
 	EDITOR.saveBandwith = (connection && connection.saveData) ? true : false;
 
+	var fadeInCaretAnimation;
+
 	function funMap(f){return f.fun}
 	
 	/*
@@ -10639,14 +10641,16 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 		}
 	}
 	
-	EDITOR.animationFrame = 0;
 	EDITOR.DEFAULT_FPS = 60;
 	EDITOR.fps = EDITOR.DEFAULT_FPS;
+	EDITOR.animationFrame = 0;
 	var isAnimating = false;
 	var lastFrame = -1;
 	function animate() {
 		
-		if(lastFrame === -1) lastFrame = (new Date()).getTime();
+		if(lastFrame === -1) {
+			lastFrame = (new Date()).getTime();
+		}
 		else {
 			// time * fps = 1000 : 1000/time = fps
 			var diff = (new Date()).getTime() - lastFrame
@@ -10667,11 +10671,14 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 		else {
 			isAnimating = false;
 			lastFrame = -1;
+			EDITOR.animationFrame = 0;
 		}
 	}
 	
 	function runAnimations(animationFrame) {
-		for (var i=0; i<EDITOR.animationFunctions.length; i++) EDITOR.animationFunctions[i](EDITOR.canvasContext, animationFrame, EDITOR.fps);
+		for (var i=0; i<EDITOR.animationFunctions.length; i++) {
+			EDITOR.animationFunctions[i](EDITOR.canvasContext, animationFrame, EDITOR.fps);
+		}
 	}
 	
 	function runTests_5616458984153156(onlyOne, allInSync) { // Random numbers to make sure it's unique
@@ -11076,29 +11083,37 @@ function chooseSaveAsPath(saveAsDialogEvent) {
 	EDITOR.filesaveAsCallback = undefined; // Prevent old callback from firing again
 }
 
-function fadeInCaretAnimation() {
-		var c = UTIL.parseColor(EDITOR.settings.caret.color);
-		// We want the animation to last for X seconds and the caret to be compleatly filled after that X seconds... EDITOR.settings.fadingCaretTimeout
-		var transparencyDelta = 0.005; // Good on 60 FPS with 3000ms timeout
-		transparencyDelta = transparencyDelta * EDITOR.DEFAULT_FPS / EDITOR.fps; // Adjust for actual FPS
+	function createFadeInCaretAnimation(frameStart) {
+		
+return function fadeInCaretAnimation(ctx, frame, fps) {
+			var c = UTIL.parseColor(EDITOR.settings.caret.color);
+			/*
+				We want the animation to last for X seconds and the caret to be compleatly filled after that X seconds... EDITOR.settings.fadingCaretTimeout
 
-		//console.log("date: " + (new Date()).getTime() + " transparencyDelta=" + transparencyDelta + " EDITOR.fps=" + EDITOR.fps + " EDITOR.DEFAULT_FPS=" + EDITOR.DEFAULT_FPS);
+				But we want the delta value to be an exponential curve so that the caret becomes visible slowly in the beginning
+				(delta of 0.005 works good on 60 FPS and 3000ms animation)
 
-		// 3000ms at 60fps = 60*3=90 frames
-		// 3000ms / 250fps = 250*3=750 frames
+				3000ms at 60fps = 60*3=90 frames
+				3000ms / 250fps = 250*3=750 frames
 
-		// todo: adjust formula so that it starts slowly! curve!
+			*/
 
-		var transparencyDelta = 1.25 / (EDITOR.fps * EDITOR.settings.fadingCaretTimeout / 1000);
+			// todo: adjust formula so that it starts slowly! curve!
+		
+			var totalFrames = EDITOR.fps * EDITOR.settings.fadingCaretTimeout / 1000;
+			var frameDelta = frame - frameStart;
+			var transparencyDelta = Math.pow(frameDelta/totalFrames, 10);
 
+			//console.log("date: " + (new Date()).getTime() + " frame=" + frame + " frameStart=" + frameStart + " totalFrames=" + totalFrames + " transparencyDelta=" + transparencyDelta + " EDITOR.fps=" + EDITOR.fps + " EDITOR.DEFAULT_FPS=" + EDITOR.DEFAULT_FPS);
 
-		console.log("count");
+			//console.log("count");
 
-		var transparentColor = "rgba(" + c[0] + "," + c[1] + "," + c[2] + "," + transparencyDelta.toString() + ")";
-	if(EDITOR.currentFile) {
-		EDITOR.renderCaret(EDITOR.currentFile.caret, 0, transparentColor);
+			var transparentColor = "rgba(" + c[0] + "," + c[1] + "," + c[2] + "," + transparencyDelta.toString() + ")";
+			if(EDITOR.currentFile) {
+				EDITOR.renderCaret(EDITOR.currentFile.caret, 0, transparentColor);
+			}
+		}
 	}
-}
 
 function fileDrop(fileDropEvent) {
 	fileDropEvent.preventDefault();
@@ -11974,7 +11989,7 @@ function keyPressed(keyPressEvent) {
 				
 				// First remove any old ones so they do not stop before the caret is fully filled
 				clearTimeout(renderCaretTimer);
-				EDITOR.removeAnimation(fadeInCaretAnimation);
+				if(fadeInCaretAnimation) EDITOR.removeAnimation(fadeInCaretAnimation);
 			
 				/*
 					console.log("since lastTimeCharacterInserted=" + (new Date() - EDITOR.lastTimeCharacterInserted) +
@@ -11991,6 +12006,7 @@ function keyPressed(keyPressEvent) {
 				else {
 					//console.log("FadingCaret: Fading caret!");
 					
+					fadeInCaretAnimation = createFadeInCaretAnimation(EDITOR.animationFrame);
 					EDITOR.addAnimation(fadeInCaretAnimation);
 				
 					var caret = UTIL.canvasLocation(file.caret);
