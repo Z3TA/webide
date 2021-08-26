@@ -1,6 +1,10 @@
 
 LANG["en"] = {
 	
+	min10: "10 minutes",
+	min15: "15 minutes",
+	min20: "20 minutes",
+
 	add_to_home_screen: "Add to home screen",
 androidEmulator: "Android Emulator",
 	autocomplete: "autocomplete",
@@ -19,6 +23,7 @@ change_version: "Change version",
 	close_current_file: "Close current file",
 	close_current_file_discard_changes: "Close file & discard changes",
 	close_file: "close file",
+	coffee_break: "Coffee break",
 	commit: "commit",
 	connect_to_server_in_server_manager: "connect to remove server in server manager",
 	convert_line_breaks: "Convert line-breaks",
