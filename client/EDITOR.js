@@ -11102,7 +11102,7 @@ return function fadeInCaretAnimation(ctx, frame, fps) {
 		
 			var totalFrames = EDITOR.fps * EDITOR.settings.fadingCaretTimeout / 1000;
 			var frameDelta = frame - frameStart;
-			var transparencyDelta = Math.pow(frameDelta/totalFrames, 10);
+			var transparencyDelta = Math.pow(frameDelta/totalFrames * 3, 6);
 
 			//console.log("date: " + (new Date()).getTime() + " frame=" + frame + " frameStart=" + frameStart + " totalFrames=" + totalFrames + " transparencyDelta=" + transparencyDelta + " EDITOR.fps=" + EDITOR.fps + " EDITOR.DEFAULT_FPS=" + EDITOR.DEFAULT_FPS);
 
