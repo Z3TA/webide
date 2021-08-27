@@ -1,12 +1,4 @@
 
-
-put fading mouse caret in view -> effects so you can turn it off
-(issue with fading mouse caret on high fps monitors!? eg it uses frame counts instead of time!?)
-
-fading animation needs to be curved so that it fades in slowly in the beginning...
-
----
-
 tutorial doesn't work!
 
 On Safari modals covers the whole screen! And it's scrolled down so you don't see the text or the buttons...

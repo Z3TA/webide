@@ -29,7 +29,7 @@
 		});
 		
 		function clone() {
-			CLIENT.cmd("mercurial.clone", {local: testFolder, remote: "https://hg.webtigerteam.com/repo/test", user: "user", pw: "pass"}, function clonedRepo(err, json) {
+			CLIENT.cmd("mercurial.clone", {local: testFolder, remote: "https://hg.webtigerteam.com/repo/test", user: "user", pw: "pass"}, 45000, function clonedRepo(err, json) {
 				if(err) {
 					alertBox(err.message, err.code || "HG_CLONE_ERROR");
 					throw err
@@ -52,33 +52,33 @@
 							}
 							
 							CLIENT.cmd("mercurial.add", {directory: testFolder, files: [fileName]}, function(err, commitResp) {
-if(err) throw err
+								if(err) throw err
 							
-							CLIENT.cmd("mercurial.commit", {directory: testFolder, files: [fileName], message: "Added new file"}, function(err, commitResp) {
-if(err) throw err; // if the bug exist the err will be: "Nothing has changed!"
-								
-								// Make changes to file
-								file.writeLine("some changes");
-								
-								EDITOR.saveFile(file, filePath, function (err, path) {
-if(err) throw err;
-								
-									CLIENT.cmd("mercurial.commit", {directory: testFolder, files: [fileName], message: "Made some changes to the new file"}, function(err, commitResp) {
+								CLIENT.cmd("mercurial.commit", {directory: testFolder, files: [fileName], message: "Added new file"}, function(err, commitResp) {
 									if(err) throw err; // if the bug exist the err will be: "Nothing has changed!"
+								
+									// Make changes to file
+									file.writeLine("some changes");
+								
+									EDITOR.saveFile(file, filePath, function (err, path) {
+										if(err) throw err;
+								
+										CLIENT.cmd("mercurial.commit", {directory: testFolder, files: [fileName], message: "Made some changes to the new file"}, function(err, commitResp) {
+											if(err) throw err; // if the bug exist the err will be: "Nothing has changed!"
 									
-									// Cleanup
-									EDITOR.closeFile(filePath);
-									CLIENT.cmd("deleteDirectory", {directory: rootFolder, recursive: true}, function(err, json) {
-										if(err) throw err
+											// Cleanup
+											EDITOR.closeFile(filePath);
+											CLIENT.cmd("deleteDirectory", {directory: rootFolder, recursive: true}, function(err, json) {
+												if(err) throw err
 										
-										callback(true);
+												callback(true);
 										
+											});
+									
+										});
 									});
-									
 								});
-								});
-								});
-						});
+							});
 						});
 					});
 				});
@@ -97,7 +97,7 @@ if(err) throw err;
 function testClone() {
 			if(++testCounter > 2) throw new Error("Clone test retry more then twice!");
 			
-			CLIENT.cmd("mercurial.clone", {local: testFolder, remote: "https://hg.webtigerteam.com/repo/test", user: "user", pw: "pass"}, function(err, json) {
+			CLIENT.cmd("mercurial.clone", {local: testFolder, remote: "https://hg.webtigerteam.com/repo/test", user: "user", pw: "pass"}, 60000, function(err, json) {
 				if(err && err.code == "EXIST") {
 					// The folder might already exist from and earlier test that failed.
 					cleanup(function(err) {
@@ -192,7 +192,7 @@ function testClone() {
 			
 			console.log("testClone: repository=" + repository + " testFolder=" + testFolder);
 			
-			CLIENT.cmd("mercurial.clone", {local: testFolder, remote: repository, user: "user", pw: "pass"}, function(err, json) {
+			CLIENT.cmd("mercurial.clone", {local: testFolder, remote: repository, user: "user", pw: "pass"}, 60000, function(err, json) {
 				if(err && err.code == "EXIST") {
 					// The folder might already exist from and earlier test that failed.
 					cleanup(function(err) {
