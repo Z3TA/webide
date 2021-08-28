@@ -5275,7 +5275,7 @@ if(menuItem.parentMenu) {
 					Adding more items makes the menu higher
 					Make sure no part is hidden below the view
 					
-					EDITOR.ctxMenu.show() should take care of this beause it waits some time before moving the mnu. But just in case...
+					EDITOR.ctxMenu.show() should take care of this beause it waits some time before moving the menu. But just in case...
 				*/
 				
 				var contextmenu = document.getElementById("contextmenu");

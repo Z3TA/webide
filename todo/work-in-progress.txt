@@ -1,6 +1,13 @@
 
 tutorial doesn't work!
 
+---
+
+iOS Safari
+
+Can't long-press on tabs to bring up tab context menu
+where is the code that shows the contect menu upon long-press on the file canvas !?
+
 On Safari modals covers the whole screen! And it's scrolled down so you don't see the text or the buttons...
 
 Scrolling is wierd on mobile Safari as it also tries to Move the whole app while dragging -making it all blurry, and it also scrolls super fast
