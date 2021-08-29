@@ -9933,6 +9933,16 @@ window.addEventListener("mouseup", mouseUp, false);
 
 window.addEventListener("mousemove", mouseMove, false);
 
+	// Disable Zooming in iOS Safari
+	document.addEventListener('gesturestart', function (e) {
+		e.preventDefault();
+	});
+
+	// Prevent dragging the page in iOS Safari
+	document.addEventListener("touchmove", function(e) {
+		e.preventDefault();
+	}, {passive: false});
+
 
 // Disable annoying menus
 window.addEventListener("contextmenu", function(contextMenuEvent) {
