@@ -453,8 +453,8 @@ tabFileText.setAttribute("path", path);
 		tabFileItem.appendChild(tabFileText);
 		tabFileItem.addEventListener("click", clickTab, true);
 		
-		tabFileItem.oncontextmenu = contextmenu;
-		
+		EDITOR.oncontextmenu(tabFileItem, contextmenu);
+
 		if(folders.length > 1) {
 			folderName = folders[folders.length-2];
 		}

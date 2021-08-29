@@ -29,7 +29,9 @@ EDITOR.plugin({
 			if(EDITOR.settings.sub_pixel_antialias) winMenuItem.activate();
 			else winMenuItem.deactivate();
 			
-			winMenuItem.domElement.oncontextmenu = function contextMenu(ev) {
+			EDITOR.oncontextmenu(winMenuItem.domElement, contextMenu);
+
+			function contextMenu(ev) {
 				EDITOR.localStorage.getItem("sub_pixel_antialias", function whenChecked(err, value) {
 					if(err) throw err;
 					
@@ -41,7 +43,7 @@ EDITOR.plugin({
 					EDITOR.ctxMenu.addTemp("Forget subpixel-antialas setting", true, function whenClicked() {
 						EDITOR.localStorage.removeItem("sub_pixel_antialias", function whenForgotten(err) {
 							if(err) throw err;
-EDITOR.ctxMenu.hide();
+							EDITOR.ctxMenu.hide();
 
 							var restartNow = "Restart now";
 							var later = "Later";

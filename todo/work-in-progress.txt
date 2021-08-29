@@ -3,10 +3,11 @@ tutorial doesn't work!
 
 ---
 
-iOS Safari
+terminal files, and search report files, - still being colored by highlightjs after being reopened
 
-Can't long-press on tabs to bring up tab context menu
-where is the code that shows the contect menu upon long-press on the file canvas !?
+---
+
+iOS Safari
 
 On Safari modals covers the whole screen! And it's scrolled down so you don't see the text or the buttons...
 

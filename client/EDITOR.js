@@ -3785,7 +3785,7 @@ throw new Error("Second or third argument to EDITOR.on: callback=" + callback + 
 			item.title = title;
 			
 			if(whenConextMenuActivated) {
-				item.oncontextmenu = whenConextMenuActivated;
+				EDITOR.oncontextmenu(item, whenConextMenuActivated);
 			}
 			
 			var image = document.createElement("img");
@@ -9759,6 +9759,36 @@ function reloadNow() {
 
 	}
 
+	// TEST-CODE-START
+	// For browsers without dev tools, send log messages to the server
+	EDITOR.debugLog = function debugLog(str) {
+		CLIENT.cmd("log", {data: str});
+	}
+	// TEST-CODE-END
+
+	// For iOS Safara that does not support the oncontexmenu event
+	EDITOR.oncontextmenu = function addLongPressEventListener(element, callback) {
+		var touchTimer;
+		element.oncontextmenu = function(ev) {
+			clearTimeout(touchTimer);
+			callback(ev);
+		}
+
+		element.ontouchstart = function(ev) {
+			touchTimer = setTimeout(function() {
+				callback(ev);
+			}, 600); // Make the callback just before iOS vibrates
+		}
+
+		element.ontouchend = function(ev) {
+			clearTimeout(touchTimer);
+		}
+
+		element.ontouchcancel = function(ev) {
+			clearTimeout(touchTimer);
+		}
+	}
+
 	CLIENT.on("connectionClosed", function connectionClosed(protocol, serverAddress) {
 
 		var connectedFiles = filesOnServer();
@@ -10237,7 +10267,6 @@ window.addEventListener("contextmenu", function(contextMenuEvent) {
 				EDITOR.commitTool(file);
 			}
 		});
-	
 	
 		window.onbeforeunload = confirmExit;
 	
@@ -12932,12 +12961,10 @@ function mouseDown(mouseDownEvent) {
 		}
 	
 	return true;
-	
 	}
 
-
 	function mouseUp(mouseUpEvent) {
-	//console.time("mouseUp");
+		//console.time("mouseUp");
 	
 	mouseUpEvent = mouseUpEvent || window.event;
 	

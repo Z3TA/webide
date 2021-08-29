@@ -236,13 +236,14 @@ else {
 			
 			li.appendChild(icon);
 			
-			li.oncontextmenu = function contextmenu(contextMenuEvent) {
+			li.style.webkitTouchCallout = "none";
+
+			EDITOR.oncontextmenu(li, function contextmenu(contextMenuEvent) {
 				contextMenuEvent.preventDefault();
 				contextMenuEvent.stopPropagation(); // Prevent from bubbling to parent node
-				
+
 				showContextMenu(li, name);
-				
-			};
+			});
 			
 			var displayName = name;
 			var maxNameLength = 40;
@@ -314,13 +315,12 @@ return;
 					
 				}, false);
 				
-				li.oncontextmenu = function contextmenu(contextMenuEvent) {
+				EDITOR.oncontextmenu(li, function contextmenu(contextMenuEvent) {
 					contextMenuEvent.preventDefault();
 					contextMenuEvent.stopPropagation(); // Prevent from bubbling to parent node
 					
 					showContextMenu(li, dbName, tableName);
-					
-				};
+				});
 				
 				li.ondblclick = makeSelectAll(tableName, dbName);
 				
@@ -392,13 +392,12 @@ return;
 				
 				li.appendChild(document.createTextNode(displayName));
 				
-				li.oncontextmenu = function contextmenu(contextMenuEvent) {
+				EDITOR.oncontextmenu(li, function contextmenu(contextMenuEvent) {
 					contextMenuEvent.preventDefault();
 					contextMenuEvent.stopPropagation(); // Prevent from bubbling to parent node
 					
 					showContextMenu(li, dbName, tableName, fieldName);
-					
-				};
+				});
 				
 				fieldList.appendChild(li);
 				

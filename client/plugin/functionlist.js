@@ -57,7 +57,7 @@
 		functionListWrap.setAttribute("place", "vertical");
 
 
-		functionListWrap.oncontextmenu = function hideMaybe() {
+		EDITOR.oncontextmenu(functionListWrap, function hideMaybe() {
 			var disable = "Always hide the function list";
 			var hide = "Hide function list";
 			var cancel = "Cancel";
@@ -79,7 +79,7 @@
 				hideFunctionList();
 				EDITOR.stat("hide_functionList");
 			});
-		}
+		});
 		
 		
 		leftColumn = document.getElementById("leftColumn");
