@@ -39,7 +39,7 @@ EDITOR.plugin({
 					
 					if(value == null) return; // No setting saved
 					
-					EDITOR.ctxMenu.show();
+					EDITOR.ctxMenu.show(ev);
 					EDITOR.ctxMenu.addTemp("Forget subpixel-antialas setting", true, function whenClicked() {
 						EDITOR.localStorage.removeItem("sub_pixel_antialias", function whenForgotten(err) {
 							if(err) throw err;

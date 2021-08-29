@@ -3198,6 +3198,7 @@ ca 20ms to render, ca 13ms to render without creating new objects
 		
 		PIXEL_RATIO = window.devicePixelRatio || 1; // "Retina" displays gives 2
 		
+
 		var windowHeight = parseInt(window.innerHeight);
 		var windowWidth = parseInt(window.innerWidth);
 		
@@ -3438,6 +3439,8 @@ ca 20ms to render, ca 13ms to render without creating new objects
 			//console.log("EDITOR.resize: Not resetting canvas dimensions. It's already at EDITOR.canvas.width=" + EDITOR.canvas.width + " EDITOR.canvas.height=" + EDITOR.canvas.height);
 		}
 		
+		//EDITOR.debugLog("PIXEL_RATIO=" + PIXEL_RATIO);
+
 		if(EDITOR.currentFile) {
 			// Fix horizontal column after resizing
 			if(EDITOR.view.endingColumn < EDITOR.view.visibleColumns) {
@@ -9766,7 +9769,7 @@ function reloadNow() {
 	}
 	// TEST-CODE-END
 
-	// For iOS Safara that does not support the oncontexmenu event
+	// For iOS Safari that does not support the oncontexmenu event
 	EDITOR.oncontextmenu = function addLongPressEventListener(element, callback) {
 		var touchTimer;
 		element.oncontextmenu = function(ev) {
@@ -9944,8 +9947,8 @@ window.addEventListener("mousemove", mouseMove, false);
 	}, {passive: false});
 
 
-// Disable annoying menus
-window.addEventListener("contextmenu", function(contextMenuEvent) {
+	// Disable annoying menus
+	window.addEventListener("contextmenu", function(contextMenuEvent) {
 	
 	contextMenuEvent = contextMenuEvent || window.event;
 	
