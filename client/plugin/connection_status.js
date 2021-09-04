@@ -117,11 +117,18 @@ disable(false);
 			var bgColor = "yellow";
 			var textColor = "black";
 		}
-		else if(CLIENT.connected && CLIENT.ping == -1) {
-			var text = S("reconnecting");
-			var bgColor = "green";
-			var textColor = "black";
-		}
+		/*
+			No idea to show a message about first ping - hopefully we will get a ping value within milliseconds!
+			else if(CLIENT.connected && CLIENT.ping == -1) {
+			var text = "ping...";
+			var bgColor = EDITOR.settings.style.bgColor;
+			var textColor = EDITOR.settings.style.textColor;
+			//var bgColor = "green";
+			//var textColor = "black";
+			EDITOR.renderNeeded();
+			}
+		*/
+		
 		else if(CLIENT.connected && CLIENT.ping > -1) { 
 			var text = "ping: " + CLIENT.ping;
 			if(CLIENT.ping < 100) {

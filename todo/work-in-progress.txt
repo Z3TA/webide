@@ -1,4 +1,10 @@
 
+bug: When dropped images are saved they get corrupted! 
+Image viewer: Not a JPEG file - starts with 0x2f 0x39
+Looks like it's not a binary file! Seems like it's base64 encoded!
+
+---
+
 tutorial doesn't work!
 
 ---

@@ -6151,6 +6151,22 @@ console.warn(err.message);
 		executeOnNextInteraction.push(func);
 	}
 	
+	function triggerBTK(reason) {
+		afk = false;
+		console.log("EDITOR: triggerBTK: reason=" + reason + "");
+		EDITOR.fireEvent("btk");
+		//console.log("Setting mainLoopInterval because btk!");
+		mainLoopInterval = setInterval(resizeAndRender, 1000); // Start main loop
+	}
+
+	function triggerAFK(reason) {
+		afk = true;
+		console.log("EDITOR: triggerAFK: reason=" + reason + "");
+		EDITOR.fireEvent("afk");
+		// Try do do as little as possible to save power
+		clearInterval(mainLoopInterval);
+	}
+
 	EDITOR.interact = function(interaction, options) {
 		// This function will be called on every interaction
 		
@@ -6161,11 +6177,7 @@ console.warn(err.message);
 		nextInteractionFunctions();
 		
 		if(afk) {
-			afk = false;
-			//console.log("EDITOR: afk=" + afk);
-			EDITOR.fireEvent("btk");
-			//console.log("Setting mainLoopInterval because btk!");
-			mainLoopInterval = setInterval(resizeAndRender, 1000); // Start main loop
+			triggerBTK("interaction");
 		}
 		
 		EDITOR.lastTimeInteraction = new Date();
@@ -9946,6 +9958,11 @@ window.addEventListener("mousemove", mouseMove, false);
 		e.preventDefault();
 	}, {passive: false});
 
+	// When the browser tab becomes a "background tab"
+	document.addEventListener('visibilitychange', function(){
+		if(document.hidden) triggerAFK("background tab");
+		else triggerBTK("tab in view");
+	});
 
 	// Disable annoying menus
 	window.addEventListener("contextmenu", function(contextMenuEvent) {
@@ -12208,11 +12225,7 @@ function resizeAndRender(afterResize) {
 		}
 	
 	if((new Date() - EDITOR.lastTimeInteraction) > afkTimeout) {
-			afk = true;
-			//console.log("EDITOR: afk=" + afk);
-			EDITOR.fireEvent("afk");
-			// Try do do as little as possible to save power
-			clearInterval(mainLoopInterval);
+			triggerAFK("no interaction in " + afkTimeout + "ms");
 		}
 	
 		// note: We can't use window.requestAnimationFrame on Chrome or it will use 70% of CPU to just spin the loop!!!
