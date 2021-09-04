@@ -6152,6 +6152,8 @@ console.warn(err.message);
 	}
 	
 	function triggerBTK(reason) {
+		if(!afk) return;
+
 		afk = false;
 		console.log("EDITOR: triggerBTK: reason=" + reason + "");
 		EDITOR.fireEvent("btk");
@@ -6160,6 +6162,8 @@ console.warn(err.message);
 	}
 
 	function triggerAFK(reason) {
+		if(afk) return;
+
 		afk = true;
 		console.log("EDITOR: triggerAFK: reason=" + reason + "");
 		EDITOR.fireEvent("afk");
