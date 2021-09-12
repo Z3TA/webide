@@ -278,8 +278,8 @@ log("Ending work=" + JSON.stringify(work) + " because IN_PROGRESS=" + IN_PROGRES
 		if(!zoneData.match( new RegExp(subname + " +IN +CNAME") )) {
 			
 			// Find A and AAAA records for tld
-			var matchA = zoneData.match(/[@*]\s+IN\s+\d*?\s+A\s+([0-9.]*)/i);
-			var matchAAAA = zoneData.match(/[@*]\s+IN\s+\d*?\s+AAAA\s+([0-9a-f:]*)/i);
+			var matchA = zoneData.match(/[@*]\s+\d*\s*IN\s+\d*?\s+A\s+([0-9.]*)/i);
+			var matchAAAA = zoneData.match(/[@*]\s+\d*\s*IN\s+\d*?\s+AAAA\s+([0-9a-f:]*)/i);
 			
 			if(!matchA) {
 				if(resp) resp.end("Error: Cannot find A record for " + tld + " in zone file: " + zoneFile);
