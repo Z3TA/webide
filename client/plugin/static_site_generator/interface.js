@@ -2295,7 +2295,7 @@ if(err) return alertBox(err.message);
 						
 						if(repoUrl == undefined) throw new Error("repoUrl=" + repoUrl + " resp=" + JSON.stringify(resp, null, 2));
 						
-						summary.push("Pulled " + (changes || 0) + " changes on " + filesChanged + " files from " + repoUrl)
+						summary.push("Pulled " + (changes || 0) + " changes on " + (filesChanged || 0) + " files from " + repoUrl)
 
 						if(changes === 0) {
 							//console.log("No incoming changes from " + repoUrl);
@@ -2391,7 +2391,7 @@ whenAllFilesReloaded();
 					
 					//console.log("mercurial.push: err=" + err + " syncRepositoryCallback=" + syncRepositoryCallback + " resp=" + JSON.stringify(resp));
 					
-					summary.push("Pushed " + resp.changesets + " changesets with " + resp.changes + " changes to " + resp.files + " files");
+					summary.push("Pushed " + (resp.changesets || 0) + " changesets with " + (resp.changes || 0) + " changes to " + (resp.files || 0) + " files");
 
 					if(err) alertBox(err.message);
 					else if(syncRepositoryCallback) syncRepositoryCallback(null);
