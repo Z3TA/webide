@@ -668,7 +668,7 @@ for(var i=0; i<options.length; i++) {
 		buttonOpenEdit.setAttribute("value", "Open/edit file/page");
 		buttonOpenEdit.setAttribute("title", "Select a file from the source code folder");
 		buttonOpenEdit.addEventListener("click", function() {
-			if(!selectedSite) throw new Error("No site selected!");
+			if(!selectedSite) return alertBox("No site configured!? Click Settings / new");
 			
 			hideSSG(); // Sets EDITOR.input to true
 			
@@ -1933,6 +1933,8 @@ for(var i=0; i<options.length; i++) {
 			
 		*/
 		
+		var summary = []; // Tell user what we did
+
 		if(site.projectFolder == undefined || site.projectFolder == "undefined") {
 			alertBox("No project folder configured for site: " + site.name);
 			editSiteSettings();
@@ -2291,8 +2293,10 @@ if(err) return alertBox(err.message);
 						var filesChanged = resp.files;
 						var filesOpenedInEditorThatChanged = [];
 						
-						if(repoUrl == undefined) throw new Error("repoUrl=" + undefined + " resp=" + JSON.stringify(resp, null, 2));
+						if(repoUrl == undefined) throw new Error("repoUrl=" + repoUrl + " resp=" + JSON.stringify(resp, null, 2));
 						
+						summary.push("Found " + changes + " on " + repoUrl)
+
 						if(changes === 0) {
 							//console.log("No incoming changes from " + repoUrl);
 							
@@ -2345,6 +2349,7 @@ if(err) return alertBox(err.message);
 									alertMsg = "Update successful! " + alertMsg;
 									whenAllFilesReloaded = function push() {
 										//alertBox(alertMsg);
+										summary.push(alertMsg);
 										pushToRepo();
 									} 
 									}
@@ -2387,6 +2392,8 @@ whenAllFilesReloaded();
 					
 					//console.log("mercurial.push: err=" + err + " syncRepositoryCallback=" + syncRepositoryCallback + " resp=" + JSON.stringify(resp));
 					
+					summary.push("Pushed " + resp.changesets + " changesets with " + respo.changes + " changes to " + resp.files + " files");
+
 					if(err) alertBox(err.message);
 					else if(syncRepositoryCallback) syncRepositoryCallback(null);
 					else alertBox("Sync complete!");
