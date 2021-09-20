@@ -2396,7 +2396,7 @@ whenAllFilesReloaded();
 
 					if(err) alertBox(err.message);
 					else if(syncRepositoryCallback) syncRepositoryCallback(null);
-					else alertBox("Sync complete!");
+					else alertBox( "Sync complete!\n" + summary.join("\n") );
 					
 				});
 			}
