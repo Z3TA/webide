@@ -2392,7 +2392,7 @@ whenAllFilesReloaded();
 					
 					//console.log("mercurial.push: err=" + err + " syncRepositoryCallback=" + syncRepositoryCallback + " resp=" + JSON.stringify(resp));
 					
-					summary.push("Pushed " + resp.changesets + " changesets with " + respo.changes + " changes to " + resp.files + " files");
+					summary.push("Pushed " + resp.changesets + " changesets with " + resp.changes + " changes to " + resp.files + " files");
 
 					if(err) alertBox(err.message);
 					else if(syncRepositoryCallback) syncRepositoryCallback(null);
