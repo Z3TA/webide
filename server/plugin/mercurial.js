@@ -1162,14 +1162,17 @@ err.code = exitCode;
 						// Different servers returns different text ...
 						var resp = {
 							remote: repoUrl,
-							directory: user.toVirtualPath(rootDir)
-						}
+							directory: user.toVirtualPath(rootDir),
+				changesets: 0,
+				changes: 0,
+				files: 0
+			}
 						
-						// Mercurial:
-						// added 2 changesets with 1 changes to 1 files
-						var matchUpdate = stdout.match(/remote: added (\d+) changesets with (\d+) changes to (\d+) files/);
-						if(matchUpdate) {
-							resp.changesets = matchUpdate[1];
+			// Mercurial:
+			// added 2 changesets with 1 changes to 1 files
+			var matchUpdate = stdout.match(/remote: added (\d+) changesets with (\d+) changes to (\d+) files/);
+			if(matchUpdate) {
+				resp.changesets = matchUpdate[1];
 							resp.changes = matchUpdate[2];
 							resp.files = matchUpdate[3];
 						}
@@ -1183,8 +1186,7 @@ err.code = exitCode;
 							resp.files = matchUpdate[3];
 						}
 						
-			if(!matchUpdate) return pushDone(stdout, {directory: user.toVirtualPath(rootDir)});
-			else pushDone(null, resp);
+			pushDone(null, resp);
 						
 					
 				

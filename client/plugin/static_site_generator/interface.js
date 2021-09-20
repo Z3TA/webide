@@ -2295,7 +2295,7 @@ if(err) return alertBox(err.message);
 						
 						if(repoUrl == undefined) throw new Error("repoUrl=" + repoUrl + " resp=" + JSON.stringify(resp, null, 2));
 						
-						summary.push("Found " + changes + " on " + repoUrl)
+						summary.push("Pulled " + (changes || 0) + " changes on " + filesChanged + " files from " + repoUrl)
 
 						if(changes === 0) {
 							//console.log("No incoming changes from " + repoUrl);
@@ -2346,7 +2346,6 @@ if(err) return alertBox(err.message);
 									
 								}
 								else {
-									alertMsg = "Update successful! " + alertMsg;
 									whenAllFilesReloaded = function push() {
 										//alertBox(alertMsg);
 										summary.push(alertMsg);
