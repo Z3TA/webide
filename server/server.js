@@ -277,10 +277,17 @@ var HTTP_PORT = getArg(["port", "port"]) || DEFAULT.editor_http_port;
 var PUBLIC_PORT = getArg(["pp", "public_port"]) || HTTP_PORT; // Server might run on localhost behind a proxy sunch as nginx
 var HOSTNAME = getArg(["host", "host", "hostname"]) || HTTP_IP; // Same as "server_name" in nginx profile or "VirtualHost" on other web servers
 
-var defaultDomain = DEFAULT.domain;
-var DOMAIN = getArg(["domain", "domain"]) || (parseInt(HOSTNAME.slice(0,1)) ? defaultDomain : HOSTNAME); // Use hostname!
+/*
+	What is the difference between HOSTNAME and DOMAIN !?!?
+	HOSTNAME is the name of the computer
+	DOMAIN is a public domain name
+*/
 
-console.log("DOMAIN=" + DOMAIN);
+var DOMAIN = getArg(["domain", "domain"]) || HOSTNAME;
+
+//console.log("DOMAIN=" + DOMAIN);
+//console.log("HOSTNAME=" + HOSTNAME);
+
 //process.exit();
 
 var CHROMIUM_DEBUG_PORT = 9222;
@@ -301,7 +308,7 @@ var NAT_CLIENT_WEBSOCKET = {}; // id (same as on server) : Fake SockJS connectio
 var NAT_CLIENTS = {}; // code : socket
 var NAT_WEBSOCKET_COUNTER = 0; // Increment for each NAT:ed SockJS connection
 
-console.log("NAT_TYPE=" + NAT_TYPE);
+//console.log("NAT_TYPE=" + NAT_TYPE);
 
 if(typeof NAT_TYPE == "string" && NAT_TYPE.indexOf("client") != -1 || NAT_CODE) {
 	if(!NAT_PORT) NAT_PORT = DEFAULT.nat_port;
@@ -367,7 +374,7 @@ var mysqlConnection;
 
 //console.log("INSIDE_DOCKER ? " + !!INSIDE_DOCKER);
 //console.log("NO_NETNS ? " + !!NO_NETNS);
-console.log("IPTABLES ? " + !!IPTABLES);
+//console.log("IPTABLES ? " + !!IPTABLES);
 
 
 // # Polyfills in case you are using an older Node.js version
@@ -1321,7 +1328,7 @@ function main() {
 	
 	log("NAT_TYPE=" + NAT_TYPE + " NAT_HOST=" + NAT_HOST + " NAT_PORT=" + NAT_PORT, DEBUG);
 	if(NAT_PORT && NAT_HOST && (!NAT_TYPE || NAT_TYPE.indexOf("server") == -1)) connectToNatServer();
-	else log("Not connecting to NAT/reverse server! NAT_PORT=" + NAT_PORT + " NAT_HOST=" + NAT_HOST + " NAT_TYPE=" + NAT_TYPE);
+	else log("Not connecting to NAT/reverse server! NAT_PORT=" + NAT_PORT + " NAT_HOST=" + NAT_HOST + " NAT_TYPE=" + NAT_TYPE, DEBUG);
 
 	if(!NO_NETNS && !USERNAME && process.platform=="linux") {
 		// Make sure we have a bridge setup for Linux network namespaces
@@ -1364,7 +1371,7 @@ function main() {
 		}
 	}
 	else {
-		log("NO_NETNS=" + NO_NETNS + " USERNAME=" + USERNAME + " process.platform=" + process.platform);
+		log("NO_NETNS=" + NO_NETNS + " USERNAME=" + USERNAME + " process.platform=" + process.platform, DEBUG);
 	}
 	
 	if(info.uid == 0 && process.platform=="linux" && (!CRAZY && !INSIDE_DOCKER)) {
@@ -1727,7 +1734,7 @@ return;
 	
 	function startServer() {
 		
-		log("Starting Editor Backend/server ...");
+		log("Starting Editor Backend/server ...", DEBUG);
 		
 		var wsServer = module_sockJs.createServer();
 		wsServer.on("connection", sockJsConnection);
@@ -4855,6 +4862,28 @@ setTimeout(function() {
 		return githubRepoName;
 	}
 
+	// Currently not used function might come in handy later...
+	function isLocalIp(address) {
+		var ranges = [
+			// 10.0.0.0 - 10.255.255.255
+			/^(::f{4}:)?10\.\d{1,3}\.\d{1,3}\.\d{1,3}/,
+			// 127.0.0.0 - 127.255.255.255
+			/^(::f{4}:)?127\.\d{1,3}\.\d{1,3}\.\d{1,3}/,
+			// 169.254.1.0 - 169.254.254.255
+			/^(::f{4}:)?169\.254\.([1-9]|1?\d\d|2[0-4]\d|25[0-4])\.\d{1,3}/,
+			// 172.16.0.0 - 172.31.255.255
+			/^(::f{4}:)?(172\.1[6-9]|172\.2\d|172\.3[0-1])\.\d{1,3}\.\d{1,3}/,
+			// 192.168.0.0 - 192.168.255.255
+			/^(::f{4}:)?192\.168\.\d{1,3}\.\d{1,3}/,
+			// fc00::/7
+			/^f[c-d][0-9a-f]{2}(::1$|:[0-9a-f]{1,4}){1,7}/,
+			// fe80::/10
+			/^fe[89ab][0-9a-f](::1$|:[0-9a-f]{1,4}){1,7}/
+		]
+
+		return ( address === '::' || address === '::1' || ranges.some(function (it) { return it.test(address) }) );
+	}
+
 	function makeUrl(endPoint) {
 	
 		if(!HTTP_SERVER) throw new Error("No HTTP_SERVER available!");
@@ -4911,7 +4940,7 @@ setTimeout(function() {
 	
 		var url = ""; // "http://";
 	
-		if(DOMAIN || HOSTNAME) url += (DOMAIN || HOSTNAME);
+		if( DOMAIN || HOSTNAME ) url += (DOMAIN || HOSTNAME);
 		else url += ip;
 	
 		if(PUBLIC_PORT.charAt(0) == "/") {

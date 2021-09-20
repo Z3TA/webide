@@ -434,7 +434,7 @@ Self hosted development using the editor to edit itself...
 
 Start the backend in the cmd/terminal:
 ````
-node server/server.js --port=/home/$(whoami)/sock/test --domain=test.$(whoami).webide.se --username=test --password=pleaseuseapassword --home=/$(whoami)/johan/
+node server/server.js --port=/home/$(whoami)/sock/test --domain=test.$(whoami).webide.se --username=test --password=pleaseuseapassword --home=/home/$(whoami)/
 ````
 You might have to delete the socket (/home/$(whoami)/sock/test) before re-run. eg. when you get this error: Error: listen EADDRINUSE: address already in use
 
