@@ -406,11 +406,11 @@ self.addEventListener('activate', function serviceWorkerActivate(event) {
 	
 	caches.match() is a convenience method which checks all caches
 */
+var reWebide = /\/webide\//;
 self.addEventListener('fetch', function serviceWorkerFetch(event) {
 	console.log("serviceWorker fetch url=" + event.request.url + " * v=" + VERSION + " dev=" + DEV_MODE);
 	
-	
-	if(DEV_MODE) { // Skip cache
+	if( DEV_MODE || event.request.url.match(reWebide) ) { // Skip cache
 		event.respondWith(fetch(event.request).catch(fetchError));
 	}
 	else {
