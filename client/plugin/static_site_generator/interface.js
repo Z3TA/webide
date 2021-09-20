@@ -2295,7 +2295,7 @@ if(err) return alertBox(err.message);
 						
 						if(repoUrl == undefined) throw new Error("repoUrl=" + repoUrl + " resp=" + JSON.stringify(resp, null, 2));
 						
-						summary.push("Pulled " + (changes || 0) + " changes on " + (filesChanged || 0) + " files from " + repoUrl)
+						summary.push("Pulled " + (changes || 0) + " changes to " + (filesChanged.length) + " files from " + repoUrl)
 
 						if(changes === 0) {
 							//console.log("No incoming changes from " + repoUrl);
