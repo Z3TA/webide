@@ -680,7 +680,7 @@ text = text.replace(reNetnsIP, "$2$3$4." + username + "." + TLD);
 			
 			if(err) {
 				//console.log("stop_nodejs: err.code=" + err.code);
-				if(err.code == "NOT_RUNNING") alertBox("Script was not running: " + filePath);
+				if(err.code == "NOT_RUNNING") alertBox("The script is stopped (it wasn't running): " + filePath);
 				else return alertBox(err.message);
 			}
 			
