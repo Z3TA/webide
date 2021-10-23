@@ -140,6 +140,7 @@ function handleHttpRequest(request, response){
 			request.on('end', function() {
 var qs = require('querystring');
 				var formData = qs.parse(requestBody);
+				formData.user = formData.user.toLowerCase(); // Force lower case username because URL's (user.webide.se) is case insensitive
 				var data = formData.user + "," + formData.pw; 
 				usernameAvailable(data, function available(err, name, isAvailable) {
 					if(err) {

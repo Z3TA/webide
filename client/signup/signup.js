@@ -143,6 +143,10 @@ alertGeneralMessage("Connection to signup service closed! Attempting to reconnec
 			
 			var username = inputUsername.value;
 			
+			// Convert to lower case
+			username = username.toLowerCase();
+			inputUsername.value = username;
+
 			var urlUser = document.getElementById("urlUser");
 			urlUser.innerText = username;
 			
