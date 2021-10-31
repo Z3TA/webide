@@ -403,6 +403,9 @@
 		}, false);
 		form.appendChild(cancel);
 		
+		/*
+
+
 		// ### Signup
 		if(!EDITOR.user || EDITOR.user.name != "admin") {
 			var signupLink = document.createElement("a");
@@ -422,6 +425,19 @@
 		aboutLink.setAttribute("target", "_blank");
 		form.appendChild(aboutLink);
 		
+		*/
+
+		// Some clients (Win10 laptop with Chrome) gets into connection Limbo where they they think it's connnected but are not...
+		var disonnet = document.createElement("button");
+		disonnet.setAttribute("type", "button");
+		disonnet.setAttribute("class", "button");
+		disonnet.innerText = "Disconnect & reconnect"; // we'll automatically reconnect
+		disonnet.addEventListener("click", function cancel() {
+			// sugg: Implement a server disconnect command? To make the server disconnect right away 
+			CLIENT.disconnect();
+		}, false);
+		form.appendChild(disonnet);
+
 		if(EDITOR.localStorage) {
 			EDITOR.localStorage.getItem(["editorServerUrl","editorServerUser", "editorServerPw"], function(err, obj) {
 				if(err) return;
