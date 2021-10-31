@@ -1683,6 +1683,11 @@ div.gotoFile li:hover {
 	overflow-y: scroll;
 }
 
+.repoCommit select option:checked {
+	background: #62676f -webkit-linear-gradient(bottom, #62676f 0%, #62676f 100%);
+	/* Firefox seem to only use linear-gradient */
+}
+
 .repoCommit select, .repoCommit textarea {
 	padding-left: 2px;
 	height: 7em;

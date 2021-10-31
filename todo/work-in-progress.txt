@@ -9,10 +9,6 @@ Arenn2783 worker process stderr: [2m2021-09-23 (05:05:03) [0m[4mArenn2783: US
 
 ---
 
-Cant see which options are selected in selectbox (commit) on low contrast screen
-
----
-
 When a Node.js script is running, the bottom bar should say "restart nodejs script" instead of "start nodejs script", would also be nice if the menu updated!
 
 ---
