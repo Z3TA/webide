@@ -2089,15 +2089,21 @@ isPlaying = true;
 			
 		}
 		
+		}
 	}
-	}
-	
-	
 	
 	function callabFileSaved(file) {
 		//console.log("callabFileSaved: file.path=" + file.path + " ignoreFileSave=" + ignoreFileSave);
+		
+		if(!collabMode) return true;
+
 		if(ignoreFileSave == file.path) return true;
 		
+		if(isRecording) {
+			// Save a record about the file being saved!?
+			return true;
+		}
+
 		var fileSaveEvent = {
 			path: file.path,
 			hash: file.hash

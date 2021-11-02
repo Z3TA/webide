@@ -1,4 +1,10 @@
 
+remember file.nativeFileSystemFileHandle when reloading
+
+cant reload editor during "network problem" in order to fix the network problem (after wifi restart)
+Reloading the editor should be forced and work even if there are errors!
+---
+
 todo: Test user signup (after enforcing lower case username)
 
 Arenn2783 worker process stderr: [2m2021-09-23 (13:12:02) [0m[4mArenn2783: UTIL.getDirectoryFromPath: Unable to get directory of path=keybindings.txt (does not contain a slash) [2m(client/UTIL.js:94:12 <- plugin/mercurial.js:2138:28)[0m
