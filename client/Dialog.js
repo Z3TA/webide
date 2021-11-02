@@ -402,6 +402,8 @@ function alertBox(msg, code, icon, recursionCount) {
 	dialog.div.appendChild(feedback);
 	dialog.div.appendChild(button);
 
+	//console.trace("alertBox: msg=" + msg);
+
 	return dialog;
 }
 
