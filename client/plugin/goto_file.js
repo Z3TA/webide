@@ -202,7 +202,10 @@ EDITOR.unbindKey(show_gotoFileInput2);
 			
 			//console.log("goto_file: File was selected from file dialog: " + filePath + "\nTelling the editor to open it up for editing ...")
 			
-			EDITOR.openFile(filePath, content, {show: true}, function after_open_file(err, file) {  // path, content, callback
+			var openFileOptions = {show: true}
+			if(fileHandle) openFileOptions.nativeFileSystemFileHandle = fileHandle; // Must give the file handle before fileOpen listeners are called
+
+			EDITOR.openFile(filePath, content, openFileOptions, function after_open_file(err, file) {  // path, content, callback
 				
 				if(err) throw err;
 				
@@ -210,8 +213,6 @@ EDITOR.unbindKey(show_gotoFileInput2);
 				file.isSaved = true;
 				file.savedAs = true;
 				file.changed = false;
-				
-				if(fileHandle) file.nativeFileSystemFileHandle = fileHandle;
 				
 				hide_gotoFileInput();
 

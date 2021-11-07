@@ -1,5 +1,25 @@
+Working on saving nativeFileSystemFileHandle in indexedDB for reopening when editor is closed and reopened!
 
 remember file.nativeFileSystemFileHandle when reloading
+
+---
+
+Inserting an { in a large file (EDITOR.js) on and old laptop totally freezes the laptop and a hard reboot is needed...
+(to treat the symtops we could use Alt+C to insert a pair of curly braces to not make the parser reparse the whole file...)
+
+---
+
+Sometimes when typing on Macbook and you get far to the right the text becomes invisible!
+
+---
+
+After opening terminal on one computer, then closing that client, and open webide on another computer,
+every time I change to another file I get the message: 
+
+Uncaught Error: We might have lost the connection. Or the server is busy! Unable to send cmd: req=terminal.resize (navigator.onLine=true) (code=ENETUNREACH)
+
+restaring the client on the new client computer seem to resolv the probelm... because terminal1 session closed
+---
 
 cant reload editor during "network problem" in order to fix the network problem (after wifi restart)
 Reloading the editor should be forced and work even if there are errors!

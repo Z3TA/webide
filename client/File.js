@@ -1655,13 +1655,13 @@ file.sanityCheck();
 		file.sanityCheck();
 		//file.debugGrid();
 		
-		if(firstIndex > lastIndex) throw new Error("firstIndex=" + firstIndex + " can not be larger then lastIndex=" + lastIndex);
-		if(lastIndex >= file.text.length) throw new Error("lastIndex=" + lastIndex + " can not be equal or larger then file.text.length=" + file.text.length);
-		if(firstIndex < 0) throw new Error("firstIndex=" + firstIndex + " can not be less then 0");
+		if(firstIndex > lastIndex) throw new Error("deleteTextRange: firstIndex=" + firstIndex + " can not be larger then lastIndex=" + lastIndex + " file.path=" + file.path);
+		if(lastIndex >= file.text.length) throw new Error("deleteTextRange: lastIndex=" + lastIndex + " can not be equal or larger then file.text.length=" + file.text.length  + " file.path=" + file.path);
+		if(firstIndex < 0) throw new Error("deleteTextRange: firstIndex=" + firstIndex + " can not be less then 0 file.path=" + file.path);
 
 		if(file.lineBreak == "\r\n") {
-			if(file.text.charAt(firstIndex) == "\n") throw new Error("First index can not be between line-break characters " + UTIL.lbChars(file.lineBreak));
-			if(file.text.charAt(lastIndex) == "\n") throw new Error("Last index can not be between line-break characters " + UTIL.lbChars(file.lineBreak));
+			if(file.text.charAt(firstIndex) == "\n") throw new Error("deleteTextRange: First index can not be between line-break characters " + UTIL.lbChars(file.lineBreak) + " file.path=" + file.path);
+			if(file.text.charAt(lastIndex) == "\n") throw new Error("deleteTextRange: Last index can not be between line-break characters " + UTIL.lbChars(file.lineBreak) + " file.path=" + file.path);
 		}
 		
 		/*
@@ -1998,12 +1998,7 @@ file.sanityCheck();
 	File.prototype.getFileSize = function size(humanReadable) {
 		var file = this;
 
-		if(typeof Blob == "undefined") {
-			//console.warn("Unable to get file size of file.path=" + file.path + " typeof Blob=" + (typeof Blob));
-			return "";
-		}
-
-		var size = new Blob([file.text]).size; // byte size
+		var size = UTIL.byteSize(file.text);
 
 		if(!humanReadable) return size;
 		else return EDITOR.humanReadableNumber(size) + "B";

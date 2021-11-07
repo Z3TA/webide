@@ -36,6 +36,7 @@ EDITOR.plainTextFileExtensions = [
 
 // Make your custom settings in settings_overload.js !	These settings should not be changed unless you are adding/changing functionality
 EDITOR.settings = {
+	nativeFileSystemPathPrefix: "/~local/",
 	devMode: true,  // devMode: true will spew out debug info and make sanity checks (that will make the editor run slower, mostly because of all the console.log's) Set devMode to false when measuring performance!!!
 	enableSpellchecker: false, // The spell-checker use a lot of CPU power!
 	enableDocumentPreview: false, // Use the zoom function instead!? (Alt+Z)
@@ -1337,6 +1338,7 @@ usePseudoClipboard = false;
 				if(state.isSaved != undefined) newFile.isSaved = state.isSaved;
 				if(state.savedAs != undefined) newFile.savedAs = state.savedAs;
 				if(state.changed != undefined) newFile.changed = state.changed;
+				if(state.nativeFileSystemFileHandle != undefined) newFile.nativeFileSystemFileHandle = state.nativeFileSystemFileHandle;
 			}
 			
 			// Able to set file properties when opening the file, before openFile listers fire...
@@ -1777,7 +1779,104 @@ if(EDITOR.files.hasOwnProperty(path)) throw new Error("path=" + path + " already
 		*/
 	}
 	
-	
+	EDITOR.verifyNativeFileSystemPermission = function verifyPermission(fileHandle, mode, callback) {
+		if(typeof mode == "function") {
+			callback = mode;
+			mode = "readwrite";
+		}
+
+		var options = {mode: mode};
+		
+		// Check if permission was already granted
+		fileHandle.queryPermission(options).then(function(permission) {
+			if(permission == "granted") {
+				callback(null);
+			}
+			else {
+				// Request permission
+				requestPermission(callback);
+			}
+		}, function error(err) {
+			callback(err);
+		});
+
+		function requestPermission(callback) {
+			fileHandle.requestPermission(options).then(function(permission) {
+
+				if(permission == "granted") {
+					callback(null);
+				}
+				else {
+					var error = new Error("You did not grant permission to " + options.mode + " the file!");
+					error.code = "PERMISSION_DENIED";
+					callback(error);
+				}
+
+			}, function error(err) {
+				callback(err);
+			}).catch(function(err) {
+				console.error(err);
+				console.log("Failed to ask for permission. err.code=" + err.code);
+				if(err.code == "18") {
+					confirmBox("Click the OK button below in order to get a permission prompt for " + 
+					fileHandle.name, ["OK", "Cancel"], function(answer) {
+						if(answer == "OK") {
+							requestPermission(callback);
+						}
+						else {
+							var error = new Error("You did not want to be asked for permission for native filesystem handle!");
+							callback(error);
+						}
+					});
+				}
+				else callback(err);
+			});
+		}
+	}
+
+	EDITOR.getFileHash = function(fileOrPathOrHandle, callback) {
+		// Calls back with a SHA-256 hash of the file content
+		if(typeof FileSystemFileHandle != "undefined" && fileOrPathOrHandle instanceof FileSystemFileHandle) return getFileHashFromNativeFs(fileOrPathOrHandle, callback);
+		if(typeof fileOrPathOrHandle == "object" && fileOrPathOrHandle.hasOwnProperty("nativeFileSystemFileHandle")) return getFileHashFromNativeFs(fileOrPathOrHandle.nativeFileSystemFileHandle, callback);
+
+		if(typeof fileOrPathOrHandle == "string") var filePath = fileOrPathOrHandle
+		else if(typeof fileOrPathOrHandle == "object" && fileOrPathOrHandle.hasOwnProperty(path)) var filePath = fileOrPathOrHandle.path;
+		else throw new Error("getFileHash: Unable to determine what is fileOrPathOrHandle=" + fileOrPathOrHandle);
+
+		CLIENT.cmd("hash", {path: filePath}, function gotHash(err, hash) {
+			callback(err, hash);
+		});
+
+		function getFileHashFromNativeFs(fileHandle, callback) {
+			console.log("getFileHashFromNativeFs: fileHandle=", fileHandle);
+
+			EDITOR.verifyNativeFileSystemPermission(fileHandle, "readwrite", function(err) {
+				if(err && err.code == "PERMISSION_DENIED") return alertBox(err.message);
+				else if(err) throw err;
+
+				fileHandle.getFile().then(function readText(localFile) {
+					localFile.text().then(function(fileContent) {
+
+						if(typeof window.crypto != "object" || !("TextEncoder" in window)) {
+							throw new Error("getFileHash: window.crypto and TextEncoder is needed to compute a SHA-256 for fileSystemFileHandle!");
+						}
+
+						var enc = new TextEncoder();
+						// TypeError: Failed to execute 'digest' on 'SubtleCrypto': The provided value is not of type '(ArrayBuffer or ArrayBufferView)
+						var buff = enc.encode(fileContent);
+						crypto.subtle.digest('SHA-256', buff).then(function(hash) {
+							callback(null, hash);
+						}, function(err) {
+							console.error(err);
+							var error = new Error("getFileHash: Failed to hash fileSystemFileHandle text content using crypty API");
+							callback(error);
+						});
+					});
+				});
+			});
+		}
+	}
+
 	EDITOR.saveFile = function(file, path, callback) {
 		/*
 			This is the only save function.
@@ -1833,19 +1932,19 @@ if(EDITOR.files.hasOwnProperty(path)) throw new Error("path=" + path + " already
 			/*
 				if(!file.savedAs && path == file.path) {
 				EDITOR.pathPickerTool(path, function(err, newPath) {
-					if(err) return callback(err);
-					path = newPath;
-					beginSaving();
+				if(err) return callback(err);
+				path = newPath;
+				beginSaving();
 				});
-			}
-			else 
+				}
+				else 
 			*/
 			
 			for(var fName in returns) {
 				if( returns[fName] === PREVENT_DEFAULT ) {
 					console.warn("EDITOR.saveFile: " + fName + " prevented file from being saved!");
 					var error = new Error("EDITOR.saveFile: \"beforeSave\" event listener " + fName + " prevented file from being saved!")
-error.code = fName;
+					error.code = fName;
 					if(callback) callback(error);
 					return;
 				}
@@ -2289,7 +2388,7 @@ else if(err.code == "ENETDOWN") {
 					console.log("EDITOR.localFileDialog: localFile=", localFile);
 
 					localFile.text().then(function(fileContent) {
-						var filePath = "/local/" + fileHandle.name;
+						var filePath = EDITOR.settings.nativeFileSystemPathPrefix + fileHandle.name;
 						callback(filePath, fileContent, fileHandle);
 					});
 				});
