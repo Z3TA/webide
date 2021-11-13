@@ -144,6 +144,27 @@
 		
 	}
 	
+	function fakeProgress(totalTime) {
+		if(totalTime == undefined) totalTime = 10000;
+
+		var tickTime = 1000;
+		progressBar.max = Math.round(totalTime / tickTime);
+		progressBar.value = 0;
+		progressBarWidget.show();
+
+		var progressInterval = function tick() {
+			if(progressBar.value >= progressBar.max) {
+				progressBar.max = progressBar.max + 10;
+			}
+
+			progressBar.value = progressBar.value + 1;
+		}
+		
+		// It's up to the caller to call progressBarWidget.hide() and clearInterval(progressInterval) !!!
+
+		return progressInterval;
+	}
+
 	function exportPullRequest(clickEvent, ignoreUnsavedFiles) {
 		
 		var directory = UTIL.getDirectoryFromPath(EDITOR.currentFile && EDITOR.currentFile.path);
@@ -1080,9 +1101,14 @@ else var directory = EDITOR.workingDirectory;
 		
 		fileDirectory = figureOutDirectoryIfUndefined(fileDirectory);
 		
-		CLIENT.cmd("mercurial.push", {directory: fileDirectory}, hgPush);
+			var progressInterval = fakeProgress(20000);
+
+		CLIENT.cmd("mercurial.push", {directory: fileDirectory}, 30000, hgPush);
 		
 		function hgPush(err, resp) {
+				clearInterval(progressInterval);
+				progressBarWidget.hide();
+
 			if(err) {
 				var authNeeded = err.message.match(/abort: http authorization required for (.*)/);
 				var authFailed = err.message.match(/abort: authorization failed/);
