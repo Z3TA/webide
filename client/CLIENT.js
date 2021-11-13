@@ -668,6 +668,7 @@ reconnectTimeoutTime += 10000;
 			if(pingErr) {
 				//console.log("CLIENT: ping! pingErr.code=" + pingErr.code);
 				CLIENT.ping = Infinity;
+				EDITOR.offline = true;
 				
 				// Don't stop the ping due to pingErr, because we don't know when to start the ping again
 				
@@ -679,6 +680,8 @@ reconnectTimeoutTime += 10000;
 				if(CLIENT.ping != ping) CLIENT.fireEvent("pingChange", {oldPing: CLIENT.ping, newPing: ping});
 				CLIENT.ping = ping;
 				
+				EDITOR.offline = false;
+
 				//console.log("CLIENT: ping! Response: resp=" + resp + " ping=" + CLIENT.ping);
 				
 				if(resp != send) var error = new Error("Sent ping " + send + " but got pong resp=" + JSON.stringify(resp) + " pingCounter=" + pingCounter + "");
@@ -694,6 +697,7 @@ reconnectTimeoutTime += 10000;
 		});
 		var pingTimeout = setTimeout(function() {
 			CLIENT.ping = Infinity;
+			EDITOR.offline = true;
 			CLIENT.fireEvent("pingTimeout");
 		}, CLIENT.pingTimeout);
 	}
