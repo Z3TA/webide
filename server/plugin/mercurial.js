@@ -527,7 +527,7 @@ MERCURIAL.commit = function hgcommit(user, json, callback) {
 	if(files == undefined) return callback(new Error("No files defined"));
 	if(message == undefined) return callback(new Error("No message defined"));
 	
-	if(Object.prototype.toString.call( files ) !== '[object Array]') return callback("Expected files to be an array of files");
+	if(Object.prototype.toString.call( files ) !== '[object Array]') return callback(new Error("Expected files to be an array of files"));
 	
 	checkDir(user, directory, function gotRootDir(err, rootDir, localDirectory) {
 		if(err) return callback(err);
@@ -541,13 +541,13 @@ MERCURIAL.commit = function hgcommit(user, json, callback) {
 			console.log("hg commit uid=" + ((typeof process.getuid == "function") && process.getuid() ) +
 			" gid=" + ((typeof process.getgid == "function") && process.getgid()) + " files=" + JSON.stringify(files) + " localDirectory=" + localDirectory + " rootDir=" + rootDir + " error=" + !!err + " stderr=" + stderr + " stdout=" + stdout + " ");
 			
-			if(stdout.match(/nothing changed/) != null) return callback("Nothing has changed! Did you forget to add files ?");
+			if(stdout.match(/nothing changed/) != null) return callback(new Error("Nothing has changed! Did you forget to add files ?"));
 			
 			if(err) callback(err);
-			else if(stderr) callback(stderr);
+			else if(stderr) callback(new Error(stderr));
 			else {
 				
-				if(stdout != "") callback(stdout);
+				if(stdout != "") callback(new Error(stdout));
 				else callback(null, {directory: directory});
 				
 			}
