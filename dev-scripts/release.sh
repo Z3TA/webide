@@ -18,6 +18,7 @@ then
   rc=$?; if [[ $rc != 0 ]]; then exit $rc; fi
   # Create a tag so that we can easily go back to last release
   hg tag $(cat SEMVER)
+  echo "Don't forget to commit and push the new tag!"
 else
     echo "Not updating SEMVER because no -publish flag!"
 fi
@@ -254,10 +255,10 @@ then
 
   # Update the RSS.xml
 
+  echo "Don't forget to commit and push the new tag!!"
+
 else
     echo "Use -publish flag to publish"
 fi
-
-
 
 echo "Done!"
