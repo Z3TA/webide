@@ -1043,13 +1043,12 @@ function readEtcPasswd(username, readEtcPasswdCallback) {
 
 function recycleGuestAccounts(callback) {
 	
-	log("Recycling guest accounts ...");
-	
+	log("Recycling guest accounts ... GUEST_COUNTER=" + GUEST_COUNTER);
+
 	if(GUEST_COUNTER === 0) {
 		log("All guest accounts recycled!");
-		callback(null);
+		return callback(null);
 	}
-
 
 	var currentTime = unixTimeStamp();
 	var countLeft = GUEST_COUNTER;
