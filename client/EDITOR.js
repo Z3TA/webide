@@ -155,6 +155,8 @@ EDITOR.bootstrap = null; // Will contain JSON data from fethed url in bootstrap.
 EDITOR.platform = /^Win/.test(window.navigator.platform) ? "Windows" : (/^linux/.test(window.navigator.platform) ? "Linux" : "Unknown");
 // http://stackoverflow.com/questions/9514179/how-to-find-the-operating-system-version-using-javascript
 
+EDITOR.offline = false; // The default is to be "online" all the time, but if we loose communication to the server, don't bother with everything that needs connectivity!
+
 EDITOR.installDirectory = "/";
 EDITOR.pseudoClipboard = "";
 EDITOR.registeredAltKeys = []; // Alt keys for the virtual keyboard(s)
