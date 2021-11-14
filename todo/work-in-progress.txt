@@ -1,4 +1,11 @@
 
+
+---
+
+Maybe have a button that says "Use as offline/local editor"
+and store that option into a cookie, 
+and don't load stuff that needs the server!
+
 Support offline use, or use while having connection issues.
 Should be able to use the editor as a plain text offline editor editing local files (nativeFileSystem API)...
 We however get a lot of errors when there are connection issues... 
