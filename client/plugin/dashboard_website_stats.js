@@ -6,7 +6,7 @@
 	EDITOR.plugin({
 		desc: "Show web site stats on dashboard",
 		load: function loadWebsiteStats() {
-			CLIENT.on("loginSuccess", function loggedInToServer(login) {
+			CLIENT.on("loginSuccess", function pageViewStatsMaybe(login) {
 				if(login.tld) {
 					pageViewsStat = EDITOR.dashboard.addWidget(createPageViewStatWidget());
 				}

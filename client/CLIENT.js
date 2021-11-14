@@ -303,6 +303,7 @@ throw new Error("Second argument json (" + (typeof json) + ") must be an object!
 				// We have lost connection with the server
 				// But the socket still think it's connected!
 				var error = UTIL.updateError(properCallStackError[id], "ENETUNREACH", "Unable to contact the server after sending " + req + " command! The server might be busy or the connection has been lost.");
+				// It's up to the caller to decide if they want to ignore there errors or not. We do not want to be too spammy with modal/dialogs in case we lose the connection!
 			}
 			else {
 				// We still have contact to the server

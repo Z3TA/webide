@@ -10479,7 +10479,7 @@ window.addEventListener("mousemove", mouseMove, false);
 		var body = document.getElementById('body');
 	
 		// Attatch CLIENT listeners before plugins and start events load
-		CLIENT.on("loginSuccess", function loggedInToServer(login) {
+		CLIENT.on("loginSuccess", function editorAfterLogin(login) {
 			EDITOR.user = {
 				name: login.user,
 				homeDir: login.homeDir,
