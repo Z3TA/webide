@@ -478,6 +478,8 @@ _editorInput = true;
 				throw new Error("wait=" + wait + " needs to be a Boolean!");
 			}
 			
+			if(serverStorageWaitingItems === null) throw new Error("serverStorageWaitingItems=" + serverStorageWaitingItems + " id=" + id + " val=" + val + " wait=" + wait + " callback=", callback);
+
 			// Wait one second before storing the value, in case it gets deleted right away, or we get another change
 			if(serverStorageWaitingItems.hasOwnProperty(id)) clearTimeout(serverStorageWaitingItems[id]);
 			
