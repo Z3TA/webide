@@ -66,6 +66,8 @@ if(VERSION === 0) {
 	DEV_MODE = true;
 }
 
+var foo = 1/0;
+
 console.log("serviceWorker with cache VERSION=" + VERSION + " and DEV_MODE=" + DEV_MODE + " started ...");
 
 
@@ -158,6 +160,21 @@ var CACHE_DISCOVERY_ICONS = [
 
 ];
 
+if(DEV_MODE) {
+	// Make sure core files are in cache
+	CACHE_FILES = CACHE_FILES.concat([
+		"polyfill.js", 
+		"UTIL.js", 
+		"global.js", 
+		"locale/en.js", 
+		"sockjs-0.3.4.js",
+		"CLIENT.js",
+		"Dialog.js", 
+		"File.js", 
+		"ImageFile.js", 
+		"EDITOR.js"
+	]);
+}
 
 var haveRecivedMessage = false;
 self.addEventListener('message', function(msg) {
@@ -411,7 +428,41 @@ self.addEventListener('fetch', function serviceWorkerFetch(event) {
 	console.log("serviceWorker fetch url=" + event.request.url + " * v=" + VERSION + " dev=" + DEV_MODE);
 	
 	if( DEV_MODE || event.request.url.match(reWebide) ) { // Skip cache
-		event.respondWith(fetch(event.request).catch(fetchError));
+		
+		if(DEV_MODE && !event.request.url.match(reWebide)) {
+			var cacheVersion = "webide_v" + VERSION;
+			if(navigator.onLine) {
+				// Fetch fresh files and put everything in the cache so that we can test out offline capabilities in devMode
+				event.respondWith(caches.open(cacheVersion).then(function(cache) {
+					return fetch(event.request).then(function(response) {
+						cache.put(event.request, response.clone());
+						console.log("Added to cache becasue DEV_MODE=" + DEV_MODE + " url=" + event.request.url + "");
+						return response;
+					});
+				}));
+			}
+			else {
+				// Get the file from the cache because we are offline
+				event.respondWith(caches.match(event.request).then(function(response) {
+					if (response) {
+						console.log("serviceWorker Serving from cache because navigator.onLine=" + navigator.onLine + ": " + event.request.url);
+						return response;
+					}
+					else {
+						console.warn("serviceWorker Cache miss: " + event.request.url);
+						return fetch(event.request).catch(fetchError);
+					}
+				}, function(err) {
+					console.log("serviceWorker fetch caches.match error: " + err.message);
+					return fetch(event.request).catch(fetchError);
+				}));
+			}
+		}
+		else {
+			// Fetch fresh
+			event.respondWith(fetch(event.request).catch(fetchError));
+		}
+
 	}
 	else {
 		// Check cache first

@@ -79,6 +79,9 @@
 	
 	function serverLoginLoginNeeded(loginNeededByCommand) {
 		//console.log("Login needed because of command: " + loginNeededByCommand);
+
+		if(EDITOR.offlineMode) return;
+
 		showLoginDialog();
 	}
 	
@@ -428,15 +431,28 @@
 		*/
 
 		// Some clients (Win10 laptop with Chrome) gets into connection Limbo where they they think it's connnected but are not...
-		var disonnet = document.createElement("button");
-		disonnet.setAttribute("type", "button");
-		disonnet.setAttribute("class", "button");
-		disonnet.innerText = "Disconnect & reconnect"; // we'll automatically reconnect
-		disonnet.addEventListener("click", function cancel() {
+		var disconnectButton = document.createElement("button");
+		disconnectButton.setAttribute("type", "button");
+		disconnectButton.setAttribute("class", "button");
+		disconnectButton.innerText = "Disconnect & reconnect"; // we'll automatically reconnect
+		disconnectButton.addEventListener("click", function cancel() {
 			// sugg: Implement a server disconnect command? To make the server disconnect right away 
 			CLIENT.disconnect();
 		}, false);
-		form.appendChild(disonnet);
+		form.appendChild(disconnectButton);
+
+
+		var offlineModeButton = document.createElement("button");
+		offlineModeButton.setAttribute("type", "button");
+		offlineModeButton.setAttribute("class", "button");
+		offlineModeButton.innerText = S("offline mode");
+		offlineModeButton.addEventListener("click", function cancel() {
+			hideLoginDialog();
+			EDITOR.changeOfflineMode(true, function(listenerErrors) {
+				CLIENT.disconnect();
+			});
+		}, false);
+		form.appendChild(offlineModeButton);
 
 		if(EDITOR.localStorage) {
 			EDITOR.localStorage.getItem(["editorServerUrl","editorServerUser", "editorServerPw"], function(err, obj) {
@@ -539,7 +555,12 @@
 					}
 					else {
 						//console.log("Attempting logging in after connection ...");
-						login();
+
+						// Automatically change mode to online mode when connected
+						EDITOR.changeOfflineMode(false, function(listenerErrors) {
+							login();
+						});
+
 					}
 				});
 			}

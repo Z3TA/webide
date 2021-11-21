@@ -16,12 +16,6 @@ note: navigator.online can still be true! there might be ISP issues specifically
 
 ---
 
-Working on saving nativeFileSystemFileHandle in indexedDB for reopening when editor is closed and reopened!
-
-remember file.nativeFileSystemFileHandle when reloading
-
----
-
 Inserting an { in a large file (EDITOR.js) on and old laptop totally freezes the laptop and a hard reboot is needed...
 (to treat the symtops we could use Alt+C to insert a pair of curly braces to not make the parser reparse the whole file...)
 

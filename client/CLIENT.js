@@ -119,6 +119,7 @@ var CLIENT = {}; // Client object is global
 		connection.onclose = function serverDisconnected() {
 			//console.log("CLIENT: connection closed! url=" + url);
 			CLIENT.connected = false;
+			CLIENT.lastUrl = CLIENT.url; // If we have disconnected but want to know where where disconnected from
 			CLIENT.url = null;
 			
 			stopPing();
@@ -133,6 +134,7 @@ var CLIENT = {}; // Client object is global
 			CLIENT.fireEvent("connectionLost");
 			
 			
+			if(!EDITOR.offlineMode) {
 			// Attempt to reconnect ...
 			reconnectTimeout = setTimeout(function reconnect() {
 				//console.log("CLIENT: reconnect: Reconnecting to server=" + JSON.stringify(server) + " reconnectTimeoutTime=" + reconnectTimeoutTime);
@@ -148,7 +150,7 @@ var CLIENT = {}; // Client object is global
 			
 			reconnectTimeoutTime += 1000;
 			//console.log("CLIENT: Increasing reconnectTimeoutTime to " + reconnectTimeoutTime + " because many attempts");
-			
+			}
 		}
 		
 	}
@@ -659,6 +661,9 @@ reconnectTimeoutTime += 10000;
 	}
 	
 	function sendPing() {
+
+		if(EDITOR.offlineMode) return stopPing();
+
 		var start = timer();
 		//console.log("CLIENT: ping! send: sendingPings=" + sendingPings + " start=" + start);
 		var send = ++pingCounter;
@@ -671,6 +676,8 @@ reconnectTimeoutTime += 10000;
 				CLIENT.ping = Infinity;
 				EDITOR.offline = true;
 				
+				EDITOR.fireEvent("connectionStatus", [{online: false, offline: true}]);
+
 				// Don't stop the ping due to pingErr, because we don't know when to start the ping again
 				
 			}
@@ -682,6 +689,8 @@ reconnectTimeoutTime += 10000;
 				CLIENT.ping = ping;
 				
 				EDITOR.offline = false;
+
+				EDITOR.fireEvent("connectionStatus", [{online: true, offline: false}]);
 
 				//console.log("CLIENT: ping! Response: resp=" + resp + " ping=" + CLIENT.ping);
 				

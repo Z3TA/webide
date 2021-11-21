@@ -14,7 +14,8 @@
 
 		*/
 
-		setTimeout(registerServiceWorker, 1000 * 60 * 5);
+		if(EDITOR.settings.devMode) registerServiceWorker();
+		else setTimeout(registerServiceWorker, 1000 * 60 * 5);
 	}
 
 	function registerServiceWorker() {

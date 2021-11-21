@@ -279,7 +279,7 @@ EDITOR.unbindKey(show_gotoFileInput2);
 		inputFolder.setAttribute("id", "inputFolder");
 		inputFolder.setAttribute("class", "inputtext");
 		inputFolder.setAttribute("value", folderToSearchIn || EDITOR.workingDirectory);
-		inputFolder.setAttribute("size", Math.max(EDITOR.workingDirectory.length + 3, 20));
+		if(EDITOR.workingDirectory) inputFolder.setAttribute("size", Math.max(EDITOR.workingDirectory.length + 3, 20));
 		inputFolder.setAttribute("default", folderToSearchIn || EDITOR.workingDirectory);
 		inputFolder.setAttribute("placeholder", "folder path");
 		

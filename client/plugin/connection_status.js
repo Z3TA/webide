@@ -112,7 +112,12 @@ disable(false);
 	
 	function renderConnectionStatus(ctx) {
 		
-		if(CLIENT.connected && CLIENT.ping == Infinity) {
+		if(EDITOR.offlineMode) {
+			var text = S("offline mode");
+			var bgColor = EDITOR.settings.style.bgColor;
+			var textColor = UTIL.makeColorTransparent(EDITOR.settings.style.textColor, 50);
+		}
+		else if(CLIENT.connected && CLIENT.ping == Infinity) {
 			var text = S("network_problem");
 			var bgColor = "yellow";
 			var textColor = "black";

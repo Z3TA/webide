@@ -155,7 +155,7 @@ EDITOR.bootstrap = null; // Will contain JSON data from fethed url in bootstrap.
 EDITOR.platform = /^Win/.test(window.navigator.platform) ? "Windows" : (/^linux/.test(window.navigator.platform) ? "Linux" : "Unknown");
 // http://stackoverflow.com/questions/9514179/how-to-find-the-operating-system-version-using-javascript
 
-EDITOR.offline = false; // The default is to be "online" all the time, but if we loose communication to the server, don't bother with everything that needs connectivity!
+EDITOR.offline = false; // If we have lost the connection to the server EDITOR.offline will be true
 
 EDITOR.installDirectory = "/";
 EDITOR.pseudoClipboard = "";
@@ -164,6 +164,8 @@ EDITOR.isScrolling = false; // Render optimization for scrolling
 
 // When iterating over the event listeners, first copy the array in case one of the event listeners remove itself from the list! var f = EDITOR.eventListeners[ev]
 EDITOR.eventListeners = { // Use EDITOR.on to add listeners to these events:
+	offlineMode: [], // Called when the user manually switches mode between online or offline
+	connectionStatus: [], // Called when the editor has lost the connection to the server
 	afk: [], // Away from keyboard
 	btk: [], // Back to keyboard
 	copy: [],
@@ -381,6 +383,7 @@ ctxMenuVisibleOnce = true;
 	var _soundAssist = false;
 	var _project = "default";
 	var _scmBranch = "";
+	var _offlineMode = false;
 
 	if(!Object.defineProperty) {
 		// Object.defineProperty (ES5) should work in most browsers!
@@ -388,6 +391,12 @@ ctxMenuVisibleOnce = true;
 	}
 	else {
 
+		// The default is to be "online" all the time, but if the user specifically choose to be disconnected to the server - don't bother with everything that needs the server!
+		Object.defineProperty(EDITOR, 'offlineMode', {
+			get: function getOfflineMode() { return _offlineMode; },
+			set: function setOfflineMode(newValue) { throw new Error("Use EDITOR.changeOfflineMode() to manaully set the mode to online of offline"); },
+			enumerable: true
+		});
 
 		Object.defineProperty(EDITOR, 'branch', {
 			get: function getProjectName() { return _scmBranch; },
@@ -9862,6 +9871,17 @@ function reloadNow() {
 			//console.log("function " + UTIL.getFunctionName(f[i]));
 			f[i](branchName); // Call function
 		}
+	}
+
+	EDITOR.changeOfflineMode = function(offline, callback) {
+
+		if(_offlineMode == offline) return callback(new Error("_offlineMode is already offline=" + offline));
+
+		_offlineMode = offline;
+
+		if(offline) var options = {};
+
+		EDITOR.fireEvent("offlineMode", [offline], callback);
 	}
 
 	EDITOR.changeProject = function(projectName) {

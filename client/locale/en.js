@@ -119,6 +119,7 @@ network_problem: "network problem",
 	new_file: "New file",
 	nodejs_deploy: "Node.js Deploy",
 	
+	"offline mode": "offline mode",
 	open: "open",
 	open_in_new_window: "Open in new window",
 	open_file_by_searching: "Open file by searching for file path",
