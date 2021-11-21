@@ -196,11 +196,13 @@
 			var transaction = db.transaction(["fileHandles"]);
 			var objectStore = transaction.objectStore("fileHandles");
 			var request = objectStore.get(path);
-			request.onerror = function(event) {
+			request.onerror = function(err) {
 				// Handle errors!
+				callback(new Error("Error when reading file handle from indexDb: " + err.message));
 			};
-			request.onsuccess = function(event) {
+			request.onsuccess = function() {
 				// Do something with the request.result!
+				if(typeof request.result == "undefined") return callback(new Error("No result in request when reading file handle for path?" + path + " request=" + JSON.stringify(request)));
 				var fileSize = request.result.size;
 				var fileHandle = request.result.handle;
 				callback(null, fileSize, fileHandle);
