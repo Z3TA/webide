@@ -561,7 +561,7 @@ tabFileText.setAttribute("path", path);
 				
 				var yes = "Ignore changes";
 				var no = "Don't close!"
-				confirmBox("The file is not saved. Are you sure you want to close it !?\n(Ctrl click to close without saving)", [yes, no], function confirmClose(answer) {
+				confirmBox("The file is not saved. Are you sure you want to close it !?\n(Ctrl click to close without saving)\n" + path, [yes, no], function confirmClose(answer) {
 					
 					if(answer == yes) {
 						EDITOR.closeFile(path);
