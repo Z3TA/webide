@@ -37,6 +37,8 @@ Feature list (Not ordered/prioritized)
 --------------------------------------
 
 
+Alt+W (wrap) should pretty print (and wrap!?) JSON !
+
 ---
 
 When searching, have an option for showing all matches in all open files, and easily navigate between the matches

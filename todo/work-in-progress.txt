@@ -1,4 +1,9 @@
 
+Issue: Clicking open file from the SSG makes you select a file from your computer...
+
+Issue: When you click a link when editing files in WYSIWYG mode in SSG you can no longer edit in WYSIWYG
+
+Issue: SSG "sync with repo" asks for a password... even when there is no repo configured, should give an explanation about repos and how to use one...
 
 ---
 
