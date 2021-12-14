@@ -71,7 +71,7 @@
 		
 		var caption = document.createElement("div");
 		caption.setAttribute("class", "description");
-		caption.innerText = "System CPU Load";
+		caption.innerText = "Backend CPU Load";
 		widget.appendChild(caption);
 		
 		var currentLoad = document.createElement("div");
@@ -158,8 +158,6 @@
 		}
 		
 		return {domElement: widget, update: update};
-		
-		
 	}
 	
 	function createMemoryWidget() {
@@ -169,7 +167,7 @@
 		
 		var caption = document.createElement("div");
 		caption.setAttribute("class", "description");
-		caption.innerText = "System memory usage";
+		caption.innerText = "Backend memory usage";
 		widget.appendChild(caption);
 		
 		var memoryUsage = document.createElement("div");
