@@ -1175,7 +1175,8 @@ usePseudoClipboard = false;
 				var file = EDITOR.files[path];
 				
 				if(!EDITOR.currentFile) { // For sanity
-					return fileOpenError(new Error("There are files opened, but EDITOR.currentFile=" + EDITOR.currentFile + " EDITOR.files=" + Object.keys(EDITOR.files)));
+					
+					return fileOpenError(new Error("EDITOR.openFile: There are files opened, but EDITOR.currentFile=" + EDITOR.currentFile + " EDITOR.files=" + Object.keys(EDITOR.files)));
 				}
 				
 				if(EDITOR.currentFile != file && (showFile == undefined || showFile == path)) {
@@ -7096,6 +7097,8 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 	
 	EDITOR.showFile = function(fileOrFilePath, focus, overrideShowFile) {
 		
+		console.log("EDITOR.showFile: fileOrFilePath=" + fileOrFilePath);
+
 		if(fileOrFilePath instanceof File) {
 			var file = fileOrFilePath;
 		}
