@@ -269,13 +269,13 @@
 				// Convert back to string
 				openedFilesString = server.join(fileDelimiter);
 				
-				//console.log("reopenFiles: Combined server and local: " + openedFilesString);
+				console.log("reopenFiles: Combined server and local: " + openedFilesString);
 				
 				// Just in case
 				openedFilesString = removeDublicates(openedFilesString);
 				
 				// Save this list locally so that the old code doesn't go nutz
-				EDITOR.localStorage.setItem("openedFiles", openedFilesString, function(err) {
+				EDITOR.localStorage.setItem("openedFiles", openedFilesString, function afterLocalStorageSet(err) {
 					if(err) throw err;
 					
 					findBugs(false, function(err, openedFilesString) {
@@ -387,7 +387,7 @@
 		
 		function openFile(path, callback) {
 			
-			//console.log("reopenFiles: openFile: path=" + path);
+			console.log("reopenFiles: openFile: path=" + path);
 			
 			if(!callback) throw new Error("Internal error: Expected a callback!");
 			
@@ -405,7 +405,7 @@
 				
 				// Decide if we should open the last saved state, or from the disk (or other protocol) ...
 				
-				//console.log("reopenFiles: Got fileSizeOnDisk=" + fileSizeOnDisk + " for path=" + path + "");
+				console.log("reopenFiles: Got fileSizeOnDisk=" + fileSizeOnDisk + " for path=" + path + "");
 				
 				if(getFileSizeError) {
 					//if(err.code === 'ENOENT') {
@@ -417,12 +417,14 @@
 				// Load both the server saved state and the locally saved state, then compare them and resolve...
 				var serverState = EDITOR.storage.getItem("state_" + path);
 				
-				loadState(path, function(err, localState) {
+				loadState(path, function stateLoaded(err, localState) {
 					
+					console.log("reopen_files:gotFileSize:stateLoaded: localState=" + JSON.stringify(localState, null, 2));
+
 					if(err) console.error(err);
 					
 					if(!serverState && !localState) {
-						//console.log("reopenFiles: Unable to load neither server nor local state for path=" + path);
+						console.log("reopenFiles: Unable to load neither server nor local state for path=" + path);
 						lastFileState = undefined; // Overwrite just in case, so that we don't get state from an earlier file
 						return open();
 					}
@@ -483,8 +485,10 @@
 						
 						lastFileState = state;
 						
-						//console.log("reopenFiles: loadLastState=" + loadLastState);
-						//console.log("reopenFiles: lastFileState.isSaved=" + lastFileState.isSaved);
+						console.log("reopenFiles: decidedWhichStateToUse: state=" + JSON.stringify(state, null, 2));
+						
+						//console.log("reopenFiles: decidedWhichStateToUse: loadLastState=" + loadLastState);
+						//console.log("reopenFiles: decidedWhichStateToUse: lastFileState.isSaved=" + lastFileState.isSaved);
 						
 						if(notFound && lastFileState.text != undefined && lastFileState.text != "") {
 							// Only ask if we actually have the last state, otherwise just ignore that it's gone.
@@ -529,7 +533,7 @@
 				
 				function open() {
 					
-					//console.log("reopenFiles: open file path=" + path);
+					console.log("reopenFiles: open file path=" + path);
 					
 					var stateprops = {};
 					
@@ -612,7 +616,7 @@
 					if(file.path != path) throw new Error("File opened, but with another path: path=" + path + " file.path=" + file.path + " EDITOR.files=" + JSON.stringify(Object.keys(EDITOR.files)) );
 				}
 				
-				//console.log("reopenFiles: Got (Reopening) file from editor path=" + path + " file.path=" + (file ? file.path : "file=" + file));
+				console.log("reopenFiles: Got (Reopening) file from editor path=" + path + " file.path=" + (file ? file.path : "file=" + file));
 				
 				//if(openFileError) {console.log("reopenFiles: fileReopened openFileError.path=" + openFileError.path);}
 				
@@ -658,7 +662,7 @@
 				else updateLastState();
 				
 				function updateLastState() {
-					//console.log("reopenFiles: updateLastState path=" + path);
+					console.log("reopenFiles: updateLastState path=" + path);
 					
 					// Set last state
 					// Note that some state need to be set when opening the file!
@@ -691,7 +695,7 @@
 					}
 					
 					
-					//console.log("reopenFiles: file.partStartRow=" + file.partStartRow + " content=" + content);
+					console.log("reopenFiles: file.path=" + file.path + " file.partStartRow=" + file.partStartRow + " content=" + content + " fileWasCurrentfile=" + fileWasCurrentfile + " lastFileState=" + (lastFileState && JSON.stringify(lastFileState, null, 2)));
 					
 					if(file.partStartRow > 0 && content == undefined) {
 						/*
@@ -1055,7 +1059,8 @@
 	function saveStateOfOpenFiles(reason, callback) {
 		// Called when the editor closes, and at an time interval
 		
-		//console.log("reopenFiles: saveStateOfOpenFiles! reason=" + reason);
+		console.log("reopenFiles: saveStateOfOpenFiles! reason=" + reason);
+		
 		if(typeof callback != "function") {
 			//console.log("callback=" + callback + " (" + (typeof callback) + ") is not a function!");
 			callback = null;
@@ -1091,13 +1096,14 @@
 		
 		EDITOR.localStorage.getItem("openedFiles", function(err, openedFilesString) {
 			if(openedFilesString == null || openedFilesString == "") {
-				//console.warn("reopenFiles: No open files!?");
+				console.warn("reopenFiles: No open files!?");
 				if(callback) callback(null);
 				return;
 			}
 			else {
 				findBugs(true, function(err, openedFilesString) { // true == also check if the list match EDITOR.files
 					if(err) {
+						console.warn("reopenFiles:saveStateOfOpenFiles: found bug! err=" + err.message);
 						if(callback) callback(err);
 						return;
 					}
@@ -1108,9 +1114,10 @@
 					
 					// note: "".split(fileDelimiter).length == 1 !! (an empty string gives one item in the array)
 					if(openedFilesString != "") {
-						//console.log("reopenFiles: openFiles.length=" + openFiles.length);
+						console.log("reopenFiles: openFiles.length=" + openFiles.length);
 						for(var i=0; i<openFiles.length; i++) {
-							//console.log("reopenFiles: Saving state for openFiles[" + i + "]=" + openFiles[i] + " ...");
+
+							console.log("reopenFiles: changedstate[" + openFiles[i] + "]=" + changedstate[openFiles[i]]);
 							if(changedstate[openFiles[i]]) {
 								saveState(openFiles[i], stateSaved);
 							}
@@ -1154,9 +1161,9 @@
 		if(typeof path != "string") throw new Error("path needs to be a string!")
 		if(typeof callback != "function") throw new Error("callback needs to be a function!")
 		
-		//console.log("reopenFiles: Saving state for: " + path);
+		console.log("reopenFiles: Saving state for: " + path);
 		
-		changedstate[false] = false;
+		changedstate[path] = false;
 		
 		if(path.length == 0) {
 			findBugs(false, function(err, openedFilesString) {
@@ -1208,8 +1215,10 @@
 		// Send only what actually changed !? Like moved cursor in a large document.
 		// Use browsers localStorage instead of server storage !?!?
 		
-		EDITOR.localStorage.setItem("state_" + path, JSON.stringify(state), function(err) {
+		EDITOR.localStorage.setItem("state_" + path, JSON.stringify(state), function localStorageItemSet(err) {
 			
+			console.log("reopen_files:saveState:localStorageItemSet: err=" + err + " EDITOR.storage.ready()=" + EDITOR.storage.ready() + " CLIENT.connected=" + CLIENT.connected + " CLIENT.ping=" + CLIENT.ping);
+
 			if(EDITOR.storage.ready() && CLIENT.connected && CLIENT.ping < 2000) {
 				// Also store some of the state on the server
 				var serverState = state;
@@ -1223,6 +1232,7 @@
 					});
 					oldServerState[path] = serverState;
 				}
+				else console.log("reopen_files:saveState:localStorageItemSet: Not saving on server because the state has not changed!");
 			}
 			
 			callback(err, path, state);
@@ -1242,7 +1252,7 @@
 			if(err) throw err;
 		}
 		
-		EDITOR.localStorage.getItem("openedFiles", function(err, text) {
+		EDITOR.localStorage.getItem("openedFiles", function afterLocalStorageGet(err, text) {
 			if(err) throw err;
 			if(text == null) text = "";
 			
