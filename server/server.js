@@ -725,6 +725,10 @@ process.on("exit", function () {
 	log("Program exit\n\n", DEBUG, true);
 });
 
+process.on('warning', (warning) => {
+	console.log(warning.stack);
+});
+
 var mysqlReconnectTimer;
 function mysqlConnect() {
 	
@@ -2431,7 +2435,7 @@ function broadcast(myIp) {
 	}
 	
 	function advertise(broadcastAddress) {
-		var message = new Buffer(serverAdvertiseMessage);
+		var message = Buffer.from(serverAdvertiseMessage);
 		broadcastClient.send(message, 0, message.length, broadcastPort, broadcastAddress, function() {
 			//console.log("advertise: Sent '" + message + "'");
 		});
