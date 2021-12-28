@@ -26,7 +26,7 @@
 	/*
 		Optimizations:
 		
-		* Addin colStart & colStop had no effect!
+		* Adding colStart & colStop had no effect!
 		* Commenting some if's had no effect!
 		* Commenting (not setting) ctx.fillStyle made it faster 30% faster! textRender: 9.792ms
 		* ctx.fillStyle behind if, textRender: 8.727ms, even faster!
