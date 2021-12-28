@@ -402,25 +402,6 @@ text = text.replace(reNetnsIP, "$2$3$4." + username + "." + TLD);
 		
 		else throw new Error("Unknown message from nodej script: " + JSON.stringify(msg));
 		
-		
-		function attemptOpen(path, callback) {
-			if(EDITOR.currentFile && EDITOR.currentFile.path == path) return callback(null, EDITOR.currentFile);
-			if(EDITOR.files.hasOwnProperty(path)) {
-				var file = EDITOR.files[path];
-				EDITOR.showFile(file);
-				return callback(null, file);
-			}
-			else {
-				//console.log("EDITOR.files=" + Object.keys(EDITOR.files));
-				EDITOR.openFile(path, undefined, function open(err, file) {
-					if(err) return callback(err);
-					else {
-						return callback(null, file);
-					}
-				});
-			}
-		}
-		
 	}
 	
 	
@@ -613,7 +594,8 @@ text = text.replace(reNetnsIP, "$2$3$4." + username + "." + TLD);
 				show: false, 
 				props: {
 					noCollaboration: true,
-					disableParsing: true
+					disableParsing: true,
+					fullAutoIndentation: false
 				}
 			}, function fileOpened(err, file) {
 				if(err) {

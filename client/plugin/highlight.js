@@ -93,6 +93,7 @@
 	});
 	
 	function shouldHighlight(file) {
+		//console.log("shouldHighlight: file.path=" + file.path + " file.noChangeEvents=" + file.noChangeEvents + " file.fullAutoIndentation=" + file.fullAutoIndentation + " file.disableParsing=" + file.disableParsing);
 		return (file instanceof File) && !file.noChangeEvents && !file.fullAutoIndentation && file.fileExtension != "txt" && !file.disableParsing;
 	}
 
@@ -109,7 +110,7 @@
 
 		*/
 
-		if(!shouldHighlight(file)) {
+		if(shouldHighlight(file)) {
 			if(!initiated) init();
 			
 			worker.postMessage({text: file.text, path: file.path});
