@@ -1,16 +1,6 @@
 
 ---
 
-Problems with the following string:
-WelcomebackagainwhereitallbeganOpenaretheports&Servicesallstarted&=nockateverydoorandgrabthemissingstringsPuttheminarowandcrackthecodetowinScanningclosethefilesmayrevealsomethingsDatayoucan'thear&Datayoucan'tsee&ScatteredarethecluesallaroundthediskSomeareinplainsightsomeyouneedtothink7heckyourmailformessages$logon;R78eelingoldalready3Oh;betyoudid&Youwillneedsometools$lookaroundforhacksTalkwithallthedaemonshidinginthedarkNowdon'tbeafraid&;t'sasimplegame&5llyouneedarememoriesburiedinyourbrain8orit'sinthepastwhereyouneedtostartSurfinglikeapirate&;wishyougoodluck&
-
-the character '\u001a' does weird stuff
-Ctrl+Z control code, fall-back character for a failed encoding conversion
-␚
-https://en.wikipedia.org/wiki/Substitute_character
-
----
-
 Worker process crash when trying to download image.
 Should be able to download files from file explorer!
 
