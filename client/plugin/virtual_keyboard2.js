@@ -117,11 +117,14 @@
 	var useBuiltin = false; // is built-in keyboard activated
 	var usePhysical = false;
 	var lastUsedKeyboard = "builtin"; // builtin, native or physical
+	var preferredKeyboard = UTIL.getCookie("preferredKeyboard");
 	var nativeKeyboardCatcher;
 	var winMenuVirtual, winMenuOnScreen, winMenuPhysical;
 	var winMenuVibration, vibrationEnabled = true;
 	var checkActiveElementInterval;
 	
+	if(preferredKeyboard == "physical") usePhysical = true;
+
 	canvas.onmousedown = canvasMouseDown;
 	canvas.onmouseup = canvasMouseUp;
 	canvas.ontouchstart = canvasMouseDown;
@@ -168,11 +171,6 @@
 			var wrapper = document.getElementById("virtualKeyboard2");
 			wrapper.style.display="none";
 			wrapper.appendChild(canvas);
-			
-			setTimeout(function() {
-				var input = EDITOR.input
-				//alertBox("input=" + input);
-			}, 3000);
 			
 		},
 		unload: function unloadVirtualKeyboard() {
@@ -285,6 +283,8 @@
 		
 		hideNativeKeyboard();
 		showBuiltinKeyboard(); // Will set useBuiltin to true
+
+		UTIL.setCookie("preferredKeyboard", lastUsedKeyboard, 999);
 	}
 	
 	function menuPickOnScreen() {
@@ -309,6 +309,8 @@
 		
 		hideBuiltinKeyboard();
 		showNativeKeyboard(); // Will set useNative to true
+
+		UTIL.setCookie("preferredKeyboard", lastUsedKeyboard, 999);
 	}
 	
 	function menuPickPhysical() {
@@ -329,6 +331,13 @@
 		
 		winMenuPhysical.hide();
 		
+		/*
+			problem: On laptops with both a physical keyboard and touch screen, the editor always displays the editor's keyboard (builtin/virtual), and you have to manually disable it every time you open the editor...
+			solution: Remember to use the physical keyboard for this device (save in cookies)
+		*/
+		UTIL.setCookie("preferredKeyboard", lastUsedKeyboard, 999);
+
+
 		// If the key presses are not captured; Android will do weird annoying stuff.
 		EDITOR.input = true;
 		setTimeout(function() {

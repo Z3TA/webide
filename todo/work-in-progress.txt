@@ -1,4 +1,9 @@
 
+When showing annotations and you have a terminal file open, you get alot of errors about not being able to annotate the terminal!
+
+---
+
+on galaxy fold the canvas/text disapear when scrolling
 ---
 
 Worker process crash when trying to download image.
@@ -12,13 +17,10 @@ Should also be able to right click and resize image
 
 get message about colab even though no colaborator
 
-Keep getting error about now being able to load nodejs version...
+Keep getting error about not being able to load nodejs version...
 Unable to get node version! Error: Server: API error: spawn /bin/dash ENOENT err.code=ENOENT
 
 bug: The editor locked, was unable to click anywhere.
-
-Editor always start with keyboard on laptops that has a touch screen.
-Should save the setting, so once you manually pick "physical keyboard" it should auto pick it next time for the same computer (save in localStorage or cookies)
 
 ---
 
