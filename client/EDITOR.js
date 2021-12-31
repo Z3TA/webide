@@ -7637,8 +7637,9 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 				}
 				
 				if(plugin.unload) plugin.unload();
-				else console.warn("Plugin has no unload method: " + desc);
-				
+				else {
+					console.warn("Plugin has no unload method: " + desc);
+				}
 				if(remove) EDITOR.plugins.splice(i, 1);
 				
 				//console.log("Plugin disabled" + (remove ? " and removed": "") + ": " + desc);

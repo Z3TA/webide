@@ -5,9 +5,10 @@
 	var winMenus = {};
 	var versions = [];
 	var nPath = "/usr/local/n/versions/node/";
-	
+	var pluginDescription = "Change Node.js version";
+
 	EDITOR.plugin({
-		desc: "Change Node.js version",
+		desc: pluginDescription,
 		load: function loadChangeNodeVersion() {
 			CLIENT.on("loginSuccess", checkNodeVersions);
 			EDITOR.on("changeWorkingDir", checkNvmrc);
@@ -106,7 +107,22 @@ switchToVersion(version);
 			
 			// Check which version is currently in use
 			CLIENT.cmd("run", {command: "$(command -v node) -v"}, function(err, resp) {
-				if(err) throw new Error("Unable to get node version! Error: " + err.message + " err.code=" + err.code);
+
+				//err = new Error("just testing"); err.code = "ENOENT";
+
+				if(err) {
+					/*
+						I have no idea why we sometimes get this error:
+						Error: Server: API error: spawn /bin/dash ENOENT err.code=ENOENT
+						But it is very annoying!
+					*/
+					if(err.code == "ENOENT") {
+						EDITOR.disablePlugin(pluginDescription);
+						EDITOR.sendFeedback("EDITOR.user=" + JSON.stringify(EDITOR.user) + " unable to get Node.js version: " + err.message, err.message, true);
+						return;
+					}
+					throw new Error("Unable to get node version! Error: " + err.message + " err.code=" + err.code);
+				}
 				
 				var currentVersion = resp.stdout.trim().slice(1);
 				//console.log("change_node_version: currentVersion=" + currentVersion);

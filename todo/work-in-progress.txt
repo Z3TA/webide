@@ -17,9 +17,6 @@ Should also be able to right click and resize image
 
 get message about colab even though no colaborator
 
-Keep getting error about not being able to load nodejs version...
-Unable to get node version! Error: Server: API error: spawn /bin/dash ENOENT err.code=ENOENT
-
 bug: The editor locked, was unable to click anywhere.
 
 ---
