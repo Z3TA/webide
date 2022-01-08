@@ -75,16 +75,18 @@
 		
 		if(!(file instanceof File)) {
 			//console.log("nodejsScriptFileOpenedMaybe: Not a File (text or code) file.path=" + file.path);
-return;
+			return;
 		}
 		
 		var ext = UTIL.getFileExtension(file.path);
 		var reSock = /\/sock\/([^'" ]*)/;
 		var match = file.text.match(reSock);
 		
-		//console.log("nodejsScriptFileOpenedMaybe: ext=" + ext + " match?" + (!!match) + " EDITOR.user?" + (!!EDITOR.user));
-		
-		if((ext == "js" || ext == "stdout") && match && EDITOR.user) {
+		console.log("nodejsScriptFileOpenedMaybe: ext=" + ext + " match?" + (!!match) + " EDITOR.user?" + (!!EDITOR.user));
+
+		// We do not want to show the banner for *all* JavaScript files. Only js-files intended to be run in Node.js
+
+		if((ext == "js" || ext == "stdout") && EDITOR.user && match) {
 			var name = match[1].trim();
 			
 			var url = "http://" + name + "." + EDITOR.user.name + "." + document.location.hostname;
@@ -92,14 +94,30 @@ return;
 			//showNodejsBanner({url: url});
 			nodeJsBanner.show();
 			
+			CLIENT.cmd("showRunningProcesses", function (err, json) {
+				if(err) throw err;
+
+				console.log("nodejsScriptFileOpenedMaybe: showRunningProcesses: json=" + json);
+
+				var arr = JSON.parse(json);
+
+				for (var i=0, obj; i<arr.length; i++) {
+					if(arr[i].COMMAND.indexOf(file.path) != -1) {
+						scriptStarted(file.path);
+						return;
+					}
+				}
+			});
+
 			startStopButton.innerText = "Run Node.js script";
 			startStopButton.onclick = function() {
-saveAndRun(file);
+				saveAndRun(file);
 			}
+			return;
+			
 		}
-		else {
-nodeJsBanner.hide();
-		}
+
+		nodeJsBanner.hide();
 	}
 	
 	function saveAndRun(file) {
@@ -211,7 +229,7 @@ nodeJsBanner.hide();
 			firstRunMsg = firstRunMsgDefault + 'To access port 8080 go to http://8080.' + login.user + '.' + location.hostname + 
 			' or for unix sockets placed in /home/' + login.user + '/sock/socketname go to http://socketname.' + login.user + '.' + location.hostname + "\n" +
 			'(If you get a "port in use" or "unable to bind to port" error, try deleting the /home/' + login.user + '/sock/socketname file)\n';
-			}
+		}
 		
 		if(login.netnsIP && !UTIL.isIP(TLD)) {
 			var netnsIP = login.netnsIP;
@@ -235,9 +253,9 @@ nodeJsBanner.hide();
 			text = text.replace("<", "&lt;"); // EDITOR.addInfo takes HTML as input
 			text = text.replace(">", "&gt;");
 			
-if(reNetnsIP) {
-text = text.replace(reNetnsIP, "$2$3$4." + username + "." + TLD);
-}
+			if(reNetnsIP) {
+				text = text.replace(reNetnsIP, "$2$3$4." + username + "." + TLD);
+			}
 
 			// console.log(undefined) results in an empty message
 			if(text == "") text = "undefined?";
@@ -250,7 +268,7 @@ text = text.replace(reNetnsIP, "$2$3$4." + username + "." + TLD);
 				var col = columnMinusIndention(loc.file, loc.row, loc.col);
 				EDITOR.addInfo(loc.row, col, text, loc.file, level);
 			}
-}
+		}
 		else throw new Error("Unknown nodejsDebugMsg: json=" + JSON.stringify(json));
 	}
 	
@@ -319,7 +337,7 @@ text = text.replace(reNetnsIP, "$2$3$4." + username + "." + TLD);
 		if(text.indexOf("window.onload") != -1) return false;
 		
 		return true;
-		}
+	}
 	
 	function nodejsMessage(msg) {
 		//console.log("nodejsMessage: " + JSON.stringify(msg));

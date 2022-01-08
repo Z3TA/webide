@@ -800,6 +800,56 @@ process.on('disconnect', function ipcChannelClosed(message) {
 	
 });
 
+API.showRunningProcesses = function showRunningProcesses(user, json, callback) {
+	// In the future use something that works for all platforms!
+
+	module_child_process.exec("ps aux", function(err, stdout, stderr) {
+		if(err) return callback(err);
+		if(stderr) return callback(new Error(stderr));
+
+		var reSpace = /\s+/;
+
+		console.log("showRunningProcesses: stdout=" + stdout);
+
+		var rows = stdout.trim().split("\n");
+		var th = rows[0].split(reSpace).map(function (name) {
+			return name.replace("%", "");
+		});
+
+		console.log("showRunningProcesses: th=" + JSON.stringify(th));
+
+		var runningProcesses = [];
+		/*
+			USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+			johan      724  0.0  0.0  18644  2928 pts/0    Ss   20:52   0:00 /bin/bash
+			johan     1358  0.0  0.2 1808100 35752 pts/0   Sl+  20:52   0:01 docker run -it -v /home/johan/repo/jzedit/:/srv/webide/ -p 80:80 cloudide
+			johan     6694  0.0  0.1 638532 16720 ?        Sl   21:22   0:00 /home/johan/.local/bin/node --inspect-brk=1024 /home/johan/repo/myoroface/woocommerce/order_webhook.js
+			johan     7209  0.0  0.0  18604  2892 pts/1    Ss   21:25   0:00 /bin/bash
+			johan    25398  0.0  0.0  34412  2216 pts/1    R+   22:03   0:00 ps aux
+		*/
+
+		for (var row=1, col, obj; row<rows.length; row++) {
+			col = rows[row].split(reSpace);
+			col[th.length-1] = col.splice(th.length-1).join(" "); // Last col contains 
+
+			console.log("showRunningProcesses: col=" + JSON.stringify(col));
+
+			obj={};
+
+			for (var i=0; i<col.length; i++) {
+				obj[th[i]] = col[i].trim();
+			}
+			runningProcesses.push(obj);
+		}
+
+		console.log("showRunningProcesses: runningProcesses=" + JSON.stringify(runningProcesses, null, 2));
+
+		callback(null, JSON.stringify(runningProcesses));
+		
+	});
+
+}
+
 API.run_nodejs = function run_nodejs(user, json, callback) {
 	
 	var filePath = user.translatePath(json.filePath);

@@ -1,27 +1,6 @@
 
 ---
 
-get message about colab even though no colaborator
-Should give a hint which device it's colaborating with so that we can figure out why we get that message even though there are no one collaborating...
-
-idea: able to give current device a name "set device name"
-
----
-
-todo: Test user signup (after enforcing lower case username)
-
-Arenn2783 worker process stderr: [2m2021-09-23 (13:12:02) [0m[4mArenn2783: UTIL.getDirectoryFromPath: Unable to get directory of path=keybindings.txt (does not contain a slash) [2m(client/UTIL.js:94:12 <- plugin/mercurial.js:2138:28)[0m
-Arenn2783 worker process stderr: [2m2021-09-23 (13:10:09) [0m[4mArenn2783: UTIL.getDirectoryFromPath: Unable to get directory of path=terminal1 (does not contain a slash) [2m(client/UTIL.js:94:12 <- plugin/mercurial.js:2138:28)[0m
-Arenn2783 worker process stderr: [2m2021-09-23 (05:05:03) [0m[4mArenn2783: USER Arenn2783 IS CURRENTLY SAVING itemName=state_/home/Arenn2783/log/access.log [2m(user_worker.js:590:11 <- server_api.js:2587:8)[0m
-Arenn2783 worker process stderr: [2m2021-09-23 (05:05:03) [0m[4mArenn2783: USER Arenn2783 IS CURRENTLY SAVING itemName=state_/home/Arenn2783/log/access.log [2m(user_worker.js:590:11 <- server_api.js:2587:8)[0m
-
-
----
-
-When a Node.js script is running, the bottom bar should say "restart nodejs script" instead of "start nodejs script", would also be nice if the menu updated!
-
----
-
 bug: When dropped images are saved they get corrupted! 
 Image viewer: Not a JPEG file - starts with 0x2f 0x39
 Looks like it's not a binary file! Seems like it's base64 encoded!
