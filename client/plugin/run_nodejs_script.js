@@ -82,7 +82,7 @@
 		var reSock = /\/sock\/([^'" ]*)/;
 		var match = file.text.match(reSock);
 		
-		console.log("nodejsScriptFileOpenedMaybe: ext=" + ext + " match?" + (!!match) + " EDITOR.user?" + (!!EDITOR.user));
+		//console.log("nodejsScriptFileOpenedMaybe: ext=" + ext + " match?" + (!!match) + " EDITOR.user?" + (!!EDITOR.user));
 
 		// We do not want to show the banner for *all* JavaScript files. Only js-files intended to be run in Node.js
 
@@ -97,7 +97,7 @@
 			CLIENT.cmd("showRunningProcesses", function (err, json) {
 				if(err) throw err;
 
-				console.log("nodejsScriptFileOpenedMaybe: showRunningProcesses: json=" + json);
+				//console.log("nodejsScriptFileOpenedMaybe: showRunningProcesses: json=" + json);
 
 				var arr = JSON.parse(json);
 

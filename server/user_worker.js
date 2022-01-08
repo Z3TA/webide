@@ -809,14 +809,14 @@ API.showRunningProcesses = function showRunningProcesses(user, json, callback) {
 
 		var reSpace = /\s+/;
 
-		console.log("showRunningProcesses: stdout=" + stdout);
+		//console.log("showRunningProcesses: stdout=" + stdout);
 
 		var rows = stdout.trim().split("\n");
 		var th = rows[0].split(reSpace).map(function (name) {
 			return name.replace("%", "");
 		});
 
-		console.log("showRunningProcesses: th=" + JSON.stringify(th));
+		//console.log("showRunningProcesses: th=" + JSON.stringify(th));
 
 		var runningProcesses = [];
 		/*
@@ -832,7 +832,7 @@ API.showRunningProcesses = function showRunningProcesses(user, json, callback) {
 			col = rows[row].split(reSpace);
 			col[th.length-1] = col.splice(th.length-1).join(" "); // Last col contains 
 
-			console.log("showRunningProcesses: col=" + JSON.stringify(col));
+			//console.log("showRunningProcesses: col=" + JSON.stringify(col));
 
 			obj={};
 
@@ -842,7 +842,7 @@ API.showRunningProcesses = function showRunningProcesses(user, json, callback) {
 			runningProcesses.push(obj);
 		}
 
-		console.log("showRunningProcesses: runningProcesses=" + JSON.stringify(runningProcesses, null, 2));
+		//console.log("showRunningProcesses: runningProcesses=" + JSON.stringify(runningProcesses, null, 2));
 
 		callback(null, JSON.stringify(runningProcesses));
 		
