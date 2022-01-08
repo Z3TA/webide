@@ -187,7 +187,7 @@
 			}
 
 			function identify() {
-				CLIENT.cmd("identify", {username: userValue, password: pwValue, sessionId: EDITOR.sessionId, editorVersion: EDITOR.version}, function loggedInMaybe(err, resp) {
+				CLIENT.cmd("identify", {username: userValue, password: pwValue, sessionId: EDITOR.sessionId, editorVersion: EDITOR.version, alias: UTIL.getCookie("deviceAlias")}, function loggedInMaybe(err, resp) {
 					loggingIn = false;
 					if(loginButton) loginButton.disabled = false;
 					if(err) {
@@ -592,7 +592,7 @@
 				}
 
 				function identify() {
-					CLIENT.cmd("identify", {username: user.value, password: pw.value, sessionId: EDITOR.sessionId, editorVersion: EDITOR.version}, function loggedIn(err, resp) {
+					CLIENT.cmd("identify", {username: user.value, password: pw.value, sessionId: EDITOR.sessionId, editorVersion: EDITOR.version, alias: UTIL.getCookie("deviceAlias")}, function loggedIn(err, resp) {
 						loggingIn = false;
 						if(loginButton) loginButton.disabled = false;
 						if(err) {

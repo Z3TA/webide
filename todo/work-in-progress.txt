@@ -1,72 +1,11 @@
 
-When showing annotations and you have a terminal file open, you get alot of errors about not being able to annotate the terminal!
-
----
-
-on galaxy fold the canvas/text disapear when scrolling
----
-
-Worker process crash when trying to download image.
-Should be able to download files from file explorer!
-
-Should be able to select many files in the file explorer (and then delete them)
-
-Should also be able to right click and resize image
-
 ---
 
 get message about colab even though no colaborator
+Should give a hint which device it's colaborating with so that we can figure out why we get that message even though there are no one collaborating...
 
-bug: The editor locked, was unable to click anywhere.
+idea: able to give current device a name "set device name"
 
----
-
-bug: State of open file is never saved, (becase we dont want to waste bandwith sending unchanged data to server every 5 second...),
-so the state "currentFile" is not saved even though we show another file... so when reopening we can't know if the file was the editors current file or not...
-
----
-
-Issue: Clicking open file from the SSG makes you select a file from your computer...
-
-Issue: When you click a link when editing files in WYSIWYG mode in SSG you can no longer edit in WYSIWYG
-
-Issue: SSG "sync with repo" asks for a password... even when there is no repo configured, should give an explanation about repos and how to use one...
-
----
-
-Maybe have a button that says "Use as offline/local editor"
-and store that option into a cookie, 
-and don't load stuff that needs the server!
-
-Support offline use, or use while having connection issues.
-Should be able to use the editor as a plain text offline editor editing local files (nativeFileSystem API)...
-We however get a lot of errors when there are connection issues... 
-Maybe have an offline mode !? Or should all functions gracefully handle offline ECONNERROR error messages !?
-eg. the user should not get 25 errors messages when he goes offline.
-note: navigator.online can still be true! there might be ISP issues specifically between the server and the client (while other pages works fine) like what happened to me on tuesday
-
-
----
-
-Inserting an { in a large file (EDITOR.js) on and old laptop totally freezes the laptop and a hard reboot is needed...
-(to treat the symtops we could use Alt+C to insert a pair of curly braces to not make the parser reparse the whole file...)
-
----
-
-Sometimes when typing on Macbook and you get far to the right the text becomes invisible!
-
----
-
-After opening terminal on one computer, then closing that client, and open webide on another computer,
-every time I change to another file I get the message: 
-
-Uncaught Error: We might have lost the connection. Or the server is busy! Unable to send cmd: req=terminal.resize (navigator.onLine=true) (code=ENETUNREACH)
-
-restaring the client on the new client computer seem to resolv the probelm... because terminal1 session closed
----
-
-cant reload editor during "network problem" in order to fix the network problem (after wifi restart)
-Reloading the editor should be forced and work even if there are errors!
 ---
 
 todo: Test user signup (after enforcing lower case username)

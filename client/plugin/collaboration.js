@@ -50,7 +50,7 @@
 	var bindTest = false;
 	var ignoreFileSave = "";
 	var ignoreUndoRedoEvent = {}; // filePath: [ev.order...]
-	var winMenuUndo, winMenuRedo, winMenuInvite, winMenuRecord, winMenuTutorials;
+	var winMenuUndo, winMenuRedo, winMenuInvite, winMenuRecord, winMenuTutorials, winMenuSetAlias;
 	
 	var recordTimeline, recordButton, playButton, isRecording = false, record = [], playbackFPS = 25;
 	var playbackInterval, isPlaying = false, recordInfo, lastRecordItem = -1;
@@ -140,7 +140,8 @@
 			winMenuInvite = EDITOR.windowMenu.add(S("invite_collaborator"), [S("Editor"), 3], invite);
 			winMenuRecord = EDITOR.windowMenu.add(S("screen_code_casting"), [S("Tools"), 100], recordWidget.show);
 			winMenuTutorials = EDITOR.windowMenu.add(S("first_intro"), [S("Editor"), S("Tutorials"), S("Intro"), 1], tutorialPlayFirstIntro);
-			
+			winMenuSetAlias = EDITOR.windowMenu.add(S("set_alias"), [S("Editor"), 4], setAlias);
+
 			discoveryBarIcon = EDITOR.discoveryBar.addIcon("gfx/treaty.svg", 140, S("invite_collaborator"), "colab", inviteFromDiscoveryBar);
 			// Icon created by: https://www.flaticon.com/authors/phatplus
 			
@@ -181,7 +182,8 @@
 			EDITOR.windowMenu.remove(winMenuInvite);
 			EDITOR.windowMenu.remove(winMenuRecord);
 			EDITOR.windowMenu.remove(winMenuTutorials);
-			
+			EDITOR.windowMenu.remove(winMenuSetAlias);
+
 			
 			// TEST-CODE-START
 			if(bindTest) {
@@ -204,6 +206,22 @@
 		order: 100
 	});
 	
+	function setAlias() {
+
+		var msg = "Give this device an alias in order to identify it if you login from several devices"
+		
+		promptBox(msg, {placeholder: "Safari on Johans Macbook"}, function(answer) {
+			if(!answer) return;
+
+			UTIL.setCookie("deviceAlias", answer, 999);
+
+			// Force alias update by logging out (alias is sent when logging in)
+			CLIENT.cmd("logout", {});
+
+		});
+
+	}
+
 	function tutorialPlayFirstIntro() {
 		
 	}

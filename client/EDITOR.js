@@ -10278,7 +10278,7 @@ window.addEventListener("mousemove", mouseMove, false);
 				loginAsGuest.disabled = true;
 				loginMessage.innerText = "";
 
-				CLIENT.cmd("identify", {username: userValue, password: pwValue, sessionId: EDITOR.sessionId, editorVersion: EDITOR.version}, function loggedInMaybe(err, resp) {
+				CLIENT.cmd("identify", { username: userValue, password: pwValue, sessionId: EDITOR.sessionId, editorVersion: EDITOR.version, alias: UTIL.getCookie("deviceAlias") }, function loggedInMaybe(err, resp) {
 					if(err) {
 
 						loginScreen.style.display = "block";
