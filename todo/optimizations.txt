@@ -4,6 +4,15 @@ This file contains a list of things that should be optimized...
 Optimization
 ============
 
+
+
+---
+
+Inserting an { in a large file (EDITOR.js) on and old laptop totally freezes the laptop and a hard reboot is needed...
+(to treat the symtops we could use Alt+C to insert a pair of curly braces to not make the parser reparse the whole file...)
+
+---
+
 When the terminal file becomes 6k lines long, it lags every time a message is added to the terminal!
 solution? Only have EDITOR.bigFileLoadRows in the terminal and store the rest on termin1.log on disk!?
 

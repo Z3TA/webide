@@ -36,7 +36,41 @@ Run all tests! (to make sure you did not break anything else)
 BUGS (and issues)
 =================
 
+bug: State of open file is never saved, (becase we dont want to waste bandwith sending unchanged data to server every 5 second...),
+so the state "currentFile" is not saved even though we show another file... so when reopening we can't know if the file was the editors current file or not...
 
+---
+
+
+
+---
+
+After opening terminal on one computer, then closing that client, and open webide on another computer,
+every time I change to another file I get the message: 
+
+Uncaught Error: We might have lost the connection. Or the server is busy! Unable to send cmd: req=terminal.resize (navigator.onLine=true) (code=ENETUNREACH)
+
+restaring the client on the new client computer seem to resolv the probelm... because terminal1 session closed
+
+---
+
+Sometimes when typing on Macbook and you get far to the right the text becomes invisible!
+
+
+---
+
+bug: The editor locked, was unable to click anywhere.
+
+---
+
+When showing annotations and you have a terminal file open, you get alot of errors about not being able to annotate the terminal!
+
+---
+
+on galaxy fold the canvas/text disapear when scrolling
+---
+
+Worker process crash when trying to download image.
 
 ---
 

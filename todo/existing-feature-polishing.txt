@@ -4,6 +4,23 @@ This file contains a list of things we can do to improve already implemented fea
 Polishing (only existing features)
 ==================================
 
+Updated high CPU warning messages so we can se it in the e-mail topic
+
+---
+
+Issue: Clicking open file from the SSG makes you select a file from your computer...
+
+Issue: When you click a link when editing files in WYSIWYG mode in SSG you can no longer edit in WYSIWYG
+
+Issue: SSG "sync with repo" asks for a password... even when there is no repo configured, should give an explanation about repos and how to use one...
+
+---
+
+Should be able to download files from file explorer!
+
+Should be able to select many files in the file explorer (and then delete them)
+
+Should also be able to right click and resize image
 
 
 ---
