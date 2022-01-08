@@ -1658,7 +1658,7 @@ return;
 			// todo: use cgroups to limit CPU !?
 
 			if(cpuWarn.length > 0) {
-				var msg = "The following processes use a lot of CPU: " + JSON.stringify(cpuWarn, null, 2);
+				var msg = "High CPU: " + (cpuWarn.length == 1 ? cpuWarn[0].cmd : ("(" + cpuWarn.length + ")")) + "\nThe following processes use a lot of CPU: " + JSON.stringify(cpuWarn, null, 2);
 
 				reportError(msg);
 			
