@@ -446,7 +446,7 @@ throw new Error("recordInfo.startFile=" + recordInfo.startFile + " recordInfo=" 
 		var audioFilePath = UTIL.joinPaths(rootFolder, recordInfo.startFile + ".ogg");
 		var dataFilePath = UTIL.joinPaths(rootFolder, recordInfo.startFile + ".json");
 		var dataFolder = UTIL.getDirectoryFromPath(dataFilePath);
-		var publicAudioUrl = document.location.protocol + "//" + EDITOR.user.name + "." + document.location.hostname + audioFilePath.replace(wwwpub, "");
+		var publicAudioUrl = document.location.protocol + "//" + EDITOR.user.name + "." + document.location.hostname + audioFilePath.replace(wwwpub, "/");
 		
 		if(!data) return alertBox("No recording available! Either open a saved recordning (json) file, or make a new recording.");
 		
@@ -1334,7 +1334,7 @@ var file = fileOrData;
 	}
 	
 	function loadAudio(audioPlayer, audioFilePath, callback) {
-		//console.log("Loading audio file " + audioFilePath + " ...");
+		console.trace("Loading audio file " + audioFilePath + " ...");
 		
 		if(audioFilePath.match(/^https?:/i)) {
 			audioPlayer.src = audioFilePath;
