@@ -2657,7 +2657,12 @@ function userCleanup() {
 		if(!USER_CONNECTIONS.hasOwnProperty(userConnectionName)) {
 			// No other clients logged is as this user
 			
-			USER_WORKERS[userConnectionName].send({teardown: true}); // Will make Worker exiting by itself (no need for kill signal)
+			if(USER_WORKERS.hasOwnProperty(userConnectionName)) {
+				USER_WORKERS[userConnectionName].send({teardown: true}); // Will make Worker exiting by itself (no need for kill signal)
+			}
+			else {
+				log("userConnectionName=" + userConnectionName + " had no worker process!");
+			}
 			
 			if(DROPBOX.hasOwnProperty(userConnectionName)) {
 				if(!DROPBOX[userConnectionName].linked) stopDropboxDaemon(userConnectionName);
@@ -3288,7 +3293,7 @@ var loginCounter = 0;
 			}
 		}
 		else {
-			// User has authorized
+			// # User has authorized
 			
 			if(!USER_WORKERS.hasOwnProperty(userConnectionName)) throw new Error(userConnectionName + " has no worker process!");
 			
@@ -3326,12 +3331,15 @@ var loginCounter = 0;
 				
 			}
 			else if(command == "logout") {
-				userCleanup();
+				//userCleanup();
+				// dont clean up right away in case we are in colaboration mode or want to relogin
 
+				connection.close();
+				
 				userConnectionName = null;
 				commandQueue.length = 0;
 				connectionAuthorized = false;
-			
+
 			}
 			else {
 				

@@ -7753,7 +7753,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 	}
 	
 	EDITOR.disconnect = function(protocol, serverAddress, callback) {
-		
+		// Disconnect from FTP,SFTP,FTPS etc server
 		if(protocol == undefined) throw new Error("Expected protocol! protocol=" + protocol);
 		if(serverAddress == undefined) throw new Error("Expected serverAddress! serverAddress=" + serverAddress);
 		

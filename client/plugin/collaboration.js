@@ -210,14 +210,25 @@
 
 		var msg = "Give this device an alias in order to identify it if you login from several devices"
 		
-		promptBox(msg, {placeholder: "Safari on Johans Macbook"}, function(answer) {
+		var currentAlias = UTIL.getCookie("deviceAlias");
+
+		var options = {};
+
+		if(currentAlias) {
+			options.defaultValue = currentAlias;
+		}
+		else {
+			options.placeholder = "Safari on Johans Macbook";
+		}
+
+		promptBox(msg, options, function(answer) {
 			if(!answer) return;
 
 			UTIL.setCookie("deviceAlias", answer, 999);
 
 			// Force alias update by logging out (alias is sent when logging in)
 			CLIENT.cmd("logout", {});
-
+			
 		});
 
 	}
