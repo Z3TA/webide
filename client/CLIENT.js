@@ -86,11 +86,12 @@ var CLIENT = {}; // Client object is global
 		//connection = new SockJS(apiUrl);
 		
 		var sockJsReservedQuirk = '';
-		var sockJsOptions = {debug: true};
 		
 		CLIENT.ping = -1;
 
-		connection = new SockJS(url, sockJsReservedQuirk, sockJsOptions); 
+		//var sockJsOptions = {debug: true};
+		connection = new SockJS(url, sockJsReservedQuirk); 
+		//connection = new SockJS(url, sockJsReservedQuirk, sockJsOptions); 
 		connection.onopen = function serverConnected() {
 			//console.log("CLIENT: connected to server=" + JSON.stringify(server));
 			CLIENT.connected = true;

@@ -99,7 +99,7 @@
 			
 			*/
 		
-debug("Using ligatures with FiraCode");
+//debug("Using ligatures with FiraCode");
 		webFontLoading = "FiraCode";
 		loadFont = function() {
 			UTIL.loadCSS("gfx/font/FiraCode_1.204/fira_code.css", cssLoadedMaybe);
@@ -143,7 +143,7 @@ EDITOR.settings.style.font = "Fira Code";
 		
 		*/
 		
-		debug("Using Consolas with LCD sub pixel antialias!");
+		//debug("Using Consolas with LCD sub pixel antialias!");
 		
 		// Tested in Firefox on Windows 10
 		
@@ -167,7 +167,7 @@ EDITOR.settings.style.font = "Fira Code";
 			Font's seem to work nice on localhost/127.0.0.1 in IE, but not when using a domain ...
 		*/
 		
-		debug("Deciding what font to use considering LCD=" + EDITOR.settings.sub_pixel_antialias + " ");
+		//debug("Deciding what font to use considering LCD=" + EDITOR.settings.sub_pixel_antialias + " ");
 		
 		if(MSWIN) {
 			// Windows fonts are rendered more hard and slightly smaller then on Linux and Mac, so use a more roundish font
@@ -204,7 +204,7 @@ EDITOR.settings.style.font = "Fira Code";
 					// Text has a different width if it's antialiased!
 					var antialias = detectAntialias();
 					if(antialias) {
-						debug("Antialias detected! Updating grid width");
+						//debug("Antialias detected! Updating grid width");
 						EDITOR.settings.gridWidth = 7.5;
 					}
 					
@@ -269,7 +269,7 @@ EDITOR.settings.style.font = "Fira Code";
 		EDITOR.settings.gridHeight = 23;
 		EDITOR.settings.gridWidth = 9;
 		
-		debug("Using web safe font (" + EDITOR.settings.style.font + ")");
+		//debug("Using web safe font (" + EDITOR.settings.style.font + ")");
 		
 		var width = parseInt(window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth);
 		var height = parseInt(window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight);

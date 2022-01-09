@@ -2574,9 +2574,7 @@ else if(err.code == "ENETDOWN") {
 			//console.log("EDITOR.getCanvasContext: ctx set as EDITOR.canvasContext!");
 		}
 		
-		if(typeof ctx.getContextAttributes == "function") {
-			console.log( "EDITOR.getCanvasContext: getContextAttributes=" + JSON.stringify(ctx.getContextAttributes()) );
-		}
+		//if(typeof ctx.getContextAttributes == "function") {console.log( "EDITOR.getCanvasContext: getContextAttributes=" + JSON.stringify(ctx.getContextAttributes()) );}
 		
 		//canvasContextReset(ctx);
 		
