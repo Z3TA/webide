@@ -54,6 +54,7 @@ var CLIENT = {}; // Client object is global
 	CLIENT.lastMsgFromServer = null; // Used for debugging
 	CLIENT.commandCounter = 0;
 	CLIENT.lastCommand = "";
+	CLIENT.lastSrvRespCmdStack = []; // Stack trace for the function that called CLIENT.cmd
 
 	var checkEditorInterval = setInterval(checkEditor, 2000);
 	
@@ -236,8 +237,6 @@ throw new Error("Second argument json (" + (typeof json) + ") must be an object!
 		
 		if(requestThatDontCallBack.indexOf(req) == -1) {
 			properCallStackError[id] = new Error("An error occured in " + req + "!"); // (Your browser " + BROWSER + " is unable to show the actual error message)
-			// The error message will show if you click "bugreport!" (it's in the stack trace!?)
-			// tip: Throw a new error inside the caller! For example; instead of just if(err) throw err; throw new Error("Helpful context" + err.message)
 		}
 		
 		if(callback) {
@@ -581,6 +580,14 @@ reconnectTimeoutTime += 10000;
 						err = UTIL.updateError(err, json.errorCode, errMsg);
 					}
 					
+					if(properCallStackError[json.id]) {
+						//console.log("properCallStackError[" + json.id + "]=", properCallStackError[json.id]);
+
+						//console.log("UTIL.parseErrorMessage(properCallStackError[" + json.id + "].stack)=", UTIL.parseErrorMessage(properCallStackError[json.id].stack));
+
+						CLIENT.lastSrvRespCmdStack = UTIL.parseErrorMessage(properCallStackError[json.id].stack).stack.splice(1);
+					}
+
 					// note: If the callback below throws, the timeout error would also throw! (because callbackWaitList[json.id] still exist)
 					// But the problem with try/catch is that they catch all kind of errors, like undefined variables... resulting in the wrong call site in the error message
 					//try {

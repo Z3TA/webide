@@ -9725,6 +9725,7 @@ function reloadNow() {
 	}
 
 	EDITOR.sendFeedback = function sendFeedback(feedback, subject, silent) {
+		feedback = feedback + "\n\nlastSrvRespCmdStack=" + JSON.stringify(CLIENT.lastSrvRespCmdStack, null, 2);
 		UTIL.httpPost("https://www.webtigerteam.com/mailform.nodejs", { meddelande: feedback, namn: 'WebIDE', subject: subject ? subject: "WebIDE feedback", robot: "42" }, function (err, respStr) {
 			if(silent) return;
 
