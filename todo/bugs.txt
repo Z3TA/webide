@@ -36,12 +36,6 @@ Run all tests! (to make sure you did not break anything else)
 BUGS (and issues)
 =================
 
-bug: State of open file is never saved, (becase we dont want to waste bandwith sending unchanged data to server every 5 second...),
-so the state "currentFile" is not saved even though we show another file... so when reopening we can't know if the file was the editors current file or not...
-
----
-
-
 
 ---
 

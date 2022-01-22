@@ -69,6 +69,8 @@
 	var nativeFileSystemFileHandleDb; // undefined means we have not yet tried to open it
 	var nativeFileSystemFileHandleDbWaitList = [];
 
+	var currentFileOnServer = "";
+
 	EDITOR.plugin({
 		desc: "Open up the files from last session", 
 		order: 2000, // Load after the parser and other stuff that has fileOpen event listener
@@ -117,6 +119,7 @@
 			EDITOR.removeEvent("fileChange", fileStateChange);
 			EDITOR.removeEvent("afterSave", saveStateOfFile);
 			EDITOR.removeEvent("moveCaret", fileStateChange);
+			EDITOR.removeEvent("fileShow", saveCurrentFile);
 			EDITOR.removeEvent("exit", saveStateOfOpenFiles);
 			EDITOR.removeEvent("afk", stopSavingState);
 			EDITOR.removeEvent("btk", continueSavingState);
@@ -164,7 +167,8 @@
 			EDITOR.on("fileChange", fileStateChange);
 			EDITOR.on("afterSave", saveStateOfFile, 1);
 			EDITOR.on("moveCaret", fileStateChange);
-			
+			EDITOR.on("fileShow", saveCurrentFile);
+
 			EDITOR.on("afk", stopSavingState);
 			EDITOR.on("btk", continueSavingState);
 		}
@@ -175,7 +179,7 @@
 			// Save state when exiting the editor
 
 			// problem: Sometimes there is already an exit event called saveStateOfOpenFiles!
-			console.log("reopen_file:  reopenFilesMain: Adding exit event: saveStateOfOpenFiles! EDITOR.files=" + EDITOR.sortFileList());
+			//console.log("reopen_file:  reopenFilesMain: Adding exit event: saveStateOfOpenFiles! EDITOR.files=" + EDITOR.sortFileList());
 			EDITOR.on("exit", saveStateOfOpenFiles);
 			
 
@@ -223,8 +227,6 @@
 			so try to recover the last session ...
 		*/
 		
-		var setCurrent = "";
-		
 		EDITOR.localStorage.getItem("openedFiles", function(err, openedFilesString) {
 			if(err) throw err;
 			
@@ -269,7 +271,7 @@
 				// Convert back to string
 				openedFilesString = server.join(fileDelimiter);
 				
-				console.log("reopenFiles: Combined server and local: " + openedFilesString);
+				//console.log("reopenFiles: Combined server and local: " + openedFilesString);
 				
 				// Just in case
 				openedFilesString = removeDublicates(openedFilesString);
@@ -308,7 +310,7 @@
 			
 		});
 		
-		function fileInListOpened(err, file, wasCurrent) {
+		function fileInListOpened(err, file) {
 			
 			if(err) {
 				if(err.code === 'ENOENT') {
@@ -323,8 +325,6 @@
 			}
 			
 			//console.log("reopenFiles: We now have it open: file.path=" + file.path);
-			
-			if(wasCurrent) setCurrent = file.path;
 			
 			// Is all files we want to open opened!?
 			compareAndDone();
@@ -348,46 +348,41 @@
 		}
 		
 		function allFilesOpened() {
-			
 			allFilesOpenedNeverCalled = false;
-			
 			
 			//console.log("reopenFiles: All files from last lession opened!");
 			
 			findBugs(true); // true == also check if the list match EDITOR.files
 			
-			//console.log("reopenFiles: setCurrent=" + setCurrent);
-			
-			
-			if(setCurrent) {
-				// Make the file with last state "open" the current file
-				
-				// Switch to this file
-				console.log("allFilesOpened: setCurrent=" + setCurrent + "");
+			EDITOR.localStorage.getItem("currentFile", function(err, currentFilePath) {
+				if(err) throw err;
 
-				if(!EDITOR.files.hasOwnProperty(setCurrent)) {
-					throw new Error("reopenfiles plugin: After all files has been reopened we want to show setCurrent=" + setCurrent + " . But it's not opened! Opened files are: " + JSON.stringify(Object.keys(EDITOR.files)));
+				//console.log("reopenFiles: allFilesOpened: EDITOR.files.hasOwnProperty(" + currentFilePath + ")=" + EDITOR.files.hasOwnProperty(currentFilePath) + " ");
+
+				if(EDITOR.files.hasOwnProperty(currentFilePath)) EDITOR.showFile(currentFilePath);
+
+				if(EDITOR.storage.ready() && CLIENT.connected && CLIENT.ping < 2000) {
+					var currentFilePathOnServer = EDITOR.storage.getItem("currentFile");
+
+					//console.log("reopenFiles: allFilesOpened: currentFilePathOnServer=" + currentFilePathOnServer);
+
+					// Swallow this error because it's too annoying when you get spammed lots of these if we lose connection to the server'
+					if(err) console.error(err);
+					else if(currentFilePath != currentFilePathOnServer) {
+						EDITOR.showFile(currentFilePathOnServer);
+					}
+
+					reopenFilesCallback();
+
+					if(allFilesOpenedAlreadyCalled) throw new Error("allFilesOpenedAlreadyCalled=" + allFilesOpenedAlreadyCalled);
+					allFilesOpenedAlreadyCalled = true;
 				}
-				else EDITOR.showFile(EDITOR.files[setCurrent]);
-				
-			}
-			else {
-				// 
-				console.warn("allFilesOpened: setCurrent=" + setCurrent + " EDITOR.files=" + Object.keys(EDITOR.files))
-			}
-			
-			reopenFilesCallback();
-			
-			if(allFilesOpenedAlreadyCalled) throw new Error("allFilesOpenedAlreadyCalled=" + allFilesOpenedAlreadyCalled);
-			allFilesOpenedAlreadyCalled = true;
+			});
 		}
-		
-		
-		
 		
 		function openFile(path, callback) {
 			
-			console.log("reopenFiles: openFile: path=" + path);
+			//console.log("reopenFiles: openFile: path=" + path);
 			
 			if(!callback) throw new Error("Internal error: Expected a callback!");
 			
@@ -405,7 +400,7 @@
 				
 				// Decide if we should open the last saved state, or from the disk (or other protocol) ...
 				
-				console.log("reopenFiles: Got fileSizeOnDisk=" + fileSizeOnDisk + " for path=" + path + "");
+				//console.log("reopenFiles: Got fileSizeOnDisk=" + fileSizeOnDisk + " for path=" + path + "");
 				
 				if(getFileSizeError) {
 					//if(err.code === 'ENOENT') {
@@ -419,12 +414,12 @@
 				
 				loadState(path, function stateLoaded(err, localState) {
 					
-					console.log("reopen_files:gotFileSize:stateLoaded: localState=" + JSON.stringify(localState, null, 2));
+					//console.log("reopen_files:gotFileSize:stateLoaded: localState=" + JSON.stringify(localState, null, 2));
 
 					if(err) console.error(err);
 					
 					if(!serverState && !localState) {
-						console.log("reopenFiles: Unable to load neither server nor local state for path=" + path);
+						//console.log("reopenFiles: Unable to load neither server nor local state for path=" + path);
 						lastFileState = undefined; // Overwrite just in case, so that we don't get state from an earlier file
 						return open();
 					}
@@ -485,7 +480,7 @@
 						
 						lastFileState = state;
 						
-						console.log("reopenFiles: decidedWhichStateToUse: state=" + JSON.stringify(state, null, 2));
+						//console.log("reopenFiles: decidedWhichStateToUse: state=" + JSON.stringify(state, null, 2));
 						
 						//console.log("reopenFiles: decidedWhichStateToUse: loadLastState=" + loadLastState);
 						//console.log("reopenFiles: decidedWhichStateToUse: lastFileState.isSaved=" + lastFileState.isSaved);
@@ -533,7 +528,7 @@
 				
 				function open() {
 					
-					console.log("reopenFiles: open file path=" + path);
+					//console.log("reopenFiles: open file path=" + path);
 					
 					var stateprops = {};
 					
@@ -558,7 +553,7 @@
 								//console.log("reopenFiles: lastFileState=", lastFileState);
 								removeFromOpenedFiles(path, function(err) {
 									if(err) throw err;
-									callback(contentError, path, false);
+									callback(contentError, path);
 								});
 								return;
 							}
@@ -569,7 +564,7 @@
 							
 							removeFromOpenedFiles(path, function(err) {
 								if(err) throw err;
-								callback(getFileSizeError, path, false);
+								callback(getFileSizeError, path);
 							});
 							
 							return; // Don't attempt to open the file
@@ -616,17 +611,15 @@
 					if(file.path != path) throw new Error("File opened, but with another path: path=" + path + " file.path=" + file.path + " EDITOR.files=" + JSON.stringify(Object.keys(EDITOR.files)) );
 				}
 				
-				console.log("reopenFiles: Got (Reopening) file from editor path=" + path + " file.path=" + (file ? file.path : "file=" + file));
+				//console.log("reopenFiles: Got (Reopening) file from editor path=" + path + " file.path=" + (file ? file.path : "file=" + file));
 				
 				//if(openFileError) {console.log("reopenFiles: fileReopened openFileError.path=" + openFileError.path);}
 				
 				//if(file) {console.log("reopenFiles: fileReopened file.path=" + file.path);}
 				
-				var fileWasCurrentfile = false; // Was the file open (in view) last time we closed the editor
-				
 				if(openFileError) {
 					console.error(openFileError.message);
-					console.log("reopenFiles: ", openFileError.stack);
+					//console.log("reopenFiles: ", openFileError.stack);
 					alertBox("Unable to reopen file:\n" + path + "\nError: " + openFileError.message);
 					
 					removeFromOpenedFiles(path, function(err) {
@@ -662,7 +655,7 @@
 				else updateLastState();
 				
 				function updateLastState() {
-					console.log("reopenFiles: updateLastState path=" + path);
+					//console.log("reopenFiles: updateLastState path=" + path);
 					
 					// Set last state
 					// Note that some state need to be set when opening the file!
@@ -672,8 +665,6 @@
 						if(lastFileState.startColumn != undefined && lastFileState.startRow != undefined) {
 							file.scrollTo(lastFileState.startColumn, lastFileState.startRow);
 						}
-						
-						if(lastFileState.currentFile === true) fileWasCurrentfile = true;
 						
 						if(lastFileState.caret !== undefined) {
 							// Set the caret as it was
@@ -695,7 +686,7 @@
 					}
 					
 					
-					console.log("reopenFiles: file.path=" + file.path + " file.partStartRow=" + file.partStartRow + " content=" + content + " fileWasCurrentfile=" + fileWasCurrentfile + " lastFileState=" + (lastFileState && JSON.stringify(lastFileState, null, 2)));
+					//console.log("reopenFiles: file.path=" + file.path + " file.partStartRow=" + file.partStartRow + " content=" + content + " lastFileState=" + (lastFileState && JSON.stringify(lastFileState, null, 2)));
 					
 					if(file.partStartRow > 0 && content == undefined) {
 						/*
@@ -703,10 +694,10 @@
 							But if it was loaded from state, just leave it as is.
 						*/
 						file.gotoLine(file.partStartRow+file.caret.row+1, function(err) {
-							callback(err, file, fileWasCurrentfile);
+							callback(err, file);
 						});
 					}
-					else callback(null, file, fileWasCurrentfile);
+					else callback(null, file);
 				}
 				
 				
@@ -773,7 +764,7 @@
 	function addToOpenedFiles(file) {
 		// Called when the editor opens a new file
 		
-		console.log("addToOpenedFiles! file.nativeFileSystemFileHandle=", file.nativeFileSystemFileHandle);
+		//console.log("addToOpenedFiles! file.nativeFileSystemFileHandle=", file.nativeFileSystemFileHandle);
 
 		if(!file.path) throw new Error("Argument need to be a file object!");
 		
@@ -786,10 +777,10 @@
 				var transaction = db.transaction(["fileHandles"], "readwrite");
 				var objectStore = transaction.objectStore("fileHandles");
 				transaction.oncomplete = function(event) {
-					console.log("nativeFileSystemFileHandle for path="+ file.path + " saved in indexedDB!");
+					//console.log("nativeFileSystemFileHandle for path="+ file.path + " saved in indexedDB!");
 				};
 				transaction.onerror = function(event) {
-					console.error("Failed to save nativeFileSystemFileHandle for path="+ file.path + " in indexedDB!");
+					//console.error("Failed to save nativeFileSystemFileHandle for path="+ file.path + " in indexedDB!");
 				};
 				// Use put in case for some reaso (crash?) it already exist in the indexdb (we want to save the latest handle)
 				objectStore.put({path: file.path, handle: file.nativeFileSystemFileHandle, size: file.getFileSize()});
@@ -892,7 +883,7 @@
 			var transaction = nativeFileSystemFileHandleDb.transaction(["fileHandles"], "readwrite");
 			var objectStore = transaction.objectStore("fileHandles");
 			transaction.oncomplete = function(event) {
-				console.log("nativeFileSystemFileHandle for filePath="+ filePath + " deleted from indexedDB!");
+				//console.log("nativeFileSystemFileHandle for filePath="+ filePath + " deleted from indexedDB!");
 			};
 			transaction.onerror = function(event) {
 				console.error("Failed to delete nativeFileSystemFileHandle for filePath="+ filePath + " in indexedDB!");
@@ -1019,7 +1010,7 @@
 		};
 		requestToUseDb.onsuccess = function(event) {
 			nativeFileSystemFileHandleDb = event.target.result;
-			console.log("Successfully opened indexedDB for nativeFileSystemFileHandleDb");
+			//console.log("Successfully opened indexedDB for nativeFileSystemFileHandleDb");
 
 			nativeFileSystemFileHandleDbWaitList.forEach(function(cb) {
 				cb(null, nativeFileSystemFileHandleDb);
@@ -1030,12 +1021,12 @@
 		requestToUseDb.onupgradeneeded = function(event) {
 			var db = event.target.result;
 
-			console.log("onupgradeneeded triggered for indexedDB nativeFileSystemFileHandleDb");
+			//console.log("onupgradeneeded triggered for indexedDB nativeFileSystemFileHandleDb");
 
 			var objectStore = db.createObjectStore("fileHandles", { keyPath: "path" });
 
 			objectStore.transaction.oncomplete = function(event) {
-				console.log("Finished creating indexedDB nativeFileSystemFileHandleDb!");
+				//console.log("Finished creating indexedDB nativeFileSystemFileHandleDb!");
 			};
 		};
 
@@ -1056,10 +1047,35 @@
 		});
 	}
 	
+	function saveCurrentFile(file, lastCurrentFile, saveRightAway) {
+		if(file == undefined) return;
+		EDITOR.localStorage.setItem("currentFile", file.path, function(err) {
+			if(err) throw err;
+
+			if(saveRightAway) updateCurrentFileOnServer();
+			// Only bother sending the current file path to the server if we are still on the same file 10 seconds from now
+			else setTimeout(updateCurrentFileOnServer, 10000);
+
+			function updateCurrentFileOnServer() {
+				if(file == currentFileOnServer) return;
+				if(EDITOR.currentFile != file) return;
+
+				if(EDITOR.storage.ready() && CLIENT.connected && CLIENT.ping < 2000) {
+					EDITOR.storage.setItem("currentFile", file.path, function(err) {
+						// Swallow this error because it's too annoying when you get spammed lots of these if we lose connection to the server'
+						if(err) console.error(err);
+						else currentFileOnServer = file;
+					});
+				}
+			}
+		});
+	}
+
+
 	function saveStateOfOpenFiles(reason, callback) {
 		// Called when the editor closes, and at an time interval
 		
-		console.log("reopenFiles: saveStateOfOpenFiles! reason=" + reason);
+		//console.log("reopenFiles: saveStateOfOpenFiles! reason=" + reason);
 		
 		if(typeof callback != "function") {
 			//console.log("callback=" + callback + " (" + (typeof callback) + ") is not a function!");
@@ -1114,10 +1130,10 @@
 					
 					// note: "".split(fileDelimiter).length == 1 !! (an empty string gives one item in the array)
 					if(openedFilesString != "") {
-						console.log("reopenFiles: openFiles.length=" + openFiles.length);
+						//console.log("reopenFiles: openFiles.length=" + openFiles.length);
 						for(var i=0; i<openFiles.length; i++) {
 
-							console.log("reopenFiles: changedstate[" + openFiles[i] + "]=" + changedstate[openFiles[i]]);
+							//console.log("reopenFiles: changedstate[" + openFiles[i] + "]=" + changedstate[openFiles[i]]);
 							if(changedstate[openFiles[i]]) {
 								saveState(openFiles[i], stateSaved);
 							}
@@ -1143,6 +1159,8 @@
 				});
 			}
 		});
+
+		saveCurrentFile(EDITOR.currentFile, EDITOR.lastFileShowed, true);
 	}
 	
 	function stateChanged(oldState, newState) {
@@ -1161,7 +1179,7 @@
 		if(typeof path != "string") throw new Error("path needs to be a string!")
 		if(typeof callback != "function") throw new Error("callback needs to be a function!")
 		
-		console.log("reopenFiles: Saving state for: " + path);
+		//console.log("reopenFiles: Saving state for: " + path);
 		
 		changedstate[path] = false;
 		
@@ -1196,13 +1214,6 @@
 		
 		var state = getFileState(file);
 
-		if(file == EDITOR.currentFile) {
-			state.currentFile = true;
-		}
-		else {
-			state.currentFile = false;
-		}
-		
 		var sizeLimit = 2551000; // Max size for localStorage in Chrome is 2,551,000 characters (5 MB)
 		
 		if(file.text.length < sizeLimit) {
@@ -1217,7 +1228,7 @@
 		
 		EDITOR.localStorage.setItem("state_" + path, JSON.stringify(state), function localStorageItemSet(err) {
 			
-			console.log("reopen_files:saveState:localStorageItemSet: err=" + err + " EDITOR.storage.ready()=" + EDITOR.storage.ready() + " CLIENT.connected=" + CLIENT.connected + " CLIENT.ping=" + CLIENT.ping);
+			//console.log("reopen_files:saveState:localStorageItemSet: err=" + err + " EDITOR.storage.ready()=" + EDITOR.storage.ready() + " CLIENT.connected=" + CLIENT.connected + " CLIENT.ping=" + CLIENT.ping);
 
 			if(EDITOR.storage.ready() && CLIENT.connected && CLIENT.ping < 2000) {
 				// Also store some of the state on the server
@@ -1232,7 +1243,9 @@
 					});
 					oldServerState[path] = serverState;
 				}
-				else console.log("reopen_files:saveState:localStorageItemSet: Not saving on server because the state has not changed!");
+				else {
+					//console.log("reopen_files:saveState:localStorageItemSet: Not saving on server because the state has not changed!");
+				}
 			}
 			
 			callback(err, path, state);
