@@ -29,7 +29,7 @@
 		});
 		
 		function clone() {
-			CLIENT.cmd("mercurial.clone", {local: testFolder, remote: "https://hg.webtigerteam.com/repo/test", user: "user", pw: "pass"}, 45000, function clonedRepo(err, json) {
+			CLIENT.cmd("mercurial.clone", {local: testFolder, remote: "https://hg.webtigerteam.com/repo/test", user: "user", pw: "pass"}, 160000, function clonedRepo(err, json) {
 				if(err) {
 					alertBox(err.message, err.code || "HG_CLONE_ERROR");
 					throw err
@@ -97,7 +97,7 @@
 function testClone() {
 			if(++testCounter > 2) throw new Error("Clone test retry more then twice!");
 			
-			CLIENT.cmd("mercurial.clone", {local: testFolder, remote: "https://hg.webtigerteam.com/repo/test", user: "user", pw: "pass"}, 60000, function(err, json) {
+			CLIENT.cmd("mercurial.clone", {local: testFolder, remote: "https://hg.webtigerteam.com/repo/test", user: "user", pw: "pass"}, 160000, function(err, json) {
 				if(err && err.code == "EXIST") {
 					// The folder might already exist from and earlier test that failed.
 					cleanup(function(err) {
@@ -192,7 +192,7 @@ function testClone() {
 			
 			console.log("testClone: repository=" + repository + " testFolder=" + testFolder);
 			
-			CLIENT.cmd("mercurial.clone", {local: testFolder, remote: repository, user: "user", pw: "pass"}, 60000, function(err, json) {
+			CLIENT.cmd("mercurial.clone", {local: testFolder, remote: repository, user: "user", pw: "pass"}, 160000, function(err, json) {
 				if(err && err.code == "EXIST") {
 					// The folder might already exist from and earlier test that failed.
 					cleanup(function(err) {

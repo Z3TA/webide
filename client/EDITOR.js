@@ -2211,7 +2211,7 @@ else if(err.code == "ENETDOWN") {
 		
 		var json = {path: path, text: text, inputBuffer: inputBuffer, encoding: encoding};
 		var startTimer = (new Date()).getTime();
-		var saveTimeout = (estimatedUploadTime ? estimatedUploadTime : 10000) + 5000;
+		var saveTimeout = (estimatedUploadTime ? estimatedUploadTime : 10000) + 15000;
 		CLIENT.cmd("saveToDisk", json, saveTimeout, function saveToDiskCmd(err, json) {
 			
 			if(progress) {
@@ -10900,7 +10900,7 @@ window.addEventListener("mousemove", mouseMove, false);
 		
 		EDITOR.dashboard.hide(true);
 		
-		var maxParallel = 5; // Running too many tests at once will cause timeout issues
+		var maxParallel = 3; // Running too many tests at once will cause timeout issues
 		var abortOnError = false;
 		
 		if(onlyOne) testFirstTest = true;
