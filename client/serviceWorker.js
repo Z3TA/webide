@@ -436,7 +436,7 @@ self.addEventListener('fetch', function serviceWorkerFetch(event) {
 				event.respondWith(caches.open(cacheVersion).then(function(cache) {
 					return fetch(event.request).then(function(response) {
 						cache.put(event.request, response.clone());
-						console.log("Added to cache becasue DEV_MODE=" + DEV_MODE + " url=" + event.request.url + "");
+						//console.log("Added to cache becasue DEV_MODE=" + DEV_MODE + " url=" + event.request.url + "");
 						return response;
 					});
 				}));
@@ -445,7 +445,7 @@ self.addEventListener('fetch', function serviceWorkerFetch(event) {
 				// Get the file from the cache because we are offline
 				event.respondWith(caches.match(event.request).then(function(response) {
 					if (response) {
-						console.log("serviceWorker Serving from cache because navigator.onLine=" + navigator.onLine + ": " + event.request.url);
+						//console.log("serviceWorker Serving from cache because navigator.onLine=" + navigator.onLine + ": " + event.request.url);
 						return response;
 					}
 					else {
@@ -469,7 +469,7 @@ self.addEventListener('fetch', function serviceWorkerFetch(event) {
 		// event.respondWith returns undefined!
 		event.respondWith(caches.match(event.request).then(function(response) {
 			if (response) {
-				console.log("serviceWorker Serving from cache: " + event.request.url);
+				//console.log("serviceWorker Serving from cache: " + event.request.url);
 				return response;
 			}
 			else {

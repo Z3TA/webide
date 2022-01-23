@@ -1048,7 +1048,7 @@ usePseudoClipboard = false;
 	
 	EDITOR.changeWorkingDir = function(workingDir) {
 		
-		//console.log("Changing working directory to: " + workingDir);
+		//console.warn("Changing working directory to: " + workingDir);
 		
 		// Update internally (on client)
 		var workingDirectory = setWorkingDirectory(workingDir);
@@ -3269,8 +3269,10 @@ ca 20ms to render, ca 13ms to render without creating new objects
 		}
 		// TEST-CODE-END
 
-		EDITOR.shouldRender = true;
 		
+		EDITOR.shouldRender = true;
+		//console.warn("EDITOR.shouldRender!");
+
 		clearTimeout(renderTimer);
 		renderTimer = setTimeout(function renderMaybe() {
 			resizeAndRender();
@@ -3280,8 +3282,6 @@ ca 20ms to render, ca 13ms to render without creating new objects
 			window.requestAnimationFrame(animate);
 		}
 	}
-	
-	
 	
 	EDITOR.resize = function(resizeOverride) {
 		/*
@@ -9784,6 +9784,7 @@ var loaded = !!theWindow.location.href;
 		return true;
 
 		function search(currentFolder) {
+			//console.log("EDITOR.findFileReverseRecursive: search: currentFolder=" + currentFolder + " names=", names);
 			EDITOR.listFiles(currentFolder, function listedFiles(err, files) {
 
 				//console.log("findFileReverseRecursive: startDir=" + startDir + " currentFolder= " + currentFolder + " err=" + (err && err.message));
