@@ -2580,6 +2580,9 @@ annotationRev.setAttribute("title", "Show diff");
 			var fileName = "hg.diff";
 			if(filePaths.length == 1) fileName = filePaths[0] + ".diff";
 				//console.log("filePaths=" + filePaths);
+
+				EDITOR.changeWorkingDir(directory); // So other plugins can figure out the full path of the diff file!
+
 			EDITOR.openFile(fileName, text, function(err, file) {
 				if(err) alertBox(err.message);
 			});

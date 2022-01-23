@@ -1,4 +1,10 @@
 
+
+---
+
+Pressing Ctrl+O to open a file while on a file without a root path will search from / the root!
+in that case we want to search from the working dir!
+
 ---
 
 unable t see win menu afterhiding it
