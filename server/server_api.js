@@ -331,7 +331,7 @@ API.httpGet = function httpGet(user, options, callback) {
 			callback = null;
 			gotError = true;
 
-			console.warn("url=" + url + " error: " + err.message);
+			console.warn("WARN: url=" + url + " error: " + err.message);
 		});
 		
 		req.end();
@@ -406,7 +406,7 @@ callback(new Error("Too many redirects! redirects=" + redirects));
 				console.log("iconv.encodingExists('" + charset + "')=" + module_iconv.encodingExists(charset));
 				}
 				else {
-					console.warn("module_iconv not loaded!");
+					console.warn("WARN: module_iconv not loaded!");
 				}
 
 				if(!module_iconv || !module_iconv.encodingExists(charset)) {
@@ -593,7 +593,7 @@ API.readLines = function readLines(user, json, callback) {
 				// Could also use sftp.createReadStream
 				c.readFile(parse.pathname, options, function getSftpFile(err, buffer) {
 					
-					if(err) console.warn(err.message);
+				if(err) console.warn("WARN: " + err.message);
 					
 					callback(err, {path: path, data: buffer.toString("utf8")});
 					
@@ -702,7 +702,7 @@ API.readLines = function readLines(user, json, callback) {
 		}
 		
 		if(!doneReading) {
-			//console.warn("chunk=" + chunk + " but doneReading=" + doneReading);
+			//console.log("chunk=" + chunk + " but doneReading=" + doneReading);
 			readWhenReady = true;
 			//console.log("Waiting for stream readable ...");
 		}
@@ -824,7 +824,7 @@ var encoding = "utf8";
 		// The 'readable' event is emitted when there is data available to be read from the stream
 		// note: It will be called many times!
 		//console.log("writeLines: original:readable: Read stream now readable!");
-		//if(originalReadable) console.warn("read stream readable called twice!");
+		//if(originalReadable) console.warn("WARN: read stream readable called twice!");
 		originalReadable = true;
 		if(tmpReady && !hasStarted) begin();
 		else if(!hasStarted) console.log("Waiting for write stream ready ... tmpReady=" + tmpReady + " hasStarted=" + hasStarted);
@@ -847,7 +847,7 @@ var encoding = "utf8";
 	original.on("close", function() {
 		// The 'close' event is emitted when the stream and any of its underlying resources (a file descriptor, for example) have been closed. The event indicates that no more events will be emitted, and no further computation will occur.
 		console.log("writeLines: original:close: doneReading=" + doneReading + " contentWritten=" + contentWritten);
-		if(originalClosed) console.warn("writeLines: original:close: read stream close called twice!");
+		if(originalClosed) console.warn("WARN: writeLines: original:close: read stream close called twice!");
 		originalClosed = true;
 		if(tmpClosed && !finished) finish();
 		else console.log("writeLines: original:close: Waiting for write stream to close ...");
@@ -861,7 +861,7 @@ var encoding = "utf8";
 	tmp.on('ready', function() {
 		// Emitted when the fs.WriteStream is ready to be used.
 		console.log("writeLines: write stream ready!");
-		if(tmpReady) console.warn("writeLines: write stream ready called twice!");
+		if(tmpReady) console.warn("WARN: writeLines: write stream ready called twice!");
 		tmpReady = true;
 		if(originalReadable && !hasStarted) begin();
 		else if(!hasStarted) console.log("writeLines: Waiting for read stream readable ...");
@@ -874,7 +874,7 @@ var encoding = "utf8";
 	tmp.on("close", function() {
 		// Emitted when the WriteStream's underlying file descriptor has been closed.
 		console.log("writeLines: tmp stream closed! doneReading=" + doneReading + " contentWritten=" + contentWritten);
-		if(tmpClosed) console.warn("writeLines: write stream close called twice!");
+		if(tmpClosed) console.warn("WARN: writeLines: write stream close called twice!");
 		tmpClosed = true;
 		if(originalClosed && !finished) finish();
 		else console.log("writeLines: Waiting for read stream to close");
@@ -1060,7 +1060,7 @@ var encoding = "utf8";
 	}
 	
 	function write(rows, callback) {
-		if(isWriting) console.warn("writeLines: write: Write in progress!");
+		if(isWriting) console.warn("WARN: writeLines: write: Write in progress!");
 		
 		//console.log("writeLines: write: rows.length=" + rows.length + " : 0=" + rows[0]);
 		
@@ -1071,7 +1071,7 @@ var encoding = "utf8";
 		//console.log("writeLines: write: " + JSON.stringify(rows));
 		
 		if(rows.length == 0) {
-			//console.warn("writeLines: write: Zero rows!");
+			//console.warn("WARN: writeLines: write: Zero rows!");
 			return done();
 		}
 		
@@ -1208,7 +1208,7 @@ str = decoder.write(data);
 				
 					if(err) {
 					
-					console.warn(err.message);
+					console.warn("WARN: " + err.message);
 					
 					if(err.message == "No such file") {
 						err = new Error(err.message + " (err.code=" + err.code + ")");
@@ -1285,7 +1285,7 @@ str = decoder.write(data);
 		/*
 			if(encoding == undefined) encoding = "utf8";
 				fs.readFile(path, encoding, function(err, string) {
-					if(err) console.warn(err.message);
+			if(err) console.warn("WARN: " + err.message);
 					callback(err, {path: user.toVirtualPath(path), data: string});
 					});
 		*/
@@ -1522,7 +1522,7 @@ API.getFileSizeOnDisk = function getFileSizeOnDisk(user, json, callback) {
 			// Asume the FTP server has support for RFC 3659 "size"
 			c.size(parse.pathname, function gotFtpFileSize(err, size) {
 				if(err) {
-					console.warn(err.message);
+					console.warn("WARN: " + err.message);
 					callback(err);
 				}
 				else {
@@ -1646,7 +1646,7 @@ else if(protocol == "sftp:") {
 		console.log("Waiting for SFTP ...");
 		c.writeFile(destPath, input, options, function sftpWrite(err) {
 			if(err) {
-				console.warn("Failed to save to path= " + path + "\n" + err.message);
+					console.warn("WARN: Failed to save to path= " + path + "\n" + err.message);
 				saveToDiskCallback(err);
 			}
 			else {
@@ -1695,7 +1695,7 @@ else if(protocol == "sftp:") {
 			console.log("Attempting saving to local file system: " + path + " ...");
 			
 			if(err) {
-				console.warn("Unable to save " + path + "! Error: " + (err.message || err ) + " code=" + err.code);
+				console.warn("WARN: Unable to save " + path + "! Error: " + (err.message || err ) + " code=" + err.code);
 				
 				if(err.code == "EISDIR") saveToDiskCallback(new Error("Make sure " + path + " is not a directory! " + err.message));
 				else saveToDiskCallback(err);
@@ -1729,7 +1729,7 @@ else if(protocol == "sftp:") {
 		
 		function putFtpDone(err) {
 			if(err) {
-				console.warn("Failed to save pathname= " + pathname + "\n" + err);
+				console.warn("WARN: Failed to save pathname= " + pathname + "\n" + err);
 				saveToDiskCallback(err);
 				runFtpQueue();
 			}
@@ -1997,7 +1997,7 @@ listFilesCallback(null, list);
 			
 			ftpClient.list(parse.pathname, function readdirFtp(err, folderItems) {
 				if (err) {
-					console.warn(err.message);
+					console.warn("WARN: " + err.message);
 					listFilesCallback(err);
 					runFtpQueue();
 				}
@@ -2074,7 +2074,7 @@ API.createPath = function createPath(user, json, createPathCallback) {
 	
 	// Execute mkdir in order !
 	if(create.length == 0) {
-		console.warn("No path to create! fullPath=" + fullPath);
+		console.warn("WARN: No path to create! fullPath=" + fullPath);
 		createPathCallback(null, {path: fullPath});
 	}
 	else executeMkdir(create.shift());
@@ -2084,7 +2084,7 @@ API.createPath = function createPath(user, json, createPathCallback) {
 		createPathSomewhere(folder, json.public, function(err, path) {
 			if(err) {
 errors.push(err.message + " path=" + path);
-				//console.warn("Failed to create path=" + path + "\n" + err.message);
+				//console.warn("WARN: Failed to create path=" + path + "\n" + err.message);
 			}
 			else {
 				//console.log("Successfully created path=" + path);
@@ -2106,7 +2106,7 @@ errors.push(err.message + " path=" + path);
 		function listFileResult(err, files) {
 			
 			if(err) {
-				console.warn("List failed! " + err.message + " pathToCreate=" + pathToCreate);
+				console.warn("WARN: List failed! " + err.message + " pathToCreate=" + pathToCreate);
 				var errorMsg = "Failed to create path=" + pathToCreate + "\n" + err.message;
 				for(var i=0; i<errors.length; i++) {
 					errorMsg += "\n" + errors[i];
@@ -2134,7 +2134,7 @@ errors.push(err.message + " path=" + path);
 				path = path.replace(protocol + ":/", protocol + "://");
 			}
 			
-			console.warn("Sanitized path=" + path + " pathToCreate=" + pathToCreate);
+			console.warn("WARN: Sanitized path=" + path + " pathToCreate=" + pathToCreate);
 		}
 		
 		if(protocol) {
@@ -2251,7 +2251,7 @@ API.connect = function connect(user, json, callback) {
 	if(workingDir !== undefined) return callback("workingDir parameter not yet implemented! workingDir=" + workingDir);
 	
 	if(protocol.indexOf(":") != -1) {
-		console.warn("Removing : (colon) from protocol=" + protocol);
+		console.warn("WARN: Removing : (colon) from protocol=" + protocol);
 		protocol = protocol.replace(/:/g, "");
 	}
 	
@@ -2270,7 +2270,7 @@ API.connect = function connect(user, json, callback) {
 		}
 
 		if(ftpQueue.length > 0) {
-			console.warn("Removing " + ftpQueue.length + " items from the FTP queue");
+			console.warn("WARN: Removing " + ftpQueue.length + " items from the FTP queue because of new connection");
 			ftpQueue.length = 0;
 		}
 		
@@ -2327,7 +2327,7 @@ API.connect = function connect(user, json, callback) {
 				checkServerIdentity: function(servername, cert) {
 					console.log("Checking server identity for servername=" + servername);
 					
-					if(Object.keys(cert).length == 0) console.warn("No cert attached!");
+					if(Object.keys(cert).length == 0) console.warn("WARN: No cert attached!");
 					else {
 						// Do some checking?
 						//console.log(JSON.stringify(cert));
@@ -2473,7 +2473,7 @@ API.connect = function connect(user, json, callback) {
 					}).stderr.on('data', function(data) {
 //cb(new Error("Error executing pwd on SSH:" +  serverAddress + "\n" + data));
 						user.send("Error executing pwd on SSH:" +  serverAddress + "\n" + data);
-						console.warn('SFTP pwd stderr: ' + data);
+						console.warn('WARN: SFTP pwd stderr: ' + data);
 					});
 				});
 				
@@ -2634,7 +2634,7 @@ API.deleteFile = function deleteFile(user, json, callback) {
 			
 			c.delete(parse.pathname, function ftpFileDeleted(err) {
 				if(err) {
-					console.warn(err.message);
+					console.warn("WARN: " + err.message);
 					callback(err);
 				}
 				else {
@@ -2706,7 +2706,7 @@ API.deleteDirectory = function deleteDirectory(user, json, callback) {
 			
 			c.rmdir(parse.pathname, recursive, function ftpDirDeleted(err) {
 				if(err) {
-					console.warn(err.message);
+					console.warn("WARN: " + err.message);
 					callback(err);
 				}
 				else {
@@ -3268,7 +3268,7 @@ API.findFiles = function findFiles(user, json, findFilesCallback) {
 				if(FIND_FILES_ABORTED) return finish(null);
 				
 				if(err) {
-					console.warn(err.message);
+				console.warn("WARN: " + err.message);
 					return;
 				}
 				
