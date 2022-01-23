@@ -602,6 +602,8 @@ functionListSelect.setAttribute("filePath", file.path);
 				
 				if(!file) return;
 				
+				// Firefox sometimes calls onchange with functionListSelect.selectedIndex=-1
+
 				if( functionListSelect.options[functionListSelect.selectedIndex] == undefined ) {
 					throw new Error("functionListSelect=" + functionListSelect + " functionListSelect.selectedIndex=" + (functionListSelect && functionListSelect.selectedIndex) + " functionListSelect.options=" + (functionListSelect && functionListSelect.options) + " functionListSelect.options.length=" + (functionListSelect && functionListSelect.options && functionListSelect.options.length));
 				}
