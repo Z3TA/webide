@@ -271,7 +271,7 @@ function updateCache(latestVersionMaybe, forceRefresh) {
 					//return cache.add(url+"?v=" + latestVersionMaybe);
 					// Yes, appending the ?v=### is what was causing the cache bailout
 					
-					console.log("serviceWorker adding to cache (version " + latestVersionMaybe + ") url=" + url);
+					//console.log("serviceWorker adding to cache (version " + latestVersionMaybe + ") url=" + url);
 					return cache.add(url);
 					
 				}) );
@@ -425,7 +425,7 @@ self.addEventListener('activate', function serviceWorkerActivate(event) {
 */
 var reWebide = /\/webide\//;
 self.addEventListener('fetch', function serviceWorkerFetch(event) {
-	console.log("serviceWorker fetch url=" + event.request.url + " * v=" + VERSION + " dev=" + DEV_MODE);
+	//console.log("serviceWorker fetch url=" + event.request.url + " * v=" + VERSION + " dev=" + DEV_MODE);
 	
 	if( DEV_MODE || event.request.url.match(reWebide) ) { // Skip cache
 		
