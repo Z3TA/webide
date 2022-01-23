@@ -7175,6 +7175,8 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		EDITOR.renderNeeded();
 		
 		//EDITOR.interact("showFile", window.event);
+
+		return file;
 	}
 	
 	EDITOR.getKeyFor = function(funName, actualComboSum) {

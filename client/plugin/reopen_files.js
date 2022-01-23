@@ -354,29 +354,37 @@
 			
 			findBugs(true); // true == also check if the list match EDITOR.files
 			
+			var fileShown;
+
 			EDITOR.localStorage.getItem("currentFile", function(err, currentFilePath) {
 				if(err) throw err;
 
 				//console.log("reopenFiles: allFilesOpened: EDITOR.files.hasOwnProperty(" + currentFilePath + ")=" + EDITOR.files.hasOwnProperty(currentFilePath) + " ");
+				if(currentFilePath != null) {
+					if(EDITOR.files.hasOwnProperty(currentFilePath)) fileShown = EDITOR.showFile(currentFilePath);
 
-				if(EDITOR.files.hasOwnProperty(currentFilePath)) EDITOR.showFile(currentFilePath);
+					if(EDITOR.storage.ready() && CLIENT.connected && CLIENT.ping < 2000) {
+						var currentFilePathOnServer = EDITOR.storage.getItem("currentFile");
 
-				if(EDITOR.storage.ready() && CLIENT.connected && CLIENT.ping < 2000) {
-					var currentFilePathOnServer = EDITOR.storage.getItem("currentFile");
+						//console.log("reopenFiles: allFilesOpened: currentFilePathOnServer=" + currentFilePathOnServer);
 
-					//console.log("reopenFiles: allFilesOpened: currentFilePathOnServer=" + currentFilePathOnServer);
-
-					// Swallow this error because it's too annoying when you get spammed lots of these if we lose connection to the server'
-					if(err) console.error(err);
-					else if(currentFilePath != currentFilePathOnServer) {
-						EDITOR.showFile(currentFilePathOnServer);
-					}
-
-					reopenFilesCallback();
-
-					if(allFilesOpenedAlreadyCalled) throw new Error("allFilesOpenedAlreadyCalled=" + allFilesOpenedAlreadyCalled);
-					allFilesOpenedAlreadyCalled = true;
+						if(currentFilePath != currentFilePathOnServer && currentFilePathOnServer != null && EDITOR.files.hasOwnProperty(currentFilePathOnServer)) {
+							fileShown = EDITOR.showFile(currentFilePathOnServer);
+						}
+}
 				}
+
+				console.log("reopenFiles: allFilesOpened: fileShown=" + fileShown + " Object.keys(EDITOR.files).length=" + Object.keys(EDITOR.files).length + " ");
+
+				if(!fileShown && Object.keys(EDITOR.files).length > 0) {
+					fileShown = EDITOR.showFile(EDITOR.lastChangedFile());
+				}
+
+				reopenFilesCallback();
+
+				if(allFilesOpenedAlreadyCalled) throw new Error("allFilesOpenedAlreadyCalled=" + allFilesOpenedAlreadyCalled);
+				allFilesOpenedAlreadyCalled = true;
+
 			});
 		}
 		
