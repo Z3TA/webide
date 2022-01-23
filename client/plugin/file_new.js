@@ -46,8 +46,8 @@
 			
 			EDITOR.registerAltKey({char: "n", alt:1, label: S("new"), fun: newFileFromVirtualKeyboard});
 			
-			newFileDashboardWidget = EDITOR.dashboard.addWidget(createNewFileDashboardWidget());
-			
+			EDITOR.dashboard.announceWidget(announceCreateNewFileDashboardWidget);
+
 			
 			// Note: Most browsers wont let you bind Ctrl+N (so it makes sence to have a dedicated button) (more keyboards bindings are allowed once you've added the app to desktop (PWA add2desktop)
 			
@@ -72,6 +72,11 @@
 		order: 10
 	});
 	
+	function announceCreateNewFileDashboardWidget(callback) {
+		newFileDashboardWidget = createNewFileDashboardWidget();
+		callback(newFileDashboardWidget);
+	}
+
 	function newFileFromDiscoveryBar() {
 		EDITOR.stat("newFileFromDiscoveryBar");
 		return newFile();

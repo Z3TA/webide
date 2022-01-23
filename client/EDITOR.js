@@ -8598,6 +8598,18 @@ var loaded = !!theWindow.location.href;
 	
 	
 	EDITOR.dashboard = {
+		announcedWidgets: [],
+		announceWidget: function(func) {
+			/*
+				optimization that loads the function that creates the widget only if the dashboard is show 
+				when the dashboard is displayed for the first time, func will be called, and it must call the callback function with the created element
+			*/
+			if(EDITOR.dashboard.isVisible) EDITOR.dashboard.createWidget(func);
+			else EDITOR.dashboard.announcedWidgets.push(func);
+		},
+		deannounceWidget: function(func) {
+			return removeFrom(EDITOR.dashboard.announcedWidgets, func);
+		},
 		addWidget: function(el) {
 			
 			if(typeof el == "function") throw new Error("Parameter el in EDITOR.addDashboardWidget is a function. Expected a HTML DOM Node!");
@@ -8641,12 +8653,21 @@ var loaded = !!theWindow.location.href;
 			
 			return true;
 		},
+		createWidget: function (create) {
+			create(function widgetCreated(err, widgetEl) {
+				if(err && err instanceof Error) console.error(err);
+				else return EDITOR.dashboard.addWidget(widgetEl || err);
+			});
+			removeFrom(EDITOR.dashboard.announcedWidgets, create);
+		},
 		show: function showDashboard() {
 			
-			//console.log("Showing the dashboard! stayHidden=" + EDITOR.dashboard.stayHidden);
+			console.log("Showing the dashboard! stayHidden=" + EDITOR.dashboard.stayHidden);
 			
 			if(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("dashboard") != -1) throw new Error("dashboard disabled via query string!");
 			
+			while(EDITOR.dashboard.announcedWidgets.length > 0) EDITOR.dashboard.createWidget(EDITOR.dashboard.announcedWidgets[0]);
+
 			var dashboard = document.getElementById("dashboard");
 			
 			EDITOR.canvas.style.display = "none";
@@ -8844,133 +8865,133 @@ var loaded = !!theWindow.location.href;
 				var text = file.text; 
 				var state = {
 					isSaved: file.isSaved,
-				changed: file.changed,
-				savedAs: file.savedAs
-			}
+					changed: file.changed,
+					savedAs: file.savedAs
+				}
 			
-			var doNotSwitchFile = true;
-			EDITOR.closeFile(file.path, doNotSwitchFile);
-			EDITOR.openFile(newPath, text, state, function(openFileErr, newFile) {
+				var doNotSwitchFile = true;
+				EDITOR.closeFile(file.path, doNotSwitchFile);
+				EDITOR.openFile(newPath, text, state, function(openFileErr, newFile) {
 				
-				if(openFileErr) throw openFileErr;
+					if(openFileErr) throw openFileErr;
 				
-				callback(null, newFile.path);
+					callback(null, newFile.path);
 				
-				EDITOR.fireEvent("move", [oldPath, newPath]);
+					EDITOR.fireEvent("move", [oldPath, newPath]);
 				
-			});
-		}
-		else callback(null, newPath);
+				});
+			}
+			else callback(null, newPath);
 		
-	});
+		});
 	
-}
+	}
 
-EDITOR.callEventListeners = function callEventListeners(ev, file, allListenersCalled) {
-	/*
-		Generic function for calling event listeners.
-		Each event listener gets file and callback as parameters
-		And must return true(ish) or call the callback function, or the event-listener is considered failed
+	EDITOR.callEventListeners = function callEventListeners(ev, file, allListenersCalled) {
+		/*
+			Generic function for calling event listeners.
+			Each event listener gets file and callback as parameters
+			And must return true(ish) or call the callback function, or the event-listener is considered failed
 		
-		allListenersCalled will be called with an array of errors as the first parameter
-	*/
+			allListenersCalled will be called with an array of errors as the first parameter
+		*/
 	
-	var waitingFor = [];
-	var eventFunsCalled = 0;
-	var errors = [];
-	var returns = [];
-	var alreadyTooLate = false;
+		var waitingFor = [];
+		var eventFunsCalled = 0;
+		var errors = [];
+		var returns = [];
+		var alreadyTooLate = false;
 		var uniqueFunctionNames = [];
-	var returnedOrCalledBack = [];
-	var stackTrace = {};
+		var returnedOrCalledBack = [];
+		var stackTrace = {};
 	
 		var f = EDITOR.eventListeners[ev].map(funMap);
 		
 		for(var i=0; i<f.length; i++) {
 			callListener(f[i]);
-	}
+		}
 	
-	if(waitingFor.length > 0) {
-		var maxWait = 15;
-		var waitCounter = 0;
-		var checkInterval = setInterval(checkIfReturnedOrCalledCallback, 1000);
-	}
+		if(waitingFor.length > 0) {
+			var maxWait = 15;
+			var waitCounter = 0;
+			var checkInterval = setInterval(checkIfReturnedOrCalledCallback, 1000);
+		}
 	
-	function callListener(fun) {
-		var fName = UTIL.getFunctionName(fun);
+		function callListener(fun) {
+			var fName = UTIL.getFunctionName(fun);
 		
-		if(!fName) throw new Error("A " + ev + " event listener function has no name!");
-		if(uniqueFunctionNames.indexOf(fName) != -1) throw new Error("There is already a " + ev + " event listener function named " + fName + ". Event function names need to be unique!");
-		uniqueFunctionNames.push(fName);
+			if(!fName) throw new Error("A " + ev + " event listener function has no name!");
+			if(uniqueFunctionNames.indexOf(fName) != -1) throw new Error("There is already a " + ev + " event listener function named " + fName + ". Event function names need to be unique!");
+			uniqueFunctionNames.push(fName);
 		
-		waitingFor.push(fName);
+			waitingFor.push(fName);
 			//console.log("Calling " + ev + " eventListener: " + fName);
-		var ret = fun(file, evCallback);
-		eventFunsCalled++;
+			var ret = fun(file, evCallback);
+			eventFunsCalled++;
 			//console.log(ev + " event listener " + fName + " returned " + ret + " (" + (typeof ret) + ")");
-		if(ret || ret === false || ret === null) evCallback(null, ret);// The function did not return void, asume it's done!
+			if(ret || ret === false || ret === null) evCallback(null, ret);// The function did not return void, asume it's done!
 		
-		function evCallback(err, ret) {
+			function evCallback(err, ret) {
 				//console.log("Got " + ev + " event callback from " + fName + " err=" + err);
-			if(returnedOrCalledBack.indexOf(fName) != -1) throw new Error(fName + " has already returned or called back! stackTrace[" + fName + "]=" + stackTrace[fName] + "\n\n");
-			returnedOrCalledBack.push(fName);
+				if(returnedOrCalledBack.indexOf(fName) != -1) throw new Error(fName + " has already returned or called back! stackTrace[" + fName + "]=" + stackTrace[fName] + "\n\n");
+				returnedOrCalledBack.push(fName);
 			
-			stackTrace[fName] = UTIL.getStack("callback");
+				stackTrace[fName] = UTIL.getStack("callback");
 			
-			if(err) errors.push(err);
-			returns[fName] = ret;
+				if(err) errors.push(err);
+				returns[fName] = ret;
 			
-			var index = waitingFor.indexOf(fName);
-			if(index == -1) throw new Error(fName + " not in " + JSON.stringify(waitingFor) + " it might already have returned or called back!" +
-			" Make sure " + fName + " either return something true:ish or calls the callback. Not both!");
+				var index = waitingFor.indexOf(fName);
+				if(index == -1) throw new Error(fName + " not in " + JSON.stringify(waitingFor) + " it might already have returned or called back!" +
+				" Make sure " + fName + " either return something true:ish or calls the callback. Not both!");
 			
-			waitingFor.splice(index, 1);
+				waitingFor.splice(index, 1);
 				if(waitingFor.length == 0 && returnedOrCalledBack.length == f.length && !alreadyTooLate) {
-				if(checkInterval) clearInterval(checkInterval);
-				allListenersCalled(errors, returns);
+					if(checkInterval) clearInterval(checkInterval);
+					allListenersCalled(errors, returns);
+				}
+				return;
 			}
-			return;
 		}
-	}
 	
-	function checkIfReturnedOrCalledCallback() {
-		console.warn("The following listeners has not yet returned or called back: " + JSON.stringify(waitingFor));
+		function checkIfReturnedOrCalledCallback() {
+			console.warn("The following listeners has not yet returned or called back: " + JSON.stringify(waitingFor));
 		
-		if(++waitCounter >= maxWait) {
-			clearInterval(checkInterval);
-			errors.push(  new Error( "The following event listeners failed to return something trueish or call back in a timely fashion: " + JSON.stringify(waitingFor) + 
-			" And these functions did succeed: " + JSON.stringify(returnedOrCalledBack) )  );
-			alreadyTooLate = true;
-			allListenersCalled(errors);
+			if(++waitCounter >= maxWait) {
+				clearInterval(checkInterval);
+				errors.push(  new Error( "The following event listeners failed to return something trueish or call back in a timely fashion: " + JSON.stringify(waitingFor) + 
+				" And these functions did succeed: " + JSON.stringify(returnedOrCalledBack) )  );
+				alreadyTooLate = true;
+				allListenersCalled(errors);
+			}
+		
 		}
-		
-	}
 	
-}
+	}
 
-EDITOR.loadScript = function loadScript(src, dontAsk, callback) {
+	EDITOR.loadScript = function loadScript(src, dontAsk, callback) {
 	
-	if(typeof dontAsk == "function" && callback == undefined) {
-		callback = dontAsk;
-		dontAsk = undefined;
-	}
+		if(typeof dontAsk == "function" && callback == undefined) {
+			callback = dontAsk;
+			dontAsk = undefined;
+		}
 	
-	if(dontAsk == undefined) dontAsk = false;
+		if(dontAsk == undefined) dontAsk = false;
 	
-	var host = window.location.hostname;
-	var protocol = window.location.protocol;
+		var host = window.location.hostname;
+		var protocol = window.location.protocol;
 	
-	var loc = UTIL.getLocation(src);
+		var loc = UTIL.getLocation(src);
 	
-	if(host == loc.host) dontAsk = true;
+		if(host == loc.host) dontAsk = true;
 	
-	if(src.slice(0,1) == "/" || src.slice(0, 3) == "../") dontAsk = true;
+		if(src.slice(0,1) == "/" || src.slice(0, 3) == "../") dontAsk = true;
 	
-	if(!dontAsk) {
-		var yes = "Yes, I trust " + loc.host;
-		var no = "No";
-		confirmBox("Do you trust " + loc.host + " to load the following script:\n" + src, [yes, no], function(answer) {
-			if(answer == yes) load();
+		if(!dontAsk) {
+			var yes = "Yes, I trust " + loc.host;
+			var no = "No";
+			confirmBox("Do you trust " + loc.host + " to load the following script:\n" + src, [yes, no], function(answer) {
+				if(answer == yes) load();
 				else if(callback) callback(new Error("User declined loading the script!"));
 			});
 		}
@@ -8982,62 +9003,62 @@ EDITOR.loadScript = function loadScript(src, dontAsk, callback) {
 			if(callback) {
 				script.onload = function () {
 					callback(null);
-			callback = null;
-		};
-		script.onerror  = function (err) {
-			callback(err || new Error("Unable to load " + src));
-			callback = null;
-		};
+					callback = null;
+				};
+				script.onerror  = function (err) {
+					callback(err || new Error("Unable to load " + src));
+					callback = null;
+				};
 			}
 
 			script.src = src;
 		
-		document.head.appendChild(script);
+			document.head.appendChild(script);
+		}
 	}
-}
 
-EDITOR.reload = function reload(url) {
-	console.warn("Reloading the editor ...");
+	EDITOR.reload = function reload(url) {
+		console.warn("Reloading the editor ...");
 		
 		//console.log("Calling exit event listeners...");
 		EDITOR.fireEvent("exit", ["reload"], function afterExitEvent(err, returns) {
 			//console.log("All exit event listeners called!");
-		if(err) throw err;
+			if(err) throw err;
 		
-		var gotError = false;
+			var gotError = false;
 		
-		for(var fName in returns) {
+			for(var fName in returns) {
 				//console.log(fName + " returned " + returns[fName]);
-			if(returns[fName] === false || returns[fName] instanceof Error) {
-				gotError = true;
-				break;
-			}
-		}
-		
-		if(gotError) {
-			throw new Error("There was an error in " + fName + " (EDITOR.eventListeners.exit) when reloading the editor!\nYou have to reload manually.");
-		}
-		else {
-			
-			// Unload all plugins
-			for(var i=0; i<EDITOR.plugins.length; i++) {
-					//console.log("unloading plugin: " + EDITOR.plugins[i].desc);
-				EDITOR.plugins[i].unload(); // Call function (and pass global objects!?)
-			}
-			
-			// Close all open windows
-			for(var win in EDITOR.openedWindows) {
-				try{EDITOR.openWindows[win].close();}
-				catch(err) {};
-			}
-			
-			/*
-				for(var file in EDITOR.files) {
-				delete EDITOR.files[file];
+				if(returns[fName] === false || returns[fName] instanceof Error) {
+					gotError = true;
+					break;
 				}
-			*/
+			}
+		
+			if(gotError) {
+				throw new Error("There was an error in " + fName + " (EDITOR.eventListeners.exit) when reloading the editor!\nYou have to reload manually.");
+			}
+			else {
 			
-			//document.location = "about:blank";
+				// Unload all plugins
+				for(var i=0; i<EDITOR.plugins.length; i++) {
+					//console.log("unloading plugin: " + EDITOR.plugins[i].desc);
+					EDITOR.plugins[i].unload(); // Call function (and pass global objects!?)
+				}
+			
+				// Close all open windows
+				for(var win in EDITOR.openedWindows) {
+					try{EDITOR.openWindows[win].close();}
+					catch(err) {};
+				}
+			
+				/*
+					for(var file in EDITOR.files) {
+					delete EDITOR.files[file];
+					}
+				*/
+			
+				//document.location = "about:blank";
 			
 				if(CLIENT.inFlight == 0) reloadNow(); 
 				else {
@@ -9047,7 +9068,7 @@ EDITOR.reload = function reload(url) {
 				
 			}
 
-function reloadNow() {
+			function reloadNow() {
 				//console.log("Reloading!");
 
 				window.onbeforeunload = null;

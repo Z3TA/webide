@@ -13,18 +13,15 @@
 		desc: "Show system CPU and memory usage on the dashboard",
 		load: function loadCpuAndMemoryWidget() {
 			
-			cpuWidget = createCpuWidget();
-			memoryWidget = createMemoryWidget();
-			
 			EDITOR.on("showDashboard", startCpuAndMemoryTimer);
 			EDITOR.on("hideDashboard", stopCpuAndMemoryTimer);
 			
 			EDITOR.on("afk", stopCpuAndMemoryTimer);
 			EDITOR.on("btk", startCpuAndMemoryTimerWhenBackToKeyboard);
 
-			EDITOR.dashboard.addWidget(cpuWidget.domElement);
-			EDITOR.dashboard.addWidget(memoryWidget.domElement);
-			
+			EDITOR.dashboard.announceWidget(announceCpuWidget);
+			EDITOR.dashboard.announceWidget(announceMemoryWidget);
+
 		},
 		unload: function unloadCpuAndMemoryWidget() {
 			
@@ -34,12 +31,25 @@
 			EDITOR.removeEvent("afk", stopCpuAndMemoryTimer);
 			EDITOR.removeEvent("btk", startCpuAndMemoryTimerWhenBackToKeyboard);
 
-			EDITOR.dashboard.removeWidget(cpuWidget.domElement);
-			EDITOR.dashboard.removeWidget(memoryWidget.domElement);
+			if(cpuWidget) EDITOR.dashboard.removeWidget(cpuWidget.domElement);
+			if(memoryWidget) EDITOR.dashboard.removeWidget(memoryWidget.domElement);
+			
+				EDITOR.dashboard.deannounceWidget(announceCpuWidget);
+				EDITOR.dashboard.deannounceWidget(announceMemoryWidget);
 
 		}
 	});
-	
+
+	function announceCpuWidget(callback) {
+		cpuWidget = createCpuWidget();
+		callback(cpuWidget.domElement);
+	}
+
+	function announceMemoryWidget(callback) {
+		memoryWidget = createMemoryWidget();
+		callback(memoryWidget.domElement);
+	}
+
 	function startCpuAndMemoryTimerWhenBackToKeyboard() {
 		if( EDITOR.dashboard.isVisible ) {
 			return startCpuAndMemoryTimer();
@@ -51,8 +61,8 @@
 		
 		if(updateInterval) clearInterval(updateInterval);
 		updateInterval = setInterval(function updateCpuAndMemoryUsage() {
-			cpuWidget.update();
-			memoryWidget.update();
+			if(cpuWidget) cpuWidget.update();
+			if(memoryWidget) memoryWidget.update();
 		}, UPDATE_TIME);
 		
 		return true;
@@ -66,6 +76,8 @@
 	
 	function createCpuWidget() {
 		
+		//console.warn("createCpuWidget!");
+
 		var widget = document.createElement("div");
 		widget.setAttribute("class", "smallGraph dashboardWidget");
 		

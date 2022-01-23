@@ -8,28 +8,31 @@ EDITOR.plugin({
 		desc: "Time widget for the dashboard",
 		load: function loadTimeWidget() {
 			
-			timeWidget = createTimeWidget();
-			
 			EDITOR.on("showDashboard", updateTime);
 			EDITOR.on("hideDashboard", stopTime);
 			
-			EDITOR.dashboard.addWidget(timeWidget.domElement);
-			
-},
+			EDITOR.dashboard.announceWidget(announceTimeWidget);
+
+		},
 		unload: function unloadTimeWidget() {
 			
-			EDITOR.dashboard.removeWidget(timeWidget.domElement);
-			
+			if(timeWidget) EDITOR.dashboard.removeWidget(timeWidget.domElement);
+			EDITOR.dashboard.deannounceWidget(announceTimeWidget);
+
 			EDITOR.removeEvent("showDashboard", updateTime);
 			EDITOR.removeEvent("hideDashboard", stopTime);
 }
 });
 
+	function announceTimeWidget(callback) {
+		timeWidget = createTimeWidget();
+		callback(timeWidget.domElement);
+	}
 	
 	function updateTime() {
-		timeWidget.update();
+		if(timeWidget) timeWidget.update();
 		updateInterval = setInterval(function updateTime() {
-			timeWidget.update();
+			if(timeWidget) timeWidget.update();
 		}, 1000);
 		
 		return true;

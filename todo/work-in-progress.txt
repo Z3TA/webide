@@ -1,6 +1,24 @@
 
 ---
 
+unable t see win menu afterhiding it
+
+virt keyb wrong size too big after 
+choosing physicak. hiding win menu. and
+chosing virt keyb in ctx menu
+
+bug: unable to scroll in win menu on mobile (liggande)
+---
+
+
+Page Visibility API
+
+afk when editor is not in view to save battery !?
+
+https://developer.mozilla.org/en-US/docs/Web/API/Page_Visibility_API
+
+---
+
 bug: When dropped images are saved they get corrupted! 
 Image viewer: Not a JPEG file - starts with 0x2f 0x39
 Looks like it's not a binary file! Seems like it's base64 encoded!

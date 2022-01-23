@@ -8,16 +8,17 @@
 		load: function loadWebsiteStats() {
 			CLIENT.on("loginSuccess", function pageViewStatsMaybe(login) {
 				if(login.tld) {
-					pageViewsStat = EDITOR.dashboard.addWidget(createPageViewStatWidget());
+					EDITOR.dashboard.announceWidget(createPageViewStatWidget);
 				}
 			});
 		},
 		unload: function unloadWebsiteStats() {
 			if(pageViewsStat) EDITOR.dashboard.removeWidget(pageViewsStat);
+			EDITOR.dashboard.deannounceWidget(createPageViewStatWidget);
 		},
 	});
 	
-	function createPageViewStatWidget() {
+	function createPageViewStatWidget(callback) {
 		
 		var readMonths = 0;
 		
@@ -119,7 +120,7 @@
 					var str = (perc).toLocaleString() + "%";
 					
 					if(perc > 0) {
-str = "+" + str;
+						str = "+" + str;
 						percIncrease.classList.add("posetive");
 						percIncrease.classList.remove("negative");
 					}
@@ -133,6 +134,8 @@ str = "+" + str;
 					// Reset if we login to another server
 					logsToCheck = 0;
 					logsChecked = 0;
+
+					callback(pageViewStat);
 					
 				}
 				//else {console.log("requests_stat: n=" + n + " logsChecked=" + logsChecked + " logsToCheck=" + logsToCheck);}
