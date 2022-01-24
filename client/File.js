@@ -158,8 +158,11 @@ var File; // File object is global
 		}
 		else {
 			
+			// Q: Why is there a setTimeout here ?
+			// A: Callback needs to be called *after* new File constructor has returned!
+			// (otherwise the variable that new File will be assigned to will still be undefined when the callback functions runs) 
 			if(callback) setTimeout(function newFileConstructorFinished() {
-				callback(checkGridError || checkCaretError);
+			callback(checkGridError || checkCaretError);
 			}, 0);
 			
 		}

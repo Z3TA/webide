@@ -1394,13 +1394,14 @@ usePseudoClipboard = false;
 				
 if(EDITOR.files.hasOwnProperty(path)) throw new Error("path=" + path + " already exist in EDITOR.files=" + JSON.stringify(Object.keys(EDITOR.files)));
 
+				if(newFile == undefined) throw new Error( "newFile=" + newFile + " path=" + path + " EDITOR.files=" + JSON.stringify(Object.keys(EDITOR.files)) ); // bug trap
 				EDITOR.files[path] = newFile;
 				file = EDITOR.files[path];
 				
 				if(!EDITOR.files.hasOwnProperty(path)) throw new Error("File didn't enter EDITOR.files"); // For sanity
 				
 				for(var p in EDITOR.files) { // Make sure we are not insane
-					if(!EDITOR.files[p].path) fileOpenError(new Error("Internal error: File without path=" + p));
+					if( !(typeof EDITOR.files[p] == "object" && EDITOR.files[p].hasOwnProperty("path")) ) fileOpenError(new Error("Internal error: File without path=" + p));
 				}
 				
 				var f = EDITOR.eventListeners.fileOpen.map(funMap);
