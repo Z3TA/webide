@@ -24,7 +24,7 @@ var GIT_PATH = "git";
 module_which("git", function(err, path) {
 	if(err) {
 
-		console.warn("Unable to find git in process.env.HOME=" + process.env.HOME);
+		console.warn("WARN: Unable to find git in process.env.HOME=" + process.env.HOME);
 
 		console.error(err);
 	}

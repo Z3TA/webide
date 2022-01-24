@@ -13,7 +13,7 @@ try {
 	var module_pty = require('node-pty');
 }
 catch(err) {
-	console.warn("Unable to require module node-pty: " + err.message);
+	console.warn("WARN: Unable to require module node-pty: " + err.message);
 	ptyMissing = err.message;
 }
 

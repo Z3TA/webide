@@ -1493,7 +1493,7 @@ function contentOfHtmlTag(text, tag, nr) {
 	} while (insideXmp && tagEnd != -1);
 	
 	if(tagEnd == -1) {
-		console.warn("SSG: contentOfHtmlTag: Could not find tag ending for tag: " + tag + "");
+			console.warn("WARN: SSG: contentOfHtmlTag: Could not find tag ending for tag: " + tag + "");
 		return "";
 	}
 	

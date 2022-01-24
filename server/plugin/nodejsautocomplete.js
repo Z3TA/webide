@@ -118,7 +118,7 @@ function Variable(type, value) {
 	
 	// Only functions Should have a prototype!
 	
-	//console.warn("new Variable! type=" + type + " value=" + value + "");
+	//console.warn("WARN: new Variable! type=" + type + " value=" + value + "");
 }
 
 function Func(name, args, start, lineNumber) {

@@ -145,7 +145,7 @@ API.compile = function compile(user, json, callback) {
 		worker.on('message', worker_message);
 		
 		worker.on('error', function worker_error(code) {
-			console.warn("SSG: Error code=" + code);
+			console.warn("WARN: SSG: Error code=" + code);
 		});
 		worker.on('exit', function worker_exit(code) {
 			console.log("SSG: Exit! code=" + code);
@@ -220,11 +220,11 @@ API.compile = function compile(user, json, callback) {
 			else if(data.type == "error") {
 				user.send({ssgBuildMessage: data});
 				//console.log(data);
-				if(data.code == "ENOENT" && data.stack.indexOf("�") != -1) console.warn("File name encoding problem when opening file (try renaming it) ...\n" + data.stack);
-				else if(data.code == "ENOENT") console.warn("Problem occured when opening file...\n" + data.stack);
+				if(data.code == "ENOENT" && data.stack.indexOf("�") != -1) console.warn("WARN: File name encoding problem when opening file (try renaming it) ...\n" + data.stack);
+				else if(data.code == "ENOENT") console.warn("WARN: Problem occured when opening file...\n" + data.stack);
 				else console.log(data.stack);
 				}
-			else console.warn("Unknown message from build script: " + JSON.stringify(data));
+			else console.warn("WARN: Unknown message from build script: " + JSON.stringify(data));
 			
 		}
 		
@@ -253,7 +253,7 @@ API.compile = function compile(user, json, callback) {
 				if(ABORT) return;
 				
 				if(err) {
-					console.warn("Unable to copy file (" + err.message + ")\n" + json.to);
+					console.warn("WARN: Unable to copy file (" + err.message + ")\n" + json.to);
 				}
 				else {
 					fileSaved(to);

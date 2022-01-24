@@ -39,7 +39,7 @@ var HG_PATH = "hg";
 module_which("hg", function(err, path) {
 	if(err) {
 
-		console.warn("Unable to find hg in process.env.HOME=" + process.env.HOME);
+		console.warn("WARN: Unable to find hg in process.env.HOME=" + process.env.HOME);
 
 		console.error(err);
 	}
@@ -289,7 +289,7 @@ else console.log("hg clone stdout=" + stdout.slice(0,500) + " ... (" + stdout.le
 		
 		function cloneDone(errorMessage) {
 			// We might get both an error and a close event
-			if(callback === null) return console.warn("clone callback already called!");
+			if(callback === null) return console.warn("WARN: clone callback already called!");
 			
 			clearInterval(progressInterval);
 			user.send({mercurialProgress: {max: progressCounter, value: progressCounter}});
@@ -2089,7 +2089,7 @@ function saveCredentialsInHgrc(user, directory, remote, hguser, pw, callback) {
 			
 			if(user.rootPath) {
 				if(mercurialRoot.indexOf(user.rootPath) !== 0) {
-					console.warn("user.rootPath=" + user.rootPath + " mercurialRoot=" + mercurialRoot);
+					console.warn("WARN: user.rootPath=" + user.rootPath + " mercurialRoot=" + mercurialRoot);
 					return callback("Unable to find a mercurial reposity from directory=" + directory);
 				}
 			}
@@ -2146,7 +2146,7 @@ function checkDir(user, virtualPath, callback) {
 			
 			if(user.rootPath) {
 				if(mercurialRoot.indexOf(user.rootPath) !== 0) {
-					console.warn("user.rootPath=" + user.rootPath + " mercurialRoot=" + mercurialRoot);
+					console.warn("WARN: user.rootPath=" + user.rootPath + " mercurialRoot=" + mercurialRoot);
 					return callback("Unable to find a mercurial reposity from path=" + virtualPath);
 				}
 			}
@@ -2223,7 +2223,7 @@ return findDotHgCallback(err);
 				
 				if(user.rootPath) {
 					if(mercurialRoot.indexOf(user.rootPath) !== 0) {
-						console.warn("user.rootPath=" + user.rootPath + " mercurialRoot=" + mercurialRoot);
+						console.warn("WARN: user.rootPath=" + user.rootPath + " mercurialRoot=" + mercurialRoot);
 						return callback("Unable to find a mercurial reposity from path=" + virtualPath);
 					}
 				}
