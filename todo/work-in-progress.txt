@@ -1,4 +1,15 @@
 
+
+---
+
+Double click while holding down Ctrl to select a column !?
+
+---
+
+When opening a file and we get less then 10? results, continue globbing (look in parent folder) !?
+
+---
+
 When should the dashboard show !?
 
 ---

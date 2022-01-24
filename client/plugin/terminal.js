@@ -378,6 +378,11 @@ EDITOR.unbindKey(startTerminalFromKeyboard);
 		var cols = EDITOR.view.visibleColumns;
 		var rows = EDITOR.view.visibleRows;
 		
+		if(cols <= 0 || rows <= 0) {
+			console.warn("Not resizing terminal window because cols=" + cols + " or rows=" + rows + " is too small");
+			return;
+		}
+
 		if(oldCols != cols || oldRows != rows) {
 			oldCols = cols;
 			oldRows = rows;
