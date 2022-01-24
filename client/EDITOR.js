@@ -13459,7 +13459,7 @@ function dblclick(dblClickEvent) {
 		
 		//console.log("Calling dblclick listeners (" + f.length + ") ...");
 		for(var i=0; i<f.length; i++) {
-			//console.log("Calling " + UTIL.getFunctionName(f[i]) + " ...");
+			//console.log("EDITOR: Calling " + UTIL.getFunctionName(f[i]) + " ...");
 			
 			// Note that caret is a temporary position caret (not the current file.caret)!
 			

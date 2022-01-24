@@ -1550,7 +1550,7 @@ file.sanityCheck();
 			return;
 		}
 		
-		//console.log("Selecting ...");
+		console.log("Selecting ...");
 		
 		//console.log(typeof box);
 		
@@ -1618,6 +1618,8 @@ file.sanityCheck();
 		var selected = file.selected;
 		var selectedLength = selected.length;
 		
+		console.log("File.deselect! selectedLength=" + selectedLength);
+
 		if(selectedLength == 0) return; // Early return optimization
 		
 		if(box) {
@@ -1977,19 +1979,35 @@ file.sanityCheck();
 		
 		// Selected text always goes from left to right!
 		
+		var missedNewLine = 0;
+		var missedSpace = 0;
+
 		for(var i=0; i<selected.length; i++) {
 			
 			box = selected[i];
 			
 			if(index > -1 && (box.index-index) > 1) {
 				// See what we missed
-				while(index < (box.index-1)) {
+				// update: When making column select I updated this from selecting everything between, to skip all text between
+				missedNewLine = 0;
+				missedSpace = 0;
+				whileloop: while(index < (box.index-1)) {
 					index++;
 					missed = file.text.charAt(index);
-					text += missed;
 					//console.log("missed=" + missed + " (" + missed.charCodeAt(0) + ")");
+
+					if(missed == "\n") {missedNewLine++; break whileloop};
+					if(missed == " ") {missedSpace++; break whileloop};
+
+					//text += missed;
+				}
+				//console.log("missedNewLine=" + missedNewLine + " missedSpace=" + missedSpace);
+				if(missedNewLine != 0) text += file.lineBreak;
+				else if(missedSpace != 0) {
+					text = text.trim() + ", ";
 				}
 			}
+
 			text += selected[i].char;
 			index = box.index;
 		}
