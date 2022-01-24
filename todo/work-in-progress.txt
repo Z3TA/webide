@@ -1,8 +1,14 @@
-
-
 ---
 
 Double click while holding down Ctrl to select a column !?
+
+---
+
+when you turn on annotations and have  a terminal open you get a lot of messages about no annotations existing in the terminal file...
+
+---
+
+Use path picker for Find in file "in directory" !?
 
 ---
 
