@@ -34,7 +34,7 @@
 	*/
 	
 	var eventOrder = -1;
-	var eventOrderSynced = false;
+	var eventOrderSynced = false; // not used !? can we remove ?
 	var userConnectionId = -1;
 	var fileChangeEvents = {}; // filePath: [order][n]ev: Store latest events for use in transformation
 	var collabMode = false;
@@ -2229,12 +2229,12 @@ isPlaying = true;
 			
 			//console.log("master=" + master + " userConnectionId=" + userConnectionId + " connectedClientIds=" + JSON.stringify(connectedClientIds));
 			
-			if(userConnectionId == master) {
+			//if(userConnectionId == master) {
 				for(var path in EDITOR.files) {
 					if(!fileChangeEventOrderCounters.hasOwnProperty(path)) fileChangeEventOrderCounters[path] = -1;
 				}
 				CLIENT.cmd("echo", {eventOrder: ++eventOrder, fileChangeEventOrderCounters: fileChangeEventOrderCounters});
-			}
+			
 			
 			var file;
 			for(var path in EDITOR.files) {
@@ -2676,7 +2676,9 @@ isPlaying = true;
 			throw new Error("Events are out of order, we have missed " + (json.eventOrder-eventOrder) + " events! json.eventOrder=" + json.eventOrder + " eventOrder=" + eventOrder);
 		}
 		else if(json.fileChangeEventOrderCounters) {
-			fileChangeEventOrderCounters = json.fileChangeEventOrderCounters;
+			for(var filePath in json.fileChangeEventOrderCounters) {
+				if( !fileChangeEventOrderCounters.hasOwnProperty(filePath) || json.cId > userConnectionId ) fileChangeEventOrderCounters[filePath] = json.fileChangeEventOrderCounters[filePath];
+			}
 		}
 		else if(json.fileOpen) {
 			var file = EDITOR.files[json.fileOpen.path];
