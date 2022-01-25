@@ -603,7 +603,8 @@
 						//file.isSaved = true;
 						//file.savedAs = true;
 					}
-					//console.log("reopenFiles: Reopening file path=" + path +" typeof content=" + typeof content);
+					
+					//console.log("reopenFiles: Reopening file path=" + path +" typeof content=" + typeof content + " stateprops=" + JSON.stringify(stateprops, null, 2));
 					
 					EDITOR.openFile(path, content, {props: stateprops, show: false}, fileReopened); 
 				}
