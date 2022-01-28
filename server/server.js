@@ -7373,40 +7373,40 @@ function dockerDaemon(username, homeDir, uid, gid, options, callback) {
 	
 		function waitForSsh(IP, tries) {
 			if(tries == undefined) tries = 0;
+
 			module_child_process.exec('bash -c "echo > /dev/tcp/' + IP + '/22"', function(err) {
 				if(++tries > 10) return error("Could not connect ot SSH server on IP=" + IP);
 				else if(err) {
 					log(username + ":docker: Waiting for SSH server on" + IP + " ...");
 					setTimeout(function() {
-						log(username + ":docker:
 						waitForSsh(IP, tries);
 					}, 1000);
 				}
+
 				else configure(IP);
 			});
 		}
-	}
 
-	function configure(IP) {
-		/*
-			Things to do when booted: (see check_config_in_vm.sh)
-			* Create the mount to user home dir
-			* Set a static IP
+		function configure(IP) {
+			/*
+				Things to do when booted: (see check_config_in_vm.sh)
+				* Create the mount to user home dir
+				* Set a static IP
 			
-			(.ssh/authorized_keys should already be set in the base image!)
+				(.ssh/authorized_keys should already be set in the base image!)
 			
-		*/
+			*/
 		
-		if(IP == undefined) throw new Error("IP=" + IP);
+			if(IP == undefined) throw new Error("IP=" + IP);
 			
-		log(username + ":docker: copying config script to Docker daemon VM on " + IP, DEBUG);
-		module_child_process.exec("scp -i /root/.ssh/dockervm -o ConnectTimeout=30 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ../dockervm/check_config_in_vm.sh docker@" + IP + ":/home/docker/", EXEC_OPTIONS, function(err, stdout, stderr) {
-			if(err) return error(err);
-			progress(10);
+			log(username + ":docker: copying config script to Docker daemon VM on " + IP, DEBUG);
+			module_child_process.exec("scp -i /root/.ssh/dockervm -o ConnectTimeout=30 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ../dockervm/check_config_in_vm.sh docker@" + IP + ":/home/docker/", EXEC_OPTIONS, function(err, stdout, stderr) {
+				if(err) return error(err);
+				progress(10);
 			
-			log(username + ":docker: running config script via SSH on " + IP, DEBUG);
-			module_child_process.exec("echo dockerpw | ssh -tt -i /root/.ssh/dockervm -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null docker@" + IP + " sudo bash /home/docker/check_config_in_vm.sh " + username + " " + uid + " " + gid , EXEC_OPTIONS, function(err, stdout, stderr) {
-				if(err) {
+				log(username + ":docker: running config script via SSH on " + IP, DEBUG);
+				module_child_process.exec("echo dockerpw | ssh -tt -i /root/.ssh/dockervm -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null docker@" + IP + " sudo bash /home/docker/check_config_in_vm.sh " + username + " " + uid + " " + gid , EXEC_OPTIONS, function(err, stdout, stderr) {
+					if(err) {
 					
 					// We might have been successful anyway!
 					if(stdout.indexOf("SUCCESS!") != -1) return success();

@@ -375,12 +375,10 @@ if(last == undefined) return patchObj();
 			file.scrollToCaret();
 			file.scrollTo(0, row - Math.round(EDITOR.view.visibleRows / 2));
 
-			// lastJump[file.path].col
-
 		}
 		else if(lastFile) {
 			//console.log("url-history: to_last_position: moveCaretBackToLastPosition: Showing last file =" + lastFile.path);
-			EDITOR.show(lastFile);
+			EDITOR.showFile(lastFile);
 		}
 		else {
 			alertBox("Nothing to move back to!");
@@ -461,6 +459,21 @@ if(last == undefined) return patchObj();
 			}
 		}
 
+	});
+
+	// When there is no jump history, pressing CTRL+SHIFT+B should go to the last file we was in
+	EDITOR.addTest(1, function back_to_last_posA(callback) {
+		EDITOR.openFile("back_to_last_posA.txt", "abc\ndef", function(err, fileA) {
+			fileA.moveCaretRight();
+			EDITOR.openFile("back_to_last_posB.txt", "ghi\njkl", function(err, fileB) {
+
+				moveCaretBackToLastPosition(EDITOR.currentFile);
+
+				if(EDITOR.currentFile == fileA) return callback(true);
+
+				throw new Error("Expected " + fileA.path + " to be the current file after going back to last position" );
+			});
+		});
 	});
 
 	// TEST-CODE-END
