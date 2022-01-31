@@ -7111,7 +7111,7 @@ function dockerDaemon(username, homeDir, uid, gid, options, callback) {
 	// When the user activates a VPN we also want the Docker VM to use the VPN!
 	
 	sendToClient(username, "progress", [0,0]);
-	sendToClient(username, "progress", [0,37]);
+	sendToClient(username, "progress", [0,45]);
 	
 	// The user running libvirt need to have access to the user home dir in order to mount it
 	// We however need to run libvirt as root in order to write to the mounted home dir!
@@ -7377,13 +7377,15 @@ function dockerDaemon(username, homeDir, uid, gid, options, callback) {
 			module_child_process.exec('bash -c "echo > /dev/tcp/' + IP + '/22"', function(err) {
 				if(++tries > 10) return error("Could not connect ot SSH server on IP=" + IP);
 				else if(err) {
-					log(username + ":docker: Waiting for SSH server on" + IP + " ...");
+					log(username + ":docker: Waiting for SSH server on " + IP + " ...");
 					setTimeout(function() {
 						waitForSsh(IP, tries);
 					}, 1000);
 				}
 
 				else configure(IP);
+
+				progress();
 			});
 		}
 
