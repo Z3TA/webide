@@ -462,7 +462,7 @@ if(last == undefined) return patchObj();
 	});
 
 	// When there is no jump history, pressing CTRL+SHIFT+B should go to the last file we was in
-	EDITOR.addTest(function back_to_last_posA(callback) {
+	EDITOR.addTest(true, function back_to_last_posA(callback) {
 		EDITOR.openFile("back_to_last_posA.txt", "abc\ndef", function(err, fileA) {
 			fileA.moveCaretRight();
 			EDITOR.openFile("back_to_last_posB.txt", "ghi\njkl", function(err, fileB) {
