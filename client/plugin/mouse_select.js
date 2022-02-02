@@ -641,7 +641,7 @@ if(!EDITOR.currentFile || !caret) {
 	
 	// TEST-CODE-START
 	
-	EDITOR.addTest(true, function popWhenShiftSelectingRight(callback) {
+	EDITOR.addTest(false, function popWhenShiftSelectingRight(callback) {
 		EDITOR.openFile("popWhenShiftSelectingRight.txt", 'abcdef\n', function(err, file) {
 			if(err) throw err;
 			

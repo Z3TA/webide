@@ -1388,7 +1388,7 @@
 	
 	// TEST-CODE-START
 
-	EDITOR.addTest(true, function testCloseFileWhileOffline3(callback) {
+	EDITOR.addTest(false, function testCloseFileWhileOffline3(callback) {
 		/*
 			
 			bug: If you close a file while the editor is offline,
