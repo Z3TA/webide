@@ -8061,7 +8061,8 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 			
 			if(!options.target.className) options.target = {className: options.target}; // Shorter to write
 			
-			var doubleClickEvent = {clientX: options.x, 
+			var doubleClickEvent = {
+				clientX: options.x, 
 				offsetX: options.x, 
 				clientY: options.y, 
 				offsetY: options.y, 
@@ -8072,10 +8073,16 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 			}
 			//console.log(doubleClickEvent);
 			
+			for (var key in options) {
+				doubleClickEvent[key] = options[key];
+			}
+
 			mouseDown(doubleClickEvent);
 			mouseUp(doubleClickEvent);
 			mouseDown(doubleClickEvent);
 			mouseUp(doubleClickEvent);
+			dblclick(doubleClickEvent);
+		
 		}
 		else if(mock == "typing") {
 			var text = options;

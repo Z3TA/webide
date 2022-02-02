@@ -1618,7 +1618,7 @@ file.sanityCheck();
 		var selected = file.selected;
 		var selectedLength = selected.length;
 		
-		console.log("File.deselect! selectedLength=" + selectedLength);
+		console.warn("File.deselect! selectedLength=" + selectedLength);
 
 		if(selectedLength == 0) return; // Early return optimization
 		
@@ -1989,6 +1989,7 @@ file.sanityCheck();
 			if(index > -1 && (box.index-index) > 1) {
 				// See what we missed
 				// update: When making column select I updated this from selecting everything between, to skip all text between
+				// update: When selecting many text rows we want to keep the line breaks!
 				missedNewLine = 0;
 				missedSpace = 0;
 				whileloop: while(index < (box.index-1)) {
@@ -1996,13 +1997,17 @@ file.sanityCheck();
 					missed = file.text.charAt(index);
 					//console.log("missed=" + missed + " (" + missed.charCodeAt(0) + ")");
 
-					if(missed == "\n") {missedNewLine++; break whileloop};
+					if(missed == "\n") {missedNewLine++;};
 					if(missed == " ") {missedSpace++; break whileloop};
 
 					//text += missed;
 				}
 				//console.log("missedNewLine=" + missedNewLine + " missedSpace=" + missedSpace);
-				if(missedNewLine != 0) text += file.lineBreak;
+				if(missedNewLine != 0) {
+					for (var j=0; j<missedNewLine; j++) {
+						text += file.lineBreak;
+					}
+				}
 				else if(missedSpace != 0) {
 					text = text.trim() + ", ";
 				}

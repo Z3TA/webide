@@ -12,7 +12,7 @@
 	
 	function selectTheColumn(mouseX, mouseY, caret) {
 		var file = EDITOR.currentFile;
-		//console.log("selectTheColumn: caret=" + JSON.stringify(caret) + " file.path=" + (typeof file == "object" && file.path));
+		console.log("selectTheColumn: caret=" + JSON.stringify(caret) + " file.path=" + (typeof file == "object" && file.path));
 		if(file == undefined) return ALLOW_DEFAULT;
 
 		return selectColumn(file, caret);
@@ -27,6 +27,8 @@
 		var comma = 0;
 		var pipe = 0;
 		var rowText = file.rowText(caret.row);
+
+		console.log("selectColumn: rowText=" + rowText + " caret=" + JSON.stringify(caret) + " file.path=" + (typeof file == "object" && file.path));
 
 		for (var i=0; i<rowText.length; i++) {
 			if(rowText.charAt(i) == "\t") tabs++;
@@ -136,5 +138,33 @@
 
 	}
 
+	// TEST-CODE-START
+
+	EDITOR.addTest(function testSelectColumns(callback) {
+		var fileContent = 
+		'r1c1\tr1c2\tr1c3\n' + 
+		'r2c1\tr2c2\tr2c3\n' + 
+		'r3c1\tr3c2\tr3c3\n';
+
+		EDITOR.openFile("sSelectColumns.txt", fileContent, function(err, file) {
+
+			var y = EDITOR.settings.topMargin;
+			var x = EDITOR.settings.leftMargin + EDITOR.settings.gridWidth * 7;
+
+			EDITOR.mock("doubleClick", {x: x, y: y, ctrlKey: true});
+
+			var selectedText = file.getSelectedText();
+			var expectedText = "r1c2\nr2c2\nr3c2";
+			if(selectedText != expectedText) throw new Error("Expected selectedText=" + UTIL.lbChars(selectedText) + " to be expectedText=" + UTIL.lbChars(expectedText));
+
+
+			EDITOR.closeFile(file);
+			callback(true);
+
+		});
+	});
+
+
+	// TEST-CODE-END
 
 })();

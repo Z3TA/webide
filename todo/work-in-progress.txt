@@ -1,5 +1,5 @@
 
-
+Selecting many lines, then copy pasting, should keep the line endings!
 
 ---
 
