@@ -1,5 +1,16 @@
 
-Selecting many lines, then copy pasting, should keep the line endings!
+---
+
+" inside ` produces " + + " (it should not) 
+
+---
+
+bug in column select when the code is indentated! 
+
+---
+
+when running in desktop mode:
+can't ctrl tab to go to last file after opening a local file! 
 
 ---
 

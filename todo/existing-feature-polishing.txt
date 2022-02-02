@@ -4,6 +4,12 @@ This file contains a list of things we can do to improve already implemented fea
 Polishing (only existing features)
 ==================================
 
+
+I want to select TWO columns
+idea: hold down Shift+Ctrl while double clicking to select additional columns 
+
+---
+
 Updated high CPU warning messages so we can se it in the e-mail topic
 
 ---

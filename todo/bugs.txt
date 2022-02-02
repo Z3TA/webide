@@ -36,6 +36,22 @@ Run all tests! (to make sure you did not break anything else)
 BUGS (and issues)
 =================
 
+
+
+---
+
+Got a message about a local file being emty on disk... ??? then when loading last state and saving it it did give native fs dialog!
+
+---
+
+can't open two files with the same name on local fs! 
+
+---
+
+getting message from reopen_file that /local/ file does not exist on disk... 
+
+---
+
 When you open a local file, but does not save it, then restart the editor, you will get an error from reopen_files.js that it can't find the file on disk!
 solution: the file handle is probably already stored in indexed db, so should get it and ask for permission to open the file!
 
