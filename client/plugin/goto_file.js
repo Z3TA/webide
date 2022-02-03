@@ -202,7 +202,10 @@ EDITOR.unbindKey(show_gotoFileInput2);
 			
 			//console.log("goto_file: File was selected from file dialog: " + filePath + "\nTelling the editor to open it up for editing ...")
 			
-			var openFileOptions = {show: true}
+			var openFileOptions = {
+				//show: true // Why show the file ? It means we can't tab away for it for 5 seconds! Users might find that annoying!
+			};
+			
 			if(fileHandle) {
 				openFileOptions.nativeFileSystemFileHandle = fileHandle; // Must give the file handle before fileOpen listeners are called
 				//openFileOptions.noCollaboration = true; // Because this file is local 

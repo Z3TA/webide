@@ -2,12 +2,6 @@ Reporting a bug ? Make sure it's repeatable!
 ============================================
 
 
-
----
-
-when running in desktop mode:
-can't ctrl tab to go to last file after opening a local file! 
-
 ---
 
 <script nomodule src="main.es5.js"></script>

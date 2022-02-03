@@ -1147,8 +1147,10 @@ usePseudoClipboard = false;
 		
 		if(state && state.show) {
 			showFile = path;
+			//console.log("EDITOR.openFile: set showFile=" + showFile);
 			setTimeout(function() {
 				showFile = undefined;
+				//console.log("EDITOR.openFile: set showFile=" + showFile);
 			}, 5000);
 		}
 		
