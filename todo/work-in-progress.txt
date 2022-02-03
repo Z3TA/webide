@@ -1,11 +1,7 @@
+Reporting a bug ? Make sure it's repeatable!
+============================================
 
----
 
-" inside ` produces " + + " (it should not) 
-
----
-
-bug in column select when the code is indentated! 
 
 ---
 
