@@ -14,6 +14,22 @@ var MAX_OPEN_DIALOGS = 10;
 var CURRENTLY_OPEN_DIALOGS = 0;
 var FULL_SCREEN_DIALOG_COUNT = 0;
 
+(function() {
+	var bindKeys = setInterval(function() {
+
+		if(typeof EDITOR == "undefined") return;
+
+		EDITOR.bindKey({desc: S("close_dialog"), charCode: 27, combo: 0, fun: function closeDialog() {  // Escape key
+				var lastOpen = EDITOR.openDialogs.length-1;
+				if(lastOpen == -1) return;
+				EDITOR.openDialogs[lastOpen].close();
+				return ALLOW_DEFAULT;
+		}});
+
+		clearInterval(bindKeys);
+	}, 1000);
+})();
+
 function Dialog(msg, options) {
 	var dialog = this;
 	
@@ -57,8 +73,8 @@ function Dialog(msg, options) {
 				return 0;
 			}
 			//else {console.log("Not the same:\n" + msg + "\n" + EDITOR.openDialogs[i].message);}
-
 		}
+
 	}
 	
 	var message = document.createElement("div");
