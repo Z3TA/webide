@@ -63,7 +63,7 @@ load: mouse_select_init,
 	
 	function mouseSelect(mouseX, mouseY, caret, direction, button, target, keyboardCombo, ev) {
 		
-		console.log("mouseSelect: llEvType=" + llEvType + " mouseX=" + mouseX + " mouseY=" + mouseY + " direction=" + direction + " button=" + button + " caret=" + JSON.stringify(caret) + " target=" + target + " keyboardCombo=" + JSON.stringify(keyboardCombo) + " ev.type=" + ev.type);
+		//console.log("mouseSelect: llEvType=" + llEvType + " mouseX=" + mouseX + " mouseY=" + mouseY + " direction=" + direction + " button=" + button + " caret=" + JSON.stringify(caret) + " target=" + target + " keyboardCombo=" + JSON.stringify(keyboardCombo) + " ev.type=" + ev.type);
 		
 		// Some mobile browser (Opera Mobile) fires both mousedown and touchstart!
 		//console.log("mouseSelect: llEvType=" + llEvType + " lastEvType=" + lastEvType + " ev.type=" + ev.type);
@@ -82,7 +82,7 @@ load: mouse_select_init,
 		// Note that caret is a temporary position caret (not the current file.caret)!
 
 if(!EDITOR.currentFile || !caret) {
-			console.log("mouseSelect: EDITOR.currentFile=" + EDITOR.currentFile + " caret=" + caret);
+			//console.log("mouseSelect: EDITOR.currentFile=" + EDITOR.currentFile + " caret=" + caret);
 			return true;
 		}
 
@@ -90,7 +90,7 @@ if(!EDITOR.currentFile || !caret) {
 			
 			file.removeHighlights();
 
-		console.log("mouseSelect: direction=" + direction + " lastDirection=" + lastDirection + " keyboardCombo.sum=" + keyboardCombo.sum + " oldCaretEol=" + oldCaretEol + " caret=" + JSON.stringify(caret) + " file.selected.length=" + file.selected.length);
+		//console.log("mouseSelect: direction=" + direction + " lastDirection=" + lastDirection + " keyboardCombo.sum=" + keyboardCombo.sum + " oldCaretEol=" + oldCaretEol + " caret=" + JSON.stringify(caret) + " file.selected.length=" + file.selected.length);
 			
 			if(direction == "down") {
 			startSelecting(file, caret);
@@ -100,7 +100,7 @@ if(!EDITOR.currentFile || !caret) {
 		}
 			
 		if(keyboardCombo.sum == SHIFT && direction == "down") {
-			console.log("mouseSelect: SHIFT + mouse down...");
+			//console.log("mouseSelect: SHIFT + mouse down...");
 				// If there's already an selection, use the old startIndex
 				if(file.selected.length == 0) {
 				startIndex = file.caret.index; // file.caret because the user holds down shift and clicks - we want to select from the current caret to the new caret
@@ -118,7 +118,7 @@ if(!EDITOR.currentFile || !caret) {
 				oldCaretEol = file.caret.eol;
 			}
 			
-			console.log("calling makeSelection");
+			//console.log("calling makeSelection");
 			makeSelection(file, caret);
 			file.caret = caret; // ??
 				
@@ -130,7 +130,7 @@ if(!EDITOR.currentFile || !caret) {
 				oldMouseX = mouseX;
 				oldMouseY = mouseY;
 				startIndex = caret.index;
-			console.log("mouseSelect: Setting oldCaretEol=" + oldCaretEol + " to to caret.eol=" + caret.eol + " (file.caret.eol=" + file.caret.eol + ")")
+			//console.log("mouseSelect: Setting oldCaretEol=" + oldCaretEol + " to to caret.eol=" + caret.eol + " (file.caret.eol=" + file.caret.eol + ")")
 			oldCaretEol = caret.eol // || file.caret.eol;
 			
 				oldCaret = caret;
@@ -152,12 +152,12 @@ if(!EDITOR.currentFile || !caret) {
 			else if(direction == "up" && lastDirection == "down" && keyboardCombo.sum == 0) {
 					
 			// ## Select text ...
-			console.log("mouseSelect: Selecting text ...");
+			//console.log("mouseSelect: Selecting text ...");
 				endSelecting();
 				
 				endIndex = caret.index;
 				
-			console.log("mouseSelect: startIndex=" + startIndex + " endIndex=" + endIndex);
+			//console.log("mouseSelect: startIndex=" + startIndex + " endIndex=" + endIndex);
 				
 				var diff = (new Date()) - lastUp; // milliseconds
 			//console.log("mouseSelect: diff=" + diff);
@@ -170,7 +170,7 @@ if(!EDITOR.currentFile || !caret) {
 					clicksAfterEachOther = 0;
 				}
 				
-			console.log("mouseSelect: diff=" + diff + " dblClickTime=" + dblClickTime + " clicksAfterEachOther=" + clicksAfterEachOther + " lastCaretIndex=" + lastCaretIndex + " caret.index=" + caret.index);
+			//console.log("mouseSelect: diff=" + diff + " dblClickTime=" + dblClickTime + " clicksAfterEachOther=" + clicksAfterEachOther + " lastCaretIndex=" + lastCaretIndex + " caret.index=" + caret.index);
 				
 				if(clicksAfterEachOther == 3) {
 				//console.log("mouseSelect: Quad click!");
@@ -186,7 +186,7 @@ if(!EDITOR.currentFile || !caret) {
 						// Place caret at the end of the selection (to prevent the last character from popping)
 						//file.moveCaretToIndex(endIndex, caret);
 					
-					console.log("calling makeSelection");
+					//console.log("calling makeSelection");
 						makeSelection(file, caret, false); // false means "do not pop"
 					}
 					
@@ -199,18 +199,18 @@ if(!EDITOR.currentFile || !caret) {
 					// Place caret at the end of the selection (to prevent the last character from popping)
 					file.moveCaretToIndex(endIndex, caret);
 					
-				console.log("calling makeSelection");
+				//console.log("calling makeSelection");
 					makeSelection(file, caret);
 					
 					
 				}
 				else if(clicksAfterEachOther == 1) {
-				console.log("mouseSelect: It's a double click!");
+				//console.log("mouseSelect: It's a double click!");
 					
 					// When you double click in the margin, the whole line should be selected
 					if(caret.col==0 && file.grid[caret.row].length > 0 && mouseX < EDITOR.settings.leftMargin * 0.85) {
 						selectWholeLine();
-					console.log("calling makeSelection");
+					//console.log("calling makeSelection");
 						makeSelection(file, caret, false);
 						
 					}
@@ -233,13 +233,13 @@ if(!EDITOR.currentFile || !caret) {
 							//var pop = true;
 							//if(file.caret.eol) pop = false;
 							
-						console.log("calling makeSelection");
+						//console.log("calling makeSelection");
 							makeSelection(file, caret);
 						}
 				}
 			}
 			else {
-				console.log("mouseSelect: Not making a selection!? clicksAfterEachOther=" + clicksAfterEachOther + " ");
+				//console.log("mouseSelect: Not making a selection!? clicksAfterEachOther=" + clicksAfterEachOther + " ");
 				//makeSelection(file, caret);
 			}
 				
@@ -374,7 +374,7 @@ if(!EDITOR.currentFile || !caret) {
 		if(start != end) {
 			
 			if(start > end) {
-				console.log("mouseSelect: makeSelection: Selected from the right to the left. Switch the cursors! oldCaretEol=" + oldCaretEol);
+				//console.log("mouseSelect: makeSelection: Selected from the right to the left. Switch the cursors! oldCaretEol=" + oldCaretEol);
 				
 				var rightCaretEol = oldCaretEol;
 				
@@ -389,7 +389,7 @@ if(!EDITOR.currentFile || !caret) {
 			
 			//if(start == lastSelectionStart && end == lastSelectionEnd) {console.warn("mouseSelect: makeSelection: Selecting the same selection again!");}
 			
-			console.log("mouseSelect: makeSelection: Making selection from " + start + " to " + end + "")
+			//console.log("mouseSelect: makeSelection: Making selection from " + start + " to " + end + "")
 			
 			// Select the text
 			var textRange = file.createTextRange(start, end);
@@ -410,14 +410,14 @@ if(!EDITOR.currentFile || !caret) {
 			lastSelectionStart = start;
 			lastSelectionEnd = end;
 			
-			console.log("mouseSelect: makeSelection: Select text=" + file.getSelectedText() );
+			//console.log("mouseSelect: makeSelection: Select text=" + file.getSelectedText() );
 			EDITOR.renderNeeded();
 
 		}
 		else if(Math.sqrt(  Math.pow(mouseX-oldMouseX, 2)  +  Math.pow(mouseY-oldMouseY, 2)  ) > distSelfSelect) {
 			// Select the current caret
 			file.select(file.grid[caret.row][caret.col]);
-			console.log("mouseSelect: makeSelection: Select the current caret=" + file.getSelectedText() );
+			//console.log("mouseSelect: makeSelection: Select the current caret=" + file.getSelectedText() );
 			EDITOR.renderNeeded();
 		}
 
@@ -427,7 +427,7 @@ if(!EDITOR.currentFile || !caret) {
 	
 	function startSelecting(file, caret) {
 
-		console.log("startSelecting!");
+		//console.log("startSelecting!");
 		/*
 		EDITOR.addRender(select_render);
 		
@@ -447,7 +447,7 @@ if(!EDITOR.currentFile || !caret) {
 	}
 	
 	function endSelecting() {
-		console.log("endSelecting!");
+		//console.log("endSelecting!");
 
 		isSelecting = false;
 		
@@ -561,7 +561,7 @@ if(!EDITOR.currentFile || !caret) {
 				file.deselect();
 				//console.log("mouseSelect: Deselected!");
 				
-				console.log("mouseSelect: mouseSelectMouseMove: makeSelection! x=" + x + "y=" + y + " mouseX=" + mouseX + " mouseY=" + mouseY + " caret=" + JSON.stringify(caret) + "  ");
+				//console.log("mouseSelect: mouseSelectMouseMove: makeSelection! x=" + x + "y=" + y + " mouseX=" + mouseX + " mouseY=" + mouseY + " caret=" + JSON.stringify(caret) + "  ");
 				makeSelection(file, caret);
 				
 				EDITOR.renderNeeded();
@@ -738,12 +738,12 @@ if(!EDITOR.currentFile || !caret) {
 
 			var mouseCaret = EDITOR.mousePositionToCaret(x2, y2);
 
-			console.log("testCopyPasteManyLines: mouseCaret=" + JSON.stringify(mouseCaret) + " x2=" + x2 + " y2=" + y2);
+			//console.log("testCopyPasteManyLines: mouseCaret=" + JSON.stringify(mouseCaret) + " x2=" + x2 + " y2=" + y2);
 
 			mouseSelect(x1, y1, caret1, "down", button, target, {sum: 0}, {type: "mousedown"});
 			mouseSelectMouseMove(x1, y1 +  EDITOR.settings.gridHeight, target);
 
-			console.log("testCopyPasteManyLines: Triggering mouseSelectMouseMove: x2=" + x2 + " y2=" + y2 + "  ");
+			//console.log("testCopyPasteManyLines: Triggering mouseSelectMouseMove: x2=" + x2 + " y2=" + y2 + "  ");
 			mouseSelectMouseMove(x2, y2, target);
 			mouseSelect(x2, y2, caret2, "up"  , button, target, {sum: 0}, {type: "mouseup"});
 

@@ -1618,7 +1618,7 @@ file.sanityCheck();
 		var selected = file.selected;
 		var selectedLength = selected.length;
 		
-		console.warn("File.deselect! selectedLength=" + selectedLength);
+		//console.warn("File.deselect! selectedLength=" + selectedLength);
 
 		if(selectedLength == 0) return; // Early return optimization
 		
