@@ -458,9 +458,6 @@ var buttonSaveAs = document.createElement("input");
 	
 	function hideSaveDialog() {
 		// Bring back focus to the current file
-		if(EDITOR.currentFile) {
-			EDITOR.input = true;
-		}
 		
 		if(saveDialog) {
 			
@@ -470,10 +467,11 @@ var buttonSaveAs = document.createElement("input");
 			//saveDialog.style.display = "none";
 			
 			EDITOR.resizeNeeded();
+
+			if(EDITOR.currentFile) EDITOR.input = true;
 		}
 		
 		return false;
-		
 	}
 	
 	function enter() {

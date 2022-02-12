@@ -20,10 +20,19 @@ var FULL_SCREEN_DIALOG_COUNT = 0;
 		if(typeof EDITOR == "undefined") return;
 
 		EDITOR.bindKey({desc: S("close_dialog"), charCode: 27, combo: 0, fun: function closeDialog() {  // Escape key
-				var lastOpen = EDITOR.openDialogs.length-1;
-				if(lastOpen == -1) return;
-				EDITOR.openDialogs[lastOpen].close();
-				return ALLOW_DEFAULT;
+			if(EDITOR.openDialogs.length === -0) return ALLOW_DEFAULT;
+
+			var dialog = EDITOR.openDialogs[0];
+
+			if(!dialog.escapeable) {
+				dialog.focus();
+				return PREVENT_DEFAULT;
+			}
+			else {
+				dialog.close(); // First dialog to  open will have the highest z-index
+			}
+
+			return ALLOW_DEFAULT;
 		}});
 
 		clearInterval(bindKeys);
@@ -38,8 +47,8 @@ function Dialog(msg, options) {
 	
 	var icon = options.icon;
 	var dialogDelay = options.delay;
-	var escapeAble = options.escapeAble || true;
 	
+	dialog.escapeable = options.escapeable == false ? false : true;
 	dialog.code = options.code || "MISC";
 	
 	//console.log(UTIL.getStack("Creating dialog: code=" + dialog.code + " msg=" + msg));
@@ -109,7 +118,6 @@ function Dialog(msg, options) {
 	div.style.zIndex = (--DIALOG_Z_INDEX);
 	
 	div.addEventListener("click", focusDefaultElement, true);
-	if(escapeAble) div.addEventListener("keydown", dialogKeyDown, false);
 	
 	div.appendChild(message);
 	
@@ -197,36 +205,27 @@ function Dialog(msg, options) {
 	if(dialogDelay === 0) return 0; // Manually set focus
 	if(dialogDelay == undefined) dialogDelay = 2000;
 	dialog.focusTimeout = setTimeout(focusDefaultElement, dialogDelay); 
-	
+	dialog.focus = focusDefaultElement;
+
 	return 0;
-	
-	function dialogKeyDown(keydownEvent) {
-		/*
-			Pressing esc should close the dialog
-			ref: https://www.w3.org/TR/wai-aria-practices/examples/dialog-modal/alertdialog.html
-		*/
-		var keyCodeEsc = 27;
-		//console.log("dialogKeyDown: key=" + keydownEvent.key + " keyCode=" + keydownEvent.keyCode);
-		if(keydownEvent.key=="Escape" || keydownEvent.keyCode == keyCodeEsc) {
-			dialog.close();
-			return false;
-		}
-		return true;
-	}
 	
 	function focusDefaultElement(ev) {
 		// Give focus to the element with attribute focus:true
 		
-		//console.warn("focusDefaultElement! ev.target.className=" + (ev && ev.target && ev.target.className) + " EDITOR.lastElementWithFocus=", EDITOR.lastElementWithFocus + " document.activeElement=", document.activeElement);
+		console.warn("focusDefaultElement! ev.target.className=" + (ev && ev.target && ev.target.className) + " EDITOR.lastElementWithFocus=", EDITOR.lastElementWithFocus + " document.activeElement=", document.activeElement);
 
 		if( ev && ev.target && ev.target.className == "allowDefault") return true;
 		if( EDITOR.lastElementWithFocus && EDITOR.lastElementWithFocus.className == "allowDefault") return true;
 		if( document.activeElement && document.activeElement.className == "allowDefault" ) return true;
 
+		console.log("focusing...");
+
 		var childElement = div.childNodes;
 		for (var i=0; i<childElement.length; i++) {
 			if(childElement[i].getAttribute("focus") == "true") {
+				console.log("focusing element=", childElement[i]);
 				childElement[i].focus();
+				EDITOR.input = false;
 				break;
 			}
 		}
@@ -520,7 +519,7 @@ function promptBox(msg, options, callback, recursionCount) {
 	
 	//console.log("promptBox: msg=" + msg+ " isPassword=" + isPassword + " defaultValue=" + defaultValue + " dialogDelay=" + dialogDelay + " recursionCount=" + recursionCount);
 	
-	var dialog = new Dialog(msg, {icon: undefined, delay: dialogDelay, escapeAble: false});
+	var dialog = new Dialog(msg, {icon: undefined, delay: dialogDelay, escapeable: false});
 	
 	if(!dialog.div) {
 		//console.log("promptBox: Waiting until the body element is available ...");

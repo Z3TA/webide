@@ -583,18 +583,18 @@
 	
 	function hideServerManger() {
 		// Bring back focus to the current file
-		if(EDITOR.currentFile) {
-			EDITOR.input = true;
-		}
 		
-		if(serverManager) serverManager.style.display = "none";
+		if(serverManager) {
+			serverManager.style.display = "none";
 		
 		discoveryBarIcon.classList.remove("active");
 		
 		EDITOR.resizeNeeded();
-		
+
+			if(EDITOR.currentFile) EDITOR.input = true;
+		}
+
 		return false;
-		
 	}
 	
 	function connectToConnection() {

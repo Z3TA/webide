@@ -4626,6 +4626,7 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 			// ### pressing Escape key on window menu
 			else if(key == "Escape" || code == keyEsc) {
 				// Hide all menus and go into go into a edit mode
+				//console.log("EDITOR:DropdownMenuItem: Pressed Esc!");
 				item.parentMenu.hide(true, true);
 				EDITOR.input = true;
 			}
@@ -8174,8 +8175,6 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 			
 			var wasHidden = true;
 			
-			if(EDITOR.currentFile) EDITOR.input = true; // Bring back focus to the current file
-			
 			// Only need to hide if the object is created!
 			if(widget.mainElement) {
 				
@@ -8194,6 +8193,8 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 			
 			widget.visible = false;
 			
+			if(EDITOR.currentFile && !wasHidden) EDITOR.input = true; // Bring back focus to the current file
+
 			return wasHidden;
 		}
 		

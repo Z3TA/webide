@@ -1478,12 +1478,14 @@ for(var i=0; i<options.length; i++) {
 	}
 	
 	function hideSSG() {
-		if(EDITOR.currentFile) EDITOR.input = true; // Bring back focus to the current file
+		
+		var didHideSomething = false;
 		
 		// Only need to hide if the object is created!
 		if(manager) {
 			manager.style.display = "none";
 			EDITOR.resizeNeeded();
+			didHideSomething = true;
 		}
 		
 		if(previewWin) {
@@ -1493,10 +1495,15 @@ for(var i=0; i<options.length; i++) {
 				buttonWysiwyg.setAttribute("class", "button");
 				buttonPreview.setAttribute("class", "button");
 			}
+			didHideSomething = true;
 		}
 		
-		if(discoveryBarIcon) discoveryBarIcon.classList.remove("active");
-		
+		if(discoveryBarIcon) {
+			discoveryBarIcon.classList.remove("active");
+		}
+
+		if(EDITOR.currentFile && didHideSomething) EDITOR.input = true; // Bring back focus to the current file
+
 		return false;
 	}
 	
