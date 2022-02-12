@@ -7119,7 +7119,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		
 		if(!file) throw new Error("fileOrFilePath=" + fileOrFilePath + " need to be a File object or a path to an open file");
 		
-		console.log("EDITOR.showFile: file.path=" + file.path + " " + UTIL.getStack("showFile"));
+		//console.log("EDITOR.showFile: file.path=" + file.path + " " + UTIL.getStack("showFile"));
 
 		if(!overrideShowFile && showFile != undefined && showFile != file.path) {
 			console.warn("Not showing: file.path=" + file.path + " because showFile=" + showFile);
@@ -10393,10 +10393,8 @@ window.addEventListener("mousemove", mouseMove, false);
 	
 		var ctx = EDITOR.getCanvasContext(canvas);
 		
-		
-		
 		// Don't bother resetting the canvas context here, wait for the resize!
-	
+		/*
 		// TEST-CODE-START
 		setTimeout(debugCtx, 1);
 		setTimeout(debugCtx, 10);
@@ -10412,7 +10410,7 @@ window.addEventListener("mousemove", mouseMove, false);
 			console.log("DebugCtx: (interval) windowLoaded=" + windowLoaded + " ctx.imageSmoothingEnabled=" + ctx.imageSmoothingEnabled + " EDITOR.canvasContext.imageSmoothingEnabled=" + EDITOR.canvasContext.imageSmoothingEnabled + " ctx==EDITOR.canvasContext?" + (EDITOR.canvasContext==ctx) + " ctx.font=" + ctx.font);
 		}
 		// TEST-CODE-END
-		
+		*/
 		
 		EDITOR.resizeNeeded(); // We must call the resize function at least once at editor startup.
 	

@@ -369,7 +369,7 @@ if(!EDITOR.currentFile || !caret) {
 		var start = startIndex;
 		var end = endIndex;
 		
-		console.warn("makeSelection! start=" + start + " end=" + end);
+		//console.warn("makeSelection! start=" + start + " end=" + end);
 
 		if(start != end) {
 			
