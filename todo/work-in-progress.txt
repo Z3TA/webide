@@ -1,7 +1,7 @@
 Reporting a bug ? Make sure it's repeatable!
 ============================================
 
-
+Lots of uneccesary resizing when showing SCM annotations
 
 ---
 

@@ -3577,7 +3577,7 @@ ca 20ms to render, ca 13ms to render without creating new objects
 		
 		// Resize listeners (after)
 		var f = EDITOR.eventListeners.afterResize.map(funMap);
-		//console.log("EDITOR.resize: Calling afterResize listeners (" + f.length + ") ...");
+		//console.warn("EDITOR.resize: Calling afterResize listeners (" + f.length + ") ...");
 		for(var i=0; i<f.length; i++) {
 			f[i](EDITOR.currentFile, windowWidth, windowHeight);
 		}
@@ -9804,7 +9804,8 @@ var loaded = !!theWindow.location.href;
 
 				if(err) {
 					// File/folder has probably been deleted! Or we have been disconnected Or we don't have access
-					callback(err);
+					callback(err, filesFound);
+					
 					callback = null;
 					return;
 				}

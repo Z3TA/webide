@@ -86,7 +86,7 @@
 			//console.log("diff: path=" + path + " findFolder=" + findFolder + " folders=", folders);
 
 			EDITOR.findFileReverseRecursive([findFolder], EDITOR.workingDirectory, function(err, files) {
-				if(err) throw err;
+				if(err && files.length==0) alertBox("Unable to find original file from the diff! " + err.message);
 
 				folders.shift();
 
