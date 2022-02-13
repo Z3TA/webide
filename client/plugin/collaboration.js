@@ -206,10 +206,17 @@
 		order: 100
 	});
 	
-	function setAlias() {
+	function setAlias(msg) {
 
-		var msg = "Give this device an alias in order to identify it if you login from several devices"
-		
+		console.log("setAlias: msg=", msg);
+
+		if(typeof msg == "string") {
+			var question = msg + "\n\nSet an alias for this device to let collaborators know who you are";
+		}
+		else {
+			var question = "Give this device an alias in order to identify it if you login from several devices";
+		}
+
 		var currentAlias = UTIL.getCookie("deviceAlias");
 
 		var options = {};
@@ -221,7 +228,7 @@
 			options.placeholder = "Safari on Johans Macbook";
 		}
 
-		promptBox(msg, options, function(answer) {
+		promptBox(question, options, function(answer) {
 			if(!answer) return;
 
 			UTIL.setCookie("deviceAlias", answer, 999);
@@ -2244,6 +2251,7 @@ isPlaying = true;
 			
 			var showCollaborationNotice = !(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("collaboration_notice") != -1);
 			if(showCollaborationNotice) {
+
 				if(json.cId == userConnectionId) {
 					var msg = "You are in collaboration mode with ";
 					var others = connectedClientIds.filter(notMe);
@@ -2261,7 +2269,6 @@ isPlaying = true;
 					}
 					else throw new Error("others.length=" + others.length);
 					
-					alertBox(msg, "COLLABORATION_NOTICE");
 				}
 				else {
 					if(clientLeaveDialog.hasOwnProperty(json.alias)) {
@@ -2273,13 +2280,19 @@ isPlaying = true;
 						
 						if(!wasInCollabMode) msg += "\nYou are now in collaboration mode!";
 						
-						alertBox(msg, "COLLABORATION_NOTICE");
+						
 					}
 				}
 			}
 			
+			var currentAlias = UTIL.getCookie("deviceAlias");
+
+			if(msg) {
+				if(!currentAlias) setAlias(msg);
+				else alertBox(msg, "COLLABORATION_NOTICE");
+			}
+
 			EDITOR.stat("collaboration_mode");
-			
 		}
 		
 		function notMe(id) {
@@ -2710,13 +2723,15 @@ isPlaying = true;
 				}
 				
 				if(file.isSaved && file.hash == sync.hash) {
-					updateFileConent(file, sync.text);
+					updateFileContent(file, sync.text);
 				}
 				else if(file.text != sync.text) {
 					var update = "Just update";
+					var useMine = "Use my version instead";
 					var backup = "Save a backup"
-					confirmBox( json.alias  + " has made changes to:\n" + sync.path + "\n\nSave a backup before updating ?", [update, backup], function(answer) {
-						if(answer == update) updateFileConent(file, sync.text, sync.hash);
+					confirmBox( json.alias  + " has made changes to:\n" + sync.path + "\n\nSave a backup before updating ?", [update, useMine, backup], function(answer) {
+						if(answer == update) updateFileContent(file, sync.text, sync.hash);
+						else if(answer == useMine) syncFile(file);
 						else if(answer == backup) {
 							var backupPath = file.path + ".bak";
 							EDITOR.saveFile(file, backupPath, function(err) {
@@ -2905,7 +2920,7 @@ isPlaying = true;
 		
 		
 		
-		function updateFileConent(file, text, hash) {
+		function updateFileContent(file, text, hash) {
 			ignoreFileChange = true;
 			file.reload(text);
 			ignoreFileChange = false;
