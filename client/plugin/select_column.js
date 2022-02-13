@@ -12,7 +12,7 @@
 	
 	function selectTheColumn(mouseX, mouseY, caret) {
 		var file = EDITOR.currentFile;
-		console.log("selectTheColumn: caret=" + JSON.stringify(caret) + " file.path=" + (typeof file == "object" && file.path));
+		//console.log("selectTheColumn: caret=" + JSON.stringify(caret) + " file.path=" + (typeof file == "object" && file.path));
 		if(file == undefined) return ALLOW_DEFAULT;
 
 		return selectColumn(file, caret);
@@ -26,9 +26,9 @@
 		var semicolon = 0;
 		var comma = 0;
 		var pipe = 0;
-		var rowText = file.rowText(caret.row);
+		var rowText = file.rowText(caret.row, false);
 
-		console.log("selectColumn: rowText=" + rowText + " caret=" + JSON.stringify(caret) + " file.path=" + (typeof file == "object" && file.path));
+		//console.log("selectColumn: rowText=" + rowText + " caret=" + JSON.stringify(caret) + " file.path=" + (typeof file == "object" && file.path));
 
 		for (var i=0; i<rowText.length; i++) {
 			if(rowText.charAt(i) == "\t") tabs++;
@@ -61,7 +61,7 @@
 
 		// Search up
 		for (var row=caret.row-1; row>1; row--) {
-			col = findColumn(file.rowText(row), file.grid[row].startIndex, columnToFind);
+			col = findColumn(file.rowText(row, false), file.grid[row].startIndex, columnToFind);
 			if(col.tot < totalColumns) break;
 
 			cols.push(col);
@@ -69,7 +69,7 @@
 
 		// Search down
 		for (var row=caret.row+1; row<file.grid.length; row++) {
-			col = findColumn(file.rowText(row), file.grid[row].startIndex, columnToFind);
+			col = findColumn(file.rowText(row, false), file.grid[row].startIndex, columnToFind);
 			if(col.tot < totalColumns) break;
 
 			cols.push(col);
@@ -176,6 +176,8 @@
 
 			var y = EDITOR.settings.topMargin + EDITOR.settings.gridHeight * 1;
 			var x = EDITOR.settings.leftMargin + EDITOR.settings.gridWidth * (7 + EDITOR.settings.tabSpace);
+
+			//console.log( "testSelectColmnsIndented: y=" + y + " x=" + x + " gridPos=" + JSON.stringify(  file.rowColFromMouse(x, y)  ) );
 
 			EDITOR.mock("doubleClick", {x: x, y: y, ctrlKey: true});
 
