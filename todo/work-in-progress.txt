@@ -4,12 +4,15 @@ Reporting a bug ? Make sure it's repeatable!
 
 ---
 
-Annoying (error message) when you click commit on a .diff file and you meant to commit on the orginal file in the diff...
+But after fixing so that we reopen unsaved nativefs file we get an dialog for *all* local file, before we did not get a dialog for the files we had write permission on!...
+Should reopen_files wait for each file !?
 
+
+When you open a local file, but do not save it, and reload the editor, it wont re-open the local file! (and you get a error message from reopen_files.js)
 
 ---
 
-When you open a local file, but do not save it, and reload the editor, it wont re-open the local file! (and you get a error message from reopen_files.js)
+Indentation line helpers (Ctrl+I) are off! (when scrolled horizontal !?) (should start on { brackets)
 
 ---
 

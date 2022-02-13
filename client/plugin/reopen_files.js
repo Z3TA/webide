@@ -1,4 +1,4 @@
-(function() {
++(function() {
 	
 	"use strict";
 	
@@ -196,12 +196,15 @@
 	
 	function readFileHandleFromIndexDb(path, callback) {
 
+		console.log("readFileHandleFromIndexDb: path=" + path);
+
 		openNativeFileSystemFileHandleDb(function(err, db) {
 			var transaction = db.transaction(["fileHandles"]);
 			var objectStore = transaction.objectStore("fileHandles");
 			var request = objectStore.get(path);
 			request.onerror = function(err) {
 				// Handle errors!
+				console.error(err);
 				callback(new Error("Error when reading file handle from indexDb: " + err.message));
 			};
 			request.onsuccess = function() {
@@ -371,7 +374,7 @@
 						if(currentFilePath != currentFilePathOnServer && currentFilePathOnServer != null && EDITOR.files.hasOwnProperty(currentFilePathOnServer)) {
 							fileShown = EDITOR.showFile(currentFilePathOnServer);
 						}
-}
+					}
 				}
 
 				console.log("reopenFiles: allFilesOpened: fileShown=" + fileShown + " Object.keys(EDITOR.files).length=" + Object.keys(EDITOR.files).length + " ");
@@ -408,7 +411,7 @@
 				
 				// Decide if we should open the last saved state, or from the disk (or other protocol) ...
 				
-				//console.log("reopenFiles: Got fileSizeOnDisk=" + fileSizeOnDisk + " for path=" + path + "");
+				console.log("reopenFiles: Got fileSizeOnDisk=" + fileSizeOnDisk + " for path=" + path + "");
 				
 				if(getFileSizeError) {
 					//if(err.code === 'ENOENT') {
@@ -422,7 +425,7 @@
 				
 				loadState(path, function stateLoaded(err, localState) {
 					
-					//console.log("reopen_files:gotFileSize:stateLoaded: localState=" + JSON.stringify(localState, null, 2));
+					console.log("reopen_files:gotFileSize:stateLoaded: localState=" + JSON.stringify(localState, null, 2));
 
 					if(err) console.error(err);
 					

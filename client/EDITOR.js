@@ -1115,7 +1115,7 @@ usePseudoClipboard = false;
 			solution2: A list of files that are beaing opened
 		*/
 		
-// Have the bug trap error created here in order to get a proper call stack for stached callbaks
+		// Have the bug trap error created here in order to get a proper call stack for stached callbaks
 		var trapErrorMsg = "Bug trap: File properties need to be set using state.props (third argument to EDITOR.openFile)! Or they wouldn't be available for fileOpen listeners!";
 
 		var file = null;
@@ -1259,7 +1259,7 @@ usePseudoClipboard = false;
 		
 		if(text == undefined) {
 			
-			//console.log("EDIOR.openFile: Text is undefined! Reading file from disk: " + path)
+			//console.log("EDIOR.openFile: Text is undefined! path=" + path + " state=", state);
 			
 			var fileExtension = UTIL.getFileExtension(path);
 			var imageFileExt = ["jpg", "jpge", "gif", "bmp", "tiff", "png"];
@@ -1269,6 +1269,31 @@ usePseudoClipboard = false;
 				
 				EDITOR.readFromDisk(path, false, "base64", load);
 				
+			}
+			else if(state && state.props && state.props.nativeFileSystemFileHandle) {
+				//console.log("It got a native file system handle! path=" + path);
+				EDITOR.verifyNativeFileSystemPermission(state.props.nativeFileSystemFileHandle, "readwrite", function(err) {
+					if(err && err.code == "PERMISSION_DENIED") return askforpermission;
+					else if(err) return load(err);
+
+					state.props.nativeFileSystemFileHandle.getFile().then(function readText(localFile) {
+						localFile.text().then(function(fileContent) {
+
+							if(typeof window.crypto != "object" || !("TextEncoder" in window)) {
+								return load(null, path, fileContent, null);
+							}
+
+							var enc = new TextEncoder();
+							// TypeError: Failed to execute 'digest' on 'SubtleCrypto': The provided value is not of type '(ArrayBuffer or ArrayBufferView)
+							var buff = enc.encode(fileContent);
+							crypto.subtle.digest('SHA-256', buff).then(function(hash) {
+								return load(null, path, fileContent, hash);
+							}, function(err) {
+								return load(null, path, fileContent, null);
+							});
+						});
+					});
+				});
 			}
 			else {
 				// Check the file size
@@ -1318,7 +1343,7 @@ usePseudoClipboard = false;
 			else {
 				load(null, path, text, null, true);
 			}
-			}
+		}
 		
 		function load(err, path, text, hash, notFromDisk, tooBig) {
 			
@@ -1394,7 +1419,7 @@ usePseudoClipboard = false;
 					
 				*/
 				
-if(EDITOR.files.hasOwnProperty(path)) throw new Error("path=" + path + " already exist in EDITOR.files=" + JSON.stringify(Object.keys(EDITOR.files)));
+				if(EDITOR.files.hasOwnProperty(path)) throw new Error("path=" + path + " already exist in EDITOR.files=" + JSON.stringify(Object.keys(EDITOR.files)));
 
 				if(newFile == undefined) throw new Error( "newFile=" + newFile + " path=" + path + " EDITOR.files=" + JSON.stringify(Object.keys(EDITOR.files)) ); // bug trap
 				EDITOR.files[path] = newFile;
@@ -1466,11 +1491,9 @@ if(EDITOR.files.hasOwnProperty(path)) throw new Error("path=" + path + " already
 		function fileOpenError(err) {
 			removeFromQueue(path);
 			
-			console.warn(err.message);
+			console.warn("fileOpenError: (code=" + err.code + ") " + err.message + " path=" + path);
 			
 			callCallbacks(err, file);
-			
-			console.warn("Error when opening file path=" + path + " message: " + err.message);
 			
 			return err;
 		}
@@ -1522,28 +1545,28 @@ if(EDITOR.files.hasOwnProperty(path)) throw new Error("path=" + path + " already
 	EDITOR.getFileSizeOnDisk = function(path, callback) {
 		// Check the file size
 		
-		//console.log("EDITOR.getFileSizeOnDisk: path=" + path);
+		//console.warn("EDITOR.getFileSizeOnDisk: path=" + path);
 		
 		if(!callback) throw new Error("Callback not defined!");
 		
 		var protocol = UTIL.urlProtocol(path);
 		
 		if(protocol == "http" || protocol == "https") {
-		if(!CLIENT.connected) {
-			var xhr = new XMLHttpRequest();
-			xhr.open("HEAD", path, true); // Notice "HEAD" instead of "GET", to get only the header
-			xhr.onreadystatechange = function() {
-				if (this.readyState == this.DONE) {
-					callback(null, parseInt(xhr.getResponseHeader("Content-Length")));
+			if(!CLIENT.connected) {
+				var xhr = new XMLHttpRequest();
+				xhr.open("HEAD", path, true); // Notice "HEAD" instead of "GET", to get only the header
+				xhr.onreadystatechange = function() {
+					if (this.readyState == this.DONE) {
+						callback(null, parseInt(xhr.getResponseHeader("Content-Length")));
+					}
+				};
+				try {
+					xhr.send();
 				}
-			};
-			try {
-				xhr.send();
+				catch(err) {
+					callback(err);
+				}
 			}
-			catch(err) {
-				callback(err);
-			}
-		}
 		}
 		else {
 			var json = {path: path};
@@ -1604,7 +1627,7 @@ if(EDITOR.files.hasOwnProperty(path)) throw new Error("path=" + path + " already
 	}
 	
 	var closeFileHistory = []; // Trying to figure out why sometimes the user close files that are not open...
-// todo: Remove closeFileHistory after fixing the bug!
+	// todo: Remove closeFileHistory after fixing the bug!
 	EDITOR.closeFile = function(path, doNotSwitchFile) {
 		
 		if(typeof path != "string" && path && path instanceof File) {
@@ -1806,6 +1829,7 @@ if(EDITOR.files.hasOwnProperty(path)) throw new Error("path=" + path + " already
 		
 		// Check if permission was already granted
 		fileHandle.queryPermission(options).then(function(permission) {
+			//console.log("EDITOR.verifyNativeFileSystemPermission: permission=" + permission);
 			if(permission == "granted") {
 				callback(null);
 			}
@@ -1814,10 +1838,12 @@ if(EDITOR.files.hasOwnProperty(path)) throw new Error("path=" + path + " already
 				requestPermission(callback);
 			}
 		}, function error(err) {
+			//console.log("EDITOR.verifyNativeFileSystemPermission: err.code=" + err.code + " err.message=" + err.message);
 			callback(err);
 		});
 
 		function requestPermission(callback) {
+			//console.log("EDITOR.verifyNativeFileSystemPermission: requestPermission: ...");
 			fileHandle.requestPermission(options).then(function(permission) {
 
 				if(permission == "granted") {
@@ -1830,10 +1856,7 @@ if(EDITOR.files.hasOwnProperty(path)) throw new Error("path=" + path + " already
 				}
 
 			}, function error(err) {
-				callback(err);
-			}).catch(function(err) {
-				console.error(err);
-				console.log("Failed to ask for permission. err.code=" + err.code);
+				//console.warn("EDITOR.verifyNativeFileSystemPermission: requestPermission: err.code=" + err.code + " err.message=" + err.message);
 				if(err.code == "18") {
 					confirmBox("Click the OK button below in order to get a permission prompt for " + 
 					fileHandle.name, ["OK", "Cancel"], function(answer) {
@@ -1865,7 +1888,7 @@ if(EDITOR.files.hasOwnProperty(path)) throw new Error("path=" + path + " already
 		});
 
 		function getFileHashFromNativeFs(fileHandle, callback) {
-			console.log("getFileHashFromNativeFs: fileHandle=", fileHandle);
+			//console.log("getFileHashFromNativeFs: fileHandle=", fileHandle);
 
 			EDITOR.verifyNativeFileSystemPermission(fileHandle, "readwrite", function(err) {
 				if(err && err.code == "PERMISSION_DENIED") return alertBox(err.message);
