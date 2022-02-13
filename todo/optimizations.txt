@@ -5,6 +5,10 @@ Optimization
 ============
 
 
+---
+
+<script nomodule src="main.es5.js"></script>
+"modern" browsers does not load this file, so we can place the polyfills there!
 
 ---
 

@@ -1550,7 +1550,7 @@ file.sanityCheck();
 			return;
 		}
 		
-		console.log("Selecting ...");
+		//console.log("Selecting ...");
 		
 		//console.log(typeof box);
 		

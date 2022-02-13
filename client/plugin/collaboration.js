@@ -2728,7 +2728,7 @@ isPlaying = true;
 				else if(file.text != sync.text) {
 					var update = "Just update";
 					var useMine = "Use my version instead";
-					var backup = "Save a backup"
+					var backup = "Save a backup";
 					confirmBox( json.alias  + " has made changes to:\n" + sync.path + "\n\nSave a backup before updating ?", [update, useMine, backup], function(answer) {
 						if(answer == update) updateFileContent(file, sync.text, sync.hash);
 						else if(answer == useMine) syncFile(file);

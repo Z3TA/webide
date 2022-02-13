@@ -2,12 +2,6 @@ Reporting a bug ? Make sure it's repeatable!
 ============================================
 
 
-
----
-
-You are in collaboration mode with...
-If the user has not entered their device id, then ask for it (see setAlias() in collaboration.js)
-
 ---
 
 Double click while holding down Ctrl to select a column !?
