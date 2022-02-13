@@ -1729,8 +1729,10 @@ else var directory = EDITOR.workingDirectory;
 		
 		hide();
 		
+		//console.warn("showAnnotations: file.path=" + file.path + " rootDir=" + rootDir);
+
 		if(annotations.hasOwnProperty(file.path)) show(annotations[file.path]);
-		else {
+		else if(file.savedAs && !file.nativeFileSystemFileHandle) { // Only bother to annotate files that are saved on disk!
 			
 			var filePath = file.path;
 			
@@ -1743,7 +1745,7 @@ else var directory = EDITOR.workingDirectory;
 			CLIENT.cmd("mercurial.annotate", {file: filePath}, 60000, function updateAnnotation(err, resp) {
 				
 				if(err) {
-					alertBox("Unable to show annotations for " + filePath + "\n" + err.message);
+					alertBox("Unable to show annotations for " + filePath + " (could not find a Mercurial repo)\n" + err.message);
 					annotations[file.path] = null;
 				}
 				else {
@@ -1896,7 +1898,7 @@ annotationRev.setAttribute("title", "Show diff");
 		
 		function hide(line) {
 			
-				//console.log("Hiding annotation. line=" + line + " real=" + (caret.row+1));
+				console.warn("Hiding annotation. line=" + line + " real=" + (caret.row+1));
 			
 			var annotationWidget = document.getElementById("mercurialAnnotationWidget");
 			

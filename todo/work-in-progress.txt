@@ -1,11 +1,15 @@
 Reporting a bug ? Make sure it's repeatable!
 ============================================
 
-Lots of uneccesary resizing when showing SCM annotations
 
 ---
 
-when you turn on annotations and have  a terminal open you get a lot of messages about no annotations existing in the terminal file...
+Annoying (error message) when you click commit on a .diff file and you meant to commit on the orginal file in the diff...
+
+
+---
+
+When you open a local file, but do not save it, and reload the editor, it wont re-open the local file! (and you get a error message from reopen_files.js)
 
 ---
 

@@ -46,7 +46,8 @@ todo: Run vttest
 	var waitForReopen = true; // Buffer terminal messages for two seconds so that the last session get a chance to load
 	var BUFFER = {}; // termid: [data]
 	var vimTip = true;
-	
+	var resizeOnShow = false;
+
 	EDITOR.plugin({
 		desc: "Terminal emulator",
 		load: function loadTerminal() {
@@ -165,6 +166,8 @@ EDITOR.unbindKey(startTerminalFromKeyboard);
 		else {
 			if(terminalActive) removeTerminalEvents();
 		}
+
+		if(resizeOnShow && isTerminal) resizeTerminals(file);
 	}
 	
 	function addTerminalEvents() {
@@ -226,6 +229,8 @@ EDITOR.unbindKey(startTerminalFromKeyboard);
 		var file = EDITOR.currentFile;
 		if(terminalFiles.indexOf(file) == -1) return true;
 		
+		//console.log("terminalMouseClick: file.path=" + file.path);
+
 		var terminalState = file.terminal;
 		
 		// Another module places the caret when we push mouse button down!
@@ -375,6 +380,13 @@ EDITOR.unbindKey(startTerminalFromKeyboard);
 	}
 	
 	function resizeTerminals(file) {
+
+		if(terminalFiles.indexOf(file) == -1) {
+			resizeOnShow = true;
+			return true;
+		}
+		resizeOnShow = false;
+
 		var cols = EDITOR.view.visibleColumns;
 		var rows = EDITOR.view.visibleRows;
 		
