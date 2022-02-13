@@ -146,7 +146,7 @@
 		'r2c1\tr2c2\tr2c3\n' + 
 		'r3c1\tr3c2\tr3c3\n';
 
-		EDITOR.openFile("sSelectColumns.txt", fileContent, function(err, file) {
+		EDITOR.openFile("selectColumns.txt", fileContent, function(err, file) {
 
 			var y = EDITOR.settings.topMargin;
 			var x = EDITOR.settings.leftMargin + EDITOR.settings.gridWidth * 7;
@@ -164,6 +164,31 @@
 		});
 	});
 
+
+	EDITOR.addTest(1, function testSelectColumnsIndented(callback) {
+		var fileContent = '{\n' +
+		'\tr1c1\tr1c2\tr1c3\n' +
+		'\tr2c1\tr2c2\tr2c3\n' +
+		'\tr3c1\tr3c2\tr3c3\n' + 
+		'}';
+
+		EDITOR.openFile("selectColumnsIndentCode.js", fileContent, function(err, file) {
+
+			var y = EDITOR.settings.topMargin + EDITOR.settings.gridHeight * 1;
+			var x = EDITOR.settings.leftMargin + EDITOR.settings.gridWidth * (7 + EDITOR.settings.tabSpace);
+
+			EDITOR.mock("doubleClick", {x: x, y: y, ctrlKey: true});
+
+			var selectedText = file.getSelectedText();
+			var expectedText = "r1c2\nr2c2\nr3c2";
+			if(selectedText != expectedText) throw new Error("Expected selectedText=" + UTIL.lbChars(selectedText) + " to be expectedText=" + UTIL.lbChars(expectedText));
+
+
+			EDITOR.closeFile(file);
+			callback(true);
+
+		});
+	});
 
 	// TEST-CODE-END
 

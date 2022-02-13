@@ -69,7 +69,7 @@ function Dialog(msg, options) {
 	}
 	
 	if(!++CURRENTLY_OPEN_DIALOGS > MAX_OPEN_DIALOGS) {
-		console.warn("CURRENTLY_OPEN_DIALOGS=" + CURRENTLY_OPEN_DIALOGS + " MAX_OPEN_DIALOGS=" + MAX_OPEN_DIALOGS);
+		//console.warn("CURRENTLY_OPEN_DIALOGS=" + CURRENTLY_OPEN_DIALOGS + " MAX_OPEN_DIALOGS=" + MAX_OPEN_DIALOGS);
 		return 1;
 	}
 	
@@ -212,18 +212,18 @@ function Dialog(msg, options) {
 	function focusDefaultElement(ev) {
 		// Give focus to the element with attribute focus:true
 		
-		console.warn("focusDefaultElement! ev.target.className=" + (ev && ev.target && ev.target.className) + " EDITOR.lastElementWithFocus=", EDITOR.lastElementWithFocus + " document.activeElement=", document.activeElement);
+		//console.warn("focusDefaultElement! ev.target.className=" + (ev && ev.target && ev.target.className) + " EDITOR.lastElementWithFocus=", EDITOR.lastElementWithFocus + " document.activeElement=", document.activeElement);
 
 		if( ev && ev.target && ev.target.className == "allowDefault") return true;
 		if( EDITOR.lastElementWithFocus && EDITOR.lastElementWithFocus.className == "allowDefault") return true;
 		if( document.activeElement && document.activeElement.className == "allowDefault" ) return true;
 
-		console.log("focusing...");
+		//console.log("focusing...");
 
 		var childElement = div.childNodes;
 		for (var i=0; i<childElement.length; i++) {
 			if(childElement[i].getAttribute("focus") == "true") {
-				console.log("focusing element=", childElement[i]);
+				//console.log("focusing element=", childElement[i]);
 				childElement[i].focus();
 				EDITOR.input = false;
 				break;

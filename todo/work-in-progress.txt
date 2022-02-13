@@ -1,6 +1,21 @@
 Reporting a bug ? Make sure it's repeatable!
 ============================================
 
+Problems reloading file as code ? Sprung bugtrap: 
+Error message: Uncaught Error: Bug trap: File properties need to be set using state.props
+ (third argument to EDITOR.openFile)! Or they wouldn't be available for fileOpen listeners! 
+ (offending property is disableParsing)
+Error code: undefined
+
+Error: Bug trap: File properties need to be set using state.props (third argument to EDITOR.openFile)! Or they wouldn't be available for fileOpen listeners! (offending property is disableParsing)
+    at File.trap [as disableParsing] (https://d80.johan.webide.se/EDITOR.js:1444:162)
+    at File.reload (https://d80.johan.webide.se/File.js:3194:45)
+    at reloadAsCode (https://d80.johan.webide.se/plugin/reload_as_plain_text.js:46:8)
+    at HTMLTableRowElement.menuItemClick (https://d80.johan.webide.se/EDITOR.js:5077:5)
+    
+---
+
+Problems with columns select when the code in indentated!
 
 ---
 
