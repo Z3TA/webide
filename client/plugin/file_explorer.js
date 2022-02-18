@@ -215,6 +215,8 @@
 				var pathToExplore = EDITOR.workingDirectory;
 			}
 			
+			if(pathToExplore == EDITOR.settings.nativeFileSystemPathPrefix) pathToExplore = EDITOR.workingDirectory;
+
 			//console.log("File explorer: pathToExplore=" + pathToExplore + " lastPathExplored=" + lastPathExplored + " EDITOR.workingDirectory=" + EDITOR.workingDirectory);
 			
 			exploreDir(pathToExplore);

@@ -2,7 +2,15 @@ Reporting a bug ? Make sure it's repeatable!
 ============================================
 
 
+
 ---
+
+iPhone zooms a lot and the text is pixelated.
+iPhone zooms too much and you can't scroll right, you only see half the app, the other is at the right.
+
+---
+
+what permission are we asking for ? read or write ? Did we only have read before ?
 
 But after fixing so that we reopen unsaved nativefs file we get an dialog for *all* local file, before we did not get a dialog for the files we had write permission on!...
 Should reopen_files wait for each file !?

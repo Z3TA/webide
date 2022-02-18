@@ -242,12 +242,17 @@ EDITOR.unbindKey(show_gotoFileInput2);
 		
 	}
 	
+	function setInputFolder(directory) {
+		console.warn("setInputFolder: inputFolder.value=" + inputFolder.value + " new directory=" + directory);
+		inputFolder.value = directory;
+	}
+
 	function openAnyFileTool(options, filePath) {
 		
 		var directory = options.directory;
 		
 		if(directory) {
-			if(inputFolder) inputFolder.value = directory;
+			if(inputFolder) setInputFolder(directory);
 			else EDITOR.changeWorkingDir(directory);
 		}
 		
@@ -284,11 +289,12 @@ EDITOR.unbindKey(show_gotoFileInput2);
 		inputFolder.setAttribute("type", "text");
 		inputFolder.setAttribute("id", "inputFolder");
 		inputFolder.setAttribute("class", "inputtext");
-		inputFolder.setAttribute("value", folderToSearchIn || EDITOR.workingDirectory);
 		if(EDITOR.workingDirectory) inputFolder.setAttribute("size", Math.max(EDITOR.workingDirectory.length + 3, 20));
 		inputFolder.setAttribute("default", folderToSearchIn || EDITOR.workingDirectory);
 		inputFolder.setAttribute("placeholder", "folder path");
 		
+		setInputFolder( folderToSearchIn || EDITOR.workingDirectory )
+
 		var labelGoto = document.createElement("label");
 		labelGoto.setAttribute("for", "inputGoto");
 		labelGoto.appendChild(document.createTextNode("File (search):")); // Language settings!?
@@ -413,7 +419,7 @@ EDITOR.unbindKey(show_gotoFileInput2);
 			var file = UTIL.getFilenameFromPath(text);
 			
 			inputGoto.value = file;
-			inputFolder.value = dir;
+			setInputFolder(dir);
 			inputFolder.dispatchEvent(new Event('input'));
 			
 			
@@ -442,7 +448,7 @@ EDITOR.unbindKey(show_gotoFileInput2);
 			if (code == charEnter) {
 				if(text == "..") {
 					
-					inputFolder.value = UTIL.parentFolder(inputFolder.value);
+					setInputFolder( UTIL.parentFolder(inputFolder.value) );
 					inputGoto.value = "";
 					inputFolder.dispatchEvent(new Event('input'));
 					
@@ -492,7 +498,7 @@ EDITOR.unbindKey(show_gotoFileInput2);
 			if(isSearching && 1==2) {
 				//console.log("goto_file: abortFindFiles because: typing() and isSearching=" + isSearching + " (is true)");
 				abortFindFiles();
-				inputFolder.value = inputFolder.getAttribute("default");
+				setInputFolder( nputFolder.getAttribute("default") )
 			}
 			
 			trySearch();
@@ -511,8 +517,8 @@ EDITOR.unbindKey(show_gotoFileInput2);
 		
 		var reText = text;
 		if(reText.indexOf("-") != -1 || reText.indexOf("_") != -1) {
-// Often forget if it was - or _ so search for both
-reText = reText.replace(/-/g, "[-_]");
+			// Often forget if it was - or _ so search for both
+			reText = reText.replace(/-/g, "[-_]");
 			reText = reText.replace(/_/g, "[-_]");
 			reText = reText.replace(/\[-\[-_\]\]/g, "[-_]");
 		}
@@ -774,8 +780,12 @@ folderToSearchIn = EDITOR.workingDirectory;
 		}
 			
 		}
+
+		//console.log("goto_file: folderToSearchIn=" + folderToSearchIn);
+
+		if( folderToSearchIn == EDITOR.settings.nativeFileSystemPathPrefix || folderToSearchIn == UTIL.root()) folderToSearchIn = EDITOR.workingDirectory;
 		
-		
+
 		//console.log("goto_file: gotoInputIsVisible=" + gotoInputIsVisible + " before showing");
 		
 		if(!gotoInputIsVisible) {
@@ -1114,7 +1124,7 @@ abortFindFiles();
 	function gotoFilePathGlob(folder) {
 		//console.log("goto_file: gotoFilePathGlob: folder=" + folder);
 		if(inputFolder) {
-inputFolder.value = folder;
+			setInputFolder(folder);
 			inputFolder.dispatchEvent(new Event('input'));
 		}
 	}

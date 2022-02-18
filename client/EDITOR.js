@@ -1048,8 +1048,12 @@ usePseudoClipboard = false;
 	
 	EDITOR.changeWorkingDir = function(workingDir) {
 		
-		//console.warn("Changing working directory to: " + workingDir);
+		console.warn("Changing working directory to: " + workingDir);
 		
+		if( workingDir == "/" || workingDir == "/home/") {
+			throw new Error("Tried to change working directory to workingDir=" + workingDir + " How did this bug happen?")
+		}
+
 		// Update internally (on client)
 		var workingDirectory = setWorkingDirectory(workingDir);
 		
