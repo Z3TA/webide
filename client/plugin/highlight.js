@@ -139,11 +139,14 @@
 
 	}
 	
-	function highlightChangedFile(file) {
+	function highlightChangedFile(file, change) {
 		
 		//console.log("highlight: highlightChangedFile: file.noChangeEvents=" + file.noChangeEvents + " file.path=" + file.path);
 		
-		if(!shouldHighlight(file)) return;
+		if(!shouldHighlight(file)) {
+			if(change=="reload") delete fileColors[file.path];
+			return;
+		}
 
 		worker.postMessage({text: file.text, path: file.path});
 	}
@@ -205,7 +208,7 @@
 		EDITOR.openFile("doNotSHowColorsAfterReloadAsPlainText.dart", "void main() {}", function(err, file) {
 			if(err) throw err;
 
-			setTimeout(checkIfHighlighted, 1000);
+			setTimeout(checkIfHighlighted, 600); // The Web worker overhead is terrible, so we need to wait for the text/code to be highlighted!
 
 			function checkIfHighlighted() {
 				if( !fileColors.hasOwnProperty(file.path) ) throw new Error("Expected " + file.path + " to be highlighted!");
@@ -217,12 +220,11 @@
 					parsed: null
 				});
 
-				if( !fileColors.hasOwnProperty(file.path) ) throw new Error("Did not expected " + file.path + " to have color data after reloading as plain text!");
+				if( fileColors.hasOwnProperty(file.path) ) throw new Error("Did not expect " + file.path + " to have color data after reloading as plain text!");
 
+				callback(true);
 			}
-
 		});
-
 	});
 
 	// TEST-CODE-END

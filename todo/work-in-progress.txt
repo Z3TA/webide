@@ -5,12 +5,8 @@ Need a way to glob (search in parent dir) when opening (goto) file without using
 
 ---
 
-when pressing backspace at the start of indenting in 
-
----
-
-When reloading as plain text, code highlightning no longer works, so remove all existing coloring!
-for example dart code
+when pressing backspace at the start of an indentation (in "plain text mode"), the indentation should be deleted and you should be placed on the row before it !?
+how does other editors do it ?
 
 ---
 
