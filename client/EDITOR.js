@@ -8496,26 +8496,35 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 				
 			}
 			
-			theWindow.addEventListener("load", function createdWindowLoaded() {
+			if(typeof theWindow.addEventListener == "function") {
+				//console.log("Using theWindow.addEventListener load");
+				theWindow.addEventListener("load", createdWindowLoaded, false);
+			}
+			else {
+				throw new Error("BROWSER=" + BROWSER + " has no addEventListener method on theWindow=", theWindow);
+			}
+
+			function createdWindowLoaded() {
 				//console.log("EDITOR.createWindow: New window: " +  UTIL.timeStamp() + " load event!");
 				//console.log("EDITOR.createWindow: theWindow.location.href = " + theWindow.location.href);
 				/*
 					document.readyState === "complete" does not mean everything has loaded!
 					So because it's impossible to tell if the window has loaded or not,
 					we will give the window object a new property: loaded (true or undefined)
-					
+
 					What if the window was loaded until we got here (theWindow.addEventListener("load") ? Nightmare!
-					
+
 				*/
 				if(theWindow.loadedByWebideYo === true) throw new Error("It seems the window has already loaded!!"); // Sanity check
-				theWindow.loadedByWebideYo = true; 
+				theWindow.loadedByWebideYo = true;
 				if(waitUntilLoaded) {
 					//console.warn("EDITOR.createWindow: Calling back!");
 					callback(null, theWindow);
 					callback = function() { return "Already called callback after theWindow got load event" };
 				}
-				
-			}, false);
+
+			}
+
 			/*
 				theWindow.addEventListener("DOMContentLoaded", function createdWindowDOMContentLoaded() {
 				console.log("EDITOR.createWindow: New window: " + UTIL.timeStamp() + " DOMContentLoaded event! theWindow.document.readyState changed to: " + theWindow.document.readyState);
