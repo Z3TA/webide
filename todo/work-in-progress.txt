@@ -1,6 +1,7 @@
 Reporting a bug ? Make sure it's repeatable!
 ============================================
 
+Trying to run tests in IE
 
 ---
 

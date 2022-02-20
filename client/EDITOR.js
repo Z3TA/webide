@@ -8496,11 +8496,14 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 				
 			}
 			
+			// IE sometimes does not recognise theWindow.addEventListener as a function... why ?
 			if(typeof theWindow.addEventListener == "function") {
 				//console.log("Using theWindow.addEventListener load");
+				
 				theWindow.addEventListener("load", createdWindowLoaded, false);
 			}
 			else {
+
 				throw new Error("BROWSER=" + BROWSER + " has no addEventListener method on theWindow=", theWindow);
 			}
 

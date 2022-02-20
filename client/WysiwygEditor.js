@@ -1898,6 +1898,7 @@ alertBox(wysiwygEditor.sourceFile.path + " contains SSG scripts which is not yet
 			The window might already have loaded! Thus we missed the early console.log's !!
 		*/
 		if(wysiwygEditor.captureConsoleLog) {
+			// IE sometimes gives a Permission deined here
 			consoleLogOriginal = previewWin.window.console.log;
 			previewWin.window.console.log = consoleLogCapturer;
 			previewWin.window.console.warn = consoleLogCapturer;
