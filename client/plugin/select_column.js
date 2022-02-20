@@ -165,7 +165,7 @@
 	});
 
 
-	EDITOR.addTest(1, function testSelectColumnsIndented(callback) {
+	EDITOR.addTest(function testSelectColumnsIndented(callback) {
 		var fileContent = '{\n' +
 		'\tr1c1\tr1c2\tr1c3\n' +
 		'\tr2c1\tr2c2\tr2c3\n' +

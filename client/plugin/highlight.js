@@ -199,5 +199,33 @@
 		return buffer;
 	}
 
+	// TEST-CODE-START
+
+	EDITOR.addTest(1, function doNotSHowColorsAfterReloadAsPlainText(callback) {
+		EDITOR.openFile("doNotSHowColorsAfterReloadAsPlainText.dart", "void main() {}", function(err, file) {
+			if(err) throw err;
+
+			setTimeout(checkIfHighlighted, 1000);
+
+			function checkIfHighlighted() {
+				if( !fileColors.hasOwnProperty(file.path) ) throw new Error("Expected " + file.path + " to be highlighted!");
+
+				// see reload_as_plain_text.js
+				file.reload(file.text,  {
+					disableParsing: true,
+					fullAutoIndentation: false,
+					parsed: null
+				});
+
+				if( !fileColors.hasOwnProperty(file.path) ) throw new Error("Did not expected " + file.path + " to have color data after reloading as plain text!");
+
+			}
+
+		});
+
+	});
+
+	// TEST-CODE-END
+
 
 })();

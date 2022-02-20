@@ -1,7 +1,51 @@
 Reporting a bug ? Make sure it's repeatable!
 ============================================
 
+When you get the question "Click the OK button below in order to get a permission prompt for new file.txt" (nativefs)
+and you click Cancel there is an error loop!
 
+Error: You did not want to be asked for permission for native filesystem handle!
+    at https://d80.johan.webide.se/EDITOR.js:1871:20
+    at HTMLButtonElement.<anonymous> (https://d80.johan.webide.se/Dialog.js:478:58)
+
+-- 
+
+Need a way to glob (search in parent dir) when opening (goto) file without using the mouse. eg. keyboard shortcut...
+
+---
+
+when pressing backspace at the start of indenting in 
+
+---
+
+When reloading as plain text, code highlightning no longer works, so remove all existing coloring!
+for example dart code
+
+---
+
+FLutter dev
+
+https://superuser.com/questions/1705748/how-to-install-flutter-for-all-users-on-linux/1705754#1705754
+
+cd /opt/
+sudo mkdir flutter
+sudo chown $($whoami):$($whoami) flutter
+sudo chmod 775 flutter
+wget https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_2.10.2-stable.tar.xz
+
+---
+
+todo: Google login and Oauth login
+
+---
+
+on small screens put file tabs in a select element like
+with the function list.
+
+
+---
+
+use webider as git editor when running as pwa.
 
 ---
 
