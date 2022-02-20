@@ -585,7 +585,10 @@ reconnectTimeoutTime += 10000;
 
 						//console.log("UTIL.parseErrorMessage(properCallStackError[" + json.id + "].stack)=", UTIL.parseErrorMessage(properCallStackError[json.id].stack));
 
-						CLIENT.lastSrvRespCmdStack = UTIL.parseErrorMessage(properCallStackError[json.id].stack).stack.splice(1);
+						var properError = properCallStackError[json.id];
+						//console.log("properError:", properError);
+						//console.log("properError.stack=:", properError.stack);
+						if(properError.stack) CLIENT.lastSrvRespCmdStack = UTIL.parseErrorMessage(properError.stack).stack.splice(1);
 					}
 
 					// note: If the callback below throws, the timeout error would also throw! (because callbackWaitList[json.id] still exist)
