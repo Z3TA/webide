@@ -51,8 +51,10 @@ if ('serviceWorker' in navigator) {
 		}).catch(function(err) {
 			alertBox("Failed to get registerd service workers: " + err.message)
 		}).then(function() {
+			setTimeout(function() {
 			EDITOR.windowMenu.hide();
 			EDITOR.reload();
+			}, 0);
 		});
 	}
 	

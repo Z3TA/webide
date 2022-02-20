@@ -1,15 +1,6 @@
 Reporting a bug ? Make sure it's repeatable!
 ============================================
 
-When you get the question "Click the OK button below in order to get a permission prompt for new file.txt" (nativefs)
-and you click Cancel there is an error loop!
-
-Error: You did not want to be asked for permission for native filesystem handle!
-    at https://d80.johan.webide.se/EDITOR.js:1871:20
-    at HTMLButtonElement.<anonymous> (https://d80.johan.webide.se/Dialog.js:478:58)
-
--- 
-
 Need a way to glob (search in parent dir) when opening (goto) file without using the mouse. eg. keyboard shortcut...
 
 ---

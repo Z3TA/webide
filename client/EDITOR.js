@@ -848,10 +848,10 @@ EDITOR.bindKey(b);
 		}
 		navigator.clipboard.writeText(text).then(function() {
 			//console.log('Async: Copying to clipboard was successful!');
-			done(null, true, false);
+			cb(done, null, true, false);
 		}, function(err) {
 			console.error('Async: Could not copy text: ', err);
-			return fallbackCopyTextToClipboard(text);
+			cb(fallbackCopyTextToClipboard, text);
 		});
 		
 		function done(error, copiedIntoPlatformClipboard, manuallyCopied) {
@@ -966,10 +966,10 @@ usePseudoClipboard = false;
 			//console.log("getClipboardContent: Trying navigator.clipboard ...");
 			navigator.clipboard.readText().then(function(data) {
 				//console.log("getClipboardContent: navigator.clipboard.readText succeeded!");
-				readSuccess(data);
+				cb(readSuccess, data);
 			}).catch(function(err, something) {
 				//console.log("getClipboardContent: navigator.clipboard.readText failed!");
-				readFail(err || something);
+				cb(readFail, err || something);
 			});
 		}
 		else if(window.clipboardData) {
@@ -1291,9 +1291,9 @@ usePseudoClipboard = false;
 							// TypeError: Failed to execute 'digest' on 'SubtleCrypto': The provided value is not of type '(ArrayBuffer or ArrayBufferView)
 							var buff = enc.encode(fileContent);
 							crypto.subtle.digest('SHA-256', buff).then(function(hash) {
-								return load(null, path, fileContent, hash);
+								cb(load, null, path, fileContent, hash);
 							}, function(err) {
-								return load(null, path, fileContent, null);
+								cb(load, null, path, fileContent, null);
 							});
 						});
 					});
@@ -1835,7 +1835,7 @@ usePseudoClipboard = false;
 		fileHandle.queryPermission(options).then(function(permission) {
 			//console.log("EDITOR.verifyNativeFileSystemPermission: permission=" + permission);
 			if(permission == "granted") {
-				callback(null);
+				cb(callback, null);
 			}
 			else {
 				// Request permission
@@ -1843,7 +1843,7 @@ usePseudoClipboard = false;
 			}
 		}, function error(err) {
 			//console.log("EDITOR.verifyNativeFileSystemPermission: err.code=" + err.code + " err.message=" + err.message);
-			callback(err);
+			cb(callback, err);
 		});
 
 		function requestPermission(callback) {
@@ -1851,12 +1851,12 @@ usePseudoClipboard = false;
 			fileHandle.requestPermission(options).then(function(permission) {
 
 				if(permission == "granted") {
-					callback(null);
+					cb(callback, null);
 				}
 				else {
 					var error = new Error("You did not grant permission to " + options.mode + " the file!");
 					error.code = "PERMISSION_DENIED";
-					callback(error);
+					cb(callback, error);
 				}
 
 			}, function error(err) {
@@ -1869,11 +1869,11 @@ usePseudoClipboard = false;
 						}
 						else {
 							var error = new Error("You did not want to be asked for permission for native filesystem handle!");
-							callback(error);
+							cb(callback, error);
 						}
 					});
 				}
-				else callback(err);
+				else cb(callback,err);
 			});
 		}
 	}
@@ -1909,11 +1909,11 @@ usePseudoClipboard = false;
 						// TypeError: Failed to execute 'digest' on 'SubtleCrypto': The provided value is not of type '(ArrayBuffer or ArrayBufferView)
 						var buff = enc.encode(fileContent);
 						crypto.subtle.digest('SHA-256', buff).then(function(hash) {
-							callback(null, hash);
+							cb(callback, null, hash);
 						}, function(err) {
 							console.error(err);
 							var error = new Error("getFileHash: Failed to hash fileSystemFileHandle text content using crypty API");
-							callback(error);
+							cb(callback, error);
 						});
 					});
 				});
@@ -2042,20 +2042,20 @@ usePseudoClipboard = false;
 								// TypeError: Failed to execute 'digest' on 'SubtleCrypto': The provided value is not of type '(ArrayBuffer or ArrayBufferView)
 								var buff = enc.encode(text);
 								crypto.subtle.digest('SHA-256', buff).then(function(hash) {
-									doneSaving(null, path, hash);
+									cb(doneSaving, null, path, hash);
 								}, function(err) {
 									console.error(err);
 									console.warn("EDITOR.saveFile: Failed to hash the text using crypty API after saving the file using native file system API");
-									doneSaving(null, path, null);
+									cb(doneSaving, null, path, null);
 								});;
 							}
-							else doneSaving(null, path, null);
+							else cb(doneSaving, null, path, null);
 								
 						});
 					});
 					//});
 				}).catch(function(err) {
-					if(callback) callback(err);
+					if(callback) cb(callback, err);
 					else alertBox(err.message); // Can't throw inside a promise chain
 				});
 				
@@ -2433,12 +2433,12 @@ else if(err.code == "ENETDOWN") {
 
 					localFile.text().then(function(fileContent) {
 						var filePath = EDITOR.settings.nativeFileSystemPathPrefix + fileHandle.name;
-						callback(filePath, fileContent, fileHandle);
+						cb(callback, filePath, fileContent, fileHandle);
 					});
 				});
 			}).catch(function(err) {
 				var error = new Error("Something went wrong when using the native file system API to open a file: " + err.message);
-				callback(err);
+				cb(callback, err);
 			});
 			
 			
