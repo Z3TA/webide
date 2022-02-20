@@ -204,7 +204,7 @@
 
 	// TEST-CODE-START
 
-	EDITOR.addTest(1, function doNotSHowColorsAfterReloadAsPlainText(callback) {
+	EDITOR.addTest(function doNotSHowColorsAfterReloadAsPlainText(callback) {
 		EDITOR.openFile("doNotSHowColorsAfterReloadAsPlainText.dart", "void main() {}", function(err, file) {
 			if(err) throw err;
 
@@ -221,6 +221,8 @@
 				});
 
 				if( fileColors.hasOwnProperty(file.path) ) throw new Error("Did not expect " + file.path + " to have color data after reloading as plain text!");
+
+				EDITOR.closeFile(file.path);
 
 				callback(true);
 			}
