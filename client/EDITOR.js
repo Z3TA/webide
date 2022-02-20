@@ -10326,7 +10326,9 @@ window.addEventListener("mousemove", mouseMove, false);
 
 						loginScreen.style.display = "block";
 
+						var username = document.getElementById("username");
 						username.focus();
+						
 						loginButton.disabled = false;
 						loginAsGuest.disabled = false;
 
