@@ -1,7 +1,6 @@
 Reporting a bug ? Make sure it's repeatable!
 ============================================
 
-Need a way to glob (search in parent dir) when opening (goto) file without using the mouse. eg. keyboard shortcut...
 
 ---
 

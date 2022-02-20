@@ -284,7 +284,8 @@ EDITOR.unbindKey(show_gotoFileInput2);
 		inputGoto.setAttribute("id", "inputGoto");
 		inputGoto.setAttribute("class", "inputtext");
 		inputGoto.setAttribute("placeholder", "file path (regexp)");
-		
+		inputGoto.setAttribute("title", "Type .. and press Enter to search in parent folder");
+
 		inputFolder = document.createElement("input");
 		inputFolder.setAttribute("type", "text");
 		inputFolder.setAttribute("id", "inputFolder");
