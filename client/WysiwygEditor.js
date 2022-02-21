@@ -1875,7 +1875,7 @@ alertBox(wysiwygEditor.sourceFile.path + " contains SSG scripts which is not yet
 		}
 	}
 	
-	WysiwygEditor.prototype.attachTo = function attach(newWindow, callback) {
+	WysiwygEditor.prototype.attachTo = function attach(newWindow, callback, recursion) {
 		//console.log("WysiwygEditor attachTo!");
 		
 		if(typeof callback != "function") throw new Error("callback=" + callback);
@@ -1898,8 +1898,19 @@ alertBox(wysiwygEditor.sourceFile.path + " contains SSG scripts which is not yet
 			The window might already have loaded! Thus we missed the early console.log's !!
 		*/
 		if(wysiwygEditor.captureConsoleLog) {
-			// IE sometimes gives a Permission deined here
-			consoleLogOriginal = previewWin.window.console.log;
+			// IE sometimes gives a Permission deined when accessing  previewWin.window.console.log and sometimes gives error: unable to get property 'log' of undefined or null ...
+			try {
+				consoleLogOriginal = previewWin.window.console.log;
+			}
+			catch(err) {
+				// Try to reattach...
+				if(recursion==undefined) recursion = 0;
+				if(recursion < 5) setTimeout(function() { attach(newWindow, callback, recursion)  }, 100);
+				else throw new Error("Unable to get consoleLogOriginal! Error: " + err.message);
+
+				return;
+			}
+
 			previewWin.window.console.log = consoleLogCapturer;
 			previewWin.window.console.warn = consoleLogCapturer;
 			
@@ -2065,26 +2076,26 @@ alertBox(wysiwygEditor.sourceFile.path + " contains SSG scripts which is not yet
 				
 				
 				var toolbarCss = doc.createElement("link");
-					toolbarCss.setAttribute("rel", "stylesheet");
-					toolbarCss.setAttribute("type", "text/css");
-					toolbarCss.setAttribute("href", "/wysiwygEditorToolbar.css");
-					doc.head.appendChild(toolbarCss);
+				toolbarCss.setAttribute("rel", "stylesheet");
+				toolbarCss.setAttribute("type", "text/css");
+				toolbarCss.setAttribute("href", "/wysiwygEditorToolbar.css");
+				doc.head.appendChild(toolbarCss);
 					
-					var toolbar = doc.createElement("script");
-					toolbar.setAttribute("src", "/WysiwygEditorToolbar.js");
-					doc.head.appendChild(toolbar);
+				var toolbar = doc.createElement("script");
+				toolbar.setAttribute("src", "/WysiwygEditorToolbar.js");
+				doc.head.appendChild(toolbar);
 					
-					// In some browser we have to call this manually:
-					win.WysiwygEditorUpdate = function update() {
-						wysiwygEditor.previewInput();
-					};
+				// In some browser we have to call this manually:
+				win.WysiwygEditorUpdate = function update() {
+					wysiwygEditor.previewInput();
+				};
 
 				if(BROWSER != "Chrome") alertBox('"What you see is what you get" (WYSIWYG) editing only works well in Chrome browser. You are currently using ' + BROWSER + ' browser.', "BROWSER_SUPPORT", "warning");
 				
 			}
 				
-			}
 		}
+	}
 		
 		WysiwygEditor.prototype.dance = function dance() {
 			// We need to dance to make sure source code and content-editable code is the same ...
