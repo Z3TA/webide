@@ -8380,6 +8380,8 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		//if(url == undefined) url = window.location.href.replace(/\/.*/, "/dummy.htm");
 		if(url == undefined) url = "about:blank";
 		
+		console.log("EDITOR.createWindow: open url=" + url);
+
 		var theWindow = open(url);
 		// Sometimes we will not get theWindow descriptor right away... (for example when there is a cross-origin error)
 		if(theWindow != null) {
@@ -8436,7 +8438,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		
 		return theWindow;
 		
-		function testWindow(theWindow) {
+		function testWindow(theWindow, recursion) {
 			//console.log("EDITOR.createWindow: testWindow!");
 			/*
 				Due to CORS we might get errors accessing properties on the new window
@@ -8451,8 +8453,15 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 				var test = theWindow.document.domain;
 			}
 			catch(err) {
-				//console.log("EDITOR.createWindow: Possible cross-origin error!");
-				
+				// IE somtimes give an error (it occurs randomly) so retry a few times
+				console.log("EDITOR.createWindow: Possible cross-origin error! err=", err);
+				if(!recursion) recursion = 0;
+				if(recursion < 5) {
+					recursion++;
+					console.log("Retrying testWindow: recursion=" + recursion + " ");
+					return setTimeout(function() { testWindow(theWindow, recursion) }, 200);
+				}
+
 				var origin = UTIL.getLocation(document.location.href);
 				var other = UTIL.getLocation(url);
 				var diff = [];
@@ -8503,8 +8512,8 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 				theWindow.addEventListener("load", createdWindowLoaded, false);
 			}
 			else {
-
-				throw new Error("BROWSER=" + BROWSER + " has no addEventListener method on theWindow=", theWindow);
+				// IE is sometimes unable to call addEventListener...
+				setTimeout(createdWindowLoaded, 1000);
 			}
 
 			function createdWindowLoaded() {
@@ -8555,7 +8564,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 			
 			// It might have been loaded already
 			try {
-var loaded = !!theWindow.location.href;
+				var loaded = !!theWindow.location.href;
 			}
 			catch(err) {
 				console.error(err);

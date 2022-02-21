@@ -929,13 +929,16 @@ if(protocolIndex != -1) slashes = slashes - 2;
 		var fun;
 		var stack = [];
 		
-		console.log("parseErrorMessage: " + errorString);
+		console.log("UTIL.parseErrorMessage: " + errorString);
 		
 		if(errorString == undefined) {
 			console.log(arguments);
 			console.log(UTIL.getStack());
-			var error = new Error("Unable to parse error: errorString (" + (typeof errorString) + ") = " + errorString);
+			var error = new Error("UTIL.parseErrorMessage: Unable to parse error: errorString (" + (typeof errorString) + ") = " + errorString);
 			console.error(error);
+			setTimeout(function() {
+				throw error;
+			}, 0)
 			return;
 		}
 

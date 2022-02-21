@@ -106,7 +106,10 @@
 				
 				var drawErrorIcon = function() {
 					//console.log("render_info: Rendering error.svg");
-					ctx.drawImage(iconError, x+textPadding, y + textHeight/2 - iconHeight/2 + textPadding, iconHeight,iconHeight);
+					// IE error: "Unexpected call to method or property access", putting it behind setTimeout gets rid of the error
+					setTimeout(function() {
+						ctx.drawImage(iconError, x+textPadding, y + textHeight/2 - iconHeight/2 + textPadding, iconHeight,iconHeight);
+					}, 0);
 				}
 				
 				if(iconError) drawErrorIcon();
@@ -114,7 +117,8 @@
 					//console.log("render_info: Loading error.svg ...");
 					iconError = new Image();
 					iconError.src = "gfx/error.svg";
-					iconError.onload = drawErrorIcon;
+					
+					iconError.onload = function() {setTimeout(drawErrorIcon, 100)};
 				}
 				
 				iconPadding = 25;

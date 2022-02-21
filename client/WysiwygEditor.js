@@ -1948,7 +1948,10 @@ alertBox(wysiwygEditor.sourceFile.path + " contains SSG scripts which is not yet
 		}
 		
 		function consoleLogCapturer() {
+			console.log("consoleLogCapturer!");
+			console.log("consoleLogCapturer arguments=", arguments);
 			var stack = (new previewWin.window.Error("stack")).stack;
+			console.log("consoleLogCapturer stack=", stack);
 			wysiwygEditor.consoleLog(arguments, stack);
 		}
 		
@@ -2235,11 +2238,11 @@ alertBox(wysiwygEditor.sourceFile.path + " contains SSG scripts which is not yet
 			var wysiwygEditor = this;
 			
 			// Console log takes many arguments and concatenates them
-		//console.log("Console log detected! arg.length=" + arg.length + " stack=" + stack);
-			var msg = "";
+		console.log("Console log detected! arg.length=" + arg.length + " stack=" + stack);
+		var msg = "";
 			for (var i=0; i<arg.length; i++) {
-			//console.log("typeof arg[" + i + "]=" + (typeof typeof arg[i]));
-				if(typeof arg[i] == "string") msg = msg + " " + arg[i];
+			console.log("typeof arg[" + i + "]=" + (typeof typeof arg[i]));
+			if(typeof arg[i] == "string") msg = msg + " " + arg[i];
 				else if(typeof arg[i] == "object") {
 					var stringifyError = false;
 				try {
@@ -2265,11 +2268,29 @@ alertBox(wysiwygEditor.sourceFile.path + " contains SSG scripts which is not yet
 		}
 		if(msg.length > 1) msg = msg.slice(1, msg.length); // Remove the first space
 		
-		//consoleLogOriginal(msg);
+		/*
+			Internet Explorer is not able to get a call stack from (new Error()) but it can get a call stack from thro inside try/catch block
+			A try catch block here will give us a local call stack though (at consoleLog and at consoleLogCapturer)
+			Furetunately calling consoleLogOriginal() in IE will throw an error and that error also has the correct call stack!
+			(IE global usage is still a few percent as of februari 2022)
+		*/
+		if(!stack) {
+			try {
+				consoleLogOriginal("IE pls give me a call stack"); // Gives a call stack that for some weird reason points to the location of the original console.log 
+				//throw new Error("foo"); // Only gives a local call stack  (at consoleLog and at consoleLogCapturer)
+			}
+			catch(err) {
+				stack = err.stack;
+				console.log("new stack=", stack);
+			}
+		}
+
+		// IE also throw and error when trying to call consoleLogOriginal.apply() 
+		if(BROWSER != "MSIE") {
+			consoleLogOriginal.apply(undefined, arg);
+		}
 		
-		consoleLogOriginal.apply(undefined, arg);
-		
-		//console.log("Captured console.log (" + arg.length + " argument(s)): " + msg);
+		console.log("Captured console.log (" + arg.length + " argument(s)): " + msg);
 		
 		var inlinedMessage = EDITOR.showMessageFromStackTrace({
 			message: msg, 
