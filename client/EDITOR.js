@@ -11959,12 +11959,14 @@ function paste(pasteEvent) {
 	var ret;
 	var textChanged = false;
 	
-	if (window.clipboardData && window.clipboardData.getData) { // IE
-		var text = window.clipboardData.getData('Text');
-	} else if (pasteEvent.clipboardData && pasteEvent.clipboardData.getData) {
-		var text = pasteEvent.clipboardData.getData('text/plain');
+	
+		if (pasteEvent.clipboardData && pasteEvent.clipboardData.getData) {
+			var text = pasteEvent.clipboardData.getData('text/plain');
 		}
-	else {
+		else if (window.clipboardData && window.clipboardData.getData) { // IE
+			var text = window.clipboardData.getData('Text');
+		}
+		else {
 			alertBox("Unable to get platform/OS clipboard data!", "ERRPASTE");
 		}
 	

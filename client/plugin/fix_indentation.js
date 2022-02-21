@@ -557,7 +557,7 @@
 		});
 	});
 	
-	EDITOR.addTest(function pastedTextShouldBeFormatted(callback) {
+	EDITOR.addTest(1, function pastedTextShouldBeFormatted(callback) {
 		// Test pasting in a file that we don't own the lines!
 		EDITOR.openFile(UTIL.joinPaths(EDITOR.user.homeDir, "/wwwpub/pastedTextShouldBeFormatted.js"), '{\n\n\n\n}\n', function(err, file) {
 			if(err) throw err;
@@ -565,11 +565,24 @@
 			file.moveCaretDown();
 			file.moveCaretDown();
 			
-			EDITOR.onPaste(new ClipboardEvent('paste', {
-				dataType: 'text/plain',
-				data: 'if(1==2) {\nconsole.log("hi");\n}\n'
-			}));
-			
+			var data = 'if(1==2) {\nconsole.log("hi");\n}\n';
+
+			if(typeof ClipboardEvent == "undefined") {
+				// IE
+				EDITOR.onPaste({
+					clipboardData: {
+						getData: function() {return data}
+					},
+					preventDefault: function() {}
+				});
+			}
+			else {
+				EDITOR.onPaste(new ClipboardEvent('paste', {
+					dataType: 'text/plain',
+					data: data
+				}));
+			}
+
 			// Chrome browser wont let us parse, thus failing the test ...
 			if(file.text.indexOf("console.log") == -1) {
 				// Text failed to parse
