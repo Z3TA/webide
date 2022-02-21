@@ -557,7 +557,7 @@
 		});
 	});
 	
-	EDITOR.addTest(1, function pastedTextShouldBeFormatted(callback) {
+	EDITOR.addTest(function pastedTextShouldBeFormatted(callback) {
 		// Test pasting in a file that we don't own the lines!
 		EDITOR.openFile(UTIL.joinPaths(EDITOR.user.homeDir, "/wwwpub/pastedTextShouldBeFormatted.js"), '{\n\n\n\n}\n', function(err, file) {
 			if(err) throw err;
