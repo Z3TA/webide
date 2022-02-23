@@ -1794,7 +1794,7 @@
 			
 			var tests = originalTests.slice(); // Copy array
 			
-			EDITOR.saveToDisk(filePath, "First\nSecond\n", function(err) {
+			EDITOR.saveToDisk(filePath, "First\nSecond\n", undefined, undefined, 30000, function(err) { // path, text, inputBuffer, encoding, timeout, saveToDiskCallback
 				if(err) throw err;
 				test();
 			});
@@ -1912,7 +1912,8 @@
 		});
 	});
 	
-	EDITOR.addTest(true, function editBigFile2(callback) {
+	// Run this test early or it will slow down too much 
+	EDITOR.addTest(10, true, function editBigFile2(callback) {
 		var filePath = UTIL.joinPaths(EDITOR.user.homeDir, "/testfile.txt");
 		var testFile = UTIL.joinPaths(EDITOR.user.homeDir, "/editBigFileTest2.txt");
 		

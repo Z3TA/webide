@@ -1883,6 +1883,13 @@ alertBox(wysiwygEditor.sourceFile.path + " contains SSG scripts which is not yet
 		//console.log("Attaching event listeners etc to " + newWindow);
 		var wysiwygEditor = this;
 		
+		if(wysiwygEditor == undefined) {
+			// IE somtimes gives error: Unable to set property 'previewWin' of undefined or null reference
+			if(recursion==undefined) recursion = 0;
+			if(recursion < 5) setTimeout(function() { attach(newWindow, callback, recursion)  }, 100);
+			else throw new Error("wysiwygEditor(this) = (type " + (typeof wysiwygEditor) + ") " + wysiwygEditor);
+		}
+
 		if(newWindow == undefined) throw new Error("newWindow=" + newWindow);
 		
 		if(newWindow == window) throw new Error("newWindow can not be the same as window!"); // Sanity

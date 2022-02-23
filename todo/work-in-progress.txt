@@ -3,6 +3,8 @@ Reporting a bug ? Make sure it's repeatable!
 
 Trying to run tests in IE
 
+Need to refactor render_info because IE will throw and error when calling ctx.drawImage
+
 ---
 
 when pressing backspace at the start of an indentation (in "plain text mode"), the indentation should be deleted and you should be placed on the row before it !?

@@ -4503,12 +4503,12 @@ if(startColumn-indentationWidth > minIndentation*EDITOR.settings.tabSpace) {
 				
 				//console.log("File.loadFilePart: file.totalRows=" + file.totalRows);
 				var totalLineBreaks = resp.totalLines-1;
-			file.totalRows = totalLineBreaks;
+				file.totalRows = totalLineBreaks;
 				
 				if(callback) callback(null);
 			
 			}
-			});
+		});
 		}
 	
 	

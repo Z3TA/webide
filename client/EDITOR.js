@@ -2181,7 +2181,7 @@ else if(err.code == "ENETDOWN") {
 	}
 	
 	
-	EDITOR.saveToDisk = function(path, text, inputBuffer, encoding, saveToDiskCallback) {
+	EDITOR.saveToDisk = function(path, text, inputBuffer, encoding, timeout, saveToDiskCallback) {
 		// You probably want to use EDITOR.saveFile instead!
 		// This is used internaly by the editor, but exposed so plugins can save files that are not opened.
 		
@@ -2201,6 +2201,10 @@ else if(err.code == "ENETDOWN") {
 		else if(typeof encoding == "function" && saveToDiskCallback == undefined) {
 			saveToDiskCallback = encoding;
 			encoding = undefined;
+		}
+		else if(typeof timeout == "function" && saveToDiskCallback == undefined) {
+			saveToDiskCallback = timeout;
+			timeout = undefined;
 		}
 		
 		if(inputBuffer != undefined && typeof inputBuffer != "boolean") throw new Error("EDITOR.saveToDisk: Third argument inputBuffer need to be true,false or undefined!");
@@ -2223,8 +2227,8 @@ else if(err.code == "ENETDOWN") {
 		// Posting to /share also seem to work when running as a desktop editor (eg. not a cloud IDE, so it works on both the cloud IDE and desktop!) !
 		
 		//console.log("EDITOR.uploadSpeed=" + EDITOR.uploadSpeed + " text.length=" + text.length);
-		if(EDITOR.uploadSpeed && text.length / EDITOR.uploadSpeed > 1024) {
-			var estimatedUploadTime = Math.floor(text.length / EDITOR.uploadSpeed);
+		if(EDITOR.uploadSpeed && text.length / EDITOR.uploadSpeed > 1024 || timeout != undefined) {
+			var estimatedUploadTime = Math.floor(timeout ? timeout : text.length / EDITOR.uploadSpeed);
 			var progress = document.getElementById("progress");
 			var progressValue = 0;
 			progress.value = progressValue;
@@ -8513,7 +8517,9 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 			}
 			else {
 				// IE is sometimes unable to call addEventListener...
-				setTimeout(createdWindowLoaded, 1000);
+				setTimeout(function() {
+					theWindow.addEventListener("load", createdWindowLoaded, false);
+				}, 250);
 			}
 
 			function createdWindowLoaded() {
@@ -11028,7 +11034,8 @@ window.addEventListener("mousemove", mouseMove, false);
 		var aborted = false;
 		var firstTestOrder = 10000;
 		var firstTest;
-		
+			var waitTime = 2000;
+
 		if(testsToRun == 1) {
 			for (var i=0; i<EDITOR.tests.length; i++) {
 				if(EDITOR.tests[i].order < firstTestOrder) {
@@ -11058,8 +11065,8 @@ window.addEventListener("mousemove", mouseMove, false);
 
 			if(waitingForSync) {
 					//console.log("testInfo: Waiting for " + currentRunningTest + " ...");
-					setTimeout(testLoop, 1000);
-				return;
+					setTimeout(testLoop, waitTime);
+					return;
 			}
 			
 			if(finished == testsToRun) return allTestsDone();
@@ -11091,7 +11098,7 @@ window.addEventListener("mousemove", mouseMove, false);
 				
 			}
 
-				setTimeout(testLoop, 1000);
+				setTimeout(testLoop, waitTime);
 
 		}
 		
