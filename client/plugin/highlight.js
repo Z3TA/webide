@@ -208,7 +208,7 @@
 		EDITOR.openFile("doNotSHowColorsAfterReloadAsPlainText.dart", "void main() {}", function(err, file) {
 			if(err) throw err;
 
-			setTimeout(checkIfHighlighted, 600); // The Web worker overhead is terrible, so we need to wait for the text/code to be highlighted!
+			setTimeout(checkIfHighlighted, 1000); // The Web worker overhead is terrible, so we need to wait for the text/code to be highlighted!
 
 			function checkIfHighlighted() {
 				if( !fileColors.hasOwnProperty(file.path) ) throw new Error("Expected " + file.path + " to be highlighted!");
