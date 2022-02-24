@@ -1,9 +1,9 @@
 Reporting a bug ? Make sure it's repeatable!
 ============================================
 
-Trying to run tests in IE
-
-Need to refactor render_info because IE will throw and error when calling ctx.drawImage
+Improve Connecting to Google drive experience.
+(for example the explore tool spins and you start in root / ...)
+Make a video on how to connect from a clean browser/account/drive
 
 ---
 

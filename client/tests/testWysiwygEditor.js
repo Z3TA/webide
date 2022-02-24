@@ -636,7 +636,7 @@
 							callback(new Error("wysiwygEditor did not load in a timely manner. Load the dev console on the opened window and check for errors! You might also have to enable popups!"));
 							callback =  null; // Prevent it from calling again
 						}
-					}, 30000);
+					}, 60000);
 					
 					var wOptions = {
 						sourceFile: sourceFile,

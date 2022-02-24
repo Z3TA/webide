@@ -127,7 +127,10 @@
 
 				var drawWarningIcon = function() {
 					//console.log("render_info: Rendering warning.svg");
+					// IE error: "Unexpected call to method or property access", putting it behind setTimeout gets rid of the error
+					setTimeout(function() {
 					ctx.drawImage(iconWarning, x+textPadding, y + textHeight/2 - iconHeight/2 - 2 + textPadding, iconHeight,iconHeight);
+					}, 0);
 				}
 
 				if(iconWarning) drawWarningIcon();
