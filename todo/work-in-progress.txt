@@ -7,6 +7,13 @@ Make a video on how to connect from a clean browser/account/drive
 
 ---
 
+* If I double- or triple-click-and-hold, I can drag the mouse to expand the selection word-wise or line-wise, not just character-wise.
+
+
+
+
+---
+
 when pressing backspace at the start of an indentation (in "plain text mode"), the indentation should be deleted and you should be placed on the row before it !?
 how does other editors do it ?
 
