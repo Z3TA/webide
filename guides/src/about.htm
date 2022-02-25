@@ -22,12 +22,12 @@ and make it run <i>live</i> in the cloud with one click,
 
 <h1>WebIDE</h1>
 
-<p>WebIDE is an online environment for developing Node.JS, progressive web apps (PWA), websites, blog, etc.</p>
+<p>WebIDE is an online environment for developing Node.JS, progressive web apps (PWA), websites, etc.</p>
 
 
 <h3>Node.js and databases</h3>
 
-<p>WebIDE is a environment where you can not just run Node.JS code, you can also create databases,
+<p>WebIDE is a environment where you can run Node.JS code, create databases,
 and push your creations into "production" where they run live in the cloud without going to sleep.</p>
 
 <p>When you run a Node.js Script, a HTTPS endpoint is automatically created so you can access it from app.user.webide.se<nr>
@@ -111,7 +111,7 @@ and push your creations into "production" where they run live in the cloud witho
 	<li>File explorer. <kbd>Ctrl+E</kbd></li>
 	<li>Go to any file. <kbd>Ctrl+O</kbd></li>
 	<li>Automatic CSS refresh in preview mode.</li>
-	<li>.diff file coloring.</li>
+	<li>.diff file coloring and double click to go to location in source file.</li>
 	<li>Find <kbd>Ctrl+F</kbd></li>
 	<li>Find in any file. <kbd>Ctrl+Shif+F</kbd></li>
 	<li>Function to fork any web site; useful for tutorials and examples. Append ?fork=url to the query string</li>
@@ -164,22 +164,16 @@ merge if necessary, and ask the user to write a commit message before publishing
 
 <h2>What makes WebIDE better then existing editors/IDE's, or what does it do differently !?</h2>
 
-<p>WebIDE is written by one guy in simple "vanilla" JavaScript.
-It's easy to add new functionality, and all you have to do to see the new changes is to refresh/reload,
-there is no build/compilation step. 
-Or if you are working on a plugin, press <kbd>F7</kbd> key to hot reload the plugin without refreshing.</p>
+<p>It has an incremental parser (runs client side, so works offline) that parses the text/code on every key stroke, which enables stuff like fully automatic code/block indentation.</p>
 
-<p>The editor <i>does Not</i> use the document object model (DOM) or "content-editable" for text rendering!
-WebIDE uses 2d Canvas, which is faster then the DOM.</p>
+<p>Relative small footprint if run in the browser: Only 2MB download, and 2-8 MB RAM usage depending on browser</p>
 
-<p>When editing a file, it's parsed client-side an every key stroke,
-which enables automatic indentation, and "IDE" features like function-list and auto-complete.</p>
+<p>Can run on many browsers: Internet Explorer, Safari, Firefox, Chrome and mobile variants</p>
 
-<p>You can run the cloud editor on your computer, mobile phone, or your own server, not only the client, 
-but also the server.
-Eg. you could host the editor on your mobile phone or laptop, then let others connect to it via Wifi.</p>
+<p>Supports editing code on a mobile phone (it has a custom virtual keyboard)</p>
 
-
+<p>Written in simple "vanilla" JavaScript, which makes adding new functionality as easy as editing a static web site, just refresh/reload to see the changes.
+(if you are working on a plugin, press <kbd>F7</kbd> key to hot reload the plugin without refreshing.)</p>
 
 
 <h2>Why are you not working on something more important, text-editing is a solved problem!?</h2>
@@ -209,8 +203,8 @@ and visual aids to show which parts of the code does what, what parts are hot, t
 <p>Back-end and front-end is separated in order to make everything work in the browser. The back-end is a Node.JS server.
 And the client (front-end) can be any browser or <a href="https://nwjs.io/">nw.js</a></p>
 
-<p>WebIDE has a small core of only a few files. All functionality, even the rending, is implemented via plugins.<br>
-Each plugin is a independent unit and do not depend on, or interfere with other plugins.<br>
+<p>WebIDE has a small core of only a few files. All functionality, even the rendering, is implemented via plugins.<br>
+Each plugin is an independent unit and do not depend on, or interfere with other plugins.<br>
 Plugins can be hot loaded, so while making a plugin, you can reload the plugin without reloading the editor.</p>
 
 
