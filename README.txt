@@ -240,6 +240,21 @@ npm install --global webide.se
 ```
 
 
+Permission issues running npx on Windows 10/11 (EPERM: operation not permitted, mkdir)
+--------------------------------------------------------------------------------------
+Likely your home directory "C:\users\your name" contains a space...
+Start->Run type cmd, press Enter
+```
+cd C:\Users\
+dir /x
+```
+This will show you the short path to your home directory, for example "John Doe" might be JOHNDO~1
+Then edit your npm configuration:
+```
+npm config set cache "C:\Users\JOHNDO~1\AppData\Roaming\npm-cache" --global
+```
+
+
 Missing npm build dependencies
 ------------------------------
 All native module dependences are optional, but they are nice to have!
