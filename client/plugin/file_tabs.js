@@ -271,7 +271,7 @@ function switchTabInStandaloneMode() {
 		
 		var el = document.getElementById("tabFileItem_" + file.path);
 		
-		if(!el) throw new Error("Unable to find tab for file.path=" + file.path); // Possible due to tab being closed
+		if(!el) throw new Error("file_tabs: Unable to find file-tab for file.path=" + file.path + " (has it been closed?)"); // Possible due to tab being closed
 		
 		showUnsavedStatus(el);
 	}

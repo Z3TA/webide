@@ -1,11 +1,10 @@
 Reporting a bug ? Make sure it's repeatable!
 ============================================
 
+Error: remove='new file' not in array=[]
+   at removeFromStringList (http://127.0.0.1:8099/plugin/reopen_files.js:868:19) 
 
-
----
-
-Not helpful error: "Unable to find tab for file.path="
+Unable to close the file! Close the file even if there is an error.
 
 ---
 
