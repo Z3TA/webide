@@ -2058,7 +2058,7 @@ API.createPath = function createPath(user, json, createPathCallback) {
 	
 	var url = require('url');
 	var parse = url.parse(pathToCreate);
-	var protocol = parse.protocol;
+	var protocol = parse.protocol; // Gotcha: url.parse will think Windows paths have a protocol. eg. c:\\Users protocol=c
 	var delimiter = UTIL.getPathDelimiter(pathToCreate);
 	var lastChar = pathToCreate.substring(pathToCreate.length-1);
 	var hostname = parse.hostname;
@@ -2084,10 +2084,10 @@ API.createPath = function createPath(user, json, createPathCallback) {
 		createPathSomewhere(folder, json.public, function(err, path) {
 			if(err) {
 errors.push(err.message + " path=" + path);
-				//console.warn("WARN: Failed to create path=" + path + "\n" + err.message);
+				console.log("Failed to create path=" + path + "\n" + err.message);
 			}
 			else {
-				//console.log("Successfully created path=" + path);
+				console.log("Successfully created path=" + path);
 			}
 			
 			if(create.length > 0) executeMkdir(create.shift());
@@ -2140,6 +2140,8 @@ errors.push(err.message + " path=" + path);
 		if(protocol) {
 			// We only want the path!
 			path = url.parse(path).pathname;
+			// gotcha: url.parse replaces space with %20
+			path = decodeURIComponent(path); // this might cause other issues, lets hope people don't start using url escape codes in their folder names :P
 		}
 		
 		if(protocol == "ftp" || protocol == "ftps") {
@@ -2196,7 +2198,7 @@ errors.push(err.message + " path=" + path);
 				// note: The file permissions wont change if the file already exists!
 				}
 			
-			
+			//console.log("mkdir: path: " + path);
 			fs.mkdir(path, folderMode, function(err) {
 				
 				if(err) createPathSomewhereCallback(err, path);

@@ -1,6 +1,18 @@
 Reporting a bug ? Make sure it's repeatable!
 ============================================
 
+
+
+---
+
+Not helpful error: "Unable to find tab for file.path="
+
+---
+
+Can't scroll up/down using two fingers on HP mousepad
+
+---
+
 Improve Connecting to Google drive experience.
 (for example the explore tool spins and you start in root / ...)
 Make a video on how to connect from a clean browser/account/drive
@@ -8,9 +20,6 @@ Make a video on how to connect from a clean browser/account/drive
 ---
 
 * If I double- or triple-click-and-hold, I can drag the mouse to expand the selection word-wise or line-wise, not just character-wise.
-
-
-
 
 ---
 
