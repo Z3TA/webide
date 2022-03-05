@@ -331,7 +331,7 @@ If you installed using npm:
 If you are using a hosted web app (PWA):
 Most likely the editor will tell you there is a new version and ask if you want to upgrade,
 but if that for some reason doesn't work - do the following:
-* 0Go to Editor in the WebIDE top menu, and click "Unregister Service Worker". Then reload the page.
+* Go to Editor in the WebIDE top menu, and click "Unregister Service Worker". Then reload the page.
 
 If that didn't work, hit Ctrl+Shift+I in to start your browser's developer tools,
 then find the Application tab, click on service worker, then force the service worker to (un)register/update.

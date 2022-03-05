@@ -1,6 +1,18 @@
 Reporting a bug ? Make sure it's repeatable!
 ============================================
 
+
+ctx..textRendering = "optimizeSpeed"
+
+https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-textrendering-auto
+https://svgwg.org/svg2-draft/painting.html#TextRendering
+
+---
+
+https://snyk.io/test/npm/webide.se
+
+---
+
 Error: remove='new file' not in array=[]
    at removeFromStringList (http://127.0.0.1:8099/plugin/reopen_files.js:868:19) 
 
