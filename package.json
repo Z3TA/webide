@@ -42,7 +42,7 @@
   "optionalDependencies": {
     "mysql2": "^1.6.5",
     "node-pty": "^0.9.0",
-    "nodehun": "^2.0.12",
+    "nodehun": "^3.0.2",
     "nodemailer": "^6.7.2",
     "nodemailer-smtp-transport": "^2.7.2",
     "posix": "^4.1.2",

@@ -204,6 +204,8 @@ apt-get install xvfb x11vnc socat -y
 echo "#webide: Installing Mercurial"
 apt-get install mercurial -y
 
+echo "#webide: Installing Git"
+apt-get install git -y
 
 echo "#webide: Installing hggit for Mercruial"
 apt-get install python-pip -y

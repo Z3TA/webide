@@ -5,6 +5,7 @@
 */
 
 var logModule = require("../../../shared/log.js");
+var UTIL = require("../../../client/UTIL.js");
 var log = logModule.log;
 var nodehunExist = true;
 try {
@@ -42,6 +43,7 @@ for (var i=0, name=""; i<folders.length; i++) {
 }
 
 SPELLCHECK.languages = function languages(user, json, callback) {
+		// S
 	var languages = json;
 	var dictsLoaded = 0;
 	var error = null;
@@ -65,6 +67,11 @@ SPELLCHECK.languages = function languages(user, json, callback) {
 			error = new Error("Language dictionary(ies) " + notAvailable.join(",") + " not available! Try " + Object.keys(dictFiles) + "");
 		}
 		
+		for(var i=0; i<dict.length; i++) {
+			dict[i].suggest = UTIL.depromisify(dict[i].suggest);
+			//dict.isCorrect(word, spellAnswer);
+		}
+
 		callback(error, dict.length);
 }
 
@@ -78,8 +85,8 @@ SPELLCHECK.check = function check(user, json, callback) {
 		//log("Spellchecking word=" + word, logModule.DEBUG);
 	
 	for(var i=0; i<dict.length; i++) {
-		dict[i].spellSuggest(word, spellAnswer);
-		//dict.isCorrect(word, spellAnswer);
+			dict[i].suggest(word, spellAnswer);
+			//dict.isCorrect(word, spellAnswer);
 	}
 	
 	function spellAnswer(err, correct, sugg, origWord){

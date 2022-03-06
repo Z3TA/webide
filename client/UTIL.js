@@ -20,6 +20,49 @@ if(typeof EDITOR == "undefined") {
 }
 
 var UTIL = {
+	// Converts psuedo array (like arguments and some DOM data structures) to a real array
+	toArray: function toArray(pseudoArray) {
+		var args = new Array(pseudoArray.length);
+		for(var i = 0; i < args.length; ++i) {
+			args[i] = pseudoArray[i];
+		}
+		return args;
+	},
+
+	// If you want to use the callback pattern with promises
+	// The problem with Promises is that they will capture all errors in every future child call
+	// resulting in that future errors will be swallowed by the Promise
+	// Also see cb function in global.js
+	depromisify: function depromisify(promise) {
+		return function() {
+			var args = UTIL.toArray(arguments);
+			
+			var callback = args.pop(); // The last parameter is the callback function (JS callback convention)
+
+			promise.apply(undefined, args).then(function() {
+				var args = UTIL.toArray(arguments);
+				args.unshift(null); // The first parameter is the error (JS callback convention)
+				if(typeof callback == "function") {
+					// Using setTimeout to escape the promise
+					setTimeout(function() {
+						callback.apply(undefined, args);
+					}, 0);
+				}
+			}).catch(function () {
+				var args = UTIL.toArray(arguments);
+				if(typeof callback == "function") {
+					// Using setTimeout to escape the promise
+					setTimeout(function() {
+						callback.apply(undefined, args);
+					}, 0);
+				}
+				else setTimeout(function() { // Using setTimeout to escape the promise
+					throw args[0];
+				},0);
+			});
+		}
+	},
+
 	byteSize: function byteSize(str) {
 		// For example when calculating the size of a file
 
