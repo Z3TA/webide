@@ -842,22 +842,6 @@ sudo iptables -D INPUT 1
 sudo iptables -D OUTPUT 1
 
 
-Debugging Error: spawn EACCES
------------------------------
-
-1. Figure out where the spawning error is by console.log spawn exe and arg at every spawn
-2. Try running the command in a chroot, for example: sudo chroot /home/ltest4/ node -v
-3. Try running the command as that user: sudo -u ltest4 node -v
-
-
-Debugging Error: spawn ENOENT
------------------------------
-
-1. It's possible that the error is an Apparmor EACCESS in disguise. So try disabling apparmor
-2. If the process starts, but tries to find a file and exits with an ENOENT. Try running in chroot.
-The error might be related to the PATH env variable. So make sure PATH env exist `var opt = {env: {PATH: "/bin/:/usr/bin"}}`
-3. It might be because of spawn's cwd option not being a directory or not found
-
 
 Moving user to another server using ZFS
 ---------------------------------------
