@@ -153,7 +153,12 @@ function cb() {
 		fortunately calling setTimout escapes the error trap!
 	*/
 
-	var args = toArray(arguments);
+	// Convert arguments to a proper Array so we can use method shift() etc on it
+	var args = new Array(arguments.length);
+	for(var i = 0; i < args.length; ++i) {
+		args[i] = arguments[i];
+	}
+
 	var callback = args.shift();
 
 	if(typeof callback == "function") {
@@ -162,16 +167,7 @@ function cb() {
 			callback.apply(undefined, args);
 		}, 0);
 	}
-	// Using setTimeout to escape the promise
-	else setTimeout(function() {
+	else setTimeout(function() { // Using setTimeout to escape the promise
 		throw args[0];
 	},0);
-
-	function toArray(pseudoArray) {
-		var args = new Array(pseudoArray.length);
-		for(var i = 0; i < args.length; ++i) {
-			args[i] = pseudoArray[i];
-		}
-		return args;
-	}
 }
