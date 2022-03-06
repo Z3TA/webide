@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Only run this script if you want to install the editor as a cloud editor!
-
+# If you are feeling unlucky you could go through these steps manually 
 
 # Change this to your timezone:
 TZ=Europe/Stockholm
@@ -122,7 +122,7 @@ cp etc/systemd/webide.service /etc/systemd/system/webide.service
 sed -i "s/webide.se/$HOSTNAME/g" /etc/systemd/system/webide.service
 sed -i "s/zeta@zetafiles.org/$ADMIN_EMAIL/g" /etc/systemd/system/webide.service
 systemctl enable webide
-
+# systemctl daemon-reload
 
 # Signup service to let users signup
 # If you enable automatic signup you probably also want to edit client/signup/signup.htm
@@ -138,6 +138,12 @@ echo "#webide: Installing webide_nodejs_init.service"
 cp etc/systemd/webide_nodejs_init.service /etc/systemd/system/webide_nodejs_init.service
 systemctl enable webide_nodejs_init
 
+
+# Install Node.js
+curl -sL https://deb.nodesource.com/setup_16.x | sudo -E bash -
+sudo apt update && sudo apt install -y nodejs
+
+
 # Allow users to swtich between Node.js versions
 npm install -g n
 #chmod 700 /usr/lib/node_modules/n/bin/n
@@ -145,7 +151,9 @@ n 10
 n 12
 n 13
 n 14
-
+n 15
+n 16
+n 17
 
 # Install Nginx (needed to let users have their own home page under user.yourdomain.com)
 echo "#webide: Installing Nginx"
@@ -178,6 +186,13 @@ cp etc/nginx/default.nginx /etc/nginx/sites-available/default
 
 service nginx reload
 
+
+nginx -T
+echo
+echo "Don't forget to generate the certificates!"
+echo
+
+
 echo "#webide: Installing logrotate script for nginx log files"
 ln -sf $(pwd)/etc/nginx/nginx.logrotate.conf /etc/logrotate.d/nginx.logrotate.conf
 
@@ -196,15 +211,25 @@ apt-get install python-pip -y
 apt -f install -y
 # Yes, again, because of Python issues
 apt-get install python-pip -y
-pip install hg-git
-apt-get install python-brotli -y
+# For Ubuntu 20
+apt-get install python3-pip -y
 
+pip install hg-git
+# Ubuntu 18 and earlier
+apt-get install python-brotli -y
+# Ubuntu 20
+# todo: python-brotli does not exist in Ubuntu 20 ! WIll hggit work!?
 
 echo "#webide: Installing Letsencrypt's certbot"
-apt-get install software-properties-common -y
-add-apt-repository ppa:certbot/certbot -y
-apt-get update
-apt-get install python-certbot-nginx -y
+# For Ubuntu 18 and earlier
+#apt-get install software-properties-common -y
+#add-apt-repository ppa:certbot/certbot -y
+#apt-get update
+#apt-get install python-certbot-nginx -y
+
+# For Ubuntu 20
+apt-get install certbot python3-certbot-nginx -y
+
 
 
 echo "#webide: Installing archive extractor utilities"
@@ -220,8 +245,9 @@ apt-get install mysql-server -y
 apt-get install mysql-client -y
 
 echo "#webide: Configuring MySQL server"
-sed  '/\[mysqld\]/a \nplugin-load-add=auth_socket.so\nauth_socket=FORCE_PLUS_PERMANENT\n' /etc/mysql/my.cnf
-
+sed '/\[mysqld\]/a \nplugin-load-add=auth_socket.so\nauth_socket=FORCE_PLUS_PERMANENT\n' /etc/mysql/my.cnf
+# Ubunt 20 or MySQL 8 moved settings to /etc/mysql/mysql.conf.d/mysqld.cnf
+sed '/\[mysqld\]/a \nplugin-load-add=auth_socket.so\nauth_socket=FORCE_PLUS_PERMANENT\n' /etc/mysql/mysql.conf.d/mysqld.cnf
 
 # So that users cant list other user's files
 chmod 711 /home
@@ -250,7 +276,12 @@ echo "/etc/nginx/sites-available/$HOSTNAME.nginx"
 echo "/etc/nginx/sites-available/signup.$HOSTNAME.nginx"
 echo "$(pwd)/default.js"
 echo ""
-echo "then run systemctl reload nginx"
+echo "systemctl reload nginx"
 echo "(use nginx -T to check for errors)"
+echo ""
+echo "npm install"
+echo ""
+echo "Also read about Docker daemon base VM, and userdir_skeleton in README.txt"
+
 
 exit 0

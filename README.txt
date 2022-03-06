@@ -535,7 +535,7 @@ zfs rollback ben/home/userskeleton@baseX
 
 Installing/upgrading Nodejs
 ---------------------------
-Uninstall nodejs if it's already installed, then install it foromnodesource.
+Uninstall nodejs if it's already installed, then install it from Nodesource.
 See https://github.com/nodesource/distributions
 
 `sudo apt remove nodejs && sudo apt remove npm`
@@ -548,8 +548,8 @@ sudo apt update && sudo apt install -y nodejs
 Note: nodesource will use /usr/bin/node, not /usr/bin/nodejs (which is used by Ubuntu) !
 
 
-Installing certbot (letsencrypt)
---------------------------------
+Installing certbot (letsencrypt) on Ubuntu 18
+---------------------------------------------
 ````
 sudo apt-get update
 sudo apt-get install software-properties-common
@@ -557,6 +557,13 @@ sudo add-apt-repository ppa:certbot/certbot
 sudo apt-get update
 sudo apt-get install python-certbot-nginx 
 ````
+
+Installing certbot (letsencrypt) on Ubuntu 20
+---------------------------------------------
+````
+sudo apt install certbot python3-certbot-nginx -y
+````
+
 
 Automatically set up the server for running WebIDE as a cloud-IDE:
 ------------------------------------------------------------------
@@ -884,7 +891,7 @@ The error might be related to the PATH env variable. So make sure PATH env exist
 
 
 Moving user to another server using ZFS
---------------------------------
+---------------------------------------
 Run this command from the server you want to move the user TO:
 `ssh root@whereuserat 'zfs snapshot fromvol/home/nameofuser@backup && zfs send fromvol/home/nameofuser@backup' | sudo zfs receive tovol/home/nameofuser`
 

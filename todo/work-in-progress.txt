@@ -1,6 +1,19 @@
 Reporting a bug ? Make sure it's repeatable!
 ============================================
 
+Installing a new server with Ubuntu 20!
+
+todo: test webide on latest Node.js version
+
+root@kaj:/srv/webide# npm audit fix --force
+npm WARN using --force Recommended protections disabled.
+npm WARN audit Updating nodemailer to 6.7.2,which is a SemVer major change.
+npm WARN audit Updating nodemailer-smtp-transport to 2.4.2,which is a SemVer major change.
+
+removed 17 packages, changed 6 packages, and audited 118 packages in 13s
+
+
+---
 
 ctx..textRendering = "optimizeSpeed"
 

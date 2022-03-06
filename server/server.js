@@ -3453,12 +3453,12 @@ function checkMounts(options, checkMountsCallback) {
 			
 			if(createdTheFolder) {
 				var intervalFsWriteFile = setInterval(function() { log(username + " waiting for fs.writeFile...", DEBUG); }, 1000);
-				fs.writeFile(HOME_DIR + username + "/wwwpub/index.htm", '<!doctype html>\n<meta charset="utf-8">\n\n<body>\n\n<p>Edit me!</p>\n\n</body>\n', ENCODING, function(err) {
-					clearInterval(intervalFsWriteFile);
-					if(err) throw err;
-					wwwpubCreated = true;
-				});
-			}
+				module_fs.writeFile(HOME_DIR + username + "/wwwpub/index.htm", '<!doctype html>\n<meta charset="utf-8">\n\n<body>\n\n<p>Edit me!</p>\n\n</body>\n', ENCODING, function(err) {
+						clearInterval(intervalFsWriteFile);
+						if(err) throw err;
+						wwwpubCreated = true;
+					});
+				}
 			else wwwpubCreated = true;
 		});
 		
