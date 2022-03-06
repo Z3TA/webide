@@ -1030,3 +1030,126 @@ you could try resetting your globally installed npm-packages:
 
 ´rm -rf ~/.npm-packages/*´
 
+
+Setup central logging
+=====================
+
+On logging server, edit /etc/rsyslog.conf
+(replace 10.20.30.40 and somedomain with the IP or hostnames of your servers that shall send logs here)
+````
+# provides TCP syslog reception
+module(load="imtcp")
+input(type="imtcp" port="514")
+# specify senders you permit to access
+$AllowedSender TCP, 10.20.30.40, somedomain.org, subdomain.somedomain.org, *.somedomain.com
+
+And edit /etc/rsyslog.d/50-default.conf
+specify where logs files should be saved. Example:
+````
+auth,authpriv.*                 /tank/logs/log/auth.log
+````
+Remote nginx
+````
+:syslogtag, isequal, "nginx_access:" /tank/logs/log/nginx_access.log
+:syslogtag, isequal, "nginx_error:" /tank/logs/log/nginx_error.log
+````
+bash logging
+````
+local6.*;local1.notice                        /tank/logs/log/commands.log
+````
+
+sudo systemctl restart rsyslog
+
+
+On the client servers
+---------------------
+Edit /etc/rsyslog.d/50-default.conf
+````
+# Send auth logs to log server:
+auth,authpriv.*                 @@log.logserver.org:514
+# Send bash logs to log server:
+local6.*                 @@log.logserver.org:514
+````
+For mailservers, also add:
+````
+mail.*                         @log.logserver.org:514
+````
+add to the end (settings for when Rsyslog Server would be down)
+````
+$ActionQueueFileName queue
+$ActionQueueMaxDiskSpace 1g
+$ActionQueueSaveOnShutdown on
+$ActionQueueType LinkedList
+$ActionResumeRetryCount -1
+````
+
+Send bash logs
+---------------
+Edit /etc/bash.bashrc
+````
+export PROMPT_COMMAND='RETRN_VAL=$?;logger -p local6.debug "$(whoami) [$$]: $(history 1 | sed "s/^[ ]*[0-9]\+[ ]*//" ) [$RETRN_VAL]"'
+````
+
+On Freebsd:
+Edit /etc/csh.cshrc
+````
+alias precmd "history 1 | /usr/bin/logger -p local1.notice -t `echo $SHELL`:`whoami`:`pwd`:`ip r l |cut -d' ' -f12` -i "
+````
+And edit /etc/syslog.conf
+````
+local1.notice                                   @log.logserver.org:514
+````
+And remove *.notice from /var/log/messages
+
+
+Send Nginx logs
+---------------
+edit /etc/nginx/nginx.conf
+````
+#access_log /var/log/nginx/access.log;
+#error_log /var/log/nginx/error.log;
+
+log_format main  '[$time_local] $http_host $remote_addr $status "$request" "$http_referer" "$http_user_agent" $bytes_sent $request_time $remote_user';
+
+access_log syslog:server=log.logserver.org,tag=nginx_access main;
+error_log syslog:server=log.logserver.org,tag=nginx_error;
+````
+Restart syslog and nginx:
+````
+sudo systemctl restart rsyslog
+sudo systemctl restart nginx
+````
+
+Troubleshooting rsyslog
+-----------------------
+Make sure local6.* etc are above *.* /var/log/syslog !!
+@ in config uses UDP while @@ uses TCP !?!?
+
+Get the process id:
+````
+ps auxw | grep syslog
+````
+
+# Use strace (apt install strace) to see what is going on
+````
+strace -s 500 -tfp #pid#
+````
+
+sendto() sends the message to the logging server.
+connect() means it's trying TCP
+
+
+Check the the syslog...
+````
+rsyslogd-2359: action 'action 1' resumed (module 'builtin:omfwd') [v8.16.0 try http://www.rsyslog.com/e/2359 ]
+rsyslogd-2359: action 'action 0' resumed (module 'builtin:omfwd') [v8.16.0 try http://www.rsyslog.com/e/2359 ]
+````
+Messages like that usually means something is wrong...
+
+What version of rsyslog ?
+````
+rsyslogd -version
+````
+
+
+

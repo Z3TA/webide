@@ -283,7 +283,10 @@ echo "(use nginx -T to check for errors)"
 echo ""
 echo "npm install"
 echo ""
-echo "Also read about Docker daemon base VM, and userdir_skeleton in README.txt"
-
-
+echo "You have to setup the following features manually:"
+echo " * Docker daemon base VM (see README.txt)"
+echo " * userdir_skeleton (see README.txt)"
+echo " * Firewall (see etc/custom_iptables.service)"
+echo " * Letsencrypt DNS challange server (see letsencrypt folder in webide repo)"
+ehco " * Setup rsyslogd (see README.txt)"
 exit 0
