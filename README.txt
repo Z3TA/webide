@@ -841,37 +841,6 @@ sudo iptables -D FORWARD 1
 sudo iptables -D INPUT 1
 sudo iptables -D OUTPUT 1
 
-Installing more programs to the users folder (chroot)
------------------------------------------------------
-Where is the program ?
-`which python`
-
-Edit server.js and add the program and dependencies to be mounted when a user logs in
-
-
-What libs are used ?
-`ldd /usr/bin/python`
-Make sure they are mounted in the user's home dir. See server/server.js function checkMounts
-
-Try to run it in chroot
-`chroot --userspec=ltest1:ltest1 /home/ltest1/ /usr/bin/python -c 'print "hi"'`
-
-Find all other dependencies and mount or copy them into the chroot (users home dir)
-See: https://unix.stackexchange.com/questions/18844/list-the-files-accessed-by-a-program
-````
-wget https://gitlab.com/ole.tange/tangetools/raw/master/tracefile/tracefile
-sudo chmod +x tracefile
-sudo apt install strace
-./tracefile python
-````
-
-Outside the chroot (where it works):
-./tracefile -deu node pty.js
-Then also run it inside the chroot, and compare the output
-
-
-Create an apparmor profile !
-
 
 Debugging Error: spawn EACCES
 -----------------------------
