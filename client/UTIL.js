@@ -29,17 +29,28 @@ var UTIL = {
 		return args;
 	},
 
-	// If you want to use the callback pattern with promises
-	// The problem with Promises is that they will capture all errors in every future child call
-	// resulting in that future errors will be swallowed by the Promise
-	// Also see cb function in global.js
-	depromisify: function depromisify(promise) {
+	/*
+		If you want to use the callback pattern with promises
+		The problem with Promises is that they will capture all errors in every future child call
+		resulting in that future errors will be swallowed by the Promise
+		Also see cb function in global.js
+
+		Some object might use the this varaible, supply it as second argument to depromisify.
+		Example:
+
+		var car = new Car(); // car.startEngine returns a Promise
+		car.startEngineC = UTIL.depromisify(car.startEngine, car);
+
+		We ductape on another variable "startEngineC" in case startEngine is a native function which we can't overwrite
+	*/
+	
+	depromisify: function depromisify(promise, theThis) {
 		return function() {
 			var args = UTIL.toArray(arguments);
 			
 			var callback = args.pop(); // The last parameter is the callback function (JS callback convention)
 
-			promise.apply(undefined, args).then(function() {
+			promise.apply(theThis, args).then(function() {
 				var args = UTIL.toArray(arguments);
 				args.unshift(null); // The first parameter is the error (JS callback convention)
 				if(typeof callback == "function") {

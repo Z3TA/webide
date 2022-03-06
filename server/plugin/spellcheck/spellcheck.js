@@ -67,49 +67,50 @@ SPELLCHECK.languages = function languages(user, json, callback) {
 			error = new Error("Language dictionary(ies) " + notAvailable.join(",") + " not available! Try " + Object.keys(dictFiles) + "");
 		}
 		
+		// Nodehun v2->v3 changed spellSuggest to new function suggest which returns a Promise 
 		for(var i=0; i<dict.length; i++) {
-			dict[i].suggest = UTIL.depromisify(dict[i].suggest);
-			//dict.isCorrect(word, spellAnswer);
+			dict[i].spellSuggest = UTIL.depromisify(dict[i].suggest, dict[i]);
 		}
 
 		callback(error, dict.length);
-}
+	}
 
-SPELLCHECK.check = function check(user, json, callback) {
+	SPELLCHECK.check = function check(user, json, callback) {
 	
-	var word = json.word;
-	var suggestion = null;
-	var checkedDictionaries = 0;
-	var voteCorrect = 0;
+		var word = json.word;
+		var suggestion = null;
+		var checkedDictionaries = 0;
+		var voteCorrect = 0;
 	
 		//log("Spellchecking word=" + word, logModule.DEBUG);
 	
-	for(var i=0; i<dict.length; i++) {
-			dict[i].suggest(word, spellAnswer);
+		for(var i=0; i<dict.length; i++) {
+			dict[i].spellSuggest(word, spellAnswer);
 			//dict.isCorrect(word, spellAnswer);
 	}
 	
-	function spellAnswer(err, correct, sugg, origWord){
-		checkedDictionaries++;
+		function spellAnswer(err, arrSugs){
+			checkedDictionaries++;
 		
-			//log("Got answer from Nodehun err=" + (err && err.message) + " currect=" + correct + " sugg=" + sugg + " origWord=" + origWord + "", logModule.DEBUG);
+			//log("Got answer from Nodehun err=" + (err && err.message) + " arrSugs=" + JSON.stringify(arrSugs) + "", logModule.DEBUG);
 		
-		if(err) return callback(err);
+			if(err) return callback(err);
 		
-		if(correct) {
-			voteCorrect++;
-		}
-		else if(sugg && !suggestion) { // sugg is either a string or null
-			suggestion = sugg;
-		}
+			if(arrSugs===null) {
+				voteCorrect++;
+			}
+			else if(!suggestion) {
+				// todo: Finetune so that we choose the word that is most likely, for example sort by length, and diff (pick the suggestion that diffs the least)
+				suggestion = arrSugs[0];
+			}
 		
-		if(checkedDictionaries == dict.length) {
-			// All directories has been checked!
+			if(checkedDictionaries == dict.length) {
+				// All directories has been checked!
 			
-			callback(null, {word: origWord, correct: voteCorrect > 0, suggestion: suggestion});
+				callback(null, {word: word, correct: voteCorrect > 0, suggestion: suggestion});
+			}
 		}
 	}
-}
 }
 
 function nodehunNotInstalled(user, json, callback) {

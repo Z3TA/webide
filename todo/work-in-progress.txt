@@ -1,8 +1,6 @@
 Reporting a bug ? Make sure it's repeatable!
 ============================================
 
-Upgrading hunspell to v3 because v2 doesnt build on Ubuntu 20
-
 ---
 
 Installing a new server with Ubuntu 20!
@@ -18,6 +16,9 @@ npm WARN audit Updating nodemailer-smtp-transport to 2.4.2,which is a SemVer maj
 
 removed 17 packages, changed 6 packages, and audited 118 packages in 13s
 
+---
+
+todo: Include white space when copying code! For example when copying code to another program/editor!
 
 ---
 
