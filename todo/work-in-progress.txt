@@ -1,6 +1,13 @@
 Reporting a bug ? Make sure it's repeatable!
 ============================================
 
+
+Create a new userdir_skeleton on new server
+Make Docker daemon base VM
+Move users from old server to new server
+Move certbot archive and keys to new server
+Update scripts like adduser.js to follow Ubuntu20 ZFS standard!?
+
 ---
 
 Installing a new server with Ubuntu 20!
