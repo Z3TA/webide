@@ -1363,17 +1363,17 @@ function main() {
 		// Some other process might reset iptables, so also check if the nat:ing is enabled for user netns
 		if(IPTABLES) {
 			module_child_process.exec("iptables -S -t nat | grep -qe '-A POSTROUTING -s 10.0.0.0/16 -j MASQUERADE'", EXEC_OPTIONS, function(error, stdout, stderr) {
-			if(error) {
-				log("nat POSTROUTING does Not exist for user netns. Adding it...", DEBUG);
-				module_child_process.exec("iptables -t nat -A POSTROUTING -s 10.0.0.0/16 -j MASQUERADE", EXEC_OPTIONS, function(error, stdout, stderr) {
-					if(error) throw error;
-					log("nat POSTROUTING added for user netns", INFO);
-				});
-			}
-			else {
-				log("nat POSTROUTING exist for user netns", DEBUG);
-			}
-		});
+				if(error) {
+					log("nat POSTROUTING does Not exist for user netns. Adding it...", DEBUG);
+					module_child_process.exec("iptables -t nat -A POSTROUTING -s 10.0.0.0/16 -j MASQUERADE", EXEC_OPTIONS, function(error, stdout, stderr) {
+						if(error) throw error;
+						log("nat POSTROUTING added for user netns", INFO);
+					});
+				}
+				else {
+					log("nat POSTROUTING exist for user netns", DEBUG);
+				}
+			});
 		}
 		else {
 			log("IPTABLES=" + IPTABLES);
@@ -1463,7 +1463,7 @@ function main() {
 							xwininfo(USER_CONNECTIONS[name].uid, p, name);
 						}, 300);
 						
-return;
+						return;
 					}
 				}
 				log("Found no online user with uid=" + uid, DEBUG);
@@ -1484,7 +1484,7 @@ return;
 			if(VNC_CHANNEL[displayId].info && VNC_CHANNEL[displayId].info.app == processName) {
 				log(processName + " already got a VNC channel on displayId=" + displayId + " info=" + JSON.stringify(VNC_CHANNEL[displayId].info), DEBUG);
 				sendToClient(username, "vnc", VNC_CHANNEL[displayId].info)
-return;
+				return;
 			}
 		}
 		
@@ -1545,10 +1545,10 @@ return;
 
 			log("res=" + JSON.stringify(res), DEBUG);
 			
-if(res.length == 0) {
+			if(res.length == 0) {
 				log("Did not find reWindow=" + reWindow + " ", DEBUG);
-return;
-}
+				return;
+			}
 			
 			res.sort(function (a, b) {
 				if(a.x * a.y > b.x * b.y) return -1;
@@ -1787,7 +1787,7 @@ return;
 		if(HTTP_IP == "127.0.0.1" && (typeof process.getuid == "undefined" || process.getuid() != 0)) openStdinChannel();
 		else log("Not opening stdin channel! HTTP_IP=" + " USERNAME=" + USERNAME + " process.getuid()=" + process.getuid(), DEBUG);
 
-			log("Editor backend/server running on URL/address: http://" + makeUrl() + "");
+		log("Editor backend/server running on URL/address: http://" + makeUrl() + "");
 		
 		
 		if(HTTP_IP != "127.0.0.1" && !NO_BROADCAST) {
@@ -2648,9 +2648,9 @@ function sockJsConnection(connection) {
 			sendToAll(userConnectionName, disconnectMsg);
 			
 		}
-		}
+	}
 
-function userCleanup() {
+	function userCleanup() {
 		
 		log("userCleanup: userConnectionName=" + userConnectionName + " USER_CONNECTIONS=" + Object.keys(USER_CONNECTIONS) + " ", DEBUG);
 		
@@ -2743,11 +2743,11 @@ function userCleanup() {
 			
 			return false;
 		}
-else if(command == "ping") {
-send({resp: json.data});
+		else if(command == "ping") {
+			send({resp: json.data});
 
-return false;
-}
+			return false;
+		}
 		
 		//console.log("The command queue has " + commandQueue.length + " items.");
 		
@@ -2835,7 +2835,7 @@ return false;
 									if(err) {
 										if(err.code != "LOCK") {
 											return idFail(new Error("A fatal error (" + err.code + ") occured during guest account creation. Try again later. Or login with an existing account."));
-throw err;
+											throw err;
 										}
 										else if(++createUserRetries > 3) {
 											return idFail(new Error("Could not create a guest user because new guest accounts are currently locked. Try again later. Or login with an existing account."));
@@ -2954,7 +2954,7 @@ throw err;
 						
 						userConnectionName = username;
 						
-clearTimeout(USER_CLEANUP_TIMEOUT[userConnectionName]);
+						clearTimeout(USER_CLEANUP_TIMEOUT[userConnectionName]);
 
 						if(USERNAME) {
 							// Running as standalone desktop app
@@ -2980,7 +2980,7 @@ clearTimeout(USER_CLEANUP_TIMEOUT[userConnectionName]);
 									}
 									else {
 										send({error: err.message});
-									throw err;
+										throw err;
 										return;
 									}
 									
@@ -3224,29 +3224,33 @@ clearTimeout(USER_CLEANUP_TIMEOUT[userConnectionName]);
 								module_fs.writeFile(UTIL.joinPaths([homeDir, ".webide/", "storage/", "lastLogin"]), unixTimeStamp().toString(), function createLastLoginFile(err) {
 									if(err && err.code == "ENOENT") {
 										// .webide/storage/ probably doesn't exist in the home dir!
-										module_fs.mkdir(UTIL.joinPaths([homeDir, ".webide/", "storage/"], {recursive: true}), function(err) {
+										module_fs.mkdir( UTIL.joinPaths([homeDir, ".webide/", "storage/"]), {recursive: true}, function(err) {
 											if(err && err.code != "EEXIST") throw err;
 											
-											// Try again
-											module_fs.writeFile(UTIL.joinPaths([homeDir, ".webide/", "storage/", "lastLogin"]), unixTimeStamp().toString(), function(err) {
+											module_fs.chown( UTIL.joinPaths([homeDir, ".webide/", "storage/"]), uid, gid, function(err) {
 												if(err) throw err;
-												else lastLoginFileUpdated()
+
+												// Try again
+												module_fs.writeFile(UTIL.joinPaths([homeDir, ".webide/", "storage/", "lastLogin"]), unixTimeStamp().toString(), function(err) {
+													if(err) throw err;
+
+													lastLoginFileUpdated();
+												});
 											});
-											
 										});
 										
-									return;
-								}
-								else if(err) throw err;
-								else lastLoginFileUpdated();
+										return;
+									}
+									else if(err) throw err;
+									else lastLoginFileUpdated();
 								
-								function lastLoginFileUpdated() {
+									function lastLoginFileUpdated() {
 										// Update loginCounter
 										module_fs.readFile(UTIL.joinPaths([homeDir, ".webide/", "storage/", "loginCounter"]), "utf8", function readLoginCounter(err, data) {
 											if(err) {
-if(err.code != "ENOENT") throw err;
-var loginCounter = 0;
-}
+												if(err.code != "ENOENT") throw err;
+												var loginCounter = 0;
+											}
 											else {
 												data = data.replace(/'/g, ""); // nr.toString() pads with ' single quotes
 												var loginCounter = parseInt(data);
@@ -3270,14 +3274,14 @@ var loginCounter = 0;
 												checkingUser = false;
 												
 												
-});
+											});
 
 										});
 										
 										
-								}
+									}
 								
-							});
+								});
 							}
 							
 							connectionAuthorized = true;
@@ -3459,87 +3463,87 @@ function checkMounts(options, checkMountsCallback) {
 						wwwpubCreated = true;
 					});
 				}
-			else wwwpubCreated = true;
-		});
+				else wwwpubCreated = true;
+			});
 		
-		// Create a directory for unix sockets
-		// note: Each process needs to set umask to give write permission to the group!
-		createIfNotExist(HOME_DIR + username + "/sock/", uid, wwwgid, "2755", function(err) {
+			// Create a directory for unix sockets
+			// note: Each process needs to set umask to give write permission to the group!
+			createIfNotExist(HOME_DIR + username + "/sock/", uid, wwwgid, "2755", function(err) {
+				if(err) throw err;
+				else sockDirCreated = true;
+			});
+		
+		});
+	
+		// Create a directory where nginx can save logs
+		createIfNotExist(HOME_DIR + username + "/log/", uid, gid, "2755", function(err) {
 			if(err) throw err;
-			else sockDirCreated = true;
+			else logDirCreated = true;
 		});
+	
+		// Create a directory for putting "in production" files
+		createIfNotExist(HOME_DIR + username + "/.prod/", uid, gid, "0770", function(err) {
+			if(err) throw err;
+			else prodDirCreated = true;
+		});
+	
+		// Create a directory where npm can install packages globally
+		createIfNotExist(HOME_DIR + username + "/.npm-packages/", uid, gid, "0775", function(err) {
+			if(err) throw err;
+			else npmDirCreated = true;
+		});
+	
+		function createIfNotExist(folder, uid, gid, mode, callback) {
+			// Don't bother checking if it exist, just try to create it
+			var createdTheFolder = false;
 		
-	});
-	
-	// Create a directory where nginx can save logs
-	createIfNotExist(HOME_DIR + username + "/log/", uid, gid, "2755", function(err) {
-		if(err) throw err;
-		else logDirCreated = true;
-	});
-	
-	// Create a directory for putting "in production" files
-	createIfNotExist(HOME_DIR + username + "/.prod/", uid, gid, "0770", function(err) {
-		if(err) throw err;
-		else prodDirCreated = true;
-	});
-	
-	// Create a directory where npm can install packages globally
-	createIfNotExist(HOME_DIR + username + "/.npm-packages/", uid, gid, "0775", function(err) {
-		if(err) throw err;
-		else npmDirCreated = true;
-	});
-	
-	function createIfNotExist(folder, uid, gid, mode, callback) {
-		// Don't bother checking if it exist, just try to create it
-		var createdTheFolder = false;
-		
-		module_fs.mkdir(folder, function(err) {
+			module_fs.mkdir(folder, function(err) {
 			
-			if(err && err.code != "EEXIST") return callback(err);
+				if(err && err.code != "EEXIST") return callback(err);
 			
-			if(!err) createdTheFolder = true;
+				if(!err) createdTheFolder = true;
 			
-			// Don't bother checking. Always chown
-			module_fs.chown(folder, uid, gid, function(err) {
-				if(err) return callback(err);
-				// (Don't forget about the group-id bit so that all new files created will belong to the group)
-				module_fs.chmod(folder, mode, function(err) {
+				// Don't bother checking. Always chown
+				module_fs.chown(folder, uid, gid, function(err) {
 					if(err) return callback(err);
-					else return callback(null, createdTheFolder);
+					// (Don't forget about the group-id bit so that all new files created will belong to the group)
+					module_fs.chmod(folder, mode, function(err) {
+						if(err) return callback(err);
+						else return callback(null, createdTheFolder);
+					});
 				});
 			});
-		});
-	}
+		}
 	
 	
-	if(INSIDE_DOCKER) {
-		kvmAccessGranted = true;
-	}
-	else {
-		// Make it possible to run Android emulator
-		module_child_process.exec("setfacl -m u:" + username + ":rwx /dev/kvm", EXEC_OPTIONS, function(err, stdout, stderr) {
-			if(err) throw err;
-			if(stderr) log(stderr, NOTICE);
-			if(stdout) log(stdout, INFO);
+		if(INSIDE_DOCKER) {
 			kvmAccessGranted = true;
-		});
-	}
+		}
+		else {
+			// Make it possible to run Android emulator
+			module_child_process.exec("setfacl -m u:" + username + ":rwx /dev/kvm", EXEC_OPTIONS, function(err, stdout, stderr) {
+				if(err) throw err;
+				if(stderr) log(stderr, NOTICE);
+				if(stdout) log(stdout, INFO);
+				kvmAccessGranted = true;
+			});
+		}
 	
-	if(!createdNetworkNamespaces) {
+		if(!createdNetworkNamespaces) {
 		
-		var IP = UTIL.int2ip(167772162 + uid);
+			var IP = UTIL.int2ip(167772162 + uid);
 		
 		
-		var createNetnsFile = function createNetnsFile(etcFile, content) {
-			filesToWrite++;
+			var createNetnsFile = function createNetnsFile(etcFile, content) {
+				filesToWrite++;
 			
-			var stats = 0;
-			var writes = 0;
-			var netnsPath = UTIL.joinPaths("/etc/netns/", username, etcFile);
+				var stats = 0;
+				var writes = 0;
+				var netnsPath = UTIL.joinPaths("/etc/netns/", username, etcFile);
 			
-			stats++;module_fs.stat("/etc/" + etcFile + "", function(err) {stats--;
-				if(err && err.code == "ENOENT") {
-					// ip netns exec wont unshare bind if the file don't exist in /etc/
+				stats++;module_fs.stat("/etc/" + etcFile + "", function(err) {stats--;
+					if(err && err.code == "ENOENT") {
+						// ip netns exec wont unshare bind if the file don't exist in /etc/
 						
 						stats++;module_fs.stat(netnsPath, function(err) {stats--;
 							if(err && err.code == "ENOENT") return doneMaybe();
@@ -3582,7 +3586,7 @@ function checkMounts(options, checkMountsCallback) {
 				filesToWrite++;module_fs.readFile("/etc/" + etcFile, "utf8", function(err, text) {filesWritten++;
 					if(err && err.code=="ENOENT") {
 						log("/etc/" + etcFile + " does not exist!", INFO);
-					return checkMountsReadyMaybe();
+						return checkMountsReadyMaybe();
 					}
 					else if(err) throw err;
 					
@@ -3596,7 +3600,7 @@ function checkMounts(options, checkMountsCallback) {
 					}
 					if(!line) {
 						log("Unable to find " + username + ": in /etc/" + etcFile, INFO);
-					return checkMountsReadyMaybe();
+						return checkMountsReadyMaybe();
 					}
 					
 					createNetnsFile(etcFile, line);
@@ -3616,35 +3620,35 @@ function checkMounts(options, checkMountsCallback) {
 				var parsedIP = matchIP[1];
 				if(parsedIP != IP) throw new Error("Unexpected parsedIP=" + parsedIP + " IP=" + IP + "  ");
 				
-			// Create /etc/netns/guest3/ if it doesn't already exist
-			module_fs.mkdir("/etc/netns/" + username, function(err) {
-				if(err && err.code != "EEXIST") throw err;
+				// Create /etc/netns/guest3/ if it doesn't already exist
+				module_fs.mkdir("/etc/netns/" + username, function(err) {
+					if(err && err.code != "EEXIST") throw err;
 				
 				
-				// When user launches for example a node.js web server listening on "localhost"
-				// We want it to listen on the user IP in order to be accessible from https://####.user.TLD
-				createNetnsFile("hosts", IP + "\tlocalhost");
+					// When user launches for example a node.js web server listening on "localhost"
+					// We want it to listen on the user IP in order to be accessible from https://####.user.TLD
+					createNetnsFile("hosts", IP + "\tlocalhost");
 				
-				// Override host's resolvers
-				createNetnsFile("resolv.conf", "nameserver 8.8.8.8\nnameserver 8.8.4.4");
-				// note: systemd will probably re-bind resolv.conf in regular intervals with the system resolvers!
+					// Override host's resolvers
+					createNetnsFile("resolv.conf", "nameserver 8.8.8.8\nnameserver 8.8.4.4");
+					// note: systemd will probably re-bind resolv.conf in regular intervals with the system resolvers!
 				
-				// Make it harder to see other users on the system by faking...
-				createNetnsFile("passwd", username + ":x:" + uid + ":" + gid + "::" + HOME_DIR + username + ":/bin/bash");
-				createNetnsFile("group", username + ":x:" + gid + ":");
+					// Make it harder to see other users on the system by faking...
+					createNetnsFile("passwd", username + ":x:" + uid + ":" + gid + "::" + HOME_DIR + username + ":/bin/bash");
+					createNetnsFile("group", username + ":x:" + gid + ":");
 				
-				copyEntryFrom("subuid");
-				copyEntryFrom("subgid");
+					copyEntryFrom("subuid");
+					copyEntryFrom("subgid");
 				
-				createNetnsFile("mtab", ""); // Contains mountpoints and thus other users
-				
-				
+					createNetnsFile("mtab", ""); // Contains mountpoints and thus other users
 				
 				
-				createdNetworkNamespaces = true;
-				checkMountsReadyMaybe();
 				
-			});
+				
+					createdNetworkNamespaces = true;
+					checkMountsReadyMaybe();
+				
+				});
 			
 			
 			});
@@ -3680,99 +3684,99 @@ function checkMounts(options, checkMountsCallback) {
 					mysqlConnection.query("CREATE USER ?@'localhost' IDENTIFIED WITH auth_socket", [username], function(err, rows, fields) {
 						if(err) throw err;
 						
-					mySqlDone();
+						mySqlDone();
 					});
 				}
-			else mySqlDone();
-		});
+				else mySqlDone();
+			});
 			
-		function mySqlDone() {
-			mysqlCheck = true;
-checkMountsReadyMaybe();
-}
+			function mySqlDone() {
+				mysqlCheck = true;
+				checkMountsReadyMaybe();
+			}
 		});
 
 
-	if(SKIP_NGINX) {
-		nginxProfileOK = true;
-		sslCertChecked = true;
-	}
-	else {
-		// Make sure nginx profile exist
-		var nginxSitesAvailable = "/etc/nginx/sites-available/"
-		// Allow Nginx not to be installed
-		module_fs.stat(nginxSitesAvailable, function (err, stats) {
-			if(err) {
-				log(err.message+ "\nNginx is probably not installed. User's Nginx profile was Not installed!", NOTICE);
-				mountErrorMessages.push(err);
-				nginxProfileOK = true;
-				sslCertChecked = true;
-				checkMountsReadyMaybe();
-				return;
-			}
-			console.time("Check " + username + " nginx profile");
-			var url_user = UTIL.urlFriendly(username);
-			var nginxProfilePath = nginxSitesAvailable + url_user + "." + DOMAIN + ".nginx";
-			module_fs.stat(nginxProfilePath, function (err, stats) {
-				if(checkMountsAbort) return;
-				
+		if(SKIP_NGINX) {
+			nginxProfileOK = true;
+			sslCertChecked = true;
+		}
+		else {
+			// Make sure nginx profile exist
+			var nginxSitesAvailable = "/etc/nginx/sites-available/"
+			// Allow Nginx not to be installed
+			module_fs.stat(nginxSitesAvailable, function (err, stats) {
 				if(err) {
-					if(err.code != "ENOENT") throw err;
-					
-					module_fs.readFile("../etc/nginx/user.webide.se.nginx", "utf8", function(err, nginxProfile) {
-						if(checkMountsAbort) return;
-						
-						if(err) throw err;
-						
-					// Also need to update update.js if more variables are added!
-
-						nginxProfile = nginxProfile.replace(/%USERNAME%/g, url_user);
-						nginxProfile = nginxProfile.replace(/%HOMEDIR%/g, homeDir);
-						nginxProfile = nginxProfile.replace(/%NETNSIP%/g, UTIL.int2ip(167772162 + uid));
-						nginxProfile = nginxProfile.replace(/%DOCKERIP%/g, UTIL.int2ip(167903234 + uid));
-					// dots need to be escaped!? Not in cert paths or nginx will not reload! Only in regular expressions!
-					nginxProfile = nginxProfile.replace(/%DOM_ESC_DOTS%/g, DOMAIN.replace(/\./g, "\\.") );
-					nginxProfile = nginxProfile.replace(/%DOMAIN%/g, DOMAIN);
-					
-					module_fs.writeFile(nginxProfilePath, nginxProfile, function(err) {
-							if(err) throw err;
-							console.log("Nginx profile created!");
-							console.timeEnd("Check " + username + " nginx profile");
-							checkNginxEnabled();
-						});
-						
-					});
+					log(err.message+ "\nNginx is probably not installed. User's Nginx profile was Not installed!", NOTICE);
+					mountErrorMessages.push(err);
+					nginxProfileOK = true;
+					sslCertChecked = true;
+					checkMountsReadyMaybe();
+					return;
 				}
-				else {
-					console.timeEnd("Check " + username + " nginx profile");
-					checkNginxEnabled();
-				}
+				console.time("Check " + username + " nginx profile");
+				var url_user = UTIL.urlFriendly(username);
+				var nginxProfilePath = nginxSitesAvailable + url_user + "." + DOMAIN + ".nginx";
+				module_fs.stat(nginxProfilePath, function (err, stats) {
+					if(checkMountsAbort) return;
 				
-				function checkNginxEnabled() {
-					console.time("Check " + username + " Nginx enabled");
-					var nginxProfileEnabledPath = "/etc/nginx/sites-enabled/" + url_user + "." + DOMAIN;
-					module_fs.stat(nginxProfileEnabledPath, function (err, stats) {
-						if(checkMountsAbort) return;
+					if(err) {
+						if(err.code != "ENOENT") throw err;
+					
+						module_fs.readFile("../etc/nginx/user.webide.se.nginx", "utf8", function(err, nginxProfile) {
+							if(checkMountsAbort) return;
 						
-						if(err) {
-							if(err.code != "ENOENT") throw err;
+							if(err) throw err;
+						
+							// Also need to update update.js if more variables are added!
+
+							nginxProfile = nginxProfile.replace(/%USERNAME%/g, url_user);
+							nginxProfile = nginxProfile.replace(/%HOMEDIR%/g, homeDir);
+							nginxProfile = nginxProfile.replace(/%NETNSIP%/g, UTIL.int2ip(167772162 + uid));
+							nginxProfile = nginxProfile.replace(/%DOCKERIP%/g, UTIL.int2ip(167903234 + uid));
+							// dots need to be escaped!? Not in cert paths or nginx will not reload! Only in regular expressions!
+							nginxProfile = nginxProfile.replace(/%DOM_ESC_DOTS%/g, DOMAIN.replace(/\./g, "\\.") );
+							nginxProfile = nginxProfile.replace(/%DOMAIN%/g, DOMAIN);
+					
+							module_fs.writeFile(nginxProfilePath, nginxProfile, function(err) {
+								if(err) throw err;
+								console.log("Nginx profile created!");
+								console.timeEnd("Check " + username + " nginx profile");
+								checkNginxEnabled();
+							});
+						
+						});
+					}
+					else {
+						console.timeEnd("Check " + username + " nginx profile");
+						checkNginxEnabled();
+					}
+				
+					function checkNginxEnabled() {
+						console.time("Check " + username + " Nginx enabled");
+						var nginxProfileEnabledPath = "/etc/nginx/sites-enabled/" + url_user + "." + DOMAIN;
+						module_fs.stat(nginxProfileEnabledPath, function (err, stats) {
+							if(checkMountsAbort) return;
+						
+							if(err) {
+								if(err.code != "ENOENT") throw err;
 							
-							module_fs.symlink(nginxProfilePath, nginxProfileEnabledPath, function(err) {
-								if(err && err.code != "EEXIST") throw err;
+								module_fs.symlink(nginxProfilePath, nginxProfileEnabledPath, function(err) {
+									if(err && err.code != "EEXIST") throw err;
 								
-								var exec = module_child_process.exec;
-								exec("service nginx reload", EXEC_OPTIONS, function(error, stdout, stderr) {
-									if(stderr) error = new Error(stderr);
-									if(stdout) error = new Error(stdout);
-									if(error) {
-										// Get the actual error
-										module_child_process.exec("nginx -T", EXEC_OPTIONS, function(err, stdout, stderr) {
-											log(stdout, NOTICE);
-											log(stderr, NOTICE);
-											reportError(stdout + "\n" + stderr);
-											log("Disabling Nginx profile due to errors: " + nginxProfileEnabledPath);
-											module_fs.unlink(nginxProfileEnabledPath, function(err) {
-												if(err) throw err;
+									var exec = module_child_process.exec;
+									exec("service nginx reload", EXEC_OPTIONS, function(error, stdout, stderr) {
+										if(stderr) error = new Error(stderr);
+										if(stdout) error = new Error(stdout);
+										if(error) {
+											// Get the actual error
+											module_child_process.exec("nginx -T", EXEC_OPTIONS, function(err, stdout, stderr) {
+												log(stdout, NOTICE);
+												log(stderr, NOTICE);
+												reportError(stdout + "\n" + stderr);
+												log("Disabling Nginx profile due to errors: " + nginxProfileEnabledPath);
+												module_fs.unlink(nginxProfileEnabledPath, function(err) {
+													if(err) throw err;
 											});
 										});
 									}
