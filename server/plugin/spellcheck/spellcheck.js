@@ -8,6 +8,8 @@ var logModule = require("../../../shared/log.js");
 var UTIL = require("../../../client/UTIL.js");
 var log = logModule.log;
 var nodehunExist = true;
+var nodehunVersion = 2;
+
 try {
 var Nodehun = require("nodehun");
 }
@@ -68,9 +70,14 @@ SPELLCHECK.languages = function languages(user, json, callback) {
 		}
 		
 		// Nodehun v2->v3 changed spellSuggest to new function suggest which returns a Promise 
-		for(var i=0; i<dict.length; i++) {
-			dict[i].spellSuggest = UTIL.depromisify(dict[i].suggest, dict[i]);
+		if(dict.length > 0 && typeof dict[0].suggest == "function") {
+			// Using Nodehun v3
+			nodehunVersion = 3;
+			for(var i=0; i<dict.length; i++) {
+				dict[i].spellSuggest = UTIL.depromisify(dict[i].suggest, dict[i]);
+			}
 		}
+		
 
 		callback(error, dict.length);
 	}
@@ -84,12 +91,15 @@ SPELLCHECK.languages = function languages(user, json, callback) {
 	
 		//log("Spellchecking word=" + word, logModule.DEBUG);
 	
+		if(nodehunVersion == 3) var spellAnswer = spellAnswerv3;
+		else var spellAnswer = spellAnswerv2;
+
 		for(var i=0; i<dict.length; i++) {
 			dict[i].spellSuggest(word, spellAnswer);
 			//dict.isCorrect(word, spellAnswer);
 	}
 	
-		function spellAnswer(err, arrSugs){
+		function spellAnswerv3(err, arrSugs) {
 			checkedDictionaries++;
 		
 			//log("Got answer from Nodehun err=" + (err && err.message) + " arrSugs=" + JSON.stringify(arrSugs) + "", logModule.DEBUG);
@@ -110,6 +120,28 @@ SPELLCHECK.languages = function languages(user, json, callback) {
 				callback(null, {word: word, correct: voteCorrect > 0, suggestion: suggestion});
 			}
 		}
+
+		function spellAnswerv2(err, correct, sugg, origWord){
+			checkedDictionaries++;
+
+			//log("Got answer from Nodehun err=" + (err && err.message) + " currect=" + correct + " sugg=" + sugg + " origWord=" + origWord + "", logModule.DEBUG);
+
+			if(err) return callback(err);
+
+			if(correct) {
+				voteCorrect++;
+			}
+			else if(sugg && !suggestion) { // sugg is either a string or null
+				suggestion = sugg;
+			}
+
+			if(checkedDictionaries == dict.length) {
+				// All directories has been checked!
+
+				callback(null, {word: origWord, correct: voteCorrect > 0, suggestion: suggestion});
+			}
+		}
+
 	}
 }
 

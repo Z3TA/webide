@@ -1,9 +1,6 @@
 Reporting a bug ? Make sure it's repeatable!
 ============================================
 
-Spellcheck.js... nodehun3 can only build on Ubuntu20 and nodehun2 on Ubuntu18... 
-so disable spellcheck if we dont have correct combo!
-
 Create a new userdir_skeleton on new server
 Make Docker daemon base VM
 Move users from old server to new server
@@ -24,6 +21,10 @@ npm WARN audit Updating nodemailer to 6.7.2,which is a SemVer major change.
 npm WARN audit Updating nodemailer-smtp-transport to 2.4.2,which is a SemVer major change.
 
 removed 17 packages, changed 6 packages, and audited 118 packages in 13s
+
+---
+
+todo: Look at https://tauri.studio/ for "native" distribution
 
 ---
 
