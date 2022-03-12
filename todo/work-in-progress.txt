@@ -1,8 +1,20 @@
 Reporting a bug ? Make sure it's repeatable!
 ============================================
 
-Create a new userdir_skeleton on new server
+Switch do Debian instead of Ubuntu !?
+reasoning: Debian seems more stable!
+https://openzfs.github.io/openzfs-docs/Getting%20Started/Debian/index.html
+But we want the latest software in the editor. (use snap for popular apps like git ?)
+The Docker VM can be super stable though...
+
+Give each user their own VM !?
+
+libvirt dhcp not working!?
+
+make a lightweight Ubuntu 20 docker base VM
+
 Make Docker daemon base VM
+Create a new userdir_skeleton on new server
 Move users from old server to new server
 Move certbot archive and keys to new server
 Update scripts like adduser.js to follow Ubuntu20 ZFS standard!?

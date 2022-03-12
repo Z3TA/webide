@@ -763,10 +763,36 @@ cd dockervm
 sudo virsh define docker.xml
 ````
 
+Make sure you have the correct path to the zvol disk:
+````
+ls /dev/zvol/
+virsh edit docker
+````
+
 Check the IP of the VM
 `sudo virsh net-dhcp-leases default`
 
 Install Ubuntu OS on the VM...
+
+Attach cdrom:
+````
+virsh attach-disk docker /tmp/ubuntu-20.04.4-live-server-amd64.iso hda --driver qemu --type cdrom --mode readonly
+````
+
+Remove cdrom:
+````
+virsh change-media docker hda --eject
+````
+
+Access VNC:
+````
+ssh root@hostserver.org -L 5900:127.0.0.1:5900
+````
+
+Force restart:
+````
+virsh destroy docker && virsh start docker
+````
 
 Follow instructions to install Docker daemon: https://docs.docker.com/install/linux/docker-ce/ubuntu/
 
@@ -784,6 +810,11 @@ ExecStart=/usr/bin/dockerd -H fd:// -H tcp://0.0.0.0:2376
 ````
 sudo systemctl daemon-reload
 sudo systemctl restart docker.service
+````
+
+Se DHCL leases (from host)
+````
+virsh net-dhcp-leases default
 ````
 
 Install SSH server and disable password login
