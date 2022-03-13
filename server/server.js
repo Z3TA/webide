@@ -4993,7 +4993,15 @@ function checkMounts(options, checkMountsCallback) {
 	
 		// You can have different group and user. Default is the user/group running the node process
 		var spawnOptions = {};
-		var workerArgs = ["--loglevel=" + LOGLEVEL, "--user=" + username, "--uid=" + uid, "--gid=" + gid, "--home=" + homeDir, "--virtualroot=" + VIRTUAL_ROOT];
+		var workerArgs = [
+			"--loglevel=" + LOGLEVEL, 
+			"--user=" + username, 
+			"--uid=" + uid, 
+			"--gid=" + gid, 
+			"--home=" + homeDir, 
+			"--virtualroot=" + VIRTUAL_ROOT,
+			"--crazy=" + CRAZY
+		];
 		var workerNode = process.argv[0]; // First argument is the path to the nodejs executable!
 	
 		log("Spawn user_worker.js with workerNode=" + workerNode);
@@ -7693,8 +7701,8 @@ function checkMounts(options, checkMountsCallback) {
 	function getCpuModel() {
 
 		var model = module_os.cpus()[0].model;
-		if(model.match(/^Intel/) return "intel";
-		else if(model.match(/^AMD/) return "amd";
+		if( model.match(/^Intel/) ) return "intel";
+		else if( model.match(/^AMD/) ) return "amd";
 		else throw new Error("Unable to determine which or unsupported CPU model=" + model);
 
 	}

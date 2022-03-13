@@ -733,7 +733,7 @@ example: %HOME%%USERNAME%/bin/bash flags=(attach_disconnected) {
 
 Creating a Docker daemon base VM
 --------------------------------
-
+tip: Do this on a developer machine, then send the zvol to the production server
 
 Create a zvol
 `sudo zfs create -V 16G rpool/docker`
@@ -783,8 +783,11 @@ This makes it possible to access the VM guest via serial from the host:
 ````
 virsh console docker
 ````
+Don't forget to disable the serial console when you are done configuring SSH
+`sudo systemctl disable serial-getty@ttyS0.service`
 
-Force restart:
+
+Force restart in case shutdown doesn't work:
 ````
 virsh destroy docker && virsh start docker
 ````
@@ -813,7 +816,7 @@ virsh net-dhcp-leases default
 ````
 
 Generate a ssh key on the host server
-`ssh-keygen -f /root/.ssh/docker`
+`ssh-keygen -f /root/.ssh/dockervm`
 
 Copy generated public key
 `sudo cat /root/.ssh/docker.pub`
@@ -834,6 +837,15 @@ PermitRootLogin prohibit-password
 then restart sshd: 
 `sudo systemctl reload sshd`
 
+Set the password to "dockerpw" on the VM
+`passwd`
+
+Make sure the user uid ang gid are below 1000 so that it wont collide:
+````
+usermod -u 999 docker
+groupmod -g 999 docker
+````
+Might have to enable root login as you can't change uid if there are processes running as that user
 
 Add public key to the VM (copy/paste)
 ````

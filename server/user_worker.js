@@ -97,17 +97,20 @@ console.log("username=" + username + " uid=" + uid + " gid=" + gid + " process.e
 	
 	*/
 	
+// If we are in a network namespace with a uniqie /etc/passwd module_os.userInfo() will throw because it wont fint root in the local/namespace /etc/passwd 
 try {
 var info = module_os.userInfo ? module_os.userInfo() : {username: "ROOT", uid: process.geteuid()};
 }
 catch(err) {
-	console.warn(err);
-	info = {username: username, uid: uid}
+	log(err.message);
+	var info = {username: "ROOT", uid: process.geteuid()}
 }
 
 
 if(info.uid==0) {
 	
+	// note: In order to use network namespaces we neet to start as root!
+
 	if( isNaN(uid) ) {
 		console.warn("User worker is running as root, but no uid given!");
 	}
@@ -192,7 +195,11 @@ var NPM_PATH; // We need the full path to npm-cli.js in order to fork
 
 var isRoot = process.getuid && process.getuid() === 0;
 // note: If the user is testing inside a container or VM the user is likely to be root!
-if(isRoot) log("It's strongly adviced not to run worker process as superuser!", WARN);
+if(isRoot) {
+	log("It's strongly adviced not to run worker process as superuser!", WARN);
+	if(!getArg(["crazy", "crazy"]) != "true") throw new Error("Start the server with -crazy to run user worker as root");
+}
+
 //if(isRoot) throw new Error("Can not run worker process as superuser!");
 
 var processUser = process.env.SUDO_USER || process.env.LOGNAME || process.env.USER || process.env.LNAME || process.env.USERNAME || process.env.username;
