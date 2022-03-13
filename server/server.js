@@ -72,7 +72,6 @@ catch(err) {
 	log("Unable to load optional module(s): " + err.message);
 }
 
-
 var nodeVersion = parseInt(process.version.match(/v(\d*)\./)[1]);
 var testedNodeVersions = [0,4,6,8,10];
 if(testedNodeVersions.indexOf(nodeVersion) == -1) log("warn: The editor has only been tested with node.js versions " + JSON.stringify(testedNodeVersions) + " ! You are running version=" + process.version, WARN);
@@ -223,7 +222,6 @@ var USER_CLEANUP_TIMEOUT = [];
 	}
 	
 })();
-
 
 var CURRENT_USER = "ROOT";
 
@@ -3681,7 +3679,7 @@ function checkMounts(options, checkMountsCallback) {
 				if(err) throw err;
 				
 				if(rows.length == 0) {
-				mysqlConnection.query("CREATE USER ?@'localhost' IDENTIFIED WITH unix_socket", [username], function(err, rows, fields) {
+					mysqlConnection.query("CREATE USER ?@'localhost' IDENTIFIED WITH unix_socket", [username], function(err, rows, fields) {
 						if(err) throw err;
 						
 						mySqlDone();
@@ -3777,328 +3775,328 @@ function checkMounts(options, checkMountsCallback) {
 												log("Disabling Nginx profile due to errors: " + nginxProfileEnabledPath);
 												module_fs.unlink(nginxProfileEnabledPath, function(err) {
 													if(err) throw err;
+												});
 											});
-										});
-									}
+										}
 									
-									nginxProfileOK = true;
-									console.timeEnd("Check " + username + " Nginx enabled");
+										nginxProfileOK = true;
+										console.timeEnd("Check " + username + " Nginx enabled");
 									
-									checkSslCert();
+										checkSslCert();
 									
-									checkMountsReadyMaybe();
-								});
+										checkMountsReadyMaybe();
+									});
 								
-							});
-						}
-						else {
-							nginxProfileOK = true;
-							console.timeEnd("Check " + username + " Nginx enabled");
-							
-							checkSslCert();
-							
-							checkMountsReadyMaybe();
-						}
-					});
-				}
-				
-			});
-		});
-	}
-	
-	
-	
-	function checkMountsReadyMaybe() {
-		if(checkMountsAbort) return;
-		
-		if(prodDirCreated && npmDirCreated && logDirCreated && sockDirCreated && wwwpubCreated && kvmAccessGranted && createdNetworkNamespaces && nginxProfileOK && (sslCertChecked || !options.waitForSSL) && mysqlCheck && filesToWrite==filesWritten) {
-			
-			if(!checkMountsReady) { // Prevent double accept
-				checkMountsReady = true;
-				
-				if(mountErrorMessages.length > 0) {
-					// Send the server admin a message !?
-					var errorMessages = "The following errors occured when the mount points where checked:\n";
-					for (var i=0; i<mountErrorMessages.length; i++) {
-						errorMessages = errorMessages+ mountErrorMessages[i] + "\n";
-					}
-					log(errorMessages, WARN);
-				}
-				
-				console.timeEnd("check " + username + " mounts");
-				checkMountsCallback(null);
-			}
-			else throw new Error("checkMounts already callced checkMountsCallback!");
-			
-		}
-		else {
-			
-			if(!createdNetworkNamespaces) log(username + " waiting for network namespace to be created...", DEBUG);
-			if(!nginxProfileOK) log(username + " waiting for Nginx profiles to be created...", DEBUG);
-			if((!sslCertChecked && options.waitForSSL)) log(username + " waiting for SSL certificates to be created...", DEBUG);
-			if(!mysqlCheck) log(username + " waiting for mySQL socket to be created ...", DEBUG);
-			if(filesToWrite!=filesWritten) log(username + " waiting for filesToWrite=" + filesToWrite + " filesWritten=" + filesWritten + "  ", DEBUG);
-			if(!kvmAccessGranted) log(username + " waiting for access to /dev/kvm ...", DEBUG);
-			if(!wwwpubCreated)  log(username + " wwwpub folder not yet checked/created...", DEBUG);
-			if(!sockDirCreated)  log(username + " sock folder not yet checked/created...", DEBUG);
-			if(!logDirCreated)  log(username + " log folder not yet checked/created...", DEBUG);
-			if(!prodDirCreated)  log(username + ".prod folder not yet checked/created...", DEBUG);
-			if(!npmDirCreated)  log(username + ".npm-packages folder not yet checked/created...", DEBUG);
-			
-		}
-	}
-	
-	
-	function checkMountsError(err) {
-		if(checkMountsAbort) return;
-		checkMountsAbort = true;
-		
-		checkMountsCallback(err);
-		
-	}
-	
-	function checkSslCert() {
-		// Check ssl certificate
-
-		if(INSIDE_DOCKER) {
-			sslCertChecked = true;
-			if(options.waitForSSL) checkMountsReadyMaybe();
-			return;
-		}
-
-		console.time("Check " + username + " SSL Cert");
-		var url_user = UTIL.urlFriendly(username);
-		var userDomain = url_user + "." + DOMAIN;
-		
-		var certPath = "/etc/letsencrypt/live/" + url_user + "." + DOMAIN + "/fullchain.pem";
-		module_fs.stat(certPath, function(err, stat) {
-			if(err == null) {
-				console.log("SSL certificate for " + url_user + "." + DOMAIN + " exist!");
-				
-				enableSSL(userDomain); // Check if Nginx needs to be updated
-				
-				return;
-			}
-			else if(err.code == 'ENOENT') {
-				console.log("ENOENT: certPath=" + certPath);
-				
-				if(FAILED_SSL_REG.hasOwnProperty(url_user + "." + DOMAIN)) {
-					log("Skipping SSL registration because of too many failed attempts!");
-					sslCertChecked = true;
-					console.timeEnd("Check " + username + " SSL Cert");
-					if(options.waitForSSL) checkMountsReadyMaybe();
-					return;
-				}
-				
-				// the cert does not exist. Try to register it
-				
-				console.time("Register " + userDomain + " with letsencrypt");
-				var wildcard = true;
-				module_letsencrypt.register(userDomain, ADMIN_EMAIL, wildcard, function(err) {
-					console.timeEnd("Register " + userDomain + " with letsencrypt");
-					if(err) {
-						if(FAILED_SSL_REG.hasOwnProperty(userDomain)) FAILED_SSL_REG[userDomain]++;
-						else FAILED_SSL_REG[userDomain] = 1;
-						
-						if(err.code == "ENOENT") log("certbot not installed!", WARN);
-						else if(err.code == "RATE_LIMIT") log("Unable to create letsencrypt cert because of rate limit!", WARN);
-						else {
-							log(err.message, WARN);
-						}
-						sslCertChecked = true;
-						console.timeEnd("Check " + username + " SSL Cert");
-						if(options.waitForSSL) checkMountsReadyMaybe();
-					}
-					else {
-						console.log("SSL certificate for " + userDomain + " installed!");
-						setTimeout(function() {
-						enableSSL(userDomain);
-						}, 500); // It will take some time for the certificate to be installed!? no, it was another bug, but keep the timeout for now...
-					}
-				}); // letsencrypt.register
-			}
-			else {
-				// Another module_fs.stat ssl file error
-				throw err;
-			}
-		});
-		
-		function enableSSL(userDomain) {
-			// Enable SSL on the site
-			var nginxProfilePath = "/etc/nginx/sites-available/" + userDomain + ".nginx";
-			module_fs.readFile(nginxProfilePath, "utf8", function read(err, data) {
-				if(err) throw err;
-				
-				if(data.indexOf("#SSL#") == -1 && data.indexOf("#NOSSL#") == -1) {
-					log("SSL already configured on " + userDomain);
-					sslCertChecked = true;
-					console.timeEnd("Check " + username + " SSL Cert");
-					if(options.waitForSSL) checkMountsReadyMaybe();
-					return;
-				}
-				
-				data = data.replace(/#SSL#/g, ""); // Remove the comment before "listen 443 ssl"
-				data = data.replace(/.*#NOSSL#/g, ""); // Remove all lines that have #NOSSL# in it
-				
-				module_fs.writeFile(nginxProfilePath, data, function(err) {
-					if(err) throw err;
-					
-					console.log("SSL enabled: " + nginxProfilePath);
-					
-					console.time(username + " nginx reload");
-					var exec = module_child_process.exec;
-					exec("service nginx reload", EXEC_OPTIONS, function(error, stdout, stderr) {
-						console.timeEnd(username + " nginx reload");
-						
-						var err = error || stdout || stderr;
-						if(err) reportError(err);
-						
-						/*
-							if(error) throw(error);
-							if(stderr) throw new Error(stderr);
-							if(stdout) throw new Error(stdout);
-						*/
-						
-						sslCertChecked = true;
-						console.timeEnd("Check " + username + " SSL Cert");
-						if(options.waitForSSL) checkMountsReadyMaybe();
-					});
-				});
-			});
-		}
-		
-		
-	} // checkSslCert
-	
-} // checkMounts
-
-function mountFollowSymlink(binaryFile, homeDir, mountFollowSymlinkActualCallback) {
-	//log("mountFollowSymlink: binaryFile=" + binaryFile + " homeDir=" + homeDir + " ", DEBUG);
-	 
-	// Check if binaryFile is a symlink, follows the symlinks,
-	// mounts the actual binary file, then creates the symlinks
-	var folder = UTIL.getDirectoryFromPath(binaryFile);
-
-	recursiveLinks(binaryFile, function(err, links, targetBinary, targetRelative) {
-		if(err) return mountFollowSymlinkCallback(err);
-
-		var targetInHomeDir = UTIL.joinPaths(homeDir, targetBinary);
-		
-		//log("mountFollowSymlink: targetBinary=" + binaryFile + " targetInHomeDir=" + targetInHomeDir + " links=" + JSON.stringify(links) + " ", DEBUG);
-		
-		module_mount(targetBinary, targetInHomeDir, function(err) {
-			if(err) return mountFollowSymlinkCallback(err);
-			
-			createLinks(links, function(err) {
-				if(err) mountFollowSymlinkCallback(err);
-				else mountFollowSymlinkCallback(null, targetRelative);
-			});
-		});
-	});
-	
-	function mountFollowSymlinkCallback(err, target) {
-		mountFollowSymlinkActualCallback(err, target);
-		mountFollowSymlinkActualCallback = null; // Prevent further callbacks, and throw an error if it tries to call back again
-	}
-	
-	function createLinks(links, callback) {
-		if(links.length == 0) return callback(null);
-		
-		var linksToCreate = links.slice(); // Don't mess with the original array
-		
-		createLink(linksToCreate.pop());
-		
-		function createLink(link) {
-			
-			var pathInHomeDir = UTIL.joinPaths(homeDir, link.path);
-			
-			module_fs.symlink(link.target, pathInHomeDir, function (err) {
-				if(err) {
-					if(err.code == "EEXIST") {
-						// Make sure it links to the correct target
-						module_fs.readlink(pathInHomeDir, function(err, linkStr) {
-							if(err) {
-								// It's probably not a link!
-								module_fs.stat(pathInHomeDir, function(err, stats) {
-									if(err) throw err; // We should not fail to stat, because it exist
-									
-									if(stats.size == 0) {
-										// It's emty, so we can delete it
-										module_fs.unlink(pathInHomeDir, function(err) {
-											if(err) throw err; // Should not result in an error
-											
-											// Now attempt to create the link again
-											// Not recursive to prevent loop
-											module_fs.symlink(link.target, pathInHomeDir, function (err) {
-												if(err) return callback(err); // We give up (this should not result in an error)
-												else makeAnotherLink();
-											});
-											
-										});
-									}
-									else {
-										// We don't know what to do
-										return callback(new Error(pathInHomeDir + " is not a link and it's not empty! Unable to link it to " + link.target)); 
-									}
 								});
 							}
 							else {
-								if(linkStr == link.target) makeAnotherLink();
-								else {
-									throw new Error("linkStr=" + linkStr + " link.target=" + link.target);
-								}
+								nginxProfileOK = true;
+								console.timeEnd("Check " + username + " Nginx enabled");
+							
+								checkSslCert();
+							
+								checkMountsReadyMaybe();
 							}
 						});
 					}
-					else return callback(err); 
-				}
-				else {
-					makeAnotherLink();
-				}
 				
-				function makeAnotherLink() {
-					if(linksToCreate.length > 0) createLink(linksToCreate.pop());
-					else callback(null);
-				}
-				
+				});
 			});
 		}
-	}
 	
-	function recursiveLinks(binaryFile, callback) {
-		// Returns an array of links, and the final binary they all link to
+	
+	
+		function checkMountsReadyMaybe() {
+			if(checkMountsAbort) return;
 		
-		var folder = UTIL.getDirectoryFromPath(binaryFile);
-		var links = [];
-		
-		checkLink(binaryFile);
-		
-		function checkLink(binaryFile) {
-			module_fs.readlink(binaryFile, function(err, linkString) {
-				if(!err) {
-					// No error means it's a symlink
-					
-					var targetAbsolutePath = UTIL.resolvePath(folder, linkString);
-					
-					// note: Target can NOT be an absolute path! Or chroot wont work.
-					
-					links.push({target: linkString, path: binaryFile});
-					
-					// Check if it's a symbolic link
-					checkLink(targetAbsolutePath, linkString);
+			if(prodDirCreated && npmDirCreated && logDirCreated && sockDirCreated && wwwpubCreated && kvmAccessGranted && createdNetworkNamespaces && nginxProfileOK && (sslCertChecked || !options.waitForSSL) && mysqlCheck && filesToWrite==filesWritten) {
+			
+				if(!checkMountsReady) { // Prevent double accept
+					checkMountsReady = true;
+				
+					if(mountErrorMessages.length > 0) {
+						// Send the server admin a message !?
+						var errorMessages = "The following errors occured when the mount points where checked:\n";
+						for (var i=0; i<mountErrorMessages.length; i++) {
+							errorMessages = errorMessages+ mountErrorMessages[i] + "\n";
+						}
+						log(errorMessages, WARN);
+					}
+				
+					console.timeEnd("check " + username + " mounts");
+					checkMountsCallback(null);
 				}
-				else if(err.code == "EINVAL") {
-					// We found the actually a binary!
+				else throw new Error("checkMounts already callced checkMountsCallback!");
+			
+			}
+			else {
+			
+				if(!createdNetworkNamespaces) log(username + " waiting for network namespace to be created...", DEBUG);
+				if(!nginxProfileOK) log(username + " waiting for Nginx profiles to be created...", DEBUG);
+				if((!sslCertChecked && options.waitForSSL)) log(username + " waiting for SSL certificates to be created...", DEBUG);
+				if(!mysqlCheck) log(username + " waiting for mySQL socket to be created ...", DEBUG);
+				if(filesToWrite!=filesWritten) log(username + " waiting for filesToWrite=" + filesToWrite + " filesWritten=" + filesWritten + "  ", DEBUG);
+				if(!kvmAccessGranted) log(username + " waiting for access to /dev/kvm ...", DEBUG);
+				if(!wwwpubCreated)  log(username + " wwwpub folder not yet checked/created...", DEBUG);
+				if(!sockDirCreated)  log(username + " sock folder not yet checked/created...", DEBUG);
+				if(!logDirCreated)  log(username + " log folder not yet checked/created...", DEBUG);
+				if(!prodDirCreated)  log(username + ".prod folder not yet checked/created...", DEBUG);
+				if(!npmDirCreated)  log(username + ".npm-packages folder not yet checked/created...", DEBUG);
+			
+			}
+		}
+	
+	
+		function checkMountsError(err) {
+			if(checkMountsAbort) return;
+			checkMountsAbort = true;
+		
+			checkMountsCallback(err);
+		
+		}
+	
+		function checkSslCert() {
+			// Check ssl certificate
+
+			if(INSIDE_DOCKER) {
+				sslCertChecked = true;
+				if(options.waitForSSL) checkMountsReadyMaybe();
+				return;
+			}
+
+			console.time("Check " + username + " SSL Cert");
+			var url_user = UTIL.urlFriendly(username);
+			var userDomain = url_user + "." + DOMAIN;
+		
+			var certPath = "/etc/letsencrypt/live/" + url_user + "." + DOMAIN + "/fullchain.pem";
+			module_fs.stat(certPath, function(err, stat) {
+				if(err == null) {
+					console.log("SSL certificate for " + url_user + "." + DOMAIN + " exist!");
+				
+					enableSSL(userDomain); // Check if Nginx needs to be updated
+				
+					return;
+				}
+				else if(err.code == 'ENOENT') {
+					console.log("ENOENT: certPath=" + certPath);
+				
+					if(FAILED_SSL_REG.hasOwnProperty(url_user + "." + DOMAIN)) {
+						log("Skipping SSL registration because of too many failed attempts!");
+						sslCertChecked = true;
+						console.timeEnd("Check " + username + " SSL Cert");
+						if(options.waitForSSL) checkMountsReadyMaybe();
+						return;
+					}
+				
+					// the cert does not exist. Try to register it
+				
+					console.time("Register " + userDomain + " with letsencrypt");
+					var wildcard = true;
+					module_letsencrypt.register(userDomain, ADMIN_EMAIL, wildcard, function(err) {
+						console.timeEnd("Register " + userDomain + " with letsencrypt");
+						if(err) {
+							if(FAILED_SSL_REG.hasOwnProperty(userDomain)) FAILED_SSL_REG[userDomain]++;
+							else FAILED_SSL_REG[userDomain] = 1;
+						
+							if(err.code == "ENOENT") log("certbot not installed!", WARN);
+							else if(err.code == "RATE_LIMIT") log("Unable to create letsencrypt cert because of rate limit!", WARN);
+							else {
+								log(err.message, WARN);
+							}
+							sslCertChecked = true;
+							console.timeEnd("Check " + username + " SSL Cert");
+							if(options.waitForSSL) checkMountsReadyMaybe();
+						}
+						else {
+							console.log("SSL certificate for " + userDomain + " installed!");
+							setTimeout(function() {
+								enableSSL(userDomain);
+							}, 500); // It will take some time for the certificate to be installed!? no, it was another bug, but keep the timeout for now...
+						}
+					}); // letsencrypt.register
+				}
+				else {
+					// Another module_fs.stat ssl file error
+					throw err;
+				}
+			});
+		
+			function enableSSL(userDomain) {
+				// Enable SSL on the site
+				var nginxProfilePath = "/etc/nginx/sites-available/" + userDomain + ".nginx";
+				module_fs.readFile(nginxProfilePath, "utf8", function read(err, data) {
+					if(err) throw err;
+				
+					if(data.indexOf("#SSL#") == -1 && data.indexOf("#NOSSL#") == -1) {
+						log("SSL already configured on " + userDomain);
+						sslCertChecked = true;
+						console.timeEnd("Check " + username + " SSL Cert");
+						if(options.waitForSSL) checkMountsReadyMaybe();
+						return;
+					}
+				
+					data = data.replace(/#SSL#/g, ""); // Remove the comment before "listen 443 ssl"
+					data = data.replace(/.*#NOSSL#/g, ""); // Remove all lines that have #NOSSL# in it
+				
+					module_fs.writeFile(nginxProfilePath, data, function(err) {
+						if(err) throw err;
 					
-					if(links.length > 0) {
-						var targetRelative = links[0].target;
+						console.log("SSL enabled: " + nginxProfilePath);
+					
+						console.time(username + " nginx reload");
+						var exec = module_child_process.exec;
+						exec("service nginx reload", EXEC_OPTIONS, function(error, stdout, stderr) {
+							console.timeEnd(username + " nginx reload");
+						
+							var err = error || stdout || stderr;
+							if(err) reportError(err);
+						
+							/*
+								if(error) throw(error);
+								if(stderr) throw new Error(stderr);
+								if(stdout) throw new Error(stdout);
+							*/
+						
+							sslCertChecked = true;
+							console.timeEnd("Check " + username + " SSL Cert");
+							if(options.waitForSSL) checkMountsReadyMaybe();
+						});
+					});
+				});
+			}
+		
+		
+		} // checkSslCert
+	
+	} // checkMounts
+
+	function mountFollowSymlink(binaryFile, homeDir, mountFollowSymlinkActualCallback) {
+		//log("mountFollowSymlink: binaryFile=" + binaryFile + " homeDir=" + homeDir + " ", DEBUG);
+	 
+		// Check if binaryFile is a symlink, follows the symlinks,
+		// mounts the actual binary file, then creates the symlinks
+		var folder = UTIL.getDirectoryFromPath(binaryFile);
+
+		recursiveLinks(binaryFile, function(err, links, targetBinary, targetRelative) {
+			if(err) return mountFollowSymlinkCallback(err);
+
+			var targetInHomeDir = UTIL.joinPaths(homeDir, targetBinary);
+		
+			//log("mountFollowSymlink: targetBinary=" + binaryFile + " targetInHomeDir=" + targetInHomeDir + " links=" + JSON.stringify(links) + " ", DEBUG);
+		
+			module_mount(targetBinary, targetInHomeDir, function(err) {
+				if(err) return mountFollowSymlinkCallback(err);
+			
+				createLinks(links, function(err) {
+					if(err) mountFollowSymlinkCallback(err);
+					else mountFollowSymlinkCallback(null, targetRelative);
+				});
+			});
+		});
+	
+		function mountFollowSymlinkCallback(err, target) {
+			mountFollowSymlinkActualCallback(err, target);
+			mountFollowSymlinkActualCallback = null; // Prevent further callbacks, and throw an error if it tries to call back again
+		}
+	
+		function createLinks(links, callback) {
+			if(links.length == 0) return callback(null);
+		
+			var linksToCreate = links.slice(); // Don't mess with the original array
+		
+			createLink(linksToCreate.pop());
+		
+			function createLink(link) {
+			
+				var pathInHomeDir = UTIL.joinPaths(homeDir, link.path);
+			
+				module_fs.symlink(link.target, pathInHomeDir, function (err) {
+					if(err) {
+						if(err.code == "EEXIST") {
+							// Make sure it links to the correct target
+							module_fs.readlink(pathInHomeDir, function(err, linkStr) {
+								if(err) {
+									// It's probably not a link!
+									module_fs.stat(pathInHomeDir, function(err, stats) {
+										if(err) throw err; // We should not fail to stat, because it exist
+									
+										if(stats.size == 0) {
+											// It's emty, so we can delete it
+											module_fs.unlink(pathInHomeDir, function(err) {
+												if(err) throw err; // Should not result in an error
+											
+												// Now attempt to create the link again
+												// Not recursive to prevent loop
+												module_fs.symlink(link.target, pathInHomeDir, function (err) {
+													if(err) return callback(err); // We give up (this should not result in an error)
+													else makeAnotherLink();
+												});
+											
+											});
+										}
+										else {
+											// We don't know what to do
+											return callback(new Error(pathInHomeDir + " is not a link and it's not empty! Unable to link it to " + link.target)); 
+										}
+									});
+								}
+								else {
+									if(linkStr == link.target) makeAnotherLink();
+									else {
+										throw new Error("linkStr=" + linkStr + " link.target=" + link.target);
+									}
+								}
+							});
+						}
+						else return callback(err); 
 					}
 					else {
-						var targetRelative = UTIL.getFilenameFromPath(binaryFile);
+						makeAnotherLink();
 					}
+				
+					function makeAnotherLink() {
+						if(linksToCreate.length > 0) createLink(linksToCreate.pop());
+						else callback(null);
+					}
+				
+				});
+			}
+		}
+	
+		function recursiveLinks(binaryFile, callback) {
+			// Returns an array of links, and the final binary they all link to
+		
+			var folder = UTIL.getDirectoryFromPath(binaryFile);
+			var links = [];
+		
+			checkLink(binaryFile);
+		
+			function checkLink(binaryFile) {
+				module_fs.readlink(binaryFile, function(err, linkString) {
+					if(!err) {
+						// No error means it's a symlink
 					
-					callback(null, links, binaryFile, targetRelative);
-				}
+						var targetAbsolutePath = UTIL.resolvePath(folder, linkString);
+					
+						// note: Target can NOT be an absolute path! Or chroot wont work.
+					
+						links.push({target: linkString, path: binaryFile});
+					
+						// Check if it's a symbolic link
+						checkLink(targetAbsolutePath, linkString);
+					}
+					else if(err.code == "EINVAL") {
+						// We found the actually a binary!
+					
+						if(links.length > 0) {
+							var targetRelative = links[0].target;
+						}
+						else {
+							var targetRelative = UTIL.getFilenameFromPath(binaryFile);
+						}
+					
+						callback(null, links, binaryFile, targetRelative);
+					}
 					else callback(err);
 				});
 			}
@@ -4340,276 +4338,276 @@ function mountFollowSymlink(binaryFile, homeDir, mountFollowSymlinkActualCallbac
 			if(INSPECTOR.hasOwnProperty(secondDir)) {
 				if(request.url.indexOf("/json")) {
 					console.log("Proxying request to inspector " + secondDir + " using http? " + request.protocol);
-				INSPECTOR[secondDir].proxy.web(request, response);
+					INSPECTOR[secondDir].proxy.web(request, response);
+				}
+				else {
+					console.log("Proxying request to inspector " + secondDir + " using websockets (request.protocol=" + request.protocol + " dirs[2]=" + dirs[2] + ")");
+				
+					INSPECTOR[secondDir].proxy.ws(request, response, { target: 'http://127.0.0.1:' + INSPECTOR[secondDir].port });
+					//INSPECTOR[secondDir].proxy.ws(request, response, { target: 'http://127.0.0.1:' + INSPECTOR[secondDir].port + "/" +  });
+				}
+			
 			}
 			else {
-				console.log("Proxying request to inspector " + secondDir + " using websockets (request.protocol=" + request.protocol + " dirs[2]=" + dirs[2] + ")");
-				
-				INSPECTOR[secondDir].proxy.ws(request, response, { target: 'http://127.0.0.1:' + INSPECTOR[secondDir].port });
-				//INSPECTOR[secondDir].proxy.ws(request, response, { target: 'http://127.0.0.1:' + INSPECTOR[secondDir].port + "/" +  });
+				response.writeHead(404, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
+				response.end("Inspector not found: " + secondDir);
 			}
-			
+			return;
 		}
-		else {
-			response.writeHead(404, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
-			response.end("Inspector not found: " + secondDir);
+		else if(firstDir == "proxy") {
+			if(PROXY.hasOwnProperty(secondDir)) {
+				log("Proxying request to proxy " + secondDir, INFO);
+				//request.url = request.url.replace("/proxy/secondDir", "");
+				PROXY[secondDir].proxy.web(request, response);
+			}
+			else {
+				response.writeHead(404, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
+				response.end("Proxy not found: " + secondDir);
+			}
+			return;
 		}
-		return;
-	}
-	else if(firstDir == "proxy") {
-		if(PROXY.hasOwnProperty(secondDir)) {
-			log("Proxying request to proxy " + secondDir, INFO);
-			//request.url = request.url.replace("/proxy/secondDir", "");
-			PROXY[secondDir].proxy.web(request, response);
-		}
-		else {
-			response.writeHead(404, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
-			response.end("Proxy not found: " + secondDir);
-		}
-		return;
-	}
-	else if(firstDir == "share") {
-		/*
-			### Upload files to user via web share
-			https://developers.google.com/web/updates/2018/12/web-share-target
-			https://stackoverflow.com/questions/57917599/how-to-handle-images-offline-in-a-pwa-share-target
-			
-			The PWA will navigate to /share as specified in manifest.webmanisfest
-			
-		*/
-		var Busboy = require('busboy');
-		var sendToUser = "";
-		var notifyUser = true;
-		var files = [];
-		if (request.method === 'POST') {
+		else if(firstDir == "share") {
 			/*
-				Figure out what user should get the file
-				Probably the user with the same IP !?
-				
-				What if there are many users with the same IP!?
-				todo: Make the service worker handle the request!
-				Then "upload" the file from the service worker cache!?
-				https://glitch.com/~web-share-offline
+				### Upload files to user via web share
+				https://developers.google.com/web/updates/2018/12/web-share-target
+				https://stackoverflow.com/questions/57917599/how-to-handle-images-offline-in-a-pwa-share-target
+			
+				The PWA will navigate to /share as specified in manifest.webmanisfest
+			
 			*/
-			
-			log("File upload: request.headers=" + JSON.stringify(request.headers), DEBUG);
-			
-			var cookie = request.headers.cookie;
-			var cookieMatchUser = cookie.match(/user=([^;]*)?/);
-			if(cookieMatchUser) {
-				sendToUser = cookieMatchUser[1];
-				log("File upload: Found sendToUser=" + sendToUser + " in cookies!", INFO);
-			}
-			
-			if(!sendToUser) {
-				log("File upload: USER_CONNECTIONS=" + JSON.stringify(Object.keys(USER_CONNECTIONS)));
+			var Busboy = require('busboy');
+			var sendToUser = "";
+			var notifyUser = true;
+			var files = [];
+			if (request.method === 'POST') {
+				/*
+					Figure out what user should get the file
+					Probably the user with the same IP !?
 				
-			var conn, ip;
-			conns: for(var username in USER_CONNECTIONS) {
-					log("File upload: Checking connections for username=" + username, DEBUG);
-				for(var connectionId in USER_CONNECTIONS[username].connections) {
-					conn = USER_CONNECTIONS[username].connections[connectionId];
-					ip = getIp(conn);
-					if(ip == IP) {
-						sendToUser = username;
-						log("File upload: User found: " + sendToUser, INFO);
-						break conns;
-					}
-						else {
-							log("File upload: Not a match: User " + username  + " ip=" + ip + ". Uploader IP=" + IP, DEBUG);
-						}
-						
-					//log(UTIL.objInfo(conn), INFO);
+					What if there are many users with the same IP!?
+					todo: Make the service worker handle the request!
+					Then "upload" the file from the service worker cache!?
+					https://glitch.com/~web-share-offline
+				*/
+			
+				log("File upload: request.headers=" + JSON.stringify(request.headers), DEBUG);
+			
+				var cookie = request.headers.cookie;
+				var cookieMatchUser = cookie.match(/user=([^;]*)?/);
+				if(cookieMatchUser) {
+					sendToUser = cookieMatchUser[1];
+					log("File upload: Found sendToUser=" + sendToUser + " in cookies!", INFO);
 				}
-			}
-			}
 			
-			var busboy = new Busboy({ headers: request.headers });
-			busboy.on('file', function(fieldname, file, filename, encoding, mimetype) {
-				log('File upload: File [' + fieldname + ']: filename: ' + filename + ', encoding: ' + encoding + ', mimetype: ' + mimetype, DEBUG);
-				file.on('data', function(data) {
-					log('File upload: File [' + fieldname + '] got ' + data.length + ' bytes', DEBUG);
-					
-				});
-				file.on('end', function() {
-					log('File upload: File [' + fieldname + '] Finished', DEBUG);
-				});
+				if(!sendToUser) {
+					log("File upload: USER_CONNECTIONS=" + JSON.stringify(Object.keys(USER_CONNECTIONS)));
 				
-				// Save file in temp dir, then move it to the user home dir.
+					var conn, ip;
+					conns: for(var username in USER_CONNECTIONS) {
+						log("File upload: Checking connections for username=" + username, DEBUG);
+						for(var connectionId in USER_CONNECTIONS[username].connections) {
+							conn = USER_CONNECTIONS[username].connections[connectionId];
+							ip = getIp(conn);
+							if(ip == IP) {
+								sendToUser = username;
+								log("File upload: User found: " + sendToUser, INFO);
+								break conns;
+							}
+							else {
+								log("File upload: Not a match: User " + username  + " ip=" + ip + ". Uploader IP=" + IP, DEBUG);
+							}
+						
+							//log(UTIL.objInfo(conn), INFO);
+						}
+					}
+				}
+			
+				var busboy = new Busboy({ headers: request.headers });
+				busboy.on('file', function(fieldname, file, filename, encoding, mimetype) {
+					log('File upload: File [' + fieldname + ']: filename: ' + filename + ', encoding: ' + encoding + ', mimetype: ' + mimetype, DEBUG);
+					file.on('data', function(data) {
+						log('File upload: File [' + fieldname + '] got ' + data.length + ' bytes', DEBUG);
+					
+					});
+					file.on('end', function() {
+						log('File upload: File [' + fieldname + '] Finished', DEBUG);
+					});
+				
+					// Save file in temp dir, then move it to the user home dir.
 					var saveTo = module_path.join(module_os.tmpdir(), module_path.basename(filename || fieldname));
 					log("File upload: piping to write stream: saveTo=" + saveTo);
 					file.pipe(module_fs.createWriteStream(saveTo));
-				files.push(saveTo);
+					files.push(saveTo);
 				
-			});
-			busboy.on('field', function(fieldname, val, fieldnameTruncated, valTruncated, encoding, mimetype) {
-				log('File upload: Field [' + fieldname + ']: value: ', val, DEBUG);
+				});
+				busboy.on('field', function(fieldname, val, fieldnameTruncated, valTruncated, encoding, mimetype) {
+					log('File upload: Field [' + fieldname + ']: value: ', val, DEBUG);
 				
-				if(fieldname == "user") sendToUser = val;
-				else if(fieldname == "open" && val=="false") notifyUser = false;
+					if(fieldname == "user") sendToUser = val;
+					else if(fieldname == "open" && val=="false") notifyUser = false;
 				
-			});
-			busboy.on('finish', function() {
-				log('File upload: Done parsing form!', DEBUG);
+				});
+				busboy.on('finish', function() {
+					log('File upload: Done parsing form!', DEBUG);
 				
-				var done = function(uploadMessage) {
-					log("File upload: done! uploadMessage=" + uploadMessage, DEBUG);
-					response.writeHead(302, { Location: '/?open=/upload/file', 'Content-Type': 'text/plain; charset=utf-8' });
-					response.end(uploadMessage);
-				}
+					var done = function(uploadMessage) {
+						log("File upload: done! uploadMessage=" + uploadMessage, DEBUG);
+						response.writeHead(302, { Location: '/?open=/upload/file', 'Content-Type': 'text/plain; charset=utf-8' });
+						response.end(uploadMessage);
+					}
 				
-				var uploadedFiles = [];
+					var uploadedFiles = [];
 				
-				if(files.length == 0) {
-					done("Error: Did not recieve any files!");
-				}
-				else if(sendToUser) {
-					log("File upload: sendToUser=" + sendToUser, DEBUG);
+					if(files.length == 0) {
+						done("Error: Did not recieve any files!");
+					}
+					else if(sendToUser) {
+						log("File upload: sendToUser=" + sendToUser, DEBUG);
 					
-					var copyFile = function copyFile(fromPath, username, fileName) {
+						var copyFile = function copyFile(fromPath, username, fileName) {
 						
-						var uploadFolder = HOME_DIR + username + "/upload/";
-						var toPath = uploadFolder + fileName;
+							var uploadFolder = HOME_DIR + username + "/upload/";
+							var toPath = uploadFolder + fileName;
 						
-						// First create the upload dir if it doesn't already exist
-						log("File upload: Checking folder: " + uploadFolder, DEBUG);
-						module_fs.stat(uploadFolder, function(err, stats) {
-							if(err) {
-								if(err.code == "ENOENT") {
-									module_fs.mkdir(uploadFolder, function(err) {
-										if(err) {
-console.error(err);
-											filesFailed.push(fileName, " Error: " + err.message);
-											filesMovedCount++;
-											doneMaybe();
-										}
-										else folderCreated(uploadFolder);
-									});
+							// First create the upload dir if it doesn't already exist
+							log("File upload: Checking folder: " + uploadFolder, DEBUG);
+							module_fs.stat(uploadFolder, function(err, stats) {
+								if(err) {
+									if(err.code == "ENOENT") {
+										module_fs.mkdir(uploadFolder, function(err) {
+											if(err) {
+												console.error(err);
+												filesFailed.push(fileName, " Error: " + err.message);
+												filesMovedCount++;
+												doneMaybe();
+											}
+											else folderCreated(uploadFolder);
+										});
+									}
+									else throw err;
 								}
-								else throw err;
+								else if(stats.isDirectory()) {
+									log("File upload: Folder exist: " + uploadFolder, DEBUG);
+									folderCreated(uploadFolder);
+								}
+								else {
+									log("File upload: Not a directory: " + uploadFolder, DEBUG);
+									filesFailed.push(fileName, " Error: Problem with upload folder");
+									filesMovedCount++;
+									doneMaybe();
+								}
+							});
+						
+							function folderCreated(uploadFolder) {
+							
+								log("File upload: Copying file: " + fromPath + " to " + toPath, DEBUG);
+								module_fs.copyFile(fromPath, toPath, fileCopied);
+							}
+						
+							function doneMaybe() {
+								if(filesMovedCount == files.length) {
+									if(files.length == 1) {
+										var uploadMessage = "Success: File sent to " + sendToUser;
+									}
+									else {
+										var uploadMessage = "Success: " + files.length + "files sent to " + sendToUser;
+									}
+								
+									if(filesFailed.length > 0) {
+										var uploadMessage = "Warning: " + filesFailed.length + " / " + files.length + " failed to upload to " + sendToUser + "!\n" + filesFailed.join("\n");
+									}
+								
+									if(notifyUser) {
+										// Chrome PWA will close, then re-open the app when sharing files to it, so wait until it has reopened before notifying the user
+										setTimeout(function() {
+											if(USER_CONNECTIONS.hasOwnProperty(username)) {
+												log("File upload: Notifying user " + username + " (" + USER_CONNECTIONS[username].connectedClientIds.length + " connections) ... ", DEBUG);
+												sendToAll(username, {uploadedFiles: uploadedFiles});
+											}
+											else {
+												uploadMessage += "Warning: " + username + " is not online!";
+												log("File upload: User " + username + " not online!", INFO);
+											}
+										}, 4000);
+									
+									}
+									done(uploadMessage);
+								}
+							}
+						
+							function fileCopied(err) {
+								filesMovedCount++;
+								if(err) {
+									console.error(err);
+									filesFailed.push(fileName, " Error: " + err.message);
+								}
+								else {
+									log("File upload: Copied file to " + toPath, DEBUG);
+									uploadedFiles.push(fileName);
+									module_fs.unlink(fromPath, function(err) {
+										if(err) console.error(err);
+										else log("File upload: Deleted " + fromPath, DEBUG);
+									});
+								
+									readEtcPasswd(username, function(err, user) {
+										if(err) {
+											console.error(err);
+											return;
+										}
+										module_fs.chown(toPath, user.uid, user.gid, function(err) {
+											if(err) console.error(err);
+											else log("File upload: Changed ownership of " + toPath + " to " + username, DEBUG);
+										});
+									});
+								
+								}
+							
+								doneMaybe();
+							
+							}
+						}
+					
+						// Need to copy the file into user dir. Can't move/rename: EXDEV: cross-device link not permitted
+						var filesMovedCount = 0;
+						var filesFailed = [];
+					
+						// Does user exist ?
+						var homeDir = HOME_DIR + sendToUser;
+						log("File upload: Checking folder: " + homeDir, DEBUG);
+						module_fs.stat(homeDir, function(err, stats) {
+							if(err) {
+								log("File upload: Folder not found: " + homeDir + " Assuming user doesnt exist.", DEBUG);
+								done("Error: User does not exist:" + sendToUser);
 							}
 							else if(stats.isDirectory()) {
-								log("File upload: Folder exist: " + uploadFolder, DEBUG);
-								folderCreated(uploadFolder);
+								log("File upload: Folder exist: " + homeDir + "", DEBUG);
+							
+								var fileName;
+								for (var i=0; i<files.length; i++) {
+									fileName = UTIL.getFilenameFromPath(files[i]);
+									copyFile(files[i], sendToUser, fileName);
+								}
 							}
 							else {
-								log("File upload: Not a directory: " + uploadFolder, DEBUG);
-								filesFailed.push(fileName, " Error: Problem with upload folder");
-								filesMovedCount++;
-								doneMaybe();
+								done("Error: Not a folder:" + homeDir);
 							}
 						});
-						
-						function folderCreated(uploadFolder) {
-							
-							log("File upload: Copying file: " + fromPath + " to " + toPath, DEBUG);
-							module_fs.copyFile(fromPath, toPath, fileCopied);
-						}
-						
-						function doneMaybe() {
-							if(filesMovedCount == files.length) {
-								if(files.length == 1) {
-									var uploadMessage = "Success: File sent to " + sendToUser;
-								}
-								else {
-									var uploadMessage = "Success: " + files.length + "files sent to " + sendToUser;
-								}
-								
-								if(filesFailed.length > 0) {
-									var uploadMessage = "Warning: " + filesFailed.length + " / " + files.length + " failed to upload to " + sendToUser + "!\n" + filesFailed.join("\n");
-								}
-								
-								if(notifyUser) {
-									// Chrome PWA will close, then re-open the app when sharing files to it, so wait until it has reopened before notifying the user
-setTimeout(function() {
-								if(USER_CONNECTIONS.hasOwnProperty(username)) {
-										log("File upload: Notifying user " + username + " (" + USER_CONNECTIONS[username].connectedClientIds.length + " connections) ... ", DEBUG);
-									sendToAll(username, {uploadedFiles: uploadedFiles});
-								}
-								else {
-									uploadMessage += "Warning: " + username + " is not online!";
-										log("File upload: User " + username + " not online!", INFO);
-								}
-									}, 4000);
-									
-								}
-								done(uploadMessage);
-							}
-						}
-						
-						function fileCopied(err) {
-							filesMovedCount++;
-							if(err) {
-								console.error(err);
-								filesFailed.push(fileName, " Error: " + err.message);
-							}
-							else {
-								log("File upload: Copied file to " + toPath, DEBUG);
-								uploadedFiles.push(fileName);
-								module_fs.unlink(fromPath, function(err) {
-									if(err) console.error(err);
-									else log("File upload: Deleted " + fromPath, DEBUG);
-								});
-								
-								readEtcPasswd(username, function(err, user) {
-									if(err) {
-										console.error(err);
-										return;
-									}
-									module_fs.chown(toPath, user.uid, user.gid, function(err) {
-										if(err) console.error(err);
-										else log("File upload: Changed ownership of " + toPath + " to " + username, DEBUG);
-									});
-								});
-								
-							}
-							
-							doneMaybe();
-							
-						}
+					
 					}
-					
-					// Need to copy the file into user dir. Can't move/rename: EXDEV: cross-device link not permitted
-					var filesMovedCount = 0;
-					var filesFailed = [];
-					
-					// Does user exist ?
-					var homeDir = HOME_DIR + sendToUser;
-					log("File upload: Checking folder: " + homeDir, DEBUG);
-					module_fs.stat(homeDir, function(err, stats) {
-						if(err) {
-							log("File upload: Folder not found: " + homeDir + " Assuming user doesnt exist.", DEBUG);
-							done("Error: User does not exist:" + sendToUser);
-						}
-						else if(stats.isDirectory()) {
-							log("File upload: Folder exist: " + homeDir + "", DEBUG);
-							
-							var fileName;
-							for (var i=0; i<files.length; i++) {
-								fileName = UTIL.getFilenameFromPath(files[i]);
-								copyFile(files[i], sendToUser, fileName);
-							}
-						}
-						else {
-							done("Error: Not a folder:" + homeDir);
-						}
-					});
-					
-				}
-				else {
-					done("Error: Found no user to send the file to! Add a user field!");
-				}
+					else {
+						done("Error: Found no user to send the file to! Add a user field!");
+					}
 				
-			});
-			request.pipe(busboy);
+				});
+				request.pipe(busboy);
+			}
+			else if (request.method === 'GET') {
+				response.writeHead(400, { Connection: 'close', 'Content-Type': 'text/plain; charset=utf-8' });
+				response.end('Expected a HTTP POST!');
+			}
+			return;
 		}
-		else if (request.method === 'GET') {
-			response.writeHead(400, { Connection: 'close', 'Content-Type': 'text/plain; charset=utf-8' });
-			response.end('Expected a HTTP POST!');
-		}
-		return;
-	}
-	else if(HTTP_ENDPOINTS.hasOwnProperty(firstDir)) {
+		else if(HTTP_ENDPOINTS.hasOwnProperty(firstDir)) {
 		
 			if(!HTTP_ENDPOINTS.hasOwnProperty(firstDir)) {
 				response.writeHead(400, { Connection: 'close', 'Content-Type': 'text/plain; charset=utf-8' });
@@ -4634,105 +4632,105 @@ setTimeout(function() {
 		
 			/*
 				response.writeHead(400, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
-			response.end("Unknown endpoint: '" + firstDir + "' of " + urlPath);
-			return;
-		*/
+				response.end("Unknown endpoint: '" + firstDir + "' of " + urlPath);
+				return;
+			*/
 		
-	}
+		}
 	
-	if(urlPath == "/" || urlPath == "") urlPath = "/index.htm";
+		if(urlPath == "/" || urlPath == "") urlPath = "/index.htm";
 
-	//console.log("localFolder=" + localFolder);
-	//console.log("urlPath=" + urlPath);
+		//console.log("localFolder=" + localFolder);
+		//console.log("urlPath=" + urlPath);
 	
 	
-	if(urlPath == "") {
-		response.writeHead(400, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
-		response.end("No file in url: " + urlPath);
-		return;
-	}
+		if(urlPath == "") {
+			response.writeHead(400, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
+			response.end("No file in url: " + urlPath);
+			return;
+		}
 	
 	
-	var filePath = module_path.join(localFolder, urlPath);
+		var filePath = module_path.join(localFolder, urlPath);
 	
 	
-	if(filePath.indexOf(localFolder) != 0 || !module_path.isAbsolute(filePath)) {
-		if(filePath.indexOf(localFolder) != 0) console.log("filePath=" + filePath + " does not start with localFolder=" + localFolder);
-		if(!module_path.isAbsolute(filePath)) console.log("Not absolute: filePath=" +filePath);
+		if(filePath.indexOf(localFolder) != 0 || !module_path.isAbsolute(filePath)) {
+			if(filePath.indexOf(localFolder) != 0) console.log("filePath=" + filePath + " does not start with localFolder=" + localFolder);
+			if(!module_path.isAbsolute(filePath)) console.log("Not absolute: filePath=" +filePath);
 		
-		console.log("urlPath=" + urlPath);
+			console.log("urlPath=" + urlPath);
 		
-		response.writeHead(400, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
-		response.end("Bad path: " + urlPath);
-		return;
-	}
+			response.writeHead(400, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
+			response.end("Bad path: " + urlPath);
+			return;
+		}
 	
 	
 	
 	
-	var fileExtension = UTIL.getFileExtension(urlPath);
+		var fileExtension = UTIL.getFileExtension(urlPath);
 	
 	
 	
-	if(fileExtension && !module_mimeMap.hasOwnProperty(fileExtension)) {
-		response.writeHead(400, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
-		response.end("Bad file type: '" + fileExtension + "'");
+		if(fileExtension && !module_mimeMap.hasOwnProperty(fileExtension)) {
+			response.writeHead(400, "Error", {'Content-Type': 'text/plain; charset=utf-8'});
+			response.end("Bad file type: '" + fileExtension + "'");
 		
-		log("Unknown mime type: fileExtension=" + fileExtension, WARN);
+			log("Unknown mime type: fileExtension=" + fileExtension, WARN);
 		
-		return;
-	}
+			return;
+		}
 	
-	var stat = module_fs.stat(filePath, function(err, stats) {
+		var stat = module_fs.stat(filePath, function(err, stats) {
 		
-		if(err) {
-			responseHeaders['Access-Control-Allow-Origin'] = "*";
+			if(err) {
+				responseHeaders['Access-Control-Allow-Origin'] = "*";
 			
-			response.writeHead(404, "Error", responseHeaders);
+				response.writeHead(404, "Error", responseHeaders);
 			
-			if(err.code == "ENOENT") {
-				//var virtualPath = user.toVirtualPath(filePath);
-				//response.end("File not found: " + virtualPath);
+				if(err.code == "ENOENT") {
+					//var virtualPath = user.toVirtualPath(filePath);
+					//response.end("File not found: " + virtualPath);
 				
-				response.end("File not found: " + filePath);
+					response.end("File not found: " + filePath);
 				
-				log("HTTP Server: File not found: " + filePath, WARN);
+					log("HTTP Server: File not found: " + filePath, WARN);
 				
+				}
+				else {
+					response.end(err.message);
+				}
+			
+			
+			}
+			else if(stats == undefined) throw new Error("No stats!");
+			else if(!stats.isFile()) {
+			
+				response.writeHead(404, "Error", responseHeaders);
+				response.end("Not a file: " + filePath);
+			
 			}
 			else {
-				response.end(err.message);
+			
+				responseHeaders['Content-Type'] = module_mimeMap[fileExtension];
+				responseHeaders['Content-Length'] = stats.size;
+			
+				// Some browsers (like IE11) doesn't use utf8 by default
+				if(fileExtension == "js" || fileExtension == "svg" || fileExtension == "htm" || fileExtension == "html" || fileExtension == "css") {
+					responseHeaders['Content-Type'] += "; charset=utf-8";
+				}
+			
+				response.writeHead(200, responseHeaders);
+			
+				var readStream = module_fs.createReadStream(filePath);
+				readStream.pipe(response);
+			
 			}
-			
-			
-		}
-		else if(stats == undefined) throw new Error("No stats!");
-		else if(!stats.isFile()) {
-			
-			response.writeHead(404, "Error", responseHeaders);
-			response.end("Not a file: " + filePath);
-			
-		}
-		else {
-			
-			responseHeaders['Content-Type'] = module_mimeMap[fileExtension];
-			responseHeaders['Content-Length'] = stats.size;
-			
-			// Some browsers (like IE11) doesn't use utf8 by default
-			if(fileExtension == "js" || fileExtension == "svg" || fileExtension == "htm" || fileExtension == "html" || fileExtension == "css") {
-				responseHeaders['Content-Type'] += "; charset=utf-8";
-			}
-			
-			response.writeHead(200, responseHeaders);
-			
-			var readStream = module_fs.createReadStream(filePath);
-			readStream.pipe(response);
-			
-		}
 		
-	});
+		});
 	
 	
-}
+	}
 
 	function isSHA1hash(str) {
 		if(str.length != 40) return false;
@@ -4746,22 +4744,22 @@ setTimeout(function() {
 
 	function cloneGitRepo(dirs, IP) {
 
-	/*
-		git clone --single-branch --branch <branchname> <remote-repo>
+		/*
+			git clone --single-branch --branch <branchname> <remote-repo>
 
-		Examples: 
+			Examples: 
 			https://github.com/Z3TA/dbo/blob/gh-pages/design1/style.css
 			https://github.com/Z3TA/dbo/blob/1c4135ccc10131343117a465385c67a1a5a00d50/dbo.js
 			https://github.com/Z3TA/dbo
 			https://github.com/Z3TA/dbo/tree/gh-pages
 			https://github.com/redhat-developer/vscode-java/wiki/JDK-Requirements
 
-	*/
+		*/
 		var branch = ""; // default no branch
 
 		if(dirs[2] == "blob") {
-		var githubUser = dirs[0];
-		var githubRepoName = dirs[1];
+			var githubUser = dirs[0];
+			var githubRepoName = dirs[1];
 			var branch =  dirs[3];
 		}
 		else if(dirs[2] == "tree") {
@@ -4784,8 +4782,8 @@ setTimeout(function() {
 		}
 		else {
 			reportError("Unknown github url format: " + dirs.join("/") + " dirs.length=" + dirs.length);
-		return;
-	}
+			return;
+		}
 
 		if(branch == "HEAD") branch = "";
 
@@ -4817,17 +4815,17 @@ setTimeout(function() {
 
 			log("github2s: Created tmpDir=" + tmpDir);
 
-		module_fs.chown(tmpDir, uid, gid, function(err) {
-			if(err) throw err;
+			module_fs.chown(tmpDir, uid, gid, function(err) {
+				if(err) throw err;
 
 				log("github2s: chowned uid=" + uid + " gid=" + gid + " tmpDir=" + tmpDir);
 
-			var execOptions = {
-				shell: EXEC_OPTIONS.shell,
-				cwd: tmpDir,
-				uid: uid,
-				gid: gid
-			};
+				var execOptions = {
+					shell: EXEC_OPTIONS.shell,
+					cwd: tmpDir,
+					uid: uid,
+					gid: gid
+				};
 
 				var gitArg = ["clone"];
 
@@ -4998,6 +4996,8 @@ setTimeout(function() {
 		var workerArgs = ["--loglevel=" + LOGLEVEL, "--user=" + username, "--uid=" + uid, "--gid=" + gid, "--home=" + homeDir, "--virtualroot=" + VIRTUAL_ROOT];
 		var workerNode = process.argv[0]; // First argument is the path to the nodejs executable!
 	
+		log("Spawn user_worker.js with workerNode=" + workerNode);
+
 		// Using spawn instead of fork to be able to use Linux network namespaces
 	
 		spawnOptions.env = {
@@ -5469,1570 +5469,1570 @@ setTimeout(function() {
 			
 				else throw new Error("Unknown request from worker: " + JSON.stringify(req, null, 2));
 			}
-		else throw new Error("Bad message from worker: workerMessage=" + JSON.stringify(workerMessage, null, 2));
+			else throw new Error("Bad message from worker: workerMessage=" + JSON.stringify(workerMessage, null, 2));
 		
 		
-		function workerResp(err, resp) {
-			if(id == undefined) throw new Error("id=" + id);
-			var obj = {id: id, parentResponse: resp};
-			if(err) obj.err = err.message ? {message: err.message, code: err.code, stack: err.stack} : err;
-			worker.send(obj);
-		}
+			function workerResp(err, resp) {
+				if(id == undefined) throw new Error("id=" + id);
+				var obj = {id: id, parentResponse: resp};
+				if(err) obj.err = err.message ? {message: err.message, code: err.code, stack: err.stack} : err;
+				worker.send(obj);
+			}
 		
-	}
-}
-
-
-function startChromiumBrowserInVnc(username, uid, gid, url, callback) {
-	
-	if(!module_ps) return callback(new Error("Module ps not loaded."));
-	
-	if(username == undefined && !CRAZY) throw new Error("username needed to start chromium browser!");
-	if(uid == undefined && !CRAZY) throw new Error("uid needed to start chromium browser!");
-	if(gid == undefined && !CRAZY) throw new Error("gid eeded to start chromium browser!");
-	
-	// If chromium-browser is already running on a display (by the same user ??),
-	// it will make a clean close (no useful message). Probabbly because it detects that the user is already runnig another chromium-browser
-	for(var displayId in VNC_CHANNEL) {
-		if(VNC_CHANNEL[displayId].startedBy == username) {
-			// Give the old session
-			return callback(null, VNC_CHANNEL[displayId].info);
 		}
 	}
+
+
+	function startChromiumBrowserInVnc(username, uid, gid, url, callback) {
 	
-	var displayId = 5; // Don't start on a low number, if running on a dev box it might already have one or more monitors!
+		if(!module_ps) return callback(new Error("Module ps not loaded."));
 	
-	// Pick a channel (display id) that is not used
-	while(VNC_CHANNEL.hasOwnProperty(displayId) && displayId < 10000) displayId++;
+		if(username == undefined && !CRAZY) throw new Error("username needed to start chromium browser!");
+		if(uid == undefined && !CRAZY) throw new Error("uid needed to start chromium browser!");
+		if(gid == undefined && !CRAZY) throw new Error("gid eeded to start chromium browser!");
 	
-	if(displayId >= 9999) throw new Error("Too many active VNC channels!");
+		// If chromium-browser is already running on a display (by the same user ??),
+		// it will make a clean close (no useful message). Probabbly because it detects that the user is already runnig another chromium-browser
+		for(var displayId in VNC_CHANNEL) {
+			if(VNC_CHANNEL[displayId].startedBy == username) {
+				// Give the old session
+				return callback(null, VNC_CHANNEL[displayId].info);
+			}
+		}
 	
-	var vncUnixSocket =  HOME_DIR + username + "/sock/vnc";
-	// https://github.com/nodejitsu/node-http-proxy#proxying-websockets
-	VNC_CHANNEL[displayId] = {startedBy: username};
+		var displayId = 5; // Don't start on a low number, if running on a dev box it might already have one or more monitors!
 	
+		// Pick a channel (display id) that is not used
+		while(VNC_CHANNEL.hasOwnProperty(displayId) && displayId < 10000) displayId++;
 	
+		if(displayId >= 9999) throw new Error("Too many active VNC channels!");
 	
-	// The proxy that will proxy requests to the x11vnc server (using websocket)
-	// unix socket (AF_UNIX) needs the modified libvncserver
-	// bundled in the the x11vnc 0.9.13 tarball and later.
-	var modifiedLibvncserver = false;
-	if(modifiedLibvncserver) {
-		VNC_CHANNEL[displayId].proxy = new module_httpProxy.createProxyServer({
-			target: {
-				socketPath: vncUnixSocket
-			},
-			ws: true
-		});
-	}
-	
-	var xvfbOptions = {};
-	var chromiumBrowserOptions = {};
-	var x11vncOptions = {};
-	
-	var chromiumDebuggerPort = CHROMIUM_DEBUG_PORT;
-	
-	if(chromiumDebuggerPort instanceof Error) {
-		stopVncChannel(displayId);
-		return callback(chromiumDebuggerPort);
-	}
-	
-	var chromeWindowId = "0x400001"; // It's hopefully always the same
+		var vncUnixSocket =  HOME_DIR + username + "/sock/vnc";
+		// https://github.com/nodejitsu/node-http-proxy#proxying-websockets
+		VNC_CHANNEL[displayId] = {startedBy: username};
 	
 	
-	if((uid == undefined || uid == -1)) {
-		log("No uid specified! Browser will run as username=" + CURRENT_USER, WARN);
-	}
 	
-	if(uid != undefined) {
-		xvfbOptions.uid = parseInt(uid);
-		chromiumBrowserOptions.uid = parseInt(uid);
-		x11vncOptions.uid = parseInt(uid);
-	}
-	if(gid != undefined) {
-		xvfbOptions.gid = parseInt(gid);
-		chromiumBrowserOptions.gid = parseInt(gid);
-		x11vncOptions.gid = parseInt(gid);
-	}
+		// The proxy that will proxy requests to the x11vnc server (using websocket)
+		// unix socket (AF_UNIX) needs the modified libvncserver
+		// bundled in the the x11vnc 0.9.13 tarball and later.
+		var modifiedLibvncserver = false;
+		if(modifiedLibvncserver) {
+			VNC_CHANNEL[displayId].proxy = new module_httpProxy.createProxyServer({
+				target: {
+					socketPath: vncUnixSocket
+				},
+				ws: true
+			});
+		}
 	
-	log("Creating VNC for username=" + username + " uid=" + uid + " gid=" + gid, DEBUG);
+		var xvfbOptions = {};
+		var chromiumBrowserOptions = {};
+		var x11vncOptions = {};
 	
-	var xvfbStartCounter = 0;
+		var chromiumDebuggerPort = CHROMIUM_DEBUG_PORT;
 	
-	startXvfb();
+		if(chromiumDebuggerPort instanceof Error) {
+			stopVncChannel(displayId);
+			return callback(chromiumDebuggerPort);
+		}
 	
-	function startXvfb() {
+		var chromeWindowId = "0x400001"; // It's hopefully always the same
+	
+	
+		if((uid == undefined || uid == -1)) {
+			log("No uid specified! Browser will run as username=" + CURRENT_USER, WARN);
+		}
+	
+		if(uid != undefined) {
+			xvfbOptions.uid = parseInt(uid);
+			chromiumBrowserOptions.uid = parseInt(uid);
+			x11vncOptions.uid = parseInt(uid);
+		}
+		if(gid != undefined) {
+			xvfbOptions.gid = parseInt(gid);
+			chromiumBrowserOptions.gid = parseInt(gid);
+			x11vncOptions.gid = parseInt(gid);
+		}
+	
+		log("Creating VNC for username=" + username + " uid=" + uid + " gid=" + gid, DEBUG);
+	
+		var xvfbStartCounter = 0;
+	
+		startXvfb();
+	
+		function startXvfb() {
 		
-		xvfbStartCounter++;
+			xvfbStartCounter++;
 		
-		var xvfbArgs = [
-			":" + displayId,  // Server/monitor/display ... ?
-			"-screen",
-			"0",
-			"800x600x24", // Screen 0 res and depth, I guess you can have many screens on one Server/monitor/display !?
-			"-ac" // Disables X access control
-		];
+			var xvfbArgs = [
+				":" + displayId,  // Server/monitor/display ... ?
+				"-screen",
+				"0",
+				"800x600x24", // Screen 0 res and depth, I guess you can have many screens on one Server/monitor/display !?
+				"-ac" // Disables X access control
+			];
 		
-		// debug: Xvfb :5 -screen 0 800x600x24 -ac &
-		// debug: xwininfo -display :5 -root -children
-		// debug: ps ax | grep Xvfb
+			// debug: Xvfb :5 -screen 0 800x600x24 -ac &
+			// debug: xwininfo -display :5 -root -children
+			// debug: ps ax | grep Xvfb
 		
-		log("Starting Xvfb with args=" + JSON.stringify(xvfbArgs) + " (" + xvfbArgs.join(" ") + ") xvfbOptions=" + JSON.stringify(xvfbOptions));
-		var xvfb = module_child_process.spawn("Xvfb", xvfbArgs, xvfbOptions);
+			log("Starting Xvfb with args=" + JSON.stringify(xvfbArgs) + " (" + xvfbArgs.join(" ") + ") xvfbOptions=" + JSON.stringify(xvfbOptions));
+			var xvfb = module_child_process.spawn("Xvfb", xvfbArgs, xvfbOptions);
 		
-		VNC_CHANNEL[displayId].xvfb = xvfb;
+			VNC_CHANNEL[displayId].xvfb = xvfb;
 		
-		xvfb.on("close", function (code, signal) {
-			log(username + " xvfb (displayId=" + displayId + ") close: code=" + code + " signal=" + signal, NOTICE);
-		});
+			xvfb.on("close", function (code, signal) {
+				log(username + " xvfb (displayId=" + displayId + ") close: code=" + code + " signal=" + signal, NOTICE);
+			});
 		
-		xvfb.on("disconnect", function () {
-			log(username + " xvfb (displayId=" + displayId + ") disconnect: xvfb.connected=" + xvfb.connected, DEBUG);
-		});
+			xvfb.on("disconnect", function () {
+				log(username + " xvfb (displayId=" + displayId + ") disconnect: xvfb.connected=" + xvfb.connected, DEBUG);
+			});
 		
-		xvfb.on("error", function (err) {
-			log(username + " xvfb (displayId=" + displayId + ") error: err.message=" + err.message, ERROR);
-			console.error(err);
-		});
+			xvfb.on("error", function (err) {
+				log(username + " xvfb (displayId=" + displayId + ") error: err.message=" + err.message, ERROR);
+				console.error(err);
+			});
 		
-		xvfb.stdout.on("data", function(data) {
-			log(username + " xvfb (displayId=" + displayId + ") stdout: " + data, WARN);
-		});
+			xvfb.stdout.on("data", function(data) {
+				log(username + " xvfb (displayId=" + displayId + ") stdout: " + data, WARN);
+			});
 		
-		xvfb.stderr.on("data", function (data) {
-			log(username + " xvfb (displayId=" + displayId + ") stderr: " + data, ERROR);
+			xvfb.stderr.on("data", function (data) {
+				log(username + " xvfb (displayId=" + displayId + ") stderr: " + data, ERROR);
 			
-			if(data.indexOf("(EE) Server is already active for display " + displayId) != -1) {
-				/*
-					The server was probably restarted without killing xvfb
-					This means a chromium-browser and x11vnc is also probably running !
-					And will make x11vnc close (ListenOnTCPPort: Address already in use)
+				if(data.indexOf("(EE) Server is already active for display " + displayId) != -1) {
+					/*
+						The server was probably restarted without killing xvfb
+						This means a chromium-browser and x11vnc is also probably running !
+						And will make x11vnc close (ListenOnTCPPort: Address already in use)
 					
-					We don't want to reuse chromium-browser inside the "ghost" Xvfb because we don't know what user started it.
-					And it's probably best to not reuse the Xvfb either.
-					But the user has already been sent the callback ...
+						We don't want to reuse chromium-browser inside the "ghost" Xvfb because we don't know what user started it.
+						And it's probably best to not reuse the Xvfb either.
+						But the user has already been sent the callback ...
 					
-					Killing a xvfb will kill both chromium-browser's inside it and x11vnc ...
+						Killing a xvfb will kill both chromium-browser's inside it and x11vnc ...
 					
-				*/
+					*/
 				
-				module_ps.lookup({
-					command: 'Xvfb',
-					arguments: xvfbArgs.join(" "),
-				}, function(err, resultList ) {
-					if (err) {
-						throw new Error( err );
-					}
-					
-					resultList.forEach(function( p ){
-						if( p ){
-							console.log( 'PID: %s, COMMAND: %s, ARGUMENTS: %s', p.pid, p.command, p.arguments );
-							module_ps.kill( p.pid, function( err ) {
-								if (err) {
-									throw new Error( err );
-								}
-								else {
-									console.log( 'Process %s has been killed!', pid );
-									// Restart Xvfb. But only if it has not already been restarted to prevent endless loop.
-									if(xvfbStartCounter <= 1) startXvfb();
-									
-								}
-							});
+					module_ps.lookup({
+						command: 'Xvfb',
+						arguments: xvfbArgs.join(" "),
+					}, function(err, resultList ) {
+						if (err) {
+							throw new Error( err );
 						}
-						else throw new Error("Expected p");
-					});
-				});
-			}
-			
-		});
-		
-		// Wait until Xvfb is successfully running before starting chromium-browser !
-		var timeInterval = 100;
-		var maxCheck = 10;
-		var checkCounter = 0;
-		
-		setTimeout(isXvfbRunning, timeInterval);
-		
-		function isXvfbRunning() {
-			
-			var xwininfoArg = ["-display", ":" + displayId, "-root", "-children"];
-			module_child_process.execFile("xwininfo", xwininfoArg, function (err, stdout, stderr) {
-				console.log("xwininfo err=" + err + " stderr=" + stderr + " stdout=" + stdout + " arg=" + JSON.stringify(xwininfoArg));
-				
-				if(++checkCounter > maxCheck) {
-					xvfb.kill();
-					callback(new Error("Failed to start Xvfb in a timely manner"));
-				}
-				if(stderr.indexOf('xwininfo: error: unable to open display ":' + displayId + '"') != -1) {
-					// The Xvfb has not yet started, or it has crashed!
-					setTimeout(isXvfbRunning, timeInterval);
-				}
-				else if(stdout.indexOf(chromeWindowId) != -1) {
-					// A chromium-browser is already running inside. That means it's a "ghost" Xvfb
-					// Wait until Xvfb gives an "(EE) Server is already active for display" message on stderr
-					// Which will trigger a restart of Xvfb
-					setTimeout(isXvfbRunning, timeInterval);
-				}
-				else {
-					// Xvfb has started, and no chromium-browser window exists (yet)
-					getTcpPort(CHROMIUM_DEBUG_PORT, gotChromiumDebuggerPort);
 					
-				}
-				
-			});
-		}
-	}
-	
-	function gotChromiumDebuggerPort(err, port) {
-		if(err) callback(new Error("Failed to get a tcp port for the chromium debugger: " + err.message));
-		else {
-			chromiumDebuggerPort = port;
-			startChromiumBrowser();
-		}
-	}
-	
-	function startChromiumBrowser() {
-		
-		if(url == undefined) url = "about:blank";
-		
-		// https://peter.sh/experiments/chromium-command-line-switches/#condition-6
-		var chromiumBrowserArgs = [
-			//"--chrome", // No idea what --chrome flag does ...
-			"--user-data-dir=" + HOME_DIR + username + "/.chromium/", // Chromium will create the folder if it doesn't exist!
-			"--kiosk", // Full screen
-			url,
-			"--incognito", // Don't save cache or history
-			"--disable-pinch", // Disables compositor-accelerated touch-screen pinch gestures. Why not ?
-			"--overscroll-history-navigation=0", // disable history navigation in response to horizontal overscroll. Why not ?
-			"--remote-debugging-port=" + chromiumDebuggerPort // Port that we can connect chrome inspector to
-		];
-		
-		// debug: xwininfo -display :5 -root -children
-		// debug: Xvfb :5 -screen 0 800x600x24 -ac &
-		// debug: ps ax | grep chromium
-		// debug: runuser -l demo -c 'DISPLAY=:5 chromium-browser --chrome --kiosk http://www.webtigerteam.com/johan/ --incognito --disable-pinch --overscroll-history-navigation=0 --remote-debugging-port=9222' & 
-		// debug: DISPLAY=:5 chromium-browser --chrome --kiosk http://www.webtigerteam.com/johan/ --incognito --disable-pinch --overscroll-history-navigation=0
-		// debug: Try starting google-chrome: https://askubuntu.com/questions/79280/how-to-install-chrome-browser-properly-via-command-line
-		
-		
-		chromiumBrowserOptions.env = {DISPLAY: ":" + displayId};
-		
-		log("Starting chromium-browser with args=" + JSON.stringify(chromiumBrowserArgs) 
-		+ " chromiumBrowserOptions=" + JSON.stringify(chromiumBrowserOptions) + " on displayId=" + displayId);
-		var chromiumBrowser = module_child_process.spawn("chromium-browser", chromiumBrowserArgs, chromiumBrowserOptions);
-		
-		VNC_CHANNEL[displayId].chromiumBrowser = chromiumBrowser;
-		
-		chromiumBrowser.on("close", function (code, signal) {
-			log(username + " chromium-browser (displayId=" + displayId + ") close: code=" + code + " signal=" + signal, NOTICE);
-			// Should we restart chromium-browser !?
-		});
-		
-		chromiumBrowser.on("disconnect", function () {
-			log(username + " chromium-browser (displayId=" + displayId + ") disconnect: chromiumBrowser.connected=" + chromiumBrowser.connected, DEBUG);
-		});
-		
-		chromiumBrowser.on("error", function (err) {
-			log(username + " chromium-browser (displayId=" + displayId + ") error: err.message=" + err.message, ERROR);
-			console.error(err);
-		});
-		
-		chromiumBrowser.stdout.on("data", function(data) {
-			log(username + " chromiumBrowser (displayId=" + displayId + ") stdout: " + data, INFO);
-		});
-		
-		chromiumBrowser.stderr.on("data", function (data) {
-			log(username + " chromiumBrowser (displayId=" + displayId + ") stderr: " + data, DEBUG);
-		});
-		
-		// Wait until chromium-browser has started ...
-		var timeInterval = 100;
-		var maxCheck = 10;
-		var checkCounter = 0;
-		setTimeout(checkIfChromiumBrowserHasStarted, timeInterval);
-		
-		function checkIfChromiumBrowserHasStarted() {
-			var xwininfoArg = ["-display", ":" + displayId, "-root", "-children"];
-			module_child_process.execFile("xwininfo", xwininfoArg, function (err, stdout, stderr) {
-				console.log("xwininfo err=" + err + " stderr=" + stderr + " stdout=" + stdout + " arg=" + JSON.stringify(xwininfoArg));
-				if(stdout.indexOf(chromeWindowId) != -1) getTcpPort(VNC_PORT, gotX11vncPort);
-				else if(++checkCounter < maxCheck) setTimeout(checkIfChromiumBrowserHasStarted, timeInterval);
-				else {
-					VNC_CHANNEL[displayId].xvfb.kill();
-					callback(new Error("Failed to start chromium-browser in a timely manner. Result from xwininfo: + " + stdout));
-				}
-			});
-		}
-	}
-	
-	function gotX11vncPort(err, port) {
-		if(err) callback(new Error("Failed to get a tcp port for x11vnc: " + err.message));
-		else {
-			startX11vnc(port);
-		}
-	}
-	
-	function startX11vnc(x11vncPort) {
-
-if(!x11vncPort) throw new Error("x11vncPort=" + x11vncPort);
-
-// ### x11vnc
-
-if(x11vncPort instanceof Error) {
-stopVncChannel(displayId);
-return callback(x11vncPort);
-}
-
-
-if(modifiedLibvncserver) x11vncPort = 0;
-
-// note: x11vnc supports both websockets and normal tcp on the same port!
-
-var vncPassword = generatePassword(8);
-
-
-// http://www.karlrunge.com/x11vnc/x11vnc_opts.html
-var x11vncArgs = [
-"-usepw", // We shall use a password! To prevent users getting into each others vnc session.
-"-passwd",
-vncPassword,
-"-rfbport",
-x11vncPort,
-"-display",
-":" + displayId,
-"-id",
-chromeWindowId,
-"-forever"
-];
-
-if(modifiedLibvncserver) {
-x11vncArgs.push("unixsock");
-x11vncArgs.push(vncUnixSocket);
-}
-
-// debug: xwininfo -display :5 -root -children
-// debug: x11vnc -rfbport 5901 -display :5 -id 0x400001 -forever
-
-log("Starting x11vnc with args=" + JSON.stringify(x11vncArgs)
-+ " x11vncOptions=" + JSON.stringify(x11vncOptions) + "");
-var x11vnc = module_child_process.spawn("x11vnc", x11vncArgs, x11vncOptions);
-
-VNC_CHANNEL[displayId].x11vnc = x11vnc;
-
-x11vnc.on("close", function (code, signal) {
-log(username + " x11vnc (displayId=" + displayId + ") close: code=" + code + " signal=" + signal, NOTICE);
-});
-
-x11vnc.on("disconnect", function () {
-log(username + " x11vnc (displayId=" + displayId + ") disconnect: x11vnc.connected=" + x11vnc.connected, DEBUG);
-});
-
-x11vnc.on("error", function (err) {
-log(username + " x11vnc (displayId=" + displayId + ") error: err.message=" + err.message, ERROR);
-console.error(err);
-});
-
-x11vnc.stdout.on("data", function (data) {
-log(username + " x11vnc (displayId=" + displayId + ") stdout: " + data, INFO);
-});
-
-x11vnc.stderr.on("data", function (data) {
-log(username + " x11vnc (displayId=" + displayId + ") stderr: " + data, DEBUG);
-});
-
-var resp = {
-chromiumDebuggerPort: chromiumDebuggerPort,
-vncPassword: vncPassword
-}
-
-if(modifiedLibvncserver) {
-resp.vncChannel = displayId;
-}
-else {
-resp.vncHost = HOSTNAME;
-resp.vncPort = x11vncPort;
-}
-
-VNC_CHANNEL[displayId].info = resp;
-
-callback(null, resp);
-}
-}
-
-function stopVncChannel(displayId) {
-	if(VNC_CHANNEL[displayId].proxy) VNC_CHANNEL[displayId].proxy.close();
-	if(VNC_CHANNEL[displayId].x11vnc) VNC_CHANNEL[displayId].x11vnc.kill();
-	if(VNC_CHANNEL[displayId].chromiumBrowser) VNC_CHANNEL[displayId].chromiumBrowser.kill();
-	if(VNC_CHANNEL[displayId].xvfb) VNC_CHANNEL[displayId].xvfb.kill();
-	delete VNC_CHANNEL[displayId];
-}
-
-function generatePassword(n) {
-	if(n == undefined) n = 8;
-	var pw = "";
-	for(var i=0; i<n; i++) pw += Math.floor(Math.random() * 10);
-	return pw;
-}
-
-function getTcpPort(preferPort, cb) {
-	// There are only 65,535 ports ...
-	// Don't record ports in use, that way we don't have to implement a "free port" api. Just test ports until we find a free one!
-	
-	if(typeof preferPort == "function") {
-		cb = preferPort;
-		preferPort = undefined;
-	}
-	else if(typeof preferPort != "number" && preferPort != undefined) {
-		preferPort = parseInt(preferPort);
-		if(isNaN(preferPort)) throw new Error("First argument preferPort=" + preferPort + " needs to be a numeric value, or undefined");
-	}
-	
-	var port = preferPort || 1024;
-	
-	isPortTaken(port, portTakenMaybe);
-	
-	function portTakenMaybe(err, taken) {
-		if(err) return cb(err);
-		
-		if(taken) {
-			console.log("Port " + port + " is already in use!");
-			port++;
-			if(port >= 65535) return cb(new Error("Server has used up all TCP ports!"));
-			isPortTaken(port, portTakenMaybe);
-		}
-		else {
-			console.log("Port " + port + " seems to be free!");
-			cb(null, port);
-		}
-	}
-	
-	function isPortTaken(port, fn) {
-		console.log("Checking if port " + port + " is in use ...");
-		var net = require('net')
-		var tester = net.createServer()
-		.once('error', function (err) {
-			if (err.code != 'EADDRINUSE') return fn(err)
-			fn(null, true)
-		})
-		.once('listening', function() {
-			tester.once('close', function() { fn(null, false) })
-			.close()
-		})
-		.listen(port)
-	}
-}
-
-
-function getGroupId(groupName, callback) {
-	module_fs.readFile("/etc/group", "utf8", function(err, groupData) {
-		
-		if(err) return callback(err);
-		
-		//console.log("groupData=" + groupData);
-		
-		var groups = groupData.split(/\r|\n/);
-		
-		// format: groupname:x:115:
-		
-		for (var i=0, group, name, id; i<groups.length; i++) {
-			group = groups[i].split(":");
-			name = group[0];
-			id = group[2];
-			
-			if(name == groupName) return callback(null, parseInt(id));
-		}
-		
-		return callback(new Error("Unable to find id for groupName=" + groupName));
-	});
-}
-
-
-function chownDirRecursive(path, uid, gid, callback) {
-	
-	if(typeof callback != "function") throw new Error("Expected fourth parameter callback=" + callback + " to be a callback function!");
-	
-	path = UTIL.trailingSlash(path); // Path is always a directory, put a slash after it to ease concatenation
-	
-	var abort = false;
-	
-	var dirsToRead = 0;
-	var pathsToStat = 0;
-	var pathsToChown = 0;
-	var arrPathsToChown = [];
-	
-	dirsToRead++;
-	module_fs.readdir(path, function readDir(err, files) {
-		dirsToRead--;
-		if(abort) return;
-		if(err) return chownDirRecursiveDone(err);
-		
-		for (var i=0; i<files.length; i++) {
-			doPath(path + files[i]);
-		}
-		
-		chownDirRecursiveDoneMaybe();
-	});
-	
-	pathsToChown++;
-	arrPathsToChown.push(path);
-	module_fs.chown(path, uid, gid, function chowned(err) {
-		pathsToChown--;
-		arrPathsToChown.splice(arrPathsToChown.indexOf(path), 1);
-		if(err) return chownDirRecursiveDone(err);
-		
-		chownDirRecursiveDoneMaybe();
-	});
-	
-	// Closure for path so statResult know's which path it stat'ed
-	function doPath(path) {
-		
-		// Check if it's a directory
-		pathsToStat++;
-		module_fs.stat(path, function statResult(err, stats) {
-			pathsToStat--;
-			if(abort) return;
-			if(err) return chownDirRecursiveDone(err);
-			
-			if(stats.isDirectory()) {
-				// recursively chown if it's a directory
-				pathsToChown++;
-				arrPathsToChown.push(path);
-				chownDirRecursive(path, uid, gid, function(err) {
-					pathsToChown--;
-					arrPathsToChown.splice(arrPathsToChown.indexOf(path), 1);
-					if(err) return chownDirRecursiveDone(err);
-					
-					chownDirRecursiveDoneMaybe();
-					
-				});
-			}
-			else {
-				// chown the file
-				pathsToChown++;
-				arrPathsToChown.push(path);
-				module_fs.chown(path, uid, gid, function chowned(err) {
-					pathsToChown--;
-					arrPathsToChown.splice(arrPathsToChown.indexOf(path), 1);
-					if(err) return chownDirRecursiveDone(err);
-					
-					chownDirRecursiveDoneMaybe();
-				});
-			}
-		});
-		
-	}
-	
-	function chownDirRecursiveDoneMaybe() {
-		if(pathsToStat == 0 && dirsToRead == 0 && pathsToChown == 0 && !abort) {
-			console.log("chownDirRecursive: Done! path=" + path);
-			chownDirRecursiveDone(null);
-		}
-		else {
-			console.log("chownDirRecursive: path=" + path + " pathsToStat=" + pathsToStat + " dirsToRead=" + dirsToRead + 
-			" pathsToChown=" + pathsToChown + " abort=" + abort + " arrPathsToChown=" + JSON.stringify(arrPathsToChown));
-		}
-	}
-	
-	function chownDirRecursiveDone(err) {
-		abort = true;
-		
-		if(callback) {
-			callback(err);
-			console.log("chownDirRecursive: Called callback! pack=" + path + " err=" + err);
-			callback = null;
-		}
-		else throw new Error("Callback to be called twice!");
-	}
-	
-}
-
-
-
-
-function umount(path, callback) {
-	
-	
-	var exec = module_child_process.exec;
-	
-	exec("umount " + path + " --force --lazy", EXEC_OPTIONS, function(error, stdout, stderr) {
-		
-		console.log("umount: path=" + path + " error=" + error + " stdout=" + stdout + " stderr=" + stderr);
-		
-		if(error) {
-			if(error.message.indexOf("umount: " + path + ": not mounted") != -1) {
-				log("not mounted: path=" + path, WARN);
-			}
-			else if(error.message.indexOf("umount: " + path + ": mountpoint not found") != -1) {
-				log("mountpoint not found: path=" + path, WARN);
-			}
-			else if(error.message.indexOf("umount: " + path + ": No such file or directory") != -1) {
-				log("No such file or directory: path=" + path, WARN);
-			}
-			else return callback(error);
-		}
-		else {
-			if(stderr) return callback(new Error(stderr));
-			if(stdout) return callback(new Error(stdout));
-		}
-		
-		console.log("umount: success! path=" + path);
-		
-		return callback(null);
-		
-	});
-	
-}
-
-function sendMail(from, to, subject, text) {
-	
-	log( "Sending mail from=" + from + " to=" + to + " subject=" + subject + " text.length=" + text.length + "" );
-	
-	var mailSettings = {
-		port: SMTP_PORT,
-		host: SMTP_HOST
-	};
-	
-	if(SMTP_USER) mailSettings.auth = {user: SMTP_USER, pass: SMTP_PW};
-	
-	if(!module_nodemailer) return log("Module nodemailer not loaded!");
-	if(!module_smtpTransport) return log("Module smtpTransport not loaded!");
-	
-	var transporter = module_nodemailer.createTransport(module_smtpTransport(mailSettings));
-	
-	transporter.sendMail({
-		from: from,
-		to: to,
-		subject: subject,
-		text: text
-		
-	}, function(err, info){
-		if(err) {
-			//if(err.message.match(/Hostname\/IP doesn't match certificate's altnames: "IP: (192\.168\.0\.1)|(127\.0\.0\.1) is not in the cert's list/)) {
-			log("Unable to send e-mail (" + subject + "): " + err.message, WARN);
-			//}
-			//else throw new Error(err);
-		}
-		else {
-			log("Mail sent: " + info.response);
-		}
-	});
-	
-}
-
-function gcsfLogin(username, loginRetries, gcsfLoginCallback) {
-	/*
-		
-		Need to create a "native" Google OAuth 2.0 client ID from here:
-		https://console.developers.google.com/apis/credentials?pli=1&project=webide-203608&folder&organizationId
-		
-		Then edit gcsf/src/gcsf/drive_facade.rs and update the client_id, project_id and client_secret !
-		(also remove the http port 8081 auto code entry, because Google API can only redirect to localhost!!)
-		
-	*/
-	
-	if(typeof username != "string") throw new Error("typeof username=" + typeof username);
-	if(typeof loginRetries != "number") throw new Error("typeof loginRetries=" + typeof loginRetries);
-	if(typeof gcsfLoginCallback != "function") throw new Error("typeof gcsfLoginCallback=" + typeof gcsfLoginCallback);
-	
-	var maxLoginRetries = 1;
-	
-	if(GCSF.hasOwnProperty(username)) {
-		gcsfLoginCallback(new Error("There is already a GCSF session for " + username));
-		gcsfLoginCallback = null;
-		return;
-	}
-	
-	var enterCodeCallback = undefined; // Call this function when mounted
-	var loginSuccess = false;
-	
-	// Where configDir + .config/gcsf/gcsf.toml should be saved
-	var configDir = UTIL.trailingSlash( module_path.normalize(__dirname + "/..") );
-	
-	console.log("configDir=" + configDir);
-	
-	var gcsfOptions = {};
-	
-	//gcsfOptions.env = {XDG_CONFIG_HOME: configDir,HOME: configDir};
-	
-	
-	var gcsfArgs = ["login", username];
-	
-	var reBrowserUrl = /Please direct your browser to (.*), follow the instructions/;
-	var reTokenFileExist = /token file (.*) already exists/;
-	
-	log("Starting gcsfLoginSession with args=" + JSON.stringify(gcsfArgs) + " gcsfOptions=" + JSON.stringify(gcsfOptions));
-	
-	var gcsfLoginSession = module_child_process.spawn("./../gcsf", gcsfArgs, gcsfOptions);
-	
-	GCSF[username] = {};
-	
-	GCSF[username].loginSession = gcsfLoginSession;
-	GCSF[username].enterCode = function enterGcsfCodeForLoginSession(code, cb) {
-		log("enter gcsf code called for " + username + " from login session", DEBUG);
-		enterCodeCallback = cb;
-		this.loginSession.stdin.write(code + "\n");
-	}
-	
-	gcsfLoginSession.on("close", function (code, signal) {
-		log(username + " gcsfLoginSession close: code=" + code + " signal=" + signal, NOTICE);
-		
-		// The GCS sessions might already have been "cleaned"
-		if( GCSF.hasOwnProperty(username) ) {
-			GCSF[username].loginSession = null;
-			GCSF[username].enterCode = null; // So we get an error if it's called
-		}
-		
-		if(gcsfLoginCallback) {
-			gcsfLoginCallback( new Error("gcsf login session closed with code=" + code + " and signal=" + signal) );
-			gcsfLoginCallback = null;
-		}
-		
-	});
-	
-	gcsfLoginSession.on("disconnect", function () {
-		log(username + " gcsfLoginSession disconnect: gcsfLoginSession.connected=" + gcsfLoginSession.connected, DEBUG);
-	});
-	
-	gcsfLoginSession.on("error", function (err) {
-		log(username + " gcsfLoginSession error: err.message=" + err.message, ERROR);
-		console.error(err);
-		if(gcsfLoginCallback) {
-			gcsfLoginCallback(err);
-			gcsfLoginCallback = null;
-		}
-		gcsfCleanup(username);
-	});
-	
-	gcsfLoginSession.stdout.on("data", function(data) {
-		log(username + " gcsfLoginSession stdout: " + data, INFO);
-		
-		var str = data.toString();
-		
-		var matchBrowserUrl = str.match(reBrowserUrl);
-		
-		if(matchBrowserUrl) {
-			log("gcsfLoginSession Need to request Google auth code for " + username + " before logging in to Google Drive ...", DEBUG);
-			var authUrl = matchBrowserUrl[1];
-			gcsfLoginCallback(null, {url: authUrl});
-			gcsfLoginCallback = null;
-		}
-		else if( str.match(/Successfully logged in/) ) {
-			if(loginSuccess === true) throw new Error(username + " gcsfLoginSession already logged in successfully !?");
-			loginSuccess = true;
-			log("Running gcsf mount for " + username + " because gcsf login successfully ....", DEBUG);
-			gcsfMount(username, function(err) {
-				if(err) {
-					log("Error when running gcsf mount for " + username + " after gcsf login success: " + err.message, INFO);
-					enterCodeCallback(err);
-				}
-				else {
-					log("gcsf mount successful for " + username + " after gcsf login success!", DEBUG);
-					enterCodeCallback(null, {mounted: true});
-				}
-				
-				enterCodeCallback = null;
-			});
-		}
-	});
-	
-	gcsfLoginSession.stderr.on("data", function (data) {
-		log(username + " gcsfLoginSession stderr: " + data, DEBUG);
-		
-		var str = data.toString();
-		
-		if( str.match(reTokenFileExist) ) {
-			/*
-				Already logged in !?
-				
-				gcsf login session will close!
-				
-			*/
-			
-			// We don't want to call the gcsfLoginCallback just yet (close event will call it)
-			var alreadyLoggedInCallback = gcsfLoginCallback;
-			gcsfLoginCallback = null;
-			
-			// Sanity check: We should not have a enterCodeCallback
-			if(enterCodeCallback) throw new Error("Unexpected enterCodeCallback " + !!enterCodeCallback);
-			
-			log("Running gcsf mount for " + username + " because most likely already logged in ...", DEBUG);
-			gcsfMount(username, function(err, mntInfo) {
-				if(err) {
-					log("gcsf mount error for " + username + ": " + err.message, INFO);
-					
-					if(err.code=="ENTER_CODE") {
-						log(err.message, DEBUG);
-						alreadyLoggedInCallback(null, {url: mntInfo.url});
-						alreadyLoggedInCallback = null;
-					}
-					else if(err.code=="UMOUNT_THEN_TRY_AGAIN" && loginRetries < maxLoginRetries) {
-						loginRetries++;
-						
-						log("fusermount for " + username + " before retrying gcsf login ...", DEBUG);
-						gcsfUmount(username, function(err) {
-							if(err) console.error(err);
-							
-							log("Retrying (" + loginRetries + ") gcsf login for " + username + " ...", INFO);
-							gcsfLogin(username, loginRetries, alreadyLoggedInCallback);
-							alreadyLoggedInCallback = null;
-							
+						resultList.forEach(function( p ){
+							if( p ){
+								console.log( 'PID: %s, COMMAND: %s, ARGUMENTS: %s', p.pid, p.command, p.arguments );
+								module_ps.kill( p.pid, function( err ) {
+									if (err) {
+										throw new Error( err );
+									}
+									else {
+										console.log( 'Process %s has been killed!', pid );
+										// Restart Xvfb. But only if it has not already been restarted to prevent endless loop.
+										if(xvfbStartCounter <= 1) startXvfb();
+									
+									}
+								});
+							}
+							else throw new Error("Expected p");
 						});
+					});
+				}
+			
+			});
+		
+			// Wait until Xvfb is successfully running before starting chromium-browser !
+			var timeInterval = 100;
+			var maxCheck = 10;
+			var checkCounter = 0;
+		
+			setTimeout(isXvfbRunning, timeInterval);
+		
+			function isXvfbRunning() {
+			
+				var xwininfoArg = ["-display", ":" + displayId, "-root", "-children"];
+				module_child_process.execFile("xwininfo", xwininfoArg, function (err, stdout, stderr) {
+					console.log("xwininfo err=" + err + " stderr=" + stderr + " stdout=" + stdout + " arg=" + JSON.stringify(xwininfoArg));
+				
+					if(++checkCounter > maxCheck) {
+						xvfb.kill();
+						callback(new Error("Failed to start Xvfb in a timely manner"));
+					}
+					if(stderr.indexOf('xwininfo: error: unable to open display ":' + displayId + '"') != -1) {
+						// The Xvfb has not yet started, or it has crashed!
+						setTimeout(isXvfbRunning, timeInterval);
+					}
+					else if(stdout.indexOf(chromeWindowId) != -1) {
+						// A chromium-browser is already running inside. That means it's a "ghost" Xvfb
+						// Wait until Xvfb gives an "(EE) Server is already active for display" message on stderr
+						// Which will trigger a restart of Xvfb
+						setTimeout(isXvfbRunning, timeInterval);
 					}
 					else {
-						log("gcsf mount error code=" + err.code + " loginRetries=" + loginRetries + " Not trying again!", INFO);
-						alreadyLoggedInCallback(err);
-						alreadyLoggedInCallback = null;
+						// Xvfb has started, and no chromium-browser window exists (yet)
+						getTcpPort(CHROMIUM_DEBUG_PORT, gotChromiumDebuggerPort);
+					
 					}
+				
+				});
+			}
+		}
+	
+		function gotChromiumDebuggerPort(err, port) {
+			if(err) callback(new Error("Failed to get a tcp port for the chromium debugger: " + err.message));
+			else {
+				chromiumDebuggerPort = port;
+				startChromiumBrowser();
+			}
+		}
+	
+		function startChromiumBrowser() {
+		
+			if(url == undefined) url = "about:blank";
+		
+			// https://peter.sh/experiments/chromium-command-line-switches/#condition-6
+			var chromiumBrowserArgs = [
+				//"--chrome", // No idea what --chrome flag does ...
+				"--user-data-dir=" + HOME_DIR + username + "/.chromium/", // Chromium will create the folder if it doesn't exist!
+				"--kiosk", // Full screen
+				url,
+				"--incognito", // Don't save cache or history
+				"--disable-pinch", // Disables compositor-accelerated touch-screen pinch gestures. Why not ?
+				"--overscroll-history-navigation=0", // disable history navigation in response to horizontal overscroll. Why not ?
+				"--remote-debugging-port=" + chromiumDebuggerPort // Port that we can connect chrome inspector to
+			];
+		
+			// debug: xwininfo -display :5 -root -children
+			// debug: Xvfb :5 -screen 0 800x600x24 -ac &
+			// debug: ps ax | grep chromium
+			// debug: runuser -l demo -c 'DISPLAY=:5 chromium-browser --chrome --kiosk http://www.webtigerteam.com/johan/ --incognito --disable-pinch --overscroll-history-navigation=0 --remote-debugging-port=9222' & 
+			// debug: DISPLAY=:5 chromium-browser --chrome --kiosk http://www.webtigerteam.com/johan/ --incognito --disable-pinch --overscroll-history-navigation=0
+			// debug: Try starting google-chrome: https://askubuntu.com/questions/79280/how-to-install-chrome-browser-properly-via-command-line
+		
+		
+			chromiumBrowserOptions.env = {DISPLAY: ":" + displayId};
+		
+			log("Starting chromium-browser with args=" + JSON.stringify(chromiumBrowserArgs) 
+			+ " chromiumBrowserOptions=" + JSON.stringify(chromiumBrowserOptions) + " on displayId=" + displayId);
+			var chromiumBrowser = module_child_process.spawn("chromium-browser", chromiumBrowserArgs, chromiumBrowserOptions);
+		
+			VNC_CHANNEL[displayId].chromiumBrowser = chromiumBrowser;
+		
+			chromiumBrowser.on("close", function (code, signal) {
+				log(username + " chromium-browser (displayId=" + displayId + ") close: code=" + code + " signal=" + signal, NOTICE);
+				// Should we restart chromium-browser !?
+			});
+		
+			chromiumBrowser.on("disconnect", function () {
+				log(username + " chromium-browser (displayId=" + displayId + ") disconnect: chromiumBrowser.connected=" + chromiumBrowser.connected, DEBUG);
+			});
+		
+			chromiumBrowser.on("error", function (err) {
+				log(username + " chromium-browser (displayId=" + displayId + ") error: err.message=" + err.message, ERROR);
+				console.error(err);
+			});
+		
+			chromiumBrowser.stdout.on("data", function(data) {
+				log(username + " chromiumBrowser (displayId=" + displayId + ") stdout: " + data, INFO);
+			});
+		
+			chromiumBrowser.stderr.on("data", function (data) {
+				log(username + " chromiumBrowser (displayId=" + displayId + ") stderr: " + data, DEBUG);
+			});
+		
+			// Wait until chromium-browser has started ...
+			var timeInterval = 100;
+			var maxCheck = 10;
+			var checkCounter = 0;
+			setTimeout(checkIfChromiumBrowserHasStarted, timeInterval);
+		
+			function checkIfChromiumBrowserHasStarted() {
+				var xwininfoArg = ["-display", ":" + displayId, "-root", "-children"];
+				module_child_process.execFile("xwininfo", xwininfoArg, function (err, stdout, stderr) {
+					console.log("xwininfo err=" + err + " stderr=" + stderr + " stdout=" + stdout + " arg=" + JSON.stringify(xwininfoArg));
+					if(stdout.indexOf(chromeWindowId) != -1) getTcpPort(VNC_PORT, gotX11vncPort);
+					else if(++checkCounter < maxCheck) setTimeout(checkIfChromiumBrowserHasStarted, timeInterval);
+					else {
+						VNC_CHANNEL[displayId].xvfb.kill();
+						callback(new Error("Failed to start chromium-browser in a timely manner. Result from xwininfo: + " + stdout));
+					}
+				});
+			}
+		}
+	
+		function gotX11vncPort(err, port) {
+			if(err) callback(new Error("Failed to get a tcp port for x11vnc: " + err.message));
+			else {
+				startX11vnc(port);
+			}
+		}
+	
+		function startX11vnc(x11vncPort) {
+
+			if(!x11vncPort) throw new Error("x11vncPort=" + x11vncPort);
+
+			// ### x11vnc
+
+			if(x11vncPort instanceof Error) {
+				stopVncChannel(displayId);
+				return callback(x11vncPort);
+			}
+
+
+			if(modifiedLibvncserver) x11vncPort = 0;
+
+			// note: x11vnc supports both websockets and normal tcp on the same port!
+
+			var vncPassword = generatePassword(8);
+
+
+			// http://www.karlrunge.com/x11vnc/x11vnc_opts.html
+			var x11vncArgs = [
+				"-usepw", // We shall use a password! To prevent users getting into each others vnc session.
+				"-passwd",
+				vncPassword,
+				"-rfbport",
+				x11vncPort,
+				"-display",
+				":" + displayId,
+				"-id",
+				chromeWindowId,
+				"-forever"
+			];
+
+			if(modifiedLibvncserver) {
+				x11vncArgs.push("unixsock");
+				x11vncArgs.push(vncUnixSocket);
+			}
+
+			// debug: xwininfo -display :5 -root -children
+			// debug: x11vnc -rfbport 5901 -display :5 -id 0x400001 -forever
+
+			log("Starting x11vnc with args=" + JSON.stringify(x11vncArgs)
+			+ " x11vncOptions=" + JSON.stringify(x11vncOptions) + "");
+			var x11vnc = module_child_process.spawn("x11vnc", x11vncArgs, x11vncOptions);
+
+			VNC_CHANNEL[displayId].x11vnc = x11vnc;
+
+			x11vnc.on("close", function (code, signal) {
+				log(username + " x11vnc (displayId=" + displayId + ") close: code=" + code + " signal=" + signal, NOTICE);
+			});
+
+			x11vnc.on("disconnect", function () {
+				log(username + " x11vnc (displayId=" + displayId + ") disconnect: x11vnc.connected=" + x11vnc.connected, DEBUG);
+			});
+
+			x11vnc.on("error", function (err) {
+				log(username + " x11vnc (displayId=" + displayId + ") error: err.message=" + err.message, ERROR);
+				console.error(err);
+			});
+
+			x11vnc.stdout.on("data", function (data) {
+				log(username + " x11vnc (displayId=" + displayId + ") stdout: " + data, INFO);
+			});
+
+			x11vnc.stderr.on("data", function (data) {
+				log(username + " x11vnc (displayId=" + displayId + ") stderr: " + data, DEBUG);
+			});
+
+			var resp = {
+				chromiumDebuggerPort: chromiumDebuggerPort,
+				vncPassword: vncPassword
+			}
+
+			if(modifiedLibvncserver) {
+				resp.vncChannel = displayId;
+			}
+			else {
+				resp.vncHost = HOSTNAME;
+				resp.vncPort = x11vncPort;
+			}
+
+			VNC_CHANNEL[displayId].info = resp;
+
+			callback(null, resp);
+		}
+	}
+
+	function stopVncChannel(displayId) {
+		if(VNC_CHANNEL[displayId].proxy) VNC_CHANNEL[displayId].proxy.close();
+		if(VNC_CHANNEL[displayId].x11vnc) VNC_CHANNEL[displayId].x11vnc.kill();
+		if(VNC_CHANNEL[displayId].chromiumBrowser) VNC_CHANNEL[displayId].chromiumBrowser.kill();
+		if(VNC_CHANNEL[displayId].xvfb) VNC_CHANNEL[displayId].xvfb.kill();
+		delete VNC_CHANNEL[displayId];
+	}
+
+	function generatePassword(n) {
+		if(n == undefined) n = 8;
+		var pw = "";
+		for(var i=0; i<n; i++) pw += Math.floor(Math.random() * 10);
+		return pw;
+	}
+
+	function getTcpPort(preferPort, cb) {
+		// There are only 65,535 ports ...
+		// Don't record ports in use, that way we don't have to implement a "free port" api. Just test ports until we find a free one!
+	
+		if(typeof preferPort == "function") {
+			cb = preferPort;
+			preferPort = undefined;
+		}
+		else if(typeof preferPort != "number" && preferPort != undefined) {
+			preferPort = parseInt(preferPort);
+			if(isNaN(preferPort)) throw new Error("First argument preferPort=" + preferPort + " needs to be a numeric value, or undefined");
+		}
+	
+		var port = preferPort || 1024;
+	
+		isPortTaken(port, portTakenMaybe);
+	
+		function portTakenMaybe(err, taken) {
+			if(err) return cb(err);
+		
+			if(taken) {
+				console.log("Port " + port + " is already in use!");
+				port++;
+				if(port >= 65535) return cb(new Error("Server has used up all TCP ports!"));
+				isPortTaken(port, portTakenMaybe);
+			}
+			else {
+				console.log("Port " + port + " seems to be free!");
+				cb(null, port);
+			}
+		}
+	
+		function isPortTaken(port, fn) {
+			console.log("Checking if port " + port + " is in use ...");
+			var net = require('net')
+			var tester = net.createServer()
+			.once('error', function (err) {
+				if (err.code != 'EADDRINUSE') return fn(err)
+				fn(null, true)
+			})
+			.once('listening', function() {
+				tester.once('close', function() { fn(null, false) })
+				.close()
+			})
+			.listen(port)
+		}
+	}
+
+
+	function getGroupId(groupName, callback) {
+		module_fs.readFile("/etc/group", "utf8", function(err, groupData) {
+		
+			if(err) return callback(err);
+		
+			//console.log("groupData=" + groupData);
+		
+			var groups = groupData.split(/\r|\n/);
+		
+			// format: groupname:x:115:
+		
+			for (var i=0, group, name, id; i<groups.length; i++) {
+				group = groups[i].split(":");
+				name = group[0];
+				id = group[2];
+			
+				if(name == groupName) return callback(null, parseInt(id));
+			}
+		
+			return callback(new Error("Unable to find id for groupName=" + groupName));
+		});
+	}
+
+
+	function chownDirRecursive(path, uid, gid, callback) {
+	
+		if(typeof callback != "function") throw new Error("Expected fourth parameter callback=" + callback + " to be a callback function!");
+	
+		path = UTIL.trailingSlash(path); // Path is always a directory, put a slash after it to ease concatenation
+	
+		var abort = false;
+	
+		var dirsToRead = 0;
+		var pathsToStat = 0;
+		var pathsToChown = 0;
+		var arrPathsToChown = [];
+	
+		dirsToRead++;
+		module_fs.readdir(path, function readDir(err, files) {
+			dirsToRead--;
+			if(abort) return;
+			if(err) return chownDirRecursiveDone(err);
+		
+			for (var i=0; i<files.length; i++) {
+				doPath(path + files[i]);
+			}
+		
+			chownDirRecursiveDoneMaybe();
+		});
+	
+		pathsToChown++;
+		arrPathsToChown.push(path);
+		module_fs.chown(path, uid, gid, function chowned(err) {
+			pathsToChown--;
+			arrPathsToChown.splice(arrPathsToChown.indexOf(path), 1);
+			if(err) return chownDirRecursiveDone(err);
+		
+			chownDirRecursiveDoneMaybe();
+		});
+	
+		// Closure for path so statResult know's which path it stat'ed
+		function doPath(path) {
+		
+			// Check if it's a directory
+			pathsToStat++;
+			module_fs.stat(path, function statResult(err, stats) {
+				pathsToStat--;
+				if(abort) return;
+				if(err) return chownDirRecursiveDone(err);
+			
+				if(stats.isDirectory()) {
+					// recursively chown if it's a directory
+					pathsToChown++;
+					arrPathsToChown.push(path);
+					chownDirRecursive(path, uid, gid, function(err) {
+						pathsToChown--;
+						arrPathsToChown.splice(arrPathsToChown.indexOf(path), 1);
+						if(err) return chownDirRecursiveDone(err);
+					
+						chownDirRecursiveDoneMaybe();
+					
+					});
 				}
 				else {
-					log("gcsf mount success for " + username + "", DEBUG);
-					alreadyLoggedInCallback(null, {mounted: true});
-					alreadyLoggedInCallback = null;
+					// chown the file
+					pathsToChown++;
+					arrPathsToChown.push(path);
+					module_fs.chown(path, uid, gid, function chowned(err) {
+						pathsToChown--;
+						arrPathsToChown.splice(arrPathsToChown.indexOf(path), 1);
+						if(err) return chownDirRecursiveDone(err);
+					
+						chownDirRecursiveDoneMaybe();
+					});
 				}
 			});
+		
 		}
-	});
 	
-	function gcsfMount(username, gcsfMountCallback) {
-		var mountDir = HOME_DIR + username + "/googleDrive";
-		var mountSuccessString = "Mounted to " + mountDir;
-		var gcsfMountArgs = ["mount", mountDir, "-s", username];
-		var notImplementString = "Function not implemented (os error 38)";
-		var mountpointNotEmptyString = "fuse: mountpoint is not empty";
-		var notConnectedString = "Transport endpoint is not connected";
-		var driveBuzy = "Device or resource busy";
-		var gcsfMountSession;
-		
-		// First create the folder to mount to
-		module_fs.mkdir(mountDir, function(err) {
-			if(err && err.code != "EEXIST") throw err;
-			
-			log("Starting gcsfMountSession with args=" + JSON.stringify(gcsfMountArgs) + " gcsfOptions=" + JSON.stringify(gcsfOptions) + "");
-			
-			gcsfMountSession = module_child_process.spawn("./../gcsf", gcsfMountArgs, gcsfOptions);
-			
-			GCSF[username].mountSession = gcsfMountSession;
-			
-			gcsfMountSession.on("close", gcsfMountSessionClose);
-			gcsfMountSession.on("disconnect", gcsfMountSessionDisconnect);
-			gcsfMountSession.on("error", gcsfMountSessionError);
-			gcsfMountSession.stdout.on("data", gcsfMountSessionStdout);
-			gcsfMountSession.stderr.on("data", gcsfMountSessionStderr);
-			
-		});
-		
-		function gcsfMountSessionClose(code, signal) {
-			log(username + " gcsfMountSession close: code=" + code + " signal=" + signal, NOTICE);
-			
-			// The closing might be due to a cleanup
-			if( GCSF.hasOwnProperty(username) ) GCSF[username].loginSession = null;
-			
-			// Always do a cleanup when mount session closes!
-			gcsfCleanup(username);
-			
-			if(gcsfMountCallback) {
-				gcsfMountCallback( new Error("gcsf mount session closed with code=" + code + " and signal=" + signal) );
-				gcsfMountCallback = null;
+		function chownDirRecursiveDoneMaybe() {
+			if(pathsToStat == 0 && dirsToRead == 0 && pathsToChown == 0 && !abort) {
+				console.log("chownDirRecursive: Done! path=" + path);
+				chownDirRecursiveDone(null);
+			}
+			else {
+				console.log("chownDirRecursive: path=" + path + " pathsToStat=" + pathsToStat + " dirsToRead=" + dirsToRead + 
+				" pathsToChown=" + pathsToChown + " abort=" + abort + " arrPathsToChown=" + JSON.stringify(arrPathsToChown));
 			}
 		}
+	
+		function chownDirRecursiveDone(err) {
+			abort = true;
 		
-		function gcsfMountSessionDisconnect() {
-			log(username + " gcsfMountSession disconnect: gcsfMountSession.connected=" + gcsfMountSession.connected, DEBUG);
+			if(callback) {
+				callback(err);
+				console.log("chownDirRecursive: Called callback! pack=" + path + " err=" + err);
+				callback = null;
+			}
+			else throw new Error("Callback to be called twice!");
 		}
-		
-		function gcsfMountSessionError(err) {
-			log(username + " gcsfMountSession error: err.message=" + err.message, ERROR);
-			console.error(err);
-			if(gcsfMountCallback) {
-				gcsfMountCallback(err);
-				gcsfMountCallback = null;
-			}
-		}
-		
-		function gcsfMountSessionStdout(data) {
-			log(username + " gcsfMountSession stdout: " + data, INFO);
-			parseGcsfOutput(data);
-		}
-		
-		function gcsfMountSessionStderr(data) {
-			// For some reason gcsf mount outputs everything to stderr !? :P
-			log(username + " gcsfMountSession stderr: " + data, DEBUG);
-			parseGcsfOutput(data);
-		}
-		
-		function parseGcsfOutput(data) {
-			var str = data.toString();
-			
-			var matchBrowserUrl = str.match(reBrowserUrl);
-			
-			if(matchBrowserUrl) {
-				log("gcsfMount session Need to request Google auth code for " + username + " before logging in to Google Drive ...", DEBUG);
-				var authUrl = matchBrowserUrl[1];
-				
-				var error = new Error("gcsf mount session waiting for Google auth code on stdin ...");
-				error.code = "ENTER_CODE";
-				gcsfMountCallback(error, {url: authUrl});
-				gcsfMountCallback = null;
-				
-				GCSF[username].enterCode = function enterGcsfCodeToMountSession(code, cb) {
-					log("enter gcsf code called for " + username + " from mount session", DEBUG);
-					gcsfMountCallback = cb;
-					this.mountSession.stdin.write(code + "\n");
-				}
-				
-			}
-			else if( str.indexOf(mountSuccessString) != -1 ) {
-				console.log("Mount success string detected!");
-				gcsfMountCallback(null);
-				gcsfMountCallback = null;
-				// The process will continue to live and output debug info
-			}
-			else if( str.indexOf(notImplementString) != -1 ) {
-				/*
-					Most likely the dir is still mounted, but we are logged out
-					This error will close the mount session
-					Try umount and then mount again !?
-				*/
-				var error = new Error("Unable to mount Google Drive. Please try again.");
-				error.code = "UMOUNT_THEN_TRY_AGAIN";
-				gcsfMountCallback(error);
-				gcsfMountCallback = null;
-				
-			}
-			else if( str.indexOf(mountpointNotEmptyString) != -1 ) {
-				/*
-					Probably means the dir is already mounted.
-					Which is unexpected ... There is probably a gcsf mount session still lingering ...
-					*this* mount session will close.
-					I guess this should count as a mount success :P
-				*/
-				log("GCSF mountpoint is not empty! Assuming mount sucess", INFO);
-				gcsfMountCallback(null);
-				gcsfMountCallback = null;
-			}
-			else if( str.indexOf(notConnectedString) != -1 ) {
-				/*
-					GCSH has somehow lost connection to Google Drive
-					*this* mount session will close.
-					
-					It usually happens when the user forgot to logout/umount google drive from an earlier session
-				*/
-				
-				var error = new Error("We got disconnected from Google Drive. Please try again.")
-				error.code = "UMOUNT_THEN_TRY_AGAIN";
-				gcsfMountCallback(error);
-				gcsfMountCallback = null;
-				
-			}
-			else if( str.indexOf(driveBuzy) != -1 ) {
-				/*
-					Probably some reference still lingering to the old mount
-					
-					
-					This error will *NOT* close the mount session
-				*/
-				
-				gcsfMountCallback( new Error("Unable to mount Google Drive: Device or resource busy. Please try again later.") );
-				gcsfMountCallback = null;
-				
-				gcsfMountSession.kill();
-				
-			}
-		}
+	
 	}
-}
 
-function gcsfUmount(username, callback) {
-	var exec = module_child_process.exec;
-	var mountDir = HOME_DIR + username + "/googleDrive";
-	var command = "fusermount -u " + mountDir;
+
+
+
+	function umount(path, callback) {
 	
-	gcsfCleanup(username);
 	
-	exec(command, EXEC_OPTIONS, function fusermount(error, stdout, stderr) {
-		console.log(command + " error=" + (error ? error.message : error) + " stdout=" + stdout + " stderr=" + stderr);
+		var exec = module_child_process.exec;
+	
+		exec("umount " + path + " --force --lazy", EXEC_OPTIONS, function(error, stdout, stderr) {
 		
+			console.log("umount: path=" + path + " error=" + error + " stdout=" + stdout + " stderr=" + stderr);
+		
+			if(error) {
+				if(error.message.indexOf("umount: " + path + ": not mounted") != -1) {
+					log("not mounted: path=" + path, WARN);
+				}
+				else if(error.message.indexOf("umount: " + path + ": mountpoint not found") != -1) {
+					log("mountpoint not found: path=" + path, WARN);
+				}
+				else if(error.message.indexOf("umount: " + path + ": No such file or directory") != -1) {
+					log("No such file or directory: path=" + path, WARN);
+				}
+				else return callback(error);
+			}
+			else {
+				if(stderr) return callback(new Error(stderr));
+				if(stdout) return callback(new Error(stdout));
+			}
+		
+			console.log("umount: success! path=" + path);
+		
+			return callback(null);
+		
+		});
+	
+	}
+
+	function sendMail(from, to, subject, text) {
+	
+		log( "Sending mail from=" + from + " to=" + to + " subject=" + subject + " text.length=" + text.length + "" );
+	
+		var mailSettings = {
+			port: SMTP_PORT,
+			host: SMTP_HOST
+		};
+	
+		if(SMTP_USER) mailSettings.auth = {user: SMTP_USER, pass: SMTP_PW};
+	
+		if(!module_nodemailer) return log("Module nodemailer not loaded!");
+		if(!module_smtpTransport) return log("Module smtpTransport not loaded!");
+	
+		var transporter = module_nodemailer.createTransport(module_smtpTransport(mailSettings));
+	
+		transporter.sendMail({
+			from: from,
+			to: to,
+			subject: subject,
+			text: text
+		
+		}, function(err, info){
+			if(err) {
+				//if(err.message.match(/Hostname\/IP doesn't match certificate's altnames: "IP: (192\.168\.0\.1)|(127\.0\.0\.1) is not in the cert's list/)) {
+				log("Unable to send e-mail (" + subject + "): " + err.message, WARN);
+				//}
+				//else throw new Error(err);
+			}
+			else {
+				log("Mail sent: " + info.response);
+			}
+		});
+	
+	}
+
+	function gcsfLogin(username, loginRetries, gcsfLoginCallback) {
 		/*
-			If you get /bin/sh: 1: fusermount: not found
-			try: apt-get install fuse
+		
+			Need to create a "native" Google OAuth 2.0 client ID from here:
+			https://console.developers.google.com/apis/credentials?pli=1&project=webide-203608&folder&organizationId
+		
+			Then edit gcsf/src/gcsf/drive_facade.rs and update the client_id, project_id and client_secret !
+			(also remove the http port 8081 auto code entry, because Google API can only redirect to localhost!!)
+		
 		*/
+	
+		if(typeof username != "string") throw new Error("typeof username=" + typeof username);
+		if(typeof loginRetries != "number") throw new Error("typeof loginRetries=" + typeof loginRetries);
+		if(typeof gcsfLoginCallback != "function") throw new Error("typeof gcsfLoginCallback=" + typeof gcsfLoginCallback);
+	
+		var maxLoginRetries = 1;
+	
+		if(GCSF.hasOwnProperty(username)) {
+			gcsfLoginCallback(new Error("There is already a GCSF session for " + username));
+			gcsfLoginCallback = null;
+			return;
+		}
+	
+		var enterCodeCallback = undefined; // Call this function when mounted
+		var loginSuccess = false;
+	
+		// Where configDir + .config/gcsf/gcsf.toml should be saved
+		var configDir = UTIL.trailingSlash( module_path.normalize(__dirname + "/..") );
+	
+		console.log("configDir=" + configDir);
+	
+		var gcsfOptions = {};
+	
+		//gcsfOptions.env = {XDG_CONFIG_HOME: configDir,HOME: configDir};
+	
+	
+		var gcsfArgs = ["login", username];
+	
+		var reBrowserUrl = /Please direct your browser to (.*), follow the instructions/;
+		var reTokenFileExist = /token file (.*) already exists/;
+	
+		log("Starting gcsfLoginSession with args=" + JSON.stringify(gcsfArgs) + " gcsfOptions=" + JSON.stringify(gcsfOptions));
+	
+		var gcsfLoginSession = module_child_process.spawn("./../gcsf", gcsfArgs, gcsfOptions);
+	
+		GCSF[username] = {};
+	
+		GCSF[username].loginSession = gcsfLoginSession;
+		GCSF[username].enterCode = function enterGcsfCodeForLoginSession(code, cb) {
+			log("enter gcsf code called for " + username + " from login session", DEBUG);
+			enterCodeCallback = cb;
+			this.loginSession.stdin.write(code + "\n");
+		}
+	
+		gcsfLoginSession.on("close", function (code, signal) {
+			log(username + " gcsfLoginSession close: code=" + code + " signal=" + signal, NOTICE);
 		
-		if(error) callback(error);
-		else if(stderr) callback(new Error(stderr));
-		else callback(null);
+			// The GCS sessions might already have been "cleaned"
+			if( GCSF.hasOwnProperty(username) ) {
+				GCSF[username].loginSession = null;
+				GCSF[username].enterCode = null; // So we get an error if it's called
+			}
 		
-		module_fs.rmdir(mountDir, function(err) {
-			if(err) console.error(err);
+			if(gcsfLoginCallback) {
+				gcsfLoginCallback( new Error("gcsf login session closed with code=" + code + " and signal=" + signal) );
+				gcsfLoginCallback = null;
+			}
+		
 		});
+	
+		gcsfLoginSession.on("disconnect", function () {
+			log(username + " gcsfLoginSession disconnect: gcsfLoginSession.connected=" + gcsfLoginSession.connected, DEBUG);
+		});
+	
+		gcsfLoginSession.on("error", function (err) {
+			log(username + " gcsfLoginSession error: err.message=" + err.message, ERROR);
+			console.error(err);
+			if(gcsfLoginCallback) {
+				gcsfLoginCallback(err);
+				gcsfLoginCallback = null;
+			}
+			gcsfCleanup(username);
+		});
+	
+		gcsfLoginSession.stdout.on("data", function(data) {
+			log(username + " gcsfLoginSession stdout: " + data, INFO);
 		
-	});
-}
-
-function gcsfLogout(username, callback) {
-	var exec = module_child_process.exec;
-	var mountDir = HOME_DIR + username + "/googleDrive";
-	var command = "./gcsf logout " + username;
-	var options = {
-		cwd: module_path.join(__dirname, "../"), // Run in webide folder where removeuser.js is located
-		shell: EXEC_OPTIONS.shell
-	}
-	
-	gcsfCleanup(username);
-	
-	exec(command, options, function logout(error, stdout, stderr) {
-		console.log(command + " error=" + (error ? error.message : error) + " stdout=" + stdout + " stderr=" + stderr);
+			var str = data.toString();
 		
-		var reSuccess = /Successfully removed (.*)/;
+			var matchBrowserUrl = str.match(reBrowserUrl);
 		
-		if(error) callback(error);
-		else if(stderr) callback(new Error(stderr));
-		else callback(null);
+			if(matchBrowserUrl) {
+				log("gcsfLoginSession Need to request Google auth code for " + username + " before logging in to Google Drive ...", DEBUG);
+				var authUrl = matchBrowserUrl[1];
+				gcsfLoginCallback(null, {url: authUrl});
+				gcsfLoginCallback = null;
+			}
+			else if( str.match(/Successfully logged in/) ) {
+				if(loginSuccess === true) throw new Error(username + " gcsfLoginSession already logged in successfully !?");
+				loginSuccess = true;
+				log("Running gcsf mount for " + username + " because gcsf login successfully ....", DEBUG);
+				gcsfMount(username, function(err) {
+					if(err) {
+						log("Error when running gcsf mount for " + username + " after gcsf login success: " + err.message, INFO);
+						enterCodeCallback(err);
+					}
+					else {
+						log("gcsf mount successful for " + username + " after gcsf login success!", DEBUG);
+						enterCodeCallback(null, {mounted: true});
+					}
+				
+					enterCodeCallback = null;
+				});
+			}
+		});
+	
+		gcsfLoginSession.stderr.on("data", function (data) {
+			log(username + " gcsfLoginSession stderr: " + data, DEBUG);
 		
-	});
-}
-
-function gcsfCleanup(username) {
-	if( GCSF.hasOwnProperty(username) ) {
-		if( GCSF[username].loginSession ) GCSF[username].loginSession.kill();
-		if( GCSF[username].mountSession ) GCSF[username].mountSession.kill();
-		delete GCSF[username];
-		return true;
-	}
-	return false;
-}
-
-function reportError(errorOrMessage) {
-	// A more soft error to prevent the server from restarting
-	console.error(errorOrMessage);
-	if(errorOrMessage instanceof Error) {
-		var msg = errorOrMessage.message;
-	}
-	else {
-		var msg = errorOrMessage;
-	}
-	
-	sendMail("webide@" + HOSTNAME, ADMIN_EMAIL, "Server error: " + msg.split("\n")[0].slice(0, 100), msg); // from, to, subject, text
-}
-
-function startDropboxDaemon(username, uid, gid, homeDir, callback) {
-	
-	if(DROPBOX.hasOwnProperty(username)) {
-		var error = new Error("Dropbox daemon already serving " + username)
-		error.code = "ALREADY_RUNNING";
-		callback(error);
-		callback = null;
-		return;
-	}
-	
-	if(!module_ps) return callback(new Error("Module ps not loaded."));
-	
-	var reBrowserUrl = /Please visit (.*) to link this device/;
-	var reLinked = /This computer is now linked to Dropbox/;
-	var reLastLibLoaded = /linuxffi.gnu\.compiled/;
-	var reProgramPath = /setting program path '([^']*)'/;
-	var reRunning = /dropbox: running dropbox/;
-	
-	var programPath = "";
-	
-	var didStartSanityCheck = false;
-	
-	var options = {
-		uid: uid,
-		gid: gid,
-		cwd: homeDir
-	};
-	
-	
-	var dropboxPath = UTIL.joinPaths(homeDir, "Dropbox/");
-	
-	options.env = {
-		username: username,
-		HOME: homeDir,
-		USER: username,
-		LOGNAME: username,
-		USER_NAME: username,
-		dropbox_path: dropboxPath,
-		TMPDIR: UTIL.joinPaths(homeDir, "tmp/")
-	}
-	
-	var args = [];
-	
-	
-	var daemon = module_path.join(__dirname, "./../dropbox/dropboxd");
-	
-	// First check if the Dropbox folder exist
-	// If it doesn't exist it means it's the first time the user connects to Dropbox, and it will take some time for the data to sync
-	var firstTime = true;
-	module_fs.stat(dropboxPath, function(err, stats) {
-		if(err && err.code == "ENOENT") {
-			log(username + " " + dropboxPath + " path missing! Creating it...", DEBUG);
-			module_fs.mkdir(dropboxPath, function(err) {
-				if(err) {
-					var error = new Error("Failed to create Dropbox folder " + dropboxPath + " Error: " + err.message + " code=" + err.code);
-					error.code = err.code;
+			var str = data.toString();
+		
+			if( str.match(reTokenFileExist) ) {
+				/*
+					Already logged in !?
+				
+					gcsf login session will close!
+				
+				*/
+			
+				// We don't want to call the gcsfLoginCallback just yet (close event will call it)
+				var alreadyLoggedInCallback = gcsfLoginCallback;
+				gcsfLoginCallback = null;
+			
+				// Sanity check: We should not have a enterCodeCallback
+				if(enterCodeCallback) throw new Error("Unexpected enterCodeCallback " + !!enterCodeCallback);
+			
+				log("Running gcsf mount for " + username + " because most likely already logged in ...", DEBUG);
+				gcsfMount(username, function(err, mntInfo) {
+					if(err) {
+						log("gcsf mount error for " + username + ": " + err.message, INFO);
 					
-					console.error(error);
-					
-					callback(error);
-					callback = null;
-					return;
-				}
-				else {
-					log(username + " Dropbox folder created successfully! Now changing the owner of " + dropboxPath + " to " + username + " ...", DEBUG);
-					module_fs.chown(dropboxPath, uid, gid, function(err) {
-						if(err) {
-							var error = new Error("Failed to change ownership of Dropbox folder " + dropboxPath + "  to " + username + " Error: " + err.message + " code=" + err.code);
-							error.code = err.code;
+						if(err.code=="ENTER_CODE") {
+							log(err.message, DEBUG);
+							alreadyLoggedInCallback(null, {url: mntInfo.url});
+							alreadyLoggedInCallback = null;
+						}
+						else if(err.code=="UMOUNT_THEN_TRY_AGAIN" && loginRetries < maxLoginRetries) {
+							loginRetries++;
+						
+							log("fusermount for " + username + " before retrying gcsf login ...", DEBUG);
+							gcsfUmount(username, function(err) {
+								if(err) console.error(err);
 							
-							console.error(error);
+								log("Retrying (" + loginRetries + ") gcsf login for " + username + " ...", INFO);
+								gcsfLogin(username, loginRetries, alreadyLoggedInCallback);
+								alreadyLoggedInCallback = null;
 							
-							callback(error);
-							callback = null;
-							return;
+							});
 						}
 						else {
-							log(username + " Successfully changed owner of " + dropboxPath + " to " + username + "", DEBUG);
-							init();
+							log("gcsf mount error code=" + err.code + " loginRetries=" + loginRetries + " Not trying again!", INFO);
+							alreadyLoggedInCallback(err);
+							alreadyLoggedInCallback = null;
 						}
-})
-					return;
-				}
-			});
-			
-			return;
-		}
-		else if(err) {
-			log(username + " Failed to stat " + dropboxPath, NOTICE);
-			console.error(err);
-			log("err.code=" + err.code, DEBUG);
-			callback(err);
-			callback = null;
-			
-			return;
-		}
-		else {
-			
-			log(username + " Dropbox folder already exist: " + dropboxPath, DEBUG);
-			
-			firstTime = false;
-			
-			init();
-		}
-		
-	});
-	
-	function init() {
-		
-		if(didStartSanityCheck) throw new Error("init have already been called!");
-		didStartSanityCheck = true;
-		
-		log("Starting Dropbox daemon for username=" + username + " daemon=" + daemon);
-		
-		var dropboxDaemon = module_child_process.spawn(daemon, args, options);
-		
-		DROPBOX[username] = dropboxDaemon;
-		
-		setTimeout(function loadTimout() {
-			if(callback) {
-				var error = new Error("Dropbox failed to load in a timely manner, please contact WebIDE support!");
-			callback(error);
-			callback = null;
-		}
-	}, 6000);
-	
-	dropboxDaemon.on("close", function (code, signal) {
-		log(username + " Dropbox deamon close: code=" + code + " signal=" + signal, NOTICE);
-		
-		delete DROPBOX[username];
-		
-		if(callback) {
-			callback( new Error("Dropbox daemon closed with code=" + code + " and signal=" + signal) );
-			callback = null;
-		}
-		
-	});
-	
-	dropboxDaemon.on("disconnect", function () {
-		log(username + " Dropbox daemon disconnect: dropboxDaemon.connected=" + dropboxDaemon.connected, DEBUG);
-	});
-	
-	dropboxDaemon.on("error", function (err) {
-		log(username + " Dropbox daemon error: err.message=" + err.message, ERROR);
-		console.error(err);
-		if(callback) {
-			callback(err);
-			callback = null;
-		}
-	});
-	
-	dropboxDaemon.stdout.on("data", function(data) {
-		log(username + "  Dropbox daemon stdout: " + data, INFO);
-		
-		var str = data.toString();
-		
-		
-		if(str.match(reLinked)) {
-			sendToClient(username, "dropbox", {linked: true});
-				DROPBOX[username].linked = true;
-		}
-		
-		
-		var matchBrowserUrl = str.match(reBrowserUrl);
-		
-		if(matchBrowserUrl) {
-				DROPBOX[username].linked = false;
-			log("" + username + " Dropbox daemon needs authorization from Dropbox ...", DEBUG);
-			var authUrl = matchBrowserUrl[1];
-				if(callback) {
-			callback(null, {url: authUrl});
-			callback = null;
-				}
-				else if(USER_CONNECTIONS.hasOwnProperty(username)) {
-					sendToClient(username, "dropbox", {url: authUrl});
-				}
-				else {
-					// No client is connected. Kill the Dropbox daemon
-					stopDropboxDaemon(username);
-				}
+					}
+					else {
+						log("gcsf mount success for " + username + "", DEBUG);
+						alreadyLoggedInCallback(null, {mounted: true});
+						alreadyLoggedInCallback = null;
+					}
+				});
 			}
 		});
-		
-		dropboxDaemon.stderr.on("data", function (data) {
-			log(username + "  Dropbox daemon stderr: " + data, DEBUG);
-			
-			var str = data.toString();
-			
-			if(str.match(reLastLibLoaded)) {
-				/*
-				The last library has loaded and Dropbox is soon fully started...
-				If we are not authorized we will get a browser url to stdout
-				-- And once authorized we will get a "This computer is now linked" message to stdout
-				But if we do not need to authorize we will get nothing!
-				
-				So wait for a auth request, and if we do not get any, assume everything is OK
-			*/
-			setTimeout(function waitForBrowserUrl() {
-				if(callback) {
-					callback(null, {timeout: true});
-					callback = null;
-				}
-				}, (firstTime ? 6000 : 200));
-		}
-			else if(str.match(reProgramPath)) {
-				
-				if(programPath) {
-					var oldPath = programPath;
-				}
-				
-				var match = str.match(reProgramPath);
-				programPath = match[1];
-				
-				log(username + " Found dropbox program path: " + programPath + " oldPath=" + oldPath, DEBUG);
-				
-				if(oldPath && oldPath != programPath) log(username + " Found another Dropbox path! programPath=" + programPath + " oldPath=" + oldPath, WARN);
-				
-			}
-else if(str.match(reRunning)) {
-				
-				log(username + " detected Dropbox running!", DEBUG);
-				
-				setTimeout(whenDropboxIsReallyRunning, 5000);
-				
-			}
-			
-	});
-	}
 	
-	function whenDropboxIsReallyRunning() {
+		function gcsfMount(username, gcsfMountCallback) {
+			var mountDir = HOME_DIR + username + "/googleDrive";
+			var mountSuccessString = "Mounted to " + mountDir;
+			var gcsfMountArgs = ["mount", mountDir, "-s", username];
+			var notImplementString = "Function not implemented (os error 38)";
+			var mountpointNotEmptyString = "fuse: mountpoint is not empty";
+			var notConnectedString = "Transport endpoint is not connected";
+			var driveBuzy = "Device or resource busy";
+			var gcsfMountSession;
 		
-		if(!programPath) {
-			log(username + " Dropbox program path not yet found!", WARN);
+			// First create the folder to mount to
+			module_fs.mkdir(mountDir, function(err) {
+				if(err && err.code != "EEXIST") throw err;
+			
+				log("Starting gcsfMountSession with args=" + JSON.stringify(gcsfMountArgs) + " gcsfOptions=" + JSON.stringify(gcsfOptions) + "");
+			
+				gcsfMountSession = module_child_process.spawn("./../gcsf", gcsfMountArgs, gcsfOptions);
+			
+				GCSF[username].mountSession = gcsfMountSession;
+			
+				gcsfMountSession.on("close", gcsfMountSessionClose);
+				gcsfMountSession.on("disconnect", gcsfMountSessionDisconnect);
+				gcsfMountSession.on("error", gcsfMountSessionError);
+				gcsfMountSession.stdout.on("data", gcsfMountSessionStdout);
+				gcsfMountSession.stderr.on("data", gcsfMountSessionStderr);
+			
+			});
+		
+			function gcsfMountSessionClose(code, signal) {
+				log(username + " gcsfMountSession close: code=" + code + " signal=" + signal, NOTICE);
+			
+				// The closing might be due to a cleanup
+				if( GCSF.hasOwnProperty(username) ) GCSF[username].loginSession = null;
+			
+				// Always do a cleanup when mount session closes!
+				gcsfCleanup(username);
+			
+				if(gcsfMountCallback) {
+					gcsfMountCallback( new Error("gcsf mount session closed with code=" + code + " and signal=" + signal) );
+					gcsfMountCallback = null;
+				}
+			}
+		
+			function gcsfMountSessionDisconnect() {
+				log(username + " gcsfMountSession disconnect: gcsfMountSession.connected=" + gcsfMountSession.connected, DEBUG);
+			}
+		
+			function gcsfMountSessionError(err) {
+				log(username + " gcsfMountSession error: err.message=" + err.message, ERROR);
+				console.error(err);
+				if(gcsfMountCallback) {
+					gcsfMountCallback(err);
+					gcsfMountCallback = null;
+				}
+			}
+		
+			function gcsfMountSessionStdout(data) {
+				log(username + " gcsfMountSession stdout: " + data, INFO);
+				parseGcsfOutput(data);
+			}
+		
+			function gcsfMountSessionStderr(data) {
+				// For some reason gcsf mount outputs everything to stderr !? :P
+				log(username + " gcsfMountSession stderr: " + data, DEBUG);
+				parseGcsfOutput(data);
+			}
+		
+			function parseGcsfOutput(data) {
+				var str = data.toString();
+			
+				var matchBrowserUrl = str.match(reBrowserUrl);
+			
+				if(matchBrowserUrl) {
+					log("gcsfMount session Need to request Google auth code for " + username + " before logging in to Google Drive ...", DEBUG);
+					var authUrl = matchBrowserUrl[1];
+				
+					var error = new Error("gcsf mount session waiting for Google auth code on stdin ...");
+					error.code = "ENTER_CODE";
+					gcsfMountCallback(error, {url: authUrl});
+					gcsfMountCallback = null;
+				
+					GCSF[username].enterCode = function enterGcsfCodeToMountSession(code, cb) {
+						log("enter gcsf code called for " + username + " from mount session", DEBUG);
+						gcsfMountCallback = cb;
+						this.mountSession.stdin.write(code + "\n");
+					}
+				
+				}
+				else if( str.indexOf(mountSuccessString) != -1 ) {
+					console.log("Mount success string detected!");
+					gcsfMountCallback(null);
+					gcsfMountCallback = null;
+					// The process will continue to live and output debug info
+				}
+				else if( str.indexOf(notImplementString) != -1 ) {
+					/*
+						Most likely the dir is still mounted, but we are logged out
+						This error will close the mount session
+						Try umount and then mount again !?
+					*/
+					var error = new Error("Unable to mount Google Drive. Please try again.");
+					error.code = "UMOUNT_THEN_TRY_AGAIN";
+					gcsfMountCallback(error);
+					gcsfMountCallback = null;
+				
+				}
+				else if( str.indexOf(mountpointNotEmptyString) != -1 ) {
+					/*
+						Probably means the dir is already mounted.
+						Which is unexpected ... There is probably a gcsf mount session still lingering ...
+						*this* mount session will close.
+						I guess this should count as a mount success :P
+					*/
+					log("GCSF mountpoint is not empty! Assuming mount sucess", INFO);
+					gcsfMountCallback(null);
+					gcsfMountCallback = null;
+				}
+				else if( str.indexOf(notConnectedString) != -1 ) {
+					/*
+						GCSH has somehow lost connection to Google Drive
+						*this* mount session will close.
+					
+						It usually happens when the user forgot to logout/umount google drive from an earlier session
+					*/
+				
+					var error = new Error("We got disconnected from Google Drive. Please try again.")
+					error.code = "UMOUNT_THEN_TRY_AGAIN";
+					gcsfMountCallback(error);
+					gcsfMountCallback = null;
+				
+				}
+				else if( str.indexOf(driveBuzy) != -1 ) {
+					/*
+						Probably some reference still lingering to the old mount
+					
+					
+						This error will *NOT* close the mount session
+					*/
+				
+					gcsfMountCallback( new Error("Unable to mount Google Drive: Device or resource busy. Please try again later.") );
+					gcsfMountCallback = null;
+				
+					gcsfMountSession.kill();
+				
+				}
+			}
+		}
+	}
+
+	function gcsfUmount(username, callback) {
+		var exec = module_child_process.exec;
+		var mountDir = HOME_DIR + username + "/googleDrive";
+		var command = "fusermount -u " + mountDir;
+	
+		gcsfCleanup(username);
+	
+		exec(command, EXEC_OPTIONS, function fusermount(error, stdout, stderr) {
+			console.log(command + " error=" + (error ? error.message : error) + " stdout=" + stdout + " stderr=" + stderr);
+		
+			/*
+				If you get /bin/sh: 1: fusermount: not found
+				try: apt-get install fuse
+			*/
+		
+			if(error) callback(error);
+			else if(stderr) callback(new Error(stderr));
+			else callback(null);
+		
+			module_fs.rmdir(mountDir, function(err) {
+				if(err) console.error(err);
+			});
+		
+		});
+	}
+
+	function gcsfLogout(username, callback) {
+		var exec = module_child_process.exec;
+		var mountDir = HOME_DIR + username + "/googleDrive";
+		var command = "./gcsf logout " + username;
+		var options = {
+			cwd: module_path.join(__dirname, "../"), // Run in webide folder where removeuser.js is located
+			shell: EXEC_OPTIONS.shell
+		}
+	
+		gcsfCleanup(username);
+	
+		exec(command, options, function logout(error, stdout, stderr) {
+			console.log(command + " error=" + (error ? error.message : error) + " stdout=" + stdout + " stderr=" + stderr);
+		
+			var reSuccess = /Successfully removed (.*)/;
+		
+			if(error) callback(error);
+			else if(stderr) callback(new Error(stderr));
+			else callback(null);
+		
+		});
+	}
+
+	function gcsfCleanup(username) {
+		if( GCSF.hasOwnProperty(username) ) {
+			if( GCSF[username].loginSession ) GCSF[username].loginSession.kill();
+			if( GCSF[username].mountSession ) GCSF[username].mountSession.kill();
+			delete GCSF[username];
+			return true;
+		}
+		return false;
+	}
+
+	function reportError(errorOrMessage) {
+		// A more soft error to prevent the server from restarting
+		console.error(errorOrMessage);
+		if(errorOrMessage instanceof Error) {
+			var msg = errorOrMessage.message;
+		}
+		else {
+			var msg = errorOrMessage;
+		}
+	
+		sendMail("webide@" + HOSTNAME, ADMIN_EMAIL, "Server error: " + msg.split("\n")[0].slice(0, 100), msg); // from, to, subject, text
+	}
+
+	function startDropboxDaemon(username, uid, gid, homeDir, callback) {
+	
+		if(DROPBOX.hasOwnProperty(username)) {
+			var error = new Error("Dropbox daemon already serving " + username)
+			error.code = "ALREADY_RUNNING";
+			callback(error);
+			callback = null;
 			return;
 		}
+	
+		if(!module_ps) return callback(new Error("Module ps not loaded."));
+	
+		var reBrowserUrl = /Please visit (.*) to link this device/;
+		var reLinked = /This computer is now linked to Dropbox/;
+		var reLastLibLoaded = /linuxffi.gnu\.compiled/;
+		var reProgramPath = /setting program path '([^']*)'/;
+		var reRunning = /dropbox: running dropbox/;
+	
+		var programPath = "";
+	
+		var didStartSanityCheck = false;
+	
+		var options = {
+			uid: uid,
+			gid: gid,
+			cwd: homeDir
+		};
+	
+	
+		var dropboxPath = UTIL.joinPaths(homeDir, "Dropbox/");
+	
+		options.env = {
+			username: username,
+			HOME: homeDir,
+			USER: username,
+			LOGNAME: username,
+			USER_NAME: username,
+			dropbox_path: dropboxPath,
+			TMPDIR: UTIL.joinPaths(homeDir, "tmp/")
+		}
+	
+		var args = [];
+	
+	
+		var daemon = module_path.join(__dirname, "./../dropbox/dropboxd");
+	
+		// First check if the Dropbox folder exist
+		// If it doesn't exist it means it's the first time the user connects to Dropbox, and it will take some time for the data to sync
+		var firstTime = true;
+		module_fs.stat(dropboxPath, function(err, stats) {
+			if(err && err.code == "ENOENT") {
+				log(username + " " + dropboxPath + " path missing! Creating it...", DEBUG);
+				module_fs.mkdir(dropboxPath, function(err) {
+					if(err) {
+						var error = new Error("Failed to create Dropbox folder " + dropboxPath + " Error: " + err.message + " code=" + err.code);
+						error.code = err.code;
+					
+						console.error(error);
+					
+						callback(error);
+						callback = null;
+						return;
+					}
+					else {
+						log(username + " Dropbox folder created successfully! Now changing the owner of " + dropboxPath + " to " + username + " ...", DEBUG);
+						module_fs.chown(dropboxPath, uid, gid, function(err) {
+							if(err) {
+								var error = new Error("Failed to change ownership of Dropbox folder " + dropboxPath + "  to " + username + " Error: " + err.message + " code=" + err.code);
+								error.code = err.code;
+							
+								console.error(error);
+							
+								callback(error);
+								callback = null;
+								return;
+							}
+							else {
+								log(username + " Successfully changed owner of " + dropboxPath + " to " + username + "", DEBUG);
+								init();
+							}
+						})
+						return;
+					}
+				});
+			
+				return;
+			}
+			else if(err) {
+				log(username + " Failed to stat " + dropboxPath, NOTICE);
+				console.error(err);
+				log("err.code=" + err.code, DEBUG);
+				callback(err);
+				callback = null;
+			
+				return;
+			}
+			else {
+			
+				log(username + " Dropbox folder already exist: " + dropboxPath, DEBUG);
+			
+				firstTime = false;
+			
+				init();
+			}
 		
-		log(username + " Dropbox running with programPath=" + programPath, DEBUG);
+		});
+	
+		function init() {
 		
+			if(didStartSanityCheck) throw new Error("init have already been called!");
+			didStartSanityCheck = true;
+		
+			log("Starting Dropbox daemon for username=" + username + " daemon=" + daemon);
+		
+			var dropboxDaemon = module_child_process.spawn(daemon, args, options);
+		
+			DROPBOX[username] = dropboxDaemon;
+		
+			setTimeout(function loadTimout() {
+				if(callback) {
+					var error = new Error("Dropbox failed to load in a timely manner, please contact WebIDE support!");
+					callback(error);
+					callback = null;
+				}
+			}, 6000);
+	
+			dropboxDaemon.on("close", function (code, signal) {
+				log(username + " Dropbox deamon close: code=" + code + " signal=" + signal, NOTICE);
+		
+				delete DROPBOX[username];
+		
+				if(callback) {
+					callback( new Error("Dropbox daemon closed with code=" + code + " and signal=" + signal) );
+					callback = null;
+				}
+		
+			});
+	
+			dropboxDaemon.on("disconnect", function () {
+				log(username + " Dropbox daemon disconnect: dropboxDaemon.connected=" + dropboxDaemon.connected, DEBUG);
+			});
+	
+			dropboxDaemon.on("error", function (err) {
+				log(username + " Dropbox daemon error: err.message=" + err.message, ERROR);
+				console.error(err);
+				if(callback) {
+					callback(err);
+					callback = null;
+				}
+			});
+	
+			dropboxDaemon.stdout.on("data", function(data) {
+				log(username + "  Dropbox daemon stdout: " + data, INFO);
+		
+				var str = data.toString();
+		
+		
+				if(str.match(reLinked)) {
+					sendToClient(username, "dropbox", {linked: true});
+					DROPBOX[username].linked = true;
+				}
+		
+		
+				var matchBrowserUrl = str.match(reBrowserUrl);
+		
+				if(matchBrowserUrl) {
+					DROPBOX[username].linked = false;
+					log("" + username + " Dropbox daemon needs authorization from Dropbox ...", DEBUG);
+					var authUrl = matchBrowserUrl[1];
+					if(callback) {
+						callback(null, {url: authUrl});
+						callback = null;
+					}
+					else if(USER_CONNECTIONS.hasOwnProperty(username)) {
+						sendToClient(username, "dropbox", {url: authUrl});
+					}
+					else {
+						// No client is connected. Kill the Dropbox daemon
+						stopDropboxDaemon(username);
+					}
+				}
+			});
+		
+			dropboxDaemon.stderr.on("data", function (data) {
+				log(username + "  Dropbox daemon stderr: " + data, DEBUG);
+			
+				var str = data.toString();
+			
+				if(str.match(reLastLibLoaded)) {
+					/*
+						The last library has loaded and Dropbox is soon fully started...
+						If we are not authorized we will get a browser url to stdout
+						-- And once authorized we will get a "This computer is now linked" message to stdout
+						But if we do not need to authorize we will get nothing!
+				
+						So wait for a auth request, and if we do not get any, assume everything is OK
+					*/
+					setTimeout(function waitForBrowserUrl() {
+						if(callback) {
+							callback(null, {timeout: true});
+							callback = null;
+						}
+					}, (firstTime ? 6000 : 200));
+				}
+				else if(str.match(reProgramPath)) {
+				
+					if(programPath) {
+						var oldPath = programPath;
+					}
+				
+					var match = str.match(reProgramPath);
+					programPath = match[1];
+				
+					log(username + " Found dropbox program path: " + programPath + " oldPath=" + oldPath, DEBUG);
+				
+					if(oldPath && oldPath != programPath) log(username + " Found another Dropbox path! programPath=" + programPath + " oldPath=" + oldPath, WARN);
+				
+				}
+				else if(str.match(reRunning)) {
+				
+					log(username + " detected Dropbox running!", DEBUG);
+				
+					setTimeout(whenDropboxIsReallyRunning, 5000);
+				
+				}
+			
+			});
+		}
+	
+		function whenDropboxIsReallyRunning() {
+		
+			if(!programPath) {
+				log(username + " Dropbox program path not yet found!", WARN);
+				return;
+			}
+		
+			log(username + " Dropbox running with programPath=" + programPath, DEBUG);
+		
+			module_ps.lookup({
+				command: programPath,
+				psargs: "aux" // a=Include those not started by us, x=dont need to have a tty   u=include user  l=long format (l doesnt seem to work together with u)
+			}, function(err, resultList ) {
+				if (err) {
+					throw new Error( err );
+				}
+			
+				var found = false;
+			
+				resultList.forEach(function( p ){
+					if( p ) {
+					
+						log(username + " Found Dropbox daemon process: " + JSON.stringify(p) + "");
+					
+						found = true;
+					
+						if(programPath.indexOf(homeDir) == 0) {
+
+							if(!DROPBOX.hasOwnProperty(username)) {
+								log(username + " It seems the Dropbox daemon we started have closed!", DEBUG);
+								// note: Dropbox sometimes closed the process we spawned, and sometimes keep it open...
+								// Have a kill method even though the original process have closed, 
+								// because we still want to be able to kill the Dropbox daemon!
+								DROPBOX[username] = {};
+							}
+							else {
+								// note: The process that we started might still be running
+								var oldKill = DROPBOX[username].kill;
+							}
+						
+							log(username + " Overwriting Dropbox kill method!", NOTICE);
+						
+							DROPBOX[username].kill = function killDropboxDaemon() {
+							
+								if(oldKill) {
+									try {
+										oldKill.call(DROPBOX[username]);
+									}
+									catch(err) {
+										console.error(err);
+										log(username + " Failed to kill the process we started but Dropbox decided not to use.", WARN);
+									}
+								}
+							
+								module_ps.kill( p.pid, function( err ) {
+									if (err) {
+										console.error(err);
+										log("Failed to kill Dropbox daemon for username=" + username + " p.pid=" + p.pid, WARN);
+									}
+									else {
+										log("Killed Dropbox daemon for username=" + username + " pid=" + p.pid);
+									}
+								});
+							};
+						
+						}
+					}
+					else throw new Error("Expected p");
+				});
+			
+				if(!found) {
+					log(username + " Did not find Dropbox process us ps !!", WARN);
+				}
+			
+			});
+		}
+	}
+
+	function checkDropboxDaemon(username, callback) {
+		if(DROPBOX.hasOwnProperty(username)) {
+			// Likely alive
+			callback(null, {alive: true, dead: false});
+		}
+		else {
+		
+			checkForOtherDropboxDaemons(username, function(err, otherDaemons) {
+				if(err) throw err;
+			
+				if(otherDaemons.length > 0) {
+					// Migth be alive
+					callback(null, {alive: true, dead: true});
+				
+				}
+				else {
+					// Definitely dead
+					callback(null, {alive: false, dead: true});
+				}
+			
+			});
+		
+		}
+	}
+
+	function stopDropboxDaemon(username, callback) {
+	
+		if(!DROPBOX.hasOwnProperty(username)) {
+			var error = new Error("No Dropbox deamon registered for " + username);
+			error.code = "DEAD";
+			if(callback) {
+				callback(error);
+				callback = null;
+			}
+			else console.error(error);
+			return;
+		}
+	
+		var dropboxDaemon = DROPBOX[username];
+	
+		if(dropboxDaemon) {
+			log(username + " Killing Dropbox daemon", DEBUG);
+			try {
+				dropboxDaemon.kill();
+			}
+			catch(err) {
+				console.error(err);
+				log(username + " Failed to kill Dropbox daemon", WARN);
+				if(callback) {
+					callback(err);
+					callback = null;
+				}
+				else console.error(err);
+			
+				return;
+			}
+		
+			delete DROPBOX[username];
+		
+			checkToMakeSure(true);
+		}
+		else checkToMakeSure(false);
+	
+		function checkToMakeSure(killed) {
+			/*
+				Check to make sure ALL Dropbox daemons are stopped.
+				note: If a daemon is still running while deleting the Dropbox folder, all files will be deleted!
+			*/
+		
+			checkForOtherDropboxDaemons(username, function(err, otherDaemons) {
+				if(err) throw err;
+
+				if(otherDaemons.length > 0) {
+				
+					if(killed) {
+						var errMsg = "We killed one deamon, but there appears to be more...";
+					}
+					else {
+						var errMsg = "There appears to be more Dropbox deamons that we did not know about...";
+					}
+					var error = new Error(errMsg);
+				
+					if(callback) {
+						callback(error);
+						callback = null;
+					}
+					else {
+						console.error(error);
+					}
+				
+					return;
+				
+				}
+				else {
+					if(callback) {
+						callback(null);
+						callback = null;
+					}
+					else {
+						if(killed) {
+							log("Successfully killed the Dropbox deamon for username=" + username);
+						}
+						else {
+							log("Found no Dropbox deamon for username=" + username);
+						}
+					}
+				}
+			
+			});
+		
+		}
+	}
+
+	function checkForOtherDropboxDaemons(username, callback) {
+	
+		if(!module_ps) return callback(new Error("module_ps not loaded!"));
+
+		var daemons = [];
+	
 		module_ps.lookup({
-			command: programPath,
+			command: ".*dropbox.*",
 			psargs: "aux" // a=Include those not started by us, x=dont need to have a tty   u=include user  l=long format (l doesnt seem to work together with u)
 		}, function(err, resultList ) {
 			if (err) {
-				throw new Error( err );
+				return callback(err);
 			}
-			
-			var found = false;
-			
+		
 			resultList.forEach(function( p ){
 				if( p ) {
-					
+				
 					log(username + " Found Dropbox daemon process: " + JSON.stringify(p) + "");
-					
-					found = true;
-					
-					if(programPath.indexOf(homeDir) == 0) {
-
-						if(!DROPBOX.hasOwnProperty(username)) {
-							log(username + " It seems the Dropbox daemon we started have closed!", DEBUG);
-							// note: Dropbox sometimes closed the process we spawned, and sometimes keep it open...
-							// Have a kill method even though the original process have closed, 
-// because we still want to be able to kill the Dropbox daemon!
-							DROPBOX[username] = {};
-						}
-						else {
-							// note: The process that we started might still be running
-							var oldKill = DROPBOX[username].kill;
-						}
-						
-						log(username + " Overwriting Dropbox kill method!", NOTICE);
-						
-						DROPBOX[username].kill = function killDropboxDaemon() {
-							
-							if(oldKill) {
-								try {
-									oldKill.call(DROPBOX[username]);
-								}
-								catch(err) {
-									console.error(err);
-									log(username + " Failed to kill the process we started but Dropbox decided not to use.", WARN);
-								}
-							}
-							
-							module_ps.kill( p.pid, function( err ) {
-								if (err) {
-									console.error(err);
-									log("Failed to kill Dropbox daemon for username=" + username + " p.pid=" + p.pid, WARN);
-								}
-								else {
-									log("Killed Dropbox daemon for username=" + username + " pid=" + p.pid);
-								}
-							});
-						};
-						
-					}
+				
+					daemons.push(p);
 				}
-				else throw new Error("Expected p");
+			
 			});
-			
-			if(!found) {
-				log(username + " Did not find Dropbox process us ps !!", WARN);
-			}
-			
+		
+			callback(null, daemons);
+		
 		});
+	
 	}
-}
 
-function checkDropboxDaemon(username, callback) {
-	if(DROPBOX.hasOwnProperty(username)) {
-		// Likely alive
-		callback(null, {alive: true, dead: false});
-	}
-	else {
-		
-		checkForOtherDropboxDaemons(username, function(err, otherDaemons) {
-			if(err) throw err;
-			
-			if(otherDaemons.length > 0) {
-				// Migth be alive
-				callback(null, {alive: true, dead: true});
-				
-			}
-			else {
-				// Definitely dead
-				callback(null, {alive: false, dead: true});
-			}
-			
-		});
-		
-	}
-}
 
-function stopDropboxDaemon(username, callback) {
-	
-	if(!DROPBOX.hasOwnProperty(username)) {
-		var error = new Error("No Dropbox deamon registered for " + username);
-		error.code = "DEAD";
-		if(callback) {
-		callback(error);
-		callback = null;
-		}
-		else console.error(error);
-		return;
-	}
-	
-	var dropboxDaemon = DROPBOX[username];
-	
-	if(dropboxDaemon) {
-		log(username + " Killing Dropbox daemon", DEBUG);
-		try {
-			dropboxDaemon.kill();
-		}
-		catch(err) {
-			console.error(err);
-			log(username + " Failed to kill Dropbox daemon", WARN);
-			if(callback) {
-			callback(err);
-			callback = null;
-			}
-			else console.error(err);
-			
-			return;
-		}
+
+	function sendToClient(userConnectionName, cmd, obj) {
+		if(USER_CONNECTIONS.hasOwnProperty(userConnectionName)) {
+			var json = {};
+			json[cmd] = obj;
 		
-		delete DROPBOX[username];
-		
-		checkToMakeSure(true);
+			sendToAll(userConnectionName, json);
+		}
 	}
-	else checkToMakeSure(false);
-	
-	function checkToMakeSure(killed) {
+
+	function vpnCommand(username, homeDir, options, callback) {
 		/*
-			Check to make sure ALL Dropbox daemons are stopped.
-			note: If a daemon is still running while deleting the Dropbox folder, all files will be deleted!
+
+
+			todo:  Check for netns /etc/netns/username/ first and send back an NONETNS error if it doesn't exist
 		*/
-		
-		checkForOtherDropboxDaemons(username, function(err, otherDaemons) {
-			if(err) throw err;
-
-			if(otherDaemons.length > 0) {
-				
-				if(killed) {
-					var errMsg = "We killed one deamon, but there appears to be more...";
-				}
-				else {
-					var errMsg = "There appears to be more Dropbox deamons that we did not know about...";
-				}
-				var error = new Error(errMsg);
-				
-				if(callback) {
-					callback(error);
-					callback = null;
-				}
-				else {
-					console.error(error);
-				}
-				
-				return;
-				
-			}
-			else {
-				if(callback) {
-					callback(null);
-					callback = null;
-				}
-				else {
-					if(killed) {
-						log("Successfully killed the Dropbox deamon for username=" + username);
-					}
-					else {
-						log("Found no Dropbox deamon for username=" + username);
-					}
-				}
-			}
-			
-		});
-		
-	}
-}
-
-function checkForOtherDropboxDaemons(username, callback) {
+		var commands = ["start", "stop", "status"];
+		if(commands.indexOf(options.command) == -1) return callback( new Error("options.command=" + options.command + " not a valid VPN command! (" + JSON.stringify(commands) + ")") );
 	
-if(!module_ps) return callback(new Error("module_ps not loaded!"));
-
-	var daemons = [];
+		log("vpnAction: username=" + username + " homeDir=" + homeDir + " options=" + JSON.stringify(options), DEBUG);
 	
-	module_ps.lookup({
-		command: ".*dropbox.*",
-		psargs: "aux" // a=Include those not started by us, x=dont need to have a tty   u=include user  l=long format (l doesnt seem to work together with u)
-	}, function(err, resultList ) {
-		if (err) {
-			return callback(err);
+		if(INSIDE_DOCKER) {
+			var error = new Error("VPN not available. Check server flags! Disabled by -insidedocker");
+			error.code = "ENOSUPPORT";
+			return callback(error);
 		}
-		
-		resultList.forEach(function( p ){
-			if( p ) {
-				
-				log(username + " Found Dropbox daemon process: " + JSON.stringify(p) + "");
-				
-				daemons.push(p);
-			}
-			
-		});
-		
-		callback(null, daemons);
-		
-	});
-	
-}
 
-
-
-function sendToClient(userConnectionName, cmd, obj) {
-	if(USER_CONNECTIONS.hasOwnProperty(userConnectionName)) {
-		var json = {};
-		json[cmd] = obj;
-		
-		sendToAll(userConnectionName, json);
-}
-}
-
-function vpnCommand(username, homeDir, options, callback) {
-/*
-
-
-todo:  Check for netns /etc/netns/username/ first and send back an NONETNS error if it doesn't exist
-*/
-	var commands = ["start", "stop", "status"];
-	if(commands.indexOf(options.command) == -1) return callback( new Error("options.command=" + options.command + " not a valid VPN command! (" + JSON.stringify(commands) + ")") );
+		if(options===true) options = {};
 	
-	log("vpnAction: username=" + username + " homeDir=" + homeDir + " options=" + JSON.stringify(options), DEBUG);
+		if(typeof options != "object") throw new Error("options=" + options + " (" + (typeof options) + ")");
 	
-	if(INSIDE_DOCKER) {
-		var error = new Error("VPN not available. Check server flags! Disabled by -insidedocker");
-		error.code = "ENOSUPPORT";
-		return callback(error);
-	}
-
-	if(options===true) options = {};
+		var supportedTypes = ["wireguard"];
 	
-	if(typeof options != "object") throw new Error("options=" + options + " (" + (typeof options) + ")");
+		if(options.type == undefined) options.type = supportedTypes[0];
+		else if(supportedTypes.indexOf(options.type) == -1) return callback(new Error(options.type + " not in supportedTypes=" + JSON.stringify(supportedTypes)));
 	
-	var supportedTypes = ["wireguard"];
-	
-	if(options.type == undefined) options.type = supportedTypes[0];
-	else if(supportedTypes.indexOf(options.type) == -1) return callback(new Error(options.type + " not in supportedTypes=" + JSON.stringify(supportedTypes)));
-	
-	var exec = module_child_process.exec;
-	var execOptions = {
-		shell: EXEC_OPTIONS.shell
-	}
-	if(options.type == "wireguard") {
-		if(options.conf == undefined) return callback(new Error("wireguard requires a conf options with the path to a wg-quick config file!"));
-		
-		var filePath = UTIL.joinPaths(homeDir, options.conf);
-		if(filePath.indexOf(homeDir) != 0 || !module_path.isAbsolute(filePath)) return callback(new Error("options.conf=" + options.conf + " needs to be an absolute path in your home directory!"));
-		
-		if(options.command == "start") {
-			var shellCmd = "ip netns exec " + username + " wg-quick up " + filePath;
+		var exec = module_child_process.exec;
+		var execOptions = {
+			shell: EXEC_OPTIONS.shell
 		}
-		else if(options.command == "stop") {
-			var shellCmd = "ip netns exec " + username + " wg-quick down " + filePath;
-		}
-		else if(options.command == "status") {
-			var shellCmd = "ip netns exec " + username + " wg";
-		}
+		if(options.type == "wireguard") {
+			if(options.conf == undefined) return callback(new Error("wireguard requires a conf options with the path to a wg-quick config file!"));
 		
-		log("vpn: " + username + " options.command=" + options.command + " shellCmd=" + shellCmd + " ...");
-		exec(shellCmd, execOptions, function wgQuick(error, stdout, stderr) {
-			
-			log(username + " shellCmd=" + shellCmd + " error=" + (error && error.message) + " stderr=" + stderr + " stdout=" + stdout, DEBUG);
-			
-			var output = (stderr + "\n" + stdout).trim();
-			
-			if(error) return callback(error);
-			
-			
+			var filePath = UTIL.joinPaths(homeDir, options.conf);
+			if(filePath.indexOf(homeDir) != 0 || !module_path.isAbsolute(filePath)) return callback(new Error("options.conf=" + options.conf + " needs to be an absolute path in your home directory!"));
+		
 			if(options.command == "start") {
-				if(output.indexOf("wg setconf") == -1) return callback(new Error("Unexpected output: " + output));
+				var shellCmd = "ip netns exec " + username + " wg-quick up " + filePath;
+			}
+			else if(options.command == "stop") {
+				var shellCmd = "ip netns exec " + username + " wg-quick down " + filePath;
+			}
+			else if(options.command == "status") {
+				var shellCmd = "ip netns exec " + username + " wg";
+			}
+		
+			log("vpn: " + username + " options.command=" + options.command + " shellCmd=" + shellCmd + " ...");
+			exec(shellCmd, execOptions, function wgQuick(error, stdout, stderr) {
+			
+				log(username + " shellCmd=" + shellCmd + " error=" + (error && error.message) + " stderr=" + stderr + " stdout=" + stdout, DEBUG);
+			
+				var output = (stderr + "\n" + stdout).trim();
+			
+				if(error) return callback(error);
+			
+			
+				if(options.command == "start") {
+					if(output.indexOf("wg setconf") == -1) return callback(new Error("Unexpected output: " + output));
 				
 					VPN[username] = {type: options.type, conf: options.conf, homeDir: homeDir};
 				}
@@ -7042,338 +7042,338 @@ todo:  Check for netns /etc/netns/username/ first and send back an NONETNS error
 				else if(options.command == "status") {
 					if(stdout.length == 0) var status = "disconnected";
 					else if(stdout.indexOf("interface") != -1) {
-					var reEndpoint = /endpoint: (.*)/;
-					var matchEndpoint = stdout.match(reEndpoint);
-					var status = "connected"
-					if(matchEndpoint) {
-status = status + " to " + matchEndpoint[1];
+						var reEndpoint = /endpoint: (.*)/;
+						var matchEndpoint = stdout.match(reEndpoint);
+						var status = "connected"
+						if(matchEndpoint) {
+							status = status + " to " + matchEndpoint[1];
+						}
 					}
+					else throw new Error("Unexpected output: stdout=" + stdout);
 				}
-				else throw new Error("Unexpected output: stdout=" + stdout);
-			}
 			
-			callback(error, status);
+				callback(error, status);
 			
-		});
-	}
-	else {
-		throw new Error("options.type=" + options.type);
-	}
+			});
+		}
+		else {
+			throw new Error("options.type=" + options.type);
+		}
 	
 	
-}
+	}
 
 
-function dockerDaemon(username, homeDir, uid, gid, options, callback) {
-	"use strict";
+	function dockerDaemon(username, homeDir, uid, gid, options, callback) {
+		"use strict";
 	
-	/*
+		/*
 		
-		todo:
-		* Shut down Docker VM when user leaves!
-		* Fix issues with parcel live-reload
-		* *  It doesn't seem to detect changes
-		* * Make the port reachable! ex: d###.user.webide.se should proxy to the docker VM, and the terminal should detect that we are using docker in order to add the d infront of the port!?
-		* * Or users might have to use socat to expose his/her docker deamon VM to https://####.user.webide.se eg. socat TCP-LISTEN:6565,fork,reuseaddr TCP:192.168.121.138:6565
-		* * Or automatically detect open ports on the VM and run socat in the user netns. eg. sudo ip netns exec ltest1 socat TCP-LISTEN:6565,fork,reuseaddr TCP:172.17.0.2:6565
-		* Make the docker VM use the user VPN 
-		* Make VM IP address permanent: 
-		* * virsh net-update default add-last ip-dhcp-host '<host mac="52:54:00:6f:78:f3" ip="192.168.122.222"/>' --live --config --parent-index 0
-		* Block docker VM from accessing other user's netns!?
-		* Use latest snapshot from the Docker base VM when creating the zvol!
+			todo:
+			* Shut down Docker VM when user leaves!
+			* Fix issues with parcel live-reload
+			* *  It doesn't seem to detect changes
+			* * Make the port reachable! ex: d###.user.webide.se should proxy to the docker VM, and the terminal should detect that we are using docker in order to add the d infront of the port!?
+			* * Or users might have to use socat to expose his/her docker deamon VM to https://####.user.webide.se eg. socat TCP-LISTEN:6565,fork,reuseaddr TCP:192.168.121.138:6565
+			* * Or automatically detect open ports on the VM and run socat in the user netns. eg. sudo ip netns exec ltest1 socat TCP-LISTEN:6565,fork,reuseaddr TCP:172.17.0.2:6565
+			* Make the docker VM use the user VPN 
+			* Make VM IP address permanent: 
+			* * virsh net-update default add-last ip-dhcp-host '<host mac="52:54:00:6f:78:f3" ip="192.168.122.222"/>' --live --config --parent-index 0
+			* Block docker VM from accessing other user's netns!?
+			* Use latest snapshot from the Docker base VM when creating the zvol!
 		
-		If you need to debug, you can ssh into the docker VM:
-		sudo ssh -i /root/.ssh/dockervm docker@192.168.122.96
+			If you need to debug, you can ssh into the docker VM:
+			sudo ssh -i /root/.ssh/dockervm docker@192.168.122.96
 		
 		
 		
-	*/
+		*/
 	
-	if(options == undefined) return error(new Error("No options specified for the docker daemon! options=" + options));
+		if(options == undefined) return error(new Error("No options specified for the docker daemon! options=" + options));
 	
-	if(INSIDE_DOCKER) {
-		var error = new Error("Docker inside docker currently not supported! (disabled by -insidedocker server flag)");
-		error.code = "ENOSUPPORT";
-		return callback(error);
-	}
+		if(INSIDE_DOCKER) {
+			var error = new Error("Docker inside docker currently not supported! (disabled by -insidedocker server flag)");
+			error.code = "ENOSUPPORT";
+			return callback(error);
+		}
 
-	if(DOCKER_LOCK.hasOwnProperty(username)) {
-		return callback(new Error("Waiting for last command=" + DOCKER_LOCK[username]));
-	}
+		if(DOCKER_LOCK.hasOwnProperty(username)) {
+			return callback(new Error("Waiting for last command=" + DOCKER_LOCK[username]));
+		}
 	
-	DOCKER_LOCK[username] = options.command;
+		DOCKER_LOCK[username] = options.command;
 	
-	log("##############################################################");
-	log(" DOCKER  " + username + "  " + options.command + "  uid=" + uid + "      ");
-	log("##############################################################");
+		log("##############################################################");
+		log(" DOCKER  " + username + "  " + options.command + "  uid=" + uid + "      ");
+		log("##############################################################");
 	
-	var libvirtAddedToGroup = false;
-	var abort = false;
-	var dockerSshPubKey;
-	var staticIP = UTIL.int2ip(167903234+uid); // 10.2.X.Y
-	//var gateway = UTIL.int2ip(167772162 + uid); // no idea what I'm doing...
-	// When the user activates a VPN we also want the Docker VM to use the VPN!
+		var libvirtAddedToGroup = false;
+		var abort = false;
+		var dockerSshPubKey;
+		var staticIP = UTIL.int2ip(167903234+uid); // 10.2.X.Y
+		//var gateway = UTIL.int2ip(167772162 + uid); // no idea what I'm doing...
+		// When the user activates a VPN we also want the Docker VM to use the VPN!
 	
-	sendToClient(username, "progress", [0,0]);
-	sendToClient(username, "progress", [0,45]);
+		sendToClient(username, "progress", [0,0]);
+		sendToClient(username, "progress", [0,45]);
 	
-	// The user running libvirt need to have access to the user home dir in order to mount it
-	// We however need to run libvirt as root in order to write to the mounted home dir!
-	//checkLibVirtUser();
-	checkZvol();
+		// The user running libvirt need to have access to the user home dir in order to mount it
+		// We however need to run libvirt as root in order to write to the mounted home dir!
+		//checkLibVirtUser();
+		checkZvol();
 	
-	function checkLibVirtUser() {
-	// ### Make sure the libvirt-qemu user is a member of the user group (to be able to mount the user home dir in the docker VM)
-		log(username + ":docker: checking if a libvirt-qemu user exist...", DEBUG);
-		module_child_process.exec("grep -q libvirt-qemu: /etc/passwd", EXEC_OPTIONS, function(err, stdout, stderr) {
-		if(err) return error("libvirt not installed on this server");
+		function checkLibVirtUser() {
+			// ### Make sure the libvirt-qemu user is a member of the user group (to be able to mount the user home dir in the docker VM)
+			log(username + ":docker: checking if a libvirt-qemu user exist...", DEBUG);
+			module_child_process.exec("grep -q libvirt-qemu: /etc/passwd", EXEC_OPTIONS, function(err, stdout, stderr) {
+				if(err) return error("libvirt not installed on this server");
 		
-			progress();
+				progress();
 			
-			log(username + ":docker: checking if a libvirt-qemu user is part of " + username + " group...", DEBUG);
-		module_child_process.exec("grep -q " + username + ":.*libvirt-qemu /etc/group", EXEC_OPTIONS, function(err, stdout, stderr) {
+				log(username + ":docker: checking if a libvirt-qemu user is part of " + username + " group...", DEBUG);
+				module_child_process.exec("grep -q " + username + ":.*libvirt-qemu /etc/group", EXEC_OPTIONS, function(err, stdout, stderr) {
 				
-				if(err) {
-					progress();
-					log(username + ":docker: adding libvirt-qemu to " + username + " group...", INFO);
-				module_child_process.exec("usermod -a -G " + username + " libvirt-qemu", EXEC_OPTIONS, function(err, stdout, stderr) {
-						if(err) return error(err);
+					if(err) {
 						progress();
+						log(username + ":docker: adding libvirt-qemu to " + username + " group...", INFO);
+						module_child_process.exec("usermod -a -G " + username + " libvirt-qemu", EXEC_OPTIONS, function(err, stdout, stderr) {
+							if(err) return error(err);
+							progress();
+							checkZvol();
+						});
+					}
+					else {
+						progress(2);
+						log(username + ":docker: libvirt-qemu already member of group " + username + "", DEBUG);
 						checkZvol();
+					}
 				});
-			}
-			else {
-					progress(2);
-					log(username + ":docker: libvirt-qemu already member of group " + username + "", DEBUG);
-					checkZvol();
-			}
-		});
-	});
-	}
+			});
+		}
 	
-	function checkZvol() {
-		log(username + ":docker: checking if a zvol exist...", DEBUG);
-		module_child_process.exec("zfs list", EXEC_OPTIONS, function(err, stdout, stderr) {
-			if(err) return error(err);
+		function checkZvol() {
+			log(username + ":docker: checking if a zvol exist...", DEBUG);
+			module_child_process.exec("zfs list", EXEC_OPTIONS, function(err, stdout, stderr) {
+				if(err) return error(err);
 			
-			progress();
+				progress();
 			
-			// Is there a zvol we can copy from?
-			var reDocker = /\s*(.*)\/docker/;
-			var matchDocker = stdout.match(reDocker);
-			if(!matchDocker) {
-				log(username + ":docker: zfs list: stdout=" + stdout + " stderr=" + stderr + " reDocker=" + reDocker, DEBUG);
-				var err = new Error("Found no zvol to copy from!");
-				err.code = "MISSING_BASE_ZVOL";
-				return error(err);
-			}
-			
-			var zpool = matchDocker[1];
-			
-			if(zpool.indexOf(" ") != -1) throw new Error("zpool=" + zpool + " contains a space!");
-			
-			// Does user have a docker zvol?
-			var reZvol = new RegExp("\s*(.*)\\/docker_" + username);
-			var matchZvol = stdout.match(reZvol);
-			if(!matchZvol) {
-				log(username + ":docker: do not have a Docker VM zvol", DEBUG);
-				
-				if(options.command == "status" || options.command=="stop") return done({stopped: true, created: false});
-				
-				progress(0,2);
-				createZvol(zpool);
-			}
-			else {
-				var zpool = matchDocker[1];
-				log(username + ":docker: has a Docker VM zvol!", DEBUG);
-				checkVM(zpool);
-			}
-		});
-	}
-	
-	function checkVM(zpool) {
-		if(zpool == undefined) throw new Error("zpool=" + zpool);
-		
-		// Check if a VM is configured
-		log(username + ":docker: checking VM status...", DEBUG);
-		module_child_process.exec("virsh list --all", EXEC_OPTIONS, function(err, stdout, stderr) {
-			if(err) return error(err);
-			
-			progress();
-			
-			var reVM = new RegExp("docker_" + username + "\\s+(.*)");
-			var matchVM = stdout.match(reVM);
-			if(!matchVM) {
-				log(username + ":docker: has no VM configured!", DEBUG);
-				
-				if(options.command == "status" || options.command=="stop") return done({stopped: true, created: false});
-				
-				setupVM(zpool);
-			}
-			else {
-				progress(12); // Don't have to setup and start the VM
-				
-				var vmStatus = matchVM[1];
-				
-				if(vmStatus == "running") {
-					
-					if(options.command == "start" || options.command == "status") {
-						// We want to know the IP!
-						checkIP();
-					}
-					else if(options.command == "stop") {
-						stopVM();
-					}
-					else throw new Error("Unknown options.command=" + options.command);
-				}
-				else if(vmStatus == "shut off") {
-					
-					if(options.command == "start") {
-						startVM();
-					}
-					else if(options.command == "status" || options.command=="stop") {
-						return done({stopped: true, created: true});
-					}
-					else throw new Error("Unknown options.command=" + options.command);
-				}
-				else {
-					/*
-						Other states can be:
-						paused: The VM has just been defined, and start command has just been issued!?
-						dying: ?
-						crashed: ?
-						
-					*/
-					
-					var err = new Error("Unknown vmStatus=" + vmStatus + " (username=" + username + ")");
-					reportError(err);
+				// Is there a zvol we can copy from?
+				var reDocker = /\s*(.*)\/docker/;
+				var matchDocker = stdout.match(reDocker);
+				if(!matchDocker) {
+					log(username + ":docker: zfs list: stdout=" + stdout + " stderr=" + stderr + " reDocker=" + reDocker, DEBUG);
+					var err = new Error("Found no zvol to copy from!");
+					err.code = "MISSING_BASE_ZVOL";
 					return error(err);
 				}
-			}
-		});
-	}
+			
+				var zpool = matchDocker[1];
+			
+				if(zpool.indexOf(" ") != -1) throw new Error("zpool=" + zpool + " contains a space!");
+			
+				// Does user have a docker zvol?
+				var reZvol = new RegExp("\s*(.*)\\/docker_" + username);
+				var matchZvol = stdout.match(reZvol);
+				if(!matchZvol) {
+					log(username + ":docker: do not have a Docker VM zvol", DEBUG);
+				
+					if(options.command == "status" || options.command=="stop") return done({stopped: true, created: false});
+				
+					progress(0,2);
+					createZvol(zpool);
+				}
+				else {
+					var zpool = matchDocker[1];
+					log(username + ":docker: has a Docker VM zvol!", DEBUG);
+					checkVM(zpool);
+				}
+			});
+		}
 	
-	function checkSSHKey() {
-		// Do the root account has a dockervm ssh key?!?
-		module_fs.readFile("/root/.ssh/dockervm.pub", "utf8", function(err, pubkey) {
-			if(err && err.code == "ENOENT") return error("Please tell the Admin to create a base docker VM and a ssh key!");
-			// sudo ssh-keygen -f /root/.ssh/dockervm
-			else if(err) return error(err);
+		function checkVM(zpool) {
+			if(zpool == undefined) throw new Error("zpool=" + zpool);
+		
+			// Check if a VM is configured
+			log(username + ":docker: checking VM status...", DEBUG);
+			module_child_process.exec("virsh list --all", EXEC_OPTIONS, function(err, stdout, stderr) {
+				if(err) return error(err);
 			
-			dockerSshPubKey = pubkey;
-		});
-	}
+				progress();
+			
+				var reVM = new RegExp("docker_" + username + "\\s+(.*)");
+				var matchVM = stdout.match(reVM);
+				if(!matchVM) {
+					log(username + ":docker: has no VM configured!", DEBUG);
+				
+					if(options.command == "status" || options.command=="stop") return done({stopped: true, created: false});
+				
+					setupVM(zpool);
+				}
+				else {
+					progress(12); // Don't have to setup and start the VM
+				
+					var vmStatus = matchVM[1];
+				
+					if(vmStatus == "running") {
+					
+						if(options.command == "start" || options.command == "status") {
+							// We want to know the IP!
+							checkIP();
+						}
+						else if(options.command == "stop") {
+							stopVM();
+						}
+						else throw new Error("Unknown options.command=" + options.command);
+					}
+					else if(vmStatus == "shut off") {
+					
+						if(options.command == "start") {
+							startVM();
+						}
+						else if(options.command == "status" || options.command=="stop") {
+							return done({stopped: true, created: true});
+						}
+						else throw new Error("Unknown options.command=" + options.command);
+					}
+					else {
+						/*
+							Other states can be:
+							paused: The VM has just been defined, and start command has just been issued!?
+							dying: ?
+							crashed: ?
+						
+						*/
+					
+						var err = new Error("Unknown vmStatus=" + vmStatus + " (username=" + username + ")");
+						reportError(err);
+						return error(err);
+					}
+				}
+			});
+		}
 	
-	function ping(ipToPing, pingFail) {
-		// Make sure the IP is reachable
-		// Retry some times as it takes time for the server to boot!
-		
-		var maxTry = 20;
-		
-		if(!ipToPing) throw new Error("ipToPing=" + ipToPing + " IP=" + IP);
-		
-		if(pingFail == undefined) pingFail = 0;
-		
-		log(username + ":docker: pinging " + ipToPing + " ... pingFail=" + pingFail, DEBUG);
-		module_child_process.exec("ping " + ipToPing + " -w1", function(err, stdout, stderr) {
-			log(username + ":docker: ping " + ipToPing + ": err=" + (!!err) + " stdout=" + stdout + " stderr=" + stderr + "", DEBUG);
+		function checkSSHKey() {
+			// Do the root account has a dockervm ssh key?!?
+			module_fs.readFile("/root/.ssh/dockervm.pub", "utf8", function(err, pubkey) {
+				if(err && err.code == "ENOENT") return error("Please tell the Admin to create a base docker VM and a ssh key!");
+				// sudo ssh-keygen -f /root/.ssh/dockervm
+				else if(err) return error(err);
 			
-			progress();
+				dockerSshPubKey = pubkey;
+			});
+		}
+	
+		function ping(ipToPing, pingFail) {
+			// Make sure the IP is reachable
+			// Retry some times as it takes time for the server to boot!
+		
+			var maxTry = 20;
+		
+			if(!ipToPing) throw new Error("ipToPing=" + ipToPing + " IP=" + IP);
+		
+			if(pingFail == undefined) pingFail = 0;
+		
+			log(username + ":docker: pinging " + ipToPing + " ... pingFail=" + pingFail, DEBUG);
+			module_child_process.exec("ping " + ipToPing + " -w1", function(err, stdout, stderr) {
+				log(username + ":docker: ping " + ipToPing + ": err=" + (!!err) + " stdout=" + stdout + " stderr=" + stderr + "", DEBUG);
 			
-			if(err) {
-				pingFail++;
+				progress();
+			
+				if(err) {
+					pingFail++;
 				
-				log(username + ":docker: Docker VM ping fail! pingFail=" + pingFail, DEBUG);
+					log(username + ":docker: Docker VM ping fail! pingFail=" + pingFail, DEBUG);
 				
-				if(pingFail > maxTry) return error("Failed to ping the Docker deamon VM! pingFail=" + pingFail + " ipToPing=" + ipToPing);
+					if(pingFail > maxTry) return error("Failed to ping the Docker deamon VM! pingFail=" + pingFail + " ipToPing=" + ipToPing);
 				
-				ping(ipToPing, pingFail);
-			}
-			else {
-				log(username + ":docker: Docker VM ping success! attempts=" + pingFail, DEBUG);
+					ping(ipToPing, pingFail);
+				}
+				else {
+					log(username + ":docker: Docker VM ping success! attempts=" + pingFail, DEBUG);
 				
-				progress(maxTry-pingFail);
+					progress(maxTry-pingFail);
 
 					waitForSsh(ipToPing);
-			}
-		});
-	}
+				}
+			});
+		}
 	
-	function startVM() {
-		// Start the VM
-		var name = "docker_" + username;
-		log(username + ":docker: starting " + name + " VM ...", DEBUG);
-		module_child_process.exec("virsh start " + name, EXEC_OPTIONS, function(err, stdout, stderr) {
-			if(err) return error(err);
+		function startVM() {
+			// Start the VM
+			var name = "docker_" + username;
+			log(username + ":docker: starting " + name + " VM ...", DEBUG);
+			module_child_process.exec("virsh start " + name, EXEC_OPTIONS, function(err, stdout, stderr) {
+				if(err) return error(err);
 			
-			progress();
+				progress();
 			
-			log(username + ":docker: Docker VM starting for " + username + " ...");
+				log(username + ":docker: Docker VM starting for " + username + " ...");
 			
-			checkIP();
-		});
-	}
+				checkIP();
+			});
+		}
 	
-	function stopVM() {
-		var name = "docker_" + username;
-		log(username + ":docker: stopping " + name + " VM ...", DEBUG);
+		function stopVM() {
+			var name = "docker_" + username;
+			log(username + ":docker: stopping " + name + " VM ...", DEBUG);
 		
-		module_child_process.exec("virsh shutdown " + name + " --mode acpi", EXEC_OPTIONS, function(err, stdout, stderr) {
-			if(err) return error(err);
+			module_child_process.exec("virsh shutdown " + name + " --mode acpi", EXEC_OPTIONS, function(err, stdout, stderr) {
+				if(err) return error(err);
 			
-			progress();
+				progress();
 			
-			log(username + ":docker: Docker VM is shutting down...");
+				log(username + ":docker: Docker VM is shutting down...");
 			
-			if(options.command == "stop") {
-				return done({stopped: true});
-			}
-			else throw new Error("Unexpected options.command=" + options.command);
+				if(options.command == "stop") {
+					return done({stopped: true});
+				}
+				else throw new Error("Unexpected options.command=" + options.command);
 			
-		});
-	}
+			});
+		}
 	
-	function checkIptables(IP) {
-		var userIP =  UTIL.int2ip(167772162 + uid);
+		function checkIptables(IP) {
+			var userIP =  UTIL.int2ip(167772162 + uid);
 		
-		// Needed so that the user can access the VM from the user netns
-// sudo iptables -I FORWARD 1 -s 10.0.3.235 -d 192.168.122.96 -j ACCEPT
-		// sudo iptables -D FORWARD 1
+			// Needed so that the user can access the VM from the user netns
+			// sudo iptables -I FORWARD 1 -s 10.0.3.235 -d 192.168.122.96 -j ACCEPT
+			// sudo iptables -D FORWARD 1
 		
-		log(username + ":docker: checkign iptables...", DEBUG);
-		module_child_process.exec("iptables -S FORWARD", function(err, stdout, stderr) {
-			if(err) return error(err);
-			progress();
-			/*
-				if libvirt daemons are restarted, the iptable rules will re re-added and we have to re-add aswell
+			log(username + ":docker: checkign iptables...", DEBUG);
+			module_child_process.exec("iptables -S FORWARD", function(err, stdout, stderr) {
+				if(err) return error(err);
+				progress();
+				/*
+					if libvirt daemons are restarted, the iptable rules will re re-added and we have to re-add aswell
 				
-				-A FORWARD -o virbr0 -j REJECT --reject-with icmp-port-unreachable
+					-A FORWARD -o virbr0 -j REJECT --reject-with icmp-port-unreachable
 				
-			*/
+				*/
 			
-			var reUser = new RegExp(userIP + ".*" + IP);
-			var reBlock = /-o virbr0 -j REJECT/;
+				var reUser = new RegExp(userIP + ".*" + IP);
+				var reBlock = /-o virbr0 -j REJECT/;
 			
-			var matchUser = stdout.match(reUser);
-			var matchBlock = stdout.match(reBlock);
+				var matchUser = stdout.match(reUser);
+				var matchBlock = stdout.match(reBlock);
 			
-			log(username + ":docker: iptables: matchUser=" + JSON.stringify(matchUser) + " matchBlock=" + JSON.stringify(matchBlock) + " reUser=" + reUser + " reBlock=" + reBlock + " matchBlock.index=" + (matchBlock && matchBlock.index) + " matchUser.index=" + (matchUser && matchUser.index) + " ", DEBUG);
+				log(username + ":docker: iptables: matchUser=" + JSON.stringify(matchUser) + " matchBlock=" + JSON.stringify(matchBlock) + " reUser=" + reUser + " reBlock=" + reBlock + " matchBlock.index=" + (matchBlock && matchBlock.index) + " matchUser.index=" + (matchUser && matchUser.index) + " ", DEBUG);
 			
-			if(!matchUser || (matchBlock && matchBlock.index < matchUser.index)) {
-				log(username + ":docker: updating iptables...", DEBUG);
-				module_child_process.exec("iptables -I FORWARD 1 -s " + userIP + "/32 -d " + IP + "/32 -j ACCEPT", function(err, stdout, stderr) {
-					progress();
-					if(err) return error(err);
+				if(!matchUser || (matchBlock && matchBlock.index < matchUser.index)) {
+					log(username + ":docker: updating iptables...", DEBUG);
+					module_child_process.exec("iptables -I FORWARD 1 -s " + userIP + "/32 -d " + IP + "/32 -j ACCEPT", function(err, stdout, stderr) {
+						progress();
+						if(err) return error(err);
 					
+						ping(IP);
+					});
+				}
+				else {
+					// Rule exist!
 					ping(IP);
-				});
-			}
-			else {
-				// Rule exist!
-				ping(IP);
-			}
-		});
-	}
+				}
+			});
+		}
 	
 		function waitForSsh(IP, tries) {
 			if(tries == undefined) tries = 0;
@@ -7414,279 +7414,291 @@ function dockerDaemon(username, homeDir, uid, gid, options, callback) {
 				module_child_process.exec("echo dockerpw | ssh -tt -i /root/.ssh/dockervm -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null docker@" + IP + " sudo bash /home/docker/check_config_in_vm.sh " + username + " " + uid + " " + gid , EXEC_OPTIONS, function(err, stdout, stderr) {
 					if(err) {
 					
-					// We might have been successful anyway!
-					if(stdout.indexOf("SUCCESS!") != -1) return success();
-					if(stdout.indexOf("userhome already mounted") != -1) return success();
+						// We might have been successful anyway!
+						if(stdout.indexOf("SUCCESS!") != -1) return success();
+						if(stdout.indexOf("userhome already mounted") != -1) return success();
 					
-					log(username + ":docker: config stdout=" + stdout);
-					log(username + ":docker: config stderr=" + stderr);
+						log(username + ":docker: config stdout=" + stdout);
+						log(username + ":docker: config stderr=" + stderr);
 					
-					console.error(err);
+						console.error(err);
 					
-					// Don't want to tell users about our week password :P So use a custom error
-					return error("Unable to configure Docker daemon VM settings!");
-				}
-				else success();
-				
-				function success() {
-					progress();
-					
-					if(options.command == "start" || options.command == "status") {
-						return done({started: true, IP: IP, created: true});
+						// Don't want to tell users about our week password :P So use a custom error
+						return error("Unable to configure Docker daemon VM settings!");
 					}
-					else if(options.command == "stop") {
-						throw new Error("Should not configure when shutting down!");
+					else success();
+				
+					function success() {
+						progress();
+					
+						if(options.command == "start" || options.command == "status") {
+							return done({started: true, IP: IP, created: true});
+						}
+						else if(options.command == "stop") {
+							throw new Error("Should not configure when shutting down!");
+						}
+						else throw new Error("Unknown options.command=" + options.command);
 					}
-					else throw new Error("Unknown options.command=" + options.command);
-				}
+				});
 			});
-		});
 		
 		
-	}
-	
-	function checkIP(attempts) {
-		
-		checkIptables(staticIP);
-		return;
-		
-		// it might take some time for the libvirt dhcp to configure itself...
-		if(attempts==undefined) attempts = 1;
-		
-		log(username + ":docker: checking domifaddr... attempts=" + attempts, DEBUG);
-		module_child_process.exec("virsh domifaddr docker_" + username, function(err, stdout, stderr) {
-			// vnet0      52:54:00:12:be:53    ipv4         192.168.122.96/24
-			if(err) return error(err);
-			
-			log(username + ":docker: domifaddr: stdout=" + stdout + " stderr=" + stderr, DEBUG);
-			
-			progress();
-			
-			var reIP = /ipv4\s+(.*)\//;
-			var matchIP = stdout.match(reIP);
-			if(!matchIP) {
-				log(username + ":docker: domifaddr: stdout=" + stdout + " stderr=" + stderr + " reIP=" + reIP + " username=" + username, DEBUG);
-				
-				if(attempts < 5) return checkIP(++attempts);
-				
-				return error("Unable to find Docker daemon VM IP! attempts=" + attempts);
-			}
-			
-			var IP = matchIP[1];
-			
-			checkIptables(IP);
-		});
-	}
-	
-	function createZvol(zpool) {
-		if(zpool == undefined) throw new Error("zpool=" + zpool);
-		
-		// Do we have a snapshot!?
-		log(username + ":docker: listing zfs snapshots...", DEBUG);
-		module_child_process.exec("zfs list -t snapshot", EXEC_OPTIONS, function(err, stdout, stderr) {
-			if(err) return error(err);
-			
-			progress();
-			
-			var reSnapShot = new RegExp(zpool + "\\/docker@([^ ]*)");
-			var matchSnapshot = stdout.match(reSnapShot);
-			if(!matchSnapshot) {
-				return error("Please tell the Admin to create a snap-shot of the Docker VM zvol!");
-				// First shut down the base Docker VM!
-				// sudo zfs list
-				// sudo zfs snapshot pool/docker@somelabel
-			}
-			var snapshotName = matchSnapshot[1];
-			
-			if(snapshotName.indexOf(" ") != -1) throw new Error("snapshotName=" + snapshotName + " contains a space! reSnapShot=" + reSnapShot + " matchSnapshot=" + JSON.stringify(matchSnapshot));
-			
-			// Clone the snapshot
-			var fullSnapshotName = zpool + "/docker@" + snapshotName;
-			var cloneInto = zpool + "/docker_" + username;
-			log(username + ":docker: cloning " + fullSnapshotName + " into " + cloneInto + " ...", DEBUG);
-			module_child_process.exec("zfs clone -p " + fullSnapshotName + " " + cloneInto, EXEC_OPTIONS, function(err, stdout, stderr) {
-				if(err) return error(err);
-				else {
-					progress();
-					log(username + ":docker: VM zvol created");
-					checkVM(zpool);
-				}
-			});
-		});
-	}
-	
-	function setupVM(zpool) {
-		log(username + ":docker: setting up VM...");
-		if(zpool == undefined) throw new Error("zpool=" + zpool);
-		// Assuming we already have a zvol!
-		
-		function generateMAC() {
-			for(var i=0,arr=[];i<6;i++) {
-				arr[i] = Math.floor(Math.random() * 256);
-			}
-			
-			//log(JSON.stringify(arr));
-			
-			// Last octet should end with a binary 0 to make it unicast (or 1 for multicast). Eg the number should be even
-			// Some documentation say "least-significant bit of the first octet ..."
-			//log("arr[5]=" + arr[5] + " " + (arr[5]).toString(2));
-			//arr[5] = parseInt(arr[5].toString(2).slice(0,2)+"0",2);
-			arr[5] = roundEven(arr[5]);
-			arr[0] = roundEven(arr[0]);
-			//log("arr[5]=" + arr[5] + " " + (arr[5]).toString(2));
-			
-			// Second last octet should end with a binary 1 to indicate it's locally administered (or 0 for globally unique)
-			//log("arr[4]=" + arr[4] + " " + (arr[4]).toString(2));
-			//arr[4] = parseInt(arr[4].toString(2).slice(0,2)+"1",2);
-			arr[4] = roundOdd(arr[4]);
-			//log("arr[4]=" + arr[4] + " " + (arr[4]).toString(2));
-			
-			for(var i=0;i<6;i++) {
-				arr[i] = arr[i].toString(16);
-				if(arr[i].length<2) arr[i] = "0" + arr[i]; // Zero pad
-				arr[i] = arr[i].toUpperCase();
-			}
-			
-			return arr.join(":");
-			
-			function roundEven(n) {
-				return 2 * Math.round(n / 2);
-			}
-			function roundOdd(n) {
-				return  2* Math.floor(n/2) + 1;
-			}
 		}
+	
+		function checkIP(attempts) {
 		
-		var MAC = generateMAC();
-		log(username + ":docker: generated MAC=" + MAC);
+			checkIptables(staticIP);
+			return;
 		
-		log(username + ":docker: checking ip-dhcp config...");
-		module_child_process.exec('virsh net-dumpxml default', EXEC_OPTIONS, function(err, stdout, stderr) {
-			if(err) return error(err);
-			else {
-				// <host mac='52:54:00:52:ba:dc' name='docker_ltest1' ip='10.2.3.235'/>
-				
-				var reIP = new RegExp("<host mac='(.*)'.* ip='" + staticIP + "'\\/>");
+			// it might take some time for the libvirt dhcp to configure itself...
+			if(attempts==undefined) attempts = 1;
+		
+			log(username + ":docker: checking domifaddr... attempts=" + attempts, DEBUG);
+			module_child_process.exec("virsh domifaddr docker_" + username, function(err, stdout, stderr) {
+				// vnet0      52:54:00:12:be:53    ipv4         192.168.122.96/24
+				if(err) return error(err);
+			
+				log(username + ":docker: domifaddr: stdout=" + stdout + " stderr=" + stderr, DEBUG);
+			
+				progress();
+			
+				var reIP = /ipv4\s+(.*)\//;
 				var matchIP = stdout.match(reIP);
 				if(!matchIP) {
-					log(username + ":docker: reIP=" + reIP + " did not find a match in stdout=" + stdout, DEBUG);
-					return addIP();
+					log(username + ":docker: domifaddr: stdout=" + stdout + " stderr=" + stderr + " reIP=" + reIP + " username=" + username, DEBUG);
+				
+					if(attempts < 5) return checkIP(++attempts);
+				
+					return error("Unable to find Docker daemon VM IP! attempts=" + attempts);
 				}
-				else {
-					log(username + ":docker: found that a dhcp-host record already exist: " + matchIP[0], INFO);
-					// Should we reuse the MAC!?
-					return removeIP(matchIP[0]);
-				}
-			}
-		});
-		
-		function addIP() {
-			log(username + ':docker: adding ip-dhcp-host MAC=' + MAC + ' IP=' + staticIP + ' ...', DEBUG);
-			module_child_process.exec('virsh net-update default add-last ip-dhcp-host \'<host mac="' + MAC + '" ip="' + staticIP + '"/>\' --live --config --parent-index 0', EXEC_OPTIONS, function(err, stdout, stderr) {
-				if(err) return error(err);
-			else {
-				progress();
-					log(username + ":docker: Added staticIP=" + staticIP + " for MAC=" + MAC + "", INFO);
-				defineVM();
-			}
-		});
-		}
-		
-		function removeIP(dhcpHostStr) {
-			// virsh net-dumpxml uses single quotes: <host mac='52:54:00:52:ba:dc' name='docker_ltest1' ip='10.2.3.235'/>
-			log(username + ':docker: deleting ip-dhcp-host "' + dhcpHostStr + '" ...', DEBUG);
-			module_child_process.exec('virsh net-update default delete ip-dhcp-host "' + dhcpHostStr + '" --live --config --parent-index 0', EXEC_OPTIONS, function(err, stdout, stderr) {
-				if(err) return error(err);
-				else {
-					progress();
-					log(username + ":docker: Removed " + dhcpHostStr, INFO);
-					addIP();
-				}
+			
+				var IP = matchIP[1];
+			
+				checkIptables(IP);
 			});
 		}
+	
+		function createZvol(zpool) {
+			if(zpool == undefined) throw new Error("zpool=" + zpool);
 		
-		function defineVM() {
-			log(username + ":docker: reading docker_user.xml ...", DEBUG);
-			module_fs.readFile("../dockervm/docker_user.xml", "utf8", function(err, xml) {
+			// Do we have a snapshot!?
+			log(username + ":docker: listing zfs snapshots...", DEBUG);
+			module_child_process.exec("zfs list -t snapshot", EXEC_OPTIONS, function(err, stdout, stderr) {
 				if(err) return error(err);
-				
+			
 				progress();
-				
-				xml = xml.replace(/<source dir='.*'\/>/, "<source dir='" + homeDir + "'/>");
-				
-				xml = xml.replace(/<source dev='.*'\/>/, "<source dev='/dev/zvol/" + zpool + "/docker_" + username + "'/>");
-				
-				xml = xml.replace(/<name>.*<\/name>/, "<name>docker_" + username + "</name>");
-				
-				xml = xml.replace(/<mac address='.*'\/>/, "<mac address='" + MAC + "'/>");
-				
-				var vmXmlPath = module_path.normalize(__dirname + "/../dockervm/docker_" + username + ".xml");
-				log(username + ":docker: creating " + vmXmlPath + " ...", DEBUG);
-				module_fs.writeFile(vmXmlPath, xml, function(err) {
+			
+				var reSnapShot = new RegExp(zpool + "\\/docker@([^ ]*)");
+				var matchSnapshot = stdout.match(reSnapShot);
+				if(!matchSnapshot) {
+					return error("Please tell the Admin to create a snap-shot of the Docker VM zvol!");
+					// First shut down the base Docker VM!
+					// sudo zfs list
+					// sudo zfs snapshot pool/docker@somelabel
+				}
+				var snapshotName = matchSnapshot[1];
+			
+				if(snapshotName.indexOf(" ") != -1) throw new Error("snapshotName=" + snapshotName + " contains a space! reSnapShot=" + reSnapShot + " matchSnapshot=" + JSON.stringify(matchSnapshot));
+			
+				// Clone the snapshot
+				var fullSnapshotName = zpool + "/docker@" + snapshotName;
+				var cloneInto = zpool + "/docker_" + username;
+				log(username + ":docker: cloning " + fullSnapshotName + " into " + cloneInto + " ...", DEBUG);
+				module_child_process.exec("zfs clone -p " + fullSnapshotName + " " + cloneInto, EXEC_OPTIONS, function(err, stdout, stderr) {
 					if(err) return error(err);
-					
-					progress();
-					
-					log(username + ":docker: defining " + vmXmlPath + " ...", DEBUG);
-					module_child_process.exec("virsh define " + vmXmlPath, EXEC_OPTIONS, function(err, stdout, stderr) {
-						if(err) return error(err);
-						
+					else {
 						progress();
-						
-						log(username + ":docker: define stdout=" + stdout, INFO);
-						log(username + ":docker: define stderr=" + stderr, WARN);
-						
-						startVM(true);
-						
-					});
+						log(username + ":docker: VM zvol created");
+						checkVM(zpool);
+					}
 				});
 			});
 		}
-	}
 	
-	function progress(inc, max) {
-		if(abort) return;
-		if(inc == undefined) inc = 1;
+		function setupVM(zpool) {
+			log(username + ":docker: setting up VM...");
+			if(zpool == undefined) throw new Error("zpool=" + zpool);
+			// Assuming we already have a zvol!
 		
-		if(max) var obj = [inc, max];
-		else var obj = [inc];
+			function generateMAC() {
+				for(var i=0,arr=[];i<6;i++) {
+					arr[i] = Math.floor(Math.random() * 256);
+				}
+			
+				//log(JSON.stringify(arr));
+			
+				// Last octet should end with a binary 0 to make it unicast (or 1 for multicast). Eg the number should be even
+				// Some documentation say "least-significant bit of the first octet ..."
+				//log("arr[5]=" + arr[5] + " " + (arr[5]).toString(2));
+				//arr[5] = parseInt(arr[5].toString(2).slice(0,2)+"0",2);
+				arr[5] = roundEven(arr[5]);
+				arr[0] = roundEven(arr[0]);
+				//log("arr[5]=" + arr[5] + " " + (arr[5]).toString(2));
+			
+				// Second last octet should end with a binary 1 to indicate it's locally administered (or 0 for globally unique)
+				//log("arr[4]=" + arr[4] + " " + (arr[4]).toString(2));
+				//arr[4] = parseInt(arr[4].toString(2).slice(0,2)+"1",2);
+				arr[4] = roundOdd(arr[4]);
+				//log("arr[4]=" + arr[4] + " " + (arr[4]).toString(2));
+			
+				for(var i=0;i<6;i++) {
+					arr[i] = arr[i].toString(16);
+					if(arr[i].length<2) arr[i] = "0" + arr[i]; // Zero pad
+					arr[i] = arr[i].toUpperCase();
+				}
+			
+				return arr.join(":");
+			
+				function roundEven(n) {
+					return 2 * Math.round(n / 2);
+				}
+				function roundOdd(n) {
+					return  2* Math.floor(n/2) + 1;
+				}
+			}
 		
-		sendToClient(username, "progress", obj);
-	}
-	
-	function done(resp) {
-		if(abort) return;
-		//if(options.command == "status") return;
+			var MAC = generateMAC();
+			log(username + ":docker: generated MAC=" + MAC);
 		
-		sendToClient(username, "progress", []);
+			log(username + ":docker: checking ip-dhcp config...");
+			module_child_process.exec('virsh net-dumpxml default', EXEC_OPTIONS, function(err, stdout, stderr) {
+				if(err) return error(err);
+				else {
+					// <host mac='52:54:00:52:ba:dc' name='docker_ltest1' ip='10.2.3.235'/>
+				
+					var reIP = new RegExp("<host mac='(.*)'.* ip='" + staticIP + "'\\/>");
+					var matchIP = stdout.match(reIP);
+					if(!matchIP) {
+						log(username + ":docker: reIP=" + reIP + " did not find a match in stdout=" + stdout, DEBUG);
+						return addIP();
+					}
+					else {
+						log(username + ":docker: found that a dhcp-host record already exist: " + matchIP[0], INFO);
+						// Should we reuse the MAC!?
+						return removeIP(matchIP[0]);
+					}
+				}
+			});
 		
-		callback(null, resp);
-		callback = null;
+			function addIP() {
+				log(username + ':docker: adding ip-dhcp-host MAC=' + MAC + ' IP=' + staticIP + ' ...', DEBUG);
+				module_child_process.exec('virsh net-update default add-last ip-dhcp-host \'<host mac="' + MAC + '" ip="' + staticIP + '"/>\' --live --config --parent-index 0', EXEC_OPTIONS, function(err, stdout, stderr) {
+					if(err) return error(err);
+					else {
+						progress();
+						log(username + ":docker: Added staticIP=" + staticIP + " for MAC=" + MAC + "", INFO);
+						defineVM();
+					}
+				});
+			}
 		
-		delete DOCKER_LOCK[username];
-	}
-	
-	function error(errorOrErrMsg, code) {
-		if(abort) return;
+			function removeIP(dhcpHostStr) {
+				// virsh net-dumpxml uses single quotes: <host mac='52:54:00:52:ba:dc' name='docker_ltest1' ip='10.2.3.235'/>
+				log(username + ':docker: deleting ip-dhcp-host "' + dhcpHostStr + '" ...', DEBUG);
+				module_child_process.exec('virsh net-update default delete ip-dhcp-host "' + dhcpHostStr + '" --live --config --parent-index 0', EXEC_OPTIONS, function(err, stdout, stderr) {
+					if(err) return error(err);
+					else {
+						progress();
+						log(username + ":docker: Removed " + dhcpHostStr, INFO);
+						addIP();
+					}
+				});
+			}
 		
-		if(typeof errorOrErrMsg=="string") {
-			var err = new Error(errorOrErrMsg);
-			if(code) err.code = code;
+			function defineVM() {
+				log(username + ":docker: reading docker_user.xml ...", DEBUG);
+				var cpuModel = getCpuModel();
+
+				module_fs.readFile("../dockervm/docker_user_" + cpuModel + ".xml", "utf8", function(err, xml) {
+					if(err) return error(err);
+				
+					progress();
+				
+					xml = xml.replace(/<source dir='.*'\/>/, "<source dir='" + homeDir + "'/>");
+				
+					xml = xml.replace(/<source dev='.*'\/>/, "<source dev='/dev/zvol/" + zpool + "/docker_" + username + "'/>");
+				
+					xml = xml.replace(/<name>.*<\/name>/, "<name>docker_" + username + "</name>");
+				
+					xml = xml.replace(/<mac address='.*'\/>/, "<mac address='" + MAC + "'/>");
+				
+					var vmXmlPath = module_path.normalize(__dirname + "/../dockervm/docker_" + username + ".xml");
+					log(username + ":docker: creating " + vmXmlPath + " ...", DEBUG);
+					module_fs.writeFile(vmXmlPath, xml, function(err) {
+						if(err) return error(err);
+					
+						progress();
+					
+						log(username + ":docker: defining " + vmXmlPath + " ...", DEBUG);
+						module_child_process.exec("virsh define " + vmXmlPath, EXEC_OPTIONS, function(err, stdout, stderr) {
+							if(err) return error(err);
+						
+							progress();
+						
+							log(username + ":docker: define stdout=" + stdout, INFO);
+							log(username + ":docker: define stderr=" + stderr, WARN);
+						
+							startVM(true);
+						
+						});
+					});
+				});
+			}
 		}
-		else var err = errorOrErrMsg;
+	
+		function progress(inc, max) {
+			if(abort) return;
+			if(inc == undefined) inc = 1;
 		
-		callback(err);
-		callback = null;
+			if(max) var obj = [inc, max];
+			else var obj = [inc];
 		
-		abort = true;
+			sendToClient(username, "progress", obj);
+		}
+	
+		function done(resp) {
+			if(abort) return;
+			//if(options.command == "status") return;
 		
-		sendToClient(username, "progress", []);
+			sendToClient(username, "progress", []);
 		
-		delete DOCKER_LOCK[username];
+			callback(null, resp);
+			callback = null;
+		
+			delete DOCKER_LOCK[username];
+		}
+	
+		function error(errorOrErrMsg, code) {
+			if(abort) return;
+		
+			if(typeof errorOrErrMsg=="string") {
+				var err = new Error(errorOrErrMsg);
+				if(code) err.code = code;
+			}
+			else var err = errorOrErrMsg;
+		
+			callback(err);
+			callback = null;
+		
+			abort = true;
+		
+			sendToClient(username, "progress", []);
+		
+			delete DOCKER_LOCK[username];
+		}
+
+
 	}
 
+	function getCpuModel() {
 
-}
+		var model = module_os.cpus()[0].model;
+		if(model.match(/^Intel/) return "intel";
+		else if(model.match(/^AMD/) return "amd";
+		else throw new Error("Unable to determine which or unsupported CPU model=" + model);
 
-main();
+	}
+
+	main();
+
 

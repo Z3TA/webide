@@ -97,7 +97,14 @@ console.log("username=" + username + " uid=" + uid + " gid=" + gid + " process.e
 	
 	*/
 	
+try {
 var info = module_os.userInfo ? module_os.userInfo() : {username: "ROOT", uid: process.geteuid()};
+}
+catch(err) {
+	console.warn(err);
+	info = {username: username, uid: uid}
+}
+
 
 if(info.uid==0) {
 	
