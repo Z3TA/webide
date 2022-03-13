@@ -734,28 +734,12 @@ Creating a Docker daemon base VM
 
 
 Create a zvol
-`sudo zfs create -V 16G tank/docker`
+`sudo zfs create -V 16G rpool/docker`
 
 Install libvirt...
 
-libvirt* need to run as root, in order to make it possible for Docker containers to write in the user home dir
-sudo nano /etc/libvirt/qemu.conf
-````
-user = "root"
-group = "root"
-dynamic_ownership = 0
-````
-
-Setup libvirt DHCP
-Note that users netns is 10.0.X.Y so we will use 10.2.X.Y for the Docker VM's
-
-sudo virsh net-edit default
-
-<ip address='10.2.0.1' netmask='255.255.0.0'>
-    <dhcp>
-      <range start='10.2.121.2' end='10.2.125.254'/>
-    </dhcp>
-  </ip>
+Make sure libvirt network is running:
+`virsh net-start default`
 
 Create a VM
 ````
@@ -772,7 +756,7 @@ virsh edit docker
 Check the IP of the VM
 `sudo virsh net-dhcp-leases default`
 
-Install Ubuntu OS on the VM...
+Install an operating system on the VM...
 
 Attach cdrom:
 ````
@@ -787,6 +771,15 @@ virsh change-media docker hda --eject
 Access VNC:
 ````
 ssh root@hostserver.org -L 5900:127.0.0.1:5900
+````
+
+Enable serial on the guest: First login to the guest vm via vnc, then:
+````
+systemctl enable serial-getty@ttyS0.service
+````
+This makes it possible to access the VM guest via serial from the host:
+````
+virsh console docker
 ````
 
 Force restart:
@@ -817,22 +810,42 @@ Se DHCL leases (from host)
 virsh net-dhcp-leases default
 ````
 
-Install SSH server and disable password login
-
 Generate a ssh key on the host server
 `ssh-keygen -f /root/.ssh/docker`
 
 Copy generated public key
 `sudo cat /root/.ssh/docker.pub`
 
+
+Install SSH server on the docker (guest) VM and disable password login
+````
+apt install --yes openssh-server
+nano /etc/ssh/sshd_config
+````
+````
+ChallengeResponseAuthentication no
+PasswordAuthentication no
+UsePAM no
+PermitRootLogin no
+PermitRootLogin prohibit-password
+````
+then restart sshd: 
+`sudo systemctl reload sshd`
+
+
 Add public key to the VM (copy/paste)
-`nano ~/.ssh/authorized_keys`
+````
+nano ~/.ssh/authorized_keys
+chmod 700 .ssh/
+chmod 664 .ssh/authorized_keys
+````
+
 
 Logout and relogin (make sure you can't login with a password)
-`sudo ssh -i /root/.ssh/dockervm docker@192.168.122.96`
+`sudo ssh -i /root/.ssh/docker docker@192.168.122.96`
 
 
-Make sure the share is working
+Make sure the share is working (inside VM)
 `sudo ls -la /sys/bus/virtio/drivers/9pnet_virtio/`
 (should have a virtio link to a device)
 
@@ -842,27 +855,27 @@ Copy the dockervm/check_config_in_vm.sh script into the VM:
 nano check_config_in_vm.sh
 
 Make it runable
-sudo chmod + x check_config_in_vm.sh
+sudo chmod +x check_config_in_vm.sh
 
 
 Shutdown the VM
 `sudo shutdown -h now`
 
 Create a snapshot of the zvol (make sure the VM is shut down first!)
-sudo zfs snapshot tank/docker@base
+sudo zfs snapshot rpool/docker@base
 
 ZFS will reuse the the snapshot when cloning!
 So if you need to change something in base, you would have to delete all docker zvol's!
 
-sudo zfs destroy zpcdata/docker@base
-sudo zfs snapshot zpcdata/docker@base
+sudo zfs destroy rpool/docker@base
+sudo zfs snapshot rpool/docker@base
 
 
 List snapshots
 zfs list -t snapshot
 
 
-If you have problems connecting, try 
+If you have problems connecting to the Docker VM, try 
 sudo iptables -I FORWARD 1 -j ACCEPT
 sudo iptables -I INPUT 1 -j ACCEPT
 sudo iptables -I OUTPUT 1 -j ACCEPT
@@ -871,6 +884,27 @@ when you are done:
 sudo iptables -D FORWARD 1
 sudo iptables -D INPUT 1
 sudo iptables -D OUTPUT 1
+
+
+libvirt* need to run as root, in order to make it possible for Docker containers to write in the user home dir
+sudo nano /etc/libvirt/qemu.conf
+````
+user = "root"
+group = "root"
+dynamic_ownership = 0
+````
+
+Setup libvirt DHCP
+Note that users netns is 10.0.X.Y so we will use 10.2.X.Y for the Docker VM's
+
+sudo virsh net-edit default
+
+<ip address='10.2.0.1' netmask='255.255.0.0'>
+    <dhcp>
+      <range start='10.2.121.2' end='10.2.125.254'/>
+    </dhcp>
+</ip>
+
 
 
 

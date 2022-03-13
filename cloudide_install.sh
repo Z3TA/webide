@@ -18,7 +18,7 @@ DEBIAN_FRONTEND=noninteractive
 HOSTNAME=$1 
 
 # E-mail address for letsencrypt
-ADMIN_EMAIL=$1 
+ADMIN_EMAIL=$2
 
 if [ -z "$HOSTNAME" ]; then 
   echo "### First argument should be the host/domain"
@@ -39,6 +39,48 @@ apt-get update
 # The following will crash the script if the files doesn't exist
 chmod +x removeuser.js
 chmod +x adduser.js
+
+
+echo "#webide: Installing MySQL server"
+apt-get install mariadb-server -y
+apt-get install mariadb-client -y
+
+echo "#webide: Configuring MySQL server"
+#sed '/\[mysqld\]/a \nplugin-load-add=auth_socket.so\nauth_socket=FORCE_PLUS_PERMANENT\n' /etc/mysql/my.cnf
+# Ubunt 20 or MySQL 8 moved settings to /etc/mysql/mysql.conf.d/mysqld.cnf
+sed '/\[mysqld\]/a \nplugin-load-add=auth_socket.so\nauth_socket=FORCE_PLUS_PERMANENT\n' /etc/mysql/mariadb.conf.d/50-server.cnf
+
+# So that users cant list other user's files
+chmod 711 /home
+
+# Able to run: setfacl -m u:username:rwx /dev/kvm
+apt-get install acl -y
+
+
+# Install KVM support
+apt-get install qemu-kvm libvirt-clients libvirt-daemon-system bridge-utils virt-manager -y
+
+# Don't let normal users see the guts
+chmod 771 /srv
+
+# Install tools for debugging
+apt-get install dnsutils -y
+
+
+echo "#webide: Installing archive extractor utilities"
+apt-add-repository multiverse && apt-get update
+apt-get install zip -y
+apt-get install unzip -y
+apt-get install unrar -y || true
+apt-get install unrar-free -y || true
+
+echo "#webide: Installing CGSF dependencies"
+apt-get install fuse -y
+
+
+
+# Allow ip forwarding so that users in netns can talk to the Internet
+sysctl -w net.ipv4.ip_forward=1
 
 
 # Enabled package forwarding, needed for Linux network namespace bridges
@@ -64,30 +106,6 @@ apt-get update
 apt install wireguard openresolv -y
 
 
-# Docker support
-
-apt-get remove docker docker-engine docker.io containerd runc -y
-apt-get install apt-transport-https ca-certificates curl gnupg-agent software-properties-common -y
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-apt-get update
-apt-get install docker-ce-cli -y
-
-curl -L "https://github.com/docker/compose/releases/download/1.25.3/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-chmod +x /usr/local/bin/docker-compose
-
-mkdir -p /root/.ssh/
-# Create private key for accessing docker VM's
-apt-get install openssh-client -y
-# We will age a "are you sure" prompt if the key already exist
-if [ ! -f /root/.ssh/dockervm ]; then
-  ssh-keygen -b 2048 -t rsa -f /root/.ssh/dockervm -q -N "" || true
-fi
-chown root:root /root/.ssh/dockervm
-chmod 700 /root/.ssh/dockervm
-
-
-
 echo "#webide: Editing defaults"
 if [[ "$*" != *-test* ]]; then
   sed -i "s/zeta@zetafiles.org/$ADMIN_EMAIL/g" ./server/default_settings.js
@@ -95,9 +113,8 @@ if [[ "$*" != *-test* ]]; then
 fi
 
 
-
 # Set hostname
-echo $HOSTNAME > /etc/hostname
+#echo $HOSTNAME > /etc/hostname
 
 
 apt-get install systemd -y
@@ -140,6 +157,7 @@ systemctl enable webide_nodejs_init
 
 
 # Install Node.js
+sudo apt install curl -y
 curl -sL https://deb.nodesource.com/setup_16.x | sudo -E bash -
 sudo apt update && sudo apt install -y nodejs
 
@@ -184,10 +202,10 @@ fi
 echo "#webide: Adding default Nginx config"
 cp etc/nginx/default.nginx /etc/nginx/sites-available/default
 
-service nginx reload
+service nginx reload || true
 
 
-nginx -T
+nginx -T || true
 echo
 echo "Don't forget to generate the certificates!"
 echo
@@ -208,17 +226,17 @@ echo "#webide: Installing Git"
 apt-get install git -y
 
 echo "#webide: Installing hggit for Mercruial"
-apt-get install python-pip -y
+apt-get install python-pip -y || true
 # Fix problems with Python
 apt -f install -y
 # Yes, again, because of Python issues
-apt-get install python-pip -y
+apt-get install python-pip -y || true
 # For Ubuntu 20
 apt-get install python3-pip -y
 
 pip install hg-git
 # Ubuntu 18 and earlier
-apt-get install python-brotli -y
+apt-get install python-brotli -y || true
 # Ubuntu 20
 # todo: python-brotli does not exist in Ubuntu 20 ! WIll hggit work!?
 
@@ -231,44 +249,6 @@ echo "#webide: Installing Letsencrypt's certbot"
 
 # For Ubuntu 20
 apt-get install certbot python3-certbot-nginx -y
-
-
-
-echo "#webide: Installing archive extractor utilities"
-apt-add-repository multiverse && apt-get update
-apt-get install zip unzip unrar -y
-
-echo "#webide: Installing CGSF dependencies"
-apt-get install fuse -y
-
-
-echo "#webide: Installing MySQL server"
-apt-get install mysql-server -y
-apt-get install mysql-client -y
-
-echo "#webide: Configuring MySQL server"
-sed '/\[mysqld\]/a \nplugin-load-add=auth_socket.so\nauth_socket=FORCE_PLUS_PERMANENT\n' /etc/mysql/my.cnf
-# Ubunt 20 or MySQL 8 moved settings to /etc/mysql/mysql.conf.d/mysqld.cnf
-sed '/\[mysqld\]/a \nplugin-load-add=auth_socket.so\nauth_socket=FORCE_PLUS_PERMANENT\n' /etc/mysql/mysql.conf.d/mysqld.cnf
-
-# So that users cant list other user's files
-chmod 711 /home
-
-# Able to run: setfacl -m u:username:rwx /dev/kvm
-apt-get install acl -y
-
-# Allow ip forwarding so that users in netns can talk to the Internet
-sysctl -w net.ipv4.ip_forward=1
-
-
-# Install KVM support
-apt-get install qemu-kvm libvirt-clients libvirt-daemon-system bridge-utils virt-manager -y
-
-# Don't let normal users see the guts
-chmod 771 /srv
-
-# Install tools for debugging
-apt-get install dnsutils -y
 
 
 echo "#webide: Finish!"
@@ -284,9 +264,11 @@ echo ""
 echo "npm install"
 echo ""
 echo "You have to setup the following features manually:"
+
+echo " * Docker (see docs.docker.com)"
 echo " * Docker daemon base VM (see README.txt)"
 echo " * userdir_skeleton (see README.txt)"
 echo " * Firewall (see etc/custom_iptables.service)"
 echo " * Letsencrypt DNS challange server (see letsencrypt folder in webide repo)"
-ehco " * Setup rsyslogd (see README.txt)"
+echo " * Setup rsyslogd (see README.txt)"
 exit 0
