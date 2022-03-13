@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # Only run this script if you want to install the editor as a cloud editor!
-# If you are feeling unlucky you could go through these steps manually 
+# Unless you are feeling lucky - you should go though these steps manually one by one
+# Feel free to create a cloudide_install_archdist.sh 
 
 # Change this to your timezone:
 TZ=Europe/Stockholm
