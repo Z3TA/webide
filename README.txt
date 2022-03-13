@@ -518,7 +518,7 @@ sudo zfs snapshot rpool/home/userskeleton@base2
 Then send snapshot to prod server...
 If the fs do not exist:
 `sudo zfs send rpool/home/userskeleton@base2 | ssh root@webide.se zfs recv ben/home/userskeleton`
-	
+
 If the fs already exist: (send incremental data)
 `sudo zfs send -i rpool/home/userskeleton@baseX rpool/home/userskeleton@baseY | ssh root@webide.se zfs recv ben/home/userskeleton`
 	
@@ -628,6 +628,8 @@ mySQL setup
 ref: https://dev.mysql.com/doc/mysql-secure-deployment-guide/5.7/en/secure-deployment-configure-authentication.html
 
 Add these options under the [mysqld] option group in the MySQL configuration file (/etc/my.cnf): 
+
+Note: In MariaDB auth_socket is called unix_socket
 
 [mysqld]
 plugin-load-add=auth_socket.so
@@ -917,6 +919,11 @@ Run this command from the server you want to move the user TO:
 
 Enable the user on the new server by adding a new system account: 
 `sudo useradd -r -s /bin/false nameofuser`
+
+
+Copying files from one server to another
+----------------------------------------
+scp -3 root@server1:/etc/file1 root@server2:/etc/
 
 
 Take a snapshot before upgrading the server

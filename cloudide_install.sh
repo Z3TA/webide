@@ -266,10 +266,10 @@ echo "npm install"
 echo ""
 echo "You have to setup the following features manually:"
 
-echo " * Docker (see docs.docker.com)"
+echo " * Docker (see docs.docker.com) only install docker-ce-cli !"
 echo " * Docker daemon base VM (see README.txt)"
 echo " * userdir_skeleton (see README.txt)"
-echo " * Firewall (see etc/custom_iptables.service)"
+echo " * Firewall (see etc/systemd/custom_iptables.service)"
 echo " * Letsencrypt DNS challange server (see letsencrypt folder in webide repo)"
 echo " * Setup rsyslogd (see README.txt)"
 exit 0

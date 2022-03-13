@@ -735,7 +735,7 @@ function mysqlConnect() {
 	log("Connecting to mySQL database ...", DEBUG);
 	
 	var mysqlConnectionOptions = {port: MYSQL_PORT, database: "mysql", user: "root", authSwitchHandler: true};
-	// note: without authSwitchHandler auth_socket will fail!
+	// note: without authSwitchHandler auth_socket will fail! (auth_socket = unix_socket in MariaDB)
 	
 	if(!module_mysql) return log("module_mysql not loaded!");
 	
@@ -793,7 +793,7 @@ function createMysqlDb(username, options, callback) {
 		}
 		
 		if(rows.length == 0) {
-			db.query("CREATE USER ?@'localhost' IDENTIFIED WITH auth_socket", [username], function(err, rows, fields) {
+			db.query("CREATE USER ?@'localhost' IDENTIFIED WITH unix_socket", [username], function(err, rows, fields) {
 				if (err) {
 					console.error(err);
 					return callback(err);
@@ -3681,7 +3681,7 @@ function checkMounts(options, checkMountsCallback) {
 				if(err) throw err;
 				
 				if(rows.length == 0) {
-					mysqlConnection.query("CREATE USER ?@'localhost' IDENTIFIED WITH auth_socket", [username], function(err, rows, fields) {
+				mysqlConnection.query("CREATE USER ?@'localhost' IDENTIFIED WITH unix_socket", [username], function(err, rows, fields) {
 						if(err) throw err;
 						
 						mySqlDone();
