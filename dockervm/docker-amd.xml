@@ -24,7 +24,7 @@
 <emulator>/usr/bin/kvm</emulator>
 <disk type='block' device='disk'>
 <driver name='qemu' type='raw' cache='none' io='native'/>
-<source dev='/dev/zvol/zpcdata/docker'/>
+			<source dev='/dev/zvol/rpool/docker'/>
 <target dev='vda' bus='virtio'/>
 <address type='pci' domain='0x0000' bus='0x00' slot='0x05' function='0x0'/>
 </disk>

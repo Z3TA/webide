@@ -1,0 +1,50 @@
+#!/usr/bin/expect -f
+
+# Debug using: expect -d
+
+#
+# We have to change the machine ID in order for libvirt dnsmasq dhcp server to work!
+#
+#
+
+
+# Wait enough (forever) until a long-time boot
+set timeout -1
+
+set VM [lindex $argv 0];
+
+# Start the guest VM
+spawn /usr/bin/virsh console $VM
+
+expect "Escape character is"
+send "\n"
+
+set timeout 1
+expect "login: " {
+  send "root\n"
+
+  expect "Password: "
+  send "dockerpw\n"
+}
+
+set timeout 3
+expect "# "
+send "cat /etc/machine-id\n"
+
+expect "# "
+send "rm -f /etc/machine-id\n"
+
+expect "# "
+send "rm /var/lib/dbus/machine-id\n"
+
+expect "# "
+send "dbus-uuidgen --ensure=/etc/machine-id\n"
+
+expect "# "
+send "dbus-uuidgen --ensure\n"
+
+expect "# "
+send "reboot\n"
+
+
+

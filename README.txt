@@ -762,7 +762,7 @@ Install an operating system on the VM...
 
 Attach cdrom:
 ````
-virsh attach-disk docker /tmp/ubuntu-20.04.4-live-server-amd64.iso hda --driver qemu --type cdrom --mode readonly
+virsh attach-disk docker /tmp/debian-live-11.2.0-amd64-standard.iso hda --driver qemu --type cdrom --mode readonly
 ````
 
 Remove cdrom:
@@ -770,19 +770,171 @@ Remove cdrom:
 virsh change-media docker hda --eject
 ````
 
-Access VNC:
+Access VNC
+----------
+
+See VNC port: (usually 5900)
+````
+netstat -plnt
+````
+
+Connect from dev machine to server:
 ````
 ssh root@hostserver.org -L 5900:127.0.0.1:5900
 ````
+Connect to the VNC server using Remmina 
 
 Enable serial on the guest: First login to the guest vm via vnc, then:
 ````
-systemctl enable serial-getty@ttyS0.service
+sudo systemctl enable serial-getty@ttyS0
+sudo systemctl start serial-getty@ttyS0
 ````
+(tip: Alt+64 will insert @)
 This makes it possible to access the VM guest via serial from the host:
 ````
 virsh console docker
 ````
+(default debian live user is "user", and password is "live")
+
+
+Installing a basic Linux OS from Live CD
+----------------------------------------
+````
+sudo su
+fdisk -l
+fdisk /dev/vda
+````
+The following are fdisk commands:
+````
+delete partion = d
+create new = n
+type of partition = p
+partition number = 1
+first sector = 2048
+last sector = (press Enter to use default=whole disk)
+write partition = w
+````
+
+````
+mkfs.ext4 /dev/vda1
+mount /dev/vda1 /mnt
+df /mnt
+mkdir /mnt/run
+mount -t tmpfs tmpfs /mnt/run
+mkdir /mnt/run/lock
+mkdir /mnt/tmp
+chmod 1777 /mnt/tmp
+apt update
+apt install debootstrap -y
+debootstrap bullseye /mnt
+namn /mnt/etc/fstab
+````
+The content of /mnt/etc/fstab
+````
+/dev/vda1 / ext4 defaults 1 1
+````
+
+hostname docker
+hostname > /mnt/etc/hostname
+ip addr show
+nano /mnt/etc/network/interfaces.d/ens3
+````
+The content of /mnt/etc/network/interfaces.d/ens3
+````
+auto ens3
+iface ens3 inet dhcp
+````
+(ens3 is the network device, often named eth0)
+````
+nano /mnt/etc/apt/sources.list
+````
+The content of /mnt/etc/apt/sources.list (depends of what dist you installed using debootstrap)
+````
+deb http://deb.debian.org/debian bullseye main contrib
+deb-src http://deb.debian.org/debian bullseye main contrib
+
+deb http://deb.debian.org/debian-security bullseye-security main contrib
+deb-src http://deb.debian.org/debian-security bullseye-security main contrib
+
+deb http://deb.debian.org/debian bullseye-updates main contrib
+deb-src http://deb.debian.org/debian bullseye-updates main contrib
+````
+
+````
+mount --make-private --rbind /dev  /mnt/dev
+mount --make-private --rbind /proc /mnt/proc
+mount --make-private --rbind /sys  /mnt/sys
+chroot /mnt bash --login
+
+apt update
+apt install --yes console-setup locales
+dpkg-reconfigure locales tzdata
+````
+(make sure you select the en_US. UTF-8 locale)
+
+````
+apt install --yes dpkg-dev linux-headers-amd64 linux-image-amd64
+apt install --yes grub-pc
+grub-probe /boot
+update-initramfs -c -k all
+update-grub
+grub-install /dev/vda
+
+
+````
+
+Generate a ssh key on the host server
+`ssh-keygen -f /root/.ssh/dockervm`
+
+Copy generated public key
+`sudo cat /root/.ssh/dockervm.pub`
+
+Install SSH server on the docker (guest) VM and disable password login
+````
+apt install --yes openssh-server
+nano /etc/ssh/sshd_config
+````
+Content of /etc/ssh/sshd_config
+````
+ChallengeResponseAuthentication no
+PasswordAuthentication no
+UsePAM no
+PermitRootLogin yes
+PermitRootLogin prohibit-password
+````
+then restart sshd: 
+`sudo systemctl reload sshd`
+
+Set the password to "dockerpw" on the VM
+`passwd`
+
+If you did create a user, make sure the user uid ang gid are below 1000 so that it wont collide:
+````
+usermod -u 999 docker
+groupmod -g 999 docker
+````
+Might have to enable root login as you can't change uid if there are processes running as that user
+
+Add public key to the VM (copy/paste)
+````
+mkdir ~/.ssh
+nano ~/.ssh/authorized_keys
+chmod 700 ~/.ssh/
+chmod 664 ~/.ssh/authorized_keys
+ip a
+exit
+reboot
+````
+
+Remove the livecd, from the host server, run:
+````
+virsh change-media docker hda --eject
+````
+
+Logout and relogin (make sure you can't login with a password)
+`sudo ssh -i /root/.ssh/dockervm docker@192.168.122.96`
+
+
 Don't forget to disable the serial console when you are done configuring SSH
 `sudo systemctl disable serial-getty@ttyS0.service`
 
@@ -792,7 +944,8 @@ Force restart in case shutdown doesn't work:
 virsh destroy docker && virsh start docker
 ````
 
-Follow instructions to install Docker daemon: https://docs.docker.com/install/linux/docker-ce/ubuntu/
+Follow instructions to install Docker daemon: 
+https://docs.docker.com/engine/install/debian/
 
 Enable TCP access to the docker Daemon (https://success.docker.com/article/how-do-i-enable-the-remote-api-for-dockerd)
 `sudo mkdir -p /etc/systemd/system/docker.service.d/`
@@ -810,53 +963,10 @@ sudo systemctl daemon-reload
 sudo systemctl restart docker.service
 ````
 
-Se DHCL leases (from host)
+Se DHCP leases (from host)
 ````
 virsh net-dhcp-leases default
 ````
-
-Generate a ssh key on the host server
-`ssh-keygen -f /root/.ssh/dockervm`
-
-Copy generated public key
-`sudo cat /root/.ssh/docker.pub`
-
-
-Install SSH server on the docker (guest) VM and disable password login
-````
-apt install --yes openssh-server
-nano /etc/ssh/sshd_config
-````
-````
-ChallengeResponseAuthentication no
-PasswordAuthentication no
-UsePAM no
-PermitRootLogin no
-PermitRootLogin prohibit-password
-````
-then restart sshd: 
-`sudo systemctl reload sshd`
-
-Set the password to "dockerpw" on the VM
-`passwd`
-
-Make sure the user uid ang gid are below 1000 so that it wont collide:
-````
-usermod -u 999 docker
-groupmod -g 999 docker
-````
-Might have to enable root login as you can't change uid if there are processes running as that user
-
-Add public key to the VM (copy/paste)
-````
-nano ~/.ssh/authorized_keys
-chmod 700 .ssh/
-chmod 664 .ssh/authorized_keys
-````
-
-
-Logout and relogin (make sure you can't login with a password)
-`sudo ssh -i /root/.ssh/docker docker@192.168.122.96`
 
 
 Make sure the share is working (inside VM)
