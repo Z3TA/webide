@@ -831,7 +831,7 @@ nano /mnt/etc/fstab
 ````
 The content of /mnt/etc/fstab
 ````
-/dev/vda1 / ext4 rw,relatime 0 0
+/dev/vda1 / ext4 rw,relatime 0 1
 ````
 
 hostname docker
@@ -873,7 +873,7 @@ dpkg-reconfigure locales tzdata
 (make sure you select the en_US. UTF-8 locale)
 
 ````
-apt install --yes dpkg-dev linux-headers-amd64 linux-image-amd64
+apt install --yes dpkg-dev linux-headers-amd64 linux-image-amd64 sudo
 apt install --yes grub-pc
 grub-probe /boot
 nano /etc/default/grub
@@ -968,6 +968,7 @@ Se DHCP leases (from host)
 virsh net-dhcp-leases default
 ````
 
+If you have issues with the libvirt DHCP try cleaning out /var/lib/libvirt/dnsmasq/
 
 Make sure the share is working (inside VM)
 `sudo ls -la /sys/bus/virtio/drivers/9pnet_virtio/`
@@ -982,11 +983,11 @@ Make it runable
 `sudo chmod +x check_config_in_vm.sh`
 
 
-Note: The very last thing before shutting down and creating a new snapshot is to remove the machine id,
+Note: The very last thing before shutting down and creating a new snapshot is to empty the machine id,
 this will make sure a new unique machine id is generated when the cloned snapshot VM is booted!
 ````
-rm -f /etc/machine-id
-rm /var/lib/dbus/machine-id
+> /etc/machine-id
+> /var/lib/dbus/machine-id
 ````
 
 Shutdown the VM

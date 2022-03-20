@@ -27,6 +27,7 @@ echo "homedir=$homedir";
 #echo "GW=$GW";
 
 # Set the hostname
+hostname docker_$username
 echo docker_$username > /etc/hostname
 
 echo "Activating Docker user namespace and binding to TCP..."

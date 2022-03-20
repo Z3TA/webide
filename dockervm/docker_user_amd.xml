@@ -43,6 +43,11 @@
 				<model name='isa-serial'/>
 			</target>
 		</serial>
+		<video>
+			<model type='cirrus' vram='256' heads='1' primary='yes'/>
+			<alias name='video0'/>
+			<address type='pci' domain='0x0000' bus='0x00' slot='0x02' function='0x0'/>
+		</video>
 <memballoon model='virtio'>
 <alias name='balloon0'/>
 <address type='pci' domain='0x0000' bus='0x00' slot='0x04' function='0x0'/>
