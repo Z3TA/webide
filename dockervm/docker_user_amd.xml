@@ -38,11 +38,6 @@
 <model type='virtio'/>
 <address type='pci' domain='0x0000' bus='0x00' slot='0x03' function='0x0'/>
 </interface>
-<serial type='pty'>
-			<target type='isa-serial' port='0'>
-				<model name='isa-serial'/>
-			</target>
-		</serial>
 		<video>
 			<model type='cirrus' vram='256' heads='1' primary='yes'/>
 			<alias name='video0'/>
@@ -54,4 +49,3 @@
 </memballoon>
 </devices>
 </domain>
-

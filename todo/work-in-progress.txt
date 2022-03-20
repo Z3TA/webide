@@ -1,48 +1,9 @@
 Reporting a bug ? Make sure it's repeatable!
 ============================================
 
-Docker VM fail to boot unless it has video !?
- 
 
 todo: Also backup /etc/certbot !! because we need to certificates when migrating to new server!
 
-System cannot boot: Missing /etc/machine-id and /etc is mounted read-only
-
-todo: Try again now when docker base image has removed /etc/machine-id
-Also might not need console access if we manage to get DHCP to work!
-
-todo: Also set hostname of docker vm
-
-
-Due to problems with DHCP we will give each docker VM a static IP!?
-Or will changing the machine id help resolve the problem !? (dockervm/change-machine-id.exp)
-
-https://unix.stackexchange.com/questions/419321/why-are-my-cloned-linux-vms-fighting-for-the-same-ip
-https://unix.stackexchange.com/questions/402999/is-it-ok-to-change-etc-machine-id
-
-
-Newly created VM's dont get a DHCP IP!
-virsh net-dhcp-leases default
-
-Could it be that all VM's get the same Client ID or DUID !?
-
-10.2.3.234
-
-2022-03-19 19:10:01   52:54:00:14:8b:8b   ipv4       10.2.125.176/16   docker       ff:b5:5e:67:ff:00:02:00:00:ab:11:ca:78:8f:49:55:c2:02:55
-2022-03-19 11:19:30   aa:e8:15:1f:49:64   ipv4       10.2.3.236/16   docker_test2   ff:b5:5e:67:ff:00:02:00:00:ab:11:ca:78:8f:49:55:c2:02:55
-2022-03-19 23:44:09   52:54:00:14:8b:8b   ipv4       10.2.125.189/16   docker       ff:00:14:8b:8b:00:01:00:01:29:c9:0b:26:52:54:00:14:8b:8b
-2022-03-20 01:00:52   52:54:00:14:8b:8b   ipv4       10.2.125.189/16   docker       ff:00:14:8b:8b:00:01:00:01:29:c9:0b:26:52:54:00:14:8b:8b
-2022-03-20 01:07:01   52:54:00:14:8b:8b   ipv4       10.2.125.189/16   docker     -
-2022-03-20 14:45:19   a6:7a:e4:3f:53:c8   ipv4       10.2.3.234/16   docker        ff:e4:3f:53:c8:00:01:00:01:29:c9:0b:26:52:54:00:14:8b:8b
-
-2022-03-20 21:43:12   68:03:f2:6c:05:36   ipv4       10.2.125.189/16   docker      ff:f2:6c:05:36:00:01:00:01:29:c9:0b:26:52:54:00:14:8b:8b
-2022-03-20 21:10:52   a6:7a:e4:3f:53:c8   ipv4       10.2.3.234/16     -           ff:e4:3f:53:c8:00:01:00:01:29:c9:0b:26:52:54:00:14:8b:8b
-
-
-
-`sudo systemctl disable serial-getty@ttyS0.service`
-
-virt-xml docker_test2 --add-device --graphics vnc,port=5900,listen=127.0.0.1
 
 Make Docker daemon base VM
 Create a new userdir_skeleton on new server

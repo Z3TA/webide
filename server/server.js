@@ -7181,8 +7181,8 @@ function checkMounts(options, checkMountsCallback) {
 				if(zpool.indexOf(" ") != -1) throw new Error("zpool=" + zpool + " contains a space!");
 			
 				// Does user have a docker zvol?
-				var reZvol = new RegExp("\s*(.*)\\/docker_" + username);
-				var matchZvol = stdout.match(reZvol);
+			var reZvol = new RegExp("\\s*(.*)\\/docker_" + username + "\\s");
+			var matchZvol = stdout.match(reZvol);
 				if(!matchZvol) {
 					log(username + ":docker: do not have a Docker VM zvol", DEBUG);
 				
@@ -7193,7 +7193,7 @@ function checkMounts(options, checkMountsCallback) {
 				}
 				else {
 					var zpool = matchDocker[1];
-					log(username + ":docker: has a Docker VM zvol!", DEBUG);
+				log(username + ":docker: Found Docker VM zvol: " + matchDocker[0], DEBUG);
 					checkVM(zpool);
 				}
 			});
