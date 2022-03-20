@@ -831,7 +831,7 @@ nano /mnt/etc/fstab
 ````
 The content of /mnt/etc/fstab
 ````
-/dev/vda1 / ext4 defaults 1 1
+/dev/vda1 / ext4 rw,relatime 0 0
 ````
 
 hostname docker

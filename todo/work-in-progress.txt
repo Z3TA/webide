@@ -8,6 +8,9 @@ System cannot boot: Missing /etc/machine-id and /etc is mounted read-only
 todo: Try again now when docker base image has removed /etc/machine-id
 Also might not need console access if we manage to get DHCP to work!
 
+todo: Also set hostname of docker vm
+
+
 Due to problems with DHCP we will give each docker VM a static IP!?
 Or will changing the machine id help resolve the problem !? (dockervm/change-machine-id.exp)
 
