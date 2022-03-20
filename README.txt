@@ -827,7 +827,7 @@ chmod 1777 /mnt/tmp
 apt update
 apt install debootstrap -y
 debootstrap bullseye /mnt
-namn /mnt/etc/fstab
+nano /mnt/etc/fstab
 ````
 The content of /mnt/etc/fstab
 ````
@@ -876,11 +876,13 @@ dpkg-reconfigure locales tzdata
 apt install --yes dpkg-dev linux-headers-amd64 linux-image-amd64
 apt install --yes grub-pc
 grub-probe /boot
+nano /etc/default/grub
+````
+Add ` console=tty0 console=ttyS0,115200n8` to `GRUB_CMDLINE_LINUX_DEFAULT`
+````
 update-initramfs -c -k all
 update-grub
 grub-install /dev/vda
-
-
 ````
 
 Generate a ssh key on the host server
@@ -894,7 +896,7 @@ Install SSH server on the docker (guest) VM and disable password login
 apt install --yes openssh-server
 nano /etc/ssh/sshd_config
 ````
-Content of /etc/ssh/sshd_config
+Content of /etc/ssh/sshd_config (place at the end to overwrite)
 ````
 ChallengeResponseAuthentication no
 PasswordAuthentication no
@@ -908,12 +910,12 @@ then restart sshd:
 Set the password to "dockerpw" on the VM
 `passwd`
 
-If you did create a user, make sure the user uid ang gid are below 1000 so that it wont collide:
+If you (or the installer) did create a user, make sure the user uid ang gid are below 1000 so that it wont collide with WebIDE users:
 ````
 usermod -u 999 docker
 groupmod -g 999 docker
 ````
-Might have to enable root login as you can't change uid if there are processes running as that user
+(Might have to enable root login as you can't change uid if there are processes running as that user)
 
 Add public key to the VM (copy/paste)
 ````
@@ -921,6 +923,8 @@ mkdir ~/.ssh
 nano ~/.ssh/authorized_keys
 chmod 700 ~/.ssh/
 chmod 664 ~/.ssh/authorized_keys
+
+systemctl enable serial-getty@ttyS0
 ip a
 exit
 reboot
@@ -933,10 +937,6 @@ virsh change-media docker hda --eject
 
 Logout and relogin (make sure you can't login with a password)
 `sudo ssh -i /root/.ssh/dockervm docker@192.168.122.96`
-
-
-Don't forget to disable the serial console when you are done configuring SSH
-`sudo systemctl disable serial-getty@ttyS0.service`
 
 
 Force restart in case shutdown doesn't work:
@@ -976,11 +976,18 @@ Make sure the share is working (inside VM)
 note: Must shutdown -h in order to edit shares! (eg. reboot wont work)
 
 Copy the dockervm/check_config_in_vm.sh script into the VM: 
-nano check_config_in_vm.sh
+`nano check_config_in_vm.sh`
 
 Make it runable
-sudo chmod +x check_config_in_vm.sh
+`sudo chmod +x check_config_in_vm.sh`
 
+
+Note: The very last thing before shutting down and creating a new snapshot is to remove the machine id,
+this will make sure a new unique machine id is generated when the cloned snapshot VM is booted!
+````
+rm -f /etc/machine-id
+rm /var/lib/dbus/machine-id
+````
 
 Shutdown the VM
 `sudo shutdown -h now`
@@ -1045,7 +1052,11 @@ Enable the user on the new server by adding a new system account:
 
 Copying files from one server to another
 ----------------------------------------
-scp -3 root@server1:/etc/file1 root@server2:/etc/
+For single files:
+`scp -3 root@server1:/etc/file1 root@server2:/etc/`
+Copy entire folder:
+`ssh root@sourceHost "tar cf - /path/folder/ | gzip" | ssh root@destHost "gunzip | tar xvf -"`
+
 
 
 Take a snapshot before upgrading the server
