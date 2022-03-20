@@ -3,6 +3,8 @@ Reporting a bug ? Make sure it's repeatable!
 
 todo: Also backup /etc/certbot !! because we need to certificates when migrating to new server!
 
+System cannot boot: Missing /etc/machine-id and /etc is mounted read-only
+
 todo: Try again now when docker base image has removed /etc/machine-id
 Also might not need console access if we manage to get DHCP to work!
 
@@ -25,6 +27,9 @@ Could it be that all VM's get the same Client ID or DUID !?
 2022-03-19 23:44:09   52:54:00:14:8b:8b   ipv4       10.2.125.189/16   docker       ff:00:14:8b:8b:00:01:00:01:29:c9:0b:26:52:54:00:14:8b:8b
 2022-03-20 01:00:52   52:54:00:14:8b:8b   ipv4       10.2.125.189/16   docker       ff:00:14:8b:8b:00:01:00:01:29:c9:0b:26:52:54:00:14:8b:8b
 2022-03-20 01:07:01   52:54:00:14:8b:8b   ipv4       10.2.125.189/16   docker     -
+ 2022-03-20 14:45:19   a6:7a:e4:3f:53:c8   ipv4       10.2.3.234/16   docker        ff:e4:3f:53:c8:00:01:00:01:29:c9:0b:26:52:54:00:14:8b:8b
+
+
 
 `sudo systemctl disable serial-getty@ttyS0.service`
 
