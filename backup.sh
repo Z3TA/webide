@@ -59,4 +59,5 @@ for USER in *; do
     fi
 done
 
-
+cd /etc/letsencrypt/ || exit 1
+tar -c -z -f $BACKUP_FOLDERletsencrypt.tar.gz * 

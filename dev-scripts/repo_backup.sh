@@ -7,4 +7,4 @@
 cd $(dirname $0)
 
 # Sync the parent dir (because this file is in dev-scripts/
-rsync -aPz ../ root@olle.100m.se:/root/backup/webide/
+rsync -aPz ../ root@harry.100m.se:/root/backup/webide/

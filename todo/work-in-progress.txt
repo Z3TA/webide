@@ -1,6 +1,7 @@
 Reporting a bug ? Make sure it's repeatable!
 ============================================
 
+working on backup solution
 
 todo: Also backup /etc/certbot !! because we need to certificates when migrating to new server!
 
