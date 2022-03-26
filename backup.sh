@@ -53,7 +53,7 @@ for USER in *; do
        zfs snapshot $SNAP
        
        echo "Backing up $USER"
-       zfs send $SNAP | gzip > $BACKUP_FOLDER$USER.gz
+       zfs send $SNAP > $BACKUP_FOLDER$USER.zfs
        
        #echo "${D}"
     fi
