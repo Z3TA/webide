@@ -1,6 +1,59 @@
 Reporting a bug ? Make sure it's repeatable!
 ============================================
 
+This seems to work!
+It didn't work before because we didn't use -r when making the snapshot!!
+zfs send -R ben/home@today | pv | ssh root@65.108.140.51 zfs recv rpool/home.ben2
+
+
+
+Should we start "fresh" on the new system !? No, because we will use the same domain. Don't want people stealing others domains.
+
+ben/home         161G  (original)
+rpool/home.ben   1.19T (sent only child fs)
+zpcdata/home.ben 230G  (zfs send -R)
+rpool/home.ben2  161G  (zfs send -R ben/home@today | pv | ssh root@65.108.140.51 zfs recv rpool/home.ben2)
+
+zfs snapshot -r ben/home@today
+(yes that did create @today on all child filesystems)
+ssh root@ben.100m.se 'zfs send -R ben/home@today' | pv | sudo zfs recv zpcdata/home.ben
+
+problem: when sending the user home dirs one by one the clone is multiplied!
+
+hmm, the below is over 1 TB big...
+
+ZFS_LIST=$(zfs list)
+ZFS_SNAPS=$(zfs list -t snapshot)
+POOL=ben
+HOME=/home/
+cd /home/
+for USER in *; do
+    if [ -d "${USER}" ] && [[ ${USER} != "guest"* ]]; then
+       FS="$POOL$HOME$USER"
+
+       # Skip folders that are not listed as a zfs file-system
+       [[ $ZFS_LIST != *"$FS "* ]] && echo "Not a ZFS: $FS" && continue
+       
+       SNAP="$FS@backup"
+
+       # Destroy snapshot if it already exist
+       [[ $ZFS_SNAPS == *"$SNAP "* ]] && zfs destroy $SNAP
+
+       echo "Make new snapshop: $SNAP"
+       zfs snapshot $SNAP
+       
+       echo "Backing up $USER"
+       zfs send $SNAP | pv | ssh root@65.108.140.51 zfs recv rpool/home.ben/$USER
+       
+       #echo "${D}"
+    fi
+done
+
+
+cannot sendrecursively: snapshot does not exist
+
+cannot send ben/home@backup recursively: snapshot ben/home/guest1500@backup does not exist
+
 root@webide:/srv/webide# cat /sys/module/zfs/version
 0.7.5-1ubuntu16.12
 
@@ -13,7 +66,7 @@ root@Z-MAINFRAME:/home/zeta# cat /sys/module/zfs/version
 zeta@zpc:/zpcdata/projects/webide$ cat /sys/module/zfs/version
 0.7.5-1ubuntu16.12
 
-ssh root@ben.100mse 'zfs send ben/home@backup' | pv | zfs recv tank/home.ben
+ssh root@ben.100m.se 'zfs send -R ben/home@backup' | pv | zfs recv zpcdata/home.ben
 
 gotcha: Can't send rec from different versions of ZFS!!!...
 
