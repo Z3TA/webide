@@ -618,6 +618,7 @@ Error: Command failed: umount "target is busy"
 ps -aux | grep node
 kill -s 2 810460 
 sudo -u username kill 810460
+sudo systemctl stop nginx
 ````
 You might have to reboot in order to unmount all directories.
 
