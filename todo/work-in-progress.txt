@@ -1,81 +1,16 @@
 Reporting a bug ? Make sure it's repeatable!
 ============================================
 
-deleteAllGuests.js and addAllUsers.js
-
-due to bug in zfs we cannot send recv incremental recursive :(
-
-root@webide:~# zfs snapshot -r ben/home@today4
-root@webide:~# zfs send -RI ben/home@today2 ben/home@today4 | pv | ssh root@kaj.100m.se zfs recv -Fu rpool/home
-root@kaj.100m.se's password: >                                                                                                                                                       ]
-cannot receive: invalid record type           <=>                                                                                                                                    ]
-cannot restore to rpool/home/guest310@today3: destination already exists
-
-
-zfs send -R ben/home@today2 | pv | ssh root@kaj.100m.se zfs recv -F rpool/home
-
-After migrating to a new server we need to add all users to /etc/passwd, and also /etc/groups !?
-Also backup etc/passwd !?
-
-todo: Make script that recursevely rollbacks zfs child systems so we can make incremental send
-
-zfs send -R ben/home@today2 | pv | ssh root@kaj.100m.se zfs recv -F rpool/home
-zfs send -R -i ben/home@today ben/home@today3 | pv | ssh root@kaj.100m.se zfs recv rpool/home
-
-todo: run user_activity.js to see which users are active
-
-zfs set mountpoint=/root-old rpool/home/root
-
-
-Guide on how to migrate to another server:
-zfs snapshot -r tank/home@today
-zfs send -R tank/home@today | pv | ssh root@newhost zfs recv rpool/home.old
-zfs rename rpool/home.old rpool/home
-zfs snapshot -r tank/home@today2
-zfs send -i tank/home@today tank/home@today2
-
-
-Should we start "fresh" on the new system !? No, because we will use the same domain. Don't want people stealing others domains.
-
-ben/home         161G  (original)
-rpool/home.ben   1.19T (sent only child fs)
-zpcdata/home.ben 230G  (zfs send -R)
-rpool/home.ben2  161G  (zfs send -R ben/home@today | pv | ssh root@65.108.140.51 zfs recv rpool/home.ben2)
-
-zfs snapshot -r ben/home@today
-(yes that did create @today on all child filesystems)
-ssh root@ben.100m.se 'zfs send -R ben/home@today' | pv | sudo zfs recv zpcdata/home.ben
-
-todo: Fix IPv6 on new server
-
-working on backup solution 
-DO NOT copy the home dirs one by one, use zfs send so that all the clones doesn't get dublicated!
-
-todo: Also backup /etc/certbot !! because we need the certificates when migrating to new server!
-
-
 Create a new userdir_skeleton on new server
 Move users from old server to new server
 Move certbot archive and keys to new server
 
----
-
-ssh sourceHost "tar cf - /path/folder/ | gzip" | ssh destHost "gunzip | tar xvf -"
-
----
 
 Installing a new server with Debian 11
 
 ---
 
 todo: test webide on latest Node.js version
-
-root@kaj:/srv/webide# npm audit fix --force
-npm WARN using --force Recommended protections disabled.
-npm WARN audit Updating nodemailer to 6.7.2,which is a SemVer major change.
-npm WARN audit Updating nodemailer-smtp-transport to 2.4.2,which is a SemVer major change.
-
-removed 17 packages, changed 6 packages, and audited 118 packages in 13s
 
 ---
 
@@ -87,7 +22,7 @@ todo: Include white space when copying code! For example when copying code to an
 
 ---
 
-ctx..textRendering = "optimizeSpeed"
+ctx.textRendering = "optimizeSpeed"
 
 https://html.spec.whatwg.org/multipage/canvas.html#dom-context-2d-textrendering-auto
 https://svgwg.org/svg2-draft/painting.html#TextRendering

@@ -690,10 +690,16 @@ Backups
 Run on another machine where you want to save the backups, the other machine also needs to have ZFS.
 
 ````
-ssh root@ben.100m.se 'zfs snapshot -r tank/home@today'
-ssh root@ben.100m.se 'zfs send -R ben/home@today' | pv | sudo zfs recv zpcdata/home.ben
+ssh root@prod 'zfs snapshot -r tank/home@today'
+ssh root@prod 'zfs send -R tank/home@today' | pv | sudo zfs recv pool/home.ben
 
 ssh root@ben.100m.se 'cd /etc/letsencrypt/ && tar -c -z *' | pv > letsencrypt.tar.gz
+````
+
+You might be able to do an incremental backup if you are lucky (zfs might complain that destination already exists or that it has changed)
+````
+zfs snapshot -r pool/home@today4
+zfs send -RI pool/home@today2 pool/home@today4 | pv | ssh root@backuphost zfs recv -Fu pool/home
 ````
 
 
@@ -727,15 +733,23 @@ Removing guests accounts:
 ````
 
 Delete inactive users:
+(note: deleting old users makes it possible for someone else to signup as the old username/domain)
 ````
 ./dev-scripts/deleteInactiveUsers.js
 ````
-
 
 Adding all users as system users
 ````
 ./dev-scripts/addAllUsers.js
 ````
+
+If you screwed up and placed root under the home/ filesystem,
+the server you are migrating to will have it's /root folder over-mounted...
+````
+zfs set mountpoint=/root-old rpool/home/root
+reboot
+````
+
 
 Apparmor debugging
 ------------------
