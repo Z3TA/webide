@@ -234,7 +234,7 @@ var nginxProfiles = fs.readdirSync("/etc/nginx/sites-available/");
 			if(++zfsDestroyRetry > 2) throw new Error("Unable to destroy " + zfsPool + userHomeDir + "! See errors above.");
 				
 				try {
-				var zfsDestroyStdout = child_process.execSync("sleep 2 && zfs destroy " + zfsPool + userHomeDir);
+				var zfsDestroyStdout = child_process.execSync("sleep 2 && zfs destroy -r " + zfsPool + userHomeDir);
 					zfsDestroyStdout = zfsDestroyStdout.toString(ENCODING);
 				}
 				catch(zfsDestroyErr) {
