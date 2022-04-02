@@ -119,14 +119,18 @@ var nginxProfiles = fs.readdirSync("/etc/nginx/sites-available/");
 	}
 	
 	// Reload nginx to remove descriptors to files in user home dir
+	var nginxActive = true;
 	try {
-		var nginxReloadStdout = child_process.execSync("service nginx reload && sleep 3");
+		var nginxReloadStdout = child_process.execSync("service nginx reload");
 	}
 	catch(err) {
-		if(err.message.indexOf("nginx.service is not active, cannot reload.") == -1 &&
-		err.message.indexOf("unrecognized service") == -1) throw err;
+		if(err.message.indexOf("nginx.service is not active, cannot reload.") == -1 && err.message.indexOf("unrecognized service") == -1) throw err;
+		else nginxActive = false;
 	}
 	
+	// Might take some time for nginx to reload
+	if(nginxActive) child_process.execSync("sleep 3");
+
 	// Remove apparmor profiles
 	unlink("/etc/apparmor.d/usr.bin.nodejs_" + username);
 	unlink("/etc/apparmor.d/home." + username + ".bin.bash");
