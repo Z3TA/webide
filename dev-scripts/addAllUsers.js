@@ -58,7 +58,10 @@ function main() {
 		var buffer = module_child_process.execSync("chown -R " + user + ":" + user + " " + HOME + user);
 		console.log(buffer && buffer.toString());
 
-		if(!error) count++;
+		if(!error) {
+			count++;
+			console.log("Added " + user);
+		}
 	}
 
 	// Fix permissions, etc
