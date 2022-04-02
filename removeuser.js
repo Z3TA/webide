@@ -106,12 +106,12 @@ var nginxProfiles = fs.readdirSync("/etc/nginx/sites-available/");
 				else throw err;
 			}
 			
-			if(nginxProfiles.toString().indexOf(url_user) != -1) { // Can't compare the string from fs.readdirSync without .toString() !!!
+			if(nginxProfiles && nginxProfiles.toString().indexOf(url_user) != -1) { // Can't compare the string from fs.readdirSync without .toString() !!!
 				console.log("Are you sure you are using the correct domain!? DOMAIN=" + DOMAIN + " Use --domain=tld to specify domain when deleting users!");
 				if(!FORCE) process.exit();
 			}
 			else {
-				//console.log("url_user=" +url_user + " not in nginxProfiles=" + nginxProfiles);
+				console.log("url_user=" +url_user + " not in nginxProfiles=" + nginxProfiles);
 			}
 			
 		}
