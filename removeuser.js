@@ -238,7 +238,7 @@ var nginxProfiles = fs.readdirSync("/etc/nginx/sites-available/");
 			if(++zfsDestroyRetry > 2) throw new Error("Unable to destroy " + zfsPool + userHomeDir + "! See errors above.");
 				
 				try {
-				var zfsDestroyStdout = child_process.execSync("sleep 2 && zfs destroy -r " + zfsPool + userHomeDir);
+					var zfsDestroyStdout = child_process.execSync("zfs destroy -r " + zfsPool + userHomeDir);
 					zfsDestroyStdout = zfsDestroyStdout.toString(ENCODING);
 				}
 				catch(zfsDestroyErr) {
@@ -256,7 +256,9 @@ var nginxProfiles = fs.readdirSync("/etc/nginx/sites-available/");
 					
 					console.log("Retrying zfs destroy " + zfsPool + userHomeDir);
 					
-					return zfsDestroy(zfsPool, userHomeDir); // Try again
+						child_process.execSync("sleep 2");
+						zfsDestroy(zfsPool, userHomeDir); // Try again
+						return;
 						
 					}
 					else {
@@ -426,9 +428,9 @@ function fuseUmount(path, ignoreErrors) {
 					// Sometimes you can not umount because there are other mounts to the target!
 					// A lazy umount might be able to get rid of those mounts!
 					console.log("fusermount -u " + path + ". Target is busy! Doing lazy umount -uz");
-					child_process.execSync("fusermount -uz " + path + " && sleep 1"); // we want to throw if this fails
-					// We want to sleep to make it sync
-					// can't use setTimeout because it would made the script continue
+					child_process.execSync("fusermount -uz " + path + " && sync"); // we want to throw if this fails
+					// We want to sleep to make it sync (might need to change sync to sleep 1)
+					// can't use setTimeout because it would make the script continue
 					try {
 						child_process.execSync("fusermount -u " + path + "");
 					}
