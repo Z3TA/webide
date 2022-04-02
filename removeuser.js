@@ -312,6 +312,7 @@ function userdel() {
 		
 		
 		if (error) {
+			console.log("error.code=" + error.code);
 			throw new Error(error);
 			}
 		

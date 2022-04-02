@@ -1,8 +1,30 @@
 Reporting a bug ? Make sure it's repeatable!
 ============================================
 
+deleteAllGuests.js and addAllUsers.js
+
+due to bug in zfs we cannot send recv incremental recursive :(
+
+root@webide:~# zfs snapshot -r ben/home@today4
+root@webide:~# zfs send -RI ben/home@today2 ben/home@today4 | pv | ssh root@kaj.100m.se zfs recv -Fu rpool/home
+root@kaj.100m.se's password: >                                                                                                                                                       ]
+cannot receive: invalid record type           <=>                                                                                                                                    ]
+cannot restore to rpool/home/guest310@today3: destination already exists
+
+
+zfs send -R ben/home@today2 | pv | ssh root@kaj.100m.se zfs recv -F rpool/home
 
 After migrating to a new server we need to add all users to /etc/passwd, and also /etc/groups !?
+Also backup etc/passwd !?
+
+todo: Make script that recursevely rollbacks zfs child systems so we can make incremental send
+
+zfs send -R ben/home@today2 | pv | ssh root@kaj.100m.se zfs recv -F rpool/home
+zfs send -R -i ben/home@today ben/home@today3 | pv | ssh root@kaj.100m.se zfs recv rpool/home
+
+todo: run user_activity.js to see which users are active
+
+zfs set mountpoint=/root-old rpool/home/root
 
 
 Guide on how to migrate to another server:

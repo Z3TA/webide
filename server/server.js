@@ -7607,130 +7607,139 @@ function checkMounts(options, checkMountsCallback) {
 				else {
 					log(username + ":docker: found that a dhcp-host record already exist: " + matchIP[0], INFO);
 					// Should we reuse the MAC!?
-					return removeIP(matchIP[0]);
-				}
-			}
-		});
-		
-		function addIP() {
-			log(username + ':docker: adding ip-dhcp-host MAC=' + MAC + ' IP=' + staticIP + ' ...', DEBUG);
-			module_child_process.exec('virsh net-update default add-last ip-dhcp-host \'<host mac="' + MAC + '" ip="' + staticIP + '"/>\' --live --config --parent-index 0', EXEC_OPTIONS, function(err, stdout, stderr) {
-				if(err) return error(err);
-				else {
-					progress();
-					log(username + ":docker: Added staticIP=" + staticIP + " for MAC=" + MAC + "", INFO);
-					defineVM();
+						return removeIP(matchIP[0]);
+					}
 				}
 			});
-		}
 		
-		function removeIP(dhcpHostStr) {
-			// virsh net-dumpxml uses single quotes: <host mac='52:54:00:52:ba:dc' name='docker_ltest1' ip='10.2.3.235'/>
-			log(username + ':docker: deleting ip-dhcp-host "' + dhcpHostStr + '" ...', DEBUG);
-			module_child_process.exec('virsh net-update default delete ip-dhcp-host "' + dhcpHostStr + '" --live --config --parent-index 0', EXEC_OPTIONS, function(err, stdout, stderr) {
-				if(err) return error(err);
-				else {
-					progress();
-					log(username + ":docker: Removed " + dhcpHostStr, INFO);
-					addIP();
-				}
-			});
-		}
-		
-		function defineVM() {
-			log(username + ":docker: reading docker_user.xml ...", DEBUG);
-			var cpuModel = getCpuModel();
-
-			module_fs.readFile("../dockervm/docker_user_" + cpuModel + ".xml", "utf8", function(err, xml) {
-				if(err) return error(err);
-				
-				progress();
-				
-				xml = xml.replace(/<source dir='.*'\/>/, "<source dir='" + homeDir + "'/>");
-				
-				xml = xml.replace(/<source dev='.*'\/>/, "<source dev='/dev/zvol/" + zpool + "/docker_" + username + "'/>");
-				
-				xml = xml.replace(/<name>.*<\/name>/, "<name>docker_" + username + "</name>");
-				
-				xml = xml.replace(/<mac address='.*'\/>/, "<mac address='" + MAC + "'/>");
-				
-				var vmXmlPath = module_path.normalize(__dirname + "/../dockervm/docker_" + username + ".xml");
-				log(username + ":docker: creating " + vmXmlPath + " ...", DEBUG);
-				module_fs.writeFile(vmXmlPath, xml, function(err) {
-					if(err) return error(err);
-					
-					progress();
-					
-					log(username + ":docker: defining " + vmXmlPath + " ...", DEBUG);
-					module_child_process.exec("virsh define " + vmXmlPath, EXEC_OPTIONS, function(err, stdout, stderr) {
-						if(err) return error(err);
-						
+			function addIP() {
+				log(username + ':docker: adding ip-dhcp-host MAC=' + MAC + ' IP=' + staticIP + ' ...', DEBUG);
+				module_child_process.exec('virsh net-update default add-last ip-dhcp-host \'<host mac="' + MAC + '" ip="' + staticIP + '"/>\' --live --config --parent-index 0', EXEC_OPTIONS, function(err, stdout, stderr) {
+					if(err) {
+						if(err.message.match(/network is not running/)) {
+							log("Starting default libvirt network...");
+							module_child_process.exec('virsh net-start default', EXEC_OPTIONS, function(err, stdout, stderr) {
+								if(err) return error(err);
+								addIP(); // Retry after starting network
+							});
+						}
+						else return error(err);
+					}
+					else {
 						progress();
+						log(username + ":docker: Added staticIP=" + staticIP + " for MAC=" + MAC + "", INFO);
+						defineVM();
+					}
+				});
+			}
+		
+			function removeIP(dhcpHostStr) {
+				// virsh net-dumpxml uses single quotes: <host mac='52:54:00:52:ba:dc' name='docker_ltest1' ip='10.2.3.235'/>
+				log(username + ':docker: deleting ip-dhcp-host "' + dhcpHostStr + '" ...', DEBUG);
+				module_child_process.exec('virsh net-update default delete ip-dhcp-host "' + dhcpHostStr + '" --live --config --parent-index 0', EXEC_OPTIONS, function(err, stdout, stderr) {
+					if(err) return error(err);
+					else {
+						progress();
+						log(username + ":docker: Removed " + dhcpHostStr, INFO);
+						addIP();
+					}
+				});
+			}
+		
+			function defineVM() {
+				log(username + ":docker: reading docker_user.xml ...", DEBUG);
+				var cpuModel = getCpuModel();
+
+				module_fs.readFile("../dockervm/docker_user_" + cpuModel + ".xml", "utf8", function(err, xml) {
+					if(err) return error(err);
+				
+					progress();
+				
+					xml = xml.replace(/<source dir='.*'\/>/, "<source dir='" + homeDir + "'/>");
+				
+					xml = xml.replace(/<source dev='.*'\/>/, "<source dev='/dev/zvol/" + zpool + "/docker_" + username + "'/>");
+				
+					xml = xml.replace(/<name>.*<\/name>/, "<name>docker_" + username + "</name>");
+				
+					xml = xml.replace(/<mac address='.*'\/>/, "<mac address='" + MAC + "'/>");
+				
+					var vmXmlPath = module_path.normalize(__dirname + "/../dockervm/docker_" + username + ".xml");
+					log(username + ":docker: creating " + vmXmlPath + " ...", DEBUG);
+					module_fs.writeFile(vmXmlPath, xml, function(err) {
+						if(err) return error(err);
+					
+						progress();
+					
+						log(username + ":docker: defining " + vmXmlPath + " ...", DEBUG);
+						module_child_process.exec("virsh define " + vmXmlPath, EXEC_OPTIONS, function(err, stdout, stderr) {
+							if(err) return error(err);
 						
-						log(username + ":docker: define stdout=" + stdout, INFO);
-						log(username + ":docker: define stderr=" + stderr, WARN);
+							progress();
 						
-						startVM(true);
+							log(username + ":docker: define stdout=" + stdout, INFO);
+							log(username + ":docker: define stderr=" + stderr, WARN);
 						
+							startVM(true);
+						
+						});
 					});
 				});
-			});
+			}
 		}
-	}
 	
-	function progress(inc, max) {
-		if(abort) return;
-		if(inc == undefined) inc = 1;
+		function progress(inc, max) {
+			if(abort) return;
+			if(inc == undefined) inc = 1;
 		
-		if(max) var obj = [inc, max];
-		else var obj = [inc];
+			if(max) var obj = [inc, max];
+			else var obj = [inc];
 		
-		sendToClient(username, "progress", obj);
-	}
-	
-	function done(resp) {
-		if(abort) return;
-		//if(options.command == "status") return;
-		
-		sendToClient(username, "progress", []);
-		
-		callback(null, resp);
-		callback = null;
-		
-		delete DOCKER_LOCK[username];
-	}
-	
-	function error(errorOrErrMsg, code) {
-		if(abort) return;
-		
-		if(typeof errorOrErrMsg=="string") {
-			var err = new Error(errorOrErrMsg);
-			if(code) err.code = code;
+			sendToClient(username, "progress", obj);
 		}
-		else var err = errorOrErrMsg;
+	
+		function done(resp) {
+			if(abort) return;
+			//if(options.command == "status") return;
 		
-		callback(err);
-		callback = null;
+			sendToClient(username, "progress", []);
 		
-		abort = true;
+			callback(null, resp);
+			callback = null;
 		
-		sendToClient(username, "progress", []);
+			delete DOCKER_LOCK[username];
+		}
+	
+		function error(errorOrErrMsg, code) {
+			if(abort) return;
 		
-		delete DOCKER_LOCK[username];
+			if(typeof errorOrErrMsg=="string") {
+				var err = new Error(errorOrErrMsg);
+				if(code) err.code = code;
+			}
+			else var err = errorOrErrMsg;
+		
+			callback(err);
+			callback = null;
+		
+			abort = true;
+		
+			sendToClient(username, "progress", []);
+		
+			delete DOCKER_LOCK[username];
+		}
+
+
 	}
 
+	function getCpuModel() {
 
-}
+		var model = module_os.cpus()[0].model;
+		if( model.match(/^Intel/) ) return "intel";
+		else if( model.match(/^AMD/) ) return "amd";
+		else throw new Error("Unable to determine which or unsupported CPU model=" + model);
 
-function getCpuModel() {
+	}
 
-	var model = module_os.cpus()[0].model;
-	if( model.match(/^Intel/) ) return "intel";
-	else if( model.match(/^AMD/) ) return "amd";
-	else throw new Error("Unable to determine which or unsupported CPU model=" + model);
-
-}
-
-main();
+	main();
 
 

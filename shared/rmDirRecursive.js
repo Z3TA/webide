@@ -5,7 +5,7 @@ var module_copyFile = require("./copyFile.js");
 var UTIL = require("../client/UTIL.js");
 var module_path = require("path");
 
-console.log("rmDirRecursive.js");
+//console.log("rmDirRecursive.js");
 
 function rmDirRecursive(targetPath, callback) {
 	

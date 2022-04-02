@@ -499,6 +499,18 @@ node server/server.js -port 80 -nochroot -virtualroot -noguest -home C:\Users\
 The following text assumes you are on a Unix/Linux like operating system ...
 
 
+Installing the CloudIDE server OS
+---------------------------------
+It's highly recommended to use ZFS.
+The following directories should be zfs filesystems
+````
+/home/
+/etc/letsencrypt/
+````
+
+Do NOT place /root/ in the home dataset or there will be issues with /root/.ssh/authorized_keys when syncting the datasets
+
+
 Updating userskeleton and etc/userdir_skeleton
 ----------------------------------------------
 /home/userskeleton ZFS will be cloned for each new user.
@@ -521,7 +533,7 @@ If the fs do not exist:
 
 If the fs already exist: (send incremental data)
 `sudo zfs send -i rpool/home/userskeleton@baseX rpool/home/userskeleton@baseY | ssh root@webide.se zfs recv ben/home/userskeleton`
-	
+
 (where snap X on the server is the last common snap and snap Y is the latest in dev)
 
 The files might have been modified on the server...
@@ -673,6 +685,57 @@ So if you want to use different resolvers inside network namespace's you have to
 `sudo systemctl stop systemd-resolved`
 
 
+Backups
+-------
+Run on another machine where you want to save the backups, the other machine also needs to have ZFS.
+
+````
+ssh root@ben.100m.se 'zfs snapshot -r tank/home@today'
+ssh root@ben.100m.se 'zfs send -R ben/home@today' | pv | sudo zfs recv zpcdata/home.ben
+
+ssh root@ben.100m.se 'cd /etc/letsencrypt/ && tar -c -z *' | pv > letsencrypt.tar.gz
+````
+
+
+
+Migrating / Restoring from backup
+---------------------------------
+
+When re-adding the users, make sure you use their old uid, or chown the home dirs for each user.
+````
+sudo useradd testuser -s /bin/false -u 998 -g 998
+sudo chown -R testuser:testuser /home/testuser
+````
+
+After a migration/restoration run ./update.js to fix permissions in users home dirs.
+
+It's a good idea to rsync and update folders just before switching over:
+````
+rsync /etc/letsencrypt/ root@kaj.100m.se:/etc/letsencrypt/ --progress
+ssh root@ben.100m.se 'zfs snapshot -r tank/home@today2'
+ssh root@ben.100m.se 'zfs send -i tank/home@today tank/home@today2' pv | sudo zfs recv zpcdata/home.ben
+````
+
+Make it so users only can see their own home dir:
+````
+chmod 751 /home
+````
+
+Removing guests accounts:
+````
+./dev-scripts/deleteAllGuests.js
+````
+
+Delete inactive users:
+````
+./dev-scripts/deleteInactiveUsers.js
+````
+
+
+Adding all users as system users
+````
+./dev-scripts/addAllUsers.js
+````
 
 Apparmor debugging
 ------------------
