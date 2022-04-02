@@ -23,12 +23,18 @@ var filesToRead = 0;
 
 console.log("Days since last activity:");
 
-eachUser(HOME, function(user) {
+var module_child_process = require('child_process');
+
+var list = module_child_process.execSync("ls " + HOME);
+
+var users = list.toString().split(/\s+/);
+
+users.forEach(function(user) {
 	//console.log(user);
 	filesToRead++;
-	fs.readFile(user.homeDir + ".webide/storage/lastLogin", "utf8", function(err, data) {
+	fs.readFile(HOME + user + "/.webide/storage/lastLogin", "utf8", function(err, data) {
 		
-if(err) {
+		if(err) {
 			if(err.code != "ENOENT") throw err;
 			var lastLogin = 0;
 		}
@@ -39,15 +45,11 @@ if(err) {
 		
 		var diff = now - lastLogin;
 		
-		times.push({name: user.name, hours: Math.round(diff / 60 / 60)});
+		times.push({name: user, hours: Math.round(diff / 60 / 60)});
 		
 		if(--filesToRead == 0) done(); 
 		
 	});
-}, function() {
-
-	if(filesToRead == 0) done(); 
-	
 });
 
 function done() {
