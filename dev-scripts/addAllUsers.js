@@ -41,6 +41,7 @@ function main() {
 
 		if(pool != POOL) continue;
 		if(user == "userskeleton") continue;
+		if(user == "root") continue;
 
 		var error = false;
 		try {

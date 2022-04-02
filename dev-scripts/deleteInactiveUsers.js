@@ -32,6 +32,7 @@ while(match = re.exec(list)) {
 	var days = parseFloat(match[2]);
 
 	if(user == "userskeleton") continue;
+	if(user == "root") continue;
 
 	if(days > minDays) {
 		deleteUsers.push({name: user, days: days});
