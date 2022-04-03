@@ -51,10 +51,10 @@ function findSettings(settings) {
 						
 						settings.host = answer;
 						
-						ask("What tcp Port to connect to", DEFAULT_PORT, function(err, answer) {
+						ask("Username on " + settings.host, module_os.userInfo().username, function(err, answer) {
 							if(err) throw err;
 							
-							settings.port = answer;
+							settings.username = answer;
 							
 							ask("Save settings? [yN]", "Y", function(err, answer) {
 								if(err) throw err;
