@@ -251,6 +251,12 @@ echo "#webide: Installing Letsencrypt's certbot"
 # For Ubuntu 20
 apt-get install certbot python3-certbot-nginx -y
 
+# So that users can only see their own home dir
+chmod 751 /home
+
+# For testing the "local desktop"
+apt-get install x11-apps -y
+
 
 echo "#webide: Finish!"
 
@@ -262,10 +268,12 @@ echo ""
 echo "systemctl reload nginx"
 echo "(use nginx -T to check for errors)"
 echo ""
+echo "(The nginx profile expects the top level domain (TLD) cert to live in /etc/ssl/certs/letsencrypt/ and /etc/ssl/private/ "
+echo " because you probably want to control the TLD from the Letsencrypt DNS challange server... )"
+echo ""
 echo "npm install"
 echo ""
 echo "You have to setup the following features manually:"
-
 echo " * Docker (see docs.docker.com) only install docker-ce-cli !"
 echo " * Docker daemon base VM (see README.txt)"
 echo " * userdir_skeleton (see README.txt)"

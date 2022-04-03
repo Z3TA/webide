@@ -1101,7 +1101,7 @@ function recycleGuestAccounts(callback) {
 						else {
 							// Account successfully deleted. We can now decrement GUEST_COUNTER 
 							log("Decrementing GUEST_COUNTER=" + GUEST_COUNTER + " during recycle after deletion of " + username);
-							module_fs.writeFile(__dirname + "/GUEST_COUNTER", --GUEST_COUNTER, function(err) {
+							module_fs.writeFile(__dirname + "/GUEST_COUNTER", (--GUEST_COUNTER).toString(), function(err) {
 								if(err) {
 									log("Failed to save GUEST_COUNTER=" + GUEST_COUNTER + " during recycle after deletion of " + username);
 									throw err;
@@ -2254,7 +2254,7 @@ function createGuestUser(id, fromRecycler, callback) {
 		// Save guest counter so that we can continue the number serie after server restarts
 		// It's not that bad if there are holes in the number serie. 
 		// We however don't want to give two people the same guest account!
-		module_fs.writeFile(__dirname + "/GUEST_COUNTER", GUEST_COUNTER, function guestCounterSaved(err) {
+		module_fs.writeFile(__dirname + "/GUEST_COUNTER", GUEST_COUNTER.toString(), function guestCounterSaved(err) {
 			if(err) {
 				log("createGuestUser " + username + ": Failed to save GUEST_COUNTER=" + GUEST_COUNTER + "", NOTICE);
 				return callback(err);
@@ -3520,9 +3520,10 @@ function checkMounts(options, checkMountsCallback) {
 		else {
 			// Make it possible to run Android emulator
 			module_child_process.exec("setfacl -m u:" + username + ":rwx /dev/kvm", EXEC_OPTIONS, function(err, stdout, stderr) {
-				if(err) throw err;
-				if(stderr) log(stderr, NOTICE);
-				if(stdout) log(stdout, INFO);
+			if(err) throw err;
+			log("Giving " + username + " access to /dev/kvm");
+			if(stderr) log(username + " (/dev/kvm): setfacl stderr=" + stderr, NOTICE);
+			if(stdout) log(username + " (/dev/kvm): setfacl stdout=" + stdout, INFO);
 				kvmAccessGranted = true;
 			});
 		}

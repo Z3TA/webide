@@ -1,6 +1,8 @@
 Reporting a bug ? Make sure it's repeatable!
 ============================================
 
+bug: guest3.webide.se.nginx ended up empty!
+
 Create a new userdir_skeleton on new server
 Move users from old server to new server
 Move certbot archive and keys to new server

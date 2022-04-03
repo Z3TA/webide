@@ -717,7 +717,7 @@ After a migration/restoration run ./update.js to fix permissions in users home d
 
 It's a good idea to rsync and update folders just before switching over:
 ````
-rsync /etc/letsencrypt/ root@kaj.100m.se:/etc/letsencrypt/ --progress
+rsync -r --links /etc/letsencrypt/ root@kaj.100m.se:/etc/letsencrypt/ --progress
 ssh root@ben.100m.se 'zfs snapshot -r tank/home@today2'
 ssh root@ben.100m.se 'zfs send -i tank/home@today tank/home@today2' pv | sudo zfs recv zpcdata/home.ben
 ````
@@ -749,6 +749,16 @@ the server you are migrating to will have it's /root folder over-mounted...
 zfs set mountpoint=/root-old rpool/home/root
 reboot
 ````
+
+Copy over top level domain certificates from old server:
+````
+mkdir /etc/ssl/certs/letsencrypt
+scp /etc/ssl/certs/letsencrypt/* root@kaj.100m.se:/etc/ssl/certs/letsencrypt/
+scp /etc/ssl/private/* root@kaj.100m.se:/etc/ssl/private/
+````
+
+
+
 
 
 Apparmor debugging
@@ -963,7 +973,7 @@ update-grub
 grub-install /dev/vda
 ````
 
-Generate a ssh key on the host server
+Generate a ssh key on the host server (don't set a password)
 `ssh-keygen -f /root/.ssh/dockervm`
 
 Copy generated public key
@@ -1096,7 +1106,7 @@ sudo iptables -D INPUT 1
 sudo iptables -D OUTPUT 1
 
 
-libvirt* need to run as root, in order to make it possible for Docker containers to write in the user home dir
+libvirt need to run as root, in order to make it possible for Docker containers to write in the user home dir
 sudo nano /etc/libvirt/qemu.conf
 ````
 user = "root"
