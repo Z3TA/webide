@@ -281,8 +281,7 @@ EDITOR.unbindKey(startTerminalFromKeyboard);
 		// scroll wheel = paste sel, or clipboard !?
 		
 		function caretMoved(err) {
-			if(err) alertBox("Error when moving terminal caret! error=" + err.message);
-			
+			if(err && CURRENTLY_OPEN_DIALOGS == 0) alertBox("Error when moving terminal caret! error=" + err.message);
 		}
 		
 	}
