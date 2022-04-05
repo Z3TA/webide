@@ -342,14 +342,13 @@ function adduser() {
 			* Replace netnsIP and dockerVMIP
 		*/
 		
-		
 		//var gid = getGroupId(groupName);
 		
-		if(NOZFS) {
-			console.time("Update skeleton files");
+		// if(NOZFS) ... If we could remember to always update the userskeleton user when we make changes to the userdir_skeleton files...
+		console.time("Update skeleton files");
 			skeleton.update({username: username, homeDir: homeDir, domain: DOMAIN, netnsIP: netnsIP, dockerVMIP: dockerVMIP, uid: uid, gid: gid});
 			console.timeEnd("Update skeleton files");
-		}
+		
 		
 console.time("chownrSync " + homeDir);
 		// The user owns his files
