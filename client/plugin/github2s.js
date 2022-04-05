@@ -110,8 +110,24 @@
 					if(err) {
 						if(err.message.indexOf("Permission denied") != -1) {
 
-							githubLogin = EDITOR.createWidget(buildGithubLogin);
-							githubLogin.show();
+							// If we use a Webide guest user it will always get Permission denied (publickey) if using git@github.com, so try with http!
+							CLIENT.cmd("git.clone", {repo: repo, directory: userRepoDir}, cloneTimeout, function(err) {
+								if(err) {
+									if(err.message.indexOf("Permission denied") != -1) {
+
+										// Both ssh and http failed. Ask for credentials
+
+										githubLogin = EDITOR.createWidget(buildGithubLogin);
+										githubLogin.show();
+
+									}
+									else alertBox("Cloning failed! Error: " + err.message);
+
+									return;
+								}
+
+								gotRepoHopefully();
+							});
 
 						}
 						else alertBox("Cloning failed! Error: " + err.message);
