@@ -64,19 +64,30 @@ fi
 
 
 # sudo apt install rsync
+
 rsync -r --delete temp/release/server/ $SERVER:/srv/webide/
-rsync -r --delete client/noVNC/ $SERVER:/srv/webide/client/noVNC/
 
 rsync -r --delete dropbox/ $SERVER:/srv/webide/dropbox/
 
-rsync -r --delete node_modules/ $SERVER:/srv/webide/node_modules/
+# Only copy the noVNC folder if the remote OS has the same release! (different releases needs different versions of noVNC!)
+REMOTE_OS_RELEASE=$(ssh $SERVER "lsb_release -a 2>/dev/null | grep Description")
+LOCAL_OS_RELEASE=$(lsb_release -a 2>/dev/null | grep Description)
+if [ "$REMOTE_OS_RELEASE" != "$LOCAL_OS_RELEASE" ]
+then
+  echo "Remote OS release $REMOTE_OS_RELEASE is not the same as local $LOCAL_OS_RELEASE"
+else
+  rsync -r --delete client/noVNC/ $SERVER:/srv/webide/client/noVNC/
+fi
 
+# Can't use some node modules on different versions of Node.js
 REMOTE_NODE_VERSION=$(ssh $SERVER "node -v")
 LOCAL_NODE_VERSION=$(node -v)
 if [ "$REMOTE_NODE_VERSION" != "$LOCAL_NODE_VERSION" ]
 then
   echo "Remote node.js version $REMOTE_NODE_VERSION is not the same as local $LOCAL_NODE_VERSION"
   ssh $SERVER "cd /srv/webide/ && npm rebuild"
+else
+  rsync -r --delete node_modules/ $SERVER:/srv/webide/node_modules/
 fi
 
 
