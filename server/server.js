@@ -2034,11 +2034,11 @@ function openRemoteFileServer() {
 		var remoteHost = socket.remoteAddress;
 		var pipeId = false;
 		
-		log("Remote file server connection from " + remoteHost);
+		log("Remote file: server connection from " + remoteHost);
 		
 		module_dns.reverse(remoteHost, function(err, domains) {
-			if(err) return log("Unable to find DNS name for ip=" + remoteHost);
-			console.log("ip=" + remoteHost + " have domains: " + JSON.stringify(domains));
+			if(err) return log("Remote file: Unable to find DNS name for ip=" + remoteHost);
+			console.log("Remote file: ip=" + remoteHost + " have domains: " + JSON.stringify(domains));
 			if(domains.length > 0) remoteHost = domains[0];
 		});
 		
@@ -2052,10 +2052,10 @@ function openRemoteFileServer() {
 		function remoteFileSocketData(data) {
 			// The data will always start with username, linbreak, filename || STDIN, linebreak.
 			
-			console.log("Remote file socket received " + data.length + " bytes of data ...");
+			console.log("Remote file: socket received " + data.length + " bytes of data ...");
 			
 			if(fileContentReceived) {
-				log("Received data after file content EOF! data=" + data + " Destroying socket!", WARN);
+				log("Remote file: Received data after file content EOF! data=" + data + " Destroying socket!", WARN);
 				socket.destroy();
 				return;
 			}
@@ -2075,7 +2075,7 @@ function openRemoteFileServer() {
 					if(!REMOTE_FILE_SOCKETS.hasOwnProperty(username)) REMOTE_FILE_SOCKETS[username] = {};
 					
 					if(REMOTE_FILE_SOCKETS[username].hasOwnProperty(fileName)) {
-						log("An old socket exist for fileName=" + fileName + ". Closing the old socket!", WARN);
+						log("Remote file: An old socket exist for fileName=" + fileName + ". Closing the old socket!", WARN);
 						REMOTE_FILE_SOCKETS[username][fileName].close();
 					}
 					
@@ -2086,7 +2086,7 @@ function openRemoteFileServer() {
 					}
 					
 					REMOTE_FILE_SOCKETS[username][fileName] = socket;
-					log("Added socket to username=" + username + " fileName=" + fileName);
+					log("Remote file: Added socket to username=" + username + " fileName=" + fileName);
 					
 					
 				}
@@ -2100,7 +2100,7 @@ function openRemoteFileServer() {
 					
 					if(strBuffer.charAt(strBuffer.length-1) == EOF) {
 						strBuffer = strBuffer.slice(0, -1);
-						console.log("Recieved content (" + strBuffer.length + " bytes) for " + fileName);
+						console.log("Remote file: Recieved content (" + strBuffer.length + " bytes) for " + fileName);
 						
 						var msg = {remoteFile: {fileName: fileName, content: strBuffer, host: remoteHost}};
 						sendToAll(username, msg);
@@ -2108,7 +2108,7 @@ function openRemoteFileServer() {
 						// We want to keep the connection open, so we can send back the content when it's saved!
 						
 					}
-					else console.log("Waiting for file content ...");
+					else console.log("Remote file: Waiting for file content ...");
 				}
 			}
 			
@@ -2117,7 +2117,7 @@ function openRemoteFileServer() {
 				var lbIndex = strBuffer.indexOf("\n");
 				if(lbIndex != -1) {
 					var value = strBuffer.slice(0, lbIndex);
-					console.log("found value=" + UTIL.lbChars(value));
+					console.log("Remote file: found value=" + UTIL.lbChars(value));
 					strBuffer = strBuffer.slice(lbIndex+1); // Cut out the value
 					return value;
 				}
@@ -2129,7 +2129,7 @@ function openRemoteFileServer() {
 		function sendToStdin() {
 			var msg = {remotePipe: {host: remoteHost, content: strBuffer, id: pipeId}};
 			
-			console.log("Sending data to editor client user " + USERNAME + " (strBuffer.length=" + strBuffer.length + ")");
+			console.log("Remote file: Sending data to editor client user " + USERNAME + " (strBuffer.length=" + strBuffer.length + ")");
 			sendToAll(username, msg);
 			strBuffer = ""; // Clear the buffer
 		}
@@ -2139,15 +2139,15 @@ function openRemoteFileServer() {
 				strBuffer += decoder.write(endData);
 				if(pipeId) sendToStdin();
 			}
-			console.log("remoteFileSocketEnd: endData.length=" + (endData && endData.length) );
+			console.log("Remote file: remoteFileSocketEnd: endData.length=" + (endData && endData.length) );
 		}
 		
 		function remoteFileSocketError(err) {
-			console.log("Remote file socket server error: " + err.message);
+			console.log("Remote file: socket server error: " + err.message);
 		}
 		
 		function remoteFileSocketClose(hadError) {
-			console.log("Remote file socket closed. hadError=" + hadError);
+			console.log("Remote file: socket closed. hadError=" + hadError);
 			if(username && REMOTE_FILE_SOCKETS.hasOwnProperty(username) && REMOTE_FILE_SOCKETS[username].hasOwnProperty(fileName)) delete REMOTE_FILE_SOCKETS[username][fileName];
 			
 			if(pipeId) {
@@ -2165,13 +2165,13 @@ function openRemoteFileServer() {
 			}
 			
 			if(!clients && name == CURRENT_USER && users.length == 1) {
-				console.log("Assuming " + users[0] + " == " + CURRENT_USER);
+				console.log("Remote file: Assuming " + users[0] + " == " + CURRENT_USER);
 				clients = USER_CONNECTIONS[ users[0] ];
 				username = users[0];
 			}
 			
 			if(!clients) {
-				log("Unable to find a connected client for username=" + username + "! Aborting remote file transfer! Currently logged in users: " + JSON.stringify(users), NOTICE);
+				log("Remote file: Unable to find a connected client for username=" + username + "! Aborting remote file transfer! Currently logged in users: " + JSON.stringify(users), NOTICE);
 				socket.destroy();
 			}
 			
@@ -2181,18 +2181,18 @@ function openRemoteFileServer() {
 	}
 	
 	function stdSocketError(err) {
-		log("Remote file server error: " + err.message, WARN);
+		log("Remote file: server error: " + err.message, WARN);
 	}
 	
 	function sendOrBuffer(str) {
 		client_connections = USER_CONNECTIONS[USERNAME];
 		
 		if(client_connections) {
-			console.log("Sending data to editor client user " + USERNAME + " (str.length=" + str.length + ")");
+			console.log("Remote file: Sending data to editor client user " + USERNAME + " (str.length=" + str.length + ")");
 			sendToAll(client_connections, {stdin: str});
 		}
 		else {
-			console.log("Editor client user " + USERNAME + " not connected! str.length=" + str.length);
+			console.log("Remote file: Editor client user " + USERNAME + " not connected! str.length=" + str.length);
 			stdinChannelBuffer += str;
 		}
 	}
