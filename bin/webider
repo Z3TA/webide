@@ -360,7 +360,7 @@ function dance(settings) {
 			Will NodeJS keep the connection open for us, or do we have to send junk ?
 		*/
 		
-		connection = module_net.createConnection({host: settings.host, port: settings.port});
+		connection = module_net.createConnection({host: settings.host, port: settings.port, keepAlive: true});
 		connection.on("error", connectionError);
 		connection.on("connect", connectionConnected);
 		connection.on("close", connectionClosed);

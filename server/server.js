@@ -571,7 +571,7 @@ function startNatServer() {
 	var StringDecoder = module_string_decoder.StringDecoder;
 	var decoder = new StringDecoder('utf8');
 
-	var server = module_net.createServer();
+	var server = module_net.createServer({keepAlive: true});
 
 	server.on("listening", function serverListening() {
 		log("NAT SERVER: Listening on port " + NAT_PORT);
@@ -1910,7 +1910,7 @@ function openStdinChannel() {
 	var client_connections;
 	var gotArguments = false; // The data will always start with process arguments and then a line-break
 	
-	var stdinServer = module_net.createServer();
+	var stdinServer = module_net.createServer({keepAlive: true});
 	
 	stdinServer.on("listening", function stdinServerListening() {
 		log("stdin channel listening on port " + STDIN_PORT, DEBUG);
@@ -2004,7 +2004,7 @@ function openRemoteFileServer() {
 	*/
 	
 	var StringDecoder = module_string_decoder.StringDecoder;
-	var remoteFileServer = module_net.createServer();
+	var remoteFileServer = module_net.createServer({keepAlive: true});
 	
 	remoteFileServer.on("listening", function stdinServerListening() {
 		log("Remote file server listening on port " + REMOTE_FILE_PORT, DEBUG);
@@ -2033,7 +2033,8 @@ function openRemoteFileServer() {
 		var fileContentReceived = false;
 		var remoteHost = socket.remoteAddress;
 		var pipeId = false;
-		
+		//var pingInterval = setInterval(ping, 5000);
+
 		log("Remote file: server connection from " + remoteHost);
 		
 		module_dns.reverse(remoteHost, function(err, domains) {
@@ -2049,6 +2050,8 @@ function openRemoteFileServer() {
 		// Must listen for errors or node -v 8 on Windows will throw on any socket error!
 		socket.on("error", remoteFileSocketError);
 		
+		//function ping() {}
+
 		function remoteFileSocketData(data) {
 			// The data will always start with username, linbreak, filename || STDIN, linebreak.
 			
@@ -2153,6 +2156,8 @@ function openRemoteFileServer() {
 			if(pipeId) {
 				sendToAll(username, {remotePipe: {host: remoteHost, end: true, id: pipeId}});
 			}
+
+			//clearInterval(pingInterval);
 		}
 		
 		function findClients(name) {
