@@ -1,6 +1,65 @@
 Reporting a bug ? Make sure it's repeatable!
 ============================================
 
+bug: fresh guest user saves account credentials as guest/gest making it go into a new guest user next time it connects ! yes
+
+Apr 05 21:22:26 kaj.100m.se node[117457]: 2022-04-05 (21:22:26) 155.4.8.162 <= 2{"resp":{"loginSuccess":{"user":"guest13","alias":"Firefox(155.4.8.162)","sessionId":"e2ha6i","ip":"155.4.8.162","cId":1,"connectedClientIds":[1],"editorVersion":0,"platform":"linux","homeDir":"/home/guest13/","tld":"webide.se","installDirectory":"/srv/web ... (295 characters) (server.js:3389:4)
+
+Apr 05 21:22:26 kaj.100m.se node[117457]: 2022-04-05 (21:22:26) 155.4.8.162 <= 2{"resp":{"loginSuccess":{"user":"guest13","alias":"Firefox(155.4.8.162)","sessionId":"e2ha6i","ip":"155.4.8.162","cId":1,"connectedClientIds":[1],"editorVersion":0,"platform":"linux","homeDir":"/home/guest13/","tld":"webide.se","installDirectory":"/srv/web ... (295 characters) (server.js:3389:4)
+
+Apr 06 10:40:45 kaj.100m.se node[117457]: 2022-04-06 (10:40:45) command=identify connectionAuthorized=false (server.js:2752:3)
+Apr 06 10:40:45 kaj.100m.se node[117457]: 2022-04-06 (10:40:45) Using guest account guest14 from GUEST_POOL (new length=0) (server.js:2853:8)
+Apr 06 10:40:45 kaj.100m.se node[117457]: 2022-04-06 (10:40:45) New guest login: guest14 (server.js:4113:3)
+
+Apr 06 10:40:45 kaj.100m.se node[117457]: 2022-04-06 (10:40:45) 155.4.8.162 <= 1077{"resp":{"loginSuccess":{"user":"guest14","alias":"Firefox(155.4.8.162)","sessionId":"e2ha6i","ip":"155.4.8.162","cId":1,"connectedClientIds":[1],"editorVersion":0,"platform":"linux","homeDir":"/home/guest14/","tld":"webide.se","installDirectory":"/srv/web ... (298 characters) (server.js:3389:4)
+
+
+what did the server send to guest13 !? did it send user=guest14 !?
+
+guest14 was saved in local storage...
+
+Bug: I was guest13, but next day after logging in as guest13, I ended up as guest14...!?!?
+
+
+Fix crash reporting!
+
+Apr 06 15:16:54 kaj.100m.se node[1192108]: /srv/webide/server/server.js:2079
+Apr 06 15:16:54 kaj.100m.se node[1192108]:                                                 REMOTE_FILE_SOCKETS[username][fileName].close();
+Apr 06 15:16:54 kaj.100m.se node[1192108]:                                                                                         ^
+Apr 06 15:16:54 kaj.100m.se node[1192108]: TypeError: REMOTE_FILE_SOCKETS[username][fileName].close is not a function
+
+
+
+If you just copy over server.js it will send {"editorVersion": 0} because editor version is not populated, it's only populated on a proper release!
+
+
+Remote file connection goes "inactive", 
+remote machine does not update the file...
+
+
+---
+
+apt-get install libantlr4-runtime-dev
+apt-get install llvm-dev
+apt-get install llvm-13-dev
+apt-get install qt5-qmake
+apt-get install qtbase5-dev
+find / -type d -name "llvm" 2>/dev/null
+nano dz.pro
+````
+DEPENDPATH += /usr/include/antlr4-runtime \
+    /usr/include/llvm-13
+INCLUDEPATH += /usr/include/antlr4-runtime \
+    /usr/include/llvm-13
+````
+./build.sh
+qmake && make
+
+
+todo: Test creating a new guest user (due to changes in adduser.js)
+
+todo: Test from inkognito and login as guest: https://webide.se?github=/Znurre/dz/blob/master/examples/ttt/main.dz (due to change in github2s.js)
+
 bug: guest3.webide.se.nginx ended up empty!
 
 Create a new userdir_skeleton on new server

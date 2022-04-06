@@ -2754,7 +2754,7 @@ function sockJsConnection(connection) {
 		
 		//console.log("The command queue has " + commandQueue.length + " items.");
 		
-		log("command=" + command + " connectionAuthorized=" + connectionAuthorized, DEBUG);
+		log( (userConnectionName ? userConnectionName : IP) + " command=" + command + " connectionAuthorized=" + connectionAuthorized, DEBUG);
 		
 		if(!connectionAuthorized) {
 			
@@ -2849,7 +2849,10 @@ function sockJsConnection(connection) {
 											checkUser(username, password);
 										}, 1000);
 									}
-									else loginAsGuest(createdUser.username, createdUser.password, false);
+									else {
+										if( createdUser.password == "guest") throw new Error("Created guest user password=" + createdUser.password);
+										loginAsGuest(createdUser.username, createdUser.password, false);
+									}
 								});
 							}
 						}
@@ -2860,6 +2863,9 @@ function sockJsConnection(connection) {
 								length: 10,
 								numbers: true
 							});
+
+							if(guestPw == "guest") throw new Error("Randomly generated password=" + guestPw);
+
 							loginAsGuest(guestUser, guestPw, true);
 							// Save/Reset the password
 							if(!NO_PW_HASH) {
@@ -2901,6 +2907,8 @@ function sockJsConnection(connection) {
 						username = guestUser;
 						idSuccess(alreadyCheckedMounts);
 						
+						if(guestPassword == "guest") throw new Error("Attempted to send guestPassword=" + guestPassword + " to client!");
+
 						send({saveLogin: {user: username, pw: guestPassword}, id: 0});
 						
 						if(GUEST_POOL.length <= 0) {

@@ -260,10 +260,14 @@
 	
 	function saveLogin(user) {
 		//console.log("SaveLogin:", user);
+		
+		if(user.user == "guest" && user.pw == "guest") throw new Error("Attempted to save guest:guest login credentials");
+
 		EDITOR.localStorage.setItem("editorServerUrl", CLIENT.url);
 		EDITOR.localStorage.setItem("editorServerUser", user.user);
 		EDITOR.localStorage.setItem("editorServerPw", user.pw);
 		
+
 		var inputUser = document.getElementById("serverLoginUser");
 		var inputPw = document.getElementById("serverLoginPw");
 		
@@ -601,7 +605,7 @@
 						}
 						else {
 							alertBox("Successfully logged in to:\n" + server.url + "\nUser: " + resp.loginSuccess.user);
-							saveLogin({user: user.value, pw: pw.value});
+							if(user.value != "guest" && pw.value != "guest") saveLogin({user: user.value, pw: pw.value});
 						}
 					});
 				}

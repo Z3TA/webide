@@ -10427,8 +10427,7 @@ window.addEventListener("mousemove", mouseMove, false);
 							});
 						}
 
-						CLIENT.fireEvent("saveLogin", {user: userValue, pw: pwValue});
-
+						if(userValue != "guest" && pwValue != "guest") CLIENT.fireEvent("saveLogin", {user: userValue, pw: pwValue});
 
 					}
 				});
@@ -10452,21 +10451,21 @@ window.addEventListener("mousemove", mouseMove, false);
 		
 		// Don't bother resetting the canvas context here, wait for the resize!
 		/*
-		// TEST-CODE-START
-		setTimeout(debugCtx, 1);
-		setTimeout(debugCtx, 10);
-		setTimeout(debugCtx, 100);
-		setTimeout(debugCtx, 1000);
-		setTimeout(debugCtx, 2000);
-		setTimeout(debugCtx, 3000);
-		setTimeout(debugCtx, 4000);
-		setTimeout(debugCtx, 5000);
-		setTimeout(debugCtx, 6000);
+			// TEST-CODE-START
+			setTimeout(debugCtx, 1);
+			setTimeout(debugCtx, 10);
+			setTimeout(debugCtx, 100);
+			setTimeout(debugCtx, 1000);
+			setTimeout(debugCtx, 2000);
+			setTimeout(debugCtx, 3000);
+			setTimeout(debugCtx, 4000);
+			setTimeout(debugCtx, 5000);
+			setTimeout(debugCtx, 6000);
 
-		function debugCtx() {
+			function debugCtx() {
 			console.log("DebugCtx: (interval) windowLoaded=" + windowLoaded + " ctx.imageSmoothingEnabled=" + ctx.imageSmoothingEnabled + " EDITOR.canvasContext.imageSmoothingEnabled=" + EDITOR.canvasContext.imageSmoothingEnabled + " ctx==EDITOR.canvasContext?" + (EDITOR.canvasContext==ctx) + " ctx.font=" + ctx.font);
-		}
-		// TEST-CODE-END
+			}
+			// TEST-CODE-END
 		*/
 		
 		EDITOR.resizeNeeded(); // We must call the resize function at least once at editor startup.
