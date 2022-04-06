@@ -12,3 +12,6 @@ Type=oneshot
 ExecStart=/usr/local/bin/systemd-email.sh zeta@zetafiles.org %i
 User=nobody
 Group=systemd-journal
+
+[Install]
+WantedBy=default.target
