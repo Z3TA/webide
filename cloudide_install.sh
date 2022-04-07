@@ -124,7 +124,8 @@ apt-get install systemd -y
 # edit the service you want emails for and add OnFailure=status-email-user@%n.service to the [Unit] section. 
 # %n passes the unit's name to the template.
 echo "#webide: Installing status-email-user@.service"
-apt-get install sendmail -y
+apt-get install ssmtp -y
+echo "mailhub=zetafiles.org:255" >> /etc/ssmtp/ssmtp.conf
 cp etc/systemd/systemd-email.sh /usr/local/bin/
 chmod 774 /usr/local/bin/systemd-email.sh
 

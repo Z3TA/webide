@@ -40,6 +40,7 @@ iptables -A OUTPUT -d 172.65.247.93 -j REJECT
 
 # Prevent sending spam
 iptables -A OUTPUT -p tcp -d 153.92.126.143 --dport 25 -j ACCEPT
+iptables -A OUTPUT -p tcp -d 155.4.8.162 --dport 255 -j ACCEPT
 ip6tables -A OUTPUT -p tcp --dport 25 -j REJECT
 iptables -A OUTPUT -p tcp --dport 25 -j REJECT
 

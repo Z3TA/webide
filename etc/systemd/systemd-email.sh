@@ -13,7 +13,7 @@ echo "Sending report ..."
 
 # Ubuntu has sendmail in /usr/sbin/
 
-sendmail -t <<ERRMAIL
+ssmtp -t <<ERRMAIL
 To: $1
 From: systemd <root@$HOSTNAME>
 Subject: $2
