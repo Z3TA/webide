@@ -153,7 +153,7 @@
 		function gotRepoHopefully() {
 			if(_commitId && _commitId != "HEAD") {
 				CLIENT.cmd("git.checkout", {directory: userRepoContentFolder, rev: _commitId}, function cloned(err, resp) {
-					if(err) alertBox("Failed to checkout " + _commitId + ". Error: " + err.message);
+					if(err && err.message.indexOf("Already on '" + _commitId + "'") == -1) alertBox("Failed to checkout " + _commitId + ". Error: " + err.message);
 
 					//console.log("github2s: git.checkout: _commitId=" + _commitId + " resp=" + JSON.stringify(resp, null, 2));
 
