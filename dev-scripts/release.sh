@@ -163,7 +163,6 @@ rm temp/release/linux/update.js
 rm temp/release/linux/user_activity.js
 rm temp/release/linux/client/bundle.htm.gz
 rm temp/release/linux/client/sitemap.txt
-rm temp/release/linux/backup.sh
 
 
 
