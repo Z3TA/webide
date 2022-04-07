@@ -47,10 +47,6 @@ INCLUDEPATH += /usr/include/antlr4-runtime \
 qmake && make
 
 
-todo: Test creating a new guest user (due to changes in adduser.js)
-
-todo: Test from inkognito and login as guest: https://webide.se?github=/Znurre/dz/blob/master/examples/ttt/main.dz (due to change in github2s.js)
-
 bug: guest3.webide.se.nginx ended up empty!
 
 Create a new userdir_skeleton on new server
