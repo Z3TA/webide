@@ -8,6 +8,9 @@
 TZ=Europe/Stockholm
 ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
+# Change this to a SMTP-server host (for example postfix. Can run locally) 
+SMTP_SERVER=zetafiles.org
+SMTP_PORT=255
 
 # exit when any command fails
 set -e
@@ -125,7 +128,7 @@ apt-get install systemd -y
 # %n passes the unit's name to the template.
 echo "#webide: Installing status-email-user@.service"
 apt-get install ssmtp -y
-echo "mailhub=zetafiles.org:255" >> /etc/ssmtp/ssmtp.conf
+echo "mailhub=z$SMTP_SERVER:$SMTP_PORT" >> /etc/ssmtp/ssmtp.conf
 cp etc/systemd/systemd-email.sh /usr/local/bin/
 chmod 774 /usr/local/bin/systemd-email.sh
 

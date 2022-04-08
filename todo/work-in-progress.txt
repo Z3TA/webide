@@ -1,20 +1,11 @@
 Reporting a bug ? Make sure it's repeatable!
 ============================================
 
-todo: Fix crash reporting!
-sendmail got a recent update that made it not possible to send e-mail !?
-use ssmtp instead !?
-
-ssmtp zeta@zetafiles.org
-Subject: Test SSMTP Email
-Email send test using SSMTP
-via SMTP server.
 
 Apr 06 15:16:54 kaj.100m.se node[1192108]: /srv/webide/server/server.js:2079
 Apr 06 15:16:54 kaj.100m.se node[1192108]:                                                 REMOTE_FILE_SOCKETS[username][fileName].close();
 Apr 06 15:16:54 kaj.100m.se node[1192108]:                                                                                         ^
 Apr 06 15:16:54 kaj.100m.se node[1192108]: TypeError: REMOTE_FILE_SOCKETS[username][fileName].close is not a function
-
 
 
 If you just copy over server.js it will send {"editorVersion": 0} because editor version is not populated, it's only populated on a proper release!
