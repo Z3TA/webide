@@ -5436,7 +5436,7 @@ function checkMounts(options, checkMountsCallback) {
 							// File closed
 							socket.destroy();
 						}
-						workerResp(null);
+						workerResp(null, true);
 					}
 				}
 			
