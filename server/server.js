@@ -2029,7 +2029,6 @@ function openRemoteFileServer() {
 		var strBuffer = "";
 		var content = "";
 		var client_connections; // Client connections for this file transfer session
-		var metadataFound = false;
 		var fileContentReceived = false;
 		var remoteHost = socket.remoteAddress;
 		var pipeId = false;
@@ -2053,78 +2052,80 @@ function openRemoteFileServer() {
 		//function ping() {}
 
 		function remoteFileSocketData(data) {
-			// The data will always start with username, linbreak, filename || STDIN, linebreak.
-			
 			console.log("Remote file: socket received " + data.length + " bytes of data ...");
-			
-			if(fileContentReceived) {
-				log("Remote file: Received data after file content EOF! data=" + data + " Destroying socket!", WARN);
-				socket.destroy();
-				return;
-			}
 			
 			strBuffer += decoder.write(data);
 			
-			if(!username) username = findMetaData();
-			if(!fileName) fileName = findMetaData();
-			
-			if(username && fileName) {
-				
-				if(!metadataFound) {
-					metadataFound = true;
-					client_connections = findClients(username);
-					if(!client_connections) return;
-					
-					if(!REMOTE_FILE_SOCKETS.hasOwnProperty(username)) REMOTE_FILE_SOCKETS[username] = {};
-					
-					if(REMOTE_FILE_SOCKETS[username].hasOwnProperty(fileName)) {
-						log("Remote file: An old socket exist for fileName=" + fileName + ". Closing the old socket!", WARN);
-						REMOTE_FILE_SOCKETS[username][fileName].close();
-					}
-					
-					if(fileName == "STDIN") {
-						pipeId = ++PIPE_COUNTER;
-						fileName = "pipe" + pipeId;
-						sendToAll(username, {remotePipe: {host: remoteHost, start: true, id: pipeId}});
-					}
-					
-					REMOTE_FILE_SOCKETS[username][fileName] = socket;
-					log("Remote file: Added socket to username=" + username + " fileName=" + fileName);
-					
-					
-				}
-				
-				if(pipeId) {
-					// We are receiving a stdin stream
-					sendToStdin();
-				}
-				else {
-					// We are receiving file conent
-					
-					if(strBuffer.charAt(strBuffer.length-1) == EOF) {
-						strBuffer = strBuffer.slice(0, -1);
-						console.log("Remote file: Recieved content (" + strBuffer.length + " bytes) for " + fileName);
-						
-						var msg = {remoteFile: {fileName: fileName, content: strBuffer, host: remoteHost}};
-						sendToAll(username, msg);
-						fileContentReceived = true;
-						// We want to keep the connection open, so we can send back the content when it's saved!
-						
-					}
-					else console.log("Remote file: Waiting for file content ...");
-				}
+			if(strBuffer.slice(-1) != "\n") return;
+
+			// We should now have a JSON payload!
+			strBuffer = strBuffer.slice(0, -1); // Remove the linebreak
+
+			try {
+				var json = JSON.parse(strBuffer);
 			}
-			
-			function findMetaData() {
-				// Look for a linebreak
-				var lbIndex = strBuffer.indexOf("\n");
-				if(lbIndex != -1) {
-					var value = strBuffer.slice(0, lbIndex);
-					console.log("Remote file: found value=" + UTIL.lbChars(value));
-					strBuffer = strBuffer.slice(lbIndex+1); // Cut out the value
-					return value;
+			catch(err) {
+				log("Failed to parse (" + err.message + ") JSON strBuffer=" + strBuffer + "", WARN);
+				var error = {error: "Could not parse JSON! " + err.message};
+				socket.write(JSON.stringify(error) + "\n");
+				socket.destroy();
+				return;
+			}
+
+			if(username == undefined && json.username == undefined) {
+				var error = {error: "Must have username in first message!"};
+				socket.write(JSON.stringify(error) + "\n");
+				socket.destroy();
+			}
+
+			if(fileName == undefined && json.fileName == undefined) {
+				var error = {error: "Must have fileName in first message!"};
+				socket.write(JSON.stringify(error) + "\n");
+			}
+
+			if(username == undefined && fileName == undefined) {
+				// First message!
+				username = json.username;
+				fileName = json.fileName;
+
+				client_connections = findClients(username);
+				if(!client_connections) return;
+
+				if(!REMOTE_FILE_SOCKETS.hasOwnProperty(username)) REMOTE_FILE_SOCKETS[username] = {};
+
+				if(REMOTE_FILE_SOCKETS[username].hasOwnProperty(fileName)) {
+					log("Remote file: An old socket exist for fileName=" + fileName + ". Closing the old socket!", WARN);
+					REMOTE_FILE_SOCKETS[username][fileName].close();
 				}
-				return null;
+
+				if(json.stream) {
+					pipeId = ++PIPE_COUNTER;
+					fileName = "pipe" + pipeId;
+					sendToAll(username, {remotePipe: {host: remoteHost, start: true, id: pipeId}});
+				}
+
+				REMOTE_FILE_SOCKETS[username][fileName] = socket;
+				log("Remote file: Added socket to username=" + username + " fileName=" + fileName);
+			}
+
+			if(json.stream) {
+				// We are receiving a stdin stream
+				sendToStdin();
+			}
+			else if(json.fileData) {
+				// We are receiving file conent
+					
+				console.log("Remote file: Recieved content (" + json.fileData.length + " bytes) for " + fileName);
+						
+				var msg = {remoteFile: {fileName: fileName, content: json.fileData, host: remoteHost}};
+				sendToAll(username, msg);
+				fileContentReceived = true;
+					
+				// We want to keep the connection open, so we can send back the content when it's saved!
+			}
+			else if(json.ping) {
+				var pong = {pong: json.ping}M
+				socket.write(JSON.stringify(pong) + "\n");
 			}
 			
 		}

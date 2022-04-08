@@ -384,21 +384,21 @@ function dance(settings) {
 		connected = true;
 		debug("Connected to editor server!");
 		
-		// When connecting we Must always send our username, and name of file
 		var username = settings.username || module_os.userInfo().username;
-		debug("Sending username=" + username);
-		connection.write(username + "\n");
-		
+		var json = {username: username};
+
 		if(settings.filePath) {
-			connection.write(settings.filePath + "\n");
-			debug("Sending file content...");
-			connection.write(fileContent + EOF);
-			
+			json.filePath = settings.filePath;
+			json.fileContent = fileContent;
+			connection.write(JSON.stringify(json) + "\n");
 		}
 		else {
 			// Send stdin
 			isPipe = true;
-			connection.write("STDIN\n");
+			
+			json.stream = true;
+
+			connection.write(JSON.stringify(json) + "\n");
 			
 			//if(stdinData.length > 0) connection.write(stdinData);
 			//else console.log("No initial stdinData to send");
