@@ -2124,7 +2124,7 @@ function openRemoteFileServer() {
 				// We want to keep the connection open, so we can send back the content when it's saved!
 			}
 			else if(json.ping) {
-				var pong = {pong: json.ping}M
+				var pong = {pong: json.ping};
 				socket.write(JSON.stringify(pong) + "\n");
 			}
 			
