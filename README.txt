@@ -129,7 +129,7 @@ Mac OS X
 4. Install the dependencies by typing `npm install` and hit enter in the terminal.
 
 5. After nodejs and all dependencies are installed, type this in the terminal:
-`node server/server.js --port=8099 --user=admin --pw=admin -nochroot`
+`node server/server.js --port=8099 --user=admin --pw=admin`
 
 6. Navigate to the following address in your favorite web browser: http://127.0.0.1:8099/
 
@@ -170,7 +170,7 @@ But if you however want to run the editor locally on your phone, you can do this
 
 6. Type "cd node_modules/webide.se/server" (without the quotes) and press Enter
 
-7. Type "node server.js --user=admin --pw=admin -nochroot" (without the quotes) and press Enter
+7. Type "node server.js --user=admin --pw=admin" (without the quotes) and press Enter
 
 8. Start Chrome and go to url: http://127.0.0.1:8099
 
@@ -486,11 +486,10 @@ with the hash generated from node hashPw.js
 
 To start the server:
 ````
-node server/server.js -port 80 -nochroot -virtualroot -noguest -home C:\Users\
+node server/server.js -port 80 -virtualroot -noguest -home C:\Users\
 ````
 <!---
 -port 80 will start the server on port 80
--nochroot will disable chroot which does not work on Windows
 -virtualroot is like a virtual chroot, meaning users see C:\Users\username\foo\bar as just /foo/bar
 -noguest will disable guest accounts, which is currently not support on Windows
 -home C:\Users\ specifies where the user folders are located. (needed with -virtualroot)
