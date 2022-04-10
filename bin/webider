@@ -12,6 +12,8 @@
 	chomd +x webide
 	sudo mv webide /usr/local/bin
 	
+	todo: Handle many JSON messages in the same chunk!
+
 	todo: Implement ping/pong
 
 	todo: Make it usuable for sending stdin:
@@ -430,7 +432,7 @@ function dance(settings) {
 	}
 	
 	function sendPing() {
-		var randomNr = Math.random() * 9999999;
+		var randomNr = Math.floor(Math.random() * 9999999);
 		var json = {ping: randomNr};
 		var data = JSON.stringify(json);
 		debug("Sending: " + data);
@@ -490,11 +492,13 @@ function dance(settings) {
 				throw new Error("Unknown json.fileData.type=" + json.fileData.type + " json = " + JSON.stringify(json, null2, ));
 			}
 
+			if(fileContent) {
 			module_fs.writeFile(settings.filePath, fileContent, function(err) {
 				if(err) throw err;
 				console.log(fileContent.length + " characters written to " + settings.filePath);
 			});
-			
+			}
+
 			// Reset the buffer, so we can get the file content again.
 			strBuffer = "";
 			

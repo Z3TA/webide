@@ -2058,31 +2058,43 @@ function openRemoteFileServer() {
 			
 			strBuffer += decoder.write(data);
 			
-			if(strBuffer.slice(-1) != "\n") return;
+			var newLinePos = strBuffer.indexOf("\n");
 
-			// We should now have a JSON payload!
-			strBuffer = strBuffer.slice(0, -1); // Remove the linebreak
+			if(newLinePos == -1) return; // Have not yet received the full serial JSON
 
+			// There can be many JSON message in one chunk!
+
+			var arrMessages = strBuffer.split("\n");
+
+			strBuffer = arrMessages.pop();
+
+			arrMessages.forEach(parseJson);
+		}
+		
+		function parseJson(strBuffer) {
 			try {
 				var json = JSON.parse(strBuffer);
 			}
 			catch(err) {
 				log("Remote file: Failed to parse (" + err.message + ") JSON strBuffer=" + strBuffer + "", WARN);
 				var error = {error: "Could not parse JSON! " + err.message};
+				log("Remote file: Error: " + error.error);
 				socket.write(JSON.stringify(error) + "\n");
-				socket.destroy();
 				return;
 			}
 
 			if(username == undefined && json.username == undefined) {
 				var error = {error: "Must have username in first message!"};
+				log("Remote file: Error: " + error.error);
 				socket.write(JSON.stringify(error) + "\n");
-				socket.destroy();
+				return;
 			}
 
 			if(filePath == undefined && json.filePath == undefined) {
 				var error = {error: "Must have filePath in first message!"};
+				log("Remote file: Error: " + error.error);
 				socket.write(JSON.stringify(error) + "\n");
+				return;
 			}
 
 			if(username == undefined && filePath == undefined) {
@@ -2093,7 +2105,7 @@ function openRemoteFileServer() {
 				client_connections = findClients(username);
 				if(!client_connections) {
 					var error = {error: "Found no client to send the data! Try another username."};
-					log("Remote file: ", error, DEBUG);
+					log("Remote file: Error: " + error.error);
 					socket.write(JSON.stringify(error) + "\n");
 					return;
 				}
@@ -2122,13 +2134,13 @@ function openRemoteFileServer() {
 			}
 			else if(json.fileData) {
 				// We are receiving file conent
-					
-				console.log("Remote file: Recieved content (" + json.fileData.length + " bytes) for " + filePath);
-						
+
+				console.log("Remote file: Recieved content (" + json.fileData.data.length + " bytes) for " + filePath);
+
 				var msg = {remoteFile: {fileName: filePath, content: json.fileData, host: remoteHost}};
 				sendToAll(username, msg);
 				fileContentReceived = true;
-					
+
 				// We want to keep the connection open, so we can send back the content when it's saved!
 			}
 			else if(json.ping) {
@@ -2136,9 +2148,8 @@ function openRemoteFileServer() {
 				var pong = {pong: json.ping};
 				socket.write(JSON.stringify(pong) + "\n");
 			}
-			
 		}
-		
+
 		function sendToStdin() {
 			var msg = {remotePipe: {host: remoteHost, content: strBuffer, id: pipeId}};
 			
