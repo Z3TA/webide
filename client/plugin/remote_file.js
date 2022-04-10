@@ -139,7 +139,33 @@ return;
 		
 		var url = "remote://" + json.host + (json.fileName.indexOf("/") == 0 ? "" : "/") + json.fileName;
 		
-		EDITOR.openFile(url, json.content, {savedAs: true, isSaved: true}, function(err, file) {
+		if(json.content.type == "Buffer") {
+			var utf8decoder = new TextDecoder(); // default 'utf-8' or 'utf8'
+
+			var arr = json.content.data;
+			let u8arr = new Uint8Array(arr);
+			/*
+				let i8arr = new Int8Array(arr);
+				let u16arr = new Uint16Array(arr);
+				let i16arr = new Int16Array(arr);
+				let i32arr = new Int32Array(arr);
+
+				console.log("u8arr=" + utf8decoder.decode(u8arr));
+				console.log("i8arr= " + utf8decoder.decode(i8arr));
+				console.log("u16arr=" + utf8decoder.decode(u16arr));
+				console.log("i16arr=" + utf8decoder.decode(i16arr));
+				console.log("i32arr=" + utf8decoder.decode(i32arr));
+			*/
+			
+			// Assuming Node.JS would have used a u8arr
+
+			var text = utf8decoder.decode(u8arr);
+		}
+		else {
+			var text = json.content;
+		}
+
+		EDITOR.openFile(url, text, {savedAs: true, isSaved: true}, function(err, file) {
 			if(err) throw err;
 			
 			remoteFiles.push(file);

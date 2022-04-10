@@ -2025,7 +2025,7 @@ function openRemoteFileServer() {
 		
 		var decoder = new StringDecoder('utf8');
 		var username; // username for this socket
-		var fileName; // File name for this socket
+		var filePath; // Remote file path for this socket
 		var strBuffer = "";
 		var content = "";
 		var client_connections; // Client connections for this file transfer session
@@ -2052,7 +2052,9 @@ function openRemoteFileServer() {
 		//function ping() {}
 
 		function remoteFileSocketData(data) {
-			console.log("Remote file: socket received " + data.length + " bytes of data ...");
+
+			log("Remote file: data=" + data.toString(), DEBUG);
+			log("Remote file: socket received " + data.length + " bytes of data ...");
 			
 			strBuffer += decoder.write(data);
 			
@@ -2065,7 +2067,7 @@ function openRemoteFileServer() {
 				var json = JSON.parse(strBuffer);
 			}
 			catch(err) {
-				log("Failed to parse (" + err.message + ") JSON strBuffer=" + strBuffer + "", WARN);
+				log("Remote file: Failed to parse (" + err.message + ") JSON strBuffer=" + strBuffer + "", WARN);
 				var error = {error: "Could not parse JSON! " + err.message};
 				socket.write(JSON.stringify(error) + "\n");
 				socket.destroy();
@@ -2078,34 +2080,40 @@ function openRemoteFileServer() {
 				socket.destroy();
 			}
 
-			if(fileName == undefined && json.fileName == undefined) {
-				var error = {error: "Must have fileName in first message!"};
+			if(filePath == undefined && json.filePath == undefined) {
+				var error = {error: "Must have filePath in first message!"};
 				socket.write(JSON.stringify(error) + "\n");
 			}
 
-			if(username == undefined && fileName == undefined) {
+			if(username == undefined && filePath == undefined) {
 				// First message!
 				username = json.username;
-				fileName = json.fileName;
+				filePath = json.filePath;
 
 				client_connections = findClients(username);
-				if(!client_connections) return;
+				if(!client_connections) {
+					var error = {error: "Found no client to send the data! Try another username."};
+					socket.write(JSON.stringify(error) + "\n");
+					socket.destroy();
+					return;
+				}
 
 				if(!REMOTE_FILE_SOCKETS.hasOwnProperty(username)) REMOTE_FILE_SOCKETS[username] = {};
 
-				if(REMOTE_FILE_SOCKETS[username].hasOwnProperty(fileName)) {
-					log("Remote file: An old socket exist for fileName=" + fileName + ". Closing the old socket!", WARN);
-					REMOTE_FILE_SOCKETS[username][fileName].close();
+				if(REMOTE_FILE_SOCKETS[username].hasOwnProperty(filePath)) {
+					log("Remote file: An old socket exist for filePath=" + filePath + ". Closing the old socket!", WARN);
+					REMOTE_FILE_SOCKETS[username][filePath].close();
 				}
 
 				if(json.stream) {
 					pipeId = ++PIPE_COUNTER;
-					fileName = "pipe" + pipeId;
+					filePath = "pipe" + pipeId;
+					log("Remote file: Sending stream to clients...");
 					sendToAll(username, {remotePipe: {host: remoteHost, start: true, id: pipeId}});
 				}
 
-				REMOTE_FILE_SOCKETS[username][fileName] = socket;
-				log("Remote file: Added socket to username=" + username + " fileName=" + fileName);
+				REMOTE_FILE_SOCKETS[username][filePath] = socket;
+				log("Remote file: Added socket to username=" + username + " filePath=" + filePath);
 			}
 
 			if(json.stream) {
@@ -2115,15 +2123,16 @@ function openRemoteFileServer() {
 			else if(json.fileData) {
 				// We are receiving file conent
 					
-				console.log("Remote file: Recieved content (" + json.fileData.length + " bytes) for " + fileName);
+				console.log("Remote file: Recieved content (" + json.fileData.length + " bytes) for " + filePath);
 						
-				var msg = {remoteFile: {fileName: fileName, content: json.fileData, host: remoteHost}};
+				var msg = {remoteFile: {fileName: filePath, content: json.fileData, host: remoteHost}};
 				sendToAll(username, msg);
 				fileContentReceived = true;
 					
 				// We want to keep the connection open, so we can send back the content when it's saved!
 			}
 			else if(json.ping) {
+				log("Remote file: Recieved ping", DEBUG);
 				var pong = {pong: json.ping};
 				socket.write(JSON.stringify(pong) + "\n");
 			}
@@ -2133,7 +2142,7 @@ function openRemoteFileServer() {
 		function sendToStdin() {
 			var msg = {remotePipe: {host: remoteHost, content: strBuffer, id: pipeId}};
 			
-			console.log("Remote file: Sending data to editor client user " + USERNAME + " (strBuffer.length=" + strBuffer.length + ")");
+			console.log("Remote file: Sending data to editor clients... (strBuffer.length=" + strBuffer.length + ")");
 			sendToAll(username, msg);
 			strBuffer = ""; // Clear the buffer
 		}
@@ -2152,7 +2161,7 @@ function openRemoteFileServer() {
 		
 		function remoteFileSocketClose(hadError) {
 			console.log("Remote file: socket closed. hadError=" + hadError);
-			if(username && REMOTE_FILE_SOCKETS.hasOwnProperty(username) && REMOTE_FILE_SOCKETS[username].hasOwnProperty(fileName)) delete REMOTE_FILE_SOCKETS[username][fileName];
+			if(username && REMOTE_FILE_SOCKETS.hasOwnProperty(username) && REMOTE_FILE_SOCKETS[username].hasOwnProperty(filePath)) delete REMOTE_FILE_SOCKETS[username][filePath];
 			
 			if(pipeId) {
 				sendToAll(username, {remotePipe: {host: remoteHost, end: true, id: pipeId}});
@@ -5431,10 +5440,12 @@ function checkMounts(options, checkMountsCallback) {
 						var socket = REMOTE_FILE_SOCKETS[username][fileName];
 						if(req.remoteFile.content) {
 							// File saved
-							socket.write(req.remoteFile.content + EOF);
-						}
-						if(req.remoteFile.close) {
-							// File closed
+
+						var json = {filePath: fileName, fileData: {type: "jsstring", data: req.remoteFile.content} };
+						socket.write(JSON.stringify(json) + "\n");
+					}
+					if(req.remoteFile.close) {
+						// File closed
 							socket.destroy();
 						}
 						workerResp(null, true);

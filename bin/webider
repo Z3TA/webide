@@ -318,7 +318,7 @@ function dance(settings) {
 	var StringDecoder = module_string_decoder.StringDecoder;
 	var decoder;
 	var strBuffer = "";
-	var fileContent;
+	var fileData;
 	var isPipe = false;
 	
 	if(!settings.host) throw new Error("No host in settings!");
@@ -340,7 +340,7 @@ function dance(settings) {
 				console.log(err.message);
 				return;
 			}
-			fileContent = data;
+			fileData = data;
 			conn();
 		});
 		
@@ -366,7 +366,6 @@ function dance(settings) {
 		connection.on("close", connectionClosed);
 		connection.on("data", connectionData);
 		
-		
 	}
 	
 	function connectionError(err) {
@@ -389,16 +388,24 @@ function dance(settings) {
 
 		if(settings.filePath) {
 			json.filePath = settings.filePath;
-			json.fileContent = fileContent;
-			connection.write(JSON.stringify(json) + "\n");
+			json.fileData = fileData;
+			var data = JSON.stringify(json);
+			debug("Sending: " + data);
+			connection.write(data + "\n");
+
 		}
 		else {
 			// Send stdin
+
+			// test: while sleep 1; do echo $((1 + $RANDOM % 10)); done | /bin/webider teststream.txt -debug
+
 			isPipe = true;
 			
 			json.stream = true;
 
-			connection.write(JSON.stringify(json) + "\n");
+			var data = JSON.stringify(json);
+			debug("Sending: " + data);
+			connection.write(data + "\n");
 			
 			//if(stdinData.length > 0) connection.write(stdinData);
 			//else console.log("No initial stdinData to send");
@@ -426,6 +433,7 @@ function dance(settings) {
 			Solution: Keep the program running, and don't exit until we get a notice that the file has been closed
 		*/
 		
+		debug("Recived data=" + data.toString());
 		debug("Recived " + data.length + " bytes ... isPipe=" + isPipe);
 		
 		if(strBuffer == "") {
@@ -439,16 +447,29 @@ function dance(settings) {
 			console.log(strBuffer);
 			strBuffer = "";
 		}
-		else if(strBuffer.charAt(strBuffer.length-1) == EOF) {
-			strBuffer = strBuffer.slice(0, -1);
+		else if(strBuffer.charAt(strBuffer.length-1) == "\n") {
+			strBuffer = strBuffer.slice(0, -1); // Remove the line break
 			
 			var totalCharacters = strBuffer.length;
 			
 			debug("Recieved content (" + totalCharacters + " characters) for " + settings.filePath);
 			
-			module_fs.writeFile(settings.filePath, strBuffer, function(err) {
+			var json = JSON.parse(strBuffer); // OK to throw if the parse fail
+			
+			if(json.fileData.type == "jsstring") {
+				var fileContent = json.fileData.data;
+			}
+			else if(json.fileData.type == "Buffer") {
+				// This has never been tested :) But is supposed to be used for binary files
+				var fileContent = Buffer.from(json.fileData.data);
+			}
+			else {
+				throw new Error("Unknown json.fileData.type=" + json.fileData.type + " json = " + JSON.stringify(json, null2, ));
+			}
+
+			module_fs.writeFile(settings.filePath, fileContent, function(err) {
 				if(err) throw err;
-				console.log(totalCharacters + " characters written to " + settings.filePath);
+				console.log(fileContent.length + " characters written to " + settings.filePath);
 			});
 			
 			// Reset the buffer, so we can get the file content again.
