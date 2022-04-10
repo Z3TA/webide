@@ -326,7 +326,8 @@ function dance(settings) {
 	var strBuffer = "";
 	var fileData;
 	var isPipe = false;
-	
+	var pingInterval;
+
 	if(!settings.host) throw new Error("No host in settings!");
 	
 	if(!settings.port) {
@@ -424,8 +425,18 @@ function dance(settings) {
 			// When piping, the socket will automatically end when the piped stream end!
 			
 		}
+
+		pingInterval = setInterval(sendPing, 2000);
 	}
 	
+	function sendPing() {
+		var randomNr = Math.random() * 9999999;
+		var json = {ping: randomNr};
+		var data = JSON.stringify(json);
+		debug("Sending: " + data);
+		connection.write(data + "\n");
+	}
+
 	function connectionClosed(hadError) {
 		debug("connection closed. hadError=" + hadError);
 		
@@ -462,7 +473,13 @@ function dance(settings) {
 			
 			var json = JSON.parse(strBuffer); // OK to throw if the parse fail
 			
-			if(json.fileData.type == "jsstring") {
+			if(json.error) {
+				console.log(json.error);
+			}
+			else if(json.pong) {
+				debug("Received pong=" + json.pong);
+			}
+			else if(json.fileData.type == "jsstring") {
 				var fileContent = json.fileData.data;
 			}
 			else if(json.fileData.type == "Buffer") {

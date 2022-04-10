@@ -2093,8 +2093,8 @@ function openRemoteFileServer() {
 				client_connections = findClients(username);
 				if(!client_connections) {
 					var error = {error: "Found no client to send the data! Try another username."};
+					log("Remote file: ", error, DEBUG);
 					socket.write(JSON.stringify(error) + "\n");
-					socket.destroy();
 					return;
 				}
 
@@ -2183,11 +2183,6 @@ function openRemoteFileServer() {
 				console.log("Remote file: Assuming " + users[0] + " == " + CURRENT_USER);
 				clients = USER_CONNECTIONS[ users[0] ];
 				username = users[0];
-			}
-			
-			if(!clients) {
-				log("Remote file: Unable to find a connected client for username=" + username + "! Aborting remote file transfer! Currently logged in users: " + JSON.stringify(users), NOTICE);
-				socket.destroy();
 			}
 			
 			return clients;
