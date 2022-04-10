@@ -12,6 +12,12 @@
 	chomd +x webide
 	sudo mv webide /usr/local/bin
 	
+	todo: Implement ping/pong
+
+	todo: Make it usuable for sending stdin:
+	process.stdin.on( 'data', function(data) { console.log( data ) } );
+	process.stdin.on( 'end', function() { console.log( 'EOF' ) } );
+
 */
 
 var DEFAULT_PORT = 8103;
