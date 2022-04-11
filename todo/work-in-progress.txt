@@ -26,6 +26,7 @@ apt-get install llvm-dev
 apt-get install llvm-13-dev
 apt-get install qt5-qmake
 apt-get install qtbase5-dev
+apt install gcc-multilib
 find / -type d -name "llvm" 2>/dev/null
 nano dz.pro
 ````
@@ -37,6 +38,9 @@ INCLUDEPATH += /usr/include/antlr4-runtime \
 ./build.sh
 qmake && make
 
+https://webide.se/?github=/Znurre/dz/blob/master/examples/ttt/main.dz#/home/guest26/repo/dz/examples/hello_world/main.fc
+
+---
 
 bug: guest3.webide.se.nginx ended up empty!
 
@@ -48,6 +52,8 @@ Move certbot archive and keys to new server
 Installing a new server with Debian 11
 
 ---
+
+todo: Always open makefile's in plain text mode, because tabs are important! (like in Python)
 
 todo: test webide on latest Node.js version
 
