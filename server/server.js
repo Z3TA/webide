@@ -2104,7 +2104,7 @@ function openRemoteFileServer() {
 
 				client_connections = findClients(username);
 				if(!client_connections) {
-					var error = {error: "Found no client to send the data! Try another username."};
+					var error = {error: "Found no active client to send the data! Try another username."};
 					log("Remote file: Error: " + error.error);
 					socket.write(JSON.stringify(error) + "\n");
 					return;
