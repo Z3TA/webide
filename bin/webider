@@ -482,6 +482,9 @@ function dance(settings) {
 			else if(json.pong) {
 				debug("Received pong=" + json.pong);
 			}
+			else if(json.closeFile) {
+				debug("Client closed the file");
+			}
 			else if(json.fileData.type == "jsstring") {
 				var fileContent = json.fileData.data;
 			}

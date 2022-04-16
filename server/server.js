@@ -40,6 +40,7 @@ var module_os = require("os");
 var module_sockJs = require("sockjs");
 var module_http = require("http");
 var module_https = require("https");
+var module_tls = require("tls");
 var module_dns = require("dns");
 var module_dgram = require("dgram");
 var module_pwHash = require("./pwHash.js");
@@ -328,6 +329,9 @@ if(typeof NAT_TYPE == "string" && NAT_TYPE.indexOf("server") != -1) {
 		process.exit();
 	}
 }
+
+var TLS_KEY_PATH = getArg(["tls_key", "tls_key", "tls_key_path"]) || "/etc/ssl/private/" + DOMAIN + ".key";
+var TLS_CERT_PATH = getArg(["tls_cert", "tls_cert", "tls_cert_path"]) || "/etc/ssl/certs/letsencrypt/" + DOMAIN + ".crt";
 
 
 var INSIDE_DOCKER = getArg(["insidedocker", "insidedocker", "insidecontainer"]);
@@ -2004,22 +2008,64 @@ function openRemoteFileServer() {
 	*/
 	
 	var StringDecoder = module_string_decoder.StringDecoder;
-	var remoteFileServer = module_net.createServer({keepAlive: true});
-	
-	remoteFileServer.on("listening", function stdinServerListening() {
-		log("Remote file server listening on port " + REMOTE_FILE_PORT, DEBUG);
+
+	module_fs.readFile(TLS_KEY_PATH, function(err, tlsKey) {
+		if(err) {
+			log("Unable to read TLS_KEY_PATH=" + TLS_KEY_PATH + ". Remote file server will operate in clear text TCP/IP!", WARN);
+			return startRemoteFileServer("tcp");
+		}
+
+		module_fs.readFile(TLS_CERT_PATH, function(err, tlsCert) {
+			if(err) {
+				throw new Error("Unable to read TLS_CERT_PATH=" + TLS_CERT_PATH + "");
+			}
+
+			startRemoteFileServer(serverType, tlsKey, tlsCert)
+		});
 	});
+
+	function startRemoteFileServer(serverType, tlsKey, tlsCert) {
+
+		if(serverType == "tls") {
+
+			var options = {
+				key: tlsKey,
+				cert: tlsCert,
+
+				// This is necessary only if using client certificate authentication.
+				//requestCert: true,
+
+				// This is necessary only if the client uses a self-signed certificate.
+				//ca: [ fs.readFileSync('client-cert.pem') ],
+
+				keepAlive: true
+			};
+
+			var remoteFileServer = module_tls.createServer(options);
+		}
+		else {
+			var remoteFileServer = module_net.createServer({keepAlive: true});
+		}
+
+
+		remoteFileServer.on("listening", function stdinServerListening() {
+			log("Remote file server listening on port " + REMOTE_FILE_PORT, DEBUG);
+		});
+
+		remoteFileServer.on("connection", stdinConnection);
+		remoteFileServer.on("error", stdSocketError);
+
+		remoteFileServer.listen(REMOTE_FILE_PORT, "0.0.0.0");
+		// Listen on all IP's so that we can get files from anywhere ...
+
+
+		// Also listen on a unix socket so that the remote socket can be reached from within user netns ?
+		// No, we can reach it via 10.0.0.1 from within the user netns!
+		// note: Need to allow access to REMOTE_FILE_PORT in iptables/firewall!
+
+	}
+
 	
-	remoteFileServer.on("connection", stdinConnection);
-	remoteFileServer.on("error", stdSocketError);
-	
-	remoteFileServer.listen(REMOTE_FILE_PORT, "0.0.0.0");
-	// Listen on all IP's so that we can get files from anywhere ...
-	
-	
-	// Also listen on a unix socket so that the remote socket can be reached from within user netns ?
-	// No, we can reach it via 10.0.0.1 from within the user netns!
-	// note: Need to allow access to REMOTE_FILE_PORT in iptables/firewall!
 	
 	function stdinConnection(socket) {
 		
@@ -5451,7 +5497,8 @@ function checkMounts(options, checkMountsCallback) {
 						socket.write(JSON.stringify(json) + "\n");
 					}
 					if(req.remoteFile.close) {
-						// File closed
+							// File closed
+							socket.send(JSON.stringify({closeFile: fileName}) + "\n");
 							socket.destroy();
 						}
 						workerResp(null, true);

@@ -1,6 +1,20 @@
 Reporting a bug ? Make sure it's repeatable!
 ============================================
 
+Users 
+
+
+users should be able to access their tls keys (so they can test and use tls in their (dev) servers)
+chown root:user /etc/letsencrypt/live/user.webide.se
+chmod 2644 /etc/letsencrypt/live/user.webide.se
+
+TLS on webider
+json protocol on webider
+Working on webider
+
+
+---
+
 
 Apr 06 15:16:54 kaj.100m.se node[1192108]: /srv/webide/server/server.js:2079
 Apr 06 15:16:54 kaj.100m.se node[1192108]:                                                 REMOTE_FILE_SOCKETS[username][fileName].close();
