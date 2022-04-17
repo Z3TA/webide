@@ -2020,7 +2020,7 @@ function openRemoteFileServer() {
 				throw new Error("Unable to read TLS_CERT_PATH=" + TLS_CERT_PATH + "");
 			}
 
-			startRemoteFileServer(serverType, tlsKey, tlsCert)
+			startRemoteFileServer("tls", tlsKey, tlsCert)
 		});
 	});
 
@@ -2038,21 +2038,32 @@ function openRemoteFileServer() {
 				// This is necessary only if the client uses a self-signed certificate.
 				//ca: [ fs.readFileSync('client-cert.pem') ],
 
-				keepAlive: true
+				keepAlive: true,
+				servername: DOMAIN,
+				SNICallback: function(servername, callback) {
+					log("Remote file: SNICallback: servername=" + servername);
+					if(servername == DOMAIN) return callback(null);
+					else return callback(null, false);
+					
+				}
 			};
 
 			var remoteFileServer = module_tls.createServer(options);
+
+			remoteFileServer.on("secureConnection", stdinConnection);
 		}
 		else {
 			var remoteFileServer = module_net.createServer({keepAlive: true});
+
+			remoteFileServer.on("connection", stdinConnection);
+
 		}
 
-
 		remoteFileServer.on("listening", function stdinServerListening() {
-			log("Remote file server listening on port " + REMOTE_FILE_PORT, DEBUG);
+			log("Remote file server (" + serverType + ") listening on port " + REMOTE_FILE_PORT, DEBUG);
 		});
 
-		remoteFileServer.on("connection", stdinConnection);
+		
 		remoteFileServer.on("error", stdSocketError);
 
 		remoteFileServer.listen(REMOTE_FILE_PORT, "0.0.0.0");
