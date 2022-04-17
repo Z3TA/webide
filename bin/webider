@@ -31,6 +31,7 @@ var DEBUG = false; // spit out debug info if true
 var module_os = require("os");
 var module_string_decoder = require('string_decoder');
 var module_net = require("net");
+var module_tls = require('tls');
 
 var homeDir = module_os.homedir();
 
@@ -329,6 +330,7 @@ function dance(settings) {
 	var fileData;
 	var isPipe = false;
 	var pingInterval;
+	var connectionOptions = {};
 
 	if(!settings.host) throw new Error("No host in settings!");
 	
@@ -366,10 +368,18 @@ function dance(settings) {
 		if(connection) throw new Error("We already have a connection!");
 		
 		/*
-			Will NodeJS keep the connection open for us, or do we have to send junk ?
+			question: Will NodeJS keep the connection open for us, or do we have to send junk ?
+			answer: The connection will think it's open but you can't send data, so we need to send ping/pongs to check if the connection is still there
+		
+
 		*/
 		
-		connection = module_net.createConnection({host: settings.host, port: settings.port, keepAlive: true});
+		connectionOptions.host = settings.host;
+		connectionOptions.port = settings.port;
+		connectionOptions.keepAlive = true;
+		
+		connection = module_tls.connect(connectionOptions);
+
 		connection.on("error", connectionError);
 		connection.on("connect", connectionConnected);
 		connection.on("close", connectionClosed);
@@ -378,11 +388,22 @@ function dance(settings) {
 	}
 	
 	function connectionError(err) {
-		console.log(  "Connection error: " + (err && (err.message || err) )  );
+		console.log(  "Connection error: " + (err && (err.message || err) ) + " code=" + (err && err.code) );
 		
 		if(err && err.code == "ECONNREFUSED") {
 			if(settings.loadedFrom) console.log("Edit " + settings.loadedFrom + " or ");
 			console.log("try connecting to another host using -host and -port flags");
+		}
+		else if(err && err.code == "EPROTO") {
+			// Remote server probably have not configured TLS, so use plain TCP/IP
+			connection.destroy();
+			debug("Reconnecting using TCP/IP (no TLS)");
+			connection = module_net.createConnection(connectionOptions);
+			connection.on("error", connectionError);
+			connection.on("connect", connectionConnected);
+			connection.on("close", connectionClosed);
+			connection.on("data", connectionData);
+			return; // Do not exit
 		}
 		
 		process.exit(1);
