@@ -1,6 +1,22 @@
 Reporting a bug ? Make sure it's repeatable!
 ============================================
 
+Support for running qml files
+
+apt install qml
+apt install qml-module-org-kde-kquickcontrols qml-module-org-kde-kquickcontrolsaddons qml-module-qtquick-controls
+aptinstall qtdeclarative5-private-dev
+apt install qml-module-qtquick-controls2
+
+qml hot reload
+
+noVNC folder dissappeared after upgrade !?!?
+
+
+get the host name of the remote machine when getting connection from webider
+
+when opening the same file again from webider, don't create a new(1) file, use existing, check if base has changed (hash)
+
 ./bin/webider test.js -h test.johan.webide.se -p 8103 -u test -ip 10.0.4.145 -debug
 
 node server/server.js --port=/home/$(whoami)/sock/test --domain=test.$(whoami).webide.se --username=test --password=test123 --home=/home/ --tls_key=/etc/letsencrypt/live/johan.webide.se/privkey.pem --tls_cert=/etc/letsencrypt/live/johan.webide.se/fullchain.pem
@@ -17,6 +33,8 @@ Working on webider
 
 /etc/letsencrypt/live/user.webide.se/privkey.pem
 ---
+
+todo: Rename the global cb() function to CB to honour the all caps global variable convention
 
 
 Apr 06 15:16:54 kaj.100m.se node[1192108]: /srv/webide/server/server.js:2079
