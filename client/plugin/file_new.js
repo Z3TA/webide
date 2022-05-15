@@ -28,7 +28,7 @@
 				navigator.keyboard.lock(["KeyN"]).then(function(obj) {
 					// note: Locked keys only works in fullscreen!
 					//console.log("createNewFile: Allowed to bind to KeyN! obj=" + JSON.stringify(obj));
-					cb(EDITOR.bindKey, {desc: "Create new file", key: "n", combo: CTRL, fun: newFileFromKeyboardComboViaKeyboardLock});
+					CB(EDITOR.bindKey, {desc: "Create new file", key: "n", combo: CTRL, fun: newFileFromKeyboardComboViaKeyboardLock});
 				}).catch(function(err) {
 					console.log("createNewFile: Not allowed to use KeyN! " + (err.message || err));
 				});

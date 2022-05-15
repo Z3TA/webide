@@ -1,6 +1,9 @@
 Reporting a bug ? Make sure it's repeatable!
 ============================================
 
+regression: pressing Ctrl+O when caret is not a file path doesn't work
+pressing Ctrl+O while text is selected seem to trigger keyboard_shift_enter !?!?!?!?
+
 Support for running qml files
 
 apt install qml

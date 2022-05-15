@@ -344,9 +344,9 @@ EDITOR.settings.style.font = "Fira Code";
 
 				//console.log("settings_overload: All fonts ready!");
 
-				cb(whenFontLoaded);
+				CB(whenFontLoaded);
 
-				cb(makeGlyphWidthDetector);
+				CB(makeGlyphWidthDetector);
 
 			});
 		}
