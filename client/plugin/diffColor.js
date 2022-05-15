@@ -111,7 +111,7 @@
 	}
 
 	function isDiffFile(file) {
-		return file.path.slice(-5) == ".diff";
+		return file && file.path.slice(-5) == ".diff";
 	}
 
 	function applyDiffColors(buffer, file) {

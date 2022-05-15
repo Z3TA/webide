@@ -2718,9 +2718,11 @@ else {
 
 		var enc = new TextEncoder();
 		// TypeError: Failed to execute 'digest' on 'SubtleCrypto': The provided value is not of type '(ArrayBuffer or ArrayBufferView)
-		var buff = enc.encode(fileContent);
-		window.crypto.subtle.digest(algorithm, buff).then(function(hash) {
-			CB(callback, null, hash);
+		var buff = enc.encode(str);
+		window.crypto.subtle.digest(algorithm, buff).then(function(hashBuffer) {
+			var hashArray = Array.from(new Uint8Array(hashBuffer)); 
+			var hashHex = hashArray.map(function(b) {return b.toString(16).padStart(2, '0')}).join(''); // convert bytes to hex string
+			CB(callback, null, hashHex);
 		}, function(err) {
 			console.error(err);
 			var error = new Error("UTIL.hash: Failed to hash (algorithm=" + algorithm + "). Error: " + err.message + "\nstr=" + str);

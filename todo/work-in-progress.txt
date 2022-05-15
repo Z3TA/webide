@@ -1,20 +1,11 @@
 Reporting a bug ? Make sure it's repeatable!
 ============================================
 
-regression: pressing Ctrl+O when caret is not a file path doesn't work
-pressing Ctrl+O while text is selected seem to trigger keyboard_shift_enter !?!?!?!?
+---
 
-Support for running qml files
+todo: Check the hash functions (crypto.subtle.digest in EDITOR.js) to make sure it actually returns a hash. Make them use UTIL.hash !?
 
-apt install qml
-apt install qml-module-org-kde-kquickcontrols qml-module-org-kde-kquickcontrolsaddons qml-module-qtquick-controls
-aptinstall qtdeclarative5-private-dev
-apt install qml-module-qtquick-controls2
-
-qml hot reload
-
-noVNC folder dissappeared after upgrade !?!?
-
+---
 
 get the host name of the remote machine when getting connection from webider
 
@@ -37,8 +28,6 @@ Working on webider
 /etc/letsencrypt/live/user.webide.se/privkey.pem
 ---
 
-todo: Rename the global cb() function to CB to honour the all caps global variable convention
-
 
 Apr 06 15:16:54 kaj.100m.se node[1192108]: /srv/webide/server/server.js:2079
 Apr 06 15:16:54 kaj.100m.se node[1192108]:                                                 REMOTE_FILE_SOCKETS[username][fileName].close();
@@ -56,6 +45,33 @@ implement ping/pong.
 Send each data with a JSON metadata pair specialChar + JSON + specialChar2 + data + specialChar3 ? Or send the entire thing as JSON!?
 specialChar1 + JSON + specialChar2
 Use an encryption layer ? TSL !?
+
+---
+
+regression: When clickin on for example line 1275 in EDITOR.js using Firefox, the function list first select EDITOR.openFile (which is the correct function)
+but then selects EDITOR.ctxMenu.show -> fullScreenMenyMaybe and keeps highligting it making the functioin list flicker!
+
+regression: When searching right in EDITOR.js for "openFile" the search sometimes get stuck and after clicking a few times it continues...
+
+regression: pressing Ctrl+O when caret is not a file path doesn't work
+pressing Ctrl+O while text is selected seem to trigger keyboard_shift_enter !?!?!?!?
+
+---
+
+Need a simple REPL!
+When I need to use the JS/node repl I use the local REPL because the built in terminal emulator is not fully compatible with nodejs repl
+
+---
+
+Support for running qml files
+
+apt install qml
+apt install qml-module-org-kde-kquickcontrols qml-module-org-kde-kquickcontrolsaddons qml-module-qtquick-controls
+aptinstall qtdeclarative5-private-dev
+apt install qml-module-qtquick-controls2
+
+qml hot reload
+
 
 ---
 

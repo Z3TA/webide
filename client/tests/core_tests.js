@@ -40,6 +40,22 @@
 		
 	}
 	
+	EDITOR.addTest(function testClientHash(callback) {
+		
+		// UTIL.hash() should return the same hash as the server hash API!
+
+		var testText = "";
+		var testRow = "ABCDEFGHIJKLMNOPQRSTUVWXYZÅÄÖabcdefghijklmnopqrstuvwxyzåäö0123456789\n";
+		for (var i=0; i<1000; i++) testText = testText + i + ". " + testRow;
+		var correctHash = "91f8cbc3be52354a9387d2e32348e529c71d2b8aa77656f63d7815d3959a9de0"; // sha256
+
+		UTIL.hash(testText, function(err, hash) {
+			UTIL.assert(hash, correctHash);
+
+			callback(true);
+		});
+	});
+
 	EDITOR.addTest(function caretRowColNumber(callback) {
 		// caret.col and caret.row should always be type number!
 		EDITOR.openFile("caretRowColNumber.js", 'abcdefghijklmnopqrstuvwxyz\nabcdefghijklmnopqrstuvwxyz\nabcdefghijklmnopqrstuvwxyz\n', function(err, file) {

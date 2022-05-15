@@ -138,13 +138,15 @@ return;
 		//console.log( "remote_file: openRemoteFile: json=" + JSON.stringify(json, null, 2) );
 		
 		var hostname = json.host;
+
 		if(hostname.length > 15) { // 111.222.333.444
+			// shorten long hostname
 			var dot = hostname.indexOf(".");
-			if(dot < 2) dot = hostname.length;
-			hostname = hostname.slice(0, dot);
+			if(dot < 4) dot = hostname.length; // It's probably an IP address so keep it as is !?!?
+			hostname = hostname.slice(0, dot); // Cut off the domain at the first dot so that for example kaj.100m.se will be hostname=kaj
 		}
 
-		var url = hostname + "://" + json.host + (json.fileName.indexOf("/") == 0 ? "" : "/") + json.fileName;
+		var url = "remote://" + hostname + (json.fileName.indexOf("/") == 0 ? "" : "/") + json.fileName;
 		
 		if(json.content.type == "Buffer") {
 			var utf8decoder = new TextDecoder(); // default 'utf-8' or 'utf8'
@@ -178,6 +180,9 @@ return;
 				if(path == url) {
 					// File is already open
 					// Check if the base is the same
+					console.log("EDITOR.files[" + path + "].hash=" + EDITOR.files[path].hash);
+					console.log("hash=" + hash);
+
 					if(EDITOR.files[path].hash == hash) {
 						// We can continue editing it, because it's the same
 						EDITOR.showFile(url);
@@ -185,7 +190,7 @@ return;
 					}
 					else {
 						// Reopened, source changed!
-						...
+						alertBox("The source has changed. Backup this file if needed. Then close it. And run webider again");
 					}
 				}
 			}

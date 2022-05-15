@@ -204,7 +204,7 @@
 
 	// TEST-CODE-START
 
-	EDITOR.addTest(1, true, function doNotSHowColorsAfterReloadAsPlainText(callback) {
+	EDITOR.addTest(true, function doNotSHowColorsAfterReloadAsPlainText(callback) {
 		EDITOR.openFile("doNotSHowColorsAfterReloadAsPlainText.dart", "void main() {}", function(err, file) {
 			if(err) throw err;
 
