@@ -137,7 +137,14 @@ return;
 		
 		//console.log( "remote_file: openRemoteFile: json=" + JSON.stringify(json, null, 2) );
 		
-		var url = "remote://" + json.host + (json.fileName.indexOf("/") == 0 ? "" : "/") + json.fileName;
+		var hostname = json.host;
+		if(hostname.length > 15) { // 111.222.333.444
+			var dot = hostname.indexOf(".");
+			if(dot < 2) dot = hostname.length;
+			hostname = hostname.slice(0, dot);
+		}
+
+		var url = hostname + "://" + json.host + (json.fileName.indexOf("/") == 0 ? "" : "/") + json.fileName;
 		
 		if(json.content.type == "Buffer") {
 			var utf8decoder = new TextDecoder(); // default 'utf-8' or 'utf8'
@@ -165,11 +172,33 @@ return;
 			var text = json.content;
 		}
 
-		EDITOR.openFile(url, text, {savedAs: true, isSaved: true}, function(err, file) {
-			if(err) throw err;
-			
-			remoteFiles.push(file);
+		UTIL.hash(text, function (err, hash) {
+
+			for(var path in EDITOR.files) {
+				if(path == url) {
+					// File is already open
+					// Check if the base is the same
+					if(EDITOR.files[path].hash == hash) {
+						// We can continue editing it, because it's the same
+						EDITOR.showFile(url);
+						return;
+					}
+					else {
+						// Reopened, source changed!
+						...
+					}
+				}
+			}
+
+			EDITOR.openFile(url, text, {savedAs: true, isSaved: true, hash: hash}, function(err, file) {
+				if(err) throw err;
+
+				remoteFiles.push(file);
+			});
+
 		});
+
+		
 	}
 	
 	function remoteFileSaved(file) {
@@ -186,7 +215,7 @@ return;
 				if(err) alertBox("Failed to save remote file " + fileName + ".\nError: " + err.message);
 				else {
 					//console.log( "remote_file: remoteFileSaved: Data sent to remote host!" );
-				file.saved();
+					file.saved();
 				}
 			});
 			
@@ -232,7 +261,7 @@ return;
 			
 			CLIENT.cmd("remoteFile", {name: fileName, close: true}, function(err) {
 				if(err) console.warn("remote_file: Remote socket error: " + err.message);
-		});
+			});
 		}
 		else if(file.path.indexOf("remote://") == 0) {
 			console.warn("remote_file: Unknown remote file: " + file.path);

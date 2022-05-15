@@ -2050,12 +2050,12 @@ function openRemoteFileServer() {
 
 			var remoteFileServer = module_tls.createServer(options);
 
-			remoteFileServer.on("secureConnection", stdinConnection);
+			remoteFileServer.on("secureConnection", remoteFileConnection);
 		}
 		else {
 			var remoteFileServer = module_net.createServer({keepAlive: true});
 
-			remoteFileServer.on("connection", stdinConnection);
+			remoteFileServer.on("connection", remoteFileConnection);
 
 		}
 
@@ -2078,7 +2078,7 @@ function openRemoteFileServer() {
 
 	
 	
-	function stdinConnection(socket) {
+	function remoteFileConnection(socket) {
 		
 		var decoder = new StringDecoder('utf8');
 		var username; // username for this socket
@@ -2089,6 +2089,7 @@ function openRemoteFileServer() {
 		var fileContentReceived = false;
 		var remoteHost = socket.remoteAddress;
 		var pipeId = false;
+
 		//var pingInterval = setInterval(ping, 5000);
 
 		log("Remote file: server connection from " + remoteHost);
@@ -2187,6 +2188,7 @@ function openRemoteFileServer() {
 
 			if(json.stream) {
 				// We are receiving a stdin stream
+				// todo: Needs testing! (not fully implemented)
 				sendToStdin();
 			}
 			else if(json.fileData) {

@@ -2700,18 +2700,47 @@ else {
 		}
 	},
 	
-	hash: function hash(str) {
-		// https://stackoverflow.com/questions/6122571/simple-non-secure-hash-function-for-javascript
-		var hash = 0;
-		if (str.length == 0) {
+	hash: function hash(str, algorithm, callback) {
+
+		if(typeof algorithm == undefined) {
+			return simpleHash(str);
+		}
+		else if(typeof algorithm == "function") {
+			callback = algorithm;
+			algorithm = "SHA-256";
+		}
+
+		if( typeof window.crypto != "object" || !("TextEncoder" in window) ) {
+			var hash = simpleHash(str);
+			if(typeof callback == "function") return callback(null, hash);
+			else return hash;
+		}
+
+		var enc = new TextEncoder();
+		// TypeError: Failed to execute 'digest' on 'SubtleCrypto': The provided value is not of type '(ArrayBuffer or ArrayBufferView)
+		var buff = enc.encode(fileContent);
+		window.crypto.subtle.digest(algorithm, buff).then(function(hash) {
+			CB(callback, null, hash);
+		}, function(err) {
+			console.error(err);
+			var error = new Error("UTIL.hash: Failed to hash (algorithm=" + algorithm + "). Error: " + err.message + "\nstr=" + str);
+			CB(callback, error);
+		});
+
+		function simpleHash(str) {
+			// https://stackoverflow.com/questions/6122571/simple-non-secure-hash-function-for-javascript
+			var hash = 0;
+			if (str.length == 0) {
+				return hash;
+			}
+			for (var i = 0; i < str.length; i++) {
+				var char = str.charCodeAt(i);
+				hash = ((hash<<5)-hash)+char;
+				hash = hash & hash; // Convert to 32bit integer
+			}
 			return hash;
 		}
-		for (var i = 0; i < str.length; i++) {
-			var char = str.charCodeAt(i);
-			hash = ((hash<<5)-hash)+char;
-			hash = hash & hash; // Convert to 32bit integer
-		}
-		return hash;
+
 	},
 	
 	homeDir: function extractHomeDir(path) {
