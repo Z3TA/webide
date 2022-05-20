@@ -1283,18 +1283,10 @@ usePseudoClipboard = false;
 					state.props.nativeFileSystemFileHandle.getFile().then(function readText(localFile) {
 						localFile.text().then(function(fileContent) {
 
-							if(typeof window.crypto != "object" || !("TextEncoder" in window)) {
-								return load(null, path, fileContent, null);
-							}
-
-							var enc = new TextEncoder();
-							// TypeError: Failed to execute 'digest' on 'SubtleCrypto': The provided value is not of type '(ArrayBuffer or ArrayBufferView)
-							var buff = enc.encode(fileContent);
-							crypto.subtle.digest('SHA-256', buff).then(function(hash) {
-								CB(load, null, path, fileContent, hash);
-							}, function(err) {
-								CB(load, null, path, fileContent, null);
+							UTIL.hash(fileContent, function(err, hash) {
+								load(null, path, fileContent, hash || null);
 							});
+
 						});
 					});
 				});
@@ -1901,20 +1893,10 @@ usePseudoClipboard = false;
 				fileHandle.getFile().then(function readText(localFile) {
 					localFile.text().then(function(fileContent) {
 
-						if(typeof window.crypto != "object" || !("TextEncoder" in window)) {
-							throw new Error("getFileHash: window.crypto and TextEncoder is needed to compute a SHA-256 for fileSystemFileHandle!");
-						}
-
-						var enc = new TextEncoder();
-						// TypeError: Failed to execute 'digest' on 'SubtleCrypto': The provided value is not of type '(ArrayBuffer or ArrayBufferView)
-						var buff = enc.encode(fileContent);
-						crypto.subtle.digest('SHA-256', buff).then(function(hash) {
-							CB(callback, null, hash);
-						}, function(err) {
-							console.error(err);
-							var error = new Error("getFileHash: Failed to hash fileSystemFileHandle text content using crypty API");
-							CB(callback, error);
+						UTIL.hash(fileContent, function(err, hash) {
+							callback(err, hash);
 						});
+
 					});
 				});
 			});
@@ -2037,20 +2019,10 @@ usePseudoClipboard = false;
 						// Close the file and write the contents to disk
 						writer.close().then(function() {
 								
-							if(typeof window.crypto == "object" && "TextEncoder" in window) {
-								var enc = new TextEncoder();
-								// TypeError: Failed to execute 'digest' on 'SubtleCrypto': The provided value is not of type '(ArrayBuffer or ArrayBufferView)
-								var buff = enc.encode(text);
-								crypto.subtle.digest('SHA-256', buff).then(function(hash) {
-									CB(doneSaving, null, path, hash);
-								}, function(err) {
-									console.error(err);
-									console.warn("EDITOR.saveFile: Failed to hash the text using crypty API after saving the file using native file system API");
-									CB(doneSaving, null, path, null);
-								});;
-							}
-							else CB(doneSaving, null, path, null);
-								
+							UTIL.hash(text, function(err, hash) {
+								doneSaving(null, path, hash || null);
+							});
+
 						});
 					});
 					//});
@@ -2074,7 +2046,7 @@ usePseudoClipboard = false;
 				EDITOR.doesFileExist(path, function fileExist(err, exist) {
 					if(err) throw err;
 
-if(exist) {
+					if(exist) {
 						var overwrite = "Overwrite";
 						var cancel = "Cancel";
 						var open = "Open existing file"

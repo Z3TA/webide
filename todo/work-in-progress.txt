@@ -1,12 +1,6 @@
 Reporting a bug ? Make sure it's repeatable!
 ============================================
 
----
-
-todo: Check the hash functions (crypto.subtle.digest in EDITOR.js) to make sure it actually returns a hash. Make them use UTIL.hash !?
-
----
-
 get the host name of the remote machine when getting connection from webider
 
 when opening the same file again from webider, don't create a new(1) file, use existing, check if base has changed (hash)

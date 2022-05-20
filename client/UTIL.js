@@ -2702,7 +2702,8 @@ else {
 	
 	hash: function hash(str, algorithm, callback) {
 
-		if(typeof algorithm == undefined) {
+		if(algorithm == undefined) {
+			console.log("UTIL.hash: Returning simpleHash");
 			return simpleHash(str);
 		}
 		else if(typeof algorithm == "function") {
@@ -2740,7 +2741,10 @@ else {
 				hash = ((hash<<5)-hash)+char;
 				hash = hash & hash; // Convert to 32bit integer
 			}
-			return hash;
+
+			var str = "" + hash;
+
+			return str;
 		}
 
 	},
