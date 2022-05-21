@@ -1,10 +1,6 @@
 Reporting a bug ? Make sure it's repeatable!
 ============================================
 
-get the host name of the remote machine when getting connection from webider
-
-when opening the same file again from webider, don't create a new(1) file, use existing, check if base has changed (hash)
-
 ./bin/webider test.js -h test.johan.webide.se -p 8103 -u test -ip 10.0.4.145 -debug
 
 node server/server.js --port=/home/$(whoami)/sock/test --domain=test.$(whoami).webide.se --username=test --password=test123 --home=/home/ --tls_key=/etc/letsencrypt/live/johan.webide.se/privkey.pem --tls_cert=/etc/letsencrypt/live/johan.webide.se/fullchain.pem
@@ -41,6 +37,9 @@ specialChar1 + JSON + specialChar2
 Use an encryption layer ? TSL !?
 
 ---
+
+regression: In Firefox, when typing while focused on the function list it first finds the function, but then quickly unfocus it and focus on something else... very annoying!
+Try in EDTIOR.js searching for "openfile"
 
 regression: When clickin on for example line 1275 in EDITOR.js using Firefox, the function list first select EDITOR.openFile (which is the correct function)
 but then selects EDITOR.ctxMenu.show -> fullScreenMenyMaybe and keeps highligting it making the functioin list flicker!

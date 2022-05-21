@@ -1149,6 +1149,16 @@ usePseudoClipboard = false;
 			state = undefined;
 		}
 		
+		/*
+			Using the state variable is unintuitive... So throw an error if we use it wrong!
+		*/
+		if(state != undefined) {
+			var allowedInState = ["props", "show", "image", "isSaved", "savedAs", "changed"];
+			for(var prop in state) {
+				if(allowedInState.indexOf(prop) == -1) throw new Error("EDITOR.openFile error: Allowed states are " + allowedInState.join(",") + ". For all other new File properties, put them in {props:{x:x, y:y, z:z}}");
+			}
+		}
+
 		if(state && state.show) {
 			showFile = path;
 			//console.log("EDITOR.openFile: set showFile=" + showFile);
@@ -1378,8 +1388,8 @@ usePseudoClipboard = false;
 				if(state.nativeFileSystemFileHandle != undefined) newFile.nativeFileSystemFileHandle = state.nativeFileSystemFileHandle;
 			}
 			
-			// Able to set file properties when opening the file, before openFile listers fire...
-			// fileOpen listeners need to be called before the callback because the callback might change the file content - triggering file.change events
+			// Able to set file properties when opening the file, before openFile listeners fire...
+			// fileOpen listeners need to be called before the callback, because the callback might change the file content - triggering file.change events
 			// and other plugins listening to fileOpen and fileChange events might get confused when they see a file change event before a file open event.
 			if(state && state.props) {
 				for(var prop in state.props) {
@@ -1392,12 +1402,6 @@ usePseudoClipboard = false;
 				if(fileLoadError) return fileOpenError(fileLoadError);
 				
 				/*
-					
-					Dilemma1: Should file open even listeners be called before or after the callback!?
-					wrong answer: call callbacks first so that they can change the state of file.saved before calling file open listeners
-					
-					Dilemma 2: Should fileOpen events fire before or after fileShow events?
-					answer: Does it matter? I forgot why ...
 					
 					problem1: The callback might change the file, triggering file.change() 
 					then plugins will go nuts because they have not seen the file (being opened) yet!

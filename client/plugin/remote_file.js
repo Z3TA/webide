@@ -195,7 +195,7 @@ return;
 				}
 			}
 
-			EDITOR.openFile(url, text, {savedAs: true, isSaved: true, hash: hash}, function(err, file) {
+			EDITOR.openFile(url, text, {savedAs: true, isSaved: true, props: {hash: hash}}, function(err, file) {
 				if(err) throw err;
 
 				remoteFiles.push(file);
