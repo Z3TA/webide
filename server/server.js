@@ -5,9 +5,12 @@
 
 /*
 
+	note: If you just copy over server.js it will send {"editorVersion": 0} because EDITOR_VERSION is not populated... and clients wont auto-update!
+	EDITOR_VERSION is populated when running ./dev-scripts/upgrade.sh or ./dev-scripts/release.sh
+
+
 Test cloudIDE server locally:
 sudo node server/server.js --hostname=webide-dev.se -pp 80
-
 
 */
 

@@ -135,7 +135,7 @@
 			
 			CLIENT.cmd("readFromDisk", json, function(err, json) {
 				if(err) throw err
-			else {
+				else {
 					if(json.path.indexOf(testFile) == -1) throw new Error("path=" + path);
 					if(json.data != testText) throw new Error("json.data=" + json.data + " is not testText=" + testText);
 				
@@ -157,8 +157,8 @@
 						}
 					});
 					
-			}
-		});
+				}
+			});
 		}
 	});
 	
@@ -178,10 +178,10 @@
 			
 			var json = {path: path};
 		
-		CLIENT.cmd("getFileSizeOnDisk", json, function(err, json) {
-			if(err) throw err
-			else {
-				console.log("size=" + json.size);
+			CLIENT.cmd("getFileSizeOnDisk", json, function(err, json) {
+				if(err) throw err
+				else {
+					console.log("size=" + json.size);
 					if(json.size != testText.length) throw new Error("json.size=" + json.size + " testText=" + testText);
 				
 					// Cleanup
@@ -202,8 +202,8 @@
 						}
 					});
 					
-			}
-		});
+				}
+			});
 		}
 		
 	});
@@ -225,21 +225,21 @@
 			var json = {pathToFolder: testFolder};
 		
 			CLIENT.cmd("listFiles", json, function(err, list) {
-			if(err) throw err
-			else {
+				if(err) throw err
+				else {
 				
-				// Make sure testfile is in the list
-				var hasFile = false;
+					// Make sure testfile is in the list
+					var hasFile = false;
 					var lookForFileName = testFile;
 				
-				//console.log("list=" + JSON.stringify(list, null, 2));
+					//console.log("list=" + JSON.stringify(list, null, 2));
 				
-				for(var i=0, file; i<list.length; i++) {
-					file = list[i];
-					if(file.name == lookForFileName) hasFile = true;
-				}
+					for(var i=0, file; i<list.length; i++) {
+						file = list[i];
+						if(file.name == lookForFileName) hasFile = true;
+					}
 				
-				if(!hasFile) throw new Error("Did not find lookForFileName=" + lookForFileName + " in list: " + JSON.stringify(list, null, 2));
+					if(!hasFile) throw new Error("Did not find lookForFileName=" + lookForFileName + " in list: " + JSON.stringify(list, null, 2));
 
 					// Cleanup
 					CLIENT.cmd("deleteFile", {filePath: testFolder + testFile}, function(err, json) {
@@ -259,8 +259,8 @@
 						}
 					});
 					
-			}
-		});
+				}
+			});
 		}
 		
 	});
@@ -415,7 +415,7 @@
 		var testRow = "ABCDEFGHIJKLMNOPQRSTUVWXYZÅÄÖabcdefghijklmnopqrstuvwxyzåäö0123456789\n";
 		
 		
-var didReadString = false;
+		var didReadString = false;
 		var didReadBuffer = false;
 		var didHash = false;
 
@@ -512,7 +512,7 @@ var didReadString = false;
 		var didReadString = false;
 		var didHash = false;
 
-for (var i=0; i<1000; i++) testText = testText + i + ". " + testRow;
+		for (var i=0; i<1000; i++) testText = testText + i + ". " + testRow;
 		var correctHash = "91f8cbc3be52354a9387d2e32348e529c71d2b8aa77656f63d7815d3959a9de0"; // sha256
 
 		CLIENT.cmd("connect", connJson, 30000, function(err, json) {
@@ -576,7 +576,7 @@ for (var i=0; i<1000; i++) testText = testText + i + ". " + testRow;
 							callback = null;
 							
 							setTimeout(function disconnectFromSftp() {
-CLIENT.cmd("disconnect", connJson, function(err, json) {
+								CLIENT.cmd("disconnect", connJson, function(err, json) {
 									console.warn("Failed to disconnect from " + protocol + "! err=" + (err ? err.msg : err) + " json=" + JSON.stringify(json));
 									
 									setTimeout(closeDialogs, 1000);

@@ -7,6 +7,18 @@
 		
 		bin/webide is for running locally, and bin/webider should run remotely.
 		
+		How to test (using cloud ide)
+		-----------------------------
+		Open a terminal, start server:
+		node server/server.js --port=/home/$(whoami)/sock/test --domain=test.$(whoami).webide.se --username=test --password=test123 --home=/home/ --tls_key=/etc/letsencrypt/live/johan.webide.se/privkey.pem --tls_cert=/etc/letsencrypt/live/johan.webide.se/fullchain.pem
+
+		open test.user.webide.se in other browser/tab
+
+		open a new terminal, run webider:
+		./bin/webider test.js -h test.johan.webide.se -p 8103 -u test -ip 10.0.4.145 -debug
+
+
+
 	*/
 	
 	var remoteFiles = [];

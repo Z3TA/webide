@@ -1,36 +1,7 @@
 Reporting a bug ? Make sure it's repeatable!
 ============================================
 
-./bin/webider test.js -h test.johan.webide.se -p 8103 -u test -ip 10.0.4.145 -debug
 
-node server/server.js --port=/home/$(whoami)/sock/test --domain=test.$(whoami).webide.se --username=test --password=test123 --home=/home/ --tls_key=/etc/letsencrypt/live/johan.webide.se/privkey.pem --tls_cert=/etc/letsencrypt/live/johan.webide.se/fullchain.pem
-
-
-
-TLS on webider
-json protocol on webider
-Working on webider
-
-/etc/letsencrypt/live/user.webide.se/privkey.pem
----
-
-
-Apr 06 15:16:54 kaj.100m.se node[1192108]: /srv/webide/server/server.js:2079
-Apr 06 15:16:54 kaj.100m.se node[1192108]:                                                 REMOTE_FILE_SOCKETS[username][fileName].close();
-Apr 06 15:16:54 kaj.100m.se node[1192108]:                                                                                         ^
-Apr 06 15:16:54 kaj.100m.se node[1192108]: TypeError: REMOTE_FILE_SOCKETS[username][fileName].close is not a function
-
-
-If you just copy over server.js it will send {"editorVersion": 0} because editor version is not populated, it's only populated on a proper release!
-
-
-Remote file connection goes "inactive", 
-remote machine does not update the file...
-keepAlive: true doesn't seem to work :(
-implement ping/pong.
-Send each data with a JSON metadata pair specialChar + JSON + specialChar2 + data + specialChar3 ? Or send the entire thing as JSON!?
-specialChar1 + JSON + specialChar2
-Use an encryption layer ? TSL !?
 
 ---
 
