@@ -13,7 +13,13 @@
 	sudo mv webide /usr/local/bin
 	
 	usage:
+	webide test.js
 
+	command-flags/arguments:
+	-h [hostname]   Connect to this host
+	-p              Connect using this port
+	-u              Identify as this user
+	-ip             Connect to this IP
 
 
 	todo: Make it usuable for sending stdin:

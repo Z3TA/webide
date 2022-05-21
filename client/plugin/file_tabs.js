@@ -439,7 +439,6 @@ function switchTabInStandaloneMode() {
 		
 		tabFileItem.appendChild(closeFileButton);
 		
-		
 		var tabFileText = document.createElement("a");
 		tabFileText.innerText = fileName;
 		tabFileText.href = "#"; // Needed to make it clickable by screen-reader
@@ -453,6 +452,18 @@ tabFileText.setAttribute("path", path);
 		tabFileItem.appendChild(tabFileText);
 		tabFileItem.addEventListener("click", clickTab, true);
 		
+		// ### Protocol icons
+		var reProtocol = /^(.*):\/\//;
+		var matchProtocol = path.match(reProtocol);
+		if(matchProtocol) {
+			var icon = document.createElement("img");
+			icon.setAttribute("src", "/gfx/cloud.svg");
+			icon.setAttribute("width", "16");
+			icon.setAttribute("height", "16");
+			tabFileItem.appendChild(icon);
+		}
+
+
 		EDITOR.oncontextmenu(tabFileItem, contextmenu);
 
 		if(folders.length > 1) {

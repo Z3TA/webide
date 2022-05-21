@@ -37,6 +37,17 @@ Feature list (Not ordered/prioritized)
 --------------------------------------
 
 
+
+---
+
+users should be able to access their tls keys (so they can test and use tls in their (dev) servers)
+chown root:user /etc/letsencrypt/live/user.webide.se
+chown root:user /etc/letsencrypt/archive/user.webide.se/
+chmod 2644 /etc/letsencrypt/live/user.webide.se
+chmod 2644 /etc/letsencrypt/archive/user.webide.se/
+
+---
+
 Alt+W (wrap) should pretty print (and wrap!?) JSON !
 
 ---

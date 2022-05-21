@@ -5,11 +5,7 @@ Reporting a bug ? Make sure it's repeatable!
 
 node server/server.js --port=/home/$(whoami)/sock/test --domain=test.$(whoami).webide.se --username=test --password=test123 --home=/home/ --tls_key=/etc/letsencrypt/live/johan.webide.se/privkey.pem --tls_cert=/etc/letsencrypt/live/johan.webide.se/fullchain.pem
 
-users should be able to access their tls keys (so they can test and use tls in their (dev) servers)
-chown root:user /etc/letsencrypt/live/user.webide.se
-chown root:user /etc/letsencrypt/archive/user.webide.se/
-chmod 2644 /etc/letsencrypt/live/user.webide.se
-chmod 2644 /etc/letsencrypt/archive/user.webide.se/
+
 
 TLS on webider
 json protocol on webider

@@ -40,8 +40,8 @@
 			# sudo chown root:sftptest /home/sftptest
 			# sudo chmod 755 /home/sftptest
 			# sudo mkdir /home/sftptest/uploads
-			# sudo chown sftptest:sftptest /home/sftptest/uploads
-			# sudo chmod 755 /home/sftptest/uploads
+			# sudo chown sftptest:sftptest -R /home/sftptest/uploads
+			# sudo chmod 755 -R /home/sftptest/uploads
 			
 			6. Test access
 			sftp sftptest@testserver
