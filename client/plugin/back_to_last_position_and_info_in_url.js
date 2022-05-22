@@ -469,7 +469,11 @@ if(last == undefined) return patchObj();
 
 				moveCaretBackToLastPosition(EDITOR.currentFile);
 
-				if(EDITOR.currentFile == fileA) return callback(true);
+				if(EDITOR.currentFile == fileA) {
+					EDITOR.closeFile(fileA);
+					EDITOR.closeFile(fileB);
+					return callback(true);
+				}
 
 				throw new Error("Expected " + fileA.path + " to be the current file after going back to last position" );
 			});
