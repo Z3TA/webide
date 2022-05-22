@@ -1,6 +1,7 @@
 Reporting a bug ? Make sure it's repeatable!
 ============================================
 
+certbot could not find: /srv/jzedit/letsencrypt/certbot-manual-auth-hook.sh
 
 
 ---
