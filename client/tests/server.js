@@ -47,7 +47,7 @@
 		// bug: SFTP does not give proper ENOENT error code when file doesn't exist
 		
 		var protocol = "sftp";
-		var serverAddress = "ben.100m.se";
+		var serverAddress = "kaj.100m.se";
 		var testFile =  protocol + "://" + serverAddress + "/uploads/nonexistingfile.txt";
 		var connJson = {protocol: protocol, serverAddress: serverAddress,  user: "sftptest", passw: "12345"};
 		

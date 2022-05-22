@@ -40,7 +40,7 @@
 		
 	}
 	
-	EDITOR.addTest(1, function testClientHash(callback) {
+	EDITOR.addTest(function testClientHash(callback) {
 		
 		// UTIL.hash() should return the same hash as the server hash API!
 
