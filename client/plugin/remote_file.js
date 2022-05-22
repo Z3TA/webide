@@ -164,12 +164,12 @@ return;
 			var utf8decoder = new TextDecoder(); // default 'utf-8' or 'utf8'
 
 			var arr = json.content.data;
-			let u8arr = new Uint8Array(arr);
+			var u8arr = new Uint8Array(arr);
 			/*
-				let i8arr = new Int8Array(arr);
-				let u16arr = new Uint16Array(arr);
-				let i16arr = new Int16Array(arr);
-				let i32arr = new Int32Array(arr);
+				var i8arr = new Int8Array(arr);
+				var u16arr = new Uint16Array(arr);
+				var i16arr = new Int16Array(arr);
+				var i32arr = new Int32Array(arr);
 
 				console.log("u8arr=" + utf8decoder.decode(u8arr));
 				console.log("i8arr= " + utf8decoder.decode(i8arr));
