@@ -2720,6 +2720,13 @@ else {
 		var enc = new TextEncoder();
 		// TypeError: Failed to execute 'digest' on 'SubtleCrypto': The provided value is not of type '(ArrayBuffer or ArrayBufferView)
 		var buff = enc.encode(str);
+
+		if(window.crypto.subtle == undefined) {
+			var error = new Error("window.crypto.subtle only works with httpS protocol! (SSL/TSL)");
+			error.code = "SSL_NEEDED";
+			return callback(error);
+		}
+
 		window.crypto.subtle.digest(algorithm, buff).then(function(hashBuffer) {
 			var hashArray = Array.from(new Uint8Array(hashBuffer)); 
 			var hashHex = hashArray.map(function(b) {return b.toString(16).padStart(2, '0')}).join(''); // convert bytes to hex string

@@ -40,7 +40,7 @@
 		
 	}
 	
-	EDITOR.addTest(function testClientHash(callback) {
+	EDITOR.addTest(1, function testClientHash(callback) {
 		
 		// UTIL.hash() should return the same hash as the server hash API!
 
@@ -50,9 +50,17 @@
 		var correctHash = "91f8cbc3be52354a9387d2e32348e529c71d2b8aa77656f63d7815d3959a9de0"; // sha256
 
 		UTIL.hash(testText, function(err, hash) {
+			if(err && err.code == "SSL_NEEDED") {
+				return callback(true);
+			}
+			else if(err) {
+				throw err;
+			}
+			else {
 			UTIL.assert(hash, correctHash);
 
 			callback(true);
+			}
 		});
 	});
 
