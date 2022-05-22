@@ -502,7 +502,7 @@
 		// Todo: Also test on FTP!
 		
 		var protocol = "sftp";
-		var serverAddress = "ben.100m.se";
+		var serverAddress = "kaj.100m.se";
 		var testFolder = protocol + "://" + serverAddress + "/uploads/testHashOnSftp/";
 		var testFile = "testHash.txt";
 		var testText = "";

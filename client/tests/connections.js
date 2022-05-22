@@ -4,7 +4,7 @@
 	EDITOR.addTest(function sftpConnection(callback) {
 		
 		var protocol = "sftp";
-		var serverAddress = "ben.100m.se";
+		var serverAddress = "kaj.100m.se";
 		var testFolder = protocol + "://" + serverAddress + "/uploads/deletemeuniquefolder/";
 		var testFile = "testReadWrite.txt";
 		var testText = "abc123\n";
