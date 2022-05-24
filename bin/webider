@@ -61,7 +61,7 @@ function findSettings(settings) {
 				if(err) {
 					debug("Unable to open settings from " + settingsFileLocation2 + " (" + err.code + ")");
 					
-					ask("Host name or IP of WebIDE instance", "localhost", function(err, answer) {
+					ask("Host name or IP of WebIDE instance", "webide.se", function(err, answer) {
 						if(err) throw err;
 						
 						settings.host = answer;
