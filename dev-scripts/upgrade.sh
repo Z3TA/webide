@@ -65,7 +65,7 @@ fi
 
 # sudo apt install rsync
 
-rsync -r --delete --exclude=/srv/webide/client/noVNC/ temp/release/server/ $SERVER:/srv/webide/
+rsync -r --delete --exclude=client/noVNC/ temp/release/server/ $SERVER:/srv/webide/
 
 
 
@@ -77,7 +77,7 @@ LOCAL_OS_RELEASE=$(lsb_release -a 2>/dev/null | grep Description)
 if [ "$REMOTE_OS_RELEASE" != "$LOCAL_OS_RELEASE" ]
 then
   echo "Remote OS release $REMOTE_OS_RELEASE is not the same as local $LOCAL_OS_RELEASE"
-  # cd /srv/webide/client/ && git clone https://github.com/novnc/noVNC.git && git checkout tags/v1.3.0
+  #ssh $SERVER "cd /srv/webide/client/ && git clone https://github.com/novnc/noVNC.git && cd noVNC && git checkout tags/v1.3.0"
 else
   rsync -r --delete client/noVNC/ $SERVER:/srv/webide/client/noVNC/
 fi
