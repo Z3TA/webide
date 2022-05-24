@@ -7528,7 +7528,7 @@ function checkMounts(options, checkMountsCallback) {
 		}
 
 		log(username + ":docker: copying config script to Docker daemon VM on " + IP, DEBUG);
-		module_child_process.exec("scp -i /root/.ssh/dockervm -o ConnectTimeout=30 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ../dockervm/check_config_in_vm.sh " + dockerUser + "@" + IP + ":" + homeDir, EXEC_OPTIONS, function(err, stdout, stderr) {
+			module_child_process.exec("scp -i /root/.ssh/dockervm -o ConnectTimeout=30 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR ../dockervm/check_config_in_vm.sh " + dockerUser + "@" + IP + ":" + homeDir, EXEC_OPTIONS, function(err, stdout, stderr) {
 			if(err) {
 				if(err.message.indexOf("Permission denied (publickey)") != -1 && dockerUser != "root") {
 					return configure(IP, "root")
@@ -7538,7 +7538,7 @@ function checkMounts(options, checkMountsCallback) {
 			progress(10);
 			
 			log(username + ":docker: running config script via SSH on " + IP, DEBUG);
-			module_child_process.exec("echo dockerpw | ssh -tt -i /root/.ssh/dockervm -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null " + dockerUser + "@" + IP + " sudo bash " + homeDir + "check_config_in_vm.sh " + username + " " + uid + " " + gid , EXEC_OPTIONS, function(err, stdout, stderr) {
+				module_child_process.exec("echo dockerpw | ssh -tt -i /root/.ssh/dockervm -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR " + dockerUser + "@" + IP + " sudo bash " + homeDir + "check_config_in_vm.sh " + username + " " + uid + " " + gid , EXEC_OPTIONS, function(err, stdout, stderr) {
 				if(err) {
 					
 					// We might have been successful anyway!
