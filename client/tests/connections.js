@@ -108,9 +108,9 @@
 	});
 	
 	
-	EDITOR.addTest(unction testFtpConnection(callback) {
+	EDITOR.addTest(function testFtpConnection(callback) {
 		var testFolder = "ftp://100m.se/demo/editor-test/";
-var protocol = "ftp";
+		var protocol = "ftp";
 		var serverAddress = "100m.se";
 
 		CLIENT.cmd("connect", {
@@ -118,13 +118,13 @@ var protocol = "ftp";
 			serverAddress: serverAddress,
 			user: "test", 
 			passw: "ftptest123"
-}, function(err, json) {
+		}, function(err, json) {
 			if(err) throw err
 			else {
 				EDITOR.createPath(testFolder, function folderCreated(err, path) {
 					if(err) throw err;
 					EDITOR.saveToDisk(testFolder + "foo.txt", "foo bar", function fileCreated(err) {
-if(err) throw err;
+						if(err) throw err;
 
 						// Cleanup
 						CLIENT.cmd("deleteDirectory", {directory: testFolder, recursive: true}, function(err, json) {
