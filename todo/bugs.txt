@@ -38,6 +38,12 @@ BUGS (and issues)
 
 
 
+
+---
+
+Node.js change version versions are not in order, and it doesn't seem to update npm (only node)
+
+
 ---
 
 Got a message about a local file being emty on disk... ??? then when loading last state and saving it it did give native fs dialog!

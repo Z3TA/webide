@@ -1,8 +1,14 @@
 Reporting a bug ? Make sure it's repeatable!
 ============================================
 
-certbot could not find: /srv/jzedit/letsencrypt/certbot-manual-auth-hook.sh
 
+---
+
+suicide to use different versions of Mercurial!
+
+Debian GNU/Linux 11 (bullseye) = Mercurial Distributed SCM (version 5.6.1)
+Ubuntu 18.04.6 LTS = Mercurial Distributed SCM (version 4.5.3)
+Ubuntu 20.04.4 LTS = Mercurial Distributed SCM (version 5.3.1)
 
 ---
 
