@@ -50,6 +50,7 @@ function startUpdate() {
 	//copyFileSync("./etc/systemd/custom_iptables.service", "/etc/systemd/system/custom_iptables.service");
 	
 copyFileSync("./bin/webider", "/usr/local/bin/webide");
+	run("chmod +x /usr/local/bin/webide");
 
 run("systemctl daemon-reload");
 	//run("systemctl restart webide");
