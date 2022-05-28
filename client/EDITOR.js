@@ -1153,9 +1153,9 @@ usePseudoClipboard = false;
 			Using the state variable is unintuitive... So throw an error if we use it wrong!
 		*/
 		if(state != undefined) {
-			var allowedInState = ["props", "show", "image", "isSaved", "savedAs", "changed"];
+			var allowedInState = ["props", "show", "image", "isSaved", "savedAs", "changed", "nativeFileSystemFileHandle"];
 			for(var prop in state) {
-				if(allowedInState.indexOf(prop) == -1) throw new Error("EDITOR.openFile error: Allowed states are " + allowedInState.join(",") + ". For all other new File properties, put them in {props:{x:x, y:y, z:z}}");
+				if(allowedInState.indexOf(prop) == -1) throw new Error("EDITOR.openFile error: Not allowed: prop=" + prop + "\nAllowed states are " + allowedInState.join(",") + ". For all other new File properties, put them in {props:{x:x, y:y, z:z}}");
 			}
 		}
 

@@ -151,7 +151,11 @@ function CB() {
 		}
 
 		fortunately calling setTimout escapes the error trap!
+
+		gotcha: The callstack before CB dissappears in Chrome. So print it in console for debugging
 	*/
+
+	//console.error(UTIL.getStack("debug: CB"));
 
 	// Convert arguments to a proper Array so we can use method shift() etc on it
 	var args = new Array(arguments.length);
