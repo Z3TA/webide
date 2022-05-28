@@ -5515,7 +5515,6 @@ function checkMounts(options, checkMountsCallback) {
 					if(req.remoteFile.close) {
 							// File closed
 							socket.write(JSON.stringify({closeFile: fileName}) + "\n");
-							socket.destroy();
 						}
 						workerResp(null, true);
 					}

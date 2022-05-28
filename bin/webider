@@ -422,6 +422,8 @@ function dance(settings) {
 	function connectionError(err) {
 		console.log(  "Connection error: " + (err && (err.message || err) ) + " code=" + (err && err.code) );
 		
+		debug(err.stack);
+
 		if(err && err.code == "ECONNREFUSED") {
 			if(settings.loadedFrom) console.log("Edit " + settings.loadedFrom + " or ");
 			console.log("try connecting to another host using -host and -port flags");
@@ -477,7 +479,7 @@ function dance(settings) {
 			
 		}
 
-		pingInterval = setInterval(sendPing, 2000);
+		pingInterval = setInterval(sendPing, 4500);
 	}
 	
 	function sendPing() {
@@ -556,6 +558,8 @@ function dance(settings) {
 		}
 		else if(json.closeFile) {
 			debug("Client closed the file");
+			connection.destroy();
+			process.exit();
 		}
 		else if(json.fileData.type == "jsstring") {
 			var fileContent = json.fileData.data;
