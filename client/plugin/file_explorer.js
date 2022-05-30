@@ -178,7 +178,9 @@
 		// The user wants to explore ...
 		// ATM this is the only file explorer, so always take the job!
 		
-		//console.log("File explorer: openFileExplorerTool: directory=" + directory);
+		if( !UTIL.isDirectory(directory) ) directory = UTIL.getDirectoryFromPath(directory);
+
+		console.log("File explorer: openFileExplorerTool: directory=" + directory);
 		
 		if(typeof directory == "string") {
 			EDITOR.changeWorkingDir(directory);

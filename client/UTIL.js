@@ -143,8 +143,6 @@ var UTIL = {
 		/*
 			Returns the path to the directory of a file path
 			If no path is specified it uses current file or working directory
-			
-			If the file has no path delimiter, we return null
 		*/
 		
 		//console.log("getDir path=" + path);

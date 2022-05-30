@@ -1,5 +1,12 @@
 #!/bin/bash
 
+#
+# Dependencies:
+# * https://github.com/Z3TA/jsPDF.git (this fork includes commit that ads crop ability. Place in client folder)
+# * https://github.com/novnc/noVNC.git (checkout latest release tag and place in client folder)
+#
+#
+
 # Exit if anything fails
 set -e
 
