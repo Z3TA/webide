@@ -1748,6 +1748,27 @@ else if(protocol == "sftp:") {
 }
 
 
+API.base64toBinary = function base64toBinary(user, json, callback) {
+	/*
+		When uploading a file it might be saved with base64
+	*/
+
+	var path = json.path;
+
+	var fs = require('fs');
+
+	fs.readFile(path, "utf8", function(err, str) {
+		if(err) return callback(err);
+
+		fs.writeFile(path, str, "base64", function(err) {
+			if(err) return callback(err);
+
+			callback(null);
+
+		});
+	});
+}
+
 
 API.listFiles = function listFiles(user, json, listFilesCallback) {
 	if(listFilesCallback == undefined) throw new Error("Need to specify a callback!");

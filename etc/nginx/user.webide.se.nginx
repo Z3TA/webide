@@ -23,6 +23,8 @@ server {
 
   access_log %HOMEDIR%log/access.log %USERNAME%;
 
+  client_max_body_size 16G;
+
   location /vnc_/ {
     alias /srv/webide/client/noVNC/;
   }
@@ -86,6 +88,8 @@ server {
 
   access_log %HOMEDIR%log/access.log %USERNAME%;
 
+  client_max_body_size 16G;
+
   location / {
     charset	utf-8;
     proxy_pass http://%NETNSIP%:$1;
@@ -138,6 +142,8 @@ server {
 
   access_log %HOMEDIR%log/access.log %USERNAME%;
 
+  client_max_body_size 16G;
+
   location / {
     charset	utf-8;
     proxy_pass http://%DOCKERIP%:$1;
@@ -182,6 +188,8 @@ server {
   #SSL#ssl_certificate_key  /etc/letsencrypt/live/%USERNAME%.%DOMAIN%/privkey.pem;
 
   access_log %HOMEDIR%log/access.log %USERNAME%;
+
+  client_max_body_size 16G;
 
   location / {
     charset	utf-8;

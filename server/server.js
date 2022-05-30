@@ -4470,6 +4470,7 @@ function checkMounts(options, checkMountsCallback) {
 			var Busboy = require('busboy');
 			var sendToUser = "";
 			var notifyUser = true;
+			//var convertBase64ToBinary = false;
 			var files = [];
 			if (request.method === 'POST') {
 				/*
@@ -4533,10 +4534,11 @@ function checkMounts(options, checkMountsCallback) {
 				
 				});
 				busboy.on('field', function(fieldname, val, fieldnameTruncated, valTruncated, encoding, mimetype) {
-					log('File upload: Field [' + fieldname + ']: value: ', val, DEBUG);
+					log('File upload: Field [' + fieldname + ']: value: ' + val, DEBUG);
 				
 					if(fieldname == "user") sendToUser = val;
 					else if(fieldname == "open" && val=="false") notifyUser = false;
+					//else if(fieldname == "base64" && val=="true") convertBase64ToBinary = true;
 				
 				});
 				busboy.on('finish', function() {

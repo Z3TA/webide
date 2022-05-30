@@ -2161,8 +2161,6 @@ else if(err.code == "ENETDOWN") {
 		// You probably want to use EDITOR.saveFile instead!
 		// This is used internaly by the editor, but exposed so plugins can save files that are not opened.
 		
-		// Only works with text files !
-		
 		if(path instanceof File) {
 			throw new Error("EDITOR.saveToDisk: Did you mean to use EDITOR.saveFile ? EDITOR.saveToDisk is a lower level method for saving data to disk.");
 		}
@@ -2196,6 +2194,8 @@ else if(err.code == "ENETDOWN") {
 			path = trimmedPath;
 		}
 		
+		console.log("EDITOR.saveToDisk: path=" + path + " text.length=" + text.length + " inputBuffer=" + inputBuffer + " encoding=" + encoding + " timeout=" + timeout + " typeof saveToDiskCallback=" + typeof saveToDiskCallback)
+
 		// SockJS can not handle large messages! Server disconnects if you send 50MB in one message
 		var lengthLimit = 5592408; // Ca 40 MB
 		//var lengthLimit = 55924; // Ca 400 kb for testing the uploadBigFile path...
@@ -2220,6 +2220,7 @@ else if(err.code == "ENETDOWN") {
 		}
 		
 		var json = {path: path, text: text, inputBuffer: inputBuffer, encoding: encoding};
+		console.log("EDITOR.saveToDisk: json path=" + json.path + " text.length=" + json.text.length + " inputBuffer=" + json.inputBuffer + " encoding=" + json.encoding)
 		var startTimer = (new Date()).getTime();
 		var saveTimeout = (estimatedUploadTime ? estimatedUploadTime : 10000) + 15000;
 		CLIENT.cmd("saveToDisk", json, saveTimeout, function saveToDiskCmd(err, json) {
@@ -2252,12 +2253,15 @@ else if(err.code == "ENETDOWN") {
 	
 	function uploadBigFile(path, text, inputBuffer, encoding, callback) {
 		
-		//console.log("uploadBigFile: path=" + path + " text.length=" + text.length + " inputBuffer=" + inputBuffer + " encoding=" + encoding + " ")
+		console.log("uploadBigFile: path=" + path + " text.length=" + text.length + " inputBuffer=" + inputBuffer + " encoding=" + encoding + " ")
 		
 		if(typeof FormData == "undefined") return error(new Error("Large file upload not supported because FormData object does not exist in your browser=" + BROWSER + " Please contact support and tell them your browser version!"));
 		
+		var defaultEncoding = "plain/text";
+		if(encoding == undefined) encoding = defaultEncoding;
+
 		var formData = new FormData();
-		var blob = new Blob([text], { type: encoding || 'plain/text' });
+		var blob = new Blob([text], { type: encoding });
 		var fileName = UTIL.getFilenameFromPath(path);
 		formData.append(fileName, blob, fileName);
 		if(EDITOR.user) formData.append('user', EDITOR.user.name);
@@ -2304,13 +2308,30 @@ else if(err.code == "ENETDOWN") {
 
 		function moved(err) {
 			if(err) return error(new Error("Unable to move file after uploading! Error: " + err.message), err.code)
+			
+			if(encoding.toLowerCase() == "base64") {
+				/*
+					/share will just save the file as is, even if it's in base64
+					so we will have to convert the base64 data to binary
+				*/
+
+				CLIENT.cmd("base64toBinary", {path: path}, function(err) {
+					if(err) return error(new Error("Unable to do base64toBinary conversioin! Error: " + err.message), err.code)
+
+					doHash();
+				});
+			}
+			else doHash();
+		}
+		
+		function doHash() {
 			CLIENT.cmd("hash", {path: path}, function(err, hash) {
 				if(err) return error(new Error("Unable to hash file after uploading! Error: " + err.message), err.code)
 
 				callback(null, path, hash);
 			});
 		}
-		
+
 		x.open('POST', '/share');
 		x.send(formData);
 		

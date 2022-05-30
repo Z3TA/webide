@@ -1,8 +1,64 @@
 Reporting a bug ? Make sure it's repeatable!
 ============================================
 
+fs.writeFileSync("in", "JVBERi0xLjcKJbXtrvsKNCAwIG9iago8PCAvTGVuZ3Q="); // beginning of a PDF file
+var data = fs.readFileSync("in", "base64");
+var buff = Buffer.from(data, "base64");
+fs.writeFileSync("out",buff);
+fs.readFileSync("out", "binary") // It's still in base64
+
+var buff2 = Buffer.from("JVBERi0xLjcKJbXtrvsKNCAwIG9iago8PCAvTGVuZ3Q=", "base64")
+fs.writeFileSync("out", buff2)
+fs.readFileSync("out", "binary") // It's in binary!
+
+// So lets try again
+var data2 = fs.readFileSync("in", "utf8");
+var buff3 = Buffer.from(data2, "base64")
+Buffer.compare(buff2, buff3);
+fs.writeFileSync("out",buff3);
+fs.readFileSync("out", "binary") // It's now in binary, finally!
+
+// Try again for the fun of it
+var data = fs.readFileSync("in", "base64");
+
+
 
 ---
+
+
+
+What will happen when we now use x.setRequestHeader("Content-Encoding", encoding); !?
+
+bug: When uploading binary file it's saved as Base64 on disk!
+When uploading via /share the file is uploaded as is, so if we have converted it to base64 it's saved on disk as base64...
+
+May 29 22:50:39 kaj.100m.se node[1786747]: 2022-05-29 (22:50:39) johan: saveToDisk: path=/home/johan/repo/jzedit/client/jsPDF.tar options={"encoding":"utf-8","mode":504} json.public=undefined text.length=120299520 (user_worker.js:2173:2)
+May 29 22:50:38 kaj.100m.se node[1786747]: 2022-05-29 (22:50:38) File upload: File [jsPDF.tar]: filename: jsPDF.tar, encoding: 7bit, mimetype: base64 (server.js:4519:6)
+May 29 22:50:38 kaj.100m.se node[1786747]: 2022-05-29 (22:50:38) File upload: request.headers={"host":"webide.se","x-real-ip":"155.4.8.162","x-forwarded-proto":"https","connection":"close","content-length":"12029>
+
+---
+
+Trying to upload jsPDF.tar
+
+---
+
+Making a release from webIDE itself
+
+---
+
+annoyance: When scrolling up to read log in terminal emulator and another message  is entered it auto scrolls to the bottom while you are reading...
+
+---
+
+bug: Error when uploading tar file
+
+problem: Firefox went crazy when trying to open several MB tar file in webide...
+
+problem: Firefox locked when typing head 70MBbase64encoded in terminal emulator
+
+---
+
+Able to swtich between different versions of Git and Mercurial !?
 
 suicide to use different versions of Mercurial!
 
