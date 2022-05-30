@@ -6933,8 +6933,8 @@ function checkMounts(options, checkMountsCallback) {
 		else {
 		
 			checkForOtherDropboxDaemons(username, function(err, otherDaemons) {
-				if(err) throw err;
-			
+				if(err) return callback(err);
+
 				if(otherDaemons.length > 0) {
 					// Migth be alive
 					callback(null, {alive: true, dead: true});

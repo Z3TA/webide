@@ -2,6 +2,12 @@ Reporting a bug ? Make sure it's repeatable!
 ============================================
 
 
+no terminal emulator in docker build! probably missing pty module...
+
+---
+
+docker build -t cloudide --build-arg DOMAIN=d80.$(whoami).webide.se --build-arg EMAIL=editor@webtigerteam.com .
+
 ---
 
 Making a release from webIDE itself

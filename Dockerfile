@@ -16,10 +16,13 @@
 # Access from: https://d80.johan.webide.se/
 #
 # Before running tests: Run ssh-keygen in the "d80.johan.webide.se" terminal (not docker) and cat /home/ltest1/.ssh/id_rsa.pub - then add the ssh public key to the Github test account
+# 
+# hint: EDITOR.changeWorkingDir("/home/ltest1/wwwpub/");
 #
 
 # FROM must be the first instruction!
-FROM ubuntu:bionic
+#FROM ubuntu:bionic
+FROM debian:11.3
 
 ARG DOMAIN=d80.johan.webide.se
 ENV DOMAIN=${DOMAIN}
@@ -35,7 +38,7 @@ RUN apt-get install curl gcc g++ make -y
 RUN apt-get install nano -y
 RUN apt-get install git -y
 
-RUN curl -fsSL https://deb.nodesource.com/setup_12.x | bash -
+RUN curl -fsSL https://deb.nodesource.com/setup_16.x | bash -
 RUN apt-get update
 RUN apt-get install -y nodejs
 

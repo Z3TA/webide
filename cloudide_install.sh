@@ -84,11 +84,11 @@ apt-get install fuse -y
 
 
 # Allow ip forwarding so that users in netns can talk to the Internet
-sysctl -w net.ipv4.ip_forward=1
+sysctl -w net.ipv4.ip_forward=1 || true
 
 
 # Enabled package forwarding, needed for Linux network namespace bridges
-sysctl net.ipv4.ip_forward=1
+sysctl net.ipv4.ip_forward=1 || true
 
 
 # Install some dependencies usually found in Ubuntu
@@ -162,9 +162,9 @@ systemctl enable webide_nodejs_init
 
 
 # Install Node.js
-sudo apt install curl -y
-curl -sL https://deb.nodesource.com/setup_16.x | sudo -E bash -
-sudo apt update && sudo apt install -y nodejs
+apt install curl -y
+curl -sL https://deb.nodesource.com/setup_16.x | bash -
+apt update && apt install -y nodejs
 
 
 # Allow users to swtich between Node.js versions
