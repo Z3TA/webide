@@ -71,7 +71,8 @@ rsync -r --delete --exclude=client/noVNC/ --exclude=client/jsPDF/ --exclude=drop
 # Get jsPDF from https://github.com/Z3TA/jsPDF
 # For dropbox see https://www.dropbox.com/install-linux
 # wget -O - "https://www.dropbox.com/download?plat=lnx.x86" | tar xzf -
-#rsync -r --delete dropbox/ $SERVER:/srv/webide/dropbox/
+
+[ -d "dropbox/" ] && rsync -r --delete dropbox/ $SERVER:/srv/webide/dropbox/
 
 # Only copy the noVNC folder if the remote OS has the same release! (different releases needs different versions of noVNC!)
 REMOTE_OS_RELEASE=$(ssh $SERVER "lsb_release -a 2>/dev/null | grep Description")
@@ -81,7 +82,7 @@ then
   echo "Remote OS release $REMOTE_OS_RELEASE is not the same as local $LOCAL_OS_RELEASE"
   #ssh $SERVER "cd /srv/webide/client/ && git clone https://github.com/novnc/noVNC.git && cd noVNC && git checkout tags/v1.3.0"
 else
-  rsync -r --delete client/noVNC/ $SERVER:/srv/webide/client/noVNC/
+  [ -d "client/noVNC/" ] && rsync -r --delete client/noVNC/ $SERVER:/srv/webide/client/noVNC/
 fi
 
 # Can't use some node modules on different versions of Node.js
