@@ -55,9 +55,9 @@
 			"hljs-selector-id": {color: EDITOR.settings.style.colorOrange},
 			"hljs-selector-class": {color: EDITOR.settings.style.colorOrange},
 
-			"hljs-addition": {bgColor: EDITOR.settings.style.colorGreen, color: EDITOR.settings.style.textColor},
+			"hljs-addition": {bgColor: EDITOR.settings.style.addedTextBg, color: EDITOR.settings.style.addedTextColor},
 
-			"hljs-deletion": {bgColor: EDITOR.settings.style.colorRed, color: EDITOR.settings.style.textColor},
+			"hljs-deletion": {bgColor: EDITOR.settings.style.removedTextBg, color: EDITOR.settings.style.removedTextColor},
 
 			"hljs-strong": {bold: true},
 

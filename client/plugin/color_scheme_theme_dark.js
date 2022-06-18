@@ -96,6 +96,14 @@ setDarkTheme(); // use ?darkTheme=true to force the darke theme
 		EDITOR.settings.style.selectedTextBg = "#3e4765";
 		EDITOR.settings.style.highlightTextBg = "#3e5a3d";
 		
+		// .diff files
+		EDITOR.settings.style.addedTextColor = "rgb(235, 235, 229)";
+		EDITOR.settings.style.addedTextBg = "rgb(76, 142, 58)"; // rgb(101, 185, 78)
+
+		EDITOR.settings.style.removedTextColor = "rgb(235, 235, 229)"
+		EDITOR.settings.style.removedTextBg = "rgb(255, 74, 74)";
+
+
 		// Text (Colors should be in rgb() format!)
 		EDITOR.settings.style.textColor = "rgb(235, 235, 229)"; // 
 		EDITOR.settings.style.commentColor = "rgb(162, 228, 64)";

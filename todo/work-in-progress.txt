@@ -3,14 +3,12 @@ Reporting a bug ? Make sure it's repeatable!
 
 todo: Test hggit! (editing git repo with hg)
 
+todo: Mention in readme that you can: var webide = require("webide.se");  webide.run({username: "admin", password: "admin", nattype: "client"});
+
 ---
 
 When scrolling down using trackpad on HP laptopts the editor scrolls back up again when fingers are released. 
 Or scrolls extra when fingers are released if scrolling up
-
----
-
-Diff is impossible to read in dark mode due to white color on green background
 
 ---
 

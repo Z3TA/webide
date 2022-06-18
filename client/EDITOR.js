@@ -106,8 +106,13 @@ EDITOR.settings = {
 		commentColor: "rgb(0, 119, 14)", // Please check on a LCD without IPS before changing these!
 		quoteColor: "rgb(0, 91, 91)",
 		xmlTagColor: "rgb(0, 21, 162)",
-		removedTextColor: "rgb(255, 74, 74)",
-		addedTextColor: "rgb(58, 127, 58)",
+
+		// For .diff files
+		removedTextColor: "rgb(0,0,0)", 
+		removedTextBg: "rgb(255, 102, 101)",
+		addedTextColor: "rgb(0,0,0)",
+		addedTextBg: "rgb(27, 167, 44)",
+
 		selectedTextBg: "rgb(193, 214, 253)",
 		currentLineColor: "rgb(255, 255, 230)",
 		highlightTextBg: "rgb(155, 255, 155)",    // For text highlighting

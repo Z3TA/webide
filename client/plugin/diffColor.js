@@ -9,11 +9,12 @@
 	EDITOR.plugin({
 		desc: "Add colors to .diff files",
 		load: function loadDiffColor() {
-			EDITOR.addPreRender(applyDiffColors);
+			// Highlight.js takes care of the coloring of the .diff files
+			//EDITOR.addPreRender(applyDiffColors);
 			EDITOR.on("dblclick", gotoSource);
 		},
 		unload: function unloadDiffColor() {
-			EDITOR.removePreRender(applyDiffColors);
+			//EDITOR.removePreRender(applyDiffColors);
 			EDITOR.removeEvent("dblclick", gotoSource);
 		},
 	});
@@ -114,29 +115,31 @@
 		return file && file.path.slice(-5) == ".diff";
 	}
 
-	function applyDiffColors(buffer, file) {
+	/*
+		function applyDiffColors(buffer, file) {
 		if( !isDiffFile(file) ) return buffer;
-		
+
 		var colorNew = EDITOR.settings.style.addedTextColor; // green
 		var colorOld = EDITOR.settings.style.removedTextColor; // red
-		
+
 		for(var row = 0; row<buffer.length; row++) {
 
-			if(buffer[row][0] && buffer[row][0].char == "-" && !(buffer[row].length > 2 && buffer[row][buffer[row].length-1].char == "-")) {
-				colorRow(row, colorOld);
-			}
-				else if(buffer[row][0] && buffer[row][0].char == "+") {
-					colorRow(row, colorNew);
-				}
-				}
-		
+		if(buffer[row][0] && buffer[row][0].char == "-" && !(buffer[row].length > 2 && buffer[row][buffer[row].length-1].char == "-")) {
+		colorRow(row, colorOld);
+		}
+		else if(buffer[row][0] && buffer[row][0].char == "+") {
+		colorRow(row, colorNew);
+		}
+		}
+
 		return buffer;
-		
+
 		function colorRow(row, color) {
-			for(var col=0; col<buffer[row].length; col++) {
-				buffer[row][col].color = color;
-				}
+		for(var col=0; col<buffer[row].length; col++) {
+		buffer[row][col].color = color;
 		}
 		}
+		}
+	*/
 	
 })();
