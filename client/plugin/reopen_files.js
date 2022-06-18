@@ -411,7 +411,7 @@
 				
 				// Decide if we should open the last saved state, or from the disk (or other protocol) ...
 				
-				console.log("reopenFiles: Got fileSizeOnDisk=" + fileSizeOnDisk + " for path=" + path + "");
+				//console.log("reopenFiles: Got fileSizeOnDisk=" + fileSizeOnDisk + " for path=" + path + "");
 				
 				if(getFileSizeError) {
 					//if(err.code === 'ENOENT') {
@@ -425,7 +425,7 @@
 				
 				loadState(path, function stateLoaded(err, localState) {
 					
-					console.log("reopen_files:gotFileSize:stateLoaded: localState=" + JSON.stringify(localState, null, 2));
+					//console.log("reopen_files:gotFileSize:stateLoaded: localState=" + JSON.stringify(localState, null, 2));
 
 					if(err) console.error(err);
 					

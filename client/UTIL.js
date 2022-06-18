@@ -981,7 +981,7 @@ if(protocolIndex != -1) slashes = slashes - 2;
 		var fun;
 		var stack = [];
 		
-		console.log("UTIL.parseErrorMessage: " + errorString);
+		//console.log("UTIL.parseErrorMessage: " + errorString);
 		
 		if(errorString == undefined) {
 			console.log(arguments);
