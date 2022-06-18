@@ -92,7 +92,10 @@ if [ "$REMOTE_NODE_VERSION" != "$LOCAL_NODE_VERSION" ]
 then
   echo "Remote node.js version $REMOTE_NODE_VERSION is not the same as local $LOCAL_NODE_VERSION"
   # Note: node_modules folder is deleted due to rsync --delete option
-  ssh $SERVER "cd /srv/webide/ && npm install && npm audit fix --force"
+  ssh $SERVER "cd /srv/webide/ && npm install"
+  # skip npm audit fix because it will likely return and exit code meaning this script will exit
+  # && npm audit fix --force
+
 else
   rsync -r --delete node_modules/ $SERVER:/srv/webide/node_modules/
 fi
