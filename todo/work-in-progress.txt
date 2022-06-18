@@ -1,7 +1,6 @@
 Reporting a bug ? Make sure it's repeatable!
 ============================================
 
-todo: Test If SCM still works in Windows after chaning PATH variable
 
 ---
 
