@@ -71,13 +71,39 @@ if(versions.indexOf(rcVersion) != -1) {
 		CLIENT.cmd("run", {command: command}, function(err, resp) {
 			if(err) throw err;
 			
-			for(var v in winMenus) winMenus[v].deactivate();
-			
-			winMenus[version].activate();
+			// Also change npm version
+			var target = UTIL.joinPaths(nPath, version, "/lib/node_modules/npm/bin/npm-cli.js");
+			var dest = UTIL.joinPaths(EDITOR.user.homeDir, "/.npm-packages/bin/npm");
+			var destDir = UTIL.joinPaths(EDITOR.user.homeDir, "/.npm-packages/bin/");
+			var command = "mkdir -p " + destDir + " && rm -f " + dest + " && ln -s " + target  + " " + dest;
+
+			// ln -s /usr/local/n/versions/node/17.9.0/lib/node_modules/npm/bin/npm-cli.js /home/johan/.npm-packages/bin/npm
+
+			//console.log("change_node_version: command=" + command);
+
+			CLIENT.cmd("run", {command: command}, function(err, resp) {
+				if(err) throw err;
+
+				// Also change npx version
+				var target = UTIL.joinPaths(nPath, version, "/lib/node_modules/npm/bin/npx-cli.js");
+				var dest = UTIL.joinPaths(EDITOR.user.homeDir, "/.npm-packages/bin/npx");
+				var destDir = UTIL.joinPaths(EDITOR.user.homeDir, "/.npm-packages/bin/");
+				var command = "mkdir -p " + destDir + " && rm -f " + dest + " && ln -s " + target  + " " + dest;
+
+				//console.log("change_node_version: command=" + command);
+
+				CLIENT.cmd("run", {command: command}, function(err, resp) {
+					if(err) throw err;
+
+					for(var v in winMenus) winMenus[v].deactivate();
+					winMenus[version].activate();
 			
 			//console.log("change_node_version: Changed to version=" + version);
 			
 			//alertBox("Changed Node.js version to: version=" + version);
+		});
+	
+			});
 		});
 	}
 

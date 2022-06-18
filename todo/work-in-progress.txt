@@ -1,6 +1,18 @@
 Reporting a bug ? Make sure it's repeatable!
 ============================================
 
+todo: Test If SCM still works in Windows after chaning PATH variable
+
+---
+
+When scrolling down using trackpad on HP laptopts the editor scrolls back up again when fingers are released. 
+Or scrolls extra when fingers are released if scrolling up
+
+---
+
+Diff is impossible to read in dark mode due to white color on green background
+
+---
 
 no terminal emulator in docker build! probably missing pty module...
 

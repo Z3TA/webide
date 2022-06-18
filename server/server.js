@@ -5115,6 +5115,11 @@ function checkMounts(options, checkMountsCallback) {
 			VISUAL: "webide"
 		}
 	
+		// The paths will be checked in order (so put local first)
+		spawnOptions.env.PATH = "" + homeDir + ".npm-packages/bin:" + homeDir + ".local/bin:" + process.env.PATH;
+		spawnOptions.env["NPM_CONFIG_PREFIX"] = homeDir + ".npm-packages";
+		spawnOptions.env.NPM_PACKAGES = homeDir + ".npm-packages";
+
 		if(groups) {
 			// we have to manually serialize objects!
 			spawnOptions.env.groups = JSON.stringify(groups);
@@ -5133,7 +5138,11 @@ function checkMounts(options, checkMountsCallback) {
 			if(uid != undefined) spawnOptions.uid = parseInt(uid);
 			if(gid != undefined) spawnOptions.gid = parseInt(gid);
 		
-			spawnOptions.env.PATH =  process.env.PATH;
+			spawnOptions.env.NO_NETNS="true"; // For debugging PATH variables
+
+			// Q: Why are we overwriting path variable !?
+			// A: Because SCM did not work in Windows!
+			//spawnOptions.env.PATH =  process.env.PATH;
 		}
 		else {
 			// Spawning as root
@@ -5142,13 +5151,7 @@ function checkMounts(options, checkMountsCallback) {
 		
 			// Assume unix like system
 		
-			// The paths will be checked in order (so put local first)
-			spawnOptions.env.PATH = "" + homeDir + ".npm-packages/bin:" + homeDir + ".local/bin:" + process.env.PATH;
-			spawnOptions.env["NPM_CONFIG_PREFIX"] = homeDir + ".npm-packages";
 			spawnOptions.env.PORT = homeDir + "sock/test"; // Some Node.JS scripts read port from PORT by default. Make it use a unix socket instead of tcp port!
-			spawnOptions.env.NPM_PACKAGES = homeDir + ".npm-packages";
-		
-		
 			spawnOptions.env.DOCKER_HOST = "tcp://" + UTIL.int2ip(167903234+uid) + ":2376";
 		
 		}
