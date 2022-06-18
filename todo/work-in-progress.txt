@@ -1,6 +1,7 @@
 Reporting a bug ? Make sure it's repeatable!
 ============================================
 
+todo: Test hggit! (editing git repo with hg)
 
 ---
 
@@ -10,14 +11,6 @@ Or scrolls extra when fingers are released if scrolling up
 ---
 
 Diff is impossible to read in dark mode due to white color on green background
-
----
-
-no terminal emulator in docker build! probably missing pty module...
-
----
-
-docker build -t cloudide --build-arg DOMAIN=d80.$(whoami).webide.se --build-arg EMAIL=editor@webtigerteam.com .
 
 ---
 

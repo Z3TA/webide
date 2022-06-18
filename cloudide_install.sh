@@ -230,6 +230,9 @@ apt-get install mercurial -y
 echo "#webide: Installing Git"
 apt-get install git -y
 
+echo "#webide: Installing Python"
+apt-get install python -y
+
 echo "#webide: Installing hggit for Mercruial"
 apt-get install python-pip -y || true
 # Fix problems with Python
@@ -243,7 +246,7 @@ pip install hg-git
 # Ubuntu 18 and earlier
 apt-get install python-brotli -y || true
 # Ubuntu 20
-# todo: python-brotli does not exist in Ubuntu 20 ! WIll hggit work!?
+# todo: python-brotli does not exist in Ubuntu 20 ! Will hggit work!?
 
 echo "#webide: Installing Letsencrypt's certbot"
 # For Ubuntu 18 and earlier
