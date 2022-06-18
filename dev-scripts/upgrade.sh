@@ -36,7 +36,7 @@ read answer
 if echo "$answer" | grep -iq "^n" ;then exit;fi
 
 # Make sure we are in the webide folder
-if ! [[ "$(pwd)" =~ /webide$ ]]
+if ! ([[ "$(pwd)" =~ /webide$ ]] || [[ "$(pwd)" =~ /jzedit$ ]])
   then
     echo "Run this script from the webide folder!"
     exit 1
