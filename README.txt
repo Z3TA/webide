@@ -158,9 +158,10 @@ Then open the app in a web browser (Chrome) and you will get a "add to desktop" 
 
 But if you however want to run the editor locally on your phone, you can do this:
 
-1. Download and run the "Termux" app from the Play store.
+1. Either download the "UserLAnd" app or the "Termux" app from Play store. 
+(In the UserLAnd app choose any dist and then "ssh" to get a command shell)
 
-2. Within the Termux app, type "apt update" (without the quotes) and press Enter
+2. Within the command shell, type "apt update" (without the quotes) and press Enter
 
 3. Then type "apt install nodejs" and press Enter
 
@@ -181,8 +182,8 @@ It is recommended that you do so, as it will allow running the editor without br
 10. If you added WebIDE to your home screen you can now close Chrome and click on WebIDE on your home screen.
 
 Note that while you can start the client and connect to another server, in order to run the server on your 
-Android device you have to start Termux and repeat step 6-7 above every time, so you might want to automate it,
-for example adding it to your .bashrc so that the server starts every time you start the Termux app.
+Android device you have to start UserLAnd/Termux and repeat step 6-7 above every time, so you might want to automate it,
+for example adding it to your .bashrc so that the server starts every time you start the UserLAnd/Termux app.
 And/or use Tasker or other app to make the both the server and the client start at the same time, in one click.
 
 
@@ -357,10 +358,9 @@ In the bug report file, try to give instructions on how to repeat the bug.
 
 Editing files on remote computers
 =================================
-The editor opens TCP port 8080 (configured via remote-file-port) for receiving remote files.
+The editor server opens TCP port 8080 (configured via remote-file-port) for receiving remote files.
 You can install bin/webider on any remote computer, and then use webider as an editor replacement.
-(webider will connect to a WebIDE server and the files will be opened in the local client,
-there is no encryption, so only use on LAN for now, eg. not over the Internet)
+(webider will connect to a WebIDE server and the files will be opened in the local client)
 
 installing webider on a remote computer (it also need to have nodejs installed!):
 ```
@@ -372,7 +372,10 @@ sudo mv webider /usr/local/bin
 You might also have to configure the firewall to allow incoming connections to your developer machine.
 And also allow the remote computer to connect to your developer machine.
 
-
+Example:
+```
+webider foo.txt &
+```
 
 Font settings and styling
 =========================
