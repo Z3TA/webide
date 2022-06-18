@@ -65,11 +65,13 @@ fi
 
 # sudo apt install rsync
 
-rsync -r --delete --exclude=client/noVNC/ temp/release/server/ $SERVER:/srv/webide/
+rsync -r --delete --exclude=client/noVNC/ --exclude=client/jsPDF/ --exclude=dropbox/  temp/release/server/ $SERVER:/srv/webide/
 
-
-
-rsync -r --delete dropbox/ $SERVER:/srv/webide/dropbox/
+# Get noVNC from https://github.com/novnc/noVNC
+# Get jsPDF from https://github.com/Z3TA/jsPDF
+# For dropbox see https://www.dropbox.com/install-linux
+# wget -O - "https://www.dropbox.com/download?plat=lnx.x86" | tar xzf -
+#rsync -r --delete dropbox/ $SERVER:/srv/webide/dropbox/
 
 # Only copy the noVNC folder if the remote OS has the same release! (different releases needs different versions of noVNC!)
 REMOTE_OS_RELEASE=$(ssh $SERVER "lsb_release -a 2>/dev/null | grep Description")
