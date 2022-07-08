@@ -5056,7 +5056,7 @@ function checkMounts(options, checkMountsCallback) {
 		if( DOMAIN || HOSTNAME ) url += (DOMAIN || HOSTNAME);
 		else url += ip;
 	
-		if(PUBLIC_PORT.charAt(0) == "/") {
+		if(PUBLIC_PORT.toString().charAt(0) == "/") {
 			// Port is a unix socket!
 			// Assume default port
 		}
