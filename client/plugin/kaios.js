@@ -64,7 +64,7 @@
 				
 			*/
 			
-			var manifestUrl = document.location.protocol + "//" + document.location.host + "/manifest.webapp";
+			var manifestUrl = document.location.protocol + "//" + document.location.host + "/manifest.webmanifest";
 			var request = window.navigator.mozApps.install(manifestUrl);
 			request.onsuccess = function () {
 				// Save the App object that is returned
