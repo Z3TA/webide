@@ -2,9 +2,12 @@ Reporting a bug ? Make sure it's repeatable!
 ============================================
 
 
-Should we have jsPDF and dropbox dep in the repo !?
 
-Making a release from webIDE itself
+---
+
+Had issues with the editor disconnecting...
+probably due to poor Wifi !?
+todo: Test the editor in a poor network!
 
 ---
 

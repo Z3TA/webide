@@ -611,7 +611,9 @@ wget https://www.dropbox.com/download?plat=lnx.x86_64
 ````
 
 Extract files to /srv/webide/dropbox/
-
+````
+tar -xf 'download?plat=lnx.x86_64' -C /srv/webide/dropbox/
+````
 
 Do something for each user in bash shell
 ----------------------------------------
