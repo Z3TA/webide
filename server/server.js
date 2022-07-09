@@ -7023,7 +7023,7 @@ function checkMounts(options, checkMountsCallback) {
 				}
 				else {
 					if(callback) {
-						callback(null);
+						callback(null, {killed: killed});
 						callback = null;
 					}
 					else {
