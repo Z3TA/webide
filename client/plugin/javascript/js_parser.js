@@ -1671,8 +1671,10 @@
 					
 				*/
 				
+				//console.log("char=" + char + " lnw=" + lnw + " insideRegExp=" + insideRegExp + " insideLineComment=" + insideLineComment + " insideDblQuote=" + insideDblQuote + " insideSingleQuote=" + insideSingleQuote + " insideBlockComment=" + insideBlockComment + " insideHTMLComment=" + insideHTMLComment + " insideXmlTag=" + insideXmlTag + " CSS=" + CSS + " insideTemplateLiteral=" + insideTemplateLiteral + " ");
+
 				if(char=="/"
-				&& (lnw=="=" || lnw=="(" || lnw=="[" || lnw=="{" || lnw==";" || lnw=="&" || lnw=="|" || lnw=="^" || lnw=="~" || lnw=="<" || lnw==">" || lnw=="")
+				&& (lnw=="=" || lnw==":" || lnw=="(" || lnw=="[" || lnw=="{" || lnw==";" || lnw=="&" || lnw=="|" || lnw=="^" || lnw=="~" || lnw=="<" || lnw==">" || lnw=="")
 				&& !insideRegExp && !insideLineComment && !insideDblQuote && !insideSingleQuote && !insideBlockComment && !insideHTMLComment && !insideXmlTag &&
 				!CSS && !insideTemplateLiteral) {
 					insideRegExp = true;

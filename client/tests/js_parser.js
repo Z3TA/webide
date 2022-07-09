@@ -610,6 +610,21 @@ EDITOR.addTest(function asyncFunction(callback) {
 	});
 });
 
+EDITOR.addTest(function regexInObj(callback) {
+	EDITOR.openFile("regexInObj.js", 'var obj = {\nreg: /"prop":"[^"]+"/\n}\n', function(err, file) {
+
+		if(file.parsed.quotes.length > 0) throw new Error("Did not expect any quotes in the parsed code! file.parsed=" + JSON.stringify(file.parsed, null, 2));
+
+		if(file.grid[1].indentation != 1) throw new Error("Expected indentation on line 2 to be 1, not " + file.grid[1].indentation);
+
+		EDITOR.closeFile(file.path);
+		callback(true);
+	});
+});
+
+
+
+
 /*
 	
 	### parentheses Indenting
