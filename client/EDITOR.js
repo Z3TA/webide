@@ -10774,7 +10774,20 @@ window.addEventListener("mousemove", mouseMove, false);
 				catch(err) {
 					console.error(err.message);
 					console.log(err.stack);
-					alertBox('Failed to (fully) run:\n<i>"' + UTIL.getFunctionName(pluginLoaders[i]) + '"</i>\nError: ' + err.message);
+
+					var pluginName = UTIL.getFunctionName(pluginLoaders[i]);
+					var debugInfo = "Error: " + err.message + "\n";
+					debugInfo = debugInfo + "StackTrace: " + err.stack + "\n";
+					debugInfo = debugInfo + "Browser: " + ((typeof navigator == "object" && navigator.userAgent) || window.userAgent) + " (" + BROWSER + ")\n";
+					debugInfo = debugInfo + "Version: " + EDITOR.version + "\n";
+					debugInfo = debugInfo + "Dist: " + EDITOR.dist + "\n";
+
+					console.log("debugInfo=" + debugInfo);
+					setTimeout(function() {
+						EDITOR.sendFeedback(debugInfo, "Plugin failed to load: " + pluginName, true);
+					}, 2000);
+
+					alertBox('Failed to (fully) run:\n<i>"' + pluginName + '"</i>\nError: ' + err.message);
 				}
 			}
 			
