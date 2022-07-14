@@ -96,6 +96,7 @@
 	var canvasWidth = 500;
 	var canvasHeight = 200;
 	var maxButtonsPerRow = 10;
+	var iOS_bottomLineCompensation = IOS_SAFARI ? 15 : 0;
 	var radius = 8;
 	var margin = 4;
 	var lineWidth = 1;
@@ -576,7 +577,7 @@ return false;
 		buttonWidth = canvasWidth / maxButtonsPerRow;
 		
 		buttonHeight = buttonWithToHeightRatio * buttonWidth;
-		canvasHeight = Math.ceil(buttonHeight * totalRows + margin);
+		canvasHeight = Math.ceil(buttonHeight * totalRows + margin + iOS_bottomLineCompensation);
 		
 		
 		
@@ -833,6 +834,13 @@ return false;
 			}
 		}
 		ctx.stroke();
+		
+		if(IOS_SAFARI) {
+			// Trick iOS to show a black line instead of a white line
+			ctx.fillStyle="#ffffff";
+			ctx.fillRect(canvasWidth/2-90,canvasHeight - iOS_bottomLineCompensation, 180, 5);
+		}
+
 		buttonLocations.sort(sortLocationsX);
 		
 		

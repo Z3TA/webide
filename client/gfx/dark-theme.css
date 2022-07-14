@@ -237,7 +237,7 @@ select, select.functionList {
 	border-radius: 0px 0px 5px 5px;
 	box-shadow: 0px 1px 1px #121214;
 	color: #f3f3f6;
-scrollbar-color: rgba(80,80,90, .9) transparent;
+	scrollbar-color: rgba(80,80,90, .9) transparent;
 }
 
 .windowMenu .menu.pulloutright {
@@ -379,7 +379,7 @@ input[type=button], button.button, input[type=submit] {
 }
 
 input[type=button]:active, button.button:active, input[type=submit]:active {
-color: rgb(223, 235, 253);
+	color: rgb(223, 235, 253);
 	background-color: rgb(31, 117, 235);
 	border-top: 1px solid rgb(102, 162, 248);
 }
@@ -404,7 +404,7 @@ color: rgb(223, 235, 253);
 .dialog button {
 	background: none;
 	background-color: rgb(101, 102, 104);
-color: rgb(223, 223, 223);
+	color: rgb(223, 223, 223);
 	border: 0;
 	border-top: 1px solid rgb(118, 120, 121);
 	border-left: 1px solid rgb(64, 66, 67);
@@ -598,6 +598,6 @@ progress[value]::-webkit-progress-bar {
 	border: 1px solid #6f6f6f;
 }
 progress[value]::-webkit-progress-value {
-background-color: #505559;
+	background-color: #505559;
 }
 

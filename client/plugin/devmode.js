@@ -210,7 +210,9 @@ alert("Debug mode enabled!");
 				else str += arguments[i] + "\n";
 			}
 			
-			CLIENT.cmd("log", {data: str});
+			CLIENT.cmd("log", {data: str}, function(err) {
+				// Swallow the error or we might end up in a loop
+			});
 			
 			console.log = console.warn = log;
 		}

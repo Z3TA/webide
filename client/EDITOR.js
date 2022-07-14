@@ -3412,8 +3412,9 @@ ca 20ms to render, ca 13ms to render without creating new objects
 		var contentHeight = windowHeight - headerFooterHeight;
 		var columnsHeight = contentHeight;
 		
-		/*
-			if(QUERY_STRING["debug"]) {
+		
+		if(QUERY_STRING["debug"]) {
+			console.log("=================== RESIZE ===================");
 			console.log("windowWidth=" + windowWidth);
 			console.log("windowHeight=" + windowHeight);
 			console.log("leftColumnWidth=" + leftColumnWidth);
@@ -3430,7 +3431,7 @@ ca 20ms to render, ca 13ms to render without creating new objects
 			console.log("innerWidth=" + content.innerWidth);
 			console.log("outherWidth=" + content.outherWidth);
 			}
-		*/
+		
 		
 		EDITOR.height = windowHeight;
 		EDITOR.width = windowWidth;

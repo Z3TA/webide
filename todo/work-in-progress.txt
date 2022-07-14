@@ -1,7 +1,28 @@
 Reporting a bug ? Make sure it's repeatable!
 ============================================
 
+Detect IOS_SAFARI
 
+Prevent iOS zooming in on textarea
+
+
+
+---
+
+ios: did not reload usaved file when restarting
+ios: when rotating screen layout screws up
+ios: qhen opening file native keyboars isactivated
+  and layout cet screwed
+ 
+  
+
+---
+
+Pressing Ctrl+O while in therminal emulator puts the folder name foo$ as the default file name (should be empty)
+
+---
+
+Test if everything works after change in js_parser!
 
 ---
 

@@ -52,8 +52,8 @@ var QUERY_STRING = function () {
 	} else {
 	  query_string[pair[0]].push(decodeURIComponent(pair[1]));
 	}
-  } 
-  return query_string;
+  }
+	return query_string;
 }();
 
 var BROWSER = UTIL.checkBrowser();
@@ -65,6 +65,14 @@ var LINUX = (navigator.platform.indexOf("Linux") != -1); // If we are on Linux
 var MAC = (navigator.platform.indexOf("Mac") != -1); // If we are on a Mac(book)
 var CHROMEBOOK = (navigator.userAgent.indexOf("CrOS") != -1);
 var FIREFOX = (navigator.userAgent.toLowerCase().indexOf('firefox') > -1);
+var IOS_SAFARI = (function() {
+	var ua = window.navigator.userAgent;
+	var iOS = !!ua.match(/iPad/i) || !!ua.match(/iPhone/i);
+	var webkit = !!ua.match(/WebKit/i);
+	return iOS && webkit && !ua.match(/CriOS/i);
+})()
+
+//alert("IOS_SAFARI=" + IOS_SAFARI);
 
 // Global constants, note that const is block scoped!! (can't if(foo) const bar =1)
 // Don't use const just yet (not all browsers support it)'
