@@ -2690,7 +2690,7 @@ max-width: 40px;
 	input[type="datetime"], input[type="datetime-local"],
 	input[type="date"], input[type="month"], input[type="time"],
 	input[type="week"], input[type="number"], input[type="email"],
-	input[type="url"]{ font-size: 21px; }
+	input[type="url"]{ font-size: 21px!important;}
 }
 
 /* iPhone 6, iPhone 6s, iPhone 7 portrait/landscape */
@@ -2699,7 +2699,7 @@ max-width: 40px;
 	input[type="datetime"], input[type="datetime-local"],
 	input[type="date"], input[type="month"], input[type="time"],
 	input[type="week"], input[type="number"], input[type="email"],
-	input[type="url"]{ font-size: 21px; }
+	input[type="url"]{ font-size: 21px!important;}
 }
 
 /* iPhone 6 Plus, iPhone 6s Plus, iPhone 7 Plus portrait/landscape */
@@ -2708,5 +2708,14 @@ max-width: 40px;
 	input[type="datetime"], input[type="datetime-local"],
 	input[type="date"], input[type="month"], input[type="time"],
 	input[type="week"], input[type="number"], input[type="email"],
-	input[type="url"]{ font-size: 21px; }
+	input[type="url"]{ font-size: 21px!important;}
+}
+
+/* Newer iOS devices */
+@supports (-webkit-touch-callout: none) {
+	select, textarea, input[type="text"], input[type="password"],
+	input[type="datetime"], input[type="datetime-local"],
+	input[type="date"], input[type="month"], input[type="time"],
+	input[type="week"], input[type="number"], input[type="email"],
+	input[type="url"]{ font-size: 21px!important;}
 }
