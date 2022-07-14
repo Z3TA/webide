@@ -23,7 +23,7 @@
 			if(DISPLAY_MODE == "standalone") {
 				EDITOR.bindKey({desc: "Create new file", charCode: key_N, combo: CTRL, fun: newFileFromKeyboardComboOnStandalone});
 			}
-			else if(typeof navigator.keyboard == "object") {
+			else if(typeof navigator.keyboard == "object" && typeof navigator.keyboard.lock == "function") {
 				//console.log("createNewFile: Acquiring lock on KeyN ...");
 				navigator.keyboard.lock(["KeyN"]).then(function(obj) {
 					// note: Locked keys only works in fullscreen!
