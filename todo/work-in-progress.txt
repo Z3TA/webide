@@ -1,6 +1,31 @@
 Reporting a bug ? Make sure it's repeatable!
 ============================================
 
+idea: ctrl or alt + t to launch a new terminal tab!?
+
+---
+
+skeleton files ?
+
+https://community.jamf.com/t5/jamf-pro/bypass-all-of-the-mac-setup-steps-when-logging-in-a-new-local/m-p/255553
+touch "/Users/${username}/.skipbuddy"
+
+# virsh net-dhcp-leases default
+ Expiry Time           MAC address         Protocol   IP address        Hostname       Client ID or DUID
+-------------------------------------------------------------------------------------------------------------------------------------------------
+ 2022-07-18 04:04:21   1e:6a:90:73:39:6a   ipv4       10.2.4.145/16     docker-johan   ff:90:73:39:6a:00:01:00:01:29:c9:0b:26:52:54:00:14:8b:8b
+ 2022-07-18 03:55:09   52:54:00:ab:2f:6a   ipv4       10.2.125.139/16   iMac-Pro       01:52:54:00:ab:2f:6a
+
+
+Connect to Mac Remote management...
+Need to use Remmina (noVNC via websockify doesn't support Mac remote management)
+* Install display menu app on Mac, change default to 1024px !?
+* Start reminna app from "local desktop" and auto connect (high color 16bpp, quality=good, can't set lower quality or it will disconnect)
+Network need to be good or it will be extreamly laggy!
+
+
+---
+
 Detect IOS_SAFARI
 
 Prevent iOS zooming in on textarea
@@ -11,7 +36,7 @@ Prevent iOS zooming in on textarea
 
 ios: did not reload usaved file when restarting
 ios: when rotating screen layout screws up
-ios: qhen opening file native keyboars isactivated
+ios: when opening file native keyboard is activated
   and layout cet screwed
  
   

@@ -1130,6 +1130,84 @@ sudo virsh net-edit default
 </ip>
 
 
+Create a virtual Macbook
+========================
+The following instructions are intended for dev/testing...
+
+Download latest version of MacOS installer:
+````
+git clone --depth 1 --recursive https://github.com/kholia/OSX-KVM.git
+cd OSX-KVM
+./fetch-macOS-v2.py
+sudo apt install dmg2img
+dmg2img -i BaseSystem.dmg BaseSystem.img
+````
+
+Create a zvol to use as hdd:
+`sudo zfs create -V 16G rpool/mac
+
+Generate a new MAC address:
+`printf '52:54:00:AB:%02X:%02X\n' $((RANDOM%256)) $((RANDOM%256))`
+and set the new "mac address" in `./etc/libvirt/macOS_amd.xml` 
+
+If you did not clone OSX-KVM into /root/repo/OSX-KVM/ change all locations pointing to it in `./etc/libvirt/macOS_amd.xml` 
+
+Define the VM in libvirt:
+`virsh define ./etc/libvirt/macOS_amd.xml`
+
+Install MacOS via VNC...
+
+Then disable sleep and screen saver.
+
+Update Mac Hardware UUID from within MacOS
+------------------------------------------
+You probably wont be allowed to use the Appstore unless your virtual Macbook has an unique hardware UUID...
+Locate the config.plist. Should be in the one (the first) of the EFI drives ...
+The actual location of the config.plist might vary, but it should be somewhere in the EFI directory.
+Then Update Serial and Generate a new UUID using GenSMBIOS
+````
+diskutil list
+sudo diskutil mount disk0s1
+ls /Volumes/EFI/EFI/OC/config.plist
+git clone https://github.com/corpnewt/GenSMBIOS
+cd GenSMBIOS
+chmod +x GenSMBIOS.command
+./GenSMBIOS.command
+````
+
+Activate remote login (for all users) and Remote management in MacOS: System preferences > Sharing
+(Change name of the virtual Macbook to just "mac")
+
+Then reboot the virtual Macbook...
+
+Find the IP of the mac:
+`virsh net-dhcp-leases default`
+
+SSH into it and try adding a new user:
+````
+newuser=test
+uid=1167
+echo $newuser
+sudo dscl . -create /Users/$newuser
+sudo dscl . -create /Users/$newuser UserShell /bin/zsh
+sudo dscl . -create /Users/$newuser RealName "John Smith"
+sudo dscl . -create /Users/$newuser UniqueID $uid
+sudo dscl . -create /Users/$newuser PrimaryGroupID 20
+sudo dscl . -create /Users/$newuser NFSHomeDirectory /Users/$newuser
+sudo dscl . -passwd /Users/$newuser password
+sudo mkdir /Users/$newuser
+sudo chown $newuser:staff /Users/$newuser
+sudo touch /Users/$newuser/.skipbuddy
+````
+
+Make it so a WebIDE user can access the virutal Mac:
+----------------------------------------------------
+`sudo iptables -I FORWARD 1 -s 10.0.4.145 -d 10.2.125.139 -j ACCEPT`
+
+
+
+
+
 
 
 Moving user to another server using ZFS
