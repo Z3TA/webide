@@ -1157,7 +1157,11 @@ Define the VM in libvirt:
 
 Install MacOS via VNC...
 
-Then disable sleep and screen saver.
+Once installed:
+Disable sleep and screen saver.
+Set screen to low res (disable scaling)
+
+
 
 Update Mac Hardware UUID from within MacOS
 ------------------------------------------

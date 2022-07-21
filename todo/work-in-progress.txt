@@ -5,6 +5,27 @@ idea: ctrl or alt + t to launch a new terminal tab!?
 
 ---
 
+todo: Can we use the Simulator for React native dev ?
+
+reminna profile
+.local/share/remmina/
+remmina -c /home/johan/.local/share/remmina/group_vnc_mac_10-2-125-139.remmina
+window_height=525
+window_width=525
+
+
+open -a Simulator.app (start via ssh)
+
+it takes a while for MacOS to start the Simulator app (to open the device)
+we need to "warm up"...
+
+applescript
+toggle simulator fullscreen
+
+
+
+
+
 skeleton files ?
 
 https://community.jamf.com/t5/jamf-pro/bypass-all-of-the-mac-setup-steps-when-logging-in-a-new-local/m-p/255553
