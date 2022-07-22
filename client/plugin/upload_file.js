@@ -108,7 +108,7 @@ fileInput = document.createElement("input")
 			
 			if(filesSaved == filesToSave) {
 				//alertBox("Finished uploading " + filesSaved + " file(s)");
-				EDITOR.fileExplorer(path);
+				if(path) EDITOR.fileExplorer(path);
 				
 				if(errors.length > 0) alertBox("Problem saving file(s): " + errors.join("\n"));
 				
