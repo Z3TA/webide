@@ -24,6 +24,8 @@
 		"../jsPDF/src/modules/jpeg_support.js",
 		"../jsPDF/src/modules/ttfsupport.js"
 	];
+
+	// If there are any files missing they can be found in https://github.com/Z3TA/jsPDF.git
 	
 	var winMenuPrint;
 	
