@@ -3005,17 +3005,15 @@ searchDir(fileList[i].path, folderDepth);
 		
 		console.log("continueSearchFiles: fileQueue.length=" + fileQueue.length + " filesBeingSearched=" + filesBeingSearched);
 		
-		if(FIND_IN_FILES_ABORTED) return aborted();
 		if(done) return console.log("Already done! from continueSearchFiles()");
-		
+		if(FIND_IN_FILES_ABORTED) return aborted();
+
 		if(totalFiles >= searchMaxFiles) {
 			doneFinish("Aborted the search because we reached searchMaxFiles=" + searchMaxFiles + " limit!");
-			FIND_IN_FILES_ABORTED = true;
 			return;
 		}
 		else if(totalMatches >= maxTotalMatches) {
 			doneFinish("Aborted the search because we reached maxTotalMatches=" + maxTotalMatches + " limit!");
-			FIND_IN_FILES_ABORTED = true;
 			return;
 		}
 		else while(fileQueue.length > 0 && filesBeingSearched < maxFilesToSearchAtTheSameTime) searchNextFileInQueue();
@@ -3028,7 +3026,7 @@ searchDir(fileList[i].path, folderDepth);
 		
 		console.log("doneMaybe: fileQueue.length=" + fileQueue.length + " filesBeingSearched=" + filesBeingSearched);
 		
-		if(FIND_IN_FILES_ABORTED) return aborted()
+		if(FIND_IN_FILES_ABORTED) return aborted();
 		if(done) throw new Error("We should not be calling doneMaybe() if done!");
 		
 		sendProgress();
@@ -3200,7 +3198,7 @@ searchDir(fileList[i].path, folderDepth);
 findReplaceInFilesCallback(err);
 			findReplaceInFilesCallback = null;
 		}
-		FIND_IN_FILES_ABORTED = true;
+		done = true;
 	}
 	
 	function sendProgress() {
