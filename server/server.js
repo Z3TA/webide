@@ -1649,8 +1649,10 @@ function main() {
 
 			for(var i=0; i<p.length; i++) {
 
-				if(p[i].cpu > 10) {
+				if( p[i].cpu > 10 ) {
 					
+					if(p[i].uid == 0 && p[i].cpu < 25) break; // Root can use more CPU (annoying with warnings about MacOS using 10+% CPU)
+
 					if(! highCpuUsage.hasOwnProperty(p[i].pid) ) highCpuUsage[p[i].pid] = Object.assign({cpuHistory: [p[i].cpu]}, p[i]); 
 					else highCpuUsage[p[i].pid].cpuHistory.push( p[i].cpu );
 
