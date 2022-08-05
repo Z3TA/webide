@@ -1,0 +1,519 @@
+{
+ "info": {
+  "binary_version": "2v14", 
+  "variables": 2250, 
+  "link": [
+   "http://thecraftyrobot.net"
+  ], 
+  "default_console_tx": "D22", 
+  "default_console": "EV_SERIAL1", 
+  "bootloader": 1, 
+  "default_console_rx": "D23", 
+  "binary_url": "http://www.espruino.com/binaries/espruino_2v14_smartibot.hex", 
+  "thumb_url": "http://www.espruino.com/img/SMARTIBOT_thumb.jpg", 
+  "builtin_modules": [
+   "Flash", 
+   "Storage", 
+   "heatshrink", 
+   "neopixel"
+  ], 
+  "name": "Smartibot", 
+  "default_console_baudrate": "9600", 
+  "binary_name": "espruino_%v_smartibot.hex", 
+  "build": {
+   "libraries": [
+    "BLUETOOTH", 
+    "GRAPHICS", 
+    "NEOPIXEL"
+   ], 
+   "makefile": [
+    "DFU_PRIVATE_KEY=targets/nrf5x_dfu/dfu_private_key.pem", 
+    "DFU_SETTINGS=--application-version 0xff --hw-version 52 --sd-req 0x8C,0x91", 
+    "DEFINES += -DCONFIG_GPIO_AS_PINRESET", 
+    "DEFINES += -DCONFIG_NFCT_PINS_AS_GPIOS=1", 
+    "DEFINES+=-DBLUETOOTH_NAME_PREFIX='\"Smartibot\"'", 
+    "DEFINES += -DNEOPIXEL_SCK_PIN=16 -DNEOPIXEL_LRCK_PIN=15"
+   ], 
+   "optimizeflags": "-Os"
+  }, 
+  "image_url": "http://www.espruino.com/img/SMARTIBOT.jpg", 
+  "espruino_page_link": "Smartibot"
+ }, 
+ "pins": [
+  {
+   "functions": {
+    "3.3": 0, 
+    "XL1": 0
+   }, 
+   "name": "D0", 
+   "sortingname": "D00", 
+   "simplefunctions": {}, 
+   "num": "0", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "XL2": 0, 
+    "3.3": 0
+   }, 
+   "name": "D1", 
+   "sortingname": "D01", 
+   "simplefunctions": {}, 
+   "num": "1", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "ADC1_IN0": 0, 
+    "3.3": 0
+   }, 
+   "name": "D2", 
+   "sortingname": "D02", 
+   "simplefunctions": {
+    "ADC": [
+     "ADC1_IN0"
+    ]
+   }, 
+   "num": "2", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "ADC1_IN1": 0, 
+    "3.3": 0
+   }, 
+   "name": "D3", 
+   "sortingname": "D03", 
+   "simplefunctions": {
+    "ADC": [
+     "ADC1_IN1"
+    ]
+   }, 
+   "num": "3", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "3.3": 0, 
+    "ADC1_IN2": 0
+   }, 
+   "name": "D4", 
+   "sortingname": "D04", 
+   "simplefunctions": {
+    "ADC": [
+     "ADC1_IN2"
+    ]
+   }, 
+   "num": "4", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "ADC1_IN3": 0, 
+    "RTS": 0, 
+    "3.3": 0
+   }, 
+   "name": "D5", 
+   "sortingname": "D05", 
+   "simplefunctions": {
+    "ADC": [
+     "ADC1_IN3"
+    ]
+   }, 
+   "num": "5", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "3.3": 0
+   }, 
+   "name": "D6", 
+   "sortingname": "D06", 
+   "simplefunctions": {}, 
+   "num": "6", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "3.3": 0, 
+    "CTS": 0
+   }, 
+   "name": "D7", 
+   "sortingname": "D07", 
+   "simplefunctions": {}, 
+   "num": "7", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "3.3": 0
+   }, 
+   "name": "D8", 
+   "sortingname": "D08", 
+   "simplefunctions": {}, 
+   "num": "8", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "3.3": 0
+   }, 
+   "name": "D9", 
+   "sortingname": "D09", 
+   "simplefunctions": {}, 
+   "num": "9", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "3.3": 0
+   }, 
+   "name": "D10", 
+   "sortingname": "D10", 
+   "simplefunctions": {}, 
+   "num": "10", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "3.3": 0
+   }, 
+   "name": "D11", 
+   "sortingname": "D11", 
+   "simplefunctions": {}, 
+   "num": "11", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "3.3": 0
+   }, 
+   "name": "D12", 
+   "sortingname": "D12", 
+   "simplefunctions": {}, 
+   "num": "12", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "NEGATED": 0, 
+    "3.3": 0, 
+    "BTN2": "pin"
+   }, 
+   "name": "D13", 
+   "sortingname": "D13", 
+   "simplefunctions": {
+    "DEVICE": [
+     "BTN2"
+    ]
+   }, 
+   "num": "13", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "3.3": 0
+   }, 
+   "name": "D14", 
+   "sortingname": "D14", 
+   "simplefunctions": {}, 
+   "num": "14", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "3.3": 0
+   }, 
+   "name": "D15", 
+   "sortingname": "D15", 
+   "simplefunctions": {}, 
+   "num": "15", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "3.3": 0
+   }, 
+   "name": "D16", 
+   "sortingname": "D16", 
+   "simplefunctions": {}, 
+   "num": "16", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "3.3": 0
+   }, 
+   "name": "D17", 
+   "sortingname": "D17", 
+   "simplefunctions": {}, 
+   "num": "17", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "3.3": 0
+   }, 
+   "name": "D18", 
+   "sortingname": "D18", 
+   "simplefunctions": {}, 
+   "num": "18", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "3.3": 0
+   }, 
+   "name": "D19", 
+   "sortingname": "D19", 
+   "simplefunctions": {}, 
+   "num": "19", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "LED1": "pin", 
+    "3.3": 0
+   }, 
+   "name": "D20", 
+   "sortingname": "D20", 
+   "simplefunctions": {
+    "DEVICE": [
+     "LED1"
+    ]
+   }, 
+   "num": "20", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "3.3": 0
+   }, 
+   "name": "D21", 
+   "sortingname": "D21", 
+   "simplefunctions": {}, 
+   "num": "21", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "TXD": 0, 
+    "3.3": 0, 
+    "TX_PIN_NUMBER": "pin"
+   }, 
+   "name": "D22", 
+   "sortingname": "D22", 
+   "simplefunctions": {}, 
+   "num": "22", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "RX_PIN_NUMBER": "pin", 
+    "RXD": 0, 
+    "3.3": 0
+   }, 
+   "name": "D23", 
+   "sortingname": "D23", 
+   "simplefunctions": {}, 
+   "num": "23", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "3.3": 0
+   }, 
+   "name": "D24", 
+   "sortingname": "D24", 
+   "simplefunctions": {}, 
+   "num": "24", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "3.3": 0
+   }, 
+   "name": "D25", 
+   "sortingname": "D25", 
+   "simplefunctions": {}, 
+   "num": "25", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "3.3": 0
+   }, 
+   "name": "D26", 
+   "sortingname": "D26", 
+   "simplefunctions": {}, 
+   "num": "26", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "3.3": 0
+   }, 
+   "name": "D27", 
+   "sortingname": "D27", 
+   "simplefunctions": {}, 
+   "num": "27", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "ADC1_IN4": 0, 
+    "3.3": 0
+   }, 
+   "name": "D28", 
+   "sortingname": "D28", 
+   "simplefunctions": {
+    "ADC": [
+     "ADC1_IN4"
+    ]
+   }, 
+   "num": "28", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "ADC1_IN5": 0, 
+    "NEGATED": 0, 
+    "3.3": 0, 
+    "BTN1": "pin"
+   }, 
+   "name": "D29", 
+   "sortingname": "D29", 
+   "simplefunctions": {
+    "DEVICE": [
+     "BTN1"
+    ], 
+    "ADC": [
+     "ADC1_IN5"
+    ]
+   }, 
+   "num": "29", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "ADC1_IN6": 0, 
+    "3.3": 0
+   }, 
+   "name": "D30", 
+   "sortingname": "D30", 
+   "simplefunctions": {
+    "ADC": [
+     "ADC1_IN6"
+    ]
+   }, 
+   "num": "30", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "ADC1_IN7": 0, 
+    "3.3": 0
+   }, 
+   "name": "D31", 
+   "sortingname": "D31", 
+   "simplefunctions": {
+    "ADC": [
+     "ADC1_IN7"
+    ]
+   }, 
+   "num": "31", 
+   "csv": {}, 
+   "port": "D"
+  }
+ ], 
+ "chip": {
+  "family": "NRF52", 
+  "dac": 0, 
+  "ram": 64, 
+  "spi": 1, 
+  "part": "NRF52832", 
+  "speed": 64, 
+  "usart": 1, 
+  "package": "QFN48", 
+  "flash": 512, 
+  "adc": 1, 
+  "saved_code": {
+   "flash_available": 308, 
+   "pages": 10, 
+   "page_size": 4096, 
+   "address": 442368
+  }, 
+  "i2c": 1
+ }, 
+ "peripherals": {
+  "DEVICE": {
+   "": [
+    "D13", 
+    "D20", 
+    "D29"
+   ]
+  }, 
+  "ADC": {
+   "": [
+    "D2", 
+    "D3", 
+    "D4", 
+    "D5", 
+    "D28", 
+    "D29", 
+    "D30", 
+    "D31"
+   ]
+  }
+ }, 
+ "devices": {
+  "LED1": {
+   "pin": "D20"
+  }, 
+  "RX_PIN_NUMBER": {
+   "pin": "D23"
+  }, 
+  "BTN1": {
+   "pinstate": "IN_PULLUP", 
+   "pin": "D29"
+  }, 
+  "BTN2": {
+   "pinstate": "IN_PULLUP", 
+   "pin": "D13"
+  }, 
+  "TX_PIN_NUMBER": {
+   "pin": "D22"
+  }
+ }
+}

@@ -1,0 +1,521 @@
+{
+ "info": {
+  "binary_version": "2v06", 
+  "variables": 2250, 
+  "link": [
+   "https://ruuvitag.com"
+  ], 
+  "default_console_tx": "D4", 
+  "default_console": "EV_SERIAL1", 
+  "bootloader": 1, 
+  "default_console_rx": "D5", 
+  "binary_url": "http://www.espruino.com/binaries/espruino_2v06_ruuvitag.hex", 
+  "thumb_url": "http://www.espruino.com/img/RUUVITAG_thumb.jpg", 
+  "builtin_modules": [
+   "Flash", 
+   "Storage", 
+   "heatshrink", 
+   "net", 
+   "dgram", 
+   "http", 
+   "NetworkJS", 
+   "crypto", 
+   "neopixel"
+  ], 
+  "name": "RuuviTag", 
+  "default_console_baudrate": "9600", 
+  "binary_name": "espruino_%v_ruuvitag.hex", 
+  "build": {
+   "libraries": [
+    "BLUETOOTH", 
+    "NET", 
+    "GRAPHICS", 
+    "CRYPTO", 
+    "SHA256", 
+    "SHA512", 
+    "NFC", 
+    "NEOPIXEL"
+   ], 
+   "makefile": [
+    "DEFINES+=-DHAL_NFC_ENGINEERING_BC_FTPAN_WORKAROUND=1", 
+    "DEFINES+=-DCONFIG_GPIO_AS_PINRESET", 
+    "DEFINES+=-DBLUETOOTH_NAME_PREFIX='\"RuuviTag\"'", 
+    "DFU_PRIVATE_KEY=targets/nrf5x_dfu/ruuvi_open_private.pem", 
+    "DFU_SETTINGS=--debug-mode --hw-version 52 --sd-req 0x8C"
+   ], 
+   "optimizeflags": "-Os"
+  }, 
+  "image_url": "http://www.espruino.com/img/RUUVITAG.jpg", 
+  "espruino_page_link": "Ruuvitag"
+ }, 
+ "pins": [
+  {
+   "functions": {
+    "XL1": 0
+   }, 
+   "name": "D0", 
+   "sortingname": "D00", 
+   "simplefunctions": {}, 
+   "num": "0", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "XL2": 0
+   }, 
+   "name": "D1", 
+   "sortingname": "D01", 
+   "simplefunctions": {}, 
+   "num": "1", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "ADC1_IN0": 0
+   }, 
+   "name": "D2", 
+   "sortingname": "D02", 
+   "simplefunctions": {
+    "ADC": [
+     "ADC1_IN0"
+    ]
+   }, 
+   "num": "2", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "CSBME": "pin", 
+    "ADC1_IN1": 0
+   }, 
+   "name": "D3", 
+   "sortingname": "D03", 
+   "simplefunctions": {
+    "ADC": [
+     "ADC1_IN1"
+    ]
+   }, 
+   "num": "3", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "TX_PIN_NUMBER": "pin", 
+    "ADC1_IN2": 0
+   }, 
+   "name": "D4", 
+   "sortingname": "D04", 
+   "simplefunctions": {
+    "ADC": [
+     "ADC1_IN2"
+    ]
+   }, 
+   "num": "4", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "RX_PIN_NUMBER": "pin", 
+    "ADC1_IN3": 0, 
+    "RTS": 0
+   }, 
+   "name": "D5", 
+   "sortingname": "D05", 
+   "simplefunctions": {
+    "ADC": [
+     "ADC1_IN3"
+    ]
+   }, 
+   "num": "5", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "TXD": 0
+   }, 
+   "name": "D6", 
+   "sortingname": "D06", 
+   "simplefunctions": {}, 
+   "num": "6", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "CTS": 0
+   }, 
+   "name": "D7", 
+   "sortingname": "D07", 
+   "simplefunctions": {}, 
+   "num": "7", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "CSLIS": "pin", 
+    "RXD": 0
+   }, 
+   "name": "D8", 
+   "sortingname": "D08", 
+   "simplefunctions": {}, 
+   "num": "8", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "NFC1": 0, 
+    "NFC": "pin_a"
+   }, 
+   "name": "D9", 
+   "sortingname": "D09", 
+   "simplefunctions": {
+    "DEVICE": [
+     "NFC"
+    ]
+   }, 
+   "num": "9", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "NFC2": 0, 
+    "NFC": "pin_b"
+   }, 
+   "name": "D10", 
+   "sortingname": "D10", 
+   "simplefunctions": {
+    "DEVICE": [
+     "NFC"
+    ]
+   }, 
+   "num": "10", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {}, 
+   "name": "D11", 
+   "sortingname": "D11", 
+   "simplefunctions": {}, 
+   "num": "11", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {}, 
+   "name": "D12", 
+   "sortingname": "D12", 
+   "simplefunctions": {}, 
+   "num": "12", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "NEGATED": 0, 
+    "BTN1": "pin"
+   }, 
+   "name": "D13", 
+   "sortingname": "D13", 
+   "simplefunctions": {
+    "DEVICE": [
+     "BTN1"
+    ]
+   }, 
+   "num": "13", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {}, 
+   "name": "D14", 
+   "sortingname": "D14", 
+   "simplefunctions": {}, 
+   "num": "14", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {}, 
+   "name": "D15", 
+   "sortingname": "D15", 
+   "simplefunctions": {}, 
+   "num": "15", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {}, 
+   "name": "D16", 
+   "sortingname": "D16", 
+   "simplefunctions": {}, 
+   "num": "16", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "LED1": "pin", 
+    "NEGATED": 0
+   }, 
+   "name": "D17", 
+   "sortingname": "D17", 
+   "simplefunctions": {
+    "DEVICE": [
+     "LED1"
+    ]
+   }, 
+   "num": "17", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {}, 
+   "name": "D18", 
+   "sortingname": "D18", 
+   "simplefunctions": {}, 
+   "num": "18", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "NEGATED": 0, 
+    "LED2": "pin"
+   }, 
+   "name": "D19", 
+   "sortingname": "D19", 
+   "simplefunctions": {
+    "DEVICE": [
+     "LED2"
+    ]
+   }, 
+   "num": "19", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {}, 
+   "name": "D20", 
+   "sortingname": "D20", 
+   "simplefunctions": {}, 
+   "num": "20", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {}, 
+   "name": "D21", 
+   "sortingname": "D21", 
+   "simplefunctions": {}, 
+   "num": "21", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {}, 
+   "name": "D22", 
+   "sortingname": "D22", 
+   "simplefunctions": {}, 
+   "num": "22", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {}, 
+   "name": "D23", 
+   "sortingname": "D23", 
+   "simplefunctions": {}, 
+   "num": "23", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {}, 
+   "name": "D24", 
+   "sortingname": "D24", 
+   "simplefunctions": {}, 
+   "num": "24", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {}, 
+   "name": "D25", 
+   "sortingname": "D25", 
+   "simplefunctions": {}, 
+   "num": "25", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {}, 
+   "name": "D26", 
+   "sortingname": "D26", 
+   "simplefunctions": {}, 
+   "num": "26", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {}, 
+   "name": "D27", 
+   "sortingname": "D27", 
+   "simplefunctions": {}, 
+   "num": "27", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "ADC1_IN4": 0
+   }, 
+   "name": "D28", 
+   "sortingname": "D28", 
+   "simplefunctions": {
+    "ADC": [
+     "ADC1_IN4"
+    ]
+   }, 
+   "num": "28", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "ADC1_IN5": 0
+   }, 
+   "name": "D29", 
+   "sortingname": "D29", 
+   "simplefunctions": {
+    "ADC": [
+     "ADC1_IN5"
+    ]
+   }, 
+   "num": "29", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "ADC1_IN6": 0, 
+    "RTS_PIN_NUMBER": "pin"
+   }, 
+   "name": "D30", 
+   "sortingname": "D30", 
+   "simplefunctions": {
+    "ADC": [
+     "ADC1_IN6"
+    ]
+   }, 
+   "num": "30", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "ADC1_IN7": 0, 
+    "CTS_PIN_NUMBER": "pin"
+   }, 
+   "name": "D31", 
+   "sortingname": "D31", 
+   "simplefunctions": {
+    "ADC": [
+     "ADC1_IN7"
+    ]
+   }, 
+   "num": "31", 
+   "csv": {}, 
+   "port": "D"
+  }
+ ], 
+ "chip": {
+  "family": "NRF52", 
+  "dac": 0, 
+  "ram": 64, 
+  "spi": 1, 
+  "part": "NRF52832", 
+  "speed": 64, 
+  "usart": 1, 
+  "package": "QFN48", 
+  "flash": 512, 
+  "adc": 1, 
+  "saved_code": {
+   "flash_available": 296, 
+   "pages": 10, 
+   "page_size": 4096, 
+   "address": 430080
+  }, 
+  "i2c": 1
+ }, 
+ "peripherals": {
+  "DEVICE": {
+   "": [
+    "D9", 
+    "D10", 
+    "D13", 
+    "D17", 
+    "D19"
+   ]
+  }, 
+  "ADC": {
+   "": [
+    "D2", 
+    "D3", 
+    "D4", 
+    "D5", 
+    "D28", 
+    "D29", 
+    "D30", 
+    "D31"
+   ]
+  }
+ }, 
+ "devices": {
+  "LED1": {
+   "pin": "D17"
+  }, 
+  "LED2": {
+   "pin": "D19"
+  }, 
+  "NFC": {
+   "pin_a": "D9", 
+   "pin_b": "D10"
+  }, 
+  "RX_PIN_NUMBER": {
+   "pin": "D5"
+  }, 
+  "CSLIS": {
+   "pinstate": "IN_PULLUP", 
+   "pin": "D8", 
+   "inverted": true
+  }, 
+  "RTS_PIN_NUMBER": {
+   "pin": "D30"
+  }, 
+  "CSBME": {
+   "pinstate": "IN_PULLUP", 
+   "pin": "D3", 
+   "inverted": true
+  }, 
+  "BTN1": {
+   "pinstate": "IN_PULLDOWN", 
+   "pin": "D13"
+  }, 
+  "CTS_PIN_NUMBER": {
+   "pin": "D31"
+  }, 
+  "TX_PIN_NUMBER": {
+   "pin": "D4"
+  }
+ }
+}

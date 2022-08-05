@@ -1,0 +1,535 @@
+{
+ "info": {
+  "binary_version": "2v14", 
+  "variables": 6000, 
+  "link": [
+   "https://en.wikipedia.org/wiki/Micro_Bit"
+  ], 
+  "default_console_tx": "H1", 
+  "default_console": "EV_SERIAL1", 
+  "thumb_url": "http://www.espruino.com/img/MICROBIT2_thumb.jpg", 
+  "default_console_rx": "H0", 
+  "binary_url": "http://www.espruino.com/binaries/espruino_2v14_microbit2.hex", 
+  "builtin_modules": [
+   "Flash", 
+   "Storage", 
+   "heatshrink", 
+   "neopixel", 
+   "tensorflow"
+  ], 
+  "name": "BBC micro:bit 2", 
+  "default_console_baudrate": "9600", 
+  "image_url": "http://www.espruino.com/img/MICROBIT2.jpg", 
+  "build": {
+   "libraries": [
+    "BLUETOOTH", 
+    "GRAPHICS", 
+    "NEOPIXEL", 
+    "TENSORFLOW"
+   ], 
+   "makefile": [
+    "DEFINES += -DCONFIG_GPIO_AS_PINRESET", 
+    "DEFINES += -DGPIO_COUNT=2 -DP1_PIN_NUM=16 -DNRF_P1_BASE=0x50000300UL \"-DNRF_P1=((NRF_GPIO_Type*)NRF_P1_BASE)\"", 
+    "DEFINES += -DMICROBIT", 
+    "INCLUDE += -I$(ROOT)/libs/microbit", 
+    "WRAPPERSOURCES += libs/microbit/jswrap_microbit.c", 
+    "DEFINES+=-DNEOPIXEL_SCK_PIN=27", 
+    "LDFLAGS += -Xlinker --defsym=LD_SRAM_SIZE=0x20000"
+   ], 
+   "optimizeflags": "-Os"
+  }, 
+  "binary_name": "espruino_%v_microbit2.hex", 
+  "espruino_page_link": "MicroBit"
+ }, 
+ "pins": [
+  {
+   "functions": {
+    "ADC1_IN0": 0, 
+    "3.3": 0
+   }, 
+   "name": "D0", 
+   "sortingname": "D00", 
+   "simplefunctions": {
+    "ADC": [
+     "ADC1_IN0"
+    ]
+   }, 
+   "num": "2", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "ADC1_IN1": 0, 
+    "3.3": 0
+   }, 
+   "name": "D1", 
+   "sortingname": "D01", 
+   "simplefunctions": {
+    "ADC": [
+     "ADC1_IN1"
+    ]
+   }, 
+   "num": "3", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "3.3": 0, 
+    "ADC1_IN2": 0
+   }, 
+   "name": "D2", 
+   "sortingname": "D02", 
+   "simplefunctions": {
+    "ADC": [
+     "ADC1_IN2"
+    ]
+   }, 
+   "num": "4", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "3.3": 0
+   }, 
+   "name": "D3", 
+   "sortingname": "D03", 
+   "simplefunctions": {}, 
+   "num": "31", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "3.3": 0
+   }, 
+   "name": "D4", 
+   "sortingname": "D04", 
+   "simplefunctions": {}, 
+   "num": "28", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "NEGATED": 0, 
+    "3.3": 0, 
+    "BTN1": "pin"
+   }, 
+   "name": "D5", 
+   "sortingname": "D05", 
+   "simplefunctions": {
+    "DEVICE": [
+     "BTN1"
+    ]
+   }, 
+   "num": "14", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "3.3": 0
+   }, 
+   "name": "D6", 
+   "sortingname": "D06", 
+   "simplefunctions": {}, 
+   "num": "37", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "3.3": 0
+   }, 
+   "name": "D7", 
+   "sortingname": "D07", 
+   "simplefunctions": {}, 
+   "num": "11", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "3.3": 0
+   }, 
+   "name": "D8", 
+   "sortingname": "D08", 
+   "simplefunctions": {}, 
+   "num": "10", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "3.3": 0
+   }, 
+   "name": "D9", 
+   "sortingname": "D09", 
+   "simplefunctions": {}, 
+   "num": "9", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "3.3": 0
+   }, 
+   "name": "D10", 
+   "sortingname": "D10", 
+   "simplefunctions": {}, 
+   "num": "30", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "NEGATED": 0, 
+    "3.3": 0, 
+    "BTN2": "pin"
+   }, 
+   "name": "D11", 
+   "sortingname": "D11", 
+   "simplefunctions": {
+    "DEVICE": [
+     "BTN2"
+    ]
+   }, 
+   "num": "23", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "3.3": 0
+   }, 
+   "name": "D12", 
+   "sortingname": "D12", 
+   "simplefunctions": {}, 
+   "num": "12", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "3.3": 0, 
+    "SPI1_SCK": 0
+   }, 
+   "name": "D13", 
+   "sortingname": "D13", 
+   "simplefunctions": {
+    "SPI": [
+     "SPI1_SCK"
+    ]
+   }, 
+   "num": "17", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "3.3": 0, 
+    "SPI1_MISO": 0
+   }, 
+   "name": "D14", 
+   "sortingname": "D14", 
+   "simplefunctions": {
+    "SPI": [
+     "SPI1_MISO"
+    ]
+   }, 
+   "num": "1", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "SPI1_MOSI": 0, 
+    "3.3": 0
+   }, 
+   "name": "D15", 
+   "sortingname": "D15", 
+   "simplefunctions": {
+    "SPI": [
+     "SPI1_MOSI"
+    ]
+   }, 
+   "num": "13", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "3.3": 0
+   }, 
+   "name": "D16", 
+   "sortingname": "D16", 
+   "simplefunctions": {}, 
+   "num": "34", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "3.3": 0
+   }, 
+   "name": "D17", 
+   "sortingname": "D17", 
+   "simplefunctions": {}, 
+   "num": "27", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "3.3": 0
+   }, 
+   "name": "D18", 
+   "sortingname": "D18", 
+   "simplefunctions": {}, 
+   "num": "27", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "3.3": 0, 
+    "I2C1_SCL": 0
+   }, 
+   "name": "D19", 
+   "sortingname": "D19", 
+   "simplefunctions": {
+    "I2C": [
+     "I2C1_SCL"
+    ]
+   }, 
+   "num": "26", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "I2C1_SDA": 0, 
+    "3.3": 0
+   }, 
+   "name": "D20", 
+   "sortingname": "D20", 
+   "simplefunctions": {
+    "I2C": [
+     "I2C1_SDA"
+    ]
+   }, 
+   "num": "32", 
+   "csv": {}, 
+   "port": "D"
+  }, 
+  {
+   "functions": {
+    "USART1_RX": 0, 
+    "3.3": 0
+   }, 
+   "name": "H0", 
+   "sortingname": "H00", 
+   "simplefunctions": {
+    "USART": [
+     "USART1_RX"
+    ]
+   }, 
+   "num": "40", 
+   "csv": {}, 
+   "port": "H"
+  }, 
+  {
+   "functions": {
+    "USART1_TX": 0, 
+    "3.3": 0
+   }, 
+   "name": "H1", 
+   "sortingname": "H01", 
+   "simplefunctions": {
+    "USART": [
+     "USART1_TX"
+    ]
+   }, 
+   "num": "6", 
+   "csv": {}, 
+   "port": "H"
+  }, 
+  {
+   "functions": {
+    "3.3": 0
+   }, 
+   "name": "H2", 
+   "sortingname": "H02", 
+   "simplefunctions": {}, 
+   "num": "36", 
+   "csv": {}, 
+   "port": "H"
+  }, 
+  {
+   "functions": {
+    "3.3": 0
+   }, 
+   "name": "H3", 
+   "sortingname": "H03", 
+   "simplefunctions": {}, 
+   "num": "0", 
+   "csv": {}, 
+   "port": "H"
+  }, 
+  {
+   "functions": {
+    "3.3": 0, 
+    "ADC1_IN3": 0
+   }, 
+   "name": "H4", 
+   "sortingname": "H04", 
+   "simplefunctions": {
+    "ADC": [
+     "ADC1_IN3"
+    ]
+   }, 
+   "num": "5", 
+   "csv": {}, 
+   "port": "H"
+  }, 
+  {
+   "functions": {
+    "3.3": 0
+   }, 
+   "name": "H5", 
+   "sortingname": "H05", 
+   "simplefunctions": {}, 
+   "num": "20", 
+   "csv": {}, 
+   "port": "H"
+  }, 
+  {
+   "functions": {
+    "3.3": 0
+   }, 
+   "name": "H6", 
+   "sortingname": "H06", 
+   "simplefunctions": {}, 
+   "num": "16", 
+   "csv": {}, 
+   "port": "H"
+  }, 
+  {
+   "functions": {
+    "3.3": 0
+   }, 
+   "name": "H7", 
+   "sortingname": "H07", 
+   "simplefunctions": {}, 
+   "num": "8", 
+   "csv": {}, 
+   "port": "H"
+  }, 
+  {
+   "functions": {
+    "3.3": 0
+   }, 
+   "name": "H8", 
+   "sortingname": "H08", 
+   "simplefunctions": {}, 
+   "num": "25", 
+   "csv": {}, 
+   "port": "H"
+  }, 
+  {
+   "functions": {
+    "LED1": "pin", 
+    "3.3": 0
+   }, 
+   "name": "V0", 
+   "sortingname": "V0", 
+   "simplefunctions": {
+    "DEVICE": [
+     "LED1"
+    ]
+   }, 
+   "num": "0", 
+   "csv": {}, 
+   "port": "V"
+  }
+ ], 
+ "chip": {
+  "family": "NRF52", 
+  "dac": 0, 
+  "ram": 64, 
+  "spi": 1, 
+  "part": "NRF52832", 
+  "speed": 64, 
+  "usart": 1, 
+  "package": "QFN48", 
+  "flash": 512, 
+  "adc": 1, 
+  "saved_code": {
+   "flash_available": 308, 
+   "pages": 10, 
+   "page_size": 4096, 
+   "address": 442368
+  }, 
+  "i2c": 1
+ }, 
+ "peripherals": {
+  "DEVICE": {
+   "": [
+    "D5", 
+    "D11", 
+    "V0"
+   ]
+  }, 
+  "SPI1": {
+   "MISO": [
+    "D14"
+   ], 
+   "MOSI": [
+    "D15"
+   ], 
+   "SCK": [
+    "D13"
+   ]
+  }, 
+  "ADC": {
+   "": [
+    "D0", 
+    "D1", 
+    "D2", 
+    "H4"
+   ]
+  }, 
+  "USART1": {
+   "RX": [
+    "H0"
+   ], 
+   "TX": [
+    "H1"
+   ]
+  }, 
+  "I2C1": {
+   "SCL": [
+    "D19"
+   ], 
+   "SDA": [
+    "D20"
+   ]
+  }
+ }, 
+ "devices": {
+  "LED1": {
+   "pin": "V0"
+  }, 
+  "BTN1": {
+   "pinstate": "IN_PULLDOWN", 
+   "pin": "D5"
+  }, 
+  "BTN2": {
+   "pinstate": "IN_PULLDOWN", 
+   "pin": "D11"
+  }
+ }
+}

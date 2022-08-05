@@ -1,23 +1,11 @@
 Reporting a bug ? Make sure it's repeatable!
 ============================================
 
-When searching in files and max limit is reached:
+Espruino development support
 
-johan worker process stderr: /srv/webide/server/server_api.js:3173
-		if(done) throw new Error("Already done! doneStack=" + doneStack);
-		         ^
+---
 
-Error: Already done! doneStack=Error
-    at doneFinish (/srv/webide/server/server_api.js:3176:15)
-    at Timeout.continueSearchFiles [as _onTimeout] (/srv/webide/server/server_api.js:3017:4)
-    at listOnTimeout (node:internal/timers:559:17)
-    at processTimers (node:internal/timers:502:7)
-    at doneFinish (/srv/webide/server/server_api.js:3173:18)
-    at aborted (/srv/webide/server/server_api.js:3195:3)
-    at Timeout.continueSearchFiles [as _onTimeout] (/srv/webide/server/server_api.js:3008:36)
-    at listOnTimeout (node:internal/timers:559:17)
-    at processTimers (node:internal/timers:502:7)
-
+Clean search/open file cache after x minutes in case we have deleted a  lot of files...
 
 ---
 
