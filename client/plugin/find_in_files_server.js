@@ -72,6 +72,12 @@ if(CHROMEBOOK) {
 		
 		var fileId = json.id;
 		
+		if(!progressBar) {
+			// Probably a collaborator (editor opened elsewhere that did the search)
+			searchReportCounter = fileId; // Keep this synced cross all collaborators to avoid filename conflicts
+			return;
+		}
+
 		var filePath = searchReportFileName(fileId);
 		var file;
 		
@@ -890,6 +896,8 @@ EDITOR.renderNeeded();
 	function findInFilesProgressStatus(status) {
 		//console.log("findInFilesProgressStatus: " + JSON.stringify(status));
 		
+		if(!progressBar) return; // Probably a collaborator (editor opened elsewhere that did the search)
+
 		// Whatever gives the highest percentage
 		progressBar.max = status.totalFoldersToSearch + status.totalFiles;
 		progressBar.value = status.totalFoldersSearched + status.totalFilesSearched;
