@@ -74,6 +74,7 @@
 	var espruinoInitialised = false;
 
 	var espruinoConnect;
+	var espruinoSendCode;
 
 	EDITOR.plugin({
 		desc: "Espruino development",
@@ -81,23 +82,40 @@
 
 			// todo: Add to language strings!
 			espruinoConnect = EDITOR.windowMenu.add("connect/disconnect", ["espruino", 100], toggleConnection);
+			espruinoSendCode = EDITOR.windowMenu.add("send code", ["espruino", 200], sendCodeToEspruino);
+
 
 			init(function() {
 				console.log("espruino: EspruinoTools initiated!");
 
-				setTimeout(function() {
-					// Escape any Promises that might swallow errors
-					console.log("espruino: Calling addProcessors...");
-				}, 0); 
+				addProcessors();
 
 			});
 
 		},
 		unload: function unloadEspruinoSupport() {
 
+			EDITOR.windowMenu.remove(espruinoConnect);
+			EDITOR.windowMenu.remove(espruinoSendCode);
 
+			Espruino = undefined;
+			window.$ = undefined;
 		}
 	});
+
+	function sendCodeToEspruino() {
+
+		var port = "Web Bluetooth";
+		var code = EDITOR.currentFile.text;
+
+		sendCode(port, code, function(err, result) {
+			if(err) throw err;
+
+			alertBox(result);
+
+		});
+
+	}
 
 	function toggleConnection() {
 		if (Espruino.Core.Serial.isConnected()) {
@@ -205,7 +223,7 @@
 			Espruino.Core.Serial.open(port, function(status) {
 				if (status === undefined) {
 					console.error("Unable to connect!");
-					return callback();
+					return callback(new Error("Unable to connect!"));
 				}
 				Espruino.callProcessor("transformForEspruino", code, function(code) {
 					Espruino.Core.CodeWriter.writeToEspruino(code, function() {
@@ -216,7 +234,7 @@
 				});
 			}, function() { // disconnected
 				if (callback)
-					callback(response);
+					callback(null, response);
 			});
 		});
 	};
