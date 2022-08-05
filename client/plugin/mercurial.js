@@ -1192,6 +1192,18 @@ else var directory = EDITOR.workingDirectory;
 				for(var i=0; i<removed.length; i++) insertFile(removed[i], true);
 				for(var i=0; i<untracked.length; i++) insertFile(untracked[i], false);
 				
+				//console.log("fileSelect.options.length=" + fileSelect.options.length);
+				if(fileSelect.options.length > 20) {
+					//console.log("fileSelect.options.length more then 10");
+					fileSelect.style.height = "20em";
+					fileSelect.style.maxHeight = Math.round(window.innerHeight/3) + "px";
+				}
+				else {
+					fileSelect.style.height="auto";
+					fileSelect.style.maxHeight="auto";
+				}
+				EDITOR.resizeNeeded();
+
 				if(missing.length > 0) alertBox("The following files are missing:\n" + missing.join("\n"), "SCM", "warning");
 				// Ask to untrack them !?
 				
