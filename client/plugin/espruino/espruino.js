@@ -76,6 +76,8 @@
 	var espruinoConnect;
 	var espruinoSendCode;
 
+	var progress;
+
 	EDITOR.plugin({
 		desc: "Espruino development",
 		load: function loadEspruinoSupport() {
@@ -104,42 +106,13 @@
 	});
 
 	function sendCodeToEspruino() {
-
-		var port = "Web Bluetooth";
 		var code = EDITOR.currentFile.text;
-
-		sendCode(port, code, function(err, result) {
+sendCode(code, function(err, result) {
 			if(err) throw err;
 
-			alertBox(result);
-
+			if(result) alertBox(result);
 		});
 
-	}
-
-	function toggleConnection() {
-		if (Espruino.Core.Serial.isConnected()) {
-			Espruino.Core.Serial.close();
-		} else {
-			var serialPort = 'Web Bluetooth';
-			term("Connecting to "+serialPort);
-			Espruino.Core.Serial.open(serialPort, function(cInfo) {
-				Espruino.Core.Serial.setSlowWrite(false, true/*force*/);
-				if (cInfo!=undefined) {
-					console.log("Device found (connectionId="+ cInfo.connectionId +")");
-					Espruino.Core.Notifications.success("Connected to "+serialPort, true);
-					term("Connected to "+serialPort);
-				} else {
-					// fail
-					Espruino.Core.Notifications.error("Connection Failed.", true);
-					term("Connection Failed.");
-				}
-			}, function () {
-				console.log("Disconnect callback...");
-				term("Bluetooth connection closed");
-				Espruino.Core.Notifications.warning("Disconnected", true);
-			});
-		}
 	}
 
 	function term(txt) {
@@ -200,9 +173,26 @@
 				info : function(e) { console.log("Espruino.Core.Notifications.info: ", e); },
 			};
 			Espruino.Core.Status = {
-				setStatus : function(e,len) { console.log("Espruino.Core.Status.setStatus: ", e); },
+				setStatus : function(e,len) {
+					console.log("Espruino.Core.Status.setStatus: ", e, len);
+					if(len) {
+						if(!progress) progress = document.getElementById("progress");
+						progress.value = 0;
+						progress.max = len;
+						progress.style.display="block";
+						EDITOR.resizeNeeded();
+					}
+				},
+				
 				hasProgress : function(e) { console.log("Espruino.Core.Status.hasProgress: ", e); return false; },
-				incrementProgress : function(amt) { console.log("Espruino.Core.Status.incrementProgress: ", amt); }
+				incrementProgress : function(amt) {
+					console.log("Espruino.Core.Status.incrementProgress: ", amt);
+					progress.value = progress.value + amt;
+					if(progress.value == progress.max) {
+						progress.style.display="none";
+						EDITOR.resizeNeeded();
+					}
+				}
 			};
 
 			// Finally init everything
@@ -212,32 +202,101 @@
 		});
 	}
 
-	function sendCode(port, code, callback) {
-		var response = "";
+	function toggleConnection() {
+		if (Espruino.Core.Serial.isConnected()) disconnect();
+		else connect();
+	}
+
+	//var serialDataBuffer = "";
+	function gotSerialData(data) {
+		data = new Uint8Array(data);
+		var buffer = "";
+		for (var i=0;i<data.length;i++) {
+			buffer += String.fromCharCode(data[i]);
+		}
+
+		//serialDataBuffer += buffer;
+
+		console.log("espruino:gotSerialData: buffer=" + buffer);
+	}
+
+	function connect(port, callback, disconnectedCb) {
+		if(typeof port == "function") {
+			disconnectedCb = callback;
+			callback = port;
+			port = undefined;
+		}
+
+		if(port == undefined) port = "Web Bluetooth";
+
+		if(disconnectedCb == undefined) disconnectedCb = disconnectCallback;
+
+		Espruino.Core.Serial.startListening(gotSerialData);
+
+		Espruino.Core.Serial.open(port, connectedCb, disconnectedCb);
+
+		function connectedCb(status) {
+			// Middleman function to populate err callback convention
+
+			//throw new Error("Im an error, am I trapped!?")
+
+			if (status === undefined) {
+				console.error("espruino: Unable to connect!");
+				Espruino.Core.Notifications.error("Connection Failed.", true);
+				if(callback) callback(new Error("Unable to connect!"));
+				else alertBox("Failed to connect to Espruino", "ECONFAILED", "error");
+
+				return;
+			}
+
+			console.log("espruino: Device found (connectionId="+ status.connectionId +")");
+
+			Espruino.Core.Serial.setSlowWrite(false, true/*force*/); // Why?
+
+			if(callback) callback(null, status);
+			else alertBox("Connected to Espruino:\n" + JSON.stringify(status, null, 2));
+
+		}
+	}
+
+	function disconnect() {
+		if (Espruino.Core.Serial.isConnected()) {
+			Espruino.Core.Serial.close();
+		}
+	}
+
+	function disconnectCallback() {
+		console.log("espruino: Disconnected! (disconnectCallback)");
+		Espruino.Core.Notifications.warning("Disconnected", true);
+	}
+
+	function sendCode(code, callback) {
+		if(code == undefined) throw new Error("espruino:sendCode: code=" + code);
+
 		init(function() {
-			Espruino.Core.Serial.startListening(function(data) {
-				data = new Uint8Array(data);
-				for (var i=0;i<data.length;i++)
-					response += String.fromCharCode(data[i]);
-			});
-			Espruino.Core.Serial.open(port, function(status) {
-				if (status === undefined) {
-					console.error("Unable to connect!");
-					return callback(new Error("Unable to connect!"));
-				}
+
+			if (Espruino.Core.Serial.isConnected()) send();
+			else connect(send);
+
+			function send(err) {
+				if(err) throw err;
+
 				Espruino.callProcessor("transformForEspruino", code, function(code) {
 					Espruino.Core.CodeWriter.writeToEspruino(code, function() {
-						setTimeout(function() {
-							Espruino.Core.Serial.close();
-						}, 500);
+						console.log("espruino: Sent code to espruino!");
+						//disconnectWhenInactive();
 					});
 				});
-			}, function() { // disconnected
-				if (callback)
-					callback(null, response);
-			});
+			}
+
 		});
 	};
+
+	function disconnectWhenInactive() {
+		setTimeout(function() {
+			Espruino.Core.Serial.close();
+		}, 500);
+	}
 
 	/** Execute an expression on Espruino, call the callback with the result */
 	function executeExpr(port, expr, callback) {
