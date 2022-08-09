@@ -244,41 +244,22 @@
 			console.log("espruino:terminalNewLine: arguments=" + JSON.stringify(arguments));
 		});
 
-
 		// ### Processors (misc)
+		Espruino.addProcessor("environmentVar", function espruino_environmentVar(environmentData, callback) {
+			console.log("espruino:environmentVar: environmentData=" + JSON.stringify(environmentData, null, 2));
+			callback(environmentData);
+		});
+
+		Espruino.addProcessor("boardJSONLoaded", function espruino_boardJSONLoaded(env, callback) {
+			console.log("espruino:boardJSONLoaded: env=" + JSON.stringify(env, null, 2));
+			callback(env);
+		});
+
 		/*
-			Espruino.addProcessor("jsCodeChanged", function espruino_jsCodeChanged() {
-			console.log("espruino:jsCodeChanged: arguments=" + JSON.stringify(arguments));
-			});
-			Espruino.addProcessor("sending", function espruino_sending() {
-			console.log("espruino:sending: arguments=" + JSON.stringify(arguments));
-			});
-			Espruino.addProcessor("transformForEspruino", function espruino_transformForEspruino() {
-			console.log("espruino:transformForEspruino: arguments=" + JSON.stringify(arguments));
-			});
-			Espruino.addProcessor("transformModuleForEspruino", function espruino_transformModuleForEspruino() {
-			console.log("espruino:transformModuleForEspruino: arguments=" + JSON.stringify(arguments));
-			});
-			Espruino.addProcessor("environmentVar", function espruino_environmentVar() {
-			console.log("espruino:environmentVar: arguments=" + JSON.stringify(arguments));
-			});
-			Espruino.addProcessor("boardJSONLoaded", function espruino_boardJSONLoaded() {
-			console.log("espruino:boardJSONLoaded: arguments=" + JSON.stringify(arguments));
-			});
-			Espruino.addProcessor("getModule", function espruino_getModule() {
-			console.log("espruino:getModule: arguments=" + JSON.stringify(arguments));
-			});
-			Espruino.addProcessor("debugMode", function espruino_debugMode() {
-			console.log("espruino:debugMode: arguments=" + JSON.stringify(arguments));
-			});
-			Espruino.addProcessor("editorHover", function espruino_editorHover() {
-			console.log("espruino:editorHover: arguments=" + JSON.stringify(arguments));
-			});
-			Espruino.addProcessor("notification", function espruino_notification() {
-			console.log("espruino:notification: arguments=" + JSON.stringify(arguments));
-			});
+			Other used processors are:
+			transformModuleForEspruino: call back with an object containing name and code (preferably minified and optimized)
+			getModule: call back with an object containing property moduleCode
 		*/
-		
 
 	}
 
