@@ -4,6 +4,33 @@ Reporting a bug ? Make sure it's repeatable!
 note: When committing only non-whitespace using git:
 git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-zero -
 
+---
+
+
+---
+
+Allow editor plugins to add new file protocols !?
+specify functions for saveFile, readFile, listFiles
+
+then we can have plugins for each file protocol:
+* Web File System Access API / nativeFileSystem: 
+* Remote files with webider: remote://hostname/path/filename
+* Espruino : espruino://filepath
+* GoogleDrive
+* OneDrive
+* FTP/FTPS/SFTP/SSH (currently using EDITOR.connections variable which the file explorer plugin checks in order to be able to swtich between connections/systems)
+
+EDITOR.connections (used by file explorer)
+
+EDITOR.listFiles
+
+The problem with the "cloud" is that you need to have both the file data and the file processor on the same machine,
+where file processor is some program that does something to the file, like NodeJS that runs the script file,
+
+
+
+
+---
 
 Espruino development support
 

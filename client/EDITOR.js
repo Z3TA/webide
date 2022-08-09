@@ -323,6 +323,8 @@ EDITOR.env = {}; // Plugins can set custom env values that will be passed to ter
 	
 	var cursorHidden = false;
 	
+	var _protocols = {};
+
 	var discoveryBar = document.createElement("div");
 	discoveryBar.setAttribute("id", "discoveryBar");
 	discoveryBar.setAttribute("aria-label", "Discovery bar");
@@ -382,8 +384,7 @@ ctxMenuVisibleOnce = true;
 	
 	var lastMouseDownEventType = "";
 	
-	// # Working Directory
-	var workingDirectory; // Private variable
+	var workingDirectory;
 	var _editorInput = true;
 	var _soundAssist = false;
 	var _project = "default";
@@ -1755,8 +1756,10 @@ usePseudoClipboard = false;
 		
 		if(callback == undefined || typeof callback != "function") throw new Error("No callback function! callback=" + callback);
 		
-		//var protocol = UTIL.urlProtocol(path);
+		var protocol = UTIL.urlProtocol(path);
 		
+		if(protocol == "" || EDITOR.remoteProtocols.indexOf(protocol) != -1) {
+
 		var json = {path: path, returnBuffer: returnBuffer, encoding: encoding};
 		
 		CLIENT.cmd("readFromDisk", json, function readFromDiskServerResponse(err, json) {
@@ -1767,6 +1770,20 @@ usePseudoClipboard = false;
 			}
 			else callback(null, json.path, json.data, json.hash);
 		});
+			return;
+		}
+		else if(_protocols.hasOwnProperty(protocol) == -1) {
+			callback(new Error("Unsupported protocol: " + protocol + " (have the plugin been loaded!?)"));
+			return;
+		}
+		else {
+
+			if( typeof _protocols[protocol].read != "function" ) return callback("protocol=" + protocol + " has no read function!");
+
+			_protocols[protocol].read(path, returnBuffer, encoding, callback);
+			return;
+
+		}
 	}
 	
 	EDITOR.countLines = function countLines(filePath, callback) {
@@ -2199,7 +2216,20 @@ else if(err.code == "ENETDOWN") {
 			path = trimmedPath;
 		}
 		
-		console.log("EDITOR.saveToDisk: path=" + path + " text.length=" + text.length + " inputBuffer=" + inputBuffer + " encoding=" + encoding + " timeout=" + timeout + " typeof saveToDiskCallback=" + typeof saveToDiskCallback)
+		var protocol = UTIL.urlProtocol(path);
+
+		console.log("EDITOR.saveToDisk: path=" + path + " protocol=" + protocol + "  text.length=" + text.length + " inputBuffer=" + inputBuffer + " encoding=" + encoding + " timeout=" + timeout + " typeof saveToDiskCallback=" + typeof saveToDiskCallback)
+
+		if(protocol != "" && EDITOR.remoteProtocols.indexOf(protocol) == -1) {
+
+			if(!_protocols.hasOwnProperty(protocol)) return saveToDiskCallback(new Error("protocol=" + protocol + " is not supported!"));
+			if(typeof _protocols[protocol].write != "function") return saveToDiskCallback(new Error("protocol=" + protocol + " does not have a write method!"));
+
+			_protocols[protocol].write(path, text, inputBuffer, encoding, timeout, saveToDiskCallback);
+
+			return;
+		}
+
 
 		// SockJS can not handle large messages! Server disconnects if you send 50MB in one message
 		var lengthLimit = 5592408; // Ca 40 MB
@@ -2365,6 +2395,26 @@ else if(err.code == "ENETDOWN") {
 		
 	}
 	
+	EDITOR.protocols = function() {
+		return Object.keys(_protocols);
+	}
+
+	/*
+		Allow adding different protocols, with read,write,list methods so that the editor knows how to deal with them
+
+		See EDITOR methods readFromDisk, writeToDisk, listFiles
+
+	*/
+	EDITOR.addProtocol = function(protocol, methods) {
+		if(_protocols.hasOwnProperty(protocol)) throw new Error("protocol=" + protocol + " has already been added by a plugin!");
+
+		_protocols[protocol] = methods;
+	}
+
+	EDITOR.removeProtocol = function(protocol) {
+		delete _protocols[protocol];
+	}
+
 	EDITOR.fileSaveDialog = function(defaultPath, callback) {
 		/*
 			Brings up the OS save file dialog window and calls the callback with the path.
@@ -7767,7 +7817,8 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 	}
 	
 	EDITOR.connect = function(callback, protocol, serverAddress, user, passw, keyPath, workingDir) {
-		
+		// Used for connecting to ftp,sftp,ssh,sftp servers
+
 		if(protocol == undefined) throw new Error("No protocol defined!");
 		
 		var json = {protocol: protocol, serverAddress: serverAddress, user: user, passw: passw, keyPath: keyPath, workingDir: workingDir};
@@ -7813,6 +7864,14 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		
 	}
 	
+	EDITOR.addVirtualConnection = function (protocol, serverAddress) {
+		EDITOR.connections[serverAddress] = {protocol: protocol};
+	}
+
+	EDITOR.removeVirtualConnection = function (protocol, serverAddress) {
+		delete EDITOR.connections[serverAddress];
+	}
+
 	EDITOR.folderExist = function(pathToFolder, callback) {
 		/*
 			Check if a folder/path exist
@@ -7979,8 +8038,18 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		
 		var protocol = UTIL.urlProtocol(pathToFolder);
 		
-		//console.log("EDITOR.listFiles: pathToFolder=" + pathToFolder + " protocol=" + protocol);
+		console.log("EDITOR.listFiles: protocol=" + protocol + " pathToFolder=" + pathToFolder + " protocol=" + protocol);
 		
+		if(protocol != "" && EDITOR.remoteProtocols.indexOf(protocol) == -1) {
+
+			if(!_protocols.hasOwnProperty(protocol)) return saveToDiskCallback(new Error("protocol=" + protocol + " is not supported!"));
+			if(typeof _protocols[protocol].list != "function") return saveToDiskCallback(new Error("protocol=" + protocol + " does not have a list method!"));
+
+			_protocols[protocol].list(pathToFolder, listFilesCallback);
+
+			return;
+		}
+
 		var json = {pathToFolder: pathToFolder};
 			
 			CLIENT.cmd("listFiles", json, function listFilesResp(err, fileList) {

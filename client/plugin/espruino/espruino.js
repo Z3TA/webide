@@ -71,12 +71,15 @@
 	};
 	// ---------------
 
-	var espruinoInitialised = false;
+	var espruinoInitialisedStatus = "";
+
+	var progress;
 
 	var espruinoConnect;
 	var espruinoSendCode;
-
-	var progress;
+	var espruinoFileExplorer;
+	
+	var protocol = "espruino";
 
 	EDITOR.plugin({
 		desc: "Espruino development",
@@ -85,12 +88,14 @@
 			// todo: Add to language strings!
 			espruinoConnect = EDITOR.windowMenu.add("connect/disconnect", ["espruino", 100], toggleConnection);
 			espruinoSendCode = EDITOR.windowMenu.add("send code", ["espruino", 200], sendCodeToEspruino);
-
+			espruinoFileExplorer = EDITOR.windowMenu.add("Show files", ["espruino", 300], fileExplorer);
 
 			init(function() {
 				console.log("espruino: EspruinoTools initiated!");
 
 				addProcessors();
+
+				EDITOR.addProtocol("espruino", {list: getFileList, read: downloadFile});
 
 			});
 
@@ -105,9 +110,81 @@
 		}
 	});
 
+	function downloadFile(path, returnBuffer, encoding, callback) {
+
+		console.log("espruino:downloadFile:path=" + path);
+
+		if(callback == undefined && typeof encoding == "function") {
+			callback = encoding;
+			encoding = "utf8";
+		}
+
+		if(callback == undefined && typeof returnBuffer == "function") {
+			callback = returnBuffer;
+			returnBuffer = false;
+		}
+
+		if(callback == undefined || typeof callback != "function") throw new Error("No callback function! callback=" + callback);
+
+		var fileName = path.replace(protocol + "://", "");
+
+		Espruino.Core.Utils.downloadFile(fileName, function(contents) {
+			if (contents===undefined) {
+				var error = new Error("Unable to read file (timeout) path=" + path);
+				error.code = "ENOENT";
+				return callback(error);
+			}
+			
+			UTIL.hash(contents, function(err, hash) {
+				if(err) return callback(null, path, contents);
+				callback(null, path, contents, hash);
+			});
+			
+		});
+	}
+
+	function fileExplorer() {
+		
+		if( isConnected() ) explore(null, lastConnection); 
+		else connect(explore);
+
+		function explore(err, status) {
+			if(err) return alertBox(err.message);
+
+			EDITOR.fileExplorer(protocol + "://" + status.portName + "/");
+		}
+	}
+
+	function getFileList(path, callback) {
+		//callback(['"a"','"b"','"c"']);
+
+		Espruino.Core.Utils.executeStatement(`require('Storage').list().forEach(x=>print(JSON.stringify(x)));`, function(files) {
+			var fileList = [];
+			try {
+				fileList = Espruino.Core.Utils.parseJSONish("["+files.trim().replace(/\n/g,",")+"]");
+				fileList.sort();
+				// fileList.sort(); // ideally should ignore first char for sorting
+			} catch (e) {
+				return callback(e);
+			}
+
+			fileList = fileList.map(function(file) {
+				return {
+					type: "-",
+					name: file,
+					path: protocol + "://" + file, //
+					size: 0,
+					date: new Date()
+				};
+			});
+
+			callback(null, fileList);
+		});
+	}
+
 	function sendCodeToEspruino() {
 		var code = EDITOR.currentFile.text;
-sendCode(code, function(err, result) {
+		sendCode(code, function(err, result) {
 			if(err) throw err;
 
 			if(result) alertBox(result);
@@ -125,18 +202,21 @@ sendCode(code, function(err, result) {
 		console.log("espruino: typeof Espruino.addProcessor=" + typeof Espruino.addProcessor + " Espruino.initialised=" + Espruino.initialised);
 
 		Espruino.addProcessor("connected", function(data, callback) {
-			console.log("Espruino.addProcessor:connected: data=", data);
+			console.log("espruino:Espruino.addProcessor:connected: data=", data);
 			callback(data);
+
+			EDITOR.addVirtualConnection(protocol, data.portName);
 		});
 
 		Espruino.addProcessor("disconnected", function(data, callback) {
-			console.log("Espruino.addProcessor:disconnected: data=", data);
+			console.log("espruino:Espruino.addProcessor:disconnected: data=", data);
 			callback(data);
+
+			EDITOR.removeVirtualConnection(protocol, data.portName);
 		});
 
 		Espruino.addProcessor("getURL", function webideGetURL_processor(obj, callback) {
-			console.log("hello world!");
-			console.log("Espruino.addProcessor:getURL: obj=", obj);
+			console.log("espruino:Espruino.addProcessor:getURL: obj=", obj);
 
 			var reJson = /\/json\/(\w*\.json)/;
 			var match = obj.url.match(reJson);
@@ -151,30 +231,85 @@ sendCode(code, function(err, result) {
 			}
 		});
 
+		// ### Terminal
+		Espruino.addProcessor("terminalClear", function espruino_terminalClear() {
+			console.log("espruino:terminalClear: arguments=" + JSON.stringify(arguments));
+		});
+
+		Espruino.addProcessor("terminalPrompt", function espruino_terminalPrompt() {
+			console.log("espruino:terminalPrompt: arguments=" + JSON.stringify(arguments));
+		});
+
+		Espruino.addProcessor("terminalNewLine", function espruino_terminalNewLine() {
+			console.log("espruino:terminalNewLine: arguments=" + JSON.stringify(arguments));
+		});
+
+
+		// ### Processors (misc)
+		/*
+			Espruino.addProcessor("jsCodeChanged", function espruino_jsCodeChanged() {
+			console.log("espruino:jsCodeChanged: arguments=" + JSON.stringify(arguments));
+			});
+			Espruino.addProcessor("sending", function espruino_sending() {
+			console.log("espruino:sending: arguments=" + JSON.stringify(arguments));
+			});
+			Espruino.addProcessor("transformForEspruino", function espruino_transformForEspruino() {
+			console.log("espruino:transformForEspruino: arguments=" + JSON.stringify(arguments));
+			});
+			Espruino.addProcessor("transformModuleForEspruino", function espruino_transformModuleForEspruino() {
+			console.log("espruino:transformModuleForEspruino: arguments=" + JSON.stringify(arguments));
+			});
+			Espruino.addProcessor("environmentVar", function espruino_environmentVar() {
+			console.log("espruino:environmentVar: arguments=" + JSON.stringify(arguments));
+			});
+			Espruino.addProcessor("boardJSONLoaded", function espruino_boardJSONLoaded() {
+			console.log("espruino:boardJSONLoaded: arguments=" + JSON.stringify(arguments));
+			});
+			Espruino.addProcessor("getModule", function espruino_getModule() {
+			console.log("espruino:getModule: arguments=" + JSON.stringify(arguments));
+			});
+			Espruino.addProcessor("debugMode", function espruino_debugMode() {
+			console.log("espruino:debugMode: arguments=" + JSON.stringify(arguments));
+			});
+			Espruino.addProcessor("editorHover", function espruino_editorHover() {
+			console.log("espruino:editorHover: arguments=" + JSON.stringify(arguments));
+			});
+			Espruino.addProcessor("notification", function espruino_notification() {
+			console.log("espruino:notification: arguments=" + JSON.stringify(arguments));
+			});
+		*/
+		
+
 	}
 
+	var callAfterInit = [];
+
 	function init(callback) {
-		if (espruinoInitialised) {
+		if (espruinoInitialisedStatus == "finish") {
 			console.log("espruino: Already initialised.");
-			return callback();
+			return callback(null);
 		}
-		espruinoInitialised = true;
+		if (espruinoInitialisedStatus == "loading") {
+			return callback(new Error("Esprouino dependencies has not yet loaded... (check dev console for errors)"));
+		}
+
+		espruinoInitialisedStatus = "loading";
 
 		window.$ = function() { return jqShim; };
 
 		loadDependencies(function(err) {
-			if(err) throw err;
+			if(err) return callback(err);
 
 			// Bodge up notifications
 			Espruino.Core.Notifications = {
-				success : function(e) { console.log("Espruino.Core.Notifications.success: ", e); },
-				error : function(e) { console.error("Espruino.Core.Notifications.error: ", e); },
-				warning : function(e) { console.warn("Espruino.Core.Notifications.warning: ", e); },
-				info : function(e) { console.log("Espruino.Core.Notifications.info: ", e); },
+				success : function(e) { console.log("espruino:Espruino.Core.Notifications.success: ", e); },
+				error : function(e) { console.error("espruino:Espruino.Core.Notifications.error: ", e); },
+				warning : function(e) { console.warn("espruino:Espruino.Core.Notifications.warning: ", e); },
+				info : function(e) { console.log("espruino:Espruino.Core.Notifications.info: ", e); },
 			};
 			Espruino.Core.Status = {
 				setStatus : function(e,len) {
-					console.log("Espruino.Core.Status.setStatus: ", e, len);
+					console.log("espruino:Espruino.Core.Status.setStatus: ", e, len);
 					if(len) {
 						if(!progress) progress = document.getElementById("progress");
 						progress.value = 0;
@@ -184,9 +319,9 @@ sendCode(code, function(err, result) {
 					}
 				},
 				
-				hasProgress : function(e) { console.log("Espruino.Core.Status.hasProgress: ", e); return false; },
+				hasProgress : function(e) { console.log("espruino:Espruino.Core.Status.hasProgress: ", e); return false; },
 				incrementProgress : function(amt) {
-					console.log("Espruino.Core.Status.incrementProgress: ", amt);
+					console.log("espruino:Espruino.Core.Status.incrementProgress: ", amt);
 					progress.value = progress.value + amt;
 					if(progress.value == progress.max) {
 						progress.style.display="none";
@@ -198,12 +333,16 @@ sendCode(code, function(err, result) {
 			// Finally init everything
 			jqReady.forEach(function(cb){cb();});
 			Espruino.init();
-			callback();
+
+			espruinoInitialisedStatus = "finish";
+
+			callback(null);
 		});
 	}
 
 	function toggleConnection() {
-		if (Espruino.Core.Serial.isConnected()) disconnect();
+		console.log("espruino:toggleConnection!");
+		if (isConnected()) disconnect();
 		else connect();
 	}
 
@@ -220,62 +359,90 @@ sendCode(code, function(err, result) {
 		console.log("espruino:gotSerialData: buffer=" + buffer);
 	}
 
-	function connect(port, callback, disconnectedCb) {
-		if(typeof port == "function") {
-			disconnectedCb = callback;
-			callback = port;
-			port = undefined;
-		}
+	var lastConnection = {port: undefined, portName: undefined};
 
-		if(port == undefined) port = "Web Bluetooth";
+	function isConnected(port) {
+		return Espruino.Core.Serial.isConnected() && (port==undefined || lastConnection.port==port);
+	}
+	
+	function connect(port, callback, disconnectCallback) {
+		init(function(err) {
+			if(err) return alertBox(err.message);
 
-		if(disconnectedCb == undefined) disconnectedCb = disconnectCallback;
+			console.log("espruino:connect port=" + port);
 
-		Espruino.Core.Serial.startListening(gotSerialData);
-
-		Espruino.Core.Serial.open(port, connectedCb, disconnectedCb);
-
-		function connectedCb(status) {
-			// Middleman function to populate err callback convention
-
-			//throw new Error("Im an error, am I trapped!?")
-
-			if (status === undefined) {
-				console.error("espruino: Unable to connect!");
-				Espruino.Core.Notifications.error("Connection Failed.", true);
-				if(callback) callback(new Error("Unable to connect!"));
-				else alertBox("Failed to connect to Espruino", "ECONFAILED", "error");
-
-				return;
+			if(typeof port == "function") {
+				disconnectCallback = callback;
+				callback = port;
+				port = undefined;
 			}
 
-			console.log("espruino: Device found (connectionId="+ status.connectionId +")");
+			if(port == undefined) port = "Web Bluetooth";
 
-			Espruino.Core.Serial.setSlowWrite(false, true/*force*/); // Why?
+			if(disconnectCallback == undefined) disconnectCallback = _disconnectCallback;
 
-			if(callback) callback(null, status);
-			else alertBox("Connected to Espruino:\n" + JSON.stringify(status, null, 2));
+			if(isConnected(port)) throw new Error("espruino:connect: Already connected on " + JSON.stringify(lastConnection));
+			else if (isConnected()) disconnect();
+				
+			Espruino.Core.Serial.startListening(gotSerialData);
 
-		}
+			Espruino.Core.Serial.open(port, connectCallback, disconnectCallback);
+
+			function connectCallback(status) { // Middleman function to populate err callback convention
+				console.log("espruino:connect:connectCallback! arguments=" + JSON.stringify(arguments, null, 2));
+
+				setTimeout(function() { // Escape any promise to prevent it from swallowing any errors / silently fail
+					
+					console.log("espruino:connect:status=" + JSON.stringify(status, null, 2));
+
+					if (status === undefined) {
+						console.error("espruino: Unable to connect!");
+						Espruino.Core.Notifications.error("Connection Failed.", true);
+						if(callback) callback(new Error("Unable to connect!"));
+						else alertBox("Failed to connect to Espruino", "ECONFAILED", "error");
+
+						return;
+					}
+
+					console.log("espruino:connect: Device found (connectionId="+ status.connectionId +")");
+
+					Espruino.Core.Serial.setSlowWrite(false, true/*force*/); // Why?
+
+					lastConnection = {port: port, portName: status.portName};
+
+					if(callback) callback(null, status);
+					else alertBox("Connected to Espruino:\n" + JSON.stringify(status, null, 2));
+				
+				},0);
+			}
+
+			function receiveCallback() {
+				console.log("espruino:connect:receiveCallback! arguments=" + JSON.stringify(arguments, null, 2));
+			}
+
+		});
 	}
 
 	function disconnect() {
+		console.log("espruino:disconnect: Espruino.Core.Serial.isConnected()=" + Espruino.Core.Serial.isConnected());
 		if (Espruino.Core.Serial.isConnected()) {
 			Espruino.Core.Serial.close();
+			console.log("espruino:disconnect: Called Espruino.Core.Serial.close()");
 		}
 	}
 
-	function disconnectCallback() {
-		console.log("espruino: Disconnected! (disconnectCallback)");
+	function _disconnectCallback() {
+		console.log("espruino: Disconnected! (_disconnectCallback)");
 		Espruino.Core.Notifications.warning("Disconnected", true);
 	}
 
 	function sendCode(code, callback) {
 		if(code == undefined) throw new Error("espruino:sendCode: code=" + code);
 
-		init(function() {
+		init(function(err) {
+			if(err) return alertBox(err.message);
 
-			if (Espruino.Core.Serial.isConnected()) send();
+			if (isConnected()) send();
 			else connect(send);
 
 			function send(err) {

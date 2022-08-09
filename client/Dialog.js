@@ -18,6 +18,7 @@ var FULL_SCREEN_DIALOG_COUNT = 0;
 	var bindKeys = setInterval(function() {
 
 		if(typeof EDITOR == "undefined") return;
+		if(typeof EDITOR.bindKey != "function") return; // Got EDITOR.bindKey is not a function on Chrome
 
 		EDITOR.bindKey({desc: S("close_dialog"), charCode: 27, combo: 0, fun: function closeDialog() {  // Escape key
 			if(EDITOR.openDialogs.length === -0) return ALLOW_DEFAULT;
