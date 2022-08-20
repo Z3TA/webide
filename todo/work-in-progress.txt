@@ -6,6 +6,7 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
+Samsung dex likes to ZOOM IN a lot... (going into full screen mode) however zooms back out...)
 
 ---
 
@@ -36,9 +37,6 @@ Espruino development support
 
 ---
 
-Clean search/open file cache after x minutes in case we have deleted a  lot of files...
-
----
 
 idea: ctrl or alt + t to launch a new terminal tab!?
 

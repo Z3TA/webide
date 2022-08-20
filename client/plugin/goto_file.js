@@ -883,6 +883,8 @@ abortFindFiles();
 			EDITOR.resizeNeeded();
 			EDITOR.renderNeeded();
 			
+			fileCache.length = 0; // Empty the cache so that next time we do a search we will get fresh data! (annoying when you search after having deleted a folder)
+
 			return false;
 		}
 		
