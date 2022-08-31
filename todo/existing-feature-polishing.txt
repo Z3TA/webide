@@ -5,6 +5,10 @@ Polishing (only existing features)
 ==================================
 
 
+Type inference system doesn't think our QUERY_STRING global variable is a object, it thinks it's a function!
+
+---
+
 I want to select TWO columns
 idea: hold down Shift+Ctrl while double clicking to select additional columns 
 

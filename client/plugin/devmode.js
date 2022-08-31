@@ -65,8 +65,11 @@
 			
 			/*
 				setInterval(function() {
-				throw new Error("test error msg");
-				}, 5000);
+				var zoom = Math.round(((window.outerWidth) / window.innerWidth)*100) / 100;
+
+				console.log("devicePixelRatio=" + window.devicePixelRatio + " zoom=" + zoom + " outerWidth=" + window.outerWidth + " innerWidth=" + window.innerWidth);
+
+				}, 3000);
 			*/
 			
 		},

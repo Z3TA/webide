@@ -187,6 +187,17 @@ for example adding it to your .bashrc so that the server starts every time you s
 And/or use Tasker or other app to make the both the server and the client start at the same time, in one click.
 
 
+Samsung Dex
+-----------
+It's recommended to run the hosted version (webide.se or self hosted backend). 
+But if you like to run it locally see Android above.
+
+The default Samsung keyboard use Shift+Space for changing keyboard layout,
+you have to download another keyboard (Gboard by Google) to change this setting,
+or if you have a newer version of Samsung Dex you can change it in:
+Settings > General Management > Language and Input > Physical Keyboard
+
+
 Run the editor on a computer/server that is behind a firewall NAT/router or without a public IP
 -----------------------------------------------------------------------------------------------
 When starting the server from command line/prompt, specify a code/name in -nat-code argument/flag. Example:

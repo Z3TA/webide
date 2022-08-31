@@ -75,9 +75,9 @@
 
 	var progress;
 
-	var espruinoConnect;
-	var espruinoSendCode;
-	var espruinoFileExplorer;
+	var menu_espruinoConnect;
+	var menu_espruinoSendCode;
+	var menu_espruinoFileExplorer;
 	
 	var protocol = "espruino";
 
@@ -86,24 +86,23 @@
 		load: function loadEspruinoSupport() {
 
 			// todo: Add to language strings!
-			espruinoConnect = EDITOR.windowMenu.add("connect/disconnect", ["espruino", 100], toggleConnection);
-			espruinoSendCode = EDITOR.windowMenu.add("send code", ["espruino", 200], sendCodeToEspruino);
-			espruinoFileExplorer = EDITOR.windowMenu.add("Show files", ["espruino", 300], fileExplorer);
+			menu_espruinoConnect = EDITOR.windowMenu.add("connect/disconnect", ["espruino", 100], toggleConnection);
+			menu_espruinoSendCode = EDITOR.windowMenu.add("send code", ["espruino", 200], sendCodeToEspruino);
+			menu_espruinoFileExplorer = EDITOR.windowMenu.add("Show files", ["espruino", 300], fileExplorer);
 
 			init(function() {
-				console.log("espruino: EspruinoTools initiated!");
-
-				addProcessors();
-
-				EDITOR.addProtocol("espruino", {list: getFileList, read: downloadFile});
+				
 
 			});
 
 		},
 		unload: function unloadEspruinoSupport() {
 
-			EDITOR.windowMenu.remove(espruinoConnect);
-			EDITOR.windowMenu.remove(espruinoSendCode);
+			EDITOR.windowMenu.remove(menu_espruinoConnect);
+			EDITOR.windowMenu.remove(menu_espruinoSendCode);
+			EDITOR.windowMenu.remove(menu_espruinoFileExplorer);
+
+			EDITOR.removeProtocol("espruino");
 
 			Espruino = undefined;
 			window.$ = undefined;
@@ -263,15 +262,15 @@
 
 	}
 
-	var callAfterInit = [];
-
 	function init(callback) {
 		if (espruinoInitialisedStatus == "finish") {
 			console.log("espruino: Already initialised.");
 			return callback(null);
 		}
 		if (espruinoInitialisedStatus == "loading") {
-			return callback(new Error("Esprouino dependencies has not yet loaded... (check dev console for errors)"));
+			var error = new Error("Esprouino dependencies has not yet loaded... (check dev console for errors)");
+			error.code = "LOADING";
+			return callback(error);
 		}
 
 		espruinoInitialisedStatus = "loading";
@@ -316,6 +315,12 @@
 			Espruino.init();
 
 			espruinoInitialisedStatus = "finish";
+
+			console.log("espruino: EspruinoTools initiated!");
+
+			addProcessors();
+
+			EDITOR.addProtocol("espruino", {list: getFileList, read: downloadFile});
 
 			callback(null);
 		});

@@ -711,8 +711,8 @@ var File; // File object is global
 				}
 				// Make sure there is no line break character in the middle of the text
 				else if(file.text.charCodeAt(grid[row][col].index) == 10 || file.text.charCodeAt(grid[row][col].index) == 13) {
-					throw new Error("File grid sanity check error: grid[" + row + "][" + col + "].char=" + grid[row][col].char + " (" + file.text.charCodeAt(grid[row][col].index) + ") is a line break character! file.lineBreak=" + UTIL.lbChars(file.lineBreak) + " file.path=" + file.path);
-				}
+				throw new Error("File grid sanity check error: Line break in the middle of the row:\n grid[" + row + "].length=" + grid[row].length + " grid[" + row + "][" + col + "].char=" + grid[row][col].char + " (" + file.text.charCodeAt(grid[row][col].index) + ") is a line break character! file.lineBreak=" + UTIL.lbChars(file.lineBreak) + " file.path=" + file.path);
+			}
 				
 				// Make sure the box has these properties:
 				box = grid[row][col];

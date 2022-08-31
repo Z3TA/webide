@@ -82,7 +82,7 @@
 	<!-- Google will use either the description below, or the text found in server_login.js Max 156 characters!                                                                          stop here| -->
 	<meta name="description" content="Online integrated developer enviroment and code editor for JavaScript, HTML, CSS. Linux shell with X11 desktop, mySQL database, Docker, Node.js, static site generator with live preview." />
 	<meta name="keywords" content="JavaScript web IDE, JavaScript Web Editor, Online JavaScript IDE, IDE for progressive web apps, PWA editor, PWA IDE, editor, IDE, JavaScript, Node.js" />
-	<meta name="viewport" content="width=device-width, initial-scale=0.8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" /> <!-- Having viewport=0.8 caused web devices to zoom in! (doh) causing blurry text on iOS! Reason we had it at 0.8 was so that Google would mark us as "mobile friendly" -->
 	<meta http-equiv="content-language" content="en" />
 	
 	<meta name="google-site-verification" content="qj6d8GQd_UydCTMcopkR1vjmHR6CnSdt9nZsgEYTmrY" />
@@ -412,6 +412,7 @@
 <script async="true" src="plugin/github2s.js"></script>
 <script async="true" src="plugin/coffee_break.js"></script>
 <script async="true" src="plugin/select_column.js"></script>
+<script async="true" src="plugin/rebind_keys.js"></script>
 
 <!-- BEGIN TESTS -->
 <!-- Place tests here, they will be removed by the release.sh script -->

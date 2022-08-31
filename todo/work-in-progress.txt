@@ -4,11 +4,63 @@ Reporting a bug ? Make sure it's repeatable!
 note: When committing only non-whitespace using git:
 git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-zero -
 
----
-
-Samsung dex likes to ZOOM IN a lot... (going into full screen mode) however zooms back out...)
 
 ---
+
+Make new release!
+
+---
+
+Test editor on KaiOS - can't install due to manifest 404. Need to make new release!!
+
+---
+
+Evan mode for devices that don't have dev tools,
+so you can run commands in order to debug. For example type inte the console "EDITOR.view" to see the variable data
+
+---
+
+Faster startup on slow device (Samsung Dex):
+* Don't load dashboard!?
+
+
+---
+
+Typing in large file (3000+ rows) is very slow while in colab mode!
+
+
+---
+
+Show caret when pressing enter! (annoying when you cant see if something happens)
+
+---
+
+rebind keys
+for when you cant set keyboard layout.
+
+hmm, is there loadConfig feature in the editor !? i have a vauge memory implementing such functionality...
+
+---
+
+When starting a program in the terminal, then restart the editor, you get an error about terminal1 
+
+Error message: Error: Terminal file not open: terminal1
+Error code: undefined
+
+parseBuffer@https://webide.se/#bugreport.txt#1:101:12453
+openActiveTerminals/<@https://webide.se/#bugreport.txt#1:101:18915
+
+--
+
+Error message: Error: Terminal file not open: terminal1
+Error code: undefined
+
+parseBuffer@https://webide.se/#bugreport.txt#1:101:12453
+terminalMessage@https://webide.se/#bugreport.txt#1:101:12972
+fireEvent@https://webide.se/#bugreport.txt#1:16:6784
+serverMessage@https://webide.se/#bugreport.txt#1:16:2120
+
+-------
 
 Allow editor plugins to add new file protocols !?
 specify functions for saveFile, readFile, listFiles
@@ -359,9 +411,6 @@ iOS Safari
 
 On Safari modals covers the whole screen! And it's scrolled down so you don't see the text or the buttons...
 
-Text looks bad when zoomed out but OK when zoomed in on Mobile Safari...
-Is there some sort of zoom on iOS safari?!? Even text on HTML elements looks like shit...
-The text is pixelated on Both Safari and Chrome on iOS...
 ---
 
 
