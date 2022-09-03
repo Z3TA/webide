@@ -660,6 +660,8 @@ if(maxResults <= 0) {
 		
 		if(selectedItem && typeof selectedItem.scrollIntoView == "function") selectedItem.scrollIntoView();
 		
+		document.body.scrollTop = document.documentElement.scrollTop = 0;
+
 		EDITOR.resizeNeeded();
 		EDITOR.resize();
 		
@@ -841,7 +843,7 @@ folderToSearchIn = EDITOR.workingDirectory;
 			typing(); // Trigger search
 		}
 		
-		discoveryBarIcon.classList.add("active");
+		discoveryBarIcon.activate();
 		
 		return false; // Return false to prevent default
 	}
@@ -862,7 +864,7 @@ abortFindFiles();
 		
 		ignoreSelection = false;
 		
-		if(discoveryBarIcon) discoveryBarIcon.classList.remove("active");
+		if(discoveryBarIcon) discoveryBarIcon.activate();
 		
 		if(gotoInputIsVisible) {
 			
@@ -900,6 +902,8 @@ abortFindFiles();
 		
 		if(EDITOR.input) return true;
 		
+		document.body.scrollTop = document.documentElement.scrollTop = 0;
+
 		//console.log("goto_file: Moving up ...");
 		
 		var listItems = gotoList.childNodes;
@@ -936,6 +940,8 @@ abortFindFiles();
 		
 		if(EDITOR.input) return true;
 		
+		document.body.scrollTop = document.documentElement.scrollTop = 0;
+
 		var listItems = gotoList.childNodes;
 		
 		//inputGoto.blur();

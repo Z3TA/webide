@@ -23,6 +23,16 @@
 		todo: use Green phone to toggle between insert and nav mode!
 		
 	*/
+
+
+	// Don't do anything if it's not a KaiOS device!
+	if(typeof window.navigator != "object" || typeof window.navigator.mozApps != "object") return;
+
+	console.log("KaiOS!")
+
+	EDITOR.disablePlugin("File tabs", true); // File tabs take up a lot of space
+	EDITOR.discoveryBar.disable("KaiOS");
+	EDITOR.dashboard.disable("KaiOS");
 	
 	var INSERT = "numericKeypadInsert";
 	var NAV = "numericKeypadNavigate";
@@ -34,53 +44,92 @@
 	});
 	
 	function loadKaiOsSupport() {
+
 		EDITOR.bindKey({desc: "Focus next element", key: "SoftRight", fun: focusNextElement});
-		EDITOR.bindKey({desc: "Show context menu", key: "SoftLeft", fun: kaiTogglewMenuOnKeyPress});
-		EDITOR.bindKey({desc: "Show context menu", key: "Call", fun: kaiToggleMode});
-		
+		EDITOR.bindKey({desc: "Show context menu", key: "SoftLeft", fun: kaiToggleMenuOnKeyPress});
+		EDITOR.bindKey({desc: "Switch mode", key: "Call", fun: kaiToggleMode});
+		EDITOR.bindKey({desc: "Toggle mic", key: "MicrophoneToggle", fun: microphoneToggle}); // Randomly triggers when pressing Main button
+
 		EDITOR.addMode(INSERT);
 		EDITOR.addMode(NAV);
 		
+	}
+
+	function unloadKaiOsSupport() {
+
+
+
+	}
+
+	function microphoneToggle() {
+
+		return PREVENT_DEFAULT;
+	}
+
+	function adoptForSmallScreen() {
+
+	}
+
+	function mozInfo() {
+
+		if(typeof window.navigator == "object" || typeof window.navigator.mozApps == "object" || typeof window.navigator.mozApps.getSelf != "function") return;
+
+		var request = window.navigator.mozApps.getSelf();
+		request.onsuccess = function() {
+			if (request.result) {
+				// Pull the name of the app out of the App object
+				alert("KaiOS: Name of current app: " + request.result.manifest.name);
+			} else {
+				alert("KaiOS: Called from outside of an app");
+			}
+		};
+		request.onerror = function() {
+			// Display error name from the DOMError object
+			alert("KaiOS: Error: " + request.error.name);
+		};
+
+	}
+
+	function mozInstall() {
+
 		/*
-			Try to "install" the web app 
+			Try to "install" the web app
 			https://developer.mozilla.org/en-US/docs/Archive/Marketplace/API/DOMApplicationsRegistry/install
-			
+
 			Test trigger. Run in FirefoxOS simulator debugger:
 			window.open("http://192.168.0.3/index.htm");
-			
+
 		*/
 		if(typeof window.navigator == "object" && typeof window.navigator.mozApps == "object" && typeof window.navigator.mozApps.install == "function") {
 			//console.log("KaiOS: : Attempting install ...");
-			
+
 			/*
 				Install failed, error: INVALID_URL
-				I tried: 
+				I tried:
 				./manifest.webapp
 				manifest.webapp
 				/manifest.webapp
-				
+
 				Got it working with: (but got another error: Install failed, error: REINSTALL_FORBIDDEN)
 				http://192.168.0.3/manifest.webapp
-				
+
 			*/
-			
+
 			var manifestUrl = document.location.protocol + "//" + document.location.host + "/manifest.webmanifest";
 			var request = window.navigator.mozApps.install(manifestUrl);
 			request.onsuccess = function () {
 				// Save the App object that is returned
 				var appRecord = this.result;
-				alertBox('Installation successful!');
+				alertBox('KaiOS: Installation successful!');
 			};
 			request.onerror = function () {
 				// Display the error information from the DOMError object
-				alertBox('Install failed, error: ' + this.error.name + " manifestUrl=" + manifestUrl);
+				alertBox('KaiOS: Install failed, error: ' + this.error.name + " manifestUrl=" + manifestUrl);
 			};
 		}
-		
+
 	}
-	
-	function unloadKaiOsSupport() {}
-	
+
 	function kaiToggleMode() {
 		//console.log("kaiToggleMode: EDITOR.mode=" + EDITOR.mode);
 		
@@ -98,7 +147,7 @@
 		return PREVENT_DEFAULT;
 	}
 	
-	function kaiTogglewMenuOnKeyPress(file, combo, character, charCode, direction, targetElementClass, keyDownEvent) {
+	function kaiToggleMenuOnKeyPress(file, combo, character, charCode, direction, targetElementClass, keyDownEvent) {
 		EDITOR.ctxMenu.show(keyDownEvent);
 		
 		EDITOR.input = false; // Prevent inserting control character to file 

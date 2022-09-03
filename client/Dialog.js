@@ -382,6 +382,7 @@ function alertBox(msg, code, icon, recursionCount) {
 
 	button.addEventListener("click", function(clickEvent) {
 		//console.log("alertBox button click: EDITOR.input=" + ((typeof EDITOR != "undefined") && EDITOR.input) + "");
+		button.disabled = true; // Prevent from clicking again
 		dialog.close(clickEvent);
 	}, false);
 

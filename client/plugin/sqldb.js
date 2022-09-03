@@ -130,7 +130,7 @@ else {
 	function showDbManager() {
 		EDITOR.ctxMenu.hide();
 		winMenuDbManager.hide();
-		discoveryBarIcon.classList.add("active");
+		discoveryBarIcon.activate();
 		//if(dbManagerWidget.visible) return hideDbManager();
 		
 		dbManagerWidget.show();
@@ -144,7 +144,7 @@ else {
 	function hideDbManager() {
 		dbManagerWidget.hide();
 		EDITOR.ctxMenu.update(menuItem, false);
-		discoveryBarIcon.classList.remove("active");
+		discoveryBarIcon.deactivate();
 		
 		return ALLOW_DEFAULT;
 	}

@@ -5,89 +5,84 @@
 		
 		This plugin should be "dumb". Let the editor or other plugins decide what file to open if one is closed
 		
-		todo: Clean up global variables
-		
-		todo: Make into a plugin
-		
 	*/
 	
 	"use strict";
-	
-	//var fileList = []; // Temporary array copy of opened files!?
-	
-	//if(QUERY_STRING["embed"]) return;
-	
+
 	var fileTabsActive = true;
-	
+
 	if(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("file_tabs") != -1) {
 		var fileTabsActive = false;
 	}
-	
+
 	var winMenuLastTab, winMenuMoveTabLeft, winMenuMoveTabRight, winMenuTabLeft, winMenuTabRight, winMenuToggleFileTabs;
-	
+
 	var hiddenBecauseEmty = false;
-	
+
 	var tabindex = 300; // See tabindex.txt
-	
+
 	var closedTabs = [];
-	
-	EDITOR.on("start", file_tabs);
-	
-	function file_tabs() {
-		
+
+	EDITOR.plugin({
+		desc: "File tabs",
+		load: loadFileTabs,
+		unload: unloadFileTabs
+	});
+
+	function loadFileTabs() {
 		winMenuToggleFileTabs = EDITOR.windowMenu.add(S("file_tabs"), [S("View"), 90], toggleFileTabs);
-		
+
 		if(!fileTabsActive) return;
 		if(winMenuToggleFileTabs) winMenuToggleFileTabs.activate();
-		
+
 		//console.log("file_tabs: Loading file_tabs ...");
-		
+
 		buildTabs();
-		
+
 		EDITOR.on("fileOpen", tabFileOpen, 2);
 		EDITOR.on("fileClose", closeFile_tabs, 2);
 		EDITOR.on("fileChange", tabFileChange);
 		EDITOR.on("afterSave", tabFileSave);
 		EDITOR.on("fileShow", tabFileShow);
-		
+
 		var key_pageUP = 33;
 		var key_pageDown = 34;
 		var key_tab = 9;
 		var key_backspace = 8;
 		var key_ArrowLeft = 37;
-		
+
 		// Can not bind to Ctrl + Tab when in the browser
-			// Ctrl+Shift+Tab doesn't work in Firefox
-			// Shift+Tab is used for deindention
+		// Ctrl+Shift+Tab doesn't work in Firefox
+		// Shift+Tab is used for deindention
 		// Alt+Backspace is the Del button on most programs
 		// Ctrl+Shift+left conflicts with stepping words when selecting left
-		
+
 		EDITOR.bindKey({desc: S("switch_to_last_active_file"), charCode: key_tab, combo: CTRL+SHIFT, fun: switchTab});
-		
+
 		EDITOR.bindKey({desc: S("switch_to_last_active_file"), charCode: key_backspace, combo: CTRL+SHIFT, fun: switchTabCtrlShiftBackspace});
-		
-		
+
+
 		if(DISPLAY_MODE == "standalone" || CHROMEBOOK) {
 			// We can bind to Ctrl + Tab when the app was launched from the desktop or home screen
 			EDITOR.bindKey({desc: S("switch_to_last_active_file"), charCode: key_tab, combo: CTRL, fun: switchTabInStandaloneMode}); // Ctrl + tab
 		}
-		
-		
+
+
 		EDITOR.bindKey({desc: S("move_tab_left"), charCode: key_pageUP, combo: CTRL + SHIFT, fun: orderTabLeft});
 		EDITOR.bindKey({desc: S("move_tab_right"), charCode: key_pageDown, combo: CTRL + SHIFT, fun: orderTabRight});
 		// todo: implement tab drag and drop to change order
-		
+
 		EDITOR.bindKey({desc: S("switch_to_left_tab"), charCode: key_pageUP, combo: CTRL, fun: switchTabLeft});
 		EDITOR.bindKey({desc: S("switch_to_right_tab"), charCode: key_pageDown, combo: CTRL, fun: switchTabRight});
-		
+
 		winMenuLastTab = EDITOR.windowMenu.add(S("switch_to_last_active_file"), [S("Edit"), 10], switchTab);
 		winMenuMoveTabLeft = EDITOR.windowMenu.add(S("move_tab_left"), [S("Edit"), 10], orderTabLeft, "top");
 		winMenuMoveTabRight = EDITOR.windowMenu.add(S("move_tab_right"), [S("Edit"), 10], switchTabRight);
 		winMenuTabLeft = EDITOR.windowMenu.add(S("switch_to_left_tab"), [S("Edit"), 10], switchTabLeft);
 		winMenuTabRight = EDITOR.windowMenu.add(S("switch_to_right_tab"), [S("Edit"), 10], switchTabRight, "bottom");
-		
+
 		EDITOR.registerAltKey({char: "space", alt:1, label: S("last_tab"), fun: switchTab});
-		
+
 		setTimeout(function hideIfEmpty() {
 			if(Object.keys(EDITOR.files).length == 0) {
 				//console.log("file_tabs: Hiding file tabs because no files are open!");
@@ -95,9 +90,36 @@
 				hideFileTabs();
 			}
 		}, 1000);
-		
 	}
-	
+
+	function unloadFileTabs() {
+
+		hideFileTabs();
+
+		EDITOR.removeEvent("fileOpen", tabFileOpen);
+		EDITOR.removeEvent("fileClose", closeFile_tabs);
+		EDITOR.removeEvent("fileChange", tabFileChange);
+		EDITOR.removeEvent("afterSave", tabFileSave);
+		EDITOR.removeEvent("fileShow", tabFileShow);
+
+		EDITOR.unbindKey(switchTab);
+		EDITOR.unbindKey(switchTabCtrlShiftBackspace);
+		EDITOR.unbindKey(switchTabInStandaloneMode);
+		EDITOR.unbindKey(orderTabLeft);
+		EDITOR.unbindKey(orderTabRight);
+		EDITOR.unbindKey(switchTabLeft);
+		EDITOR.unbindKey(switchTabRight);
+
+		EDITOR.windowMenu.remove(winMenuToggleFileTabs);
+		EDITOR.windowMenu.remove(winMenuLastTab);
+		EDITOR.windowMenu.remove(winMenuMoveTabLeft);
+		EDITOR.windowMenu.remove(winMenuMoveTabRight);
+		EDITOR.windowMenu.remove(winMenuTabLeft);
+		EDITOR.windowMenu.remove(winMenuTabRight);
+
+		EDITOR.unregisterAltKey(switchTab);
+	}
+
 	function toggleFileTabs() {
 		if(fileTabsActive) {
 			hiddenBecauseEmty = false;

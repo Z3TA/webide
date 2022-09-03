@@ -4,6 +4,25 @@ Reporting a bug ? Make sure it's repeatable!
 note: When committing only non-whitespace using git:
 git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-zero -
 
+---
+
+todo: recover from full size footer by measuring the content of the footer, not the footer itself because when it's full screen it takes up the entire screen!
+
+---
+
+Default font sizes in em, then they can be changed by setting font size of parent elements!
+
+---
+
+KaiOS support:
+Can't scroll on loginscreen!
+
+
+
+
+---
+
+In firefox when scrolled horizontally for to the right, the text becomes invisible after random amount of seconds (8, 2, 0, 14, 1, ) then the bug magically dissapears...
 
 ---
 

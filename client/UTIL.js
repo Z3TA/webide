@@ -2922,6 +2922,7 @@ b = b.slice(8);
 		
 		function fromString(str) {
 			if(str == "SoftRight") return 9; // Tab
+			if(str == "MicrophoneToggle") return 13; // Main button on KaiOS, means Enter most of the time. 13=Enter
 			else if(str.length == 2 && str.codePointAt) return str.codePointAt(0); // For unicode higher then 65535
 			else if(str.length != 1) throw new Error("UTIL.charCode: str=" + str + " length=" + str.length);
 			else return str.charCodeAt(0);

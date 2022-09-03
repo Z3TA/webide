@@ -21,6 +21,7 @@ var benchmarkCharacterCode = 190;
 var inputCount = 0;
 var ctxMenuVisibleOnce = false;
 var CONTEXT_MENU_IS_FULL_SCREEN = false;
+var FULL_SCREEN_FOOTER = false;
 var usePseudoClipboard = undefined;
 var lastBufferStartRow = -1; // 
 var PIXEL_RATIO = window.devicePixelRatio || 1; // "Retina" displays gives 2
@@ -3393,6 +3394,8 @@ ca 20ms to render, ca 13ms to render without creating new objects
 			return;
 		}
 		
+		console.log("EDITOR.resize!");
+
 		PIXEL_RATIO = window.devicePixelRatio || 1; // "Retina" displays gives 2
 		
 
@@ -3463,7 +3466,7 @@ ca 20ms to render, ca 13ms to render without creating new objects
 		var columnsHeight = contentHeight;
 		
 		
-		if(QUERY_STRING["debug"]) {
+		//if(QUERY_STRING["debug"]) {
 			console.log("=================== RESIZE ===================");
 			console.log("windowWidth=" + windowWidth);
 			console.log("windowHeight=" + windowHeight);
@@ -3480,12 +3483,20 @@ ca 20ms to render, ca 13ms to render without creating new objects
 			console.log("offsetWidth=" + content.offsetWidth);
 			console.log("innerWidth=" + content.innerWidth);
 			console.log("outherWidth=" + content.outherWidth);
-			}
+			//}
 		
 		
 		EDITOR.height = windowHeight;
 		EDITOR.width = windowWidth;
 		
+		if( footerHeight/windowHeight > 0.8 && !FULL_SCREEN_FOOTER ) {
+			return fullScreenFooter();
+		}
+		else if( footerHeight/windowHeight < 0.5 && FULL_SCREEN_FOOTER ) {
+			recoverFromFullScreenFooter();
+			EDITOR.resize();
+			return;
+		}
 		
 		//UTIL.objInfo(centerColumn);
 		
@@ -3624,9 +3635,10 @@ ca 20ms to render, ca 13ms to render without creating new objects
 			//console.log("EDITOR.resize: Set canvas: EDITOR.canvas.width=" + EDITOR.canvas.width + " EDITOR.canvas.height=" + EDITOR.canvas.height + " EDITOR.canvas.style.width=" + EDITOR.canvas.style.width + " EDITOR.canvas.style.height=" + EDITOR.canvas.style.height);
 			
 			var dashboard = document.getElementById("dashboard");
+			if(dashboard) {
 			dashboard.style.width = EDITOR.view.canvasWidth + "px";
 			dashboard.style.height = EDITOR.view.canvasHeight + "px";
-			
+			}
 			
 			// Need to re-render after resizing the canvas!
 			//console.log("EDITOR.resize: re-render after resizing the canvas!");
@@ -4014,21 +4026,27 @@ throw new Error("Second or third argument to EDITOR.on: callback=" + callback + 
 
 
 			// Why was this not at the top before? Why was the icons added anyway!?
-			if(QUERY_STRING["embed"] || (QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("discoveryBar") != -1)) {
-				var disabledErrorMessage = "Discovery bar is disabled by query string!";
+			if( !EDITOR.discoveryBar.enabled || QUERY_STRING["embed"] || (QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("discoveryBar") != -1) ) {
+				
+				if( !EDITOR.discoveryBar.enabled ) {
+					var disabledErrorMessage = "Discovery bar is disabled (by " + EDITOR.discoveryBar.disabledBy + ")";
+				}
+				else {
+					var disabledErrorMessage = "Discovery bar is disabled by query string!";
+				}
 
 				console.warn(disabledErrorMessage);
 
 				return {
 					disabled: true,
 					activate: function() {
-						console.error(disabledErrorMessage);
+						console.log(disabledErrorMessage);
 					},
 					deactivate: function() {
-						console.error(disabledErrorMessage);
+						console.log(disabledErrorMessage);
 					},
 					isActive: function() {
-						console.error(disabledErrorMessage);
+						console.log(disabledErrorMessage);
 					}
 
 				};
@@ -4236,17 +4254,20 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 			
 			
 		},
-		disable: function disableDiscoveryBar() {
+		disable: function disableDiscoveryBar(who) {
+			if(who == undefined) throw new Error("First argument must be an identification so that we know who disabled the discovery bar");
+
 			// Disables the entire discovery bar
 			EDITOR.discoveryBar.hide();
 			EDITOR.discoveryBar.enabled = false;
+
+			EDITOR.discoveryBar.disabledBy.push(who);
 		},
 		isVisible: true,
 		enabled: true,
-		captions: true
+		captions: true,
+		disabledBy: []
 	}
-	
-	
 	
 	function DropdownMenu(options) {
 		if(typeof options == "undefined") options = {};
@@ -5171,8 +5192,8 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 		},
 		remove: function removeWindowMenuItem(menuItem) {
 			
-if(menuItem.parentMenu) {
-			menuItem.parentMenu.removeItem(menuItem);
+			if(menuItem && typeof menuItem.parentMenu == "object") {
+				menuItem.parentMenu.removeItem(menuItem);
 			}
 			else {
 				console.warn("Unable to remove menu item: ", menuItem);
@@ -7711,33 +7732,67 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 			if(EDITOR.plugins[i].desc == p.desc) throw new Error("A plugin with the same description is already loaded: " + p.desc);
 		}
 		
+		if( EDITOR.disabledPlugins.indexOf(p.disc) != -1 ) {
+			if( typeof EDITOR.disabledPluginsBy[desc] == "object" ) {
+				console.warn(p.disc + " has been disabled by " + EDITOR.disabledPluginsBy[desc].join(","));
+			}
+			else {
+				console.warn(p.disc + " has been disabled! ");
+			}
+			return;
+		}
+
 		EDITOR.plugins.push(p);
 	}
-	
-	EDITOR.disablePlugin = function(desc, remove) {
+
+	EDITOR.disabledPlugins = [];
+	EDITOR.disabledPluginsBy = {};
+
+	EDITOR.disablePlugin = function(desc, removedBy) {
 		var plugin;
+
+		console.warn("EDITOR.disablePlugin: desc=" + desc);
+
 		for(var i=0; i<EDITOR.plugins.length; i++) {
 			plugin = EDITOR.plugins[i];
 			if(plugin.desc == desc) {
-				
-				if(plugin.loaded && !plugin.unload) {
-					throw new Error("The plugin has already been loaded, and it does not have an unload method! So you have to disable this plugin before it's loaded!");
+
+				if(plugin.loaded) {
+					if(typeof plugin.unload != "function") throw new Error("The plugin has already been loaded, and it does not have an unload method! So you have to disable this plugin before it's loaded!");
+					
+					try {
+						plugin.unload();
+					}
+					catch(err) {
+						console.log("Error when unloading plugin: " + desc + " Error: " + err.message);
+					}
 				}
 				
-				if(plugin.unload) plugin.unload();
-				else {
-					console.warn("Plugin has no unload method: " + desc);
+				if(removedBy) {
+					console.warn("EDITOR.disablePlugin: Disabling already loaded plugin permanently: desc=" + desc);
+					EDITOR.plugins.splice(i, 1);
 				}
-				if(remove) EDITOR.plugins.splice(i, 1);
-				
 				//console.log("Plugin disabled" + (remove ? " and removed": "") + ": " + desc);
 				
 				return true;
 			}
 		}
 		
+		console.log("EDITOR.disablePlugin: Not yet loaded: desc=" + desc);
+
+		if( removedBy ) {
+			console.warn("EDITOR.disablePlugin: Disabling permanently: desc=" + desc);
+			EDITOR.disabledPlugins.push(desc);
+			if(typeof removeOrWho == "string") {
+				if( typeof EDITOR.disabledPluginsBy[desc] != "object") EDITOR.disabledPluginsBy[desc] = [];
+				EDITOR.disabledPluginsBy[desc].push(removeOrWho);
+			}
+		}
+
 		return false;
 	}
+
+
 	
 	EDITOR.enablePlugin = function(desc) {
 		var plugin;
@@ -8751,6 +8806,8 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		},
 		addWidget: function(el) {
 			
+			if(!EDITOR.dashboard.enabled) throw new Error("dsshboard disable by " + EDITOR.dashboard.disabledBy.join(","));
+
 			if(typeof el == "function") throw new Error("Parameter el in EDITOR.addDashboardWidget is a function. Expected a HTML DOM Node!");
 			
 			var dashboard = document.getElementById("dashboard");
@@ -8780,6 +8837,8 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 			return removedNode;
 		},
 		hide: function hideDashboard(stayHidden) {
+			if(!this.enabled) return;
+
 			var dashboard = document.getElementById("dashboard");
 			
 			dashboard.style.display = "none";
@@ -8804,7 +8863,8 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 			console.log("Showing the dashboard! stayHidden=" + EDITOR.dashboard.stayHidden);
 			
 			if(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("dashboard") != -1) throw new Error("dashboard disabled via query string!");
-			
+			if(!EDITOR.dashboard.enabled) throw new Error("dsshboard disable by " + EDITOR.dashboard.disabledBy.join(","));
+
 			while(EDITOR.dashboard.announcedWidgets.length > 0) EDITOR.dashboard.createWidget(EDITOR.dashboard.announcedWidgets[0]);
 
 			var dashboard = document.getElementById("dashboard");
@@ -8830,8 +8890,23 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 				dashboard.style.top = (headerRect.bottom - 1) + "px";
 			}
 		},
+		disable: function disableDashboard(who) {
+			if(who == undefined) throw new Error("First argument must be an identification so that we know who disabled the dashboard");
+			EDITOR.dashboard.disabledBy.push(who);
+			
+			EDITOR.dashboard.stayHidden = true;
+			EDITOR.dashboard.isVisible = false;
+
+			var dashboard = document.getElementById("dashboard");
+			dashboard.parentElement.removeChild(dashboard);
+
+			EDITOR.dashboard.enabled = false;
+
+		},
 		isVisible: false,
-		stayHidden: false
+		stayHidden: false,
+		enabled: true,
+		disabledBy: []
 	}
 	
 	EDITOR.openFileTool = function fileOpenTool(options, filePath) {
@@ -13674,7 +13749,7 @@ function scrollWheel(scrollWheelEvent) {
 	
 	EDITOR.interact("mouseScroll", scrollWheelEvent);
 	
-		console.log("scroll");
+		//console.log("scroll");
 		
 		return ALLOW_DEFAULT;
 }
@@ -13933,7 +14008,6 @@ function getFile(url, callback) {
 		EDITOR.ctxMenu.addTemp("Hide menu", function exitFullscreenMenu() {
 			EDITOR.ctxMenu.hide();
 		});
-		
 	}
 	
 	function recoverFromFullScreenMenu(menu) {
@@ -13952,6 +14026,67 @@ function getFile(url, callback) {
 		EDITOR.resizeNeeded();
 	}
 	
+
+	var footerDomLocation;
+	function fullScreenFooter() {
+		// The footer will cover the whole screen
+
+		console.log("fullScreenFooter!");
+
+		var wireframe = document.getElementById("wireframe");
+		var footer = document.getElementById("footer");
+		var body = document.getElementById("body");
+
+		footerDomLocation = footer.nextSibling;
+
+		wireframe.removeChild(footer);
+		body.appendChild(footer);
+		wireframe.style.display = "none";
+
+		footer.style.position="relative";
+		footer.style.top = "0px";
+		footer.style.left = "0px";
+		footer.style.border="0px solid";
+		//footer.style.width="100%";
+		footer.style.maxWidth="100%";
+		footer.style.height="100%";
+		footer.style.overflow="auto";
+		EDITOR.scrollingEnabled = true;
+
+		FULL_SCREEN_FOOTER = true;
+
+		EDITOR.lastElementWithFocus.focus();
+
+		//EDITOR.ctxMenu.addTemp("Hide menu", function exitFullscreenFooter() {});
+
+	}
+
+	function recoverFromFullScreenFooter() {
+		
+		console.log("recoverFromFullScreenFooter!");
+
+		var wireframe = document.getElementById("wireframe");
+		var footer = document.getElementById("footer");
+		var body = document.getElementById("body");
+
+		body.removeChild(footer);
+		wireframe.insertBefore(footer, footerDomLocation);
+
+		wireframe.style.display = "block";
+		footer.style.position="";
+		footer.style.border="";
+		//footer.style.width="";
+		footer.style.maxWidth="";
+		footer.style.height="";
+		footer.style.overflow="";
+		EDITOR.scrollingEnabled = false;
+		FULL_SCREEN_FOOTER = false;
+
+		EDITOR.lastElementWithFocus.focus();
+
+		EDITOR.resizeNeeded();
+	}
+
 	
 	
 })();

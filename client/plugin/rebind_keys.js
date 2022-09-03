@@ -1,7 +1,7 @@
 (function() {
 	"use strict";
 
-	if(! QUERY_STRING["keylog"] ) return;
+	//if(! QUERY_STRING["keylog"] ) return;
 
 	var fileName ="keyLog.tmp";
 
@@ -14,21 +14,17 @@
 		unload: function unloadRebindKeys() {
 			EDITOR.removeEvent("storageReady", loadKeySettings);
 			EDITOR.removeEvent("keyPressed", showKeyInfo);
-			//EDITOR.removeEvent("keyDown", showKeyInfo);
 		}
 	});
 
 	function loadKeySettings() {
-
 		EDITOR.on("keyPressed", showKeyInfo);
-		//EDITOR.on("keyDown", showKeyInfo);
-
 	}
 
 	function showKeyInfo(file, character, combo, e) {
 		console.log("Key pressed: character=" + character + ": ", e);
 
-		if(EDITOR.currentFile && EDITOR.currentFile.path == fileName) return; // Don't record keys in the log file
+		if(EDITOR.currentFile && EDITOR.currentFile.path == fileName) return ALLOW_DEFAULT; // Don't record keys in the log file
 
 		// 22:4:40_128 character=A isTrusted=true key="A" code="KeyA" location=0 ctrlKey=false shiftKey=true altKey=false metaKey=false repeat=false isComposing=false charCode=0 keyCode=65 DOM_KEY_LOCATION_STANDARD=0 DOM_KEY_LOCATION_LEFT=1 DOM_KEY_LOCATION_RIGHT=2 DOM_KEY_LOCATION_NUMPAD=3 getModifierState=undefined initKeyboardEvent=undefined [object KeyboardEvent]=[object Window] detail=0 sourceCapabilities={} which=65 initUIEvent=undefined type="keydown" target={} [object KeyboardEvent]=[object Window] eventPhase=3 bubbles=true cancelable=true defaultPrevented=false composed=true timeStamp=37998.80000001192 srcElement={} returnValue=true cancelBubble=false NONE=0 CAPTURING_PHASE=1 AT_TARGET=2 BUBBLING_PHASE=3 composedPath=undefined initEvent=undefined preventDefault=undefined stopImmediatePropagation=undefined stopPropagation=undefined [object KeyboardEvent]=[object HTMLCanvasElement],[object HTMLDivElement],[object HTMLDivElement],[object HTMLDivElement],[object HTMLBodyElement],[object HTMLHtmlElement],[object HTMLDocument],[object Window]
 		var p = {};

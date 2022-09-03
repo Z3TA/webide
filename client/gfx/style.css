@@ -499,7 +499,7 @@ image-rendering: crisp-edges;               /* Possible future browsers. */
 fieldset {
 	border: 2px groove #747474;
 	display: inline-block;
-	font-size: 13px;
+	font-size: 1em;
 	font-weight: bold;
 	line-height: 13px;
 	padding-top: 0px;
@@ -534,7 +534,7 @@ span.nobreak {
 .footer table.data {
 	color: white;
 	font-family: Verdana, Geneva, sans-serif;
-	font-size: 13px;
+	font-size: 1em;
 	width: 100%;
 }
 
@@ -635,11 +635,10 @@ a.signup {
 margin-left: 1em;
 }
 
-
 input[type=text], input[type=password], .inputtext, select.select {
 	border-radius: 2px;
 	border: 1px inset #4a4a4a;
-	font-size: 16px;
+	font-size: 1em;
 	background-color: #e6e6e6;
 	box-shadow: 0px 1px 1px #b3b3b3, inset 0px 1px 1px #333333;
 	padding: 3px;
@@ -649,7 +648,7 @@ input[type=text], input[type=password], .inputtext, select.select {
 input[type=number] {
 border-radius: 2px;
 border: 1px inset #4a4a4a;
-font-size: 16px;
+	font-size: 1em;
 background-color: #e6e6e6;
 box-shadow: 0px 1px 1px #b3b3b3, inset 0px 1px 1px #333333;
 padding: 3px;
@@ -692,7 +691,7 @@ input[type=button], button.button, input[type=submit] {
 	text-shadow: 0px -1px 0px #1f2020;
 	padding: 4px;
 	margin: 4px;
-	font-size: 12px;
+	font-size: 1em;
 	vertical-align: middle;
 	font-family: Segoe UI, sans-serif;
 }
@@ -725,7 +724,7 @@ input[type=button]:hover, button.button:hover, input[type=submit]:hover {
 /* For showing key-combo shortcut for the button functionality */
 button .key {
 	color: #919191;
-	font-size: 9px;
+	font-size: 0.6em;
 	text-shadow: none;
 	vertical-align: middle;
 	margin-left: 4px;
@@ -808,8 +807,6 @@ ul#tabList li.tabFolderItem {
 	border-bottom: 1px solid #d6d6d6;
 	
 	/*-webkit-transform: perspective(100px) rotateX(30deg); */
-	
-	
 	
 	font-size: 10px;
 	text-align: center;
@@ -1066,7 +1063,7 @@ background-color: white;
 
 select.functionList {
 	font-family: Verdana, Geneva, sans-serif;
-	font-size: 12px;
+	font-size: 1em;
 	color: black;
 	outline: 0;
 	width: 100%;
@@ -1138,7 +1135,7 @@ select.functionListInMenu {
 /* ############### File List ############### */
 div.fileList {
 	font-family: Verdana, Geneva, sans-serif;
-	font-size: 12px;
+	font-size: 1em;
 	color: black;
 	background-color: blue;
 	border: 2px solid red;
@@ -1155,11 +1152,11 @@ div.gotoFile {
 
 div.gotoFile .gotoList {
 max-height: 50vh;
-overflow-y: scroll;
+	overflow-y: scroll;
 }
 
 div.gotoFile li {
-	font-size: 13px;
+	font-size: 1em;
 	padding: 2px;
 	padding-top: 2px;
 	padding-bottom: 2px;
@@ -1268,8 +1265,8 @@ div.gotoFile li:hover {
 	
 	font-family: menu, 'Lucida Grande', Tahoma, Verdana, sans-serif;
 	font-weight: normal;
-	font-size: 13px;
-	}
+	font-size: 1em;
+}
 
 .windowMenu .menu {
 	border-radius: 0;
@@ -1322,7 +1319,7 @@ div.gotoFile li:hover {
 	text-shadow: 0px 0px 0px black;
 	width: 15px;
 	text-align: center;
-	font-size: 20px;
+	font-size: 2em;
 	margin: 0;
 	padding: 0;
 	padding-left: 0.5em;
@@ -1359,7 +1356,7 @@ div.gotoFile li:hover {
 	border: 0px solid red;
 	
 	color: #919191;
-	font-size: 12px;
+	font-size: 1em;
 	text-align: right;
 	
 	padding-left: 1em;
@@ -1382,7 +1379,7 @@ div.gotoFile li:hover {
 .windowMenu .pulloutIcon {
 	
 	color: #c0c0c0;
-	font-size: 10px;
+	font-size: 0.8em;
 	text.align: right;
 	
 }
@@ -1482,10 +1479,9 @@ div.gotoFile li:hover {
 	color: #45b73b;
 	font-weight: bold;
 	text-shadow: 0px 0px 0px black;
-	font-size: 13px;
 	width: 15px;
 	text-align: center;
-	font-size: 20px;
+	font-size: 2em;
 	line-height: 13px;
 }
 
@@ -1502,7 +1498,7 @@ div.gotoFile li:hover {
 	font-family: menu, 'Lucida Grande', Tahoma, Verdana, sans-serif;
 	font-weight: normal;
 	text-shadow: none;
-	font-size: 13px;
+	font-size: 1em;
 	color: #838ca2;
 	color: #313a4f;
 	color: black;
@@ -1524,7 +1520,7 @@ div.gotoFile li:hover {
 .contextmenu li .key {
 	display:inline-block;
 	color: #919191;
-	font-size: 9px;
+	font-size: 0.8em;
 	text-shadow: none;
 	vertical-align: middle;
 	margin-left: 4px;
@@ -1551,7 +1547,7 @@ div.gotoFile li:hover {
 
 .inlineCaption {
 	display:inline-block;
- font-size: 13px;
+ font-size: 1em;
 	color: #838ca2;
 	border: 0px solid red;
 	
@@ -1596,7 +1592,7 @@ div.gotoFile li:hover {
 	min-height: 32px;
 	max-height: 400px;
 	font-family: Segoe UI, sans-serif;
-	font-size: 15px;
+	font-size: 1em;
 	text-align: left;
 	padding: 20px;
 }
@@ -1618,7 +1614,7 @@ div.gotoFile li:hover {
 	text-shadow: 0px -1px 0px #1f2020;
 	padding: 4px;
 	margin: 4px;
-	font-size: 12px;
+	font-size: 1em;
 	font-family: Segoe UI, sans-serif;
 }
 
@@ -1650,7 +1646,7 @@ div.gotoFile li:hover {
 	box-shadow: 0px 1px 1px #b3b3b3, inset 0px 1px 1px #333333;
 	padding: 3px;
 	margin-bottom: 10px;
-	font-size: 15px;
+	font-size: 1em;
 	font-family: Verdana;
 }
 
@@ -1669,7 +1665,7 @@ div.gotoFile li:hover {
 }
 
 .dialog .feedback {
-	font-size: 11px;
+	font-size: 1em;
 	display: inline;
 	width: 70%;
 	float: left;
@@ -1686,7 +1682,7 @@ div.gotoFile li:hover {
 
 .dialog .repeat {
 	float: left;
-	font-size: 11px;
+	font-size: 1em;
 	padding-left: 20px;
 	margin-top: 10px;
 }
@@ -1730,7 +1726,7 @@ ul.resolveList li {
 
 	.fileExplorer {
 	font-family: Verdana, Geneva, sans-serif;
-	font-size: 13px;
+	font-size: 1em;
 	box-sizing: border-box;
 	border-left: 2px solid #e8e8e8;
 	/* Can not have padding, or the canvas will fall down */
@@ -1774,7 +1770,7 @@ ul.resolveList li {
 
 .fileExplorer .box {
 	font-family: Verdana, Geneva, sans-serif, monospace;
-	font-size: 12px;
+	font-size: 1em;
 	display: inline-block;
 	border: 0px solid black;
 	width: 12px;
@@ -1809,7 +1805,7 @@ ul.resolveList li {
 	margin: 2px;
 	margin-right: 2px;
 	margin-bottom: 2px;
-	font-size: 13px;
+	font-size: 1em;
 	
 	border: 1px outset #cccccc;
 	
@@ -1825,7 +1821,7 @@ ul.resolveList li {
 	margin-top: 0px;
 	margin-bottom: 2px;
 	margin-left: 2px;
-	font-size: 13px;
+	font-size: 1em;
 	vertical-align: middle;
 	
 	display: table-cell;
@@ -1892,7 +1888,7 @@ ul.resolveList li {
 /* ### Database Explorer */
 .dbExplorer {
 	font-family: Verdana, Geneva, sans-serif;
-	font-size: 13px;
+	font-size: 1em;
 	box-sizing: border-box;
 	border-left: 2px solid #e8e8e8;
 	/* Can not have padding, or the canvas will fall down */
@@ -1917,7 +1913,7 @@ ul.resolveList li {
 table.input {
 	color: white;
 	font-family: Verdana, Geneva, sans-serif;
-	font-size: 13px;
+	font-size: 1em;
 	width: 100%;
 }
 
@@ -2037,6 +2033,7 @@ div.folderPicker {
 	margin: 7px;
 	margin-top: 0;
 	display: block;
+	max-height: 5em; /* limit to 2 rows so it doesn't take up too much space on small screens */
 }
 
 div.folderPicker button.folder {
@@ -2094,7 +2091,7 @@ filter: url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\'><
 	text-transform: uppercase;
 	
 	font-family: Arial;
-	font-size: 9px;
+	font-size: 0.8em;
 	line-height: 10px;
 	
 	color: #333;
@@ -2142,7 +2139,7 @@ padding: 0;
 	top: -23px;
 }
 .header figcaption span {
-	font-size: 8px;
+	font-size: 0.8em;
 }
 
 .discoveryBar .discoveryItem {
@@ -2645,7 +2642,51 @@ max-width: 40px;
 		max-width: 10%; /* 100% devided by number of items  */
 	}
 	
+	input[type=button], button.button, input[type=submit]  {
+		font-size: 8px;
+		padding: 1px;
+		height: 14px;
+		min-width: 60px;
+	}
+
+	input[type=text], input[type=password], .inputtext, select.select {
+
+	}
+
+
+	.windowMenu {
+		font-size: 9px;
+	}
+
+	.windowMenu .item {
+		height: 18px;
+	}
+
+	.windowMenu .bullet {
+		width: 10px;
+		padding-left: 0.1em;
+		padding-right: 0.1em!important;
+	}
+
+	.windowMenu .key {
+		font-size: 8px;
+		padding: 0;
+	}
+
+
+	/* just having this css rule seem to fix Editor window menu from showing up outside the screen ... */
+	.windowMenu tr {
+	}
+
+
+	.footer {
+		font-size: 8px;
+	}
+
+
 }
+
+
 
 
 /* Make mobile browsers NOT zoom */

@@ -10,11 +10,12 @@
 
 var windowMenu;
 	var discoveryBarIcon;
-	
+	var myDescription = "Android emulator";
+
 	//console.log("android.js");
 	
 	EDITOR.plugin({
-		desc: "Android support",
+		desc: myDescription,
 		load: function loadAndroid() {
 			windowMenu = EDITOR.windowMenu.add(S("androidEmulator"), [S("tools"), 90], startEmulatorFromWindowMenu);
 
@@ -42,8 +43,8 @@ EDITOR.discoveryBar.remove(discoveryBarIcon);
 	function disableAndroidSupportMaybe(login) {
 		if(!login.tld) {
 			//console.warn("Disabling Android AVD plugin");
-EDITOR.disablePlugin("Android support", true);
-return;
+			EDITOR.disablePlugin(myDescription, myDescription);
+			return;
 }
 	}
 	
