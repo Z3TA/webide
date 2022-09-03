@@ -28,7 +28,7 @@
 	Firefox on Macbook     Yes   Maybe³
 	
 	1) IE only supports web fonts on 127.0.0.1 or localhost!
-	2) Firefox on Ubuntu 16 renders font differently!
+	2) Firefox on Ubuntu 16 or Samsung Dex renders font differently!
 	3) If you have a high pixel density screen you can turn off LCD-sub-pixel-antialias as it's no longer needed
 	
 
@@ -68,6 +68,8 @@
 
 	var loadCSS_error = false;
 
+	var isAndroid = /(android)/i.test(navigator.userAgent);
+
 	// These timers are cleared in the window.onload event...
 	var slowLoad = window.setTimeout( function() {
 		slowBrowser = true;
@@ -99,6 +101,8 @@
 			
 			*/
 		
+		debug("Use ligatures");
+
 //debug("Using ligatures with FiraCode");
 		webFontLoading = "FiraCode";
 		loadFont = function() {
@@ -143,7 +147,7 @@ EDITOR.settings.style.font = "Fira Code";
 		
 		*/
 		
-		//debug("Using Consolas with LCD sub pixel antialias!");
+		debug("Using Consolas with LCD sub pixel antialias!");
 		
 		// Tested in Firefox on Windows 10
 		
@@ -194,28 +198,45 @@ EDITOR.settings.style.font = "Fira Code";
 			};
 			whenFontLoaded = function() {
 				if(webFontLoading == "ubuntu") {
+
+					debug("browser=" + browser + " loaded ubuntu font");
+
 					EDITOR.settings.style.font = "ubuntu";
 					EDITOR.settings.style.highlightMatchFont = "bold 15px ubuntu";
 					EDITOR.settings.style.fontSize = 15;
 					EDITOR.settings.gridHeight = 22;
 					EDITOR.settings.gridWidth = 8;
 					
-					
 					// Text has a different width if it's antialiased!
 					var antialias = detectAntialias();
 					if(antialias) {
-						//debug("Antialias detected! Updating grid width");
-						EDITOR.settings.gridWidth = 7.5;
+						debug("Antialias detected! Updating grid width");
+						
+						if(BROWSER=="Firefox" && isAndroid ==true) {
+							debug("Firefox on Android!");
+							// Edit Firefox on Android here:
+							EDITOR.settings.gridWidth = 8.3;
+
+						}
+						else {
+							debug("Not Firefox");
+							EDITOR.settings.gridWidth = 7.5;
+						}
+						
 					}
 					
-					var isAndroid = /(android)/i.test(navigator.userAgent);
+					
 					if(BROWSER == "Chrome" && DISPLAY_MODE == "standalone" && isAndroid) {
 						// Weird bug when added to desktop from Chrome on Android where we get different kerning...
+						debug("added to desktop from Chrome_");
 						EDITOR.settings.style.highlightMatchFont = "bold 16px ubuntu";
 						EDITOR.settings.style.fontSize = 16;
 						EDITOR.settings.gridHeight = 22;
 						EDITOR.settings.gridWidth = 8;
 					}
+
+
+
 					
 					// mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmoxx
 				}
@@ -401,9 +422,10 @@ EDITOR.settings.style.font = "Fira Code";
 		
 		// We can't access the console on some browsers, to use ye old alert...
 		alert(msg + "\nBROWSER=" + BROWSER + "\n" +
-"MSWIN=" + MSWIN + " LINUX=" + LINUX + " MAC=" + MAC + " MSIE=" + MSIE + "\n" +
+		"MSWIN=" + MSWIN + " LINUX=" + LINUX + " MAC=" + MAC + " MSIE=" + MSIE + "\n" +
+		"userAgent=" + navigator.userAgent + "\n" +
 		"ligatures=" + ligatures + "\nwindow.devicePixelRatio=" + window.devicePixelRatio + "\n" +
-		"slowBrowser=" + slowBrowser + " verySlowBrowser=" + verySlowBrowser + "\n" +
+		"slowBrowser=" + slowBrowser + " verySlowBrowser=" + verySlowBrowser + " isAndroid=" + isAndroid + "\n" +
 		"loadCSS_error=" + (loadCSS_error && loadCSS_error.message));
 		
 	}

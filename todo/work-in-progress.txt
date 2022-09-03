@@ -11,6 +11,11 @@ Make new release!
 
 ---
 
+Font size is foo in mobile Firefox,. (text is wider then column /char width)
+
+Can't right click  on file tab on Mobile Firefox (in order to bring up file context menu)
+---
+
 Test editor on KaiOS - can't install due to manifest 404. Need to make new release!!
 
 ---
@@ -28,6 +33,9 @@ Faster startup on slow device (Samsung Dex):
 
 Typing in large file (3000+ rows) is very slow while in colab mode!
 
+---
+
+Support for creating Phonegap/Cordova apps
 
 ---
 
