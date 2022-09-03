@@ -715,7 +715,7 @@
 
 		var fileName = UTIL.getFilenameFromPath(filePath);
 
-		//console.log("Run nodejs script: fileName=" + fileName + " file.isSaved=" + file.isSaved + " file.savedAs=" + file.savedAs + " filePath=" + filePath + " file.path=" + file.path + " ");
+		console.log("Run nodejs script: fileName=" + fileName + " file.isSaved=" + (file && file.isSaved) + " file.savedAs=" + (file && file.savedAs) + " filePath=" + filePath + " file.path=" + (file && file.path) + " ");
 
 		if(filePath == file.path && !file.savedAs) {
 

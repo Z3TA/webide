@@ -131,6 +131,7 @@ function Dialog(msg, options) {
 	}
 	// TEST-CODE-END
 
+	console.log("Dialog: appending div to body!");
 	body.appendChild(div);
 	
 	dialog.openedDate = new Date();
@@ -169,7 +170,9 @@ function Dialog(msg, options) {
 	if(windowHeight < 500 || windowWidth < 500) {
 		dialog.fullScreen = true;
 		
-		div.style.position="relative";
+		console.warn("Dialog: Show full screen dialog!");
+
+		// Keep dialogs position=absolute so that they always stay on top of other elements
 		div.style.border="0px solid";
 		div.style.top="0px";
 		div.style.width="100%";

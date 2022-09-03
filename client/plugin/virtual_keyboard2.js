@@ -123,7 +123,8 @@
 	var winMenuVirtual, winMenuOnScreen, winMenuPhysical;
 	var winMenuVibration, vibrationEnabled = true;
 	var checkActiveElementInterval;
-	
+	var virtualKeyboardIsVisible = false;
+
 	if(preferredKeyboard == "physical") usePhysical = true;
 
 	canvas.onmousedown = canvasMouseDown;
@@ -390,6 +391,8 @@
 	}
 	
 	function showBuiltinKeyboard() {
+		console.warn("showBuiltinKeyboard!");
+
 		if(useBuiltin) {
 			//console.log("Builtin already active!");
 			return;
@@ -397,10 +400,11 @@
 		
 		if(EDITOR.currentFile && !(EDITOR.currentFile instanceof File)) return;
 		
-		
 		var wrapper = document.getElementById("virtualKeyboard2");
 		wrapper.style.display="block";
 		
+		virtualKeyboardIsVisible = true;
+
 		EDITOR.ctxMenu.update(menuItem, true, labelShowNative);
 		EDITOR.windowMenu.update(winMenuKeyboard, {active: true, label: labelShowNative});
 		
@@ -421,10 +425,17 @@
 	}
 	
 	function hideBuiltinKeyboard() {
+		console.warn("hideBuiltinKeyboard!");
+		if(!virtualKeyboardIsVisible) return;
+
 		//console.log("Hiding builtin virtual keyboard!");
 		var wrapper = document.getElementById("virtualKeyboard2");
 		wrapper.style.display="none";
+
+		virtualKeyboardIsVisible = false;
+
 		EDITOR.resizeNeeded();
+
 		useBuiltin = false;
 		
 		clearInterval(checkActiveElementInterval);

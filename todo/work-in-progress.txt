@@ -6,7 +6,15 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
-todo: recover from full size footer by measuring the content of the footer, not the footer itself because when it's full screen it takes up the entire screen!
+_serverStorage is huuuuuge
+
+
+
+
+---
+
+todo: Figure out why the function list loses it's selection after a seconds...
+annoying when typing while focus on the function list, then not seeing what was found.
 
 ---
 
@@ -15,7 +23,8 @@ Default font sizes in em, then they can be changed by setting font size of paren
 ---
 
 KaiOS support:
-Can't scroll on loginscreen!
+Crashes due to too much memory usage!
+
 
 
 

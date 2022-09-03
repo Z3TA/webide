@@ -1355,6 +1355,7 @@ EDITOR.unbindKey(startTerminalFromKeyboard);
 	
 	function parseBuffer() {
 		var file;
+		console.log("terminal:parseBuffer: BUFFER=", BUFFER); // Sometimes when opening the editor I get the ""Terminal file not open:" error. WHY!?
 		for(var terminalId in BUFFER) {
 			file = EDITOR.files[termPrefix + terminalId];
 			if(!file) throw new Error("Terminal file not open: " + termPrefix + terminalId);

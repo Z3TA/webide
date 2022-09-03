@@ -854,10 +854,10 @@ EDITOR.bindKey(b);
 			return fallbackCopyTextToClipboard(text);
 		}
 		navigator.clipboard.writeText(text).then(function() {
-			//console.log('Async: Copying to clipboard was successful!');
+			//console.log('EDITOR.putIntoClipboard: navigator.clipboard.writeText was successful!');
 			CB(done, null, true, false);
-		}, function(err) {
-			console.error('Async: Could not copy text: ', err);
+		}, function navigatorClipboardFailed(err) {
+			console.error('EDITOR.putIntoClipboard: navigator.clipboard.writeText failed: ', err);
 			CB(fallbackCopyTextToClipboard, text);
 		});
 		
@@ -1765,7 +1765,7 @@ usePseudoClipboard = false;
 		
 		CLIENT.cmd("readFromDisk", json, function readFromDiskServerResponse(err, json) {
 			if(err) {
-				var error = new Error("Unable to read path=" + path + " Error: " + err.message + "");
+				var error = new Error("EDITOR.readFromDisk: Unable to read path=" + path + " Error: " + err.message + "");
 				error.code = err.code;
 				callback(error);
 			}
@@ -2544,7 +2544,7 @@ else if(err.code == "ENETDOWN") {
 		
 		if(EDITOR.settings.devMode && EDITOR.shouldResize == false) {
 			// For debugging, so we know why a resize was needed
-			//console.log(UTIL.getStack("resizeNeeded"));
+			console.log(UTIL.getStack("resizeNeeded"));
 		}
 		EDITOR.shouldResize = true;
 	}
@@ -3394,7 +3394,7 @@ ca 20ms to render, ca 13ms to render without creating new objects
 			return;
 		}
 		
-		console.log("EDITOR.resize!");
+		//console.warn("EDITOR.resize!");
 
 		PIXEL_RATIO = window.devicePixelRatio || 1; // "Retina" displays gives 2
 		
@@ -3465,8 +3465,13 @@ ca 20ms to render, ca 13ms to render without creating new objects
 		var contentHeight = windowHeight - headerFooterHeight;
 		var columnsHeight = contentHeight;
 		
+		var footerChildrenHeight = 0;
+		for(var i=0; i<footer.children.length; i++) {
+			footerChildrenHeight += footer.children[i].offsetHeight;
+		}
+
 		
-		//if(QUERY_STRING["debug"]) {
+		if(QUERY_STRING["debug"]) {
 			console.log("=================== RESIZE ===================");
 			console.log("windowWidth=" + windowWidth);
 			console.log("windowHeight=" + windowHeight);
@@ -3475,6 +3480,8 @@ ca 20ms to render, ca 13ms to render without creating new objects
 			console.log("leftRightColumnWidth=" + leftRightColumnWidth);
 			console.log("headerHeight=" + headerHeight);
 			console.log("footerHeight=" + footerHeight);
+			console.log("footerChildrenHeight=" + footerChildrenHeight);
+
 			console.log("headerFooterHeight=" + headerFooterHeight);
 			console.log("contentWidth=" + contentWidth + " (offsetWidth=" + content.offsetWidth + " innerWidth=" + content.innerWidth + " )");
 			console.log("contentHeight=" + contentHeight + " (offsetHeight=" + content.offsetHeight + " innerHeight=" + content.innerHeight + " )");
@@ -3483,7 +3490,7 @@ ca 20ms to render, ca 13ms to render without creating new objects
 			console.log("offsetWidth=" + content.offsetWidth);
 			console.log("innerWidth=" + content.innerWidth);
 			console.log("outherWidth=" + content.outherWidth);
-			//}
+			}
 		
 		
 		EDITOR.height = windowHeight;
@@ -3492,7 +3499,7 @@ ca 20ms to render, ca 13ms to render without creating new objects
 		if( footerHeight/windowHeight > 0.8 && !FULL_SCREEN_FOOTER ) {
 			return fullScreenFooter();
 		}
-		else if( footerHeight/windowHeight < 0.5 && FULL_SCREEN_FOOTER ) {
+		else if( footerChildrenHeight/windowHeight < 0.7 && FULL_SCREEN_FOOTER ) {
 			recoverFromFullScreenFooter();
 			EDITOR.resize();
 			return;
@@ -5377,6 +5384,7 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 			
 			if(options.callback) {
 				li.onclick = clickOnCtxItem;
+				li.onmousedown = mousedownOnCtxItem;
 				li.onmouseup = mouseupOnCtxItem;
 				li.onkeyup = keyupOnCtxItem;
 				
@@ -5392,8 +5400,9 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 			
 			//console.log("EDITOR.ctxMenu.addItem: li.id=" + li.id);
 			
-			var preventClick = false;
-			
+			var preventDblClick = false;
+			var mouseWasDown = false;
+
 			function keyupOnCtxItem(keyEvent) {
 				// Number 13 is the "Enter" key on the keyboard
 				if (keyEvent.keyCode === 13) {
@@ -5409,24 +5418,33 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 				}
 			}
 			
+			// problem: When we show the context menu and it appears below the mouse button a mouseup triggers on the element below the mouse...
+			// solution: Make sure the element had a mousedown event
+			function mousedownOnCtxItem() {
+				mouseWasDown = true;
+			}
+
 			function mouseupOnCtxItem(mouseUpEvent) {
-				preventClick = true; // Prevent the click event from firing (preventDefault() had no effect)
-				//console.log("EDITOR.ctxMenu.addItem: mouseupOnCtxItem! preventClick=" + preventClick);
-				ctxItemClickAction(mouseUpEvent);
+				preventDblClick = true; // Prevent the click event from firing (preventDefault() had no effect)
+				console.log("EDITOR.ctxMenu.addItem: mouseupOnCtxItem! preventDblClick=" + preventDblClick);
+				if(mouseWasDown) ctxItemClickAction(mouseUpEvent);
 			}
 			
 			function clickOnCtxItem(clickEvent) {
-				if(preventClick) {
-					//console.log("EDITOR.ctxMenu.addItem: clickOnCtxItem prevented!");
-					preventClick = false;
+				if(preventDblClick) {
+					console.log("EDITOR.ctxMenu.addItem: clickOnCtxItem prevented!");
+					preventDblClick = false;
 					return false;
 				}
-				//console.log("EDITOR.ctxMenu.addItem: clickOnCtxItem! preventClick=" + preventClick);
+				//console.log("EDITOR.ctxMenu.addItem: clickOnCtxItem! preventDblClick=" + preventDblClick);
 				ctxItemClickAction(clickEvent);
 			}
 			
 			function ctxItemClickAction(someEvent) {
-				//console.log("EDITOR.ctxMenu.addItem: ctxItemClickAction! someEvent.ctrlKey=" + someEvent.ctrlKey);
+				console.log("EDITOR.ctxMenu.addItem: ctxItemClickAction! someEvent.ctrlKey=" + someEvent.ctrlKey);
+
+				mouseWasDown = false;
+
 				// Give the same function parameters as key bound events
 				if(options.callback) options.callback(EDITOR.currentFile, getCombo(someEvent), null, 0, "down", someEvent);
 			}
@@ -5608,12 +5626,12 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 		},
 		hide: function hideCtxMenu() {
 			
-			//console.log(UTIL.getStack("Hide context menu"));
+			console.log(UTIL.getStack("Hide context menu"));
 			
 			var menu = document.getElementById("contextmenu");
 			
 			if(!menu.classList.contains("visible")) {
-				//console.warn("Context menu already hidden. No need to hide it!");
+				console.warn("Context menu already hidden. No need to hide it!");
 				return;
 			}
 			
@@ -5624,8 +5642,8 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 			
 			
 			// Move it elsewhere so we don't see the ghost border in Android browser
-			menu.style.top = -1000 + "px";
-			menu.style.left = -1000 + "px";
+			menu.style.top = "-1000px";
+			menu.style.left = "-1000px";
 			
 			// Clear temorary menu items
 			var tempItems = document.getElementById("contextmenuTemp");
@@ -5833,6 +5851,8 @@ posX = EDITOR.width - offsetWidth;
 			
 			function fullScreenMenuMaybe() {
 				
+				if(!menu.classList.contains("visible")) return; // 
+
 				var offsetHeight = parseInt(menu.offsetHeight);
 				//console.log("showCtxMenu: fullScreenMenuMaybe: offsetHeight=" + offsetHeight + " EDITOR.height=" + EDITOR.height + " EDITOR.width=" + EDITOR.width);
 				if(offsetHeight > EDITOR.height || offsetWidth*1.1 > EDITOR.width || EDITOR.width < 500) {
@@ -10771,6 +10791,8 @@ window.addEventListener("mousemove", mouseMove, false);
 			
 				_serverStorage = json.storage;
 			
+				console.log("_serverStorage=", _serverStorage);
+
 				var discoveryBarDisabledByQueryString = QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("discoveryBar") != -1;
 
 				if(_serverStorage.showDiscoveryBar == "false") {
@@ -13988,8 +14010,12 @@ function getFile(url, callback) {
 	function fullScreenMenu(menu) {
 		// The menu will cover the whole screen
 		
-		//console.log("fullScreenMenu:");
+		console.warn("fullScreenMenu!");
 		
+		if(!menu.classList.contains("visible")) {
+			throw new Error("The menu does not have the visibile class, but want to enter full screen. Why is it hidden ?");
+		}
+
 		var wireframe = document.getElementById("wireframe");
 		wireframe.style.display = "none";
 		
@@ -14013,6 +14039,8 @@ function getFile(url, callback) {
 	function recoverFromFullScreenMenu(menu) {
 		// Reset everything from fullScreenMenu()
 		
+		console.warn("recoverFromFullScreenMenu!");
+
 		var wireframe = document.getElementById("wireframe");
 		wireframe.style.display = "block";
 		menu.style.position="";
@@ -14031,7 +14059,9 @@ function getFile(url, callback) {
 	function fullScreenFooter() {
 		// The footer will cover the whole screen
 
-		console.log("fullScreenFooter!");
+		console.warn("fullScreenFooter!");
+
+		EDITOR.ctxMenu.hide();
 
 		var wireframe = document.getElementById("wireframe");
 		var footer = document.getElementById("footer");
@@ -14063,7 +14093,7 @@ function getFile(url, callback) {
 
 	function recoverFromFullScreenFooter() {
 		
-		console.log("recoverFromFullScreenFooter!");
+		console.warn("recoverFromFullScreenFooter!");
 
 		var wireframe = document.getElementById("wireframe");
 		var footer = document.getElementById("footer");
