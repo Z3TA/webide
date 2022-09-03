@@ -46,6 +46,8 @@ body {
 
 #loginScreen {
 	box-sizing: border-box;
+	overflow: auto;
+	padding-bottom: 1em;
 }
 
 #loginScreen .content {
