@@ -10,6 +10,8 @@
 (function() {
 	"use strict";
 
+	if(! QUERY_STRING["espruino"] ) return;
+
 	var menuItem;
 	var dependenciesLoaded = false;
 	var espruinoDeps = [
