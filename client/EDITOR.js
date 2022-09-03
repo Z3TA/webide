@@ -12111,31 +12111,31 @@ function paste(pasteEvent) {
 					
 					EDITOR.closeFile(file.path, true);
 					EDITOR.openFile(filePath, undefined, undefined, function(err, file) {
-						if(err) return alertBox("The file was saved, but opening it gave the following error: " + err.message, "FILE", "warning");
-					});
+							if(err) return alertBox("The file was saved, but opening it gave the following error: " + err.message, "FILE", "warning");
+						});
 					
-				});
-			}
+					});
+				}
 			
-		});
+			});
 		
-		return;
-	}
+			return;
+		}
 	
-	if(EDITOR.settings.useCliboardcatcher && giveBackFocusAfterClipboardEvent) {
-		// Give focus back to the editor/canvas
-		EDITOR.input = true;
+		if(EDITOR.settings.useCliboardcatcher && giveBackFocusAfterClipboardEvent) {
+			// Give focus back to the editor/canvas
+			EDITOR.input = true;
 			EDITOR.canvas.focus();
-		giveBackFocusAfterClipboardEvent = false;
-	}
+			giveBackFocusAfterClipboardEvent = false;
+		}
 	
-	//console.log("PASTE: " + UTIL.lbChars(text));
+		//console.log("PASTE: " + UTIL.lbChars(text));
 	
 		var f = EDITOR.eventListeners.paste.map(funMap);
 		//console.log("Calling paste listeners on paste event (" + f.length + ") ...");
-			for(var i=0; i<f.length; i++) {
+		for(var i=0; i<f.length; i++) {
 			
-				ret = f[i](EDITOR.currentFile, text, pasteEvent);
+			ret = f[i](EDITOR.currentFile, text, pasteEvent);
 			
 			//console.log("Paste listener: " + UTIL.getFunctionName(f[i]) + " returned: (" + (typeof ret) + ") \n" + ret);
 			
@@ -12154,13 +12154,13 @@ function paste(pasteEvent) {
 		if(EDITOR.input && EDITOR.currentFile) {
 			
 			pasteEvent.preventDefault();
-		// Insert text at caret position
-		if(EDITOR.currentFile && EDITOR.currentFile instanceof File) {
-			var file = EDITOR.currentFile;
+			// Insert text at caret position
+			if(EDITOR.currentFile && EDITOR.currentFile instanceof File) {
+				var file = EDITOR.currentFile;
 			
 				//console.log("text: " + text);
 
-			text = EDITOR.sanitizeText(file, text);
+				text = EDITOR.sanitizeText(file, text);
 			
 				//console.log("after sanitizeText: text: " + text);
 				
@@ -12180,11 +12180,11 @@ function paste(pasteEvent) {
 				
 				
 				// If there is a text selection. Delete the selection first!
-			file.deleteSelection();
+				file.deleteSelection();
 			
-			file.insertText(text);
+				file.insertText(text);
 			
-			//file.fixCaret();
+				//file.fixCaret();
 				
 				
 				/*
@@ -12204,78 +12204,78 @@ function paste(pasteEvent) {
 					(There doesn't seem to be a way to get the "richtext" from the clipboard, just the plain text)
 				*/
 				
+			}
 		}
-	}
-	else {
+		else {
 			// Do the default action (enable pasting outside the canvas)
 			//console.log("paste: Not inserting text because EDITOR.input=" + EDITOR.input + " EDITOR.currentFile=" + EDITOR.currentFile);
-	}
+		}
 	
 		
-	EDITOR.interact("paste", pasteEvent);
+		EDITOR.interact("paste", pasteEvent);
 	
-}
+	}
 
 	EDITOR.onPaste = paste; // Used for automated tests
 
 
-/*
-	function updateCaretGridPosition(caret, file) {
-	var gridPosition = file.getGridPositionFromIndex(caret.index);
+	/*
+		function updateCaretGridPosition(caret, file) {
+		var gridPosition = file.getGridPositionFromIndex(caret.index);
 	
-	caret.row = gridPosition.row;
-	caret.col = gridPosition.col;
+		caret.row = gridPosition.row;
+		caret.col = gridPosition.col;
 	
-	console.log("caret: " + JSON.stringify(caret));
+		console.log("caret: " + JSON.stringify(caret));
 	
-	if(caret.index == file.text.length) {
-	console.log("caret at EOF");
-	}
-	else {
-	console.log("caret at char=" + file.grid[caret.row][caret.col].char + " charCode=" + file.grid[caret.row][caret.col].char.charCodeAt(0) + "");
-	}
+		if(caret.index == file.text.length) {
+		console.log("caret at EOF");
+		}
+		else {
+		console.log("caret at char=" + file.grid[caret.row][caret.col].char + " charCode=" + file.grid[caret.row][caret.col].char.charCodeAt(0) + "");
+		}
 	
-	}
-*/
+		}
+	*/
 
 
-function keyPressed(keyPressEvent) {
-	keyPressEvent = keyPressEvent || window.event; 
+	function keyPressed(keyPressEvent) {
+		keyPressEvent = keyPressEvent || window.event; 
 	
-	var charCode = keyPressEvent.charCode || keyPressEvent.keyCode || keyPressEvent.which;
-	var character = String.fromCharCode(charCode);
-	var combo = getCombo(keyPressEvent);
-	var file = EDITOR.currentFile;
-	var preventDefault = false;
-	var funReturn = true;
+		var charCode = keyPressEvent.charCode || keyPressEvent.keyCode || keyPressEvent.which;
+		var character = String.fromCharCode(charCode);
+		var combo = getCombo(keyPressEvent);
+		var file = EDITOR.currentFile;
+		var preventDefault = false;
+		var funReturn = true;
 	
 		//console.log("EDITOR: keyPressed: charCode=" + charCode + " character=" + character + " (key=" + keyPressEvent.key + " code=" + keyPressEvent.code + " charCode=" + keyPressEvent.charCode + ", keyCode=" + keyPressEvent.keyCode + ", which=" + keyPressEvent.which + ") combo=" + JSON.stringify(combo) + " EDITOR.input=" + (EDITOR.currentFile ? EDITOR.input : "NoFileOpen EDITOR.input=" + EDITOR.input + "") + "");
 	
-	// Don't execute keypress for the browser that support it, if keyboardCatcher is focused.
-	if(keyPressEvent.target && keyPressEvent.target.className == "keyboardCatcher") return false;
+		// Don't execute keypress for the browser that support it, if keyboardCatcher is focused.
+		if(keyPressEvent.target && keyPressEvent.target.className == "keyboardCatcher") return false;
 	
-	// Firefox and Safari go here before calling copy/paste/cut events
-	// Without this copy/paste will not work in Safari! Why !? 
-	if(nativeCopy || nativePaste || nativeCut) {
-		//console.warn("keyPressed: Abort because nativeCopy=" + nativeCopy + " nativePaste=" + nativePaste + " nativeCut=" + nativeCut);
+		// Firefox and Safari go here before calling copy/paste/cut events
+		// Without this copy/paste will not work in Safari! Why !? 
+		if(nativeCopy || nativePaste || nativeCut) {
+			//console.warn("keyPressed: Abort because nativeCopy=" + nativeCopy + " nativePaste=" + nativePaste + " nativeCut=" + nativeCut);
 			nativeCopy = false;
-		nativePaste = false;
-		nativeCut = false;
-		return;
-	}
+			nativePaste = false;
+			nativeCut = false;
+			return;
+		}
 	
 		var f = EDITOR.eventListeners.keyPressed.map(funMap);
 		//console.log("Calling keyPressed listeners (" + f.length + ") ...");
 		for(var i=0; i<f.length; i++) {
 			funReturn = f[i](file, character, combo, keyPressEvent); // Call function
 		
-		if(funReturn !== true && funReturn !== false) {
+			if(funReturn !== true && funReturn !== false) {
 				throw new Error("keyPressed event listener: " + UTIL.getFunctionName(f[i]) + 
-			" did not return true or false!");
-		}
+				" did not return true or false!");
+			}
 		
-		if(funReturn === false && !preventDefault) {
-			preventDefault = true;
+			if(funReturn === false && !preventDefault) {
+				preventDefault = true;
 				if(file && EDITOR.input) {
 					//console.log(UTIL.getFunctionName(f[i]) + " prevented insertion of character=" + character + " into file.path=" + file.path);
 				}
@@ -12323,7 +12323,19 @@ function keyPressed(keyPressEvent) {
 				function(answer) {
 					if(!answer) return;
 					
-					var message = answer + "\nkey=" + keyPressEvent.key + "\ncombo=" + JSON.stringify(combo) + "\ncomboStr=" + comboStr + "\nBROWSER=" + BROWSER;
+					var message = answer + "\nkey=" + keyPressEvent.key + "\ncombo=" + JSON.stringify(combo) + "\ncomboStr=" + comboStr + "\nBROWSER=" + BROWSER + "\n\n";
+
+					for(var prop in keyPressEvent) {
+						if(typeof keyPressEvent[prop] == "function") break;
+
+						try {
+							message = message + prop + "=" + JSON.stringify(keyPressEvent[prop]) + "\n";
+						}
+						catch(err) {
+							// Ignore prop
+						}
+					}
+
 					EDITOR.sendFeedback(message, "Keybinding wanted");
 				});
 				
@@ -13662,6 +13674,8 @@ function scrollWheel(scrollWheelEvent) {
 	
 	EDITOR.interact("mouseScroll", scrollWheelEvent);
 	
+		console.log("scroll");
+		
 		return ALLOW_DEFAULT;
 }
 
