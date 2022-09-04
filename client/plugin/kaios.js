@@ -36,10 +36,6 @@
 
 	LOW_RAM = true;
 
-	// File tabs must be disabled here, or it wont be disabled (theoretically it should be disabled because this plugin loads before file tab plugin..?)
-	EDITOR.disablePlugin("File tabs", true); // File tabs take up a lot of space
-	
-	
 	var INSERT = "numericKeypadInsert";
 	var NAV = "numericKeypadNavigate";
 	
@@ -52,6 +48,8 @@
 	
 	function loadKaiOsSupport() {
 
+		EDITOR.disablePlugin("File tabs", true); // File tabs take up a lot of screen space
+
 		//EDITOR.bindKey({desc: "Focus next element", key: "SoftRight", fun: focusNextElement});
 		//EDITOR.bindKey({desc: "Show context menu", key: "SoftLeft", fun: kaiToggleMenuOnKeyPress});
 		//EDITOR.bindKey({desc: "Switch mode", key: "Call", fun: kaiToggleMode});
@@ -63,17 +61,26 @@
 		EDITOR.discoveryBar.disable("KaiOS");
 		EDITOR.dashboard.disable("KaiOS");
 
-		alertBox("KaiOS support loaded!");
+		//alertBox("KaiOS support loaded!");
+
+		// Sometimes when we show a prompt KaiOS say Enter or Done... but not when we want to test it ...
+		//testConfirm();
 
 	}
 
 	function unloadKaiOsSupport() {
 
-		EDITOR.unbindKey(microphoneToggle);
+		//EDITOR.unbindKey(microphoneToggle);
 
-		EDITOR.discoveryBar.enable("KaiOS");
-		EDITOR.dashboard.enable("KaiOS");
+	}
 
+	function testConfirm() {
+		var yes = "Yes, please";
+		var no = "No, never mind";
+
+		confirmBox("This is a confirm box. What do you choose ?", [yes, no], function(answer) {
+			alertBox("Your answer: " + answer);
+		});
 	}
 
 	function microphoneToggle() {

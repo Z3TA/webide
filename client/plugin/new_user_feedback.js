@@ -22,8 +22,24 @@
 			var smilieMenu = document.getElementById("menu_☺");
 			if(smilieMenu) smilieMenu.title = "Send feedback, make a suggestion, or report a problem";;
 			
-			if(windowMenuFeedbackPositive.domElement) windowMenuFeedbackPositive.domElement.title = "Make a suggestion";
-			if(windowMenuFeedbackPositive.domElement) windowMenuFeedbackNegative.domElement.title = "Report a problem";
+			if(windowMenuFeedbackPositive.domElement) {
+				windowMenuFeedbackPositive.domElement.title = "Make a suggestion";
+				windowMenuFeedbackPositive.domElement.style.display = "block";
+				windowMenuFeedbackPositive.domElement.style.align = "center";
+			}
+
+			if(windowMenuFeedbackNegative.domElement) {
+				windowMenuFeedbackNegative.domElement.title = "Report a problem";
+				windowMenuFeedbackNegative.domElement.style.display = "block";
+				windowMenuFeedbackPositive.domElement.style.align = "left";
+			}
+
+			//UTIL.objInfo(rootMenuItem);
+
+			if(rootMenuItem.domElement) {
+				rootMenuItem.domElement.style.display = "block";
+				rootMenuItem.domElement.style.verticalAlign = "top";
+			}
 
 			if(QUERY_STRING["embed"]) return;
 			

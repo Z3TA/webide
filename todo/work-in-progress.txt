@@ -6,11 +6,18 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
+issue: Looses focus from full screen footer, when typing in a input, when it goes into full screen
+
+THe smilie face window menu is very high on KaiOS ...
+the smilie letter wont show up on KaiOs... replace it with text, just "Give Feedack", "report problem", "give suggestion", put it in editor menu !?
+
+Need to fix the layout after switching to em font sisez!
+
+Should we use input listener !? Works on Mobile and also desktop... while keyup doesn't work on mobile!? (mobiles with physical keyboard even) ??!?
+
 Why is File tabs plugin not disabled by KaiOS!? Or does KaiOS load a cached version!?
 
 Function list in KaiOS dissappears when you try to move down...
-
-Window menu is too far Down on KaiOS... probably something to do with the function list
 
 
 
@@ -29,6 +36,7 @@ with windowMenu removed: 10MB, with windowMenu 11.3, with windowMenu but "disabl
 
 todo: Figure out why the function list loses it's selection after a seconds...
 annoying when typing while focus on the function list, then not seeing what was found.
+probably due to the f icon is hard to click on it, if you dont click properly it will open then close !?
 
 ---
 

@@ -48,7 +48,7 @@
 			if(QUERY_STRING.dev == "false") {
 				disableDevMode(true);
 			}
-			else if(QUERY_STRING.debug && EDITOR.settings.devMode == true) {
+			else if( (QUERY_STRING.debug || QUERY_STRING.d) && EDITOR.settings.devMode == true ) {
 				enableDevMode();
 				enableDebugMode();
 			}
@@ -205,7 +205,8 @@ alert("Debug mode enabled!");
 			// Avoid recursion
 			console.log = consoleLogOriginal;
 			console.warn = consoleWarnOriginal;
-			
+			console.error = consoleErrorOriginal;
+
 			// Get the parameters
 			var str = "";
 			for (var i=0; i<arguments.length; i++) {
@@ -217,7 +218,7 @@ alert("Debug mode enabled!");
 				// Swallow the error or we might end up in a loop
 			});
 			
-			console.log = console.warn = log;
+			console.log = console.warn = console.error = log;
 		}
 		
 		function nothing() {};
@@ -227,6 +228,7 @@ alert("Debug mode enabled!");
 	function disableDebugMode() {
 		console.log = consoleLogOriginal;
 		console.warn = consoleWarnOriginal;
+		console.error = consoleErrorOriginal;
 		CLIENT.cmd("log", {data: "Debug mode disabled"});
 	}
 	

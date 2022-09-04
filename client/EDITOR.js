@@ -7865,6 +7865,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 				if(plugin.loaded) {
 					if(typeof plugin.unload != "function") throw new Error("The plugin has already been loaded, and it does not have an unload method! So you have to disable this plugin before it's loaded!");
 					
+					console.log("Attempting to unload plugin " + desc + " ...");
 					try {
 						plugin.unload();
 					}
@@ -14188,6 +14189,8 @@ function getFile(url, callback) {
 		var wireframe = document.getElementById("wireframe");
 		var footer = document.getElementById("footer");
 		var body = document.getElementById("body");
+
+		if(footer.parentNode == wireFrame && FULL_SCREEN_FOOTER === false) throw new Error("Footer is in wireFrame, but FULL_SCREEN_FOOTER=" + FULL_SCREEN_FOOTER);
 
 		body.removeChild(footer);
 		wireframe.insertBefore(footer, footerDomLocation);

@@ -1,7 +1,7 @@
 (function() {
 	"use strict";
 
-	//if(! QUERY_STRING["keylog"] ) return;
+	if(! QUERY_STRING["keylog"] ) return;
 
 	var fileName ="keyLog.tmp";
 

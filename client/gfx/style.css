@@ -2655,7 +2655,6 @@ span.key.inline {
 
 	}
 
-
 	.windowMenu {
 		font-size: 9px;
 	}
@@ -2680,9 +2679,8 @@ span.key.inline {
 	.windowMenu tr {
 	}
 
-
-	.footer {
-		font-size: 9px;
+	.footer, .header {
+		font-size: 10px;
 	}
 
 
