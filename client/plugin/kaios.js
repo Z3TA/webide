@@ -25,10 +25,14 @@
 	*/
 
 
+	LOW_RAM = true;
+
 	// Don't do anything if it's not a KaiOS device!
 	if(typeof window.navigator != "object" || typeof window.navigator.mozApps != "object") return;
 
 	console.log("KaiOS!")
+
+	LOW_RAM = true;
 
 	EDITOR.disablePlugin("File tabs", true); // File tabs take up a lot of space
 	EDITOR.discoveryBar.disable("KaiOS");

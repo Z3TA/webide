@@ -19,7 +19,7 @@ load: function loadTopRightMenuButton() {
 
 			winMenu = EDITOR.windowMenu.add("☰", [9], showContextMenu)
 			
-			winMenu.domElement.getElementsByTagName("a")[0].setAttribute("title", "Activate Context menu");
+			if(typeof winMenu.domElement.getElementsByTagName == "function") winMenu.domElement.getElementsByTagName("a")[0].setAttribute("title", "Activate Context menu");
 			
 		},
 		unload: function unloadTopRightMenuButton() {

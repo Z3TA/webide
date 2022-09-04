@@ -455,6 +455,8 @@
 		setTimeout(maybeParsedAlready, 5000);
 		
 		function maybeParsedAlready() {
+			if(LOW_RAM) return;
+
 			if(EDITOR.files.hasOwnProperty(fileToParse)) {
 				if(!parsedFiles.hasOwnProperty(fileToParse)) throw new Error("Expected file to be in fileToParse=" + Object.keys(fileToParse) + ": fileToParse=" + fileToParse);
 				if(!relatedScripts.hasOwnProperty(fileToParse)) throw new Error("Expected file to be in relatedScripts=" + Object.keys(relatedScripts) + " fileToParse=" + fileToParse);

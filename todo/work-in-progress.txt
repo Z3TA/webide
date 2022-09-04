@@ -6,10 +6,16 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
+KaiOS kills the browser after a few seconds...
+probably because out of RAM !?
+
+Limit files that can be open when LOW_RAM is true !?
+
+
 _serverStorage is huuuuuge
+46.8MB with _serverStorage 29.9MB with cleared _serverStorage
 
-
-
+with windowMenu removed: 10MB, with windowMenu 11.3, with windowMenu but "disabled" 11.2MB
 
 ---
 
@@ -23,8 +29,9 @@ Default font sizes in em, then they can be changed by setting font size of paren
 ---
 
 KaiOS support:
-Crashes due to too much memory usage!
-
+* Able to click "Enter" (main button) to close alertbox
+* Crashes due to too much memory usage!
+* EDITOR.view.endingColumns goes high sometimes over 600 randomly...
 
 
 

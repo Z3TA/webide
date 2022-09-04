@@ -268,7 +268,14 @@ leftColumn.removeChild(functionListWrap);
 			// If function list has not been scrolled, center it on the current function
 			if(scrollTop == 0 || center === true) {
 				//console.log("highlightCurrentFunction: Centering");
+				try {
 				scrollTo.scrollIntoView({block: "center"});
+				}
+				catch(err) { // Possible "ScrollIntoViewOptions 'center' is not a valid value for enumeration ScrollLogicalPosition"" ... (on KaiOS)
+					console.error(err);
+					scrollTo.scrollIntoView();
+				}
+
 			}
 			// Only scroll if needed
 			// Is it above the current view?

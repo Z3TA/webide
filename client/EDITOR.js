@@ -37,6 +37,7 @@ EDITOR.plainTextFileExtensions = [
 
 // Make your custom settings in settings_overload.js !	These settings should not be changed unless you are adding/changing functionality
 EDITOR.settings = {
+	maxOpenFilesOnLowRam: 5,
 	nativeFileSystemPathPrefix: "/~local/",
 	devMode: true,  // devMode: true will spew out debug info and make sanity checks (that will make the editor run slower, mostly because of all the console.log's) Set devMode to false when measuring performance!!!
 	enableSpellchecker: false, // The spell-checker use a lot of CPU power!
@@ -448,6 +449,23 @@ _editorInput = true;
 			enumerable: true
 		});
 		
+
+		// Debugging scrolling bugs
+		var _endingColumn = 0;
+		Object.defineProperty(EDITOR.view, 'endingColumn', {
+			get: function () { return _endingColumn; },
+			set: function (newValue) {
+				if(EDITOR.currentFile) {
+					if( EDITOR.currentFile.startColumn + EDITOR.view.visibleColumns != newValue) {
+						throw new Error("Scroll bug: new value for EDITOR.view.endingColumn is " + newValue + " but EDITOR.view.visibleColumns=" + EDITOR.view.visibleColumns + " EDITOR.currentFile.startColumn =" + EDITOR.currentFile.startColumn );
+					}
+				}
+				_endingColumn = newValue;
+			},
+			enumerable: true // if this property shows up during enumeration of the properties
+		});
+		
+
 		/*
 			Object.defineProperty(EDITOR, 'renderNeeded', {
 			get: function() {return renderNeeded;} ,
@@ -480,7 +498,7 @@ _editorInput = true;
 	EDITOR.storage = {
 		setItem: function storageSetItem(id, val, wait, callback) {
 			if(EDITOR.settings.devMode) {
-			var stack = UTIL.getStack("EDITOR.storage.setItem");
+				var stack = UTIL.getStack("EDITOR.storage.setItem");
 			}
 			
 			if(typeof wait == "function" && callback == undefined) {
@@ -517,8 +535,8 @@ _editorInput = true;
 				} 
 				
 				CLIENT.cmd("storageSet", {item: id, value: string}, function(err, json) {
-				if(callback) callback(err, json);
-				else if(err) {
+					if(callback) callback(err, json);
+					else if(err) {
 						//console.error(err);
 					console.log(stack);
 						throw new Error("Unable to save id=" + id + " value=" + string + " to server storage! Error: " + err.message + " code=" + err.code);
@@ -1133,7 +1151,7 @@ usePseudoClipboard = false;
 		
 		if(path == undefined) path = "new file";
 		
-		//console.log("Opening file: " + path + " typeof text=" + typeof text);
+		console.log("EDITOR.openFile: " + path + " typeof text=" + typeof text + " LOW_RAM=" + LOW_RAM);
 		
 		var pathToBeOpened = path;
 		
@@ -1230,6 +1248,10 @@ usePseudoClipboard = false;
 			}
 		}
 		
+		if(LOW_RAM && (Object.keys(EDITOR.files).length + EDITOR.openFileQueue.length) >= EDITOR.settings.maxOpenFilesOnLowRam) {
+			return fileOpenError(new Error("Can not open more then " + EDITOR.settings.maxOpenFilesOnLowRam + " files when global variable LOW_RAM is set to true : path=" + path));
+		}
+
 		if(EDITOR.openFileQueue.indexOf(path) != -1) {
 			//console.log("File in EDITOR.openFileQueue! path=" + path);
 			
@@ -1743,6 +1765,8 @@ usePseudoClipboard = false;
 		
 	}
 	
+	var readFromDiskQueue = [];
+	var runReadFromDiskQueueInterval = null;
 	EDITOR.readFromDisk = function readFromDisk(path, returnBuffer, encoding, callback) {
 		
 		if(callback == undefined && typeof encoding == "function") {
@@ -1757,9 +1781,32 @@ usePseudoClipboard = false;
 		
 		if(callback == undefined || typeof callback != "function") throw new Error("No callback function! callback=" + callback);
 		
-		var protocol = UTIL.urlProtocol(path);
-		
-		if(protocol == "" || EDITOR.remoteProtocols.indexOf(protocol) != -1) {
+		// Queu reads to prevent plugins to read 1000 files at once
+		readFromDiskQueue.push([path, returnBuffer, encoding, callback]);
+
+		console.log("EDITOR.readFromDisk: readFromDiskQueue.length=" + readFromDiskQueue.length);
+
+		if( readFromDiskQueue.length == 1) setTimeout(runReadFromDiskQueue, 1); // Make it async so that callers that run in sync will queu up
+		else if(runReadFromDiskQueueInterval ===  null) runReadFromDiskQueueInterval = setInterval(runReadFromDiskQueue, 250);
+
+		function runReadFromDiskQueue() {
+
+			if(readFromDiskQueue.length == 0) {
+				clearInterval(runReadFromDiskQueueInterval);
+				runReadFromDiskQueueInterval = null;
+				return;
+			}
+
+			var arr = readFromDiskQueue.shift();
+			var path = arr[0];
+			var returnBuffer = arr[1];
+			var encoding = arr[2];
+			var callback = arr[3];
+
+			console.log("EDITOR.readFromDisk: runReadFromDiskQueue: path=" + path);
+
+			var protocol = UTIL.urlProtocol(path);
+			if(protocol == "" || EDITOR.remoteProtocols.indexOf(protocol) != -1) {
 
 		var json = {path: path, returnBuffer: returnBuffer, encoding: encoding};
 		
@@ -1785,6 +1832,7 @@ usePseudoClipboard = false;
 			return;
 
 		}
+	}
 	}
 	
 	EDITOR.countLines = function countLines(filePath, callback) {
@@ -5054,7 +5102,44 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 	
 	
 	var dropdownMenuRoot;
-	EDITOR.windowMenu = {
+
+	if(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("windowMenu") != -1) { // Limiting the DOM nodes saves around 1MB of RAM
+		var msg = "Window menu is disabled (via query string)!";
+		EDITOR.windowMenu = {
+			add: function() {
+				console.log(msg);
+				return {
+					activate: function() {
+						console.log(msg);
+					},
+					deactivate: function() {
+						console.log(msg);
+					},
+					domElement: {
+					}
+				}
+			},
+			remove: function() {
+				console.log(msg);
+			},
+			update: function() {
+				console.log(msg);
+			},
+			enable: function() {
+				console.log(msg);
+			},
+			disable: function() {
+				console.log(msg);
+			},
+			hide: function() {
+				console.log(msg);
+			},
+			click: function() {
+				console.log(msg);
+			}
+		}
+	}
+	else EDITOR.windowMenu = {
 		add: function addWindowMenuItem(label, where, whenClicked, separator, keyComboFunction) {
 			/*
 				Example:
@@ -5116,7 +5201,7 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 				EDITOR.bindKey({desc: "Open File window menu", charCode: 70, combo: ALT, fun: // Alt+F
 					function showFileMenu() {
 						return showMenu(dropdownMenuRoot.items[S("File")]);
-}
+					}
 				});
 				EDITOR.bindKey({desc: "Open Edit window menu", charCode: 69, combo: ALT, fun: // Alt+E
 					function showEditMenu() {
@@ -5149,7 +5234,7 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 			}
 			
 			if(typeof label != "string") throw new Error("label=" + label + " need to be a string!");
-			if(!Array.isArray(where)) throw new Error("Where to put the mnu item? Second argument (where) needs to be an array!");
+			if(!Array.isArray(where)) throw new Error("Where to put the menu item? Second argument (where) needs to be an array!");
 			if(typeof whenClicked != "function") throw new Error("whenClicked=" + whenClicked + " need to be a function!");
 			
 			var order = 1000;

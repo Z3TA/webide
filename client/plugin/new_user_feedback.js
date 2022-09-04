@@ -17,12 +17,13 @@
 			
 			//windowMenuFeedbackPositive.parentMenu.parentMenu.domElement.getElementsByTagName("a")[0]
 			
-			rootMenuItem = windowMenuFeedbackPositive.parentMenu.parentMenuItem;
+			rootMenuItem = windowMenuFeedbackPositive.parentMenu && windowMenuFeedbackPositive.parentMenu.parentMenuItem;
 
-			document.getElementById("menu_☺").title = "Send feedback, make a suggestion, or report a problem";;
+			var smilieMenu = document.getElementById("menu_☺");
+			if(smilieMenu) smilieMenu.title = "Send feedback, make a suggestion, or report a problem";;
 			
-			windowMenuFeedbackPositive.domElement.title = "Make a suggestion";
-			windowMenuFeedbackNegative.domElement.title = "Report a problem";
+			if(windowMenuFeedbackPositive.domElement) windowMenuFeedbackPositive.domElement.title = "Make a suggestion";
+			if(windowMenuFeedbackPositive.domElement) windowMenuFeedbackNegative.domElement.title = "Report a problem";
 
 			if(QUERY_STRING["embed"]) return;
 			

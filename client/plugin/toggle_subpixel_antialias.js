@@ -29,7 +29,7 @@ EDITOR.plugin({
 			if(EDITOR.settings.sub_pixel_antialias) winMenuItem.activate();
 			else winMenuItem.deactivate();
 			
-			EDITOR.oncontextmenu(winMenuItem.domElement, contextMenu);
+			if(winMenuItem.domElement) EDITOR.oncontextmenu(winMenuItem.domElement, contextMenu);
 
 			function contextMenu(ev) {
 				EDITOR.localStorage.getItem("sub_pixel_antialias", function whenChecked(err, value) {
