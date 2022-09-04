@@ -1151,7 +1151,7 @@ usePseudoClipboard = false;
 		
 		if(path == undefined) path = "new file";
 		
-		console.log("EDITOR.openFile: " + path + " typeof text=" + typeof text + " LOW_RAM=" + LOW_RAM);
+		//console.log("EDITOR.openFile: " + path + " typeof text=" + typeof text + " LOW_RAM=" + LOW_RAM);
 		
 		var pathToBeOpened = path;
 		
@@ -1248,7 +1248,7 @@ usePseudoClipboard = false;
 			}
 		}
 		
-		if(LOW_RAM && (Object.keys(EDITOR.files).length + EDITOR.openFileQueue.length) >= EDITOR.settings.maxOpenFilesOnLowRam) {
+		if(LOW_RAM && path != "bugreport.txt" && (Object.keys(EDITOR.files).length + EDITOR.openFileQueue.length) >= EDITOR.settings.maxOpenFilesOnLowRam) {
 			return fileOpenError(new Error("Can not open more then " + EDITOR.settings.maxOpenFilesOnLowRam + " files when global variable LOW_RAM is set to true : path=" + path));
 		}
 
@@ -12498,9 +12498,14 @@ function paste(pasteEvent) {
 					//console.log("Showing developer console!?");
 					return;
 				}
+
+				// MicrophoneToggle fires randomly on KaiOS
+				if(keyPressEvent.key == "MicrophoneToggle") return;
+
+
 				//console.log("keyPressEvent.key=" + keyPressEvent.key + " comboStr=" + comboStr);
 
-				promptBox("Missing key-binding for " + keyPressEvent.key + " + " + comboStr + "  \nWhat would you like the editor to do?", 
+				promptBox("Keypress " + keyPressEvent.key + " + " + comboStr + " (character=" + character + ") was not captured\nWhat would you like the editor to do?", 
 				{placeholder: "When pressing " + keyPressEvent.key + " + " + comboStr + " the editor should..."},
 				function(answer) {
 					if(!answer) return;

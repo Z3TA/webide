@@ -6,6 +6,14 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
+Why is File tabs plugin not disabled by KaiOS!? Or does KaiOS load a cached version!?
+
+Function list in KaiOS dissappears when you try to move down...
+
+Window menu is too far Down on KaiOS... probably something to do with the function list
+
+
+
 KaiOS kills the browser after a few seconds...
 probably because out of RAM !?
 
@@ -29,7 +37,7 @@ Default font sizes in em, then they can be changed by setting font size of paren
 ---
 
 KaiOS support:
-* Able to click "Enter" (main button) to close alertbox
+* Able to click "Enter" (main button) to close alertbox... The main button registers a mouse click!
 * Crashes due to too much memory usage!
 * EDITOR.view.endingColumn goes high sometimes over 600 randomly...
 * keyup event doesnt fire when typing in a textarea/input, use input event instead!

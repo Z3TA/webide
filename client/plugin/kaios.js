@@ -22,6 +22,8 @@
 		
 		todo: use Green phone to toggle between insert and nav mode!
 		
+		note: Having the main button mock escape key was stupid because it meant widgets being closed when you clicked on something
+
 	*/
 
 
@@ -34,6 +36,8 @@
 
 	LOW_RAM = true;
 
+	// File tabs must be disabled here, or it wont be disabled (theoretically it should be disabled because this plugin loads before file tab plugin..?)
+	EDITOR.disablePlugin("File tabs", true); // File tabs take up a lot of space
 	
 	
 	var INSERT = "numericKeypadInsert";
@@ -43,7 +47,7 @@
 		desc: "Support for KaiOS",
 		load: loadKaiOsSupport,
 		unload: unloadKaiOsSupport,
-		order: 10
+		order: 1
 	});
 	
 	function loadKaiOsSupport() {
@@ -51,14 +55,15 @@
 		//EDITOR.bindKey({desc: "Focus next element", key: "SoftRight", fun: focusNextElement});
 		//EDITOR.bindKey({desc: "Show context menu", key: "SoftLeft", fun: kaiToggleMenuOnKeyPress});
 		//EDITOR.bindKey({desc: "Switch mode", key: "Call", fun: kaiToggleMode});
-		EDITOR.bindKey({desc: "Toggle mic", key: "MicrophoneToggle", fun: microphoneToggle}); // Randomly triggers when pressing Main button
+		//EDITOR.bindKey({desc: "Toggle mic", key: "MicrophoneToggle", fun: microphoneToggle}); // Randomly triggers when pressing Main button
 
 		EDITOR.addMode(INSERT);
 		EDITOR.addMode(NAV);
 
-		EDITOR.disablePlugin("File tabs", true); // File tabs take up a lot of space
 		EDITOR.discoveryBar.disable("KaiOS");
 		EDITOR.dashboard.disable("KaiOS");
+
+		alertBox("KaiOS support loaded!");
 
 	}
 
@@ -66,11 +71,12 @@
 
 		EDITOR.unbindKey(microphoneToggle);
 
+		EDITOR.discoveryBar.enable("KaiOS");
+		EDITOR.dashboard.enable("KaiOS");
+
 	}
 
 	function microphoneToggle() {
-
-		return ALLOW_DEFAULT;
 	}
 
 	function adoptForSmallScreen() {

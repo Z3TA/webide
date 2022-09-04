@@ -2574,8 +2574,8 @@ margin-top: 20px;
 }
 
 span.key.inline {
-display: none;
-}
+		display: none;
+	}
 	
 }
 
@@ -2588,9 +2588,11 @@ display: none;
 @media (max-width: 350px) {
 	
 	.windowMenu .root .label {
+		display: inline-block; /* need to be display: block for max-wdith to work! */
 		
-max-width: 40px;
+		max-width: 40px;
 		max-width: 2ch;
+		
 		overflow: hidden;
 		white-space: nowrap;
 		text-overflow:clip; /* gets rid of the ... ellipsis */
@@ -2680,7 +2682,7 @@ max-width: 40px;
 
 
 	.footer {
-		font-size: 8px;
+		font-size: 9px;
 	}
 
 

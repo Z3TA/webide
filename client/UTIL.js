@@ -922,15 +922,17 @@ if(protocolIndex != -1) slashes = slashes - 2;
 		return(n);
 	},
 
-	objInfo: function objInfo(o) {
+	objInfo: function objInfo(o, ret) {
 		/*
 			Use for debug, to see properties in an object. 
 			Useful for events like click etc.
 		*/
-		console.log("######################## OBJ INFO #########################");
+		print("######################## OBJ INFO #########################");
 		
-		if(console.dir) return console.dir(o);
+		if(console.dir && !ret) return console.dir(o);
 		
+		var buffer = "";
+
 		var val;
 		for(var p in o) {
 			try {
@@ -941,10 +943,22 @@ if(protocolIndex != -1) slashes = slashes - 2;
 			}
 			catch(err) {
 				val = "???"
-				console.log(err.message);
+				print(err.message);
 			}
-			console.log(p + "=" + val);
+			print(p + "=" + val);
 		}
+
+		if(ret) return buffer;
+
+		function print(str) {
+			if(ret) {
+				buffer = buffer + str + "\n"
+			}
+			else {
+				console.log(str);
+			}
+		}
+
 	},
 
 	parseErrorMessage: function parseJavaScriptErrorMessage(errorString) {
@@ -2915,14 +2929,19 @@ b = b.slice(8);
 		if(keyEvent.charCode) return keyEvent.charCode;
 		if(keyEvent.which) return keyEvent.which;
 		if(keyEvent.keyCode) return keyEvent.keyCode;
-		
 		if(keyEvent.key) return fromString(keyEvent.key);
-		
-		throw new Error("Unable to get charCode from keyEvent=", keyEvent);
+		if(keyEvent.data) return fromString(keyEvent.data);
+		if(keyEvent.inputType) return fromString(keyEvent.inputType);
+
+
+		UTIL.objInfo(keyEvent);
+		throw new Error("Unable to get charCode from keyEvent=" + UTIL.objInfo(keyEvent, true));
 		
 		function fromString(str) {
 			if(str == "SoftRight") return 9; // Tab
 			if(str == "MicrophoneToggle") return 13; // Main button on KaiOS, means Enter most of the time. 13=Enter
+			if(str == "deleteContentBackward") return 8; // Backspace
+
 			else if(str.length == 2 && str.codePointAt) return str.codePointAt(0); // For unicode higher then 65535
 			else if(str.length != 1) throw new Error("UTIL.charCode: str=" + str + " length=" + str.length);
 			else return str.charCodeAt(0);
