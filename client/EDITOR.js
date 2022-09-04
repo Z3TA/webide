@@ -3519,8 +3519,8 @@ ca 20ms to render, ca 13ms to render without creating new objects
 		}
 
 		
-		if(QUERY_STRING["debug"]) {
-			console.log("=================== RESIZE ===================");
+		if(true || QUERY_STRING["debug"]) {
+			console.warn("=================== RESIZE ===================");
 			console.log("windowWidth=" + windowWidth);
 			console.log("windowHeight=" + windowHeight);
 			console.log("leftColumnWidth=" + leftColumnWidth);
@@ -9735,6 +9735,12 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		}
 	}
 
+	EDITOR.focus = function setFocus(el) {
+		// Remember the element as the element that last had focus
+		EDITOR.lastElementWithFocus = el;
+		el.focus();
+	}
+
 
 	var fullScreenWidgetParent;
 	var oldFullScreenWidget;
@@ -14176,6 +14182,8 @@ function getFile(url, callback) {
 
 		FULL_SCREEN_FOOTER = true;
 
+		console.log("fullScreenFooter: EDITOR.lastElementWithFocus=", EDITOR.lastElementWithFocus);
+
 		EDITOR.lastElementWithFocus.focus();
 
 		//EDITOR.ctxMenu.addTemp("Hide menu", function exitFullscreenFooter() {});
@@ -14190,7 +14198,7 @@ function getFile(url, callback) {
 		var footer = document.getElementById("footer");
 		var body = document.getElementById("body");
 
-		if(footer.parentNode == wireFrame && FULL_SCREEN_FOOTER === false) throw new Error("Footer is in wireFrame, but FULL_SCREEN_FOOTER=" + FULL_SCREEN_FOOTER);
+		if(footer.parentNode == wireframe && FULL_SCREEN_FOOTER === false) throw new Error("Footer is in wireframe, but FULL_SCREEN_FOOTER=" + FULL_SCREEN_FOOTER);
 
 		body.removeChild(footer);
 		wireframe.insertBefore(footer, footerDomLocation);

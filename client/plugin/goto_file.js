@@ -447,7 +447,7 @@ EDITOR.unbindKey(show_gotoFileInput2);
 			
 			var code = UTIL.code(keyUpEvent);
 			
-			//console.log("goto_file: typing: code=" + code + " keyUpEvent.keyCode=" + keyUpEvent.keyCode + " EDITOR.input=" + EDITOR.input + " text=" + text + " lastTypedText=" + lastTypedText + " lastSearchText=" + lastSearchText);
+			console.log("goto_file: typing: code=" + code + " keyUpEvent.keyCode=" + keyUpEvent.keyCode + " EDITOR.input=" + EDITOR.input + " text=" + text + " lastTypedText=" + lastTypedText + " lastSearchText=" + lastSearchText);
 			
 			keyUpEvent.preventDefault();
 			
@@ -668,7 +668,7 @@ if(maxResults <= 0) {
 		document.body.scrollTop = document.documentElement.scrollTop = 0;
 
 		EDITOR.resizeNeeded();
-		EDITOR.resize();
+		//EDITOR.resize();
 		
 	}
 	
@@ -828,13 +828,10 @@ folderToSearchIn = EDITOR.workingDirectory;
 				}
 			*/
 			
-			EDITOR.input = false;
-			
-			
 			inputGoto.focus();   // Add focus to the input
 			inputGoto.select();  // Select all
-			
-			
+
+			EDITOR.input = false;
 			
 			gotoInputIsVisible = true;
 			
@@ -843,6 +840,8 @@ folderToSearchIn = EDITOR.workingDirectory;
 			
 		}
 		
+		EDITOR.focus(inputGoto);
+
 		if(fileToSearchFor) {
 			inputGoto.value = fileToSearchFor;
 			typing(); // Trigger search
