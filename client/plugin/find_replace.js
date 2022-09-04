@@ -470,7 +470,7 @@ regexOptionLabel.insertBefore(regexOption, regexOptionLabel.firstChild);
 			EDITOR.renderNeeded();
 		}
 		
-		if(discoveryBarIcon) discoveryBarIcon.classList.remove("active");
+		if(discoveryBarIcon) discoveryBarIcon.deactivate();
 	}
 	
 	function show_search() {
@@ -496,7 +496,7 @@ regexOptionLabel.insertBefore(regexOption, regexOptionLabel.firstChild);
 				EDITOR.input = false;
 			}
 			
-			if(discoveryBarIcon) discoveryBarIcon.classList.add("active");
+			if(discoveryBarIcon) discoveryBarIcon.activate();
 			
 			//console.log("Search visible! EDITOR.input=" + EDITOR.input);
 			

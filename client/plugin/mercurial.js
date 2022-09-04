@@ -2846,7 +2846,7 @@ annotationRev.setAttribute("title", "Show diff");
 		versionControlWidget.show();
 		winMenuMercurial.activate();
 		winMenuMercurial2.activate();
-		if(discoveryBarIcon) discoveryBarIcon.classList.add("active");
+		if(discoveryBarIcon) discoveryBarIcon.activate();
 	}
 	
 	function hideVersionControlWidget() {
@@ -2854,7 +2854,7 @@ annotationRev.setAttribute("title", "Show diff");
 		versionControlWidget.hide();
 		winMenuMercurial.deactivate();
 		winMenuMercurial2.deactivate();
-		if(discoveryBarIcon) discoveryBarIcon.classList.remove("active");
+		if(discoveryBarIcon) discoveryBarIcon.deactivate();
 	}
 	
 	function mercurialPullFromRepo(fileDirectory) {

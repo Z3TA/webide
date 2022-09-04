@@ -1470,7 +1470,7 @@ for(var i=0; i<options.length; i++) {
 		
 		manager.style.display = "block";
 		
-		discoveryBarIcon.classList.add("active");
+		discoveryBarIcon.activate();
 		
 		EDITOR.resizeNeeded();
 		
@@ -1499,7 +1499,7 @@ for(var i=0; i<options.length; i++) {
 		}
 		
 		if(discoveryBarIcon) {
-			discoveryBarIcon.classList.remove("active");
+			discoveryBarIcon.deactivate();
 		}
 
 		if(EDITOR.currentFile && didHideSomething) EDITOR.input = true; // Bring back focus to the current file

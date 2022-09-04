@@ -120,14 +120,14 @@ dropboxDaemonWasKilled();
 	
 	function dropboxDaemonIsRunning() {
 		daemonAlive = true;
-		if(discoveryBarIcon) discoveryBarIcon.classList.add("active");
+		if(discoveryBarIcon) discoveryBarIcon.activate();
 		winMenuDropbox.activate();
 		
 	}
 	
 	function dropboxDaemonWasKilled() {
 		daemonAlive = false;
-		if(discoveryBarIcon) discoveryBarIcon.classList.remove("active");
+		if(discoveryBarIcon) discoveryBarIcon.deactivate();
 		winMenuDropbox.deactivate();
 	}
 	

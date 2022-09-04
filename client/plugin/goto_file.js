@@ -366,8 +366,13 @@ EDITOR.unbindKey(show_gotoFileInput2);
 		
 		cancelButton.addEventListener("click", hide_gotoFileInput, false);
 		
-		inputGoto.addEventListener("keyup", typing, false);
-		
+		inputGoto.addEventListener("input", typing, false);
+		//inputGoto.addEventListener("keyup", function() {alert("keyup");}, false);
+		//inputGoto.addEventListener("keypress", function() {alert("keypress");}, false);
+		//inputGoto.addEventListener("change", function() {alert("change");}, false);
+		//inputGoto.addEventListener("input", function() {alert("input");}, false);
+
+
 		inputGoto.addEventListener('paste', paste, false);
 		
 		

@@ -574,7 +574,7 @@
 		
 		EDITOR.resizeNeeded();
 		
-		discoveryBarIcon.classList.add("active");
+		discoveryBarIcon.activate();
 		
 		
 		return false;
@@ -587,7 +587,7 @@
 		if(serverManager) {
 			serverManager.style.display = "none";
 		
-		discoveryBarIcon.classList.remove("active");
+			discoveryBarIcon.deactivate();
 		
 		EDITOR.resizeNeeded();
 

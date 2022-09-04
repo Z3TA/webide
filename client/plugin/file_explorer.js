@@ -251,7 +251,7 @@
 			
 			winMenuFileExplorer.activate();
 			
-			discoveryBarIcon.classList.add("active");
+			discoveryBarIcon.activate();
 			
 		}
 		else {
@@ -265,7 +265,7 @@
 			
 			winMenuFileExplorer.deactivate();
 			
-			discoveryBarIcon.classList.remove("active");
+			discoveryBarIcon.deactivate();
 			
 			EDITOR.stat("hide_fileExplorer");
 			

@@ -40,12 +40,12 @@
 	function virtualDisplayStatus(status) {
 		//console.log("display: virtualDisplayStatus=" + status);
 		if(status == "open") {
-windowMenu.activate();
-			if(discoveryBarIcon) discoveryBarIcon.classList.add("active");
+			windowMenu.activate();
+			if(discoveryBarIcon) discoveryBarIcon.activate();
 		}
 		else if(status == "close") {
 			windowMenu.deactivate();
-			if(discoveryBarIcon) discoveryBarIcon.classList.remove("active");
+			if(discoveryBarIcon) discoveryBarIcon.deactivate();
 		}
 	}
 	

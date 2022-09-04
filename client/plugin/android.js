@@ -52,11 +52,11 @@ EDITOR.discoveryBar.remove(discoveryBarIcon);
 	function androidEmulatorStatus(status) {
 		if(status.started) {
 windowMenu.activate();
-discoveryBarIcon.classList.add("active");
+			discoveryBarIcon.activate();
 }
 		if(status.stopped) {
 windowMenu.deactivate();
-			discoveryBarIcon.classList.remove("active");
+			discoveryBarIcon.deactivate();
 		}
 	}
 

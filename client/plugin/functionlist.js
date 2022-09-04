@@ -604,6 +604,7 @@ functionListSelect.setAttribute("filePath", file.path);
 			functionListSelect.setAttribute("multiple", "multiple");
 			
 			functionListSelect.onchange = function(e) {
+				alert("onchange");
 				var filePath = functionListSelect.getAttribute("filePath");
 				var file = EDITOR.files[filePath];
 				

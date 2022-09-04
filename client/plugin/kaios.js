@@ -25,18 +25,16 @@
 	*/
 
 
-	LOW_RAM = true;
-
 	// Don't do anything if it's not a KaiOS device!
-	if(typeof window.navigator != "object" || typeof window.navigator.mozApps != "object") return;
+	//if(typeof window.navigator != "object" || typeof window.navigator.mozApps != "object") return;
 
 	console.log("KaiOS!")
 
+	//document.location = "st.htm";
+
 	LOW_RAM = true;
 
-	EDITOR.disablePlugin("File tabs", true); // File tabs take up a lot of space
-	EDITOR.discoveryBar.disable("KaiOS");
-	EDITOR.dashboard.disable("KaiOS");
+	
 	
 	var INSERT = "numericKeypadInsert";
 	var NAV = "numericKeypadNavigate";
@@ -44,30 +42,35 @@
 	EDITOR.plugin({
 		desc: "Support for KaiOS",
 		load: loadKaiOsSupport,
-		unload: unloadKaiOsSupport
+		unload: unloadKaiOsSupport,
+		order: 10
 	});
 	
 	function loadKaiOsSupport() {
 
-		EDITOR.bindKey({desc: "Focus next element", key: "SoftRight", fun: focusNextElement});
-		EDITOR.bindKey({desc: "Show context menu", key: "SoftLeft", fun: kaiToggleMenuOnKeyPress});
-		EDITOR.bindKey({desc: "Switch mode", key: "Call", fun: kaiToggleMode});
+		//EDITOR.bindKey({desc: "Focus next element", key: "SoftRight", fun: focusNextElement});
+		//EDITOR.bindKey({desc: "Show context menu", key: "SoftLeft", fun: kaiToggleMenuOnKeyPress});
+		//EDITOR.bindKey({desc: "Switch mode", key: "Call", fun: kaiToggleMode});
 		EDITOR.bindKey({desc: "Toggle mic", key: "MicrophoneToggle", fun: microphoneToggle}); // Randomly triggers when pressing Main button
 
 		EDITOR.addMode(INSERT);
 		EDITOR.addMode(NAV);
-		
+
+		EDITOR.disablePlugin("File tabs", true); // File tabs take up a lot of space
+		EDITOR.discoveryBar.disable("KaiOS");
+		EDITOR.dashboard.disable("KaiOS");
+
 	}
 
 	function unloadKaiOsSupport() {
 
-
+		EDITOR.unbindKey(microphoneToggle);
 
 	}
 
 	function microphoneToggle() {
 
-		return PREVENT_DEFAULT;
+		return ALLOW_DEFAULT;
 	}
 
 	function adoptForSmallScreen() {
