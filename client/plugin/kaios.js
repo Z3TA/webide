@@ -25,6 +25,9 @@
 		note: Having the main button mock escape key was stupid because it meant widgets being closed when you clicked on something
 
 		problem: We can not capture keys while the canvas element is focused! (only arrow keys, Call, EndCall, MicrophoneToggle)
+		We can capture the numeric key if they are longpressed...
+		We can also capture input if a textarea is focused!
+		so we know textarea is "cd", the user has pressed 3 times on 2 (because 2=abc) and one time on 3 (because 3=def) , 
 
 
 	*/
@@ -86,16 +89,16 @@
 		EDITOR.addRender(kaiOsStatus, 4650);
 
 		textarea = document.getElementById("clipboardcatcher");
-		textarea.addEventListener("keypress", function(e) {console.log("textarea keypress: " + UTIL.objInfo(e, true))}, false);
-		textarea.addEventListener("keydown", function(e) {console.log("textarea keydown: " + UTIL.objInfo(e, true))}, false);
-		textarea.addEventListener("keyup", function(e) {console.log("textarea keyup: " + UTIL.objInfo(e, true))}, false);
+		textarea.addEventListener("keypress", function(e) {console.log("textarea keypress: keyCode=" + e.keyCode + " key=" + e.key + " code=" + e.code + "")}, false);
+		textarea.addEventListener("keydown", function(e) {console.log("textarea keydown: keyCode=" + e.keyCode + " key=" + e.key + " code=" + e.code + "");}, false);
+		textarea.addEventListener("keyup", function(e) {console.log("textarea keyup: keyCode=" + e.keyCode + " key=" + e.key + " code=" + e.code + "")}, false);
 		
 
 		EDITOR.on("keyPressed", function kaiOsKeyPressed(file, character, combo, ev) {
-			console.log("EDITOR keyPressed: character=" + character + " " + UTIL.objInfo(ev, true)); 
+			console.log("EDITOR keyPressed: character=" + character + " keyCode=" + ev.keyCode + " key=" + ev.key + " code=" + ev.code + ""); 
 			return ALLOW_DEFAULT;
 		});
-		EDITOR.on("keyDown", function kaiOsKeyDown(file, character, combo, ev) {console.log("EDITOR keyDown: character=" + character + " " + UTIL.objInfo(ev, true)); return ALLOW_DEFAULT;});
+		EDITOR.on("keyDown", function kaiOsKeyDown(file, character, combo, ev) {console.log("EDITOR keyDown: character=" + character + " keyCode=" + ev.keyCode + " key=" + ev.key + " code=" + ev.code + ""); return ALLOW_DEFAULT;});
 		
 
 		//inputGoto.addEventListener("keypress", function() {alert("keypress");}, false);

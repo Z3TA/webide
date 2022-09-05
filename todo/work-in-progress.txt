@@ -6,6 +6,8 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
+Trying to capture the numkeys on KaiOS device...
+
 KaiOS seem to get a bigger canvas, but you can't see the bottom or the right side !?
 
 THe smilie face window menu is very high on KaiOS ...
