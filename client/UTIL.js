@@ -2933,7 +2933,6 @@ b = b.slice(8);
 		if(keyEvent.data) return fromString(keyEvent.data);
 		if(keyEvent.inputType) return fromString(keyEvent.inputType);
 
-
 		UTIL.objInfo(keyEvent);
 		throw new Error("Unable to get charCode from keyEvent=" + UTIL.objInfo(keyEvent, true));
 		

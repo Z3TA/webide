@@ -6,7 +6,7 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
-issue: Looses focus from full screen footer, when typing in a input, when it goes into full screen
+KaiOS seem to get a bigger canvas, but you can't see the bottom or the right side !?
 
 THe smilie face window menu is very high on KaiOS ...
 the smilie letter wont show up on KaiOs... replace it with text, just "Give Feedack", "report problem", "give suggestion", put it in editor menu !?
@@ -31,6 +31,12 @@ _serverStorage is huuuuuge
 46.8MB with _serverStorage 29.9MB with cleared _serverStorage
 
 with windowMenu removed: 10MB, with windowMenu 11.3, with windowMenu but "disabled" 11.2MB
+
+---
+
+feature: Able to clear the text in the console
+
+feature: Get all debug logs into a separate file that doesn't auto scroll down when new text is entered
 
 ---
 

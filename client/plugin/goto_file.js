@@ -366,7 +366,9 @@ EDITOR.unbindKey(show_gotoFileInput2);
 		
 		cancelButton.addEventListener("click", hide_gotoFileInput, false);
 		
-		inputGoto.addEventListener("input", typing, false);
+		inputGoto.addEventListener("input", typing, false); // Works on mobile and desktop, but wont capture Enter key
+		inputGoto.addEventListener("keyup",typing, false); // Will also capture Enter key, but doesn't work on mobile (KaiOS)
+
 		//inputGoto.addEventListener("keyup", function() {alert("keyup");}, false);
 		//inputGoto.addEventListener("keypress", function() {alert("keypress");}, false);
 		//inputGoto.addEventListener("change", function() {alert("change");}, false);

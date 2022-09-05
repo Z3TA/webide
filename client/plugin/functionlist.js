@@ -148,9 +148,15 @@ leftColumn.removeChild(functionListWrap);
 		
 		}
 		
+		
+
+		console.log("winMenuFunctionList=", winMenuFunctionList);
+
 		if(winMenuFunctionList.text.firstChild) winMenuFunctionList.text.removeChild(winMenuFunctionList.text.firstChild); // Remove the text
 		winMenuFunctionList.text.appendChild(functionListSelect);
 		
+		functionListSelect.parentNode.style.maxWidth="50%"; // Prevent style.css from making it too small so you can't properly click on it (or see the down arrow)
+
 		function functionListMenuItemClicked() {
 			EDITOR.windowMenu.hide();
 		}

@@ -24,6 +24,9 @@
 		
 		note: Having the main button mock escape key was stupid because it meant widgets being closed when you clicked on something
 
+		problem: We can not capture keys while the canvas element is focused! (only arrow keys, Call, EndCall, MicrophoneToggle)
+
+
 	*/
 
 
@@ -39,6 +42,9 @@
 	var INSERT = "numericKeypadInsert";
 	var NAV = "numericKeypadNavigate";
 	
+	var messageToShow = "KaiOS";
+	var textarea;
+
 	EDITOR.plugin({
 		desc: "Support for KaiOS",
 		load: loadKaiOsSupport,
@@ -48,15 +54,20 @@
 	
 	function loadKaiOsSupport() {
 
-		EDITOR.disablePlugin("File tabs", true); // File tabs take up a lot of screen space
+		var canvas = document.getElementById("editorCanvas");
 
-		//EDITOR.bindKey({desc: "Focus next element", key: "SoftRight", fun: focusNextElement});
-		//EDITOR.bindKey({desc: "Show context menu", key: "SoftLeft", fun: kaiToggleMenuOnKeyPress});
-		//EDITOR.bindKey({desc: "Switch mode", key: "Call", fun: kaiToggleMode});
-		//EDITOR.bindKey({desc: "Toggle mic", key: "MicrophoneToggle", fun: microphoneToggle}); // Randomly triggers when pressing Main button
+		EDITOR.disablePlugin("File tabs", true); // File tabs take up a lot of screen space
 
 		EDITOR.addMode(INSERT);
 		EDITOR.addMode(NAV);
+
+		//EDITOR.bindKey({desc: "Focus next element", key: "SoftRight", fun: focusNextElement});
+		//EDITOR.bindKey({desc: "Show context menu", key: "SoftLeft", fun: kaiToggleMenuOnKeyPress});
+		EDITOR.bindKey({desc: "Switch mode", key: "Call", mode: "*", fun: kaiToggleMode});
+		//EDITOR.bindKey({desc: "Toggle mic", key: "MicrophoneToggle", fun: microphoneToggle}); // Randomly triggers when pressing Main button
+
+		EDITOR.bindKey({desc: "Switch mode", key: "k", combo: ALT, mode: "*", fun: kaiToggleMode2});
+		
 
 		EDITOR.discoveryBar.disable("KaiOS");
 		EDITOR.dashboard.disable("KaiOS");
@@ -66,12 +77,47 @@
 		// Sometimes when we show a prompt KaiOS say Enter or Done... but not when we want to test it ...
 		//testConfirm();
 
+		//window.addEventListener("input", function(e) {console.log("input: " + UTIL.objInfo(e, true))}, false);
+		//window.addEventListener("keypress", function(e) {console.log("window keypress: " + UTIL.objInfo(e, true))}, false);
+		//window.addEventListener("keydown", function(e) {console.log("window keydown: " + UTIL.objInfo(e, true))}, false);
+		//window.addEventListener("keyup", function(e) {console.log("window keyup: " + UTIL.objInfo(e, true))}, false);
+
+
+		EDITOR.addRender(kaiOsStatus, 4650);
+
+		textarea = document.getElementById("clipboardcatcher");
+		textarea.addEventListener("keypress", function(e) {console.log("textarea keypress: " + UTIL.objInfo(e, true))}, false);
+		textarea.addEventListener("keydown", function(e) {console.log("textarea keydown: " + UTIL.objInfo(e, true))}, false);
+		textarea.addEventListener("keyup", function(e) {console.log("textarea keyup: " + UTIL.objInfo(e, true))}, false);
+		
+
+		EDITOR.on("keyPressed", function kaiOsKeyPressed(file, character, combo, ev) {
+			console.log("EDITOR keyPressed: character=" + character + " " + UTIL.objInfo(ev, true)); 
+			return ALLOW_DEFAULT;
+		});
+		EDITOR.on("keyDown", function kaiOsKeyDown(file, character, combo, ev) {console.log("EDITOR keyDown: character=" + character + " " + UTIL.objInfo(ev, true)); return ALLOW_DEFAULT;});
+		
+
+		//inputGoto.addEventListener("keypress", function() {alert("keypress");}, false);
 	}
 
 	function unloadKaiOsSupport() {
 
 		//EDITOR.unbindKey(microphoneToggle);
+		EDITOR.removeRender(showMessage);
 
+	}
+
+	function kaiToggleMode2(file, character, combo, ev) {
+		return kaiToggleMode(file, character, combo, ev);
+	}
+
+	function kaiOsInput(ev) {
+		console.log("KaiOS:kaiOsInput: ev=" + UTIL.objInfo(ev, true));
+	}
+
+	function kaiOsKeypress(ev) {
+		console.log("KaiOS:kaiOsKeypress: ev=" + UTIL.objInfo(ev, true));
 	}
 
 	function testConfirm() {
@@ -151,7 +197,7 @@
 	}
 
 	function kaiToggleMode() {
-		//console.log("kaiToggleMode: EDITOR.mode=" + EDITOR.mode);
+		console.log("kaiToggleMode: EDITOR.mode=" + EDITOR.mode);
 		
 		if(EDITOR.mode == INSERT) {
 			EDITOR.setMode(NAV);
@@ -163,7 +209,11 @@
 		}
 		
 		EDITOR.input = false;
-		
+		textarea.focus();
+
+		messageToShow = "mode: " + EDITOR.mode;
+		EDITOR.renderNeeded();
+
 		return PREVENT_DEFAULT;
 	}
 	
@@ -227,6 +277,45 @@
 		
 	}
 	
+	function kaiOsStatus(ctx) {
+		//if(EDITOR.mode != INSERT && EDITOR.mode != NAV) return;
+
+		var text = messageToShow + " " + textarea.value;
+
+		console.log("KaiOS:showMessage: text=" + text);
+
+		if(text.length == 0) return;
+
+		var top = EDITOR.view.canvasHeight - EDITOR.settings.gridHeight - EDITOR.settings.bottomMargin - 80;
+		var middle = top + Math.floor(EDITOR.settings.gridHeight/2);
+		var measuredText = ctx.measureText(text)
+		var textWidth = measuredText.width;
+		var textHeight = measuredText.height || EDITOR.settings.gridHeight;
+		var left = EDITOR.view.canvasWidth - textWidth - EDITOR.settings.rightMargin - 20;
+
+		//console.log("measuredText=", measuredText);
+
+		// Transparent padding / text fade out before cut
+		ctx.fillStyle = UTIL.makeColorTransparent(EDITOR.settings.style.bgColor, 70);
+		ctx.fillRect(left-40, top-16, 24, textHeight+64);
+
+		// Background for the text
+		ctx.fillStyle = EDITOR.settings.style.bgColor;
+		ctx.fillRect(left-16, top-16, textWidth+64, textHeight+64);
+
+		// Print the text
+		ctx.fillStyle = EDITOR.settings.style.textColor;
+		ctx.fillText(text, left, middle);
+
+		// Show caret
+		//var textToCaret = ctx.measureText(text.slice(0, commandCaretPosition)).width;
+		//ctx.fillStyle = EDITOR.settings.caret.color;
+		//ctx.fillRect(left + textToCaret + 1, top, EDITOR.settings.caret.width, textHeight);
+
+	}
+
+
+
 	/*
 		
 		
