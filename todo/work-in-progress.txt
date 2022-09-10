@@ -6,10 +6,7 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
-Working on kaios INSERT mode..
 
-But the Keyboard t9 on KaiOS device acts weird...
-For example when pressing 6 to get n (two presses) we get N n n ...
 
 ---
 

@@ -170,6 +170,7 @@ EDITOR.registeredAltKeys = []; // Alt keys for the virtual keyboard(s)
 EDITOR.isScrolling = false; // Render optimization for scrolling
 
 // When iterating over the event listeners, first copy the array in case one of the event listeners remove itself from the list! var f = EDITOR.eventListeners[ev]
+// We use camelCase for the event names even though the browser use lowercase name for the events!
 EDITOR.eventListeners = { // Use EDITOR.on to add listeners to these events:
 	offlineMode: [], // Called when the user manually switches mode between online or offline
 	connectionStatus: [], // Called when the editor has lost the connection to the server
@@ -396,7 +397,14 @@ ctxMenuVisibleOnce = true;
 
 	if(!Object.defineProperty) {
 		// Object.defineProperty (ES5) should work in most browsers!
+		
+		EDITOR.setMode = setMode;
+
+
 		alert("Object.defineProperty not available in your browser (" + BROWSER + ") some editor functionality might not work!");
+
+
+
 	}
 	else {
 
@@ -425,6 +433,19 @@ ctxMenuVisibleOnce = true;
 			enumerable: true
 		});
 		
+		// Prevent bug where accidentally overwriting 
+		Object.defineProperty(EDITOR, 'setMode', {
+			get: function getEditorMode() { return setMode; },
+			set: function setEditorMode(newValue) { throw new Error("Did you accidentally try to overwrite EDITOR.setMode !?"); },
+			enumerable: true
+		});
+
+		Object.defineProperty(EDITOR, 'mode', {
+			get: function getEditorMode() { return _editorMode; },
+			set: function setEditorMode(newValue) { throw new Error("Use EDITOR.setMode instead of setting it directly!"); },
+			enumerable: true
+		});
+
 		Object.defineProperty(EDITOR, 'soundAssist', {
 			get: function() { return _soundAssist; },
 			set: function(newValue) {
@@ -805,13 +826,6 @@ EDITOR.bindKey(b);
 		}
 	}
 	
-	EDITOR.setMode = function setMode(name) {
-		if(EDITOR.modes.indexOf(name) == -1) throw new Error(name + " mode is not registered as a mode/modal! Available modes are: " + JSON.stringify(EDITOR.modes));
-		
-		EDITOR.mode = name;
-		//console.log("Set EDITOR.mode=" + EDITOR.mode);
-	}
-	
 	EDITOR.removeMode = function removeMode(modeName) {
 		var index = EDITOR.modes.indexOf(modeName)
 		if(index == -1) {
@@ -821,9 +835,18 @@ EDITOR.bindKey(b);
 
 		EDITOR.modes.splice(index, 1);
 	
-		if( EDITOR.mode == modeName) EDITOR.setMode = EDITOR.defaultMode;
+		if( EDITOR.mode == modeName) EDITOR.setMode(EDITOR.defaultMode);
 	}
 
+	var _editorMode = EDITOR.defaultMode;
+
+	function setMode(name) {
+		if(EDITOR.modes.indexOf(name) == -1) throw new Error(name + " mode is not registered as a mode/modal! Available modes are: " + JSON.stringify(EDITOR.modes));
+
+		_editorMode = name;
+		//console.log("Set EDITOR.mode=" + EDITOR.mode);
+	}
+	
 	EDITOR.parsers = [];
 	EDITOR.addParser = function addParser(parserController) {
 		for(var i=0; i<EDITOR.parsers; i++) {
@@ -8267,6 +8290,8 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		
 		//console.log("EDITOR.mock: mock=" + mock + " options=" + JSON.stringify(options));
 		
+		// For the editor events we use camelCase, but browser events are lowercase, so for the mocking we use ? ... mixed for now, but probably will be consistent some day :P
+
 		if(mock == "keydown") {
 			if(typeof options == "string") {
 				var letter = options;

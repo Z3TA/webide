@@ -91,18 +91,29 @@
 
 		// Only the input event is fired when we type anything in the textarea
 		textarea.addEventListener("input", textareaInput, false);
-		
-		// The editor can pick up on some of the KaiOS keyboard keys, like Call, arrow keys, etc
+		textarea.addEventListener('blur', textareaBlur, false);
+
+		// The editor can pick up on some of the KaiOS keyboard keys, like Call, arrow keys, etc, but not when focused on a textarea!
+		// but 
 		//EDITOR.on("keyPressed", function kaiOsKeyPressed(file, character, combo, ev) {console.log("EDITOR keyPressed: character=" + character + " keyCode=" + ev.keyCode + " key=" + ev.key + " code=" + ev.code + "");return ALLOW_DEFAULT;});
 		EDITOR.on("keyDown", kaiOsDebugKeyDown);
 		//EDITOR.bindKey({desc: "Focus next element", key: "SoftRight", fun: focusNextElement});
 		//EDITOR.bindKey({desc: "Show context menu", key: "SoftLeft", fun: kaiToggleMenuOnKeyPress});
 		EDITOR.bindKey({desc: "Toggle between T9 modes", key: "Call", mode: "*", fun: kaiToggleMode});
-		EDITOR.bindKey({desc: "Reload KaiOS plugin", key: "EndCall", mode: "*", fun: kaiReloadPlugin});
-		EDITOR.bindKey({desc: "KaiOS Backspace", key: "Backspace", mode: INSERT, fun: kaiBackspace});
-		EDITOR.bindKey({desc: "KaiOS Enter", key: "MicrophoneToggle", mode: INSERT, fun: kaiEnter});
+		//EDITOR.bindKey({desc: "Reload KaiOS plugin", key: "EndCall", mode: "*", fun: kaiReloadPlugin});
+		EDITOR.bindKey({desc: "Reload KaiOS plugin", key: "SoftRight", mode: "*", fun: kaiReloadPlugin});
+
+		EDITOR.bindKey({desc: "Delete character", key: "Backspace", mode: INSERT, fun: kaiBackspaceInInsertMode}); // Backspace does not fire textarea input event!
+		
+		EDITOR.bindKey({desc: "Go down", key: "ArrowDown", mode: INSERT, fun: kaiArrowDownInInsertMode});
+		EDITOR.bindKey({desc: "Go up", key: "ArrowUp", mode: INSERT, fun: kaiArrowUpInInsertMode});
+		EDITOR.bindKey({desc: "Go left", key: "ArrowLeft", mode: INSERT, fun: kaiArrowLeftInInsertMode});
+		EDITOR.bindKey({desc: "Go right", key: "ArrowRight", mode: INSERT, fun: kaiArrowRightInInsertMode});
 
 
+		// note: Enter key (middle key on KaiOS device) is captured while focused on a textarea! So we don't find to bind it to the editor!
+		//EDITOR.bindKey({desc: "KaiOS Enter", key: "MicrophoneToggle", mode: INSERT, fun: kaiEnter});
+		
 		//EDITOR.bindKey({desc: "Toggle mic", key: "MicrophoneToggle", fun: microphoneToggle}); // Randomly triggers when pressing Main button
 
 		//EDITOR.bindKey({desc: "Switch mode", key: "k", combo: ALT, mode: "*", fun: kaiToggleMode2}); // For testing on non-t9 keyboard
@@ -123,20 +134,25 @@
 
 		EDITOR.unbindKey(kaiToggleMode);
 		EDITOR.unbindKey(kaiReloadPlugin);
-		EDITOR.unbindKey(kaiBackspace);
-		EDITOR.unbindKey(kaiEnter);
+		EDITOR.unbindKey(kaiBackspaceInInsertMode);
+		//EDITOR.unbindKey(kaiEnter);
+		EDITOR.unbindKey(kaiArrowDownInInsertMode);
+		EDITOR.unbindKey(kaiArrowUpInInsertMode);
+		EDITOR.unbindKey(kaiArrowLeftInInsertMode);
+		EDITOR.unbindKey(kaiArrowRightInInsertMode);
 
 		EDITOR.removeRender(kaiOsStatus);
 	}
 
-	function kaiBackspace() {
-		// Do whatever Backspace normally do!
-		sanityCheck();
-		var mode = EDITOR.mode;
-		EDITOR.setMode(EDITOR.defaultMode);
-		EDITOR.mock("keyDown", {charCode: 8, key: "Backspace"});
-		EDITOR.setMode(mode);
-		sanityCheck();
+	function kaiBackspaceInInsertMode() {
+		var file = EDITOR.currentFile;
+		if(!file) return ALLOW_DEFAULT;
+
+		file.moveCaretLeft();
+		file.deleteCharacter();
+		EDITOR.renderNeeded();
+
+		return PREVENT_DEFAULT;
 	}
 
 	function kaiEnter() {
@@ -144,9 +160,55 @@
 		sanityCheck();
 		var mode = EDITOR.mode;
 		EDITOR.setMode(EDITOR.defaultMode);
-		EDITOR.mock("keyDown", {charCode: 13, key: "Enter"});
+		EDITOR.mock("keydown", {charCode: 13, key: "Enter"});
 		EDITOR.setMode(mode);
 		sanityCheck();
+		EDITOR.renderNeeded();
+		return PREVENT_DEFAULT;
+	}
+
+	function kaiArrowDownInInsertMode() {
+		var file = EDITOR.currentFile;
+		if(!file) return ALLOW_DEFAULT;
+
+		file.moveCaretDown();
+		file.scrollToCaret();
+		EDITOR.renderNeeded();
+
+		return PREVENT_DEFAULT;
+	}
+
+	function kaiArrowUpInInsertMode() {
+		var file = EDITOR.currentFile;
+		if(!file) return ALLOW_DEFAULT;
+
+		file.moveCaretUp();
+		file.scrollToCaret();
+		EDITOR.renderNeeded();
+
+		return PREVENT_DEFAULT;
+	}
+
+	function kaiArrowLeftInInsertMode() {
+		var file = EDITOR.currentFile;
+		if(!file) return ALLOW_DEFAULT;
+
+		file.moveCaretLeft();
+		file.scrollToCaret();
+		EDITOR.renderNeeded();
+
+		return PREVENT_DEFAULT;
+	}
+
+	function kaiArrowRightInInsertMode() {
+		var file = EDITOR.currentFile;
+		if(!file) return ALLOW_DEFAULT;
+
+		file.moveCaretRight();
+		file.scrollToCaret();
+		EDITOR.renderNeeded();
+
+		return PREVENT_DEFAULT;
 	}
 
 	function sanityCheck() {
@@ -212,9 +274,12 @@
 		return PREVENT_DEFAULT;
 	}
 
-	function textareaInput() {
+	function textareaInput(ev) {
 
-		console.log("KaiOS:textareaInput: textarea.value=" + textarea.value);
+		console.log( "KaiOS:textareaInput: textarea.value=" + UTIL.lbChars(textarea.value) );
+		//console.log( "KaiOS:textareaInput: debug: " + UTIL.objInfo(ev, true) );
+
+		if(ev.isComposing) return; // Means the user is still generating the character...
 
 		if(EDITOR.mode == INSERT) {
 			insert(textarea.value);
@@ -230,6 +295,15 @@
 		// note: returning false aka PREVENT_DEFAULT will not prevent input into the textarea!
 	}
 
+	function textareaBlur() {
+		console.log("KaiOS:textareaBlur!");
+		setNormalMode();
+	}
+
+	function kaiNav(str) {
+
+	}
+
 	function insert(str) {
 		var file = EDITOR.currentFile;
 		if(file == undefined) return ALLOW_DEFAULT;
@@ -238,7 +312,7 @@
 			console.log("KayOS:insert:str=" + str + " str[" + i + "]=" + str[i]);
 
 			if(letter == "\n") {
-
+				file.insertLineBreak();
 			}
 			else file.putCharacter(letter);
 		}
@@ -336,22 +410,38 @@
 	function kaiToggleMode() {
 		console.log("kaiToggleMode: EDITOR.mode=" + EDITOR.mode);
 		
-		if(EDITOR.mode == INSERT) {
-			EDITOR.setMode(NAV);
-			EDITOR.hideVirtualKeyboard();
-		}
-		else {
+		if(EDITOR.mode != INSERT && EDITOR.mode != NAV) {
 			EDITOR.setMode(INSERT);
 			EDITOR.showVirtualKeyboard();
+			messageToShow = INSERT;
+			EDITOR.input = false;
+			textarea.focus();
 		}
-		
-		EDITOR.input = false;
-		textarea.focus();
+		else if(EDITOR.mode == INSERT) {
+			EDITOR.setMode(NAV);
+			EDITOR.hideVirtualKeyboard();
+			messageToShow = NAV;
+			EDITOR.input = false;
+			textarea.focus();
+		}
+		else if(EDITOR.mode == NAV) {
+			setNormalMode();
+		}
 
-		messageToShow = "mode: " + EDITOR.mode;
 		EDITOR.renderNeeded();
 
 		return PREVENT_DEFAULT;
+	}
+
+	function setNormalMode() {
+		console.log("KaiOS:setNormalMode!");
+		EDITOR.setMode(EDITOR.defaultMode);
+		EDITOR.hideVirtualKeyboard();
+		messageToShow = "DEFAULT (non modal) MODE";
+		textarea.blur();
+		EDITOR.canvas.focus();
+		EDITOR.input = true;
+		EDITOR.renderNeeded();
 	}
 	
 	function kaiToggleMenuOnKeyPress(file, combo, character, charCode, direction, targetElementClass, keyDownEvent) {
