@@ -24,11 +24,14 @@
 		
 		note: Having the main button mock escape key was stupid because it meant widgets being closed when you clicked on something
 
-		problem: We can not capture keys while the canvas element is focused! (only arrow keys, Call, EndCall, MicrophoneToggle)
-		We can capture the numeric key if they are longpressed...
-		We can also capture input if a textarea is focused!
-		so we know textarea is "cd", the user has pressed 3 times on 2 (because 2=abc) and one time on 3 (because 3=def) , 
+		problem: We can not capture T9 keys (the numeric keys) (only arrow keys, Call, EndCall, MicrophoneToggle)
+		We can however capture the numeric key if they are longpressed...
+		When a textarea is focused the only event the fires is the input event, but it doesn't say which key was pressed.
+		We can however see the content of the textarea!
+		If we know textarea is "cd", the user has pressed button 2 three times (because 2=abc) and one time on button 3 (because 3=def) , 
 
+
+		note: EndCall exits the browser on KaiOS device, we probably want to leave it off, or only bind to it while in INPUT or NAV mode
 
 	*/
 
@@ -36,14 +39,16 @@
 	// Don't do anything if it's not a KaiOS device!
 	//if(typeof window.navigator != "object" || typeof window.navigator.mozApps != "object") return;
 
+	//if(! QUERY_STRING["kaios"] ) return;
+
 	console.log("KaiOS!")
 
 	//document.location = "st.htm";
 
 	LOW_RAM = true;
 
-	var INSERT = "numericKeypadInsert";
-	var NAV = "numericKeypadNavigate";
+	var INSERT = "T9-insert";
+	var NAV = "T9-navigate";
 	
 	var messageToShow = "KaiOS";
 	var textarea;
@@ -64,51 +69,180 @@
 		EDITOR.addMode(INSERT);
 		EDITOR.addMode(NAV);
 
-		//EDITOR.bindKey({desc: "Focus next element", key: "SoftRight", fun: focusNextElement});
-		//EDITOR.bindKey({desc: "Show context menu", key: "SoftLeft", fun: kaiToggleMenuOnKeyPress});
-		EDITOR.bindKey({desc: "Switch mode", key: "Call", mode: "*", fun: kaiToggleMode});
-		//EDITOR.bindKey({desc: "Toggle mic", key: "MicrophoneToggle", fun: microphoneToggle}); // Randomly triggers when pressing Main button
-
-		EDITOR.bindKey({desc: "Switch mode", key: "k", combo: ALT, mode: "*", fun: kaiToggleMode2});
-		
-
-		EDITOR.discoveryBar.disable("KaiOS");
-		EDITOR.dashboard.disable("KaiOS");
+		var disabledBy = "KaiOS";
+		EDITOR.discoveryBar.disable(disabledBy);
+		EDITOR.dashboard.disable(disabledBy);
 
 		//alertBox("KaiOS support loaded!");
 
-		// Sometimes when we show a prompt KaiOS say Enter or Done... but not when we want to test it ...
-		//testConfirm();
-
-		//window.addEventListener("input", function(e) {console.log("input: " + UTIL.objInfo(e, true))}, false);
-		//window.addEventListener("keypress", function(e) {console.log("window keypress: " + UTIL.objInfo(e, true))}, false);
-		//window.addEventListener("keydown", function(e) {console.log("window keydown: " + UTIL.objInfo(e, true))}, false);
-		//window.addEventListener("keyup", function(e) {console.log("window keyup: " + UTIL.objInfo(e, true))}, false);
-
+		//testConfirm(); // Sometimes when we show a prompt KaiOS say Enter or Done... but doesn't when we want to test it ...
 
 		EDITOR.addRender(kaiOsStatus, 4650);
 
-		textarea = document.getElementById("clipboardcatcher");
-		textarea.addEventListener("keypress", function(e) {console.log("textarea keypress: keyCode=" + e.keyCode + " key=" + e.key + " code=" + e.code + "")}, false);
-		textarea.addEventListener("keydown", function(e) {console.log("textarea keydown: keyCode=" + e.keyCode + " key=" + e.key + " code=" + e.code + "");}, false);
-		textarea.addEventListener("keyup", function(e) {console.log("textarea keyup: keyCode=" + e.keyCode + " key=" + e.key + " code=" + e.code + "")}, false);
-		
+		textarea = document.createElement("textarea");
+		var body = document.getElementById("body");
 
-		EDITOR.on("keyPressed", function kaiOsKeyPressed(file, character, combo, ev) {
-			console.log("EDITOR keyPressed: character=" + character + " keyCode=" + ev.keyCode + " key=" + ev.key + " code=" + ev.code + ""); 
-			return ALLOW_DEFAULT;
-		});
-		EDITOR.on("keyDown", function kaiOsKeyDown(file, character, combo, ev) {console.log("EDITOR keyDown: character=" + character + " keyCode=" + ev.keyCode + " key=" + ev.key + " code=" + ev.code + ""); return ALLOW_DEFAULT;});
+		body.appendChild(textarea);
+
+		//textarea.addEventListener("keypress", function(e) {console.log("textarea keypress: keyCode=" + e.keyCode + " key=" + e.key + " code=" + e.code + "")}, false);
+		//textarea.addEventListener("keydown", function(e) {console.log("textarea keydown: keyCode=" + e.keyCode + " key=" + e.key + " code=" + e.code + "");}, false);
+		//textarea.addEventListener("keyup", function(e) {console.log("textarea keyup: keyCode=" + e.keyCode + " key=" + e.key + " code=" + e.code + "")}, false);
+		//textarea.addEventListener("input", function(e) {console.log("textarea input: keyCode=" + e.keyCode + " key=" + e.key + " code=" + e.code + "");console.log(UTIL.objInfo(e, true));}, false);
+
+		// Only the input event is fired when we type anything in the textarea
+		textarea.addEventListener("input", textareaInput, false);
 		
+		// The editor can pick up on some of the KaiOS keyboard keys, like Call, arrow keys, etc
+		//EDITOR.on("keyPressed", function kaiOsKeyPressed(file, character, combo, ev) {console.log("EDITOR keyPressed: character=" + character + " keyCode=" + ev.keyCode + " key=" + ev.key + " code=" + ev.code + "");return ALLOW_DEFAULT;});
+		EDITOR.on("keyDown", kaiOsDebugKeyDown);
+		//EDITOR.bindKey({desc: "Focus next element", key: "SoftRight", fun: focusNextElement});
+		//EDITOR.bindKey({desc: "Show context menu", key: "SoftLeft", fun: kaiToggleMenuOnKeyPress});
+		EDITOR.bindKey({desc: "Toggle between T9 modes", key: "Call", mode: "*", fun: kaiToggleMode});
+		EDITOR.bindKey({desc: "Reload KaiOS plugin", key: "EndCall", mode: "*", fun: kaiReloadPlugin});
+		EDITOR.bindKey({desc: "KaiOS Backspace", key: "Backspace", mode: INSERT, fun: kaiBackspace});
+		EDITOR.bindKey({desc: "KaiOS Enter", key: "MicrophoneToggle", mode: INSERT, fun: kaiEnter});
+
+
+		//EDITOR.bindKey({desc: "Toggle mic", key: "MicrophoneToggle", fun: microphoneToggle}); // Randomly triggers when pressing Main button
+
+		//EDITOR.bindKey({desc: "Switch mode", key: "k", combo: ALT, mode: "*", fun: kaiToggleMode2}); // For testing on non-t9 keyboard
+
 
 		//inputGoto.addEventListener("keypress", function() {alert("keypress");}, false);
 	}
 
 	function unloadKaiOsSupport() {
 
-		//EDITOR.unbindKey(microphoneToggle);
-		EDITOR.removeRender(showMessage);
+		EDITOR.removeMode(INSERT);
+		EDITOR.removeMode(NAV);
 
+		var body = document.getElementById("body");
+		body.removeChild(textarea);
+
+		EDITOR.removeEvent("keyDown", kaiOsDebugKeyDown);
+
+		EDITOR.unbindKey(kaiToggleMode);
+		EDITOR.unbindKey(kaiReloadPlugin);
+		EDITOR.unbindKey(kaiBackspace);
+		EDITOR.unbindKey(kaiEnter);
+
+		EDITOR.removeRender(kaiOsStatus);
+	}
+
+	function kaiBackspace() {
+		// Do whatever Backspace normally do!
+		sanityCheck();
+		var mode = EDITOR.mode;
+		EDITOR.setMode(EDITOR.defaultMode);
+		EDITOR.mock("keyDown", {charCode: 8, key: "Backspace"});
+		EDITOR.setMode(mode);
+		sanityCheck();
+	}
+
+	function kaiEnter() {
+		// Do whatever Enter normally do!
+		sanityCheck();
+		var mode = EDITOR.mode;
+		EDITOR.setMode(EDITOR.defaultMode);
+		EDITOR.mock("keyDown", {charCode: 13, key: "Enter"});
+		EDITOR.setMode(mode);
+		sanityCheck();
+	}
+
+	function sanityCheck() {
+		if(typeof EDITOR.setMode != "function") throw new Error("EDITOR.setMode=" + EDITOR.setMode);
+	}
+
+	function kaiOsDebugKeyDown(file, character, combo, ev) {
+		console.log("EDITOR keyDown: character=" + character + " keyCode=" + ev.keyCode + " key=" + ev.key + " code=" + ev.code + " mode=" + EDITOR.mode); 
+		return ALLOW_DEFAULT;
+	}
+	
+	function kaiReloadPlugin() {
+		console.log("kaiReloadPlugin!");
+		sanityCheck();
+
+		var head = document.getElementsByTagName("html")[0];
+		var scripts = head.getElementsByTagName("script");
+
+		// Find the script ...
+		var reloaded = false;
+		for(var i=0; i < scripts.length; i++) {
+			if( scripts[i].src.indexOf("kaios.js") == -1) {
+				//console.log("kaiReloadPlugin: Not kaios plugin: " + scripts[i].src);
+				continue;
+			}
+			else {
+				break;
+			}
+		}
+
+		console.log("kaiReloadPlugin: i=" + i + " scripts.length=" + scripts.length + "");
+
+		if(i == scripts.length) {
+			console.log("kaiReloadPlugin: Unable to find KaiOS plugin!");
+			throw new Error("Unable to find KaiOS plugin!");
+		}
+
+		var script = scripts[i];
+		var scriptSource = script.src;
+		var parent = script.parentNode;
+
+		if(!parent) {
+			console.log("kaiReloadPlugin: parent=" + parent);
+		}
+
+		unloadKaiOsSupport();
+
+		parent.removeChild(script);
+
+		script = document.createElement("script");
+		script.src = scriptSource; // Relative path
+		script.type = "text/javascript";
+
+		try {
+			parent.appendChild(script);
+		}
+		catch(err) {
+			console.log("kaiReloadPlugin: Failed to append script!");
+		}
+
+		sanityCheck();
+
+		return PREVENT_DEFAULT;
+	}
+
+	function textareaInput() {
+
+		console.log("KaiOS:textareaInput: textarea.value=" + textarea.value);
+
+		if(EDITOR.mode == INSERT) {
+			insert(textarea.value);
+		}
+		else if(EDITOR.mode == NAV) {
+			kaiNav(textarea.value);
+		}
+
+		textarea.value = "";
+
+		sanityCheck();
+
+		// note: returning false aka PREVENT_DEFAULT will not prevent input into the textarea!
+	}
+
+	function insert(str) {
+		var file = EDITOR.currentFile;
+		if(file == undefined) return ALLOW_DEFAULT;
+		for (var i=0, letter=""; i<str.length; i++) {
+			letter = str[i];
+			console.log("KayOS:insert:str=" + str + " str[" + i + "]=" + str[i]);
+
+			if(letter == "\n") {
+
+			}
+			else file.putCharacter(letter);
+		}
+		EDITOR.renderNeeded();
 	}
 
 	function kaiToggleMode2(file, character, combo, ev) {
@@ -285,7 +419,7 @@
 
 		var text = messageToShow + " " + textarea.value;
 
-		console.log("KaiOS:showMessage: text=" + text);
+		//console.log("KaiOS:showMessage: text=" + text);
 
 		if(text.length == 0) return;
 

@@ -4,6 +4,17 @@ This file contains a list of things we can do to improve already implemented fea
 Polishing (only existing features)
 ==================================
 
+---
+
+Typing .. in the file open widget should change to parent (serch) dir!
+
+---
+
+False posetive:
+if(EDITOR.modes.indexOf(name) == -1) throw new Error(name + " mode is not registered as a mode/modal! Available modes are: " + JSON.stringify(EDITOR.modes));
+(it says indexOf returns a number!)
+
+---
 
 Type inference system doesn't think our QUERY_STRING global variable is a object, it thinks it's a function!
 

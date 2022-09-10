@@ -267,7 +267,8 @@ EDITOR.lastTimeCharacterInserted = new Date();
 EDITOR.lastTimeInteraction = new Date();
 
 EDITOR.modes = ["default", "*"]; // You can bind keys for use in different modes. * means all modes
-EDITOR.mode = "default"; // What you often find in GUI based editors/IDE's'
+EDITOR.defaultMode = "default" // What you often find in GUI based editors/IDE's'
+EDITOR.mode = EDITOR.defaultMode ; 
 
 EDITOR.soundAssist = false; // If set to true, widgets should make sounds (EDITOR.say) to aid the user
 EDITOR.speechRate = 1; // // 0.1 to 10
@@ -801,15 +802,27 @@ b.mode = modeName;
 EDITOR.bindKey(b);
 }
 			}
-}
-}
+		}
+	}
 	
 	EDITOR.setMode = function setMode(name) {
 		if(EDITOR.modes.indexOf(name) == -1) throw new Error(name + " mode is not registered as a mode/modal! Available modes are: " + JSON.stringify(EDITOR.modes));
+		
 		EDITOR.mode = name;
 		//console.log("Set EDITOR.mode=" + EDITOR.mode);
 	}
 	
+	EDITOR.removeMode = function removeMode(modeName) {
+		var index = EDITOR.modes.indexOf(modeName)
+		if(index == -1) {
+			console.error("EDITOR.mode modeName=" + modeName + " not registered! ");
+			return;
+		}
+
+		EDITOR.modes.splice(index, 1);
+	
+		if( EDITOR.mode == modeName) EDITOR.setMode = EDITOR.defaultMode;
+	}
 
 	EDITOR.parsers = [];
 	EDITOR.addParser = function addParser(parserController) {
@@ -7723,7 +7736,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		
 		if(b.mode == undefined) {
 			//console.warn('No mode defined for "' + b.desc + '" asuming default mode');
-			b.mode = "default";
+			b.mode = EDITOR.defaultMode;
 		}
 		else if(EDITOR.modes.indexOf(b.mode) == -1) {
 			throw new Error(b.mode + " is not a registered mode/modal.\n" + 
@@ -8998,6 +9011,11 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		},
 		disable: function disableDashboard(who) {
 			if(who == undefined) throw new Error("First argument must be an identification so that we know who disabled the dashboard");
+			
+			if(!EDITOR.dashboard.enabled) {
+				return;
+			}
+
 			EDITOR.dashboard.disabledBy.push(who);
 			
 			EDITOR.dashboard.stayHidden = true;
@@ -12512,7 +12530,7 @@ function paste(pasteEvent) {
 
 				//console.log("keyPressEvent.key=" + keyPressEvent.key + " comboStr=" + comboStr);
 
-				promptBox("Keypress " + keyPressEvent.key + " + " + comboStr + " (character=" + character + ") was not captured\nWhat would you like the editor to do?", 
+				promptBox("Keypress " + keyPressEvent.key + " + " + comboStr + " (character=" + character + ") was not captured in " + EDITOR.mode + " mode\nWhat would you like the editor to do?", 
 				{placeholder: "When pressing " + keyPressEvent.key + " + " + comboStr + " the editor should..."},
 				function(answer) {
 					if(!answer) return;
