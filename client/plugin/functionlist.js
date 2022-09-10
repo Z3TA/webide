@@ -44,8 +44,16 @@
 		
 		EDITOR.on("keyDown", searchFunctionList); // Enable searching in the function list
 		
-		//EDITOR.bindKey({desc: "Remove focus from the function list", charCode: char_Esc, fun: blurFunctionList});
+		var char_Esc = 27;
+		var char_F = 70;
+		var char_tab = 9;
+
+		EDITOR.bindKey({desc: "Focus/type on the function list", charCode: char_F, combo: CTRL + ALT, fun: focusFunctionList});
+		EDITOR.bindKey({desc: "Remove focus from the function list", charCode: char_Esc, fun: blurFunctionList});
+		EDITOR.bindKey({desc: "Move caret to selected function", charCode: char_tab, fun: moveCaretToFunction});
+
 		
+
 		winMenuToggleFunctionlist = EDITOR.windowMenu.add(S("function_list"), [S("View"), 80], toggleFunctionList);
 		if(functionListActive) winMenuToggleFunctionlist.activate();
 		
@@ -163,6 +171,34 @@ leftColumn.removeChild(functionListWrap);
 		
 	}
 	
+	function moveCaretToFunction() {
+		
+		if(!captureKeyboard) return ALLOW_DEFAULT;
+
+		if(functionListSelect.selectedIndex == -1) {
+			console.warn("functionListSelect.selectedIndex=" + functionListSelect.selectedIndex + " EDITOR.input=" + EDITOR.input);
+			return PREVENT_DEFAULT;
+		}
+
+		var line = functionListSelect.options[functionListSelect.selectedIndex] && functionListSelect.options[functionListSelect.selectedIndex].value;
+		var filePath = functionListSelect.getAttribute("filePath");
+		var file = EDITOR.files[filePath];
+
+		console.log("functionlist:moveCaretToFunction: functionListSelect.selectedIndex=" + functionListSelect.selectedIndex + " line=" + line + " filePath=" + filePath + " file?" + !!file);
+
+		if(!file) return;
+
+		file.moveCaret(undefined, line-1);
+		file.scrollToCaret();
+
+		functionListSelect.blur();
+		EDITOR.input = true;
+
+		EDITOR.renderNeeded();
+
+		return PREVENT_DEFAULT;
+	}
+
 	function leftOrRight() {
 		// If we are inside the function list, pressing left or right should go back to the caret
 		
@@ -583,6 +619,14 @@ functionListSelect.setAttribute("filePath", file.path);
 		}
 	}
 	
+	function focusFunctionList() {
+		if(functionListSelect) {
+			EDITOR.input = false;
+			functionListSelect.focus();
+		}
+		return PREVENT_DEFAULT;
+	}
+
 	function buildFunctionList(domModel) {
 		/*
 			Builds the function list from scratch using domModel
@@ -648,7 +692,10 @@ functionListSelect.setAttribute("filePath", file.path);
 				var keyEscape = 27;
 				var keyLeft = 37;
 				var keyRight = 39;
-				
+				// note: We can't capture tab key from the select keyup event listener!
+
+				console.log("functionlist: functionListSelect keyup event: keyUpEvent.keyCode=" + keyUpEvent.keyCode);
+
 				keyUpEvent.preventDefault();
 				
 				if (keyUpEvent.keyCode == keyEscape) {

@@ -6,6 +6,11 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
+It would be nice if we could search on the function list without using the mouse to click on it...
+Ctrl+Alt+F
+Then press tab to go to the function
+the editor goes to the function.... but also seemt to run an autocomplete!...
+and sometimes selectIndex is -1 ...
 
 
 ---
