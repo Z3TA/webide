@@ -53,6 +53,9 @@
 	var messageToShow = "KaiOS";
 	var textarea;
 
+	var originalBottomMargin = EDITOR.settings.bottomMargin;
+	var originalRightMargin = EDITOR.settings.rightMargin;
+
 	EDITOR.plugin({
 		desc: "Support for KaiOS",
 		load: loadKaiOsSupport,
@@ -79,10 +82,10 @@
 
 		EDITOR.addRender(kaiOsStatus, 4650);
 
-		textarea = document.createElement("textarea");
-		var body = document.getElementById("body");
+		textarea = document.createElement("keyboardCatcher");
+		// note: inserting an element in the body and then focusing it causes the top window menu to disappear! ... (so use existing textarea element)
+		textarea.value = "";
 
-		body.appendChild(textarea);
 
 		//textarea.addEventListener("keypress", function(e) {console.log("textarea keypress: keyCode=" + e.keyCode + " key=" + e.key + " code=" + e.code + "")}, false);
 		//textarea.addEventListener("keydown", function(e) {console.log("textarea keydown: keyCode=" + e.keyCode + " key=" + e.key + " code=" + e.code + "");}, false);
@@ -111,8 +114,8 @@
 		EDITOR.bindKey({desc: "Go right", key: "ArrowRight", mode: INSERT, fun: kaiArrowRightInInsertMode});
 
 
-		// note: Enter key (middle key on KaiOS device) is captured while focused on a textarea! So we don't find to bind it to the editor!
-		//EDITOR.bindKey({desc: "KaiOS Enter", key: "MicrophoneToggle", mode: INSERT, fun: kaiEnter});
+		// Enter key (middle key on KaiOS device) is captured using input event while focused on a textarea! However isComposing will be true
+		EDITOR.bindKey({desc: "KaiOS Enter", key: "Enter", mode: INSERT, fun: kaiEnterInInsertMode});
 		
 		//EDITOR.bindKey({desc: "Toggle mic", key: "MicrophoneToggle", fun: microphoneToggle}); // Randomly triggers when pressing Main button
 
@@ -120,6 +123,13 @@
 
 
 		//inputGoto.addEventListener("keypress", function() {alert("keypress");}, false);
+	
+		
+		EDITOR.settings.bottomMargin = 28; // KaiOS has a bar at the bottom that covers the canvas
+		EDITOR.settings.rightMargin = 8; // 
+
+		EDITOR.resizeNeeded();
+
 	}
 
 	function unloadKaiOsSupport() {
@@ -127,21 +137,28 @@
 		EDITOR.removeMode(INSERT);
 		EDITOR.removeMode(NAV);
 
-		var body = document.getElementById("body");
-		body.removeChild(textarea);
+		//var body = document.getElementById("body");
+		//body.removeChild(textarea);
 
 		EDITOR.removeEvent("keyDown", kaiOsDebugKeyDown);
 
 		EDITOR.unbindKey(kaiToggleMode);
 		EDITOR.unbindKey(kaiReloadPlugin);
 		EDITOR.unbindKey(kaiBackspaceInInsertMode);
-		//EDITOR.unbindKey(kaiEnter);
+		EDITOR.unbindKey(kaiEnterInInsertMode);
 		EDITOR.unbindKey(kaiArrowDownInInsertMode);
 		EDITOR.unbindKey(kaiArrowUpInInsertMode);
 		EDITOR.unbindKey(kaiArrowLeftInInsertMode);
 		EDITOR.unbindKey(kaiArrowRightInInsertMode);
 
 		EDITOR.removeRender(kaiOsStatus);
+
+		EDITOR.settings.bottomMargin = originalBottomMargin;
+		EDITOR.settings.rightMargin = originalRightMargin;
+		EDITOR.resizeNeeded();
+
+		setNormalMode();
+
 	}
 
 	function kaiBackspaceInInsertMode() {
@@ -155,15 +172,15 @@
 		return PREVENT_DEFAULT;
 	}
 
-	function kaiEnter() {
-		// Do whatever Enter normally do!
-		sanityCheck();
-		var mode = EDITOR.mode;
-		EDITOR.setMode(EDITOR.defaultMode);
-		EDITOR.mock("keydown", {charCode: 13, key: "Enter"});
-		EDITOR.setMode(mode);
-		sanityCheck();
+	function kaiEnterInInsertMode() {
+		var file = EDITOR.currentFile;
+		if(!file) return ALLOW_DEFAULT;
+
+		file.insertLineBreak();
+		file.scrollToCaret();
+
 		EDITOR.renderNeeded();
+
 		return PREVENT_DEFAULT;
 	}
 
@@ -279,7 +296,7 @@
 		console.log( "KaiOS:textareaInput: textarea.value=" + UTIL.lbChars(textarea.value) );
 		//console.log( "KaiOS:textareaInput: debug: " + UTIL.objInfo(ev, true) );
 
-		if(ev.isComposing) return; // Means the user is still generating the character...
+		if(ev.isComposing) return ALLOW_DEFAULT; // Means the user is still generating the character...
 
 		if(EDITOR.mode == INSERT) {
 			insert(textarea.value);
@@ -410,6 +427,8 @@
 	function kaiToggleMode() {
 		console.log("kaiToggleMode: EDITOR.mode=" + EDITOR.mode);
 		
+		console.log("KaiOS: EDITOR.view=" + JSON.stringify(EDITOR.view) + " EDITOR.settings.bottomMargin=" + EDITOR.settings.bottomMargin);
+
 		if(EDITOR.mode != INSERT && EDITOR.mode != NAV) {
 			EDITOR.setMode(INSERT);
 			EDITOR.showVirtualKeyboard();
@@ -513,12 +532,12 @@
 
 		if(text.length == 0) return;
 
-		var top = EDITOR.view.canvasHeight - EDITOR.settings.gridHeight - EDITOR.settings.bottomMargin - 80;
+		var top = EDITOR.view.canvasHeight - EDITOR.settings.gridHeight - EDITOR.settings.bottomMargin;
 		var middle = top + Math.floor(EDITOR.settings.gridHeight/2);
 		var measuredText = ctx.measureText(text)
 		var textWidth = measuredText.width;
 		var textHeight = measuredText.height || EDITOR.settings.gridHeight;
-		var left = EDITOR.view.canvasWidth - textWidth - EDITOR.settings.rightMargin - 20;
+		var left = EDITOR.view.canvasWidth - textWidth - EDITOR.settings.rightMargin;
 
 		//console.log("measuredText=", measuredText);
 
