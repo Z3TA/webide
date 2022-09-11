@@ -82,7 +82,7 @@
 
 		EDITOR.addRender(kaiOsStatus, 4650);
 
-		textarea = document.createElement("keyboardCatcher");
+		textarea = document.getElementById("keyboardCatcher");
 		// note: inserting an element in the body and then focusing it causes the top window menu to disappear! ... (so use existing textarea element)
 		textarea.value = "";
 
@@ -293,7 +293,7 @@
 
 	function textareaInput(ev) {
 
-		console.log( "KaiOS:textareaInput: textarea.value=" + UTIL.lbChars(textarea.value) );
+		console.log( "KaiOS:textareaInput: textarea.value=" + UTIL.lbChars(textarea.value + " ev.isComposing=" + ev.isComposing) );
 		//console.log( "KaiOS:textareaInput: debug: " + UTIL.objInfo(ev, true) );
 
 		if(ev.isComposing) return ALLOW_DEFAULT; // Means the user is still generating the character...

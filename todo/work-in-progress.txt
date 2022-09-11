@@ -6,16 +6,15 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
+
+
+---
+
 It would be nice if we could search on the function list without using the mouse to click on it...
 Ctrl+Alt+F
 Then press tab to go to the function
 the editor goes to the function.... but also seemt to run an autocomplete!...
 and sometimes selectIndex is -1 ...
-
-
----
-
-Should probably change editor events to not have camelCase! for example keydown so that it mimics browser names
 
 ---
 
@@ -23,10 +22,6 @@ stat function taking up a lot of CPU!
 
 
 ---
-
-Trying to capture the numkeys on KaiOS device...
-
-KaiOS seem to get a bigger canvas, but you can't see the bottom or the right side !?
 
 THe smilie face window menu is very high on KaiOS ...
 the smilie letter wont show up on KaiOs... replace it with text, just "Give Feedack", "report problem", "give suggestion", put it in editor menu !?
