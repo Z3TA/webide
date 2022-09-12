@@ -533,7 +533,7 @@ originalFilePath = EDITOR.workingDirectory + originalFilePath;
 		if(target.className=="fileCanvas" && file) {
 			var filePathToBeSaved = file.path;
 		}
-		else if(target.getAttribute("path")) { // note: Need to use getAttribute to get custom attributes from DOM elements
+		else if(typeof target.getAttribute == "function" && target.getAttribute("path")) { // note: Need to use getAttribute to get custom attributes from DOM elements
 			var filePathToBeSaved = target.getAttribute("path");
 		}
 		

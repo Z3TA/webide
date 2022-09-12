@@ -37,7 +37,7 @@
 		if(target.className=="fileCanvas" && file) {
 			var filePath = file.path;
 		}
-		else if(target.getAttribute("path")) {
+		else if(typeof target.getAttribute == "function" && target.getAttribute("path")) {
 			var filePath = target.getAttribute("path");
 		}
 		

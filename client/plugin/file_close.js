@@ -68,7 +68,7 @@
 		if(target.className=="fileCanvas") {
 			var fileToBeClosed = file;
 		}
-		else if(target.getAttribute("path")) { // note: Need to use getAttribute to get custom attributes from DOM elements
+		else if(typeof target.getAttribute == "function" && target.getAttribute("path")) { // note: Need to use getAttribute to get custom attributes from DOM elements
 			var fileToBeClosed = EDITOR.files[target.getAttribute("path")];
 		}
 		

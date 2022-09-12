@@ -102,7 +102,7 @@
 		if(target.className=="fileCanvas" && file) {
 			var filePath = file.path;
 		}
-		else if(target.getAttribute("path")) { // note: Need to use getAttribute to get custom attributes from DOM elements
+		else if(typeof target.getAttribute == "function" && target.getAttribute("path")) { // note: Need to use getAttribute to get custom attributes from DOM elements
 			var filePath = target.getAttribute("path");
 		}
 		

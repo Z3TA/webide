@@ -17,14 +17,16 @@
 		unload: function unloadCopyFilePath() {
 			EDITOR.removeEvent("ctxMenu", copyFilePathCtxmenuOption);
 			EDITOR.windowMenu.remove(winMenuCopyFilePath);
-			}
-		});
+		}
+	});
 	
 	function copyFilePathCtxmenuOption(file, combo, caret, target) {
+		//if( typeof target != "object") throw new Error("target=" + target + " typeof " + (typeof target));
+		
 		if(target.className=="fileCanvas" && file) {
 			var filePath = file.path;
 		}
-		else if(target.getAttribute("path")) {
+		else if(typeof target.getAttribute == "function" && target.getAttribute("path")) {
 			var filePath = target.getAttribute("path");
 		}
 		
