@@ -122,8 +122,9 @@ network_problem: "network problem",
 	
 	"offline mode": "offline mode",
 	open: "open",
-	open_in_new_window: "Open in new window",
 	open_file_by_searching: "Open file by searching for file path",
+	open_in_new_window: "Open in new window",
+	open_local: "Open local file",
 	open_search_file: "Open/search file",
 	
 	page_down: "Page down",

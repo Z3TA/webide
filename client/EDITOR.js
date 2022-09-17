@@ -2407,6 +2407,7 @@ else if(err.code == "ENETDOWN") {
 
 	EDITOR.removeProtocol = function(protocol) {
 		delete _protocols[protocol];
+		console.log("EDITOR.removeProtocol: protocol=" + protocol + " removed. _protocols=" + JSON.stringify(_protocols));
 	}
 
 	EDITOR.fileSaveDialog = function(defaultPath, callback) {
@@ -7713,7 +7714,9 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		if(windowLoaded) { // && EDITOR.settings.devMode
 			//alertBox("Gonna reload unload and load " + UTIL.getFunctionName(p.load));
 			EDITOR.disablePlugin(p.desc, true); // Unload plugin before loading it 
+			console.log("EDITOR.plugin: Loading plugin p.desc=" + p.desc + " ...");
 			p.load(); // Load the plugin right away if the editor has already started. 
+			p.loaded = true;
 		}
 		
 		for(var i=0; i<EDITOR.plugins.length; i++) {
@@ -7739,38 +7742,41 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 	EDITOR.disablePlugin = function(desc, removedBy) {
 		var plugin;
 
-		console.warn("EDITOR.disablePlugin: desc=" + desc);
+		console.warn("EDITOR.disablePlugin: desc=" + desc + "");
 
 		for(var i=0; i<EDITOR.plugins.length; i++) {
 			plugin = EDITOR.plugins[i];
+
 			if(plugin.desc == desc) {
+
+				console.warn("EDITOR.disablePlugin: Found plugin.desc=" + plugin.desc + " plugin.loaded=" + plugin.loaded);
 
 				if(plugin.loaded) {
 					if(typeof plugin.unload != "function") throw new Error("The plugin has already been loaded, and it does not have an unload method! So you have to disable this plugin before it's loaded!");
 					
-					console.log("Attempting to unload plugin " + desc + " ...");
+					console.log("EDITOR.disablePlugin: Attempting to unload plugin " + desc + " ...");
 					try {
 						plugin.unload();
 					}
 					catch(err) {
-						console.log("Error when unloading plugin: " + desc + " Error: " + err.message);
+						console.log("EDITOR.disablePlugin: Error when unloading plugin: " + desc + " Error: " + err.message);
 					}
 				}
 				
 				if(removedBy) {
-					console.warn("EDITOR.disablePlugin: Disabling already loaded plugin permanently: desc=" + desc);
+					console.warn("EDITOR.disablePlugin: Disabling already existing plugin permanently: desc=" + desc);
 					EDITOR.plugins.splice(i, 1);
 				}
-				//console.log("Plugin disabled" + (remove ? " and removed": "") + ": " + desc);
+				//console.log("EDITOR.disablePlugin: Plugin disabled" + (remove ? " and removed": "") + ": " + desc);
 				
 				return true;
 			}
 		}
 		
-		console.log("EDITOR.disablePlugin: Not yet loaded: desc=" + desc);
+		console.log("EDITOR.disablePlugin: Not yet registered: desc=" + desc);
 
-		if( removedBy ) {
-			console.warn("EDITOR.disablePlugin: Disabling permanently: desc=" + desc);
+		if( removedBy ) { // Make sure it will never load
+			console.warn("EDITOR.disablePlugin: Disabling not yet registered plugin permanently: desc=" + desc);
 			EDITOR.disabledPlugins.push(desc);
 			if(typeof removeOrWho == "string") {
 				if( typeof EDITOR.disabledPluginsBy[desc] != "object") EDITOR.disabledPluginsBy[desc] = [];
@@ -10892,6 +10898,7 @@ window.addEventListener("mousemove", mouseMove, false);
 		}
 		calledStartListeners = true;
 	
+		
 		// Sort and load plugins
 		EDITOR.plugins.sort(function(a, b) {
 			if(a.order < b.order) {
@@ -10905,14 +10912,20 @@ window.addEventListener("mousemove", mouseMove, false);
 			}
 		});
 	
+		// note: Plugins can unload each other. Making the EDITOR.plugins array a bit chaotic. So make a copy of it
+		var pluginsCopy = EDITOR.plugins.map(function(p) {return p});
+
 		//console.log("plugins: ");
 		//EDITOR.plugins.map(function (p) {console.log(p.order + ": " + p.desc)});
 	
+		var pluginDesc = EDITOR.plugins.map(function(p) {return p.desc}); // For debugging
 		var pluginLoaders = EDITOR.plugins.map(function(p) {return p.load});
 		//console.log("Loading plugins (length=" + pluginLoaders.length + ")");
 		for(var i=0; i<pluginLoaders.length; i++) {
 			
-			//console.time("Load plugin: " + UTIL.getFunctionName(pluginLoaders[i]));
+			console.log("Load plugin: desc=" + pluginDesc[i] + " load function-name=" + UTIL.getFunctionName(pluginLoaders[i]) + " (" + i + " of " + (pluginLoaders.length-1) + ")" );
+
+			//console.time("Load plugin: desc=" + pluginDesc[i] + " load function-name=" + UTIL.getFunctionName(pluginLoaders[i]));
 			
 			if(EDITOR.settings.devMode) {
 				pluginLoaders[i](EDITOR);
@@ -10926,7 +10939,7 @@ window.addEventListener("mousemove", mouseMove, false);
 					console.error(err.message);
 					console.log(err.stack);
 
-					var pluginName = UTIL.getFunctionName(pluginLoaders[i]);
+					var pluginName = UTIL.getFunctionName(pluginLoaders[i]) + " (" + pluginDesc[i] + ")";
 					var debugInfo = "Error: " + err.message + "\n";
 					debugInfo = debugInfo + "StackTrace: " + err.stack + "\n";
 					debugInfo = debugInfo + "Browser: " + ((typeof navigator == "object" && navigator.userAgent) || window.userAgent) + " (" + BROWSER + ")\n";
@@ -10942,9 +10955,13 @@ window.addEventListener("mousemove", mouseMove, false);
 				}
 			}
 			
+			pluginsCopy[i].loaded = true;
+
 			//console.timeEnd("Load plugin: " + UTIL.getFunctionName(pluginLoaders[i]));
 		}
 	
+		pluginsCopy.length = 0; // Empty the array
+
 	
 		//console.log("Setting mainLoopInterval because first load!");
 		mainLoopInterval = setInterval(resizeAndRender, 1000); // So that we always see the latest and greatest

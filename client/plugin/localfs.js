@@ -11,11 +11,13 @@
 	var fileHandles = {}; // Temporarly store file handles
 	var nativeFileSystemFileHandleDb; // For "permantely" storing file handles (able to read from the same file when browser is reopened) undefined means we have not yet tried to open it
 	var nativeFileSystemFileHandleDbWaitList = [];
-
+	var windowMenuOpenLocal;
 
 	EDITOR.plugin({
 		desc: "Web Native File System Access",
 		load: function loadWebNativeFs() {
+
+			console.log("localfs: loadWebNativeFs!");
 
 			EDITOR.addProtocol(protocol, {list: localListFiles, read: localReadFile, write: localWriteFile, hash: localHashFromDisk, size: localFileSizeOnDisk});
 
@@ -27,8 +29,12 @@
 			var charO = 79;
 			EDITOR.bindKey({desc: "Open a local file using native file select dialog", charCode: charO, combo: CTRL + SHIFT, fun: openFile});
 
+			windowMenuOpenLocal = EDITOR.windowMenu.add(S("open_local"), [S("File"), 1], openFile, openFile);
+
 		},
 		unload: function unloadWebNativeFs() {
+
+			console.log("localfs: unloadWebNativeFs!");
 
 			EDITOR.removeProtocol(protocol);
 
@@ -38,8 +44,11 @@
 			EDITOR.removeEvent("fileOpen", nativeFileOpen, 1);
 			EDITOR.removeEvent("fileClose", nativeFileClose, 1);
 			EDITOR.removeEvent("openFileTool", openLocalFileTool);
+			EDITOR.removeEvent("localFileDialog", localFileDialog);
 
 			EDITOR.unbindKey(openFile);
+
+			EDITOR.windowMenu.remove(windowMenuOpenLocal);
 		}
 	});
 
