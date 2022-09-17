@@ -1744,7 +1744,7 @@ else var directory = EDITOR.workingDirectory;
 		//console.warn("showAnnotations: file.path=" + file.path + " rootDir=" + rootDir);
 
 		if(annotations.hasOwnProperty(file.path)) show(annotations[file.path]);
-		else if(file.savedAs && !file.nativeFileSystemFileHandle) { // Only bother to annotate files that are saved on disk!
+		else if(file.savedAs) { // Only bother to annotate files that are saved on disk!
 			
 			var filePath = file.path;
 			

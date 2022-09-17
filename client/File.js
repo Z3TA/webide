@@ -45,8 +45,6 @@ var File; // File object is global
 
 		file.disallowScrollingBeyondEof = false;
 
-		file.nativeFileSystemFileHandle = undefined; // Native file system API: https://web.dev/file-system-access/
-
 		file.text = text;
 		file.path = path;
 		file.isBig = bigFile ? true : false;

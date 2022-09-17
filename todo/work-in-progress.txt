@@ -6,7 +6,17 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
+Use EDITOR.addProtocol for local and reote
 
+EDITOR.hashFileOnDisk
+
+
+Add protection to local files so they can't be overwritten by accident!
+
+
+---
+
+Don't cache local files, always open them from disk
 
 ---
 

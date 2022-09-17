@@ -234,7 +234,8 @@ EDITOR.eventListeners = { // Use EDITOR.on to add listeners to these events:
 	soundAssist: [], // Get notified when soundAssist is turned on/off
 	wrapText: [], // Call EDITOR.wrapText() to format code, because there might be many code formatters/wrappers and we only want to run one of them
 	findInFiles: [], // Starts a find-in-files tool when calling EDITOR.findInFiles()
-	virtualDisplay: [] // Listen for state changes of the virtual display (open, close, start, stop)
+	virtualDisplay: [], // Listen for state changes of the virtual display (open, close, start, stop)
+	localFileDialog: [] // Brings up a dialog for opening local files (from the browser file api)
 };
 
 EDITOR.renderFunctions = [];
@@ -1214,7 +1215,7 @@ usePseudoClipboard = false;
 			Using the state variable is unintuitive... So throw an error if we use it wrong!
 		*/
 		if(state != undefined) {
-			var allowedInState = ["props", "show", "image", "isSaved", "savedAs", "changed", "nativeFileSystemFileHandle"];
+			var allowedInState = ["props", "show", "image", "isSaved", "savedAs", "changed"];
 			for(var prop in state) {
 				if(allowedInState.indexOf(prop) == -1) throw new Error("EDITOR.openFile error: Not allowed: prop=" + prop + "\nAllowed states are " + allowedInState.join(",") + ". For all other new File properties, put them in {props:{x:x, y:y, z:z}}");
 			}
@@ -1349,23 +1350,6 @@ usePseudoClipboard = false;
 				EDITOR.readFromDisk(path, false, "base64", load);
 				
 			}
-			else if(state && state.props && state.props.nativeFileSystemFileHandle) {
-				//console.log("It got a native file system handle! path=" + path);
-				EDITOR.verifyNativeFileSystemPermission(state.props.nativeFileSystemFileHandle, "readwrite", function(err) {
-					if(err && err.code == "PERMISSION_DENIED") return askforpermission;
-					else if(err) return load(err);
-
-					state.props.nativeFileSystemFileHandle.getFile().then(function readText(localFile) {
-						localFile.text().then(function(fileContent) {
-
-							UTIL.hash(fileContent, function(err, hash) {
-								load(null, path, fileContent, hash || null);
-							});
-
-						});
-					});
-				});
-			}
 			else {
 				// Check the file size
 				//console.log("Getting file size on disk. path=" + path);
@@ -1450,7 +1434,6 @@ usePseudoClipboard = false;
 				if(state.isSaved != undefined) newFile.isSaved = state.isSaved;
 				if(state.savedAs != undefined) newFile.savedAs = state.savedAs;
 				if(state.changed != undefined) newFile.changed = state.changed;
-				if(state.nativeFileSystemFileHandle != undefined) newFile.nativeFileSystemFileHandle = state.nativeFileSystemFileHandle;
 			}
 			
 			// Able to set file properties when opening the file, before openFile listeners fire...
@@ -1615,8 +1598,7 @@ usePseudoClipboard = false;
 		if(!callback) throw new Error("Callback not defined!");
 		
 		var protocol = UTIL.urlProtocol(path);
-		
-		if(protocol == "http" || protocol == "https") {
+		if(protocol == "http" || protocol == "https") { // todo: Make PUT, READ, GET HTTP request into it's own plugin the user EDITOR.addProtocol
 			if(!CLIENT.connected) {
 				var xhr = new XMLHttpRequest();
 				xhr.open("HEAD", path, true); // Notice "HEAD" instead of "GET", to get only the header
@@ -1633,13 +1615,26 @@ usePseudoClipboard = false;
 				}
 			}
 		}
-		else {
+		if(protocol == "" || EDITOR.remoteProtocols.indexOf(protocol) != -1) {
 			var json = {path: path};
 			CLIENT.cmd("getFileSizeOnDisk", json, function gotFileSizeFromServer(err, json) {
 				if(err) return callback(err);
 				else callback(null, json.size);
 			});
 		}
+		else if(_protocols.hasOwnProperty(protocol) == -1) {
+			callback(new Error("Unsupported protocol: " + protocol + " (have the plugin been loaded!?)"));
+			return;
+		}
+		else {
+
+			if( typeof _protocols[protocol].size != "function" ) return callback("protocol=" + protocol + " has no size function!");
+
+			_protocols[protocol].size(path, callback);
+			return;
+
+		}
+		
 	}
 	
 	EDITOR.doesFileExist = function(path, callback) {
@@ -1817,7 +1812,7 @@ usePseudoClipboard = false;
 		
 		if(callback == undefined || typeof callback != "function") throw new Error("No callback function! callback=" + callback);
 		
-		// Queu reads to prevent plugins to read 1000 files at once
+		// Queue reads to prevent plugins from reading 1000 files at once
 		readFromDiskQueue.push([path, returnBuffer, encoding, callback]);
 
 		console.log("EDITOR.readFromDisk: readFromDiskQueue.length=" + readFromDiskQueue.length);
@@ -1926,91 +1921,31 @@ usePseudoClipboard = false;
 		*/
 	}
 	
-	EDITOR.verifyNativeFileSystemPermission = function verifyPermission(fileHandle, mode, callback) {
-		if(typeof mode == "function") {
-			callback = mode;
-			mode = "readwrite";
-		}
-
-		var options = {mode: mode};
-		
-		// Check if permission was already granted
-		fileHandle.queryPermission(options).then(function(permission) {
-			//console.log("EDITOR.verifyNativeFileSystemPermission: permission=" + permission);
-			if(permission == "granted") {
-				CB(callback, null);
-			}
-			else {
-				// Request permission
-				requestPermission(callback);
-			}
-		}, function error(err) {
-			//console.log("EDITOR.verifyNativeFileSystemPermission: err.code=" + err.code + " err.message=" + err.message);
-			CB(callback, err);
-		});
-
-		function requestPermission(callback) {
-			//console.log("EDITOR.verifyNativeFileSystemPermission: requestPermission: ...");
-			fileHandle.requestPermission(options).then(function(permission) {
-
-				if(permission == "granted") {
-					CB(callback, null);
-				}
-				else {
-					var error = new Error("You did not grant permission to " + options.mode + " the file!");
-					error.code = "PERMISSION_DENIED";
-					CB(callback, error);
-				}
-
-			}, function error(err) {
-				//console.warn("EDITOR.verifyNativeFileSystemPermission: requestPermission: err.code=" + err.code + " err.message=" + err.message);
-				if(err.code == "18") {
-					confirmBox("Click the OK button below in order to get a permission prompt for " + 
-					fileHandle.name, ["OK", "Cancel"], function(answer) {
-						if(answer == "OK") {
-							requestPermission(callback);
-						}
-						else {
-							var error = new Error("You did not want to be asked for permission for native filesystem handle!");
-							CB(callback, error);
-						}
-					});
-				}
-				else CB(callback,err);
-			});
-		}
-	}
-
 	EDITOR.getFileHash = function(fileOrPathOrHandle, callback) {
-		// Calls back with a SHA-256 hash of the file content
-		if(typeof FileSystemFileHandle != "undefined" && fileOrPathOrHandle instanceof FileSystemFileHandle) return getFileHashFromNativeFs(fileOrPathOrHandle, callback);
-		if(typeof fileOrPathOrHandle == "object" && fileOrPathOrHandle.hasOwnProperty("nativeFileSystemFileHandle")) return getFileHashFromNativeFs(fileOrPathOrHandle.nativeFileSystemFileHandle, callback);
-
+		// Should call back with a SHA-256 hash of the file content (but not guaranteed, see UTIL.hash )
+		
 		if(typeof fileOrPathOrHandle == "string") var filePath = fileOrPathOrHandle
-		else if(typeof fileOrPathOrHandle == "object" && fileOrPathOrHandle.hasOwnProperty(path)) var filePath = fileOrPathOrHandle.path;
+		else if(typeof fileOrPathOrHandle == "object" && fileOrPathOrHandle.hasOwnProperty("path")) var filePath = fileOrPathOrHandle.path;
 		else throw new Error("getFileHash: Unable to determine what is fileOrPathOrHandle=" + fileOrPathOrHandle);
 
-		CLIENT.cmd("hash", {path: filePath}, function gotHash(err, hash) {
-			callback(err, hash);
-		});
-
-		function getFileHashFromNativeFs(fileHandle, callback) {
-			//console.log("getFileHashFromNativeFs: fileHandle=", fileHandle);
-
-			EDITOR.verifyNativeFileSystemPermission(fileHandle, "readwrite", function(err) {
-				if(err && err.code == "PERMISSION_DENIED") return alertBox(err.message);
-				else if(err) throw err;
-
-				fileHandle.getFile().then(function readText(localFile) {
-					localFile.text().then(function(fileContent) {
-
-						UTIL.hash(fileContent, function(err, hash) {
-							callback(err, hash);
-						});
-
-					});
-				});
+		var protocol = UTIL.urlProtocol(filePath);
+		if(protocol == "" || EDITOR.remoteProtocols.indexOf(protocol) != -1) {
+			CLIENT.cmd("hash", {path: filePath}, function gotHash(err, hash) {
+				callback(err, hash);
 			});
+			return;
+		}
+		else if(_protocols.hasOwnProperty(protocol) == -1) {
+			callback(new Error("Unsupported protocol: " + protocol + " (have the plugin been loaded!?)"));
+			return;
+		}
+		else {
+
+			if( typeof _protocols[protocol].hash != "function" ) return callback("protocol=" + protocol + " has no hash function!");
+
+			_protocols[protocol].hash(path, callback);
+			return;
+
 		}
 	}
 
@@ -2117,32 +2052,6 @@ usePseudoClipboard = false;
 				text = file.text;
 				encoding = "utf-8";
 				isImage = false;
-			}
-			
-			if(file.nativeFileSystemFileHandle) {
-				
-				file.nativeFileSystemFileHandle.createWritable().then(function(writer) {
-					// Make sure we start with an empty file
-					//writer.truncate(0).then(function() {
-					// Write the full length of the contents
-					//writer.write(0, text).then(function() {
-					writer.write(text).then(function() {
-						// Close the file and write the contents to disk
-						writer.close().then(function() {
-								
-							UTIL.hash(text, function(err, hash) {
-								doneSaving(null, path, hash || null);
-							});
-
-						});
-					});
-					//});
-				}).catch(function(err) {
-					if(callback) CB(callback, err);
-					else alertBox(err.message); // Can't throw inside a promise chain
-				});
-				
-				return;
 			}
 			
 			if(file.path != path || !file.savedAs) {
@@ -2546,68 +2455,6 @@ else if(err.code == "ENETDOWN") {
 		}
 		
 		return text;
-	}
-	
-	EDITOR.localFileDialog = function(defaultPath, callback) {
-		/*
-			Brings up the OS file select dialog window.
-			File path is then passed to the callback function.
-		*/
-		
-		console.log("EDITOR.localFileDialog: Bringing up the file open dialog ...");
-		
-		if(typeof window.showOpenFilePicker == "function") {
-			console.log("EDITOR.localFileDialog: Using native file system API!");
-			
-			window.showOpenFilePicker().then(function(fileHandle) {
-
-				// todo: Handle many files
-				fileHandle = fileHandle[0];
-
-				console.log("EDITOR.localFileDialog: fileHandle=", fileHandle);
-
-				console.log("EDITOR.localFileDialog: typeof fileHandle.getFile=" + (typeof fileHandle.getFile) + "");
-
-				fileHandle.getFile().then(function readText(localFile) {
-
-					console.log("EDITOR.localFileDialog: localFile=", localFile);
-
-					localFile.text().then(function(fileContent) {
-						var filePath = EDITOR.settings.nativeFileSystemPathPrefix + fileHandle.name;
-						CB(callback, filePath, fileContent, fileHandle);
-					});
-				});
-			}).catch(function(err) {
-				var error = new Error("Something went wrong when using the native file system API to open a file: " + err.message);
-				CB(callback, err);
-			});
-			
-			
-			return;
-		}
-		//else console.warn("Local file system API not supported in " + BROWSER);
-		
-		
-		EDITOR.fileOpenCallback = callback;
-		
-		var fileOpen = document.getElementById("fileInput");
-		
-		//if(defaultPath == undefined) defaultPath = EDITOR.workingDirectory;
-		
-		if(!defaultPath) defaultPath = UTIL.getDirectoryFromPath(undefined);
-		else {
-			
-			var lastChar = defaultPath.substr(defaultPath.length-1);
-			
-			//console.log("lastChar of defaultPath=" + lastChar);
-			
-			if(! (lastChar == "/" || lastChar == "\\")) {
-				console.warn("defaultPath, bacause ending with '" + lastChar + "', doesn't seem to be a directory:" + defaultPath);
-			}
-			EDITOR.setFileOpenPath(defaultPath);
-		}
-		
-		fileOpen.click(); // Bring up the OS path selector window
 	}
 	
 	EDITOR.directoryDialog = function(defaultPath, callback) {
@@ -9137,6 +8984,8 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 	
 	EDITOR.findInFiles = tool("findInFiles", false);
 	
+	EDITOR.localFileDialog = tool("localFileDialog", false);
+
 	function tool(eventListenerName) {
 		return function(file, ev) {
 			if(file == undefined && EDITOR.currentFile) file = EDITOR.currentFile;

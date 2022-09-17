@@ -33,11 +33,6 @@ EDITOR.plugin({
 		
 		if(!file.savedAs) return true;
 		
-		if(file.nativeFileSystemFileHandle) {
-			// File system API currently only allow access to single files and wont tell us the file path
-			return true;
-		}
-
 		// See if we can find package.json or index.htm
 		
 		var folderPath = UTIL.getDirectoryFromPath(file.path);

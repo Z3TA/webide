@@ -80,11 +80,10 @@ if(CHROMEBOOK) {
 		//  hmm, can I move these to keyup on the input box? probably not
 		EDITOR.bindKey({desc: "Move up on the goto-file list", charCode: keyUp, fun: gotoFile_moveUp});
 		EDITOR.bindKey({desc: "Move up on the goto-file list", charCode: keyDown, fun: gotoFile_moveDown});
-		EDITOR.bindKey({desc: "Open a local file using native file select dialog", charCode: charO, combo: CTRL + SHIFT, fun: openFile});
+		
 		
 		EDITOR.registerAltKey({char: "o", alt:2, label: S("open"), fun: show_gotoFileInput});
 		
-		EDITOR.on("openFileTool", openLocalFileTool);
 		EDITOR.on("openFileTool", openAnyFileTool);
 		
 		CLIENT.on("findFilesStatus", gotoFileProgressStatus);
@@ -109,12 +108,10 @@ EDITOR.unbindKey(show_gotoFileInput2);
 		EDITOR.unbindKey(hide_gotoFileInput);
 		EDITOR.unbindKey(gotoFile_moveUp);
 		EDITOR.unbindKey(gotoFile_moveDown);
-		EDITOR.unbindKey(openFile);
 		
 		EDITOR.unregisterAltKey(show_gotoFileInput);
 		
 		EDITOR.removeEvent("openFileTool", openAnyFileTool);
-		EDITOR.removeEvent("openFileTool", openLocalFileTool);
 		
 		CLIENT.removeEvent("findFilesStatus", gotoFileProgressStatus);
 		CLIENT.removeEvent("fileFound", gotoFileFileFound);
@@ -130,117 +127,7 @@ EDITOR.unbindKey(show_gotoFileInput2);
 	}
 	
 	
-	function openFile() {
-		
-		EDITOR.ctxMenu.hide();
-		
-		//console.log("goto_file: Opening file ...");
-		
-		var defaultPath = "";
-		var file = EDITOR.currentFile;
-		
-		if(file) {
-			// Check if the cursor is on a file path
-			
-			var startIndex = file.grid[file.caret.row].startIndex;
-			var endIndex = (file.grid.length-1 > file.caret.row ? file.grid[file.caret.row+1].startIndex : file.text.length) - file.lineBreak.length;
-			var filePath = file.text.substring(startIndex, endIndex).trim(); //substring: second argument: Index
-			
-			if(UTIL.isFilePath(filePath)) {
-				// The text on the row is a file path! Open that file.
-				
-				EDITOR.openFile(filePath, undefined, function(err, file) {  // path, content, callback
-					
-					if(err) {
-						alert(err.message);
-						return;
-					}
-					
-					// Mark the file as saved, because we just opened it
-					file.isSaved = true;
-					file.savedAs = true;
-					file.changed = false;
-					
-					EDITOR.renderNeeded();
-					
-				});
-				
-				return false; // Exit function, and prevent default browser action
-				
-			}
-			
-			// Change default directory to the same as current file
-			
-			if(file.path.indexOf(EDITOR.workingDirectory) != -1) defaultPath = EDITOR.workingDirectory;
-			else {
-				var folders = UTIL.getFolders(file.path);
-				if(folders.length > 0) folders.pop(); // Use parent folder
-				defaultPath = folders.pop();
-				//console.log("goto_file: defaultPath=" + defaultPath);
-			}
-			
-		}
-		else {
-			// No current file opened. Use working dir!?
-			//defaultPath = EDITOR.workingDirectory;
-		}
-		
-		//alertBox(defaultPath);
-		// It doesn't seem we can set default path in Linux !
-		
-		openLocalFile(defaultPath);
-		
-		return false; // Prevent default
-	}
 	
-	function openLocalFile(directory) {
-		//console.log("goto_file: Telling the editor to open the file dialog window ...");
-		EDITOR.localFileDialog(directory, function after_dialog_open_file(filePath, content, fileHandle) {
-			
-			//console.log("goto_file: filePath=" + filePath);
-			//console.log("goto_file: content=" + content);
-			
-			//console.log("goto_file: File was selected from file dialog: " + filePath + "\nTelling the editor to open it up for editing ...")
-			
-			var openFileOptions = {
-				//show: true // Why show the file ? It means we can't tab away for it for 5 seconds! Users might find that annoying!
-			};
-			
-			if(fileHandle) {
-				openFileOptions.nativeFileSystemFileHandle = fileHandle; // Must give the file handle before fileOpen listeners are called
-				//openFileOptions.noCollaboration = true; // Because this file is local 
-			}
-
-			EDITOR.openFile(filePath, content, openFileOptions, function after_open_file(err, file) {  // path, content, callback
-				
-				if(err) throw err;
-				
-				// Mark the file as saved, because we just opened it
-				file.isSaved = true;
-				file.savedAs = true;
-				file.changed = false;
-				
-				hide_gotoFileInput();
-
-				EDITOR.dashboard.hide();
-
-				EDITOR.renderNeeded();
-				
-				//console.log("goto_file: File ready for editing");
-				
-			});
-		});
-	}
-	
-	function openLocalFileTool(options) {
-		// Only answer on openFileTool events if we are running locally/"native"
-		if(EDITOR.user.homeDir == "/") return false;
-		
-		var directory = options.directory;
-		
-		openLocalFile(directory);
-		
-	}
 	
 	function setInputFolder(directory) {
 		console.warn("setInputFolder: inputFolder.value=" + inputFolder.value + " new directory=" + directory);
@@ -326,8 +213,10 @@ EDITOR.unbindKey(show_gotoFileInput2);
 		localButton.setAttribute("type", "button");
 		localButton.setAttribute("class", "button");
 		localButton.innerHTML = 'Open file from <i title="computer/phone/usb">device</i>...';
-		localButton.onclick = openFile;
-		
+		localButton.onclick = function(ev) {
+			EDITOR.localFileDialog(undefined, ev);
+		}
+
 		gotoList = document.createElement("ul");
 		gotoList.setAttribute("id", "gotoList");
 		gotoList.classList.add("gotoList");

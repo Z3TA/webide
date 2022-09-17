@@ -66,9 +66,6 @@
 	
 	var changedstate = {}; // file-path: Boolean
 	
-	var nativeFileSystemFileHandleDb; // undefined means we have not yet tried to open it
-	var nativeFileSystemFileHandleDbWaitList = [];
-
 	var currentFileOnServer = "";
 
 	EDITOR.plugin({
@@ -107,9 +104,6 @@
 		},
 		unload: function unloadReopenFilesPlugin() {
 			
-			nativeFileSystemFileHandleDb = undefined;
-			nativeFileSystemFileHandleDbWaitList.length = 0;
-
 			CLIENT.removeEvent("loginSuccess", reopenFiles);
 			
 			if(insaneBugCatcherInterval) clearInterval(insaneBugCatcherInterval);
@@ -194,29 +188,6 @@
 		});
 	}
 	
-	function readFileHandleFromIndexDb(path, callback) {
-
-		console.log("readFileHandleFromIndexDb: path=" + path);
-
-		openNativeFileSystemFileHandleDb(function(err, db) {
-			var transaction = db.transaction(["fileHandles"]);
-			var objectStore = transaction.objectStore("fileHandles");
-			var request = objectStore.get(path);
-			request.onerror = function(err) {
-				// Handle errors!
-				console.error(err);
-				callback(new Error("Error when reading file handle from indexDb: " + err.message));
-			};
-			request.onsuccess = function() {
-				// Do something with the request.result!
-				if(typeof request.result == "undefined") return callback(new Error("No result in request when reading file handle for path?" + path + " request=" + JSON.stringify(request)));
-				var fileSize = request.result.size;
-				var fileHandle = request.result.handle;
-				callback(null, fileSize, fileHandle);
-			};
-		});
-	}
-
 	function reopenFilesMain(reopenFilesCallback) {
 		
 		//console.log("reopenFiles: ... reopenFilesMain");
@@ -404,10 +375,9 @@
 			var lastFileState;
 			
 			// Check the file size and if it exist
-			if(path.indexOf(EDITOR.settings.nativeFileSystemPathPrefix) == 0) readFileHandleFromIndexDb(path, gotFileSize)
-			else EDITOR.getFileSizeOnDisk(path, gotFileSize);
+			EDITOR.getFileSizeOnDisk(path, gotFileSize);
 			
-			function gotFileSize(getFileSizeError, fileSizeOnDisk, nativeFileSystemFileHandle) {
+			function gotFileSize(getFileSizeError, fileSizeOnDisk) {
 				
 				// Decide if we should open the last saved state, or from the disk (or other protocol) ...
 				
@@ -543,16 +513,12 @@
 					
 					var stateprops = {};
 					
-					if(nativeFileSystemFileHandle) stateprops.nativeFileSystemFileHandle = nativeFileSystemFileHandle
-
 					if(lastFileState) {
 						
 						if(loadLastState) lastFileState.isSaved = false; // Mark file as not saved. Because it was "Not found" or "Emty on disk"
 						
 						var stateprops = getStateProps(lastFileState);
 						
-						if(nativeFileSystemFileHandle) stateprops.nativeFileSystemFileHandle = nativeFileSystemFileHandle
-
 						if( loadLastState || lastFileState.isSaved === false ) {
 							// Open from temp
 							//console.warn("reopenFiles: Loading last saved state for file path=" + path);
@@ -583,7 +549,7 @@
 						else if(lastFileState.isSaved && lastFileState.hash && lastFileState.text != undefined && lastFileState.text != "") {
 							// Compare hashes to prevent losing data
 							
-							EDITOR.getFileHash(nativeFileSystemFileHandle || path, function gotHash(err, hash) {
+							EDITOR.getFileHash(path, function gotHash(err, hash) {
 								
 								if(hash != lastFileState.hash) {
 									//console.warn("reopenFiles: The file on disk has changed! hash=" + hash + " lastFileState.hash=" + lastFileState.hash);
@@ -776,30 +742,10 @@
 	function addToOpenedFiles(file) {
 		// Called when the editor opens a new file
 		
-		//console.log("addToOpenedFiles! file.nativeFileSystemFileHandle=", file.nativeFileSystemFileHandle);
-
 		if(!file.path) throw new Error("Argument need to be a file object!");
 		
 		changedstate[file.path] = false;
 		
-		if(file.nativeFileSystemFileHandle) {
-			openNativeFileSystemFileHandleDb(function(err, db) {
-				if(err) return console.error(err);
-
-				var transaction = db.transaction(["fileHandles"], "readwrite");
-				var objectStore = transaction.objectStore("fileHandles");
-				transaction.oncomplete = function(event) {
-					//console.log("nativeFileSystemFileHandle for path="+ file.path + " saved in indexedDB!");
-				};
-				transaction.onerror = function(event) {
-					//console.error("Failed to save nativeFileSystemFileHandle for path="+ file.path + " in indexedDB!");
-				};
-				// Use put in case for some reaso (crash?) it already exist in the indexdb (we want to save the latest handle)
-				objectStore.put({path: file.path, handle: file.nativeFileSystemFileHandle, size: file.getFileSize()});
-				
-			});
-		}
-
 		EDITOR.localStorage.getItem("openedFiles", function(err, openedFilesString) {
 			if(err) throw err;
 			if(openedFilesString == null) openedFilesString = "";
@@ -891,18 +837,6 @@
 		
 		//console.log(UTIL.getStack("reopenFiles: Removing file from openedFiles path='" + filePath + "'"));
 		
-		if(nativeFileSystemFileHandleDb) {
-			var transaction = nativeFileSystemFileHandleDb.transaction(["fileHandles"], "readwrite");
-			var objectStore = transaction.objectStore("fileHandles");
-			transaction.oncomplete = function(event) {
-				//console.log("nativeFileSystemFileHandle for filePath="+ filePath + " deleted from indexedDB!");
-			};
-			transaction.onerror = function(event) {
-				console.error("Failed to delete nativeFileSystemFileHandle for filePath="+ filePath + " in indexedDB!");
-			};
-			objectStore.delete(filePath);
-		}
-
 		EDITOR.localStorage.getItem("openedFiles", function gotItemFromLocalStorage(err, openedFilesString) {
 			if(err) {
 				if(callback) {
@@ -995,55 +929,6 @@
 		return true;
 	}
 	
-	function openNativeFileSystemFileHandleDb(callback) {
-		if(nativeFileSystemFileHandleDb) return callback(null, nativeFileSystemFileHandleDb);
-
-		if(nativeFileSystemFileHandleDb === 0) {
-			// Waiting for it to be opened...
-			nativeFileSystemFileHandleDbWaitList.push(callback);
-			return;
-		}
-
-		nativeFileSystemFileHandleDb = 0; // About to be opened
-		
-		nativeFileSystemFileHandleDbWaitList.push(callback);
-
-		var nativeFileSystemFileHandleDbVersion = 1; // Increment after making changes to the db structure!
-		var requestToUseDb = indexedDB.open("nativeFileSystemFileHandleDb", nativeFileSystemFileHandleDbVersion);
-		requestToUseDb.onerror = function(event) {
-			nativeFileSystemFileHandleDb = false; // We have tried opening it but failed
-			console.warn("Failed to open indexedDB for nativeFileSystemFileHandleDb");
-			
-			var error = new Error(event.target);
-			nativeFileSystemFileHandleDbWaitList.forEach(function(cb) {
-				cb(null, error);
-			});
-			nativeFileSystemFileHandleDbWaitList.length = 0;
-		};
-		requestToUseDb.onsuccess = function(event) {
-			nativeFileSystemFileHandleDb = event.target.result;
-			//console.log("Successfully opened indexedDB for nativeFileSystemFileHandleDb");
-
-			nativeFileSystemFileHandleDbWaitList.forEach(function(cb) {
-				cb(null, nativeFileSystemFileHandleDb);
-			});
-			nativeFileSystemFileHandleDbWaitList.length = 0;
-		};
-
-		requestToUseDb.onupgradeneeded = function(event) {
-			var db = event.target.result;
-
-			//console.log("onupgradeneeded triggered for indexedDB nativeFileSystemFileHandleDb");
-
-			var objectStore = db.createObjectStore("fileHandles", { keyPath: "path" });
-
-			objectStore.transaction.oncomplete = function(event) {
-				//console.log("Finished creating indexedDB nativeFileSystemFileHandleDb!");
-			};
-		};
-
-	}
-
 	function saveStateOfFile(file, callback) {
 		// Called after a file was saved
 		
