@@ -3403,7 +3403,7 @@ ca 20ms to render, ca 13ms to render without creating new objects
 		}
 
 		
-		if(true || QUERY_STRING["debug"]) {
+		if(false || QUERY_STRING["debug"]) {
 			console.warn("=================== RESIZE ===================");
 			console.log("windowWidth=" + windowWidth);
 			console.log("windowHeight=" + windowHeight);
@@ -3422,7 +3422,7 @@ ca 20ms to render, ca 13ms to render without creating new objects
 			console.log("offsetWidth=" + content.offsetWidth);
 			console.log("innerWidth=" + content.innerWidth);
 			console.log("outherWidth=" + content.outherWidth);
-			}
+		}
 		
 		
 		EDITOR.height = windowHeight;

@@ -173,6 +173,7 @@ function CB() {
 		args[i] = arguments[i];
 	}
 
+	
 	var callback = args.shift();
 
 	if(typeof callback == "function") {
@@ -181,7 +182,10 @@ function CB() {
 			callback.apply(undefined, args);
 		}, 0);
 	}
-	else setTimeout(function() { // Using setTimeout to escape the promise
-		throw args[0];
-	},0);
+	else {
+		var errorWithProperCallStack = new Error(args[0]);
+		setTimeout(function() {
+			throw errorWithProperCallStack;
+		}, 0);
+	}
 }

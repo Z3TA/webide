@@ -27,9 +27,9 @@
 			EDITOR.on("localFileDialog", localFileDialog);
 
 			var charO = 79;
-			EDITOR.bindKey({desc: "Open a local file using native file select dialog", charCode: charO, combo: CTRL + SHIFT, fun: openFile});
+			EDITOR.bindKey({desc: "Open a local file using native file select dialog", charCode: charO, combo: CTRL + SHIFT, fun: openLocalFileKeyboardShortcut});
 
-			windowMenuOpenLocal = EDITOR.windowMenu.add(S("open_local"), [S("File"), 1], openFile, openFile);
+			windowMenuOpenLocal = EDITOR.windowMenu.add(S("open_local"), [S("File"), 1], openLocalFile, openLocalFileKeyboardShortcut);
 
 		},
 		unload: function unloadWebNativeFs() {
@@ -46,17 +46,18 @@
 			EDITOR.removeEvent("openFileTool", openLocalFileTool);
 			EDITOR.removeEvent("localFileDialog", localFileDialog);
 
-			EDITOR.unbindKey(openFile);
+			EDITOR.unbindKey(openLocalFileKeyboardShortcut);
 
 			EDITOR.windowMenu.remove(windowMenuOpenLocal);
-		}
+		},
+		order: 100 // Load early 
 	});
 
-	function openFile() {
+	function openLocalFileKeyboardShortcut() {
 
 		EDITOR.ctxMenu.hide();
 
-		//console.log("goto_file: Opening file ...");
+		//console.log("localfs: Opening file ...");
 
 		var defaultPath = "";
 		var file = EDITOR.currentFile;
@@ -98,7 +99,7 @@
 				var folders = UTIL.getFolders(file.path);
 				if(folders.length > 0) folders.pop(); // Use parent folder
 				defaultPath = folders.pop();
-				//console.log("goto_file: defaultPath=" + defaultPath);
+				//console.log("localfs: defaultPath=" + defaultPath);
 			}
 
 		}
@@ -109,8 +110,17 @@
 
 		//alertBox(defaultPath);
 		// It doesn't seem we can set default path in Linux !
+		file.isSaved = true;
+		file.savedAs = true;
+		file.changed = false;
 
-		locaFileDialog();
+		localFileDialog(undefined, function(err, filePath, fileContent, fileHandle) {
+			if(err) throw err;
+
+			EDITOR.openFile(filePath, fileContent, {isSaved: true, savedAs: true, changed: false}, function(err) {
+				if(err) throw new Error("Failed to add filePath=" + filePath + " to EDITOR.files (open files). Error: " + err.message);
+			});
+		});
 
 		return false; // Prevent default
 	}
@@ -127,25 +137,32 @@
 		var fileHandle = fileHandles[path];
 
 		if(fileHandle) {
+			console.log("localfs: Saving fileHandle in indexedDB: path=" + path + " fileHandle=" + fileHandle + " typeof fileHandle = " + (typeof fileHandle));
+
 			openNativeFileSystemFileHandleDb(function(err, db) {
 				if(err) return console.error(err);
 
 				var transaction = db.transaction(["fileHandles"], "readwrite");
 				var objectStore = transaction.objectStore("fileHandles");
 				transaction.oncomplete = function(event) {
-					//console.log("nativeFileSystemFileHandle for path="+ file.path + " saved in indexedDB!");
+					console.log("localfs: nativeFileSystemFileHandle=" + fileHandle + " for path="+ file.path + " saved in indexedDB! ");
 				};
 				transaction.onerror = function(event) {
-					//console.error("Failed to save nativeFileSystemFileHandle for path="+ file.path + " in indexedDB!");
+					console.error("localfs: Failed to save nativeFileSystemFileHandle for path="+ file.path + " in indexedDB!");
 				};
 				// Use put in case for some reaso (crash?) it already exist in the indexdb (we want to save the latest handle)
-				objectStore.put({path: file.path, handle: file.nativeFileSystemFileHandle, size: file.getFileSize()});
+				objectStore.put({path: file.path, handle: fileHandle, size: file.getFileSize()});
 
 			});
 		}
+		else {
+			console.warn("localfs: No fileHandle found for path=" + path + " in Object.keys(fileHandles)=" + Object.keys(fileHandles));
+	}
 	}
 
 	function getHandle(path, callback) {
+
+		console.warn("localfs:getHandle: path=" + path);
 
 		if( fileHandles.hasOwnProperty(path) ) {
 			var fileHandle = fileHandles[path];
@@ -156,7 +173,7 @@
 			return;
 		}
 
-		readFileHandleFromIndexDb(function(err, fileSize, fileHandle) {
+		readFileHandleFromIndexDb(path, function(err, fileSize, fileHandle) {
 			if(err) throw err;
 
 			verifyNativeFileSystemPermission(fileHandle, "readwrite", function(err) {
@@ -174,10 +191,10 @@
 			var transaction = nativeFileSystemFileHandleDb.transaction(["fileHandles"], "readwrite");
 			var objectStore = transaction.objectStore("fileHandles");
 			transaction.oncomplete = function(event) {
-				//console.log("nativeFileSystemFileHandle for filePath="+ filePath + " deleted from indexedDB!");
+				//console.log("localfs: nativeFileSystemFileHandle for filePath="+ filePath + " deleted from indexedDB!");
 			};
 			transaction.onerror = function(event) {
-				console.error("Failed to delete nativeFileSystemFileHandle for filePath="+ filePath + " in indexedDB!");
+				console.error("localfs: Failed to delete nativeFileSystemFileHandle for filePath="+ filePath + " in indexedDB!");
 			};
 			objectStore.delete(filePath);
 		}
@@ -190,7 +207,7 @@
 	}
 
 	function localReadFile(path, returnBuffer, encoding, callback) {
-		console.log("WebNativeFs:localReadFile:path=" + path);
+		console.log("localfs:localReadFile:path=" + path);
 
 		if(callback == undefined && typeof encoding == "function") {
 			callback = encoding;
@@ -224,6 +241,8 @@
 	}
 
 	function localWriteFile(path, text, inputBuffer, encoding, timeout, callback) {
+
+		console.log("localfs:localWriteFile: path=" + path);
 
 		if(typeof inputBuffer == "function" && saveToDiskCallback == undefined) {
 			saveToDiskCallback = inputBuffer;
@@ -266,6 +285,7 @@
 	}
 
 	function localHashFromDisk(path, callback) {
+		console.log("localfs:localHashFromDisk: path=" + path);
 
 		getHandle(path, function(err, fileHandle) {
 			if(err && err.code == "PERMISSION_DENIED") return alertBox(err.message);
@@ -286,6 +306,7 @@
 	}
 
 	function localFileSizeOnDisk(path, callback) {
+		console.log("localfs:localFileSizeOnDisk: path=" + path);
 
 		getHandle(path, function(err, fileHandle) {
 			if(err) throw err;
@@ -293,11 +314,14 @@
 			fileHandle.getFile().then(function readText(localFile) {
 				localFile.text().then(function(fileContent) {
 
+					console.log("localfs:localFileSizeOnDisk: Successfully got content for path=" + path);
+
 					var size = UTIL.byteSize(fileContent);
 					CB(callback, size); 
 
 				});
 			}).catch(function(err) {
+				console.error(err);
 				CB(callback, err); 
 			});
 		});
@@ -306,16 +330,20 @@
 
 	function verifyNativeFileSystemPermission(fileHandle, mode, callback) {
 		
+		console.warn("nativefs:verifyNativeFileSystemPermission!");
+
 		if(typeof mode == "function") {
 			callback = mode;
 			mode = "readwrite";
 		}
 
+		if(typeof fileHandle != "object") throw new Error("Does not seem like a fileHandle: fileHandle=" + fileHandle + " typeof fileHandle = " + (typeof fileHandle));
+
 		var options = {mode: mode};
 
 		// Check if permission was already granted
 		fileHandle.queryPermission(options).then(function(permission) {
-			//console.log("EDITOR.verifyNativeFileSystemPermission: permission=" + permission);
+			console.log("localfs:verifyNativeFileSystemPermission: permission=" + permission);
 			if(permission == "granted") {
 				CB(callback, null);
 			}
@@ -324,13 +352,15 @@
 				requestPermission(callback);
 			}
 		}, function error(err) {
-			//console.log("EDITOR.verifyNativeFileSystemPermission: err.code=" + err.code + " err.message=" + err.message);
+			console.log("localfs:verifyNativeFileSystemPermission: err.code=" + err.code + " err.message=" + err.message);
 			CB(callback, err);
 		});
 
 		function requestPermission(callback) {
-			//console.log("EDITOR.verifyNativeFileSystemPermission: requestPermission: ...");
+			console.log("localfs:verifyNativeFileSystemPermission: requestPermission: ...");
 			fileHandle.requestPermission(options).then(function(permission) {
+
+				console.log("localfs:verifyNativeFileSystemPermission: permission=" + permission);
 
 				if(permission == "granted") {
 					CB(callback, null);
@@ -342,7 +372,7 @@
 				}
 
 			}, function error(err) {
-				//console.warn("EDITOR.verifyNativeFileSystemPermission: requestPermission: err.code=" + err.code + " err.message=" + err.message);
+				console.warn("localfs:verifyNativeFileSystemPermission: requestPermission: err.code=" + err.code + " err.message=" + err.message);
 				if(err.code == "18") {
 					confirmBox("Click the OK button below in order to get a permission prompt for " +
 					fileHandle.name, ["OK", "Cancel"], function(answer) {
@@ -377,7 +407,7 @@
 		var requestToUseDb = indexedDB.open("nativeFileSystemFileHandleDb", nativeFileSystemFileHandleDbVersion);
 		requestToUseDb.onerror = function(event) {
 			nativeFileSystemFileHandleDb = false; // We have tried opening it but failed
-			console.warn("Failed to open indexedDB for nativeFileSystemFileHandleDb");
+			console.warn("localfs: Failed to open indexedDB for nativeFileSystemFileHandleDb");
 
 			var error = new Error(event.target);
 			nativeFileSystemFileHandleDbWaitList.forEach(function(cb) {
@@ -387,7 +417,7 @@
 		};
 		requestToUseDb.onsuccess = function(event) {
 			nativeFileSystemFileHandleDb = event.target.result;
-			//console.log("Successfully opened indexedDB for nativeFileSystemFileHandleDb");
+			//console.log("localfs: Successfully opened indexedDB for nativeFileSystemFileHandleDb");
 
 			nativeFileSystemFileHandleDbWaitList.forEach(function(cb) {
 				cb(null, nativeFileSystemFileHandleDb);
@@ -398,12 +428,12 @@
 		requestToUseDb.onupgradeneeded = function(event) {
 			var db = event.target.result;
 
-			//console.log("onupgradeneeded triggered for indexedDB nativeFileSystemFileHandleDb");
+			//console.log("localfs: onupgradeneeded triggered for indexedDB nativeFileSystemFileHandleDb");
 
 			var objectStore = db.createObjectStore("fileHandles", { keyPath: "path" });
 
 			objectStore.transaction.oncomplete = function(event) {
-				//console.log("Finished creating indexedDB nativeFileSystemFileHandleDb!");
+				//console.log("localfs: Finished creating indexedDB nativeFileSystemFileHandleDb!");
 			};
 		};
 
@@ -411,7 +441,10 @@
 
 	function readFileHandleFromIndexDb(path, callback) {
 
-		console.log("readFileHandleFromIndexDb: path=" + path);
+		console.warn("localfs:readFileHandleFromIndexDb: path=" + path);
+
+		if(typeof path != "string") throw new Error("readFileHandleFromIndexDb: First parameter needs to be the file path!");
+		if(typeof callback != "function") throw new Error("readFileHandleFromIndexDb: Second parameter needs to be a callback function!");
 
 		openNativeFileSystemFileHandleDb(function(err, db) {
 			var transaction = db.transaction(["fileHandles"]);
@@ -423,7 +456,7 @@
 				callback(new Error("Error when reading file handle from indexDb: " + err.message));
 			};
 			request.onsuccess = function() {
-				// Do something with the request.result!
+				console.log("localfs: Got file handle etc for path=" + path + " request.result=", request.result);
 				if(typeof request.result == "undefined") return callback(new Error("No result in request when reading file handle for path?" + path + " request=" + JSON.stringify(request)));
 				var fileSize = request.result.size;
 				var fileHandle = request.result.handle;
@@ -433,39 +466,31 @@
 	}
 
 	function openLocalFile(directory) {
-		//console.log("goto_file: Telling the editor to open the file dialog window ...");
-		localFileDialog(directory, function after_dialog_open_file(filePath, content, fileHandle) {
+		//console.log("localfs: Telling the editor to open the file dialog window ...");
+		localFileDialog(directory, function after_dialog_open_file(err, filePath, content) {
+			if(err) throw err;
 
-			//console.log("goto_file: filePath=" + filePath);
-			//console.log("goto_file: content=" + content);
+			//console.log("localfs: filePath=" + filePath);
+			//console.log("localfs: content=" + content);
 
-			//console.log("goto_file: File was selected from file dialog: " + filePath + "\nTelling the editor to open it up for editing ...")
+			//console.log("localfs: File was selected from file dialog: " + filePath + "\nTelling the editor to open it up for editing ...")
 
 			var openFileOptions = {
 				//show: true // Why show the file ? It means we can't tab away for it for 5 seconds! Users might find that annoying!
+				isSaved: true,
+				savedAs: true,
+				changed: false
 			};
-
-			if(fileHandle) {
-				openFileOptions.nativeFileSystemFileHandle = fileHandle; // Must give the file handle before fileOpen listeners are called
-				//openFileOptions.noCollaboration = true; // Because this file is local
-			}
 
 			EDITOR.openFile(filePath, content, openFileOptions, function after_open_file(err, file) {  // path, content, callback
 
 				if(err) throw err;
-
-				// Mark the file as saved, because we just opened it
-				file.isSaved = true;
-				file.savedAs = true;
-				file.changed = false;
-
-				hide_gotoFileInput();
-
+				
 				EDITOR.dashboard.hide();
 
 				EDITOR.renderNeeded();
 
-				//console.log("goto_file: File ready for editing");
+				//console.log("localfs: File ready for editing");
 
 			});
 		});
@@ -487,30 +512,32 @@
 			File path is then passed to the callback function.
 		*/
 
-		console.log("localFileDialog: Bringing up the file open dialog ...");
+		if(typeof callback != "function") throw new Error("Second parameter must be a callback function!");
+
+		console.log("localfs:localFileDialog: Bringing up the file open dialog ...");
 
 		if(typeof window.showOpenFilePicker == "function") {
-			console.log("localFileDialog: Using native file system API!");
+			console.log("localfs:localFileDialog: Using native file system API!");
 
 			window.showOpenFilePicker().then(function(fileHandle) {
 
 				// todo: Handle many files
 				fileHandle = fileHandle[0];
 
-				console.log("localFileDialog: fileHandle=", fileHandle);
+				console.log("localfs:localFileDialog: fileHandle=", fileHandle);
 
-				console.log("localFileDialog: typeof fileHandle.getFile=" + (typeof fileHandle.getFile) + "");
+				console.log("localfs:localFileDialog: typeof fileHandle.getFile=" + (typeof fileHandle.getFile) + "");
 
 				fileHandle.getFile().then(function readText(localFile) {
 
-					console.log("localFileDialog: localFile=", localFile);
+					console.log("localfs:localFileDialog: localFile=", localFile);
 
 					localFile.text().then(function(fileContent) {
-						var filePath = prefix + fileHandle.name;
+						var filePath = protocol + "://" + fileHandle.name;
 
 						fileHandles[filePath] = fileHandle;
 
-						CB(callback, filePath, fileContent, fileHandle);
+						CB(callback, null, filePath, fileContent, fileHandle);
 					});
 				});
 			}).catch(function(err) {
@@ -521,7 +548,7 @@
 
 			return true;
 		}
-		//else console.warn("Local file system API not supported in " + BROWSER);
+		//else console.warn("localfs: Local file system API not supported in " + BROWSER);
 
 
 		EDITOR.fileOpenCallback = callback;
@@ -535,10 +562,10 @@
 
 			var lastChar = defaultPath.substr(defaultPath.length-1);
 
-			//console.log("lastChar of defaultPath=" + lastChar);
+			//console.log("localfs: lastChar of defaultPath=" + lastChar);
 
 			if(! (lastChar == "/" || lastChar == "\\")) {
-				console.warn("defaultPath, bacause ending with '" + lastChar + "', doesn't seem to be a directory:" + defaultPath);
+				console.warn("localfs: defaultPath, bacause ending with '" + lastChar + "', doesn't seem to be a directory:" + defaultPath);
 			}
 			EDITOR.setFileOpenPath(defaultPath);
 		}
