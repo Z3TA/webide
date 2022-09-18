@@ -2,6 +2,10 @@
 
 	Native file system API: https://web.dev/file-system-access/
 
+	todo: Implement directory access so we can create new files, delete files, and list directory content!!
+
+	showDirectoryPicker()
+
 */
 (function() {
 	"use strict";
@@ -272,6 +276,28 @@
 			timeout = undefined;
 		}
 
+		if(typeof window.showSaveFilePicker != "function") {
+			var download = "Download";
+			var cancel = "Cancel";
+			return confirmBox("Local files system API not supported in BROWSER=" + BROWSER + " Do you want to download " + path + " ?", [download, cancel], function(answer) {
+				if(answer == cancel) return;
+
+				var filename = UTIL.getFilenameFromPath(path);
+
+				var element = document.createElement('a');
+				element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+				element.setAttribute('download', filename);
+
+				element.style.display = 'none';
+				document.body.appendChild(element);
+
+				element.click();
+
+				document.body.removeChild(element);
+
+			});
+		}
+
 		getHandle(path, function gotHandle(err, fileHandle) {
 			if(err) {
 				var chooseFile = "Choose file";
@@ -527,6 +553,9 @@
 	}
 
 	function openLocalFile(directory) {
+
+		if(directory instanceof File) directory = UTIL.getDirectoryFromPath(directory.path);
+
 		//console.log("localfs: Telling the editor to open the file dialog window ...");
 		localFileDialog(directory, function after_dialog_open_file(err, filePath, content) {
 			if(err) throw err;
@@ -573,7 +602,13 @@
 			File path is then passed to the callback function.
 		*/
 
-		if(typeof callback != "function") throw new Error("localfs:localFileDialog: Second parameter must be a callback function!");
+		if(typeof defaultPath == "function" && callback == undefined) {
+			callback = defaultPath;
+			defaultPath = undefined;
+		}
+		else if(typeof defaultPath != "undefined" && typeof defaultPath != "string") throw new Error("defaultPath=" + defaultPath + " should be undefined or a string (path to a folder): ", defaultPath); 
+
+		if(typeof callback != "function") throw new Error("localfs:localFileDialog: Second (or first) parameter must be a callback function!");
 
 		console.log("localfs:localFileDialog: Bringing up the file open dialog ...");
 
@@ -618,7 +653,9 @@
 
 		//if(defaultPath == undefined) defaultPath = EDITOR.workingDirectory;
 
-		if(!defaultPath) defaultPath = UTIL.getDirectoryFromPath(undefined);
+		console.log("localfs:localFileDialog: defaultPath=" + defaultPath);
+
+		if(defaultPath == undefined) defaultPath = UTIL.getDirectoryFromPath(undefined);
 		else {
 
 			var lastChar = defaultPath.substr(defaultPath.length-1);

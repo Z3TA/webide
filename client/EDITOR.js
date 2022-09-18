@@ -11512,7 +11512,7 @@ function readSingleFile(fileOpenDialogEvent) {
 	var filePath = file.path;
 	var fileContent = undefined;
 	
-		filePath = fileName; // filePath is undefined in the browser
+		if(filePath == undefined) filePath = "local://" + fileName; // filePath is undefined in the browser
 		
 		// Read the file
 		var reader = new FileReader();
@@ -11526,8 +11526,8 @@ function readSingleFile(fileOpenDialogEvent) {
 	
 	function callCallback() {
 			//console.log("Calling file-dialog callback: " + UTIL.getFunctionName(EDITOR.fileOpenCallback) + " ...");
-		EDITOR.fileOpenCallback(filePath, fileContent);
-		EDITOR.fileOpenCallback = undefined;
+		EDITOR.fileOpenCallback(null, filePath, fileContent);
+			EDITOR.fileOpenCallback = undefined;
 		
 		fileOpenHtmlElement.value = null; // Reset the value so we can open the same file again!
 	}
