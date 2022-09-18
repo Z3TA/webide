@@ -1991,6 +1991,8 @@ usePseudoClipboard = false;
 		
 		var isImage, encoding, text; // Will be populated after beforeSave functions have run
 		
+		var reopenRecursion = 0;
+
 		EDITOR.callEventListeners("beforeSave", file, function beforeSaveListenersCalled(errors, returns) {
 			if(errors.length > 0) {
 				var errorMessages = [];
@@ -2127,6 +2129,8 @@ usePseudoClipboard = false;
 		function reOpen(oldPath, newPath) {
 			// We must close and reopen the file so that plugins keeping track of open files do not go nuts.
 			
+			if(++reopenRecursion > 2) throw new Error("File re-opened too many times! path=" + path + " oldPath=" + oldPath + " newPath=" + newPath);
+			
 			console.log("EDITOR.saveFile:reOpen: oldPath=" + oldPath + " newPath=" + newPath);
 
 			EDITOR.closeFile(oldPath, true); // true = do not switch to another file
@@ -2135,24 +2139,25 @@ usePseudoClipboard = false;
 			EDITOR.openFile(newPath, text, {image: isImage}, function savedAs(err, newFile) {
 				if(err) throw err;
 				
-				console.log("EDITOR.saveFile:reOpen: file.path=" + file.path + " newFile.path=" newFile-path);
+				console.log("EDITOR.saveFile:reOpen: file.path=" + file.path + " newFile.path=" + newFile.path);
 
 				file = newFile;
 				
-				EDITOR.saveToDisk(path, text, isBuffer, encoding, doneSaving);
-			}); 
+				EDITOR.saveToDisk(file.path, text, isBuffer, encoding, doneSaving);
+			});
 		}
 		
-		function doneSaving(err, path, hash) {
+		function doneSaving(err, saveToDiskPath, hash) {
 			if(err) {
-				if(callback) return callback(err, path);
+				if(callback) return callback(err, saveToDiskPath);
 				else throw err;
 			}
 			
-			if(file.savedAs && path != file.path) throw new Error("EDITOR.saveFile: Saved the wrong file!\npath=" + path + "\nfile.path=" + file.path); // Sanity check
-			else if(path != file.path) {
-				console.warn("EDITOR.saveFile: File path updated: old=" + file.path + " new=" + path);
-				file.path = path;
+			if(file.savedAs && saveToDiskPath != file.path) throw new Error("EDITOR.saveFile: Saved the wrong file!\nsaveToDiskPath=" + saveToDiskPath + "\nfile.path=" + file.path); // Sanity check
+			else if(saveToDiskPath != file.path) {
+				// Edge case: For example when saving a local file the user can choose another filename then the suggested, and EDITOR.saveToDisk will call back with the new path
+				console.warn("EDITOR.saveFile: File path updated: old=" + file.path + " new=" + saveToDiskPath);
+				return reOpen(file.path, saveToDiskPath);
 			}
 			
 			if(hash) file.hash = hash;
@@ -2167,7 +2172,7 @@ usePseudoClipboard = false;
 				// Callers of EDITOR.saveFile is mostly most concerned about if the file successfully saved or not
 				// We however want to know if there are any failed listeners!
 
-				if(callback) callback(null, path);
+				if(callback) callback(null, saveToDiskPath);
 				
 				if(err) {
 					console.log("EDITOR.saveFile: Error in callback from file.saved(): ", err);

@@ -293,6 +293,8 @@
 							}],
 						}).then(function(fileHandle) {
 
+							console.log("localfs:localWriteFile: path=" + path + " fileHandle.name=" + fileHandle.name);
+
 							path = protocol + "://" + fileHandle.name; // Update the path with new filname!
 							fileHandles[path] = fileHandle;
 
@@ -307,6 +309,7 @@
 				});
 			}
 
+			console.log("localfs:localWriteFile: path=" + path + " fileHandle.name=" + fileHandle.name + " creating writeable...");
 			fileHandle.createWritable().then(function(writer) {
 				// Make sure we start with an empty file
 				//writer.truncate(0).then(function() {
