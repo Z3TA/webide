@@ -426,7 +426,8 @@ var buttonSaveAs = document.createElement("input");
 					
 					alertBox("<b>The file was NOT saved!</b>\n\n" + err.message, "FILE", "warning");
 					}
-				});
+				
+			});
 			
 			
 			hideSaveDialog();
@@ -494,9 +495,9 @@ var buttonSaveAs = document.createElement("input");
 		showSaveDialog(); // This will remove focus from the editor input
 		
 		// Sometimes files does not have full path because they are not saved
-		// todo: hmm, how does windows paths look like? Answer: C:\folder\file
+		// How does windows paths look like? Answer: C:\folder\file
 		if(originalFilePath.charAt(0) != "/" && originalFilePath.indexOf("\\") == -1 && originalFilePath.match(/^.*:\/\/.*/) == null  && originalFilePath.match(/^.*:\\.*/) == null) {
-originalFilePath = EDITOR.workingDirectory + originalFilePath;
+			originalFilePath = EDITOR.workingDirectory + originalFilePath;
 		}
 		
 		inputPath.value = originalFilePath;

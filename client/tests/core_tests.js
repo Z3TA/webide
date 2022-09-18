@@ -45,12 +45,20 @@
 		UTIL.assert(UTIL.getDirectoryFromPath("/foo/bar"), "/foo/");
 		UTIL.assert(UTIL.getDirectoryFromPath("C:\\foo/bar"), "C:\\foo\\");
 		UTIL.assert(UTIL.getDirectoryFromPath("local://foo/bar"), "local://foo/");
-		UTIL.assert(UTIL.getDirectoryFromPath("local://bar,txt"), "local://");
+		UTIL.assert(UTIL.getDirectoryFromPath("local://bar,txt"), "local:///");
 
 		callback(true);
 	});
 
+	EDITOR.addTest(function test_resolveRelativePath(callback) {
 
+		UTIL.assert(UTIL.resolvePath("/foo/bar/", "../baz"), "/foo/baz");
+		UTIL.assert(UTIL.resolvePath("/", "../"), "/");
+		UTIL.assert(UTIL.resolvePath("/", "../foo.txt"), "/foo.txt");
+		UTIL.assert(UTIL.resolvePath("local:///", "../"), "local:///");
+
+		callback(true);
+	});
 
 	EDITOR.addTest(function testClientHash(callback) {
 		

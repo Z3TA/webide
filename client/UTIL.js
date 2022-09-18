@@ -169,7 +169,7 @@ var UTIL = {
 		var protocol = path.indexOf("://");
 
 		if(protocol != -1 && protocol == (lastSlash-2) ) { // Example: ftp://foo.txt
-			return path.slice(0, protocol+3);
+			return path.slice(0, protocol+3) + "/";
 		}
 
 		return UTIL.trailingSlash(path.substring(0, lastSlash));
@@ -1989,13 +1989,15 @@ base += "/";
 			base = loc.pathname;
 			//console.log("resolvePath: new base=" + base + " url=" + url);
 			
+			if(base == "/" && path=="../") return "/";
+
 			// Sanity check
 			if(url.indexOf("://") == -1) { 
 				//console.warn("resolvePath: url lost it's protocol!");
-				throw new Error("url=" + url + " (no protocol!) loc.pathname=" + loc.pathname);
+				throw new Error("url=" + url + " (no protocol!) loc.pathname=" + loc.pathname + " arguments[0]=" + arguments[0] + " arguments[1]=" + arguments[1]);
 			}
 			if(url.slice(-1) == "/") {
-				throw new Error("url=" + url + " ends with a slash! loc.pathname=" + loc.pathname);
+				throw new Error("url=" + url + " ends with a slash! loc.pathname=" + loc.pathname + " arguments[0]=" + arguments[0] + " arguments[1]=" + arguments[1]);
 			}
 		}
 		

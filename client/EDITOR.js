@@ -2127,12 +2127,16 @@ usePseudoClipboard = false;
 		function reOpen(oldPath, newPath) {
 			// We must close and reopen the file so that plugins keeping track of open files do not go nuts.
 			
+			console.log("EDITOR.saveFile:reOpen: oldPath=" + oldPath + " newPath=" + newPath);
+
 			EDITOR.closeFile(oldPath, true); // true = do not switch to another file
 			
 			// Reopen the file with the new path, makes sure fileSave events in file.save gets called after we have a new path.
 			EDITOR.openFile(newPath, text, {image: isImage}, function savedAs(err, newFile) {
 				if(err) throw err;
 				
+				console.log("EDITOR.saveFile:reOpen: file.path=" + file.path + " newFile.path=" newFile-path);
+
 				file = newFile;
 				
 				EDITOR.saveToDisk(path, text, isBuffer, encoding, doneSaving);
@@ -2156,6 +2160,7 @@ usePseudoClipboard = false;
 			//console.log("EDITOR.saveFile: Successfully saved " + file.path);
 			
 			// Change state to saved, and call afterSave listeners
+			console.log("EDITOR.saveFile:doneSaving: file.path=" + file.path + " ...");
 			file.saved(function updatedSavedState(err) {
 				
 				// Call back without an error even though some of the afterSave events failed.

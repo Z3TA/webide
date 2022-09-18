@@ -169,6 +169,8 @@
 
 		console.warn("localfs:getHandle: path=" + path);
 
+		var errorWithProperCallStack = new Error();
+
 		if( fileHandles.hasOwnProperty(path) ) {
 			var fileHandle = fileHandles[path];
 			verifyNativeFileSystemPermission(fileHandle, "readwrite", function(err) {
@@ -180,8 +182,8 @@
 
 		readFileHandleFromIndexDb(path, function(err, fileSize, fileHandle) {
 			if(err) {
-				var error = new Error("Unable to find a fileHandle for path=" + path + "\nError: " + err.message + "\n(The file might still exist, but we need to ask the user for it, try EDITOR.openLocalFile)");
-				return callback(error);
+				errorWithProperCallStack.message = "Unable to find a fileHandle for path=" + path + "\nError: " + err.message + "\n(The file might still exist, but we need to ask the user for it, try EDITOR.openLocalFile)";
+				return callback(errorWithProperCallStack);
 			}
 
 			verifyNativeFileSystemPermission(fileHandle, "readwrite", function(err) {
@@ -270,8 +272,40 @@
 			timeout = undefined;
 		}
 
-		getHandle(path, function(err, fileHandle) {
-			if(err) throw err;
+		getHandle(path, function gotHandle(err, fileHandle) {
+			if(err) {
+				var chooseFile = "Choose file";
+				var cancel = "Cancel";
+				return confirmBox("Do you want to save " + path + " locally?", [chooseFile, cancel], function(answer) {
+					if(answer == cancel) return;
+					else if(answer == chooseFile) {
+
+						var fileName = UTIL.getFilenameFromPath(path);
+						var fileExtension = "." + UTIL.getFileExtension(path);
+
+						window.showSaveFilePicker({
+							suggestedName: fileName,
+							types: [{
+									description: 'Development',
+									accept: {
+										'text/plain': [fileExtension],
+									},
+							}],
+						}).then(function(fileHandle) {
+
+							path = protocol + "://" + fileHandle.name; // Update the path with new filname!
+							fileHandles[path] = fileHandle;
+
+							CB(gotHandle, null, fileHandle);
+
+						}).catch(function(err) {
+							console.error(err);
+							alertBox("localfs: Error from showSaveFilePicker: " + err.message);
+						});
+
+					}
+				});
+			}
 
 			fileHandle.createWritable().then(function(writer) {
 				// Make sure we start with an empty file
@@ -322,7 +356,10 @@
 		console.log("localfs:localFileSizeOnDisk: path=" + path);
 
 		getHandle(path, function(err, fileHandle) {
-			if(err) throw err;
+			if(err) {
+				if(!err.code) err.code = "ENOENT";
+				return callback(err);
+			}
 
 			fileHandle.getFile().then(function readText(localFile) {
 				localFile.text().then(function(fileContent) {
@@ -474,7 +511,7 @@
 			request.onsuccess = function() {
 				console.log("localfs: Got file handle etc for path=" + path + " request.result=", request.result);
 				if(typeof request.result == "undefined") {
-					var error = new Error("No result in request when reading file handle for path?" + path + " request=" + JSON.stringify(request));
+					var error = new Error("No result in request when reading file handle for path=" + path + " request=" + JSON.stringify(request));
 					error.code = "ENOENT";
 					return callback(error);
 				}
