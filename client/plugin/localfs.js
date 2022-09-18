@@ -241,7 +241,7 @@
 					UTIL.hash(fileContent, function(err, hash) {
 						if(err) throw err;
 
-						CB(null, path, fileContent, hash);
+						CB(callback, null, path, fileContent, hash);
 					});
 
 				});

@@ -6,15 +6,7 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
-Trying to figure out why local file wont reopen after editor close and reopen
-
-Use EDITOR.addProtocol for local and reote
-
-EDITOR.hashFileOnDisk
-
-
-Add protection to local files so they can't be overwritten by accident!
-
+Use EDITOR.addProtocol for local and remote
 
 ---
 

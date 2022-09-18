@@ -1921,12 +1921,12 @@ usePseudoClipboard = false;
 		*/
 	}
 	
-	EDITOR.getFileHash = function(fileOrPathOrHandle, callback) {
+	EDITOR.getFileHash = function(fileOrPath, callback) {
 		// Should call back with a SHA-256 hash of the file content (but not guaranteed, see UTIL.hash )
 		
-		if(typeof fileOrPathOrHandle == "string") var filePath = fileOrPathOrHandle
-		else if(typeof fileOrPathOrHandle == "object" && fileOrPathOrHandle.hasOwnProperty("path")) var filePath = fileOrPathOrHandle.path;
-		else throw new Error("getFileHash: Unable to determine what is fileOrPathOrHandle=" + fileOrPathOrHandle);
+		if(typeof fileOrPath == "string") var filePath = fileOrPath
+		else if(typeof fileOrPath == "object" && fileOrPath.hasOwnProperty("path")) var filePath = fileOrPath.path;
+		else throw new Error("getFileHash: Unable to determine what is fileOrPath=" + fileOrPath);
 
 		var protocol = UTIL.urlProtocol(filePath);
 		if(protocol == "" || EDITOR.remoteProtocols.indexOf(protocol) != -1) {
@@ -1943,7 +1943,7 @@ usePseudoClipboard = false;
 
 			if( typeof _protocols[protocol].hash != "function" ) return callback("protocol=" + protocol + " has no hash function!");
 
-			_protocols[protocol].hash(path, callback);
+			_protocols[protocol].hash(filePath, callback);
 			return;
 
 		}
@@ -2094,12 +2094,13 @@ usePseudoClipboard = false;
 			}
 			else if(file.hash)  {
 				// Check the hash before saving to prevent over-writing something
-				CLIENT.cmd("hash", {path: file.path}, function(err, hash) {
+
+				EDITOR.getFileHash(file.path, function(err, hash) {
 					if(err) {
 						if(err.code == "ENOENT") {
 							console.warn("EDITOR.saveFile: File did not exist on disk: " + file.path);
 						}
-else if(err.code == "ENETDOWN") {
+						else if(err.code == "ENETDOWN") {
 							if(callback) return callback(err);
 							else throw err;
 						}
@@ -2113,11 +2114,12 @@ else if(err.code == "ENETDOWN") {
 						alertBox("FAILED TO SAVE FILE.\nFile changed on disk!\nSave as another name to prevent losing data.", "FILE", "warning");
 						return;
 					}
-					
+
 					EDITOR.saveToDisk(path, text, isBuffer, encoding, doneSaving);
 				});
 			}
 			else {
+				console.warn("file.path=" + file.path + " has no hash! file.hash=" + file.hash + " ... Saving without checking if it has changed on disk!");
 				EDITOR.saveToDisk(path, text, isBuffer, encoding, doneSaving);
 			}
 		}
