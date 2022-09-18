@@ -166,6 +166,12 @@ var UTIL = {
 			//return null;
 		}
 		
+		var protocol = path.indexOf("://");
+
+		if(protocol != -1 && protocol == (lastSlash-2) ) { // Example: ftp://foo.txt
+			return path.slice(0, protocol+3);
+		}
+
 		return UTIL.trailingSlash(path.substring(0, lastSlash));
 	},
 	
@@ -404,8 +410,11 @@ if(protocolIndex != -1) slashes = slashes - 2;
 			var path = fullPath.substr(protocol.length + 3); // Remote protocol part and the ://
 			var hostname = path.substr(0, path.indexOf("/") != -1 ? path.indexOf("/") : path.length); // Also include port nr if specified (hostname:port)
 			
-			if(hostname.length == 0) throw new Error("URL has no hostname! fullPath=" + fullPath);
-			
+			if(hostname.length == 0) {
+				return [path]; // The root folder of the whatever protocol
+				//throw new Error("URL has no hostname! fullPath=" + fullPath);
+			}
+
 			path = path.substr(hostname.length); // Remove hostname part
 			
 			//console.log("hostname=" + hostname + " path=" + path);

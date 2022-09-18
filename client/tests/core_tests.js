@@ -40,6 +40,18 @@
 		
 	}
 	
+	EDITOR.addTest(function test_getDirectoryFromPath(callback) {
+
+		UTIL.assert(UTIL.getDirectoryFromPath("/foo/bar"), "/foo/");
+		UTIL.assert(UTIL.getDirectoryFromPath("C:\\foo/bar"), "C:\\foo\\");
+		UTIL.assert(UTIL.getDirectoryFromPath("local://foo/bar"), "local://foo/");
+		UTIL.assert(UTIL.getDirectoryFromPath("local://bar,txt"), "local://");
+
+		callback(true);
+	});
+
+
+
 	EDITOR.addTest(function testClientHash(callback) {
 		
 		// UTIL.hash() should return the same hash as the server hash API!

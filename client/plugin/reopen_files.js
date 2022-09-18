@@ -381,7 +381,7 @@
 				
 				// Decide if we should open the last saved state, or from the disk (or other protocol) ...
 				
-				//console.log("reopenFiles: Got fileSizeOnDisk=" + fileSizeOnDisk + " for path=" + path + "");
+				console.log("reopenFiles: Got fileSizeOnDisk=" + fileSizeOnDisk + " for path=" + path + "");
 				
 				if(getFileSizeError) {
 					//if(err.code === 'ENOENT') {

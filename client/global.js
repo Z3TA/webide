@@ -173,8 +173,10 @@ function CB() {
 		args[i] = arguments[i];
 	}
 
-	
-	var callback = args.shift();
+	var callback = args.shift(); // First parameter shall be the function to be called
+
+	var error = args[0]; // Second parameter should be null or an error
+	if(error !== null && !(error instanceof Error) ) var notAnErrorError = new Error("Second parameter passed to CB should be the error, or null: " + error);
 
 	if(typeof callback == "function") {
 		// Using setTimeout to escape the promise
@@ -183,9 +185,15 @@ function CB() {
 		}, 0);
 	}
 	else {
-		var errorWithProperCallStack = new Error(args[0]);
-		setTimeout(function() {
-			throw errorWithProperCallStack;
+		// It's allowed for callback to be undefined, but if it's not undefined, it's probably a bug!
+		if(typeof callback != "undefined") var callbackNotUndefinedError = new Error("First parameter passed to CB is not a function nor undefined: " + callback);
+
+		setTimeout(function() { // Escape the promise jail so the arror is not swallowed silently
+			if(notAnErrorError) throw notAnErrorError;
+			if(callbackNotUndefinedError) throw callbackNotUndefinedError;
+			if(error === null) return; // If there is no error and the CB parameters look OK we don't have to do anything
+
+			throw error;
 		}, 0);
 	}
 }

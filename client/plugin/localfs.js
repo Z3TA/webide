@@ -24,7 +24,7 @@
 			EDITOR.on("fileOpen", nativeFileOpen, 1);
 			EDITOR.on("fileClose", nativeFileClose, 1);
 			EDITOR.on("openFileTool", openLocalFileTool);
-			EDITOR.on("localFileDialog", localFileDialog);
+			EDITOR.on("localFileDialog", localFileDialogTool);
 
 			var charO = 79;
 			EDITOR.bindKey({desc: "Open a local file using native file select dialog", charCode: charO, combo: CTRL + SHIFT, fun: openLocalFileKeyboardShortcut});
@@ -44,7 +44,7 @@
 			EDITOR.removeEvent("fileOpen", nativeFileOpen, 1);
 			EDITOR.removeEvent("fileClose", nativeFileClose, 1);
 			EDITOR.removeEvent("openFileTool", openLocalFileTool);
-			EDITOR.removeEvent("localFileDialog", localFileDialog);
+			EDITOR.removeEvent("localFileDialog", localFileDialogTool);
 
 			EDITOR.unbindKey(openLocalFileKeyboardShortcut);
 
@@ -53,14 +53,19 @@
 		order: 100 // Load early 
 	});
 
-	function openLocalFileKeyboardShortcut() {
+	function localFileDialogTool(file, ev) {
+		openLocalFileKeyboardShortcut(file);
+		return true;
+	}
+
+	function openLocalFileKeyboardShortcut(file) {
 
 		EDITOR.ctxMenu.hide();
 
 		//console.log("localfs: Opening file ...");
 
 		var defaultPath = "";
-		var file = EDITOR.currentFile;
+		var file = file || EDITOR.currentFile;
 
 		if(file) {
 			// Check if the cursor is on a file path
@@ -174,7 +179,10 @@
 		}
 
 		readFileHandleFromIndexDb(path, function(err, fileSize, fileHandle) {
-			if(err) throw err;
+			if(err) {
+				var error = new Error("Unable to find a fileHandle for path=" + path + "\nError: " + err.message + "\n(The file might still exist, but we need to ask the user for it, try EDITOR.openLocalFile)");
+				return callback(error);
+			}
 
 			verifyNativeFileSystemPermission(fileHandle, "readwrite", function(err) {
 				if(err) callback(err);
@@ -222,6 +230,11 @@
 		if(callback == undefined || typeof callback != "function") throw new Error("No callback function! callback=" + callback);
 
 		getHandle(path, function(err, fileHandle) {
+			if(err) {
+				if(!err.code) err.code = "ENOENT";
+				return callback(err);
+			}
+
 			fileHandle.getFile().then(function readText(localFile) {
 				localFile.text().then(function(fileContent) {
 
@@ -314,10 +327,13 @@
 			fileHandle.getFile().then(function readText(localFile) {
 				localFile.text().then(function(fileContent) {
 
-					console.log("localfs:localFileSizeOnDisk: Successfully got content for path=" + path);
+					console.log("localfs:localFileSizeOnDisk: Successfully got content for path=" + path + "");
 
 					var size = UTIL.byteSize(fileContent);
-					CB(callback, size); 
+
+					console.log("localfs:localFileSizeOnDisk: size=" + size + " fileContent=" + fileContent);
+
+					CB(callback, null, size);
 
 				});
 			}).catch(function(err) {
@@ -457,7 +473,12 @@
 			};
 			request.onsuccess = function() {
 				console.log("localfs: Got file handle etc for path=" + path + " request.result=", request.result);
-				if(typeof request.result == "undefined") return callback(new Error("No result in request when reading file handle for path?" + path + " request=" + JSON.stringify(request)));
+				if(typeof request.result == "undefined") {
+					var error = new Error("No result in request when reading file handle for path?" + path + " request=" + JSON.stringify(request));
+					error.code = "ENOENT";
+					return callback(error);
+				}
+
 				var fileSize = request.result.size;
 				var fileHandle = request.result.handle;
 				callback(null, fileSize, fileHandle);
@@ -512,7 +533,7 @@
 			File path is then passed to the callback function.
 		*/
 
-		if(typeof callback != "function") throw new Error("Second parameter must be a callback function!");
+		if(typeof callback != "function") throw new Error("localfs:localFileDialog: Second parameter must be a callback function!");
 
 		console.log("localfs:localFileDialog: Bringing up the file open dialog ...");
 
