@@ -10,7 +10,7 @@
 (function() {
 	"use strict";
 
-	if(! QUERY_STRING["espruino"] ) return;
+	//if(! QUERY_STRING["espruino"] ) return;
 
 	var menuItem;
 	var dependenciesLoaded = false;
@@ -45,7 +45,7 @@
 		"../EspruinoTools/plugins/minify.js",
 		"../EspruinoTools/plugins/pretokenise.js",
 		"../EspruinoTools/plugins/saveOnSend.js",
-		"../EspruinoTools/plugins/setTime.js"
+		"../EspruinoTools/plugins/setTime.js",
 
 		"../EspruinoTools/libs/utf8.js",
 
@@ -88,14 +88,11 @@
 		load: function loadEspruinoSupport() {
 
 			// todo: Add to language strings!
-			menu_espruinoConnect = EDITOR.windowMenu.add("connect/disconnect", ["espruino", 100], toggleConnection);
-			menu_espruinoSendCode = EDITOR.windowMenu.add("send code", ["espruino", 200], sendCodeToEspruino);
-			menu_espruinoFileExplorer = EDITOR.windowMenu.add("Show files", ["espruino", 300], fileExplorer);
+			menu_espruinoConnect = EDITOR.windowMenu.add("connect/disconnect", [S("tools"), "espruino", 100], toggleConnection);
+			menu_espruinoSendCode = EDITOR.windowMenu.add("send code", [S("tools"), "espruino", 200], sendCodeToEspruino);
+			menu_espruinoFileExplorer = EDITOR.windowMenu.add("Show files", [S("tools"), "espruino", 300], fileExplorer);
 
-			init(function() {
-				
-
-			});
+			//init(function() {});
 
 		},
 		unload: function unloadEspruinoSupport() {
@@ -350,6 +347,7 @@
 	var lastConnection = {port: undefined, portName: undefined};
 
 	function isConnected(port) {
+		if(!dependenciesLoaded) return false;
 		return Espruino.Core.Serial.isConnected() && (port==undefined || lastConnection.port==port);
 	}
 	
