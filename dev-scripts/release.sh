@@ -138,6 +138,16 @@ cp client/jsPDF/src/jspdf.js temp/release/linux/client/jsPDF/src/
 cp client/jsPDF/src/libs/{rgbcolor.js,FileSaver.js} temp/release/linux/client/jsPDF/src/libs/
 cp client/jsPDF/src/modules/{cell.js,standard_fonts_metrics.js,split_text_to_size.js,context2d.js,canvas.js,addimage.js,jpeg_support.js,ttfsupport.js} temp/release/linux/client/jsPDF/src/modules/
 
+echo "Adding Espruino dependencies"
+mkdir -p temp/release/linux/client/EspruinoTools/{core,plugins,libs}
+mkdir -p temp/release/linux/client/EspruinoTools/libs/esprima
+cp client/EspruinoTools/espruino.js temp/release/linux/client/EspruinoTools/
+cp client/EspruinoTools/core/{serial.js,serial_chrome_serial.js,serial_chrome_socket.js,serial_node_serial.js,serial_web_audio.js,serial_web_bluetooth.js,serial_web_serial.js,serial_websocket_relay.js,serial_websocket_relay.js,serial_frame.js} temp/release/linux/client/EspruinoTools/core/
+cp client/EspruinoTools/core/{terminal.js,codeWriter.js,modules.js,env.js,flasher.js,flasherESP8266.js} temp/release/linux/client/EspruinoTools/core/
+cp client/EspruinoTools/plugins/{boardJSON.js,versionChecker.js,compiler.js,assembler.js,getGitHub.js,unicode.js,minify.js,pretokenise.js,saveOnSend.js,setTime.js} temp/release/linux/client/EspruinoTools/plugins/
+cp client/EspruinoTools/libs/utf8.js temp/release/linux/client/EspruinoTools/libs/
+cp client/EspruinoTools/libs/esprima/{esprima.js,esmangle.js,escodegen.js} temp/release/linux/client/EspruinoTools/libs/esprima/
+
 
 echo "Make a server release"
 cp -rf temp/release/linux/. temp/release/server/

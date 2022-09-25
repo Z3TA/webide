@@ -6,7 +6,16 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
+New release
+- Fix text sizes in CSS
+- Add flags for work in progress
+- Make sure dependencies are included in the release!
+- Run tests
 
+
+---
+
+Better support for using the editor for offline local work!
 
 ---
 

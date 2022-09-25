@@ -41,17 +41,17 @@
 		"../EspruinoTools/plugins/compiler.js",
 		"../EspruinoTools/plugins/assembler.js",
 		"../EspruinoTools/plugins/getGitHub.js",
-		"../EspruinoTools/libs/utf8.js",
 		"../EspruinoTools/plugins/unicode.js",
-
-		"../EspruinoTools/libs/esprima/esprima.js",
-		"../EspruinoTools/libs/esprima/esmangle.js",
-		"../EspruinoTools/libs/esprima/escodegen.js",
 		"../EspruinoTools/plugins/minify.js",
 		"../EspruinoTools/plugins/pretokenise.js",
 		"../EspruinoTools/plugins/saveOnSend.js",
 		"../EspruinoTools/plugins/setTime.js"
-		
+
+		"../EspruinoTools/libs/utf8.js",
+
+		"../EspruinoTools/libs/esprima/esprima.js",
+		"../EspruinoTools/libs/esprima/esmangle.js",
+		"../EspruinoTools/libs/esprima/escodegen.js"
 	];
 
 	// ---------------
