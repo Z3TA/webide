@@ -33,11 +33,19 @@
 
 		note: EndCall exits the browser on KaiOS device, we probably want to leave it off, or only bind to it while in INPUT or NAV mode
 
+
+		todo:
+		- test developerMenu
+		
+		Goals:
+		- make it possible to develop KaiOS apps from within the editor
+
+
 	*/
 
 
 	// Don't do anything if it's not a KaiOS device!
-	//if(typeof window.navigator != "object" || typeof window.navigator.mozApps != "object") return;
+	if(typeof window.navigator != "object" || typeof window.navigator.mozApps != "object") return;
 
 	//if(! QUERY_STRING["kaios"] ) return;
 
@@ -130,6 +138,8 @@
 
 		EDITOR.resizeNeeded();
 
+		alertBox("Hello KaiOS/FirefoxOS user. Use the green phone button to switch editor mode. Support is experimental, please leave feedback :)");
+
 	}
 
 	function unloadKaiOsSupport() {
@@ -160,6 +170,27 @@
 		setNormalMode();
 
 	}
+
+	function developerMenu() {
+		if(window.MozActivity) {
+			var act = new MozActivity({
+				name: "configure",
+				data: {
+					target: "device",
+					section: "developer"
+				}
+			})
+		} else if(window.WebActivity) { // KaiOS 3.0
+			var act = new WebActivity("configure", {
+				target: "device",
+				section: "developer"
+			})
+			act.start().catch(function(e){window.alert('Cannot launch developer menu: ' + e)})
+		} else {
+			alertBox("MozActivity nor WebActivity supported on your device. See https://bananahackers.net/");
+		}
+	}
+
 
 	function kaiBackspaceInInsertMode() {
 		var file = EDITOR.currentFile;
