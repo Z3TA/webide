@@ -274,6 +274,7 @@ select, select.functionList {
 .windowMenu .menu .item.hovering {
 	background-color: #2e60d0;
 	color: #ffffff;
+	color: red!important;
 }
 
 .windowMenu .menu.vertical .item:last-child {
@@ -304,17 +305,17 @@ select, select.functionList {
 
 .contextmenu li {
 	background-color: transparent;
-	margin-right: -4px;
-	margin-left: -2px;
 	padding-top: 2px;
 	padding-bottom: 2px;
-	padding-left: 8px;
-	padding-right: 8px;
 }
 
 
 .contextmenu li .text {
 	color: #ffffff;
+}
+
+.contextmenu li .key {
+	margin-right: 4px;
 }
 
 .contextmenu li.item:hover .key {

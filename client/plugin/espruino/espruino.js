@@ -103,8 +103,8 @@
 
 			EDITOR.removeProtocol("espruino");
 
-			Espruino = undefined;
-			window.$ = undefined;
+			if(typeof Espruino != "undefined") Espruino = undefined;
+			if(typeof window.$ != "undefined") window.$ = undefined;
 		}
 	});
 
