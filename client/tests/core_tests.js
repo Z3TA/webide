@@ -50,7 +50,7 @@
 		callback(true);
 	});
 
-	EDITOR.addTest(function test_resolveRelativePath(callback) {
+	EDITOR.addTest(1, function test_resolveRelativePath(callback) {
 
 		UTIL.assert(UTIL.resolvePath("/foo/bar/", "../baz"), "/foo/baz");
 		UTIL.assert(UTIL.resolvePath("/", "../"), "/");

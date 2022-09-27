@@ -34,15 +34,10 @@
 			highlightMatch(ctx, buffer, file, a, b, startRow, containSpecialWidthCharacters, bufferStartRow, bufferEndRow, maxColumns);
 		}
 		
-var func = customRender;
+
 		// Try to avoid eval or new Function
-		try {
-			Object.defineProperty(func, "name", { value: name }); // Give function an unique name
-		}
-		catch(err) {
-			console.error(err);
-			var func = new Function("render" + name, "return function " + name + "(ctx, buffer, file, startRow, containSpecialWidthCharacters, bufferStartRow, bufferEndRow){ render" + name + "(ctx, buffer, file, startRow, containSpecialWidthCharacters, bufferStartRow, bufferEndRow) };")(customRender);
-		}
+		var func = UTIL.nameFunction(customRender, name, 7);
+		//var func = new Function("render" + name, "return function " + name + "(ctx, buffer, file, startRow, containSpecialWidthCharacters, bufferStartRow, bufferEndRow){ render" + name + "(ctx, buffer, file, startRow, containSpecialWidthCharacters, bufferStartRow, bufferEndRow) };")(customRender);
 		
 		xMatcher.push(func);
 

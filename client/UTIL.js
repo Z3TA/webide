@@ -793,6 +793,8 @@ if(protocolIndex != -1) slashes = slashes - 2;
 		if(typeof fun != "function") throw new Error("First argument to UTIL.nameFunction should be a function!");
 		if(typeof name != "string" || name.length == 0) throw new Error("Second argument to UTIL.nameFunction should be a name");
 		
+		if(OPERA_MOBILE) return newFunction(); // Opera mobile throws an error on Object.defineProperty even though it's inside the try catch block
+
 		// First try just giving the function the name, to avoid Content-Security-Policy errors
 		try {
 			Object.defineProperty(fun, "name", { value: name }); // Give function an unique name
@@ -800,21 +802,30 @@ if(protocolIndex != -1) slashes = slashes - 2;
 		catch(err) {
 			console.error(err);
 			
+			return newFunction();
+
 			// If the browser does not support Object.defineProperty it probably doesn't support SCP either
 			
+		}
+		
+		return fun;
+	
+		function newFunction() {
 			if(parameterCount == undefined) parameterCount = 1;
 			else if(typeof parameterCount != "number") throw new Error("Third argument to UTIL.nameFunction should be the number of parameters to pass to fun");
-			
+
 			// parameters are just a plain string, like: a, b, c
 			var parameters = "p0";
 			for (var i=0; i<parameterCount; i++) {
 				parameters = parameters + ", p" + i;
 			}
-			
+
+			console.log("UTIL.nameFunction: Creating function with name=" + name + " parameters=" + parameters + " fun=" + fun.toString());
+
 			return new Function("run_" + name, "return function " + name + "(" + parameters + "){ run" + name + "(" + parameters + ") };")(fun);
 		}
-		
-		return fun;
+
+
 	},
 	
 	numberOrError: function numberOrError(n) {
@@ -1989,7 +2000,7 @@ base += "/";
 			base = loc.pathname;
 			//console.log("resolvePath: new base=" + base + " url=" + url);
 			
-			if(base == "/" && path=="../") return "/";
+			if(loc.pathname == "/" && path=="../") return loc.origin + loc.pathname;
 
 			// Sanity check
 			if(url.indexOf("://") == -1) { 

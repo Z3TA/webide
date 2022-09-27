@@ -607,7 +607,7 @@
 			
 			platform = plat;
 			
-			test("python --version");
+			test("python3 --version");
 			test("hg --version");
 			test("node --version");
 			test("npm --version");

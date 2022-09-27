@@ -156,7 +156,7 @@
 	function getFileList(path, callback) {
 		//callback(['"a"','"b"','"c"']);
 
-		Espruino.Core.Utils.executeStatement(`require('Storage').list().forEach(x=>print(JSON.stringify(x)));`, function(files) {
+		Espruino.Core.Utils.executeStatement("require('Storage').list().forEach(x=>print(JSON.stringify(x)));", function(files) {
 			var fileList = [];
 			try {
 				fileList = Espruino.Core.Utils.parseJSONish("["+files.trim().replace(/\n/g,",")+"]");

@@ -274,7 +274,6 @@ select, select.functionList {
 .windowMenu .menu .item.hovering {
 	background-color: #2e60d0;
 	color: #ffffff;
-	color: red!important;
 }
 
 .windowMenu .menu.vertical .item:last-child {
