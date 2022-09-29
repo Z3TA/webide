@@ -981,14 +981,17 @@ ul#tabList button.closeFileTab {
 	width: 12px;
 	height: 15px;
 	background-color: rgba(0,0,0,0);
+	margin-top: -0.1em;
 	
 }
 
 ul#tabList button.closeFileTab:before {
-	content: '❌';
-	font-size: 8px;
+	/* note: some browsers (Opera) doesn't work well with unicode characters like ❌ it can't be resized with font-size!! */
+	content: 'x';
+	font-family: monospace;
+	font-size: 0.8em;
 	position: relative;
-	
+	display: inline-block;
 	
 	/* colorize */
 	color: transparent;
