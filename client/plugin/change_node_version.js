@@ -124,7 +124,8 @@ if(versions.indexOf(rcVersion) != -1) {
 			//console.log("change_node_version: Found versions=" + JSON.stringify(versions));
 			
 			versions.forEach(function(version) {
-				winMenus[version] = EDITOR.windowMenu.add(version, ["Node.js", S("change_version")], UTIL.nameFunction(useVersion, "use_nodejs_v" + version));
+				var fNameVersion = version.replace(/\./g, "_");
+				winMenus[version] = EDITOR.windowMenu.add(version, ["Node.js", S("change_version")], UTIL.nameFunction(useVersion, "use_nodejs_v" + fNameVersion, 0));
 				
 				function useVersion() {
 switchToVersion(version);

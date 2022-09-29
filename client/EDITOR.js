@@ -3738,13 +3738,24 @@ throw new Error("Second or third argument to EDITOR.on: callback=" + callback + 
 	
 	
 	var runOnceCounter = 0;
-	EDITOR.once = function runonce(eventName, fun) {
+	EDITOR.once = function runonce(eventName, funToRunOnce) {
 		// Runs the function one time when the event fires, then removes the event listener
 		
-		var fName = "_runonce" + (++runOnceCounter) + UTIL.getFunctionName(fun);
+		/*
+			problem: Opera (mobile) can't create a new Function that has call or apply in it!
+			Unhandled Error: Function constructor: failed to compile function 
+
+			var cb = function runOnceCb() {
+			funToRunOnce.apply(null, arguments);
+			removeEvent();
+			}
+
+		*/
+
+		var fName = "_runonce" + (++runOnceCounter) + UTIL.getFunctionName(funToRunOnce);
 		
-		var cb = function() {
-			fun.apply(null, arguments);
+		var cb = function runOnceCb(a,b,c,d,e,f,g,h,i,j,k,l,m,n) {
+			funToRunOnce(a,b,c,d,e,f,g,h,i,j,k,l,m,n);
 			removeEvent();
 		}
 		
@@ -4516,7 +4527,8 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 		if(menu.domElement.hasAttribute("aria-expanded")) menu.domElement.setAttribute("aria-expanded", "false");
 		
 		menu.domElement.style.display = "none";
-		menu.domElement.blur(); // Reset hover effect on touch screens
+		if(typeof menu.domElement.blur == "function") 
+			menu.domElement.blur(); // Reset hover effect on touch screens
 		
 		//menu.domElement.setAttribute("class", "hidden");
 		

@@ -793,6 +793,8 @@ if(protocolIndex != -1) slashes = slashes - 2;
 		if(typeof fun != "function") throw new Error("First argument to UTIL.nameFunction should be a function!");
 		if(typeof name != "string" || name.length == 0) throw new Error("Second argument to UTIL.nameFunction should be a name");
 		
+		if(name.indexOf(".") != -1) throw new Error("UTIL.nameFunction: Can't have dots . in the function name!");
+
 		if(OPERA_MOBILE) return newFunction(); // Opera mobile throws an error on Object.defineProperty even though it's inside the try catch block
 
 		// First try just giving the function the name, to avoid Content-Security-Policy errors
@@ -822,7 +824,7 @@ if(protocolIndex != -1) slashes = slashes - 2;
 
 			console.log("UTIL.nameFunction: Creating function with name=" + name + " parameters=" + parameters + " fun=" + fun.toString());
 
-			return new Function("run_" + name, "return function " + name + "(" + parameters + "){ run" + name + "(" + parameters + ") };")(fun);
+			return new Function("run_" + name, "return function " + name + "(" + parameters + "){ run_" + name + "(" + parameters + ") };")(fun);
 		}
 
 
