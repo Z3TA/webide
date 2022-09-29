@@ -227,8 +227,10 @@ select, select.functionList {
 
 .windowMenu .menu.horizontal {
 	
-	
-	
+}
+
+.windowMenu a {
+	text-decoration: none;
 }
 
 .windowMenu .menu.vertical {
