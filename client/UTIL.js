@@ -2000,7 +2000,7 @@ base += "/";
 			var loc = UTIL.getLocation(base);
 			var url = base.slice(0, base.lastIndexOf(loc.pathname));
 			base = loc.pathname;
-			//console.log("resolvePath: new base=" + base + " url=" + url);
+			console.log("resolvePath: new base=" + base + " url=" + url + " loc=" + JSON.stringify(loc));
 			
 			if(loc.pathname == "/" && path=="../") return loc.origin + loc.pathname;
 
@@ -2531,8 +2531,15 @@ else {
 		
 		var protoArray = ["file", "http", "https", "ftp", "ssh", "sftp", "ftps", "chrome-extension", "smb"];
 		
-        function firstSplit (str, splitter) {
-            var array;
+		if( typeof EDITOR != "undefined") {
+			var ep = EDITOR.protocols();
+			for (var i=0; i<ep.length; i++) {
+				protoArray.push(ep[i]);
+			}
+		}
+
+		function firstSplit (str, splitter) {
+			var array;
             if (str.indexOf(splitter) !== -1) {
                 array = [str.substring(0, str.indexOf(splitter)), str.substring(str.indexOf(splitter) + splitter.length)];
                 return array;
