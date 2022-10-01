@@ -1356,7 +1356,8 @@ This is because the program is mounted in user dir's. Stop webide and then reboo
 Testing in Opera Mobile
 ========================
 
-Download Opera Classic Mobile Emulator: https://www.opera.com/developer/mobile-emulator
+Download Opera Classic Mobile Emulator: 
+Windows: http://www.opera.com/download/get.pl?sub=++++&id=35131
 Mac: brew cask install opera-mobile-emulator
 
 
