@@ -8658,15 +8658,22 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 			}
 			
 			// IE sometimes does not recognise theWindow.addEventListener as a function... why ?
+			// Nor does Opera...
 			if(typeof theWindow.addEventListener == "function") {
 				//console.log("Using theWindow.addEventListener load");
 				
-				theWindow.addEventListener("load", createdWindowLoaded, false);
+				theWindow.addEventListener("load", createdWindowLoaded, false); // theWindow.addEventListener is a function!
 			}
 			else {
 				// IE is sometimes unable to call addEventListener...
 				setTimeout(function() {
-					theWindow.addEventListener("load", createdWindowLoaded, false);
+					if(typeof theWindow.addEventListener == "function") {
+						theWindow.addEventListener("load", createdWindowLoaded, false); // After timeout (need time to click on "accept popup")
+					}
+					else {
+						createdWindowLoaded(); // Callback anyway and hope for the best :P
+					}
+
 				}, 250);
 			}
 
