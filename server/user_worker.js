@@ -2170,7 +2170,7 @@ function debugText(text) {
 console.log = function() {
 	var msg = arguments[0];
 	for (var i = 1; i < arguments.length; i++) msg += " " + arguments[i];
-	log(user.name + ": " + msg, 7);
+	log(user.name + ": " + msg, 7, 2);
 }
 
 // Overload console.warn

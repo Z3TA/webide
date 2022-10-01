@@ -53,7 +53,7 @@ else if(require("fs").existsSync("C:\\WINDOWS\\system32\\cmd.exe")) {
 else {
 	(function() {
 		var module_path = require("path");
-		var module_fs = require("fs");
+		var fs = require("fs");
 		var path = process.env.PATH ? process.env.PATH.split(module_path.delimiter) : [];
 		for (var i=0; i<path.length; i++) {
 			var filePath = {
@@ -62,15 +62,15 @@ else {
 				cmd: module_path.join(path[i], "cmd.exe")  // Windows
 			}
 			//console.log("Checking ", filePath);
-			if(module_fs.existsSync(filePath.dash)) {
+			if(fs.existsSync(filePath.dash)) {
 				EXEC_OPTIONS.shell = filePath.dash;
 				break;
 			}
-			else if(module_fs.existsSync(filePath.bash)) {
+			else if(fs.existsSync(filePath.bash)) {
 				EXEC_OPTIONS.shell = filePath.bash;
 				break;
 			}
-			else if(module_fs.existsSync(filePath.cmd)) {
+			else if(fs.existsSync(filePath.cmd)) {
 				EXEC_OPTIONS.shell = filePath.cmd;
 				break;
 			}
@@ -3520,7 +3520,7 @@ options.cwd = json.cwd;
 	var command = json.command;
 	
 	console.log("API.run: Running command=" + command + " ...");
-	console.log("API.run: env=" + JSON.stringify(options.env, null, 2));
+	console.log("API.run: cwd=" + options.cwd + " env=" + JSON.stringify(options.env, null, 2));
 
 	retry(0);
 
@@ -3539,19 +3539,25 @@ options.cwd = json.cwd;
 					/*
 						bullshit error: spawn /bin/dash ENOENT
 						/bin/dash exist! And one minute earlier it worked fine...
+
+						Hello from the future! -You also get ENOENT errors if the cwd dir doesn't exist!
 					*/
-				
-					if(typeof counter == "undefined") counter = 0;
+					var fs = require("fs");
+					fs.readdir(options.cwd, function(err, files) {
+						if(err && err.code == "ENOENT") {
+							return callback(new Error("Unable to run command because issues with options.cwd=" + options.cwd + "\ncommand=" + command + "\nDirectory error: " + err.message));
+						}
 
-					if( counter > maxRetry ) return callback(err);
+						if(typeof counter == "undefined") counter = 0;
 
-					setTimeout(function() {
-						console.log("Retrying command=" + command);
-						retry(++counter);
-					}, 1000);
+						if( counter > maxRetry ) return callback(err);
 
+						setTimeout(function() {
+							console.log("Retrying command=" + command);
+							retry(++counter);
+						}, 1000);
+					});
 				}
-
 			}
 			else return callback(null, {stdout: stdout, stderr: stderr});
 		
