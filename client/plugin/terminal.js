@@ -1358,7 +1358,7 @@ EDITOR.unbindKey(startTerminalFromKeyboard);
 		console.log("terminal:parseBuffer: BUFFER=", BUFFER); // Sometimes when opening the editor I get the ""Terminal file not open:" error. WHY!?
 		for(var terminalId in BUFFER) {
 			file = EDITOR.files[termPrefix + terminalId];
-			if(!file) throw new Error("Terminal file not open: " + termPrefix + terminalId);
+			if(!file) throw new Error(  "Terminal file not open: " + termPrefix + terminalId + " BUFFER's=" + JSON.stringify(Object.keys(BUFFER))  );
 			for (var i=0; i<BUFFER[terminalId].length; i++) {
 				parse(BUFFER[terminalId][i], file);
 			}
@@ -1707,6 +1707,7 @@ file.writeLine("\n" + file.path + " session closed " + (new Date()) + "\n");
 	}
 	
 	function terminalCloseFile(file) {
+
 		if(typeof file == "string") {
 			file = EDITOR.files[file];
 		}
@@ -1724,6 +1725,10 @@ file.writeLine("\n" + file.path + " session closed " + (new Date()) + "\n");
 		
 		while(terminalFiles.indexOf(file) != -1) terminalFiles.splice(terminalFiles.indexOf(file), 1);
 		}
+
+		var matchTerminalId = file.path.match(reTerm);
+		if(matchTerminalId != null) delete BUFFER[matchTerminalId[1]]
+
 
 		// Terminal event are removed in the fileSHow event, 
 		// but if the terminal is the only file open, we will not get a fileshow event!
