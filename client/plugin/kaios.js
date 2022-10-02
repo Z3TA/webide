@@ -53,7 +53,7 @@
 
 	//document.location = "st.htm";
 
-	LOW_RAM = true;
+	LOW_RAM = true; // Otherwise KaiOS will just kill Firefox if it uses too much RAM!
 
 	var INSERT = "T9-insert";
 	var NAV = "T9-navigate";

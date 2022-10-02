@@ -7,12 +7,16 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 ---
 
 New release
-- Test in Opera mobile
 
 
 ---
 
-Better support for using the editor for offline local work!
+Remote file socket is kept open even though the user has closed down the computer and disconnected from the editor...
+because the file is still "open" on the remote server.
+
+---
+
+Implement more features of the local file system web api! Like reading from a folder!
 
 ---
 
@@ -27,7 +31,7 @@ Don't cache local files, always open them from disk
 It would be nice if we could search on the function list without using the mouse to click on it...
 Ctrl+Alt+F
 Then press tab to go to the function
-the editor goes to the function.... but also seemt to run an autocomplete!...
+the editor goes to the function.... but also seems to run an autocomplete!...
 and sometimes selectIndex is -1 ...
 
 ---
@@ -39,21 +43,15 @@ stat function taking up a lot of CPU!
 
 THe smilie face window menu is very high on KaiOS ...
 the smilie letter wont show up on KaiOs... replace it with text, just "Give Feedack", "report problem", "give suggestion", put it in editor menu !?
-
-Need to fix the layout after switching to em font sisez!
+"Report issue or ideas"
 
 Should we use input listener !? Works on Mobile and also desktop... while keyup doesn't work on mobile!? (mobiles with physical keyboard even) ??!?
+gotcha: iscomposing=true... on some keyboards you need to hit the same button many times in order to send the key you want...!!!
+
 
 Why is File tabs plugin not disabled by KaiOS!? Or does KaiOS load a cached version!?
 
 Function list in KaiOS dissappears when you try to move down...
-
-
-
-KaiOS kills the browser after a few seconds...
-probably because out of RAM !?
-
-Limit files that can be open when LOW_RAM is true !?
 
 
 _serverStorage is huuuuuge
