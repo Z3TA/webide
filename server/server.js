@@ -16,6 +16,11 @@ sudo node server/server.js --hostname=webide-dev.se -pp 80
 
 //console.log("server.js process.argv=" + JSON.stringify(process.argv));
 
+if(process.argv.indexOf("--help") != -1) {
+	console.log("See README.txt");
+	return;
+}
+
 var getArg = require("../shared/getArg.js");
 
 var LOGLEVEL = getArg(["ll", "loglevel"]) || 7; // Will show log messages lower then or equal to this number

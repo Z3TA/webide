@@ -3,11 +3,7 @@
 /*
 	This script can be used in place of "editor".
 	
-	note: This script will be run if someone types npx webide.se ...
-	problem2: If no local GUI is available we only want to start the server!
-	problem2: We want to be able to provide server parameters to npx (for example -nat-type client)
-	solution: If process.argv have known server parameters, just start the server and pass the parameters!
-
+	usage:
 	webide [filepath]
 
 	or pipe to it:
@@ -29,6 +25,12 @@
 	or export EDITOR='/path/to/webide/bin/webide')
 
 	permanent: Add the export command (above) to .bashrc
+
+
+	note: This script will be run if someone types npx webide.se ...
+	problem2: If no local GUI is available we only want to start the server!
+	problem2: We want to be able to provide server parameters to npx (for example -nat-type client)
+	solution: If process.argv have known server parameters, just start the server and pass the parameters!
 
 */
 
@@ -96,6 +98,10 @@ function main() {
 				
 				
 			});
+			return;
+		}
+		else if(args.indexOf("--help") != -1) {
+			console.log("Usage: webide [path to file]\nSee README.txt for more info");
 			return;
 		}
 		

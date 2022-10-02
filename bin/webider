@@ -28,6 +28,11 @@
 
 */
 
+if(process.argv.indexOf("--help") != -1) {
+	console.log("This is a script, read the source code! Or email info@webide.se for support");
+	return;
+}
+
 var DEFAULT_PORT = 8103;
 
 var EOF = String.fromCharCode(3);
