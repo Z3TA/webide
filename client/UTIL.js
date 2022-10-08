@@ -2952,6 +2952,8 @@ b = b.slice(8);
 			
 		*/
 		
+		//console.log(keyEvent);
+
 		if(typeof keyEvent == "string") return fromString(keyEvent);
 		
 		//console.log("UTIL.code: charCode=" + keyEvent.charCode + " which=" + keyEvent.which + " keyCode=" + keyEvent.keyCode +" key="  + keyEvent.key);
@@ -2962,6 +2964,7 @@ b = b.slice(8);
 		if(keyEvent.keyCode) return keyEvent.keyCode;
 		if(keyEvent.key) return fromString(keyEvent.key);
 		if(keyEvent.data) return fromString(keyEvent.data);
+		if(keyEvent.inputType == "insertFromPaste") return null;
 		if(keyEvent.inputType) return fromString(keyEvent.inputType);
 
 		UTIL.objInfo(keyEvent);

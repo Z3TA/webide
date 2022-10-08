@@ -338,7 +338,7 @@ EDITOR.unbindKey(show_gotoFileInput2);
 			
 			var code = UTIL.code(keyUpEvent);
 			
-			console.log("goto_file: typing: code=" + code + " keyUpEvent.keyCode=" + keyUpEvent.keyCode + " EDITOR.input=" + EDITOR.input + " text=" + text + " lastTypedText=" + lastTypedText + " lastSearchText=" + lastSearchText);
+			//console.log("goto_file: typing: code=" + code + " keyUpEvent.keyCode=" + keyUpEvent.keyCode + " EDITOR.input=" + EDITOR.input + " text=" + text + " lastTypedText=" + lastTypedText + " lastSearchText=" + lastSearchText);
 			
 			keyUpEvent.preventDefault();
 			
