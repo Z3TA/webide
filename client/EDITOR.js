@@ -1614,8 +1614,12 @@ usePseudoClipboard = false;
 					callback(err);
 				}
 			}
+			else {
+				// Do the HTTP request via the server...
+				throw new Error("Not yet implemented: Opening files on http/https via the server.");
+			}
 		}
-		if(protocol == "" || EDITOR.remoteProtocols.indexOf(protocol) != -1) {
+		else if(protocol == "" || EDITOR.remoteProtocols.indexOf(protocol) != -1) {
 			var json = {path: path};
 			CLIENT.cmd("getFileSizeOnDisk", json, function gotFileSizeFromServer(err, json) {
 				if(err) return callback(err);

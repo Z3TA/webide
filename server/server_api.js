@@ -3489,7 +3489,6 @@ API.run = function run(user, json, callback) {
 		maxBuffer: 200*1024,
 		env: process.env,
 		shell: EXEC_OPTIONS.shell,
-cwd: user.workingDirectory
 	};
 	
 	/*
@@ -3504,11 +3503,17 @@ cwd: user.workingDirectory
 	*/
 	
 	if(json.cwd) {
-options.cwd = json.cwd;
+		options.cwd = json.cwd;
 	}
 	else {
 		options.cwd = user.workingDirectory;
 		// If no cwd is specified __dirname (where this script is located) will be used!
+
+		var protocol = UTIL.urlProtocol(options.cwd);
+		if(protocol != "") {
+			// We most likely can't "run" a program from a protocol url/path, only from local paths!
+			options.cwd = user.homeDir;
+		}
 	}
 	
 	if(json.env) {

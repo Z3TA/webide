@@ -6,14 +6,15 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
-25 requests
-1.45 MB / 554.59 KB transferred
-Finish: 1.43 s
-DOMContentLoaded: 465 ms
-load: 500 ms
+When using the github feature: https://webide.se/?github=Znurre/dz/blob/master/examples/ld51/moon.fc
+It doesn't update the repo! So if you have an old version...
 
-New release
+LLD_DIR=/usr/bin/lld
 
+---
+
+Can't use arrow keys in the terminal!?
+try using the less command 
 
 ---
 

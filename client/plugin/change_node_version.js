@@ -10,11 +10,11 @@
 	EDITOR.plugin({
 		desc: pluginDescription,
 		load: function loadChangeNodeVersion() {
-			CLIENT.on("loginSuccess", checkNodeVersions);
+			CLIENT.on("loginSuccess", checkAvailableNodeVersions);
 			EDITOR.on("changeWorkingDir", checkNvmrc);
 		},
 		unload: function unloadChangeNodeVersion() {
-			CLIENT.removeEvent("loginSuccess", checkNodeVersions);
+			CLIENT.removeEvent("loginSuccess", checkAvailableNodeVersions);
 			
 			removeWindowMenus();
 			
@@ -107,7 +107,7 @@ if(versions.indexOf(rcVersion) != -1) {
 		});
 	}
 
-	function checkNodeVersions() {
+	function checkAvailableNodeVersions() {
 		// note: This function is called every time the user re-login
 		removeWindowMenus();
 		
