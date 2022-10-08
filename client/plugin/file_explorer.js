@@ -545,8 +545,8 @@ return;
 			var filetype = UTIL.getFileExtension(item.path) || UTIL.getFileExtension(item.name);
 			var iconLoadError = false;
 			
-			icon.setAttribute("width", "22");
-			icon.setAttribute("height", "22");
+			icon.setAttribute("width", "20");
+			icon.setAttribute("height", "20");
 			icon.setAttribute("draggable", "false");
 			
 			icon.onerror = function() {

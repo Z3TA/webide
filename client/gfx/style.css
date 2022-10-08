@@ -1785,15 +1785,15 @@ ul.resolveList li {
 
 .fileExplorer .box {
 	font-family: Verdana, Geneva, sans-serif, monospace;
-	font-size: 1em;
+	font-size: 10px;
 	display: inline-block;
 	border: 0px solid black;
 	width: 12px;
-	height: 12px;
+	
 	
 	text-align: center;
 	vertical-align: middle;
-	margin-right: 2px;
+	margin-right: 0px;
 	margin-bottom: 2px;
 	outline: 0;
 	color: #6e6e6e;
@@ -1836,12 +1836,12 @@ ul.resolveList li {
 	margin-top: 0px;
 	margin-bottom: 2px;
 	margin-left: 2px;
-	font-size: 1em;
+	font-size: 1.25em;
 	vertical-align: middle;
 	
 	display: table-cell;
 	width: auto;
-	width: 68%;
+	width: 68%; /* the button for hiding the file explorer also need to fit beside the select! */
 	box-sizing: border-box;
 }
 
@@ -1873,9 +1873,9 @@ ul.resolveList li {
 
 .tree li {
 	margin:0;
-	margin-top: 4px;
-	margin-bottom: 4px;
-	padding-left: 12px; /* indentation + .5em */
+	margin-top: 2px;
+	margin-bottom: 2px;
+	padding-left: 8px; /* indentation + .5em */
 	line-height:14px; /* default list item's `line-height` */
 	position:relative;
 }
