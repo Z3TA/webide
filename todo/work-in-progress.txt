@@ -6,14 +6,16 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
-
+todo: Automatically save differetn sizes of an image and auto insert picture source srcset
+<picture>
+	<source media="(min-width: 1000px)" srcset="gfx/iphonex_880x1532.png">
+	<img src="gfx/iphonex_440x766.png" alt="Screenshot">
+</picture>
 
 
 ---
 
 sugg: open local files, reopen, even though we don't have an internet connection! 
-
-Native file system handle "times out" a lot. eg. you get the permission dialog
 
 ---
 

@@ -171,11 +171,12 @@
 
 	function getHandle(path, callback) {
 
-		console.warn("localfs:getHandle: path=" + path);
+		console.warn( "localfs:getHandle: path=" + path + " fileHandles=" + JSON.stringify(Object.keys(fileHandles)) );
 
 		var errorWithProperCallStack = new Error();
 
 		if( fileHandles.hasOwnProperty(path) ) {
+			console.warn("localfs:getHandle: Handle exist in fileHandles!");
 			var fileHandle = fileHandles[path];
 			verifyNativeFileSystemPermission(fileHandle, "readwrite", function(err) {
 				if(err) callback(err);
@@ -184,6 +185,7 @@
 			return;
 		}
 
+		console.warn("localfs:getHandle: Reading handle from IndexDb...");
 		readFileHandleFromIndexDb(path, function(err, fileSize, fileHandle) {
 			if(err) {
 				errorWithProperCallStack.message = "Unable to find a fileHandle for path=" + path + "\nError: " + err.message + "\n(The file might still exist, but we need to ask the user for it, try EDITOR.openLocalFile)";
@@ -192,7 +194,14 @@
 
 			verifyNativeFileSystemPermission(fileHandle, "readwrite", function(err) {
 				if(err) callback(err);
-				else callback(null, fileHandle);
+				else {
+
+					fileHandles[path] = fileHandle;
+					console.log("localfs:getHandle: Updated fileHandles=" + JSON.stringify(Object.keys(fileHandles)) );
+
+					callback(null, fileHandle);
+			
+				}
 			});
 		});
 	}
@@ -320,9 +329,10 @@
 						}).then(function(fileHandle) {
 
 							console.log("localfs:localWriteFile: path=" + path + " fileHandle.name=" + fileHandle.name);
-
-							path = protocol + "://" + fileHandle.name; // Update the path with new filname!
+path = protocol + "://" + fileHandle.name; // Update the path with new filname!
 							fileHandles[path] = fileHandle;
+
+							console.log("localfs:localWriteFile: Updated fileHandles=" + JSON.stringify(Object.keys(fileHandles)) );
 
 							CB(gotHandle, null, fileHandle);
 
