@@ -808,7 +808,7 @@ ul#tabList li.tabFolderItem {
 	
 	/*-webkit-transform: perspective(100px) rotateX(30deg); */
 	
-	font-size: 10px;
+	font-size: 9px;
 	text-align: center;
 	line-height: 1px;
 	
@@ -1066,7 +1066,7 @@ background-color: white;
 
 select.functionList {
 	font-family: Verdana, Geneva, sans-serif;
-	font-size: 1em;
+	font-size: 0.8em;
 	color: black;
 	outline: 0;
 	width: 100%;
@@ -1741,7 +1741,7 @@ ul.resolveList li {
 
 	.fileExplorer {
 	font-family: Verdana, Geneva, sans-serif;
-	font-size: 1em;
+	font-size: 0.8em;
 	box-sizing: border-box;
 	border-left: 2px solid #e8e8e8;
 	/* Can not have padding, or the canvas will fall down */
@@ -2106,7 +2106,7 @@ filter: url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\'><
 	text-transform: uppercase;
 	
 	font-family: Arial;
-	font-size: 0.8em;
+	font-size: 0.6em;
 	line-height: 10px;
 	
 	color: #333;
@@ -2142,7 +2142,7 @@ margin-left: 5px;
 	width: 70%;
 	margin: 15%;
 	margin-top: 20%;
-	margin-bottom: 10%
+	margin-bottom: 10%;
 padding: 0;
 }
 
@@ -2154,7 +2154,7 @@ padding: 0;
 	top: -23px;
 }
 .header figcaption span {
-	font-size: 0.8em;
+	font-size: 8px;
 }
 
 .discoveryBar .discoveryItem {

@@ -6,6 +6,14 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
+Text sizes for function list and file explorer is off!
+
+---
+
+Annotations need a progress bar!
+
+---
+
 When using the github feature: https://webide.se/?github=Znurre/dz/blob/master/examples/ld51/moon.fc
 It doesn't update the repo! So if you have an old version...
 

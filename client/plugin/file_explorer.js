@@ -233,7 +233,7 @@
 			var pixelRatio = window.devicePixelRatio || 1; // "Retina" displays gives 2
 			// Hight pixel density screens will report a bigger screen area then they actually have.
 			var windowWidth = window.innerWidth / pixelRatio;
-			if(windowWidth < 350) {
+			if(windowWidth < 450) {
 				EDITOR.fullScreenWidget(fileExplorerWrap);
 				if(!hideButton) {
 					hideButton = document.createElement("button");
