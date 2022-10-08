@@ -50,7 +50,7 @@
 		callback(true);
 	});
 
-	EDITOR.addTest(1, function test_resolveRelativePath(callback) {
+	EDITOR.addTest(function test_resolveRelativePath(callback) {
 
 		UTIL.assert(UTIL.resolvePath("/foo/bar/", "../baz"), "/foo/baz");
 		UTIL.assert(UTIL.resolvePath("/", "../"), "/");
@@ -2073,6 +2073,7 @@
 		
 	});
 	
+
 	// This test might screw up other tests!?
 	EDITOR.addTest(100099, false, function testDoubleLogin(callback) {
 		// It should not be possible to be logged in twice

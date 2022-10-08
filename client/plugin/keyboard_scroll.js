@@ -16,18 +16,13 @@
 	EDITOR.windowMenu.add(S("scroll_down"), [S("Navigate"), 20], down, "bottom");
 	
 	function right(file) {
-		
 		if(!file) return true;
 		
-		EDITOR.view.endingColumn += delta;
-		file.startColumn += delta;
-		
-		file.sanityCheck();
-		
+		file.scroll(delta);
+
 		EDITOR.renderNeeded();
 		
 		return false;
-		
 	}
 	
 	function left(file) {
@@ -36,14 +31,11 @@
 		
 		if(file.startColumn > 0) {
 			if(file.startColumn > delta) {
-				EDITOR.view.endingColumn -= delta;
-				file.startColumn -= delta;
+				file.scroll(-delta);
 			}
 			else {
-				EDITOR.view.endingColumn = EDITOR.view.visibleColumns;
-				file.startColumn = 0;
+				file.scroll(-file.startColumn);
 			}
-			
 			EDITOR.renderNeeded();
 		}
 		
@@ -64,4 +56,29 @@
 		file.scroll(undefined, direction * delta);
 	}
 	
+
+	// TEST-CODE-START
+
+	EDITOR.addTest(1, false, function testScrollHorizontally(callback) {
+
+		var str = "";
+
+		for(var i=0; i<200; i++) {
+			str = str + String.fromCharCode(65 + i%57);
+		}
+
+		EDITOR.openFile("fileWithLongLine.txt", '\n' + str + '\n\n', function(err, file) {
+			if(err) throw err;
+
+			right(file);
+
+			EDITOR.closeFile(file);
+
+			callback(true);
+		});
+	});
+
+	// TEST-CODE-END
+
+
 })();
