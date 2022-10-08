@@ -1355,7 +1355,7 @@ EDITOR.unbindKey(startTerminalFromKeyboard);
 	
 	function parseBuffer() {
 		var file;
-		console.log("terminal:parseBuffer: BUFFER=", BUFFER); // Sometimes when opening the editor I get the ""Terminal file not open:" error. WHY!?
+		//console.log("terminal:parseBuffer: BUFFER=", BUFFER);
 		for(var terminalId in BUFFER) {
 			file = EDITOR.files[termPrefix + terminalId];
 			if(!file) throw new Error(  "Terminal file not open: " + termPrefix + terminalId + " BUFFER's=" + JSON.stringify(Object.keys(BUFFER))  );
@@ -1438,7 +1438,7 @@ file.writeLine("\n" + file.path + " session closed " + (new Date()) + "\n");
 		
 		var terminalId = file.path.match(reTerm)[1];
 		
-		//console.log("terminalKeyPressed: character=" + character + " combo=" + JSON.stringify(combo) + " keyPressEvent.key=" + keyPressEvent.key);
+		console.log("terminalKeyPressed: character=" + character + " combo=" + JSON.stringify(combo) + " keyPressEvent.key=" + keyPressEvent.key);
 		
 		if(!EDITOR.input) return ALLOW_DEFAULT;
 		
@@ -1473,9 +1473,6 @@ file.writeLine("\n" + file.path + " session closed " + (new Date()) + "\n");
 		
 		if(!file) return ALLOW_DEFAULT;
 
-		//console.log("terminalKeyDown: file.path=" + file.path);
-		//console.log("terminalFiles=" + JSON.stringify(terminalFiles.map(function(file) {return file.path})));
-		
 		if(terminalFiles.indexOf(file) == -1) {
 			//console.log("Not a terminal file: " + file.path);
 			return ALLOW_DEFAULT;
@@ -1483,8 +1480,9 @@ file.writeLine("\n" + file.path + " session closed " + (new Date()) + "\n");
 		
 		var code = keyDownEvent.charCode || keyDownEvent.keyCode;
 		
-		//console.log("terminalKeyDown: character=" + character + " code=" + code + " combo=" + JSON.stringify(combo) +" key=" + keyDownEvent.key);
-		
+		console.log("terminalKeyDown: character=" + character + " code=" + code + " combo=" + JSON.stringify(combo) + " key=" + keyDownEvent.key + " file.path=" + file.path);
+		//console.log("terminalFiles=" + JSON.stringify(terminalFiles.map(function(file) {return file.path})));
+
 		if(!EDITOR.input) {
 			return ALLOW_DEFAULT;
 		}
@@ -1594,6 +1592,7 @@ file.writeLine("\n" + file.path + " session closed " + (new Date()) + "\n");
 			data = ESC + "[C";
 		}
 		else if(code == 40 && combo.sum == 0) { // arrow down
+			// Server recives \u001b[B
 			data = ESC + "[B";
 		}
 		else if(code == 46 && combo.sum == 0) { // Delete
