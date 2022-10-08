@@ -3503,15 +3503,20 @@ API.run = function run(user, json, callback) {
 	*/
 	
 	if(json.cwd) {
+		//console.log("API.run: Setting options.cwd from " + options.cwd + " to json.cwd=" + json.cwd);
 		options.cwd = json.cwd;
 	}
 	else {
+		//console.log("API.run: Setting options.cwd from " + options.cwd + " to user.workingDirectory=" + user.workingDirectory);
 		options.cwd = user.workingDirectory;
 		// If no cwd is specified __dirname (where this script is located) will be used!
 
 		var protocol = UTIL.urlProtocol(options.cwd);
+		//console.log("API.run: protocol=" + protocol + " options.cwd=" + options.cwd);
+
 		if(protocol != "") {
 			// We most likely can't "run" a program from a protocol url/path, only from local paths!
+			//console.log("API.run: Setting options.cwd from " + options.cwd + " to user.homeDir=" + user.homeDir);
 			options.cwd = user.homeDir;
 		}
 	}
@@ -3525,7 +3530,7 @@ API.run = function run(user, json, callback) {
 	var command = json.command;
 	
 	console.log("API.run: Running command=" + command + " ...");
-	console.log("API.run: cwd=" + options.cwd + " env=" + JSON.stringify(options.env, null, 2));
+	//console.log("API.run: cwd=" + options.cwd + " user.homeDir=" + user.homeDir + " user.workingDirectory=" + user.workingDirectory + " env=" + JSON.stringify(options.env, null, 2));
 
 	retry(0);
 

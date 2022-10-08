@@ -2480,6 +2480,12 @@ else {
 		
 		if(protocolIndex != -1) return url.slice(0, protocolIndex).toLowerCase();
 	
+		var protocolIndex = url.indexOf(":/");
+		if( protocolIndex != -1) {
+			console.warn("UTIL.urlProtocol: url=" + url);
+			return url.slice(0, protocolIndex).toLowerCase();
+		}
+
 		else return ""; // Probably a local file path (should we return "file" ?)
 		
 	},
