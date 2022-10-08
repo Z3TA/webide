@@ -1402,6 +1402,15 @@ function main() {
 		});
 	}
 	
+	if(!INSIDE_DOCKER && process.platform=="linux") {
+		// Make sure /dev/kvm is read/writeable so that users can run Android emulator
+		module_child_process.exec("chmod 666 /dev/kvm", EXEC_OPTIONS, function(err, stdout, stderr) {
+			if(err) console.error( err );
+			if(stderr) log(stderr, NOTICE);
+			if(stdout) log(stdout, INFO);
+		});
+	}
+
 	if(info.uid == 0 && !USERNAME && 1==2) {
 		// ## forkstat
 		// Detect when users start an app

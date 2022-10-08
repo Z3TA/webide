@@ -84,7 +84,8 @@ function startEmulator() {
 			CLIENT.cmd("android.startEmulator", {}, startTimeout, function(err) {
 				if(err) {
 					// The emulator is a bit random if it starts or not...
-					var msg = "If you do not see the Android Emulator, you may try clicking on the Android icon again! Error: " + err.message;
+					var terminalCommands = "./Android/Sdk/emulator/emulator -list-avds\n./Android/Sdk/emulator/emulator -avd Pixel_2_API_25";
+					var msg = "If you do not see the Android Emulator, you may try clicking on the Android icon again, or run the emulator command manually via the cmd/terminal <kbd>ALT+T</kbd>:\n<pre>" + terminalCommands + "</pre>\n Error: " + err.message;
 					
 					alertBox(msg);
 					

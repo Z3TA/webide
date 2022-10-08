@@ -146,7 +146,7 @@ function startAvd(username, avd, realCallback, recursion) {
 				var err = new Error(lastStderr);
 			}
 			else if(code != 0) {
-				var err = new Error("Emulator closed with exit code=" + code);
+				var err = new Error("Emulator closed with exit code=" + code + " bin=" + bin + " args=" + JSON.stringify(emulatorArgs));
 			}
 
 			log("Calling startAvd callback after emulator.on close! code=" + code + " signal=" + signal + " lastStderr=" + lastStderr + " ");
@@ -165,7 +165,7 @@ function startAvd(username, avd, realCallback, recursion) {
 		console.error(err);
 		if(callback) {
 			log("Calling startAvd callback after emulator.on error! err.message=" + err.message);
-callback(err);
+			callback(err);
 			callback = null;
 		}
 		//throw err;
