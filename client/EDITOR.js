@@ -6082,8 +6082,10 @@ console.warn(err.message);
 	
 	var stats = null; // Key:value to store stats
 	var saveStatsTimer;
-	EDITOR.statsEnabled = true;
-	EDITOR.localStorage.getItem("_stats_", function(err, str) {
+	EDITOR.statsEnabled = false;
+
+	if(EDITOR.statsEnabled) {
+		EDITOR.localStorage.getItem("_stats_", function(err, str) {
 		if(err) {
 			console.error(err);
 		}
@@ -6102,7 +6104,8 @@ console.warn(err.message);
 			}
 		}
 	});
-	
+	}
+
 	EDITOR.stat = function stat(key, retry) {
 		// Increment a key value
 		
