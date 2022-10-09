@@ -4191,8 +4191,14 @@ if(startColumn-indentationWidth > minIndentation*EDITOR.settings.tabSpace) {
 			*/
 			
 			// Update endingcolumn and render?
-			if(EDITOR.view.endingColumn != file.startColumn + EDITOR.view.visibleColumns) {
-				EDITOR.view.endingColumn = file.startColumn + EDITOR.view.visibleColumns;
+			var newEndingColumnValue = (file.startColumn + EDITOR.view.visibleColumns)
+			if(EDITOR.view.endingColumn != newEndingColumnValue) {
+				
+				if( (file.startColumn + EDITOR.view.visibleColumns) != newEndingColumnValue ) {
+					throw new Error("This should never throw! newEndingColumnValue=" + newEndingColumnValue + " file.startColumn=" + file.startColumn + " EDITOR.view.visibleColumns=" + EDITOR.view.visibleColumns + " EDITOR.view.endingColumn=" + EDITOR.view.endingColumn);
+				}
+
+				EDITOR.view.endingColumn = newEndingColumnValue;
 				scrolled = true;
 			}
 			

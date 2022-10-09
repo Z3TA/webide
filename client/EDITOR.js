@@ -480,9 +480,10 @@ _editorInput = true;
 			set: function (newValue) {
 				if(EDITOR.currentFile) {
 					if( EDITOR.currentFile.startColumn + EDITOR.view.visibleColumns != newValue) {
-						throw new Error("Scroll bug: new value for EDITOR.view.endingColumn is " + newValue + " but EDITOR.view.visibleColumns=" + EDITOR.view.visibleColumns + " EDITOR.currentFile.startColumn =" + EDITOR.currentFile.startColumn );
+						throw new Error("Scroll bug: EDITOR.view.endingColumn=" + EDITOR.view.endingColumn + " new value for EDITOR.view.endingColumn " + newValue + " but EDITOR.view.visibleColumns=" + EDITOR.view.visibleColumns + " EDITOR.currentFile.startColumn =" + EDITOR.currentFile.startColumn );
 					}
 				}
+				console.log(UTIL.getStack("Setting _endingColumn=" + _endingColumn + " to newValue=" + newValue));
 				_endingColumn = newValue;
 			},
 			enumerable: true // if this property shows up during enumeration of the properties
