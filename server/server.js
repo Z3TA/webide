@@ -84,7 +84,7 @@ catch(err) {
 }
 
 var nodeVersion = parseInt(process.version.match(/v(\d*)\./)[1]);
-var testedNodeVersions = [0,4,6,8,10];
+var testedNodeVersions = [0,4,6,8,10,16];
 if(testedNodeVersions.indexOf(nodeVersion) == -1) log("warn: The editor has only been tested with node.js versions " + JSON.stringify(testedNodeVersions) + " ! You are running version=" + process.version, WARN);
 
 var EDITOR_VERSION = 0; // Populated by release script. Or it will be the latest commit id
@@ -2998,7 +2998,7 @@ function sockJsConnection(connection) {
 								}
 							}
 							
-							if(!checkingPw) idFail("User does not exist: " + username);
+							if(!checkingPw) idFail("Unable to login. User does not exist: " + username);
 							
 						});
 					}

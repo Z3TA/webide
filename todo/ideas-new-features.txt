@@ -38,6 +38,11 @@ Feature list (Not ordered/prioritized)
 
 
 
+
+---
+
+idea: Make a Wordpress plugin that uses Webide when editing HTML, with a auto preview of how the page looks 
+
 ---
 
 users should be able to access their tls keys (so they can test and use tls in their (dev) servers)
