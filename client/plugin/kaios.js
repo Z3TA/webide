@@ -111,8 +111,10 @@
 		//EDITOR.bindKey({desc: "Focus next element", key: "SoftRight", fun: focusNextElement});
 		//EDITOR.bindKey({desc: "Show context menu", key: "SoftLeft", fun: kaiToggleMenuOnKeyPress});
 		EDITOR.bindKey({desc: "Toggle between T9 modes", key: "Call", mode: "*", fun: kaiToggleMode});
-		//EDITOR.bindKey({desc: "Reload KaiOS plugin", key: "EndCall", mode: "*", fun: kaiReloadPlugin});
+
+		// TEST-CODE-START
 		EDITOR.bindKey({desc: "Reload KaiOS plugin", key: "SoftRight", mode: "*", fun: kaiReloadPlugin});
+		// TEST-CODE-END
 
 		EDITOR.bindKey({desc: "Delete character", key: "Backspace", mode: INSERT, fun: kaiBackspaceInInsertMode}); // Backspace does not fire textarea input event!
 		
