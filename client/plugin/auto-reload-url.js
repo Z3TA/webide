@@ -27,7 +27,7 @@
 		clearTimeout(watcher.timer);
 		watcher.win.close();
 		var index = watch.indexOf(watcher);
-		if(index == -1) throw new Error("watcher=", watcher, " not found in watch=", watch);
+		if(index == -1) throw new Error("auto-reload-url: watcher=" + watcher + " not found in watch=" + JSON.stringify(watch, null, 2));
 		watch.splice(index, 1);
 	}
 		

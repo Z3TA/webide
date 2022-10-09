@@ -2212,7 +2212,7 @@ else {
 			if(typeof recursion != "number") recursion = 0;
 			if(recursion > 100) {
 				UTIL.objInfo(pathsParameter);
-				throw new Error("UTIL.joinPaths: Too much recursion=" + recursion + " paths.length=" + paths.length + " pathsParameter.length=" + pathsParameter.length + " pathsParameter=", pathsParameter);
+				throw new Error( "UTIL.joinPaths: Too much recursion=" + recursion + " paths.length=" + paths.length + " pathsParameter.length=" + pathsParameter.length + " pathsParameter=" + JSON.stringify(pathsParameter) );
 			}
 			
 			//console.log("flatten: paths=" + JSON.stringify(paths));
@@ -2929,7 +2929,7 @@ b = b.slice(8);
 		
 		var charCode = (typeof keyEvent.which == "number") ? keyEvent.which : keyEvent.charCode || keyEvent.keyCode;
 		
-		if(charCode == undefined) throw new Error("Unable to get the key from keyEvent:", keyEvent);
+		if(charCode == undefined) throw new Error( "Unable to get the key from keyEvent:" + UTIL.ObjInfo(keyEvent, true) );
 		
 		return String.fromCharCode(charCode);
 	},

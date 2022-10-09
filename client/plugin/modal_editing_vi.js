@@ -1301,7 +1301,7 @@ repeatCommand = {undo: command.undo, redo: command.redo};
 			//console.log("historyItem:", historyItem);
 			//console.log("branch:", branch);
 		}
-		if(branch.currentItem <= -1) throw new Error("branch.currentItem=" + branch.currentItem + " branch:", branch);
+		if(branch.currentItem <= -1) throw new Error( "branch.currentItem=" + branch.currentItem + " branch:" + JSON.stringify(branch, null, 2) );
 		if(branch == undefined) throw new Error("branch=" + branch);
 		if(branch.currentItem == undefined) throw new Error("branch.currentItem=" + branch.currentItem);
 		//if(historyItem == undefined) throw new Error("historyItem=" + historyItem);
@@ -2380,7 +2380,7 @@ var lastCharIndex = gridRow[gridRow.length-1].index;
 					else if(file.caret.col < colBefore) {
 						lastCol = colBefore;
 					}
-					if(rowLength > 0 && file.caret.eol) throw new Error("We should not place the caret at eol! file.caret=", file.caret);
+					if(rowLength > 0 && file.caret.eol) throw new Error( "We should not place the caret at eol! file.caret=" + JSON.stringify(file.caret) );
 					
 				});
 			}
@@ -2400,7 +2400,7 @@ var lastCharIndex = gridRow[gridRow.length-1].index;
 					else if(file.caret.col < colBefore) {
 						lastCol = colBefore;
 					}
-					if(rowLength > 0 && file.caret.eol) throw new Error("We should not place the caret at eol! file.caret=", JSON.stringify(file.caret));
+					if(rowLength > 0 && file.caret.eol) throw new Error("We should not place the caret at eol! file.caret=" + JSON.stringify(file.caret));
 					
 				});
 			}

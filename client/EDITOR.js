@@ -536,7 +536,7 @@ _editorInput = true;
 				throw new Error("wait=" + wait + " needs to be a Boolean!");
 			}
 			
-			if(serverStorageWaitingItems === null) throw new Error("serverStorageWaitingItems=" + serverStorageWaitingItems + " id=" + id + " val=" + val + " wait=" + wait + " callback=", callback);
+			if(serverStorageWaitingItems === null) throw new Error("serverStorageWaitingItems=" + serverStorageWaitingItems + " id=" + id + " val=" + val + " wait=" + wait + " callback=" + callback.toString());
 
 			// Wait one second before storing the value, in case it gets deleted right away, or we get another change
 			if(serverStorageWaitingItems.hasOwnProperty(id)) clearTimeout(serverStorageWaitingItems[id]);
@@ -690,7 +690,7 @@ callback = value;
 				}
 				
 				for(var name in itemsObject) {
-					if(typeof itemsObject[name] != "string") throw new Error("name=" + name + " in ", itemsObject, " should be a string!");
+					if(typeof itemsObject[name] != "string") throw new Error("name=" + name + " in " + JSON.stringify(itemsObject) + " should be a string!");
 					window.localStorage.setItem(name, itemsObject[name]);
 				}
 				
@@ -843,7 +843,7 @@ EDITOR.bindKey(b);
 	var _editorMode = EDITOR.defaultMode;
 
 	function setMode(name) {
-		if(EDITOR.modes.indexOf(name) == -1) throw new Error(name + " mode is not registered as a mode/modal! Available modes are: " + JSON.stringify(EDITOR.modes));
+		if(EDITOR.modes.indexOf(name) == -1) throw new Error( name + " mode is not registered as a mode/modal! Available modes are: " + JSON.stringify(EDITOR.modes) );
 
 		_editorMode = name;
 		//console.log("Set EDITOR.mode=" + EDITOR.mode);
@@ -852,12 +852,12 @@ EDITOR.bindKey(b);
 	EDITOR.parsers = [];
 	EDITOR.addParser = function addParser(parserController) {
 		for(var i=0; i<EDITOR.parsers; i++) {
-			if(EDITOR.parsers[i] == parserController) throw new Error("Parser already registered: ", parserController);
+			if(EDITOR.parsers[i] == parserController) throw new Error( "Parser already registered: " + UTIL.objInfo(parserController, true) );
 		}
 
-		if(!parserController.hasOwnProperty("canParse")) throw new Error("Parser does not have a canParse method! ", parserController);
+		if(!parserController.hasOwnProperty("canParse")) throw new Error( "Parser does not have a canParse method! " + UTIL.objInfo(parserController, true) );
 
-		if(!parserController.fileExtensions) throw new Error("Parser do not support any file extensions! ", parserController);
+		if(!parserController.fileExtensions) throw new Error( "Parser do not support any file extensions! " + UTIL.objInfo(parserController, true) );
 		else {
 			for(var i=0; i<parserController.fileExtensions.length; i++) {
 				if( EDITOR.parseFileExtensionAsCode.indexOf(  parserController.fileExtensions[i]  ) != -1 ) {
@@ -5190,7 +5190,7 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 			
 			item = menu.addItem(label, keyCombo, action, order, separator);
 			
-			if(item == undefined) throw new Error("Failed to add item!? menu=", menu, " label=", label, " ");
+			if(item == undefined) throw new Error( "Failed to add item!? menu=" + UTIL.objInfo(menu, true) + " label=" + UTIL.objInfo(label, true) );
 			
 			return item;
 			
@@ -5207,7 +5207,7 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 		},
 		update: function updateWindowMenuItem(menuItem, options) {
 			
-			if(!menuItem instanceof DropdownMenuItem) throw new Error("menuItem is not a dropdown menu item: ", menuItem);
+			if(!menuItem instanceof DropdownMenuItem) throw new Error( "menuItem is not a dropdown menu item: " + UTIL.objInfo(menuItem) );
 			
 			if(options.active === true) menuItem.activate();
 			else if(options.active === false) menuItem.deactivate();
@@ -8839,7 +8839,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		},
 		addWidget: function(el) {
 			
-			if(!EDITOR.dashboard.enabled) throw new Error("dsshboard disable by " + EDITOR.dashboard.disabledBy.join(","));
+			if(!EDITOR.dashboard.enabled) throw new Error("dashboard disable by " + EDITOR.dashboard.disabledBy.join(",") );
 
 			if(typeof el == "function") throw new Error("Parameter el in EDITOR.addDashboardWidget is a function. Expected a HTML DOM Node!");
 			
@@ -8896,7 +8896,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 			console.log("Showing the dashboard! stayHidden=" + EDITOR.dashboard.stayHidden);
 			
 			if(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("dashboard") != -1) throw new Error("dashboard disabled via query string!");
-			if(!EDITOR.dashboard.enabled) throw new Error("dsshboard disable by " + EDITOR.dashboard.disabledBy.join(","));
+			if(!EDITOR.dashboard.enabled) throw new Error("dashboard disable by " + EDITOR.dashboard.disabledBy.join(","));
 
 			while(EDITOR.dashboard.announcedWidgets.length > 0) EDITOR.dashboard.createWidget(EDITOR.dashboard.announcedWidgets[0]);
 
@@ -9861,7 +9861,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 				Solution: Save the caret position every time the element blurs
 			*/
 
-			if(text == undefined) throw new Error("text=" + text + " t=", t);
+			if(text == undefined) throw new Error( "text=" + text + " t=" + UTIL.objInfo(t) );
 
 			var sTop = t.scrollTop || parseInt(t.getAttribute("sTop")) || 0;
 			var selStart = t.selectionStart || parseInt(t.getAttribute("selStart")) || 0;

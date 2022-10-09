@@ -616,7 +616,7 @@ path = protocol + "://" + fileHandle.name; // Update the path with new filname!
 			callback = defaultPath;
 			defaultPath = undefined;
 		}
-		else if(typeof defaultPath != "undefined" && typeof defaultPath != "string") throw new Error("defaultPath=" + defaultPath + " should be undefined or a string (path to a folder): ", defaultPath); 
+		else if(typeof defaultPath != "undefined" && typeof defaultPath != "string") throw new Error("defaultPath=" + defaultPath + " should be undefined or a string (path to a folder): " + defaultPath); 
 
 		if(typeof callback != "function") throw new Error("localfs:localFileDialog: Second (or first) parameter must be a callback function!");
 

@@ -1085,7 +1085,7 @@ setTimeout(function() {
 			}
 		}
 		
-		if(recursion > 100) throw new Error("Max recursion reached! target=", target);
+		if(recursion > 100) throw new Error( "Max recursion reached! target=" + UTIL.objInfo(target, true) );
 		
 		var id = target.id;
 		var mouseTarget = {};
@@ -1894,7 +1894,7 @@ isPlaying = true;
 			//console.log("Calling onname=" + onname + " on el=", el);
 			el[onname]();
 		}
-		else throw new Error("No means to trigger eventName=" + eventName + " on el=", el, " in BROWSER=" + BROWSER);
+		else throw new Error("No means to trigger eventName=" + eventName + " on el=" + UTIL.objInfo(el, true) + " in BROWSER=" + BROWSER);
 	}
 	
 	function mousePlaybackAnimation(newDestX, newDestY, instant) {
@@ -3326,7 +3326,7 @@ isPlaying = true;
 			
 			testFile = file;
 			
-			if(!EDITOR.currentFile) throw new Error("EDITOR.currentFile=" + EDITOR.currentFile + " EDITOR.files=", EDITOR.files);
+			if(!EDITOR.currentFile) throw new Error( "EDITOR.currentFile=" + EDITOR.currentFile + " EDITOR.files=" + JSON.stringify(Object.keys(EDITOR.files)) );
 			
 			if(EDITOR.currentFile != file) throw new Error("EDITOR.currentFile=" + EDITOR.currentFile.path + " expected file=" + file.path);
 			
@@ -3439,7 +3439,7 @@ isPlaying = true;
 			
 			testFile = file;
 			
-			if(!EDITOR.currentFile) throw new Error("EDITOR.currentFile=" + EDITOR.currentFile + " EDITOR.files=", EDITOR.files);
+			if(!EDITOR.currentFile) throw new Error( "EDITOR.currentFile=" + EDITOR.currentFile + " EDITOR.files=" + JSON.stringify(Object.keys(EDITOR.files)) );
 			
 			if(EDITOR.currentFile != file) throw new Error("EDITOR.currentFile=" + EDITOR.currentFile.path + " expected file=" + file.path);
 			
@@ -3728,7 +3728,7 @@ isPlaying = true;
 			
 			testFile = file;
 			
-			if(!EDITOR.currentFile) throw new Error("EDITOR.currentFile=" + EDITOR.currentFile + " EDITOR.files=", EDITOR.files);
+			if(!EDITOR.currentFile) throw new Error( "EDITOR.currentFile=" + EDITOR.currentFile + " EDITOR.files=" + JSON.stringify(Object.keys(EDITOR.files)) );
 			
 			if(EDITOR.currentFile != file) throw new Error("EDITOR.currentFile=" + EDITOR.currentFile.path + " expected file=" + file.path);
 			

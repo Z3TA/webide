@@ -6,6 +6,16 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
+I wanted to reopen last closed  file, but it was a search file! (so it didn't exist on disk) ...
+
+---
+
+User had problems with auto-reload-url plugin ...
+
+Used tried to "preview" a CSS file... 
+
+---
+
 2022-10-09 (12:26:23) Running gcsf mount for ltest1 because gcsf login successfully .... (server.js:6364:5)
 2022-10-09 (12:26:23) Starting gcsfMountSession with args=["mount","/home/ltest1/googleDrive","-s","ltest1"] gcsfOptions={} (server.js:6452:5)
 2022-10-09 (12:26:23) ltest1 gcsfLoginSession close: code=0 signal=null (server.js:6318:4)

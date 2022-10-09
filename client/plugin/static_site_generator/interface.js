@@ -1408,7 +1408,7 @@ for(var i=0; i<options.length; i++) {
 	}
 	
 	function saveCnf(site) {
-		if(selectedSite != site) throw new Error("site=", site, " selectedSite=", selectedSite);
+		if(selectedSite != site) throw new Error( "not the same: site=" + JSON.stringify(site) + " selectedSite=" + JSON.stringify(selectedSite) );
 		if(typeof site != "object") throw new Error("site=" + site + " need to be an object!");
 		var fileName = "ssgconf.json";
 		var folder = site.projectFolder;

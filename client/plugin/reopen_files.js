@@ -707,7 +707,7 @@
 		if(state == undefined) state = {};
 
 		fileStateProps.forEach(function(prop) {
-			if(!file.hasOwnProperty(prop)) throw new Error("Unknown file property: " + prop + " fileStateProps=" + JSON.stringify(fileStateProps) + " file[" + prop + "]=" + file[prop] + " typeof file=" + (typeof file) + " file instanceof File ? " + (file instanceof File) + " file=", file);
+			if(!file.hasOwnProperty(prop)) throw new Error( "Unknown file property: " + prop + " fileStateProps=" + JSON.stringify(fileStateProps) + " file[" + prop + "]=" + file[prop] + " typeof file=" + (typeof file) + " file instanceof File ? " + (file instanceof File) + " file=" + UTIL.objInfo(file, true) );
 			state[prop] = file[prop];
 		});
 
