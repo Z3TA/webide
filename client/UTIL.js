@@ -2537,7 +2537,7 @@ else {
 		
 		var protoArray = ["file", "http", "https", "ftp", "ssh", "sftp", "ftps", "chrome-extension", "smb"];
 		
-		if( typeof EDITOR != "undefined") {
+		if( typeof EDITOR != "undefined" && typeof EDITOR.protocols == "function") {
 			var ep = EDITOR.protocols();
 			for (var i=0; i<ep.length; i++) {
 				protoArray.push(ep[i]);
