@@ -85,7 +85,7 @@ todo: Run vttest
 			setTimeout(function() {
 					//console.log("after waitForReopen terminalFiles=" + JSON.stringify(terminalFiles.map(function(file) {return file.path})));
 				
-				parseBuffer();
+					parseTerminalBuffer();
 				
 				waitForReopen = false;
 				
@@ -488,7 +488,7 @@ EDITOR.unbindKey(startTerminalFromKeyboard);
 		
 	*/
 	
-	function parse(data, file) {
+	function parseTerminal(data, file) {
 		
 		//console.log("Parse data=" + data);
 		
@@ -1353,14 +1353,14 @@ EDITOR.unbindKey(startTerminalFromKeyboard);
 		
 	}
 	
-	function parseBuffer() {
+	function parseTerminalBuffer() {
 		var file;
-		//console.log("terminal:parseBuffer: BUFFER=", BUFFER);
+		//console.log("terminal:parseTerminalBuffer: BUFFER=", BUFFER);
 		for(var terminalId in BUFFER) {
 			file = EDITOR.files[termPrefix + terminalId];
 			if(!file) throw new Error(  "Terminal file not open: " + termPrefix + terminalId + " BUFFER's=" + JSON.stringify(Object.keys(BUFFER))  );
 			for (var i=0; i<BUFFER[terminalId].length; i++) {
-				parse(BUFFER[terminalId][i], file);
+				parseTerminal(BUFFER[terminalId][i], file);
 			}
 			BUFFER[terminalId].length = 0;
 			delete BUFFER[terminalId];
@@ -1377,7 +1377,7 @@ EDITOR.unbindKey(startTerminalFromKeyboard);
 		if(term.exit) {
 			
 			if(file) {
-file.writeLine("\n" + file.path + " session closed " + (new Date()) + "\n");
+				file.writeLine("\n" + file.path + " session closed " + (new Date()) + "\n");
 				EDITOR.renderNeeded();
 			}
 			
@@ -1405,7 +1405,7 @@ file.writeLine("\n" + file.path + " session closed " + (new Date()) + "\n");
 				
 				if(!EDITOR.files.hasOwnProperty(termPrefix + term.id)) throw new Error("termPrefix=" + termPrefix + " + term.id=" + term.id + " file failed to open!");
 				
-				parseBuffer();
+				parseTerminalBuffer();
 				
 			});
 			return;
@@ -1425,8 +1425,8 @@ file.writeLine("\n" + file.path + " session closed " + (new Date()) + "\n");
 		
 		if(term.data) {
 			//console.log("terminalMessage: Parsing data...");
-			parseBuffer();
-			parse(term.data, file);
+			parseTerminalBuffer();
+			parseTerminal(term.data, file);
 		}
 		
 	}
