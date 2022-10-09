@@ -6,6 +6,55 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
+2022-10-09 (12:26:23) Running gcsf mount for ltest1 because gcsf login successfully .... (server.js:6364:5)
+2022-10-09 (12:26:23) Starting gcsfMountSession with args=["mount","/home/ltest1/googleDrive","-s","ltest1"] gcsfOptions={} (server.js:6452:5)
+2022-10-09 (12:26:23) ltest1 gcsfLoginSession close: code=0 signal=null (server.js:6318:4)
+2022-10-09 (12:26:23) ltest1 gcsfMountSession stderr: fuse: device not found, try 'modprobe fuse' first
+                       (server.js:6501:5)
+
+
+blockedd: https://accounts.google.com/o/oauth2/auth?scope=https://www.googleapis.com/auth/drive&redirect_uri=urn:ietf:wg:oauth:2.0:oob&response_type=code&client_id=987730033948-ahajn7bgtdfh09b719f9a30u9sma2n96.apps.googleusercontent.com
+allowed : https://accounts.google.com/o/oauth2/auth?scope=https://www.googleapis.com/auth/drive&redirect_uri=urn:ietf:wg:oauth:2.0:oob&response_type=code&client_id=987730033948-ahajn7bgtdfh09b719f9a30u9sma2n96.apps.googleusercontent.com
+
+ and follow the instructions displayed there.
+
+
+grep "Please direct your browser to"
+
+
+working redirect_uri: https://accounts.google.com/o/oauth2/auth?scope=https://www.googleapis.com/auth/drive&redirect_uri=http://localhost:8081&response_type=code&client_id=987730033948-ahajn7bgtdfh09b719f9a30u9sma2n96.apps.googleusercontent.com"}
+
+https://accounts.google.com/o/oauth2/auth?scope=https://www.googleapis.com/auth/drive&redirect_uri=http://localhost:8081&response_type=code&client_id=987730033948-ahajn7bgtdfh09b719f9a30u9sma2n96.apps.googleusercontent.com
+
+http://localhost:8081
+
+Compiling gcsf:
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+cargo build --release
+
+if you get an error like 
+$ gcsf login anton
+thread 'main' panicked at 'called `Option::unwrap()` on a `None` value', /home/johan/.cargo/registry/src/github.com-1ecc6299db9ec823/gcsf-0.1.28/src/gcsf/config.rs:104:37
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+then run cargo clean and build again!
+
+
+Unable to connect to Google Drive!
+
+ltest1 gcsfLoginSession stderr: ./../gcsf: error while loading shared libraries: libssl.so.1.0.0: cannot open shared object file: No such file or directory
+
+need to recompile in order to use latest libs
+
+
+apt install libssl-dev
+
+---
+
+todo: webdav or Nextcloud support!!
+
+---
+
 todo: Automatically save differetn sizes of an image and auto insert picture source srcset
 <picture>
 	<source media="(min-width: 1000px)" srcset="gfx/iphonex_880x1532.png">

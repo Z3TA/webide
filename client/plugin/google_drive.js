@@ -30,6 +30,8 @@ EDITOR.plugin({
 			
 			EDITOR.registerAltKey({char: "&", alt:3, label: "Google Drive", fun: toggleGoogleDrive});
 			
+			console.log("googleDrive: Loaded Google Drive plugin!");
+
 },
 		unload: function unloadGoogleDriveSupport() {
 EDITOR.ctxMenu.remove(menuItem);
@@ -57,14 +59,18 @@ EDITOR.ctxMenu.remove(menuItem);
 		// Should we show a loading bar !?
 		
 		CLIENT.cmd("googleDrive", {code: null}, function(err, gd) {
-if(err) return alertBox(err.message);
+			console.log("googleDrive: callback from googleDrive command...");
+
+			console.log("googleDrive: err=" + (err && err.message) + " gd=" + JSON.stringify(gd));
+
+			if(err && (!gd || !gd.url)) return alertBox(err.message);
 		
 			if(gd.mounted) return mountSuccess();
 			else if(gd.url) {
 				EDITOR.createWindow({url: gd.url}, function(err, win) {
 					// Ignore error because we shouln't be able to access this window
 					
-					promptBox("After authorizing with Google (new window) you will get a code. Paste the code here:", function(code) {
+					promptBox('After authorizing with Google via ' + gd.url + ' (open in new window/tab) you will get a code. Paste the code here:', function(code) {
 						
 						try {
 							win.close();

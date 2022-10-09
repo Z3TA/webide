@@ -36,6 +36,8 @@ var log; // Using small caps because it looks and feels better
 
 	if(logFile) logModule.setLogFile(logFile);
 
+	console.log("LOGLEVEL=" + LOGLEVEL);
+
 })();
 
 // Declare modules here as a OPTIMIZATION
@@ -6260,17 +6262,20 @@ function checkMounts(options, checkMountsCallback) {
 			Then edit gcsf/src/gcsf/drive_facade.rs and update the client_id, project_id and client_secret !
 			(also remove the http port 8081 auto code entry, because Google API can only redirect to localhost!!)
 		
-		*/
+	*/
 	
-		if(typeof username != "string") throw new Error("typeof username=" + typeof username);
-		if(typeof loginRetries != "number") throw new Error("typeof loginRetries=" + typeof loginRetries);
-		if(typeof gcsfLoginCallback != "function") throw new Error("typeof gcsfLoginCallback=" + typeof gcsfLoginCallback);
+	if(typeof username != "string") throw new Error("typeof username=" + typeof username);
+	if(typeof loginRetries != "number") throw new Error("typeof loginRetries=" + typeof loginRetries);
+	if(typeof gcsfLoginCallback != "function") throw new Error("typeof gcsfLoginCallback=" + typeof gcsfLoginCallback);
 	
-		var maxLoginRetries = 1;
+	var maxLoginRetries = 1;
 	
-		if(GCSF.hasOwnProperty(username)) {
-			gcsfLoginCallback(new Error("There is already a GCSF session for " + username));
-			gcsfLoginCallback = null;
+	if(GCSF.hasOwnProperty(username)) {
+		var error = new Error("There is already a GCSF session for " + username);
+		error.code = "EEXIST";
+
+		gcsfLoginCallback(error, {url: GCSF[username].authUrl}); // {url: GCSF[username].authUrl}
+		gcsfLoginCallback = null;
 			return;
 		}
 	
@@ -6289,8 +6294,12 @@ function checkMounts(options, checkMountsCallback) {
 	
 		var gcsfArgs = ["login", username];
 	
-		var reBrowserUrl = /Please direct your browser to (.*), follow the instructions/;
-		var reTokenFileExist = /token file (.*) already exists/;
+	//var reBrowserUrl = /Please direct your browser to (.*) and follow the instructions displayed there/; // When using redirect
+
+	var reBrowserUrl = /Please direct your browser to (.*), follow the instructions/; // Without redirect (which is depricated by Google)
+		
+
+	var reTokenFileExist = /token file (.*) already exists/;
 	
 		log("Starting gcsfLoginSession with args=" + JSON.stringify(gcsfArgs) + " gcsfOptions=" + JSON.stringify(gcsfOptions));
 	
@@ -6345,6 +6354,7 @@ function checkMounts(options, checkMountsCallback) {
 			if(matchBrowserUrl) {
 				log("gcsfLoginSession Need to request Google auth code for " + username + " before logging in to Google Drive ...", DEBUG);
 				var authUrl = matchBrowserUrl[1];
+			GCSF[username].authUrl = authUrl;
 				gcsfLoginCallback(null, {url: authUrl});
 				gcsfLoginCallback = null;
 			}
