@@ -4,9 +4,27 @@ Reporting a bug ? Make sure it's repeatable!
 note: When committing only non-whitespace using git:
 git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-zero -
 
+
+
 ---
 
+bug: Created a new txt file in windows
+Renamed it to .htm
+Wrote <!DOC and pressed tab 
 
+---
+
+speech assist (ALT+S) read whole line when chaning to a new line
+Ctrl+arrow should place the caret infront of the word so that the word is spoken (currently caret it placed before space, and "space" is spoken)
+
+
+
+---
+
+todo: when saving as /~/ replace the ~ tilde with the home dir! 
+
+
+todo: when searching, use the same file filter as las search! Annoying having to change the filter every time! 
 
 ---
 
