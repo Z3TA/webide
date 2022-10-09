@@ -918,6 +918,7 @@ last sector = (press Enter to use default=whole disk)
 write partition = w
 ````
 
+Create a filesystem and mount it:
 ````
 mkfs.ext4 /dev/vda1
 mount /dev/vda1 /mnt
@@ -937,6 +938,8 @@ The content of /mnt/etc/fstab
 /dev/vda1 / ext4 rw,relatime 0 1
 ````
 
+Set the hostname and setup network interface:
+````
 hostname docker
 hostname > /mnt/etc/hostname
 ip addr show
@@ -963,6 +966,7 @@ deb http://deb.debian.org/debian bullseye-updates main contrib
 deb-src http://deb.debian.org/debian bullseye-updates main contrib
 ````
 
+Chroot into the system and continue from within the chroot:
 ````
 mount --make-private --rbind /dev  /mnt/dev
 mount --make-private --rbind /proc /mnt/proc
@@ -982,6 +986,7 @@ grub-probe /boot
 nano /etc/default/grub
 ````
 Add ` console=tty0 console=ttyS0,115200n8` to `GRUB_CMDLINE_LINUX_DEFAULT`
+And install the bootloader (grub) on the disk:
 ````
 update-initramfs -c -k all
 update-grub
@@ -1013,7 +1018,7 @@ then restart sshd:
 Set the password to "dockerpw" on the VM
 `passwd`
 
-If you (or the installer) did create a user, make sure the user uid ang gid are below 1000 so that it wont collide with WebIDE users:
+If you (or the installer) did create a user, make sure the user uid and gid are below 1000 so that it wont collide with WebIDE users:
 ````
 usermod -u 999 docker
 groupmod -g 999 docker
@@ -1056,6 +1061,7 @@ Enable TCP access to the docker Daemon (https://success.docker.com/article/how-d
 
 ````
 # /etc/systemd/system/docker.service.d/override.conf
+
 [Service]
 ExecStart=
 ExecStart=/usr/bin/dockerd -H fd:// -H tcp://0.0.0.0:2376
@@ -1351,6 +1357,36 @@ unable to make backup link of './usr/bin/python2.7' before installing new versio
 This is because the program is mounted in user dir's. Stop webide and then reboot the server to release all mountpoints.
 
 
+Problem accessing Internet (from within a netns)
+------------------------------------------------
+Each user have their own Linux network namespace.
+When logged in as a cloud-ide-user, run `ip a`
+The output should look something like this:
+````
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host 
+       valid_lft forever preferred_lft forever
+7: username@if6: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default qlen 1000
+    link/ether ea:58:89:f6:d4:ca brd ff:ff:ff:ff:ff:ff link-netnsid 0
+    inet 10.0.1.123/16 scope global username
+       valid_lft forever preferred_lft forever
+    inet6 fe80::e858:89ff:fef6:d4ca/64 scope link 
+       valid_lft forever preferred_lft forever
+````
+
+If you can't see username@if6 or can't ping 8.8.8.8 (or other known ip)
+Then the easiest solution is to delete the netns and recreate it.
+From the repo, run:
+````
+ip netns delete username
+./server/addnetns.sh username
+ip netns exec username ping 8.8.8.8
+systemctl restart webide
+````
+
 
 
 Testing in Opera Mobile
@@ -1434,6 +1470,7 @@ module(load="imtcp")
 input(type="imtcp" port="514")
 # specify senders you permit to access
 $AllowedSender TCP, 10.20.30.40, somedomain.org, subdomain.somedomain.org, *.somedomain.com
+````
 
 And edit /etc/rsyslog.d/50-default.conf
 specify where logs files should be saved. Example:
@@ -1450,7 +1487,7 @@ bash logging
 local6.*;local1.notice                        /tank/logs/log/commands.log
 ````
 
-sudo systemctl restart rsyslog
+Then run `sudo systemctl restart rsyslog`
 
 
 On the client servers
@@ -1522,7 +1559,7 @@ Get the process id:
 ps auxw | grep syslog
 ````
 
-# Use strace (apt install strace) to see what is going on
+Use strace (apt install strace) to see what is going on
 ````
 strace -s 500 -tfp #pid#
 ````

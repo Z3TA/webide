@@ -1371,7 +1371,14 @@ function main() {
 				});
 			}
 		});
-		
+
+		// Make sure IP forwarding is active. It's needed in order for network namespace (netns) interfaces to reach the Internet
+		module_child_process.exec("echo 1 > /proc/sys/net/ipv4/ip_forward", EXEC_OPTIONS, function(error, stdout, stderr) {
+			if(error) throw error;
+			if(stdout) log("ip_forward: stdout=" + stdout, NOTICE);
+			if(stderr) log("ip_forward: stderr=" + stderr, WARN);
+		});
+
 		// Some other process might reset iptables, so also check if the nat:ing is enabled for user netns
 		if(IPTABLES) {
 			module_child_process.exec("iptables -S -t nat | grep -qe '-A POSTROUTING -s 10.0.0.0/16 -j MASQUERADE'", EXEC_OPTIONS, function(error, stdout, stderr) {
