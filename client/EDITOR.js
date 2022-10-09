@@ -4478,7 +4478,7 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 					menuLeft = windowWidth - menuWidth + 1;
 				}
 				else {
-					console.warn("Pullout " + menu.pullout + " menu doesn't fit on the left side either! parentItemRect.left=" + parentItemRect.left + " menuWidth=" + menuWidth + " (" + (parentItemRect.left - menuWidth) + ") ");
+					//console.warn("Pullout " + menu.pullout + " menu doesn't fit on the left side either! parentItemRect.left=" + parentItemRect.left + " menuWidth=" + menuWidth + " (" + (parentItemRect.left - menuWidth) + ") ");
 					// Place it below parent
 					menuLeft = windowWidth - menuWidth + 1;
 					menuTop = parentItemRect.bottom;
@@ -5624,12 +5624,12 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 		},
 		hide: function hideCtxMenu() {
 			
-			console.log(UTIL.getStack("Hide context menu"));
+			//console.log(UTIL.getStack("Hide context menu"));
 			
 			var menu = document.getElementById("contextmenu");
 			
 			if(!menu.classList.contains("visible")) {
-				console.warn("Context menu already hidden. No need to hide it!");
+				//console.warn("Context menu already hidden. No need to hide it!");
 				return;
 			}
 			
