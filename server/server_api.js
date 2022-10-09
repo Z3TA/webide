@@ -2931,6 +2931,7 @@ API.findReplaceInFiles = function findReplaceInFiles(user, json, findReplaceInFi
 	var abort = false;
 	var done = false;
 	var doneStack = undefined;
+	var doneReason = undefined;
 	var searchSymLinks = true;
 	var maxFilesToSearchAtTheSameTime = 20; // Hard drivers are really bad at multi tasking
 	var totalFoldersSearched = 0;
@@ -3168,11 +3169,12 @@ searchDir(fileList[i].path, folderDepth);
 	}
 	
 	function doneFinish(msg) {
-		if(done) throw new Error("Already done! doneStack=" + doneStack);
+		if(done) throw new Error("Already done! doneReason=" + doneReason + " doneStack=" + doneStack + "\n\n\n");
 		
 		done = true;
-		doneStack = new Error().stack;
-		
+		doneStack = (new Error()).stack;
+		doneReason = msg;
+
 		if(msg == undefined) {
 			var totalTime = Math.round(((new Date()) - searchBegin) / 10) / 100;
 			msg = "Found " + totalMatches + " match(es) in " + totalFiles + "/" + totalFilesFound + " file(s) searched in " + totalTime + "s.\n";
