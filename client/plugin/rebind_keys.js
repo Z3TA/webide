@@ -1,15 +1,19 @@
 (function() {
 	"use strict";
 
-	if(! QUERY_STRING["keylog"] ) return;
+	//if(! QUERY_STRING["keylog"] ) return;
 
 	var fileName ="keyLog.tmp";
+	var menuDebugKeys;
 
 	EDITOR.plugin({
-		desc: "Show which key was pressend",
+		desc: "Show which key was pressed",
 		order: 10000, // Show far down in the menu
 		load:function loadRebindKeys() {
 			EDITOR.on("storageReady", loadKeySettings);
+		
+			menuDebugKeys = EDITOR.windowMenu.add("Show keypress events", [S("Editor"), "Debug", 10], toggleDebugKeys);
+
 		},
 		unload: function unloadRebindKeys() {
 			EDITOR.removeEvent("storageReady", loadKeySettings);
@@ -18,7 +22,18 @@
 	});
 
 	function loadKeySettings() {
-		EDITOR.on("keyPressed", showKeyInfo);
+		
+	}
+
+	function toggleDebugKeys() {
+		menuDebugKeys.toggle();
+
+		if(menuDebugKeys.activated) {
+			EDITOR.on("keyPressed", showKeyInfo);
+		}
+		else {
+			EDITOR.removeEvent("keyPressed", showKeyInfo);
+		}
 	}
 
 	function showKeyInfo(file, character, combo, e) {

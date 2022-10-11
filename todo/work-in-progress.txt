@@ -4,7 +4,33 @@ Reporting a bug ? Make sure it's repeatable!
 note: When committing only non-whitespace using git:
 git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-zero -
 
+---
 
+Down arrow is much bigger then the right arrow in the file explorer!
+
+
+
+---
+
+There is no Chrome dev tools, or Firefox dev tools on mobile browser...
+How do you debug while developing on a Smartphone !?
+
+
+Can't type space, dot. or ,comma in terminal on Chrome in Dax
+
+Many key combos and backspace to delete doesn't work in Firefox on Dax!
+
+---
+
+SSG:
+
+When clicking on Open/edit file/page I get a native file open dialog!
+
+Import should search the fs for ssgconf.json files and provide a import, and import all buttons
+
+---
+
+Can KaiOS users leave feedback !?
 
 ---
 
