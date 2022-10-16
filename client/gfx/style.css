@@ -1784,7 +1784,8 @@ ul.resolveList li {
 }
 
 .fileExplorer .box {
-	font-family: Verdana, Geneva, sans-serif, monospace;
+	font-family: Arial, Verdana, sans-serif, monospace; /* we want the down/right arrows to be the same size (Arial works in both Chrome and Firefox) */
+
 	font-size: 10px;
 	display: inline-block;
 	border: 0px solid black;

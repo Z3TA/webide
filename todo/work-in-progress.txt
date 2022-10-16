@@ -14,8 +14,6 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
-Down arrow is much bigger then the right arrow in the file explorer!
-
 
 
 ---
