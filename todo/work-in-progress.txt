@@ -10,7 +10,7 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
-d80.johan.webide.se http redirects to 80.johan.webide.se (https) (the d is lost)
+
 
 ---
 

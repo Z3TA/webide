@@ -128,7 +128,7 @@ server {
   #SSL#listen 80;
   #SSL#listen [::]:80;
   #SSL#server_name ~^d(\d+)\.%USERNAME%\.%DOM_ESC_DOTS%$;
-  #SSL#return 301 https://$1.%USERNAME%.%DOMAIN%$request_uri;
+  #SSL#return 301 https://d$1.%USERNAME%.%DOMAIN%$request_uri;
 #SSL#}
 
 server {
