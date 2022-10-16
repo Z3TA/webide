@@ -61,6 +61,7 @@ var BROWSER = UTIL.checkBrowser();
 var LOW_RAM = false; // Set to true for devices with low RAM
 
 // Browsers work differently depending on which platofrm they are running ...
+var ANDROID = navigator.userAgent.match(/Android/i);
 var MSIE = (BROWSER.indexOf("MSIE") == 0); // If we are on Internet Explorer
 var MSWIN = (navigator.platform == "Win32"); // If we are on Windows (any version)
 var LINUX = (navigator.platform.indexOf("Linux") != -1); // If we are on Linux
