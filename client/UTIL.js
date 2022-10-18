@@ -1019,7 +1019,7 @@ if(protocolIndex != -1) slashes = slashes - 2;
 		
 		//console.log("UTIL.parseErrorMessage: " + errorString);
 		
-		if(errorString == undefined) {
+		if(typeof errorString != "string") {
 			console.log(arguments);
 			console.log(UTIL.getStack());
 			var error = new Error("UTIL.parseErrorMessage: Unable to parse error: errorString (" + (typeof errorString) + ") = " + errorString);
@@ -1029,7 +1029,7 @@ if(protocolIndex != -1) slashes = slashes - 2;
 			}, 0)
 			return;
 		}
-
+		
 		errorString = errorString.trim();
 		
 		var rows = errorString.split(/\n|\r\n/);

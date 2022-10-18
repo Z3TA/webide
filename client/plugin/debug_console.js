@@ -12,21 +12,36 @@
 	var consoleErrorOriginal = console.error;
 	var logFile;
 
+	var debugConsoleMenu;
+
 	EDITOR.plugin({
 		desc: "Debug console",
 		load: function loadDebugConsole() {
 
-			enableDebugConsole();
+			debugConsoleMenu = EDITOR.windowMenu.add("Capture console logs", [S("Editor"), "Debug", 20], toggleDebugConsole);
 
 		},
 		unload: function unloadDebugConsole() {
 			
+			EDITOR.windowMenu.remove(debugConsoleMenu);
+
 			disableDebugConsole();
 
 			logFile = undefined;
 
 		}
 	});
+
+	function toggleDebugConsole() {
+		debugConsoleMenu.toggle();
+
+		if(debugConsoleMenu.activated) {
+			enableDebugConsole();
+		}
+		else {
+			disableDebugConsole();
+		}
+	}
 
 	function enableDebugConsole() {
 	
@@ -42,7 +57,7 @@
 			logFile = file;
 
 			console.log = captureConsoleLog("log");
-			console.warn = captureConsoleLog("wanr");
+			console.warn = captureConsoleLog("warn");
 			console.error = captureConsoleLog("error");
 
 		});
@@ -63,7 +78,12 @@
 				addArg(arguments[i]);
 			}
 
-			logFile.write(timeStamp() + logType + ": " + str + stackTrace(), true);
+
+			var message = timeStamp() + " " + logType + ": " + str + " " + stackTrace();
+
+			consoleLogOriginal(message);
+
+			logFile.write(message, true);
 		
 			function addArg(arg) {
 
@@ -89,10 +109,27 @@
 				}
 			}
 		}
-
-
-
 	}
+
+	function timeStamp() {
+		var d = new Date();
+		var h = d.getHours();
+		var m  = d.getMinutes();
+		var s = d.getSeconds();
+
+		return h + ":" + m + ":" + s;
+	}
+
+	function stackTrace() {
+		var err = UTIL.parseErrorMessage( (new Error()).stack );
+		var stack = err.stack;
+		stack.shift();
+
+		if(stack.lenth == 0) return "";
+
+		return stack[0].source + ":" + stack[0].line + " @" + stack[0].fun;
+	}
+
 
 })();
 

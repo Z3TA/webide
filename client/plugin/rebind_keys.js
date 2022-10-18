@@ -16,6 +16,8 @@
 
 		},
 		unload: function unloadRebindKeys() {
+			EDITOR.windowMenu.remove(menuDebugKeys);
+
 			EDITOR.removeEvent("storageReady", loadKeySettings);
 			EDITOR.removeEvent("keyPressed", showKeyInfoFromKeyPressed);
 			EDITOR.removeEvent("keyPressed", showKeyInfoFromKeydown);
