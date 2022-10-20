@@ -728,10 +728,13 @@ var File; // File object is global
 		if(EDITOR.currentFile == file) {
 		// Check if the scrolling is OK
 		if(EDITOR.view.endingColumn != file.startColumn + EDITOR.view.visibleColumns) {
-				throw new Error("File grid sanity check error: Scrolling bug: EDITOR.currentFile.path=" + EDITOR.currentFile.path + 
-				" EDITOR.view.endingColumn=" + EDITOR.view.endingColumn + " file.startColumn=" + file.startColumn + 
-				" EDITOR.view.visibleColumns=" + EDITOR.view.visibleColumns + " path=" + file.path);
-		}
+				throw new Error("File grid sanity check error: Scrolling bug:" +  
+				" EDITOR.view.endingColumn=" + EDITOR.view.endingColumn + 
+				" file.startColumn=" + file.startColumn + 
+				" EDITOR.view.visibleColumns=" + EDITOR.view.visibleColumns + 
+				" EDITOR.currentFile.path=" + EDITOR.currentFile.path + 
+				" file.path=" + file.path);
+			}
 		}
 		
 		// TEST-CODE-END
@@ -869,30 +872,36 @@ var File; // File object is global
 	File.prototype.write = function(text, addLineBreak) {
 		// Writes text at EOF (faster then insertText)
 		
+		if(FILE_WRITE_RECURSION !== 0) throw new Error("File.write recursion! file.path=" + file.path + " text=" + text);
+
+		FILE_WRITE_RECURSION++;
+
+		console.log("File.write: text=" + text);
+
 		if(typeof text != "string") text = UTIL.toString(text);
 		
 		if(!UTIL.isString(text)) throw new Error("text is not a string! text=" + text);
 		
 		if(text.length == 0) {
 			console.warn("No text in write argument!");
+			FILE_WRITE_RECURSION--;
 			return;
 		}
 		
 		var file = this;
 		
 		if(text.indexOf(file.lineBreak) != -1) {
-			var rows = text.split(file.lineBreak);
-			// Write first line
-			rows[0].replace(/\n|\r/g, ""); // Remove all CR and LF
-			file.write(rows[0]);
 			
-			// Then write the rest using writeLine()
-			for(var i=1; i<rows.length; i++) {
+			var rows = text.split(file.lineBreak);
+			
+			for(var i=0; i<rows.length; i++) {
 				rows[i].replace(/\n|\r/g, ""); // Remove all CR and LF
 				if(rows[i] == "") file.writeLineBreak();
 				else file.writeLine(rows[i]);
 			}
-			return addLineBreakMaybe();
+			addLineBreakMaybe();
+			FILE_WRITE_RECURSION--;
+			return;
 		}
 		
 		var grid = file.grid;
@@ -911,7 +920,7 @@ var File; // File object is global
 		file.text += text;
 		
 		file.checkGrid();
-		
+
 		if(file.caret.eof) {
 			// Move the caret (only have to do that if it's EOF)
 			file.caret.index = file.text.length;
@@ -925,6 +934,8 @@ var File; // File object is global
 		
 		addLineBreakMaybe();
 		
+		FILE_WRITE_RECURSION--;
+
 		function addLineBreakMaybe() {
 
 			if(file.text.length == 0) throw new Error("added text=" + text + " but file.text.length=" + file.text.length + " file.text=" + file.text);
@@ -4101,6 +4112,18 @@ if(startColumn-indentationWidth > minIndentation*EDITOR.settings.tabSpace) {
 		*/
 		
 		var file = this;
+
+		if(!EDITOR.currentFile) {
+			// If no file yet open, just set the state.
+			if( UTIL.isNumeric(x) ) file.startColumn = parseInt(x);
+			if( UTIL.isNumeric(y) ) file.startRow = parseInt(y);
+			return;
+		}
+
+		if(EDITOR.currentFile != file) {
+			throw new Error("Scrolling in a file that is not the current file! EDITOR.currentFile.path=" + (EDITOR.currentFile && EDITOR.currentFile.path) + " file.path=" + file.path);
+		}
+
 		var startColumn = file.startColumn;
 		var startRow = file.startRow;
 		var scrolled = false;
@@ -4188,15 +4211,23 @@ if(startColumn-indentationWidth > minIndentation*EDITOR.settings.tabSpace) {
 				file.startRow = 0;
 				scrolled = true;
 				}
+
 			*/
 			
 			// Update endingcolumn and render?
+			
 			var newEndingColumnValue = (file.startColumn + EDITOR.view.visibleColumns)
 			if(EDITOR.view.endingColumn != newEndingColumnValue) {
 				
 				if( (file.startColumn + EDITOR.view.visibleColumns) != newEndingColumnValue ) {
 					throw new Error("This should never throw! newEndingColumnValue=" + newEndingColumnValue + " file.startColumn=" + file.startColumn + " EDITOR.view.visibleColumns=" + EDITOR.view.visibleColumns + " EDITOR.view.endingColumn=" + EDITOR.view.endingColumn);
 				}
+
+				/*
+					Error: Scroll bug: EDITOR.view.endingColumn=211 new value for EDITOR.view.endingColumn 203 but EDITOR.view.visibleColumns=203 EDITOR.currentFile.startColumn =8 (code=undefined)
+				*/
+
+				console.log("File.scrollTo: Going to set newEndingColumnValue=" + newEndingColumnValue + " file.startColumn=" + file.startColumn + " EDITOR.view.visibleColumns=" + EDITOR.view.visibleColumns + " EDITOR.view.endingColumn=" + EDITOR.view.endingColumn + " file.path=" + file.path + " EDITOR.currentFile.path=" + EDITOR.currentFile.path + " file.isBig=" + file.isBig );
 
 				EDITOR.view.endingColumn = newEndingColumnValue;
 				scrolled = true;

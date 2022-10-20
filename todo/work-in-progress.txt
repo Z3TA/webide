@@ -4,19 +4,17 @@ Reporting a bug ? Make sure it's repeatable!
 note: When committing only non-whitespace using git:
 git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-zero -
 
+
+---
+
+More work on native file system - the goal is that you can work fully locally.
+There is something special about developing on *your own* device.
+
 ---
 
 line numbers still off in Safari on Mac.
 When line number is rendered, on the line im typing on, it has the correct position
 but the long line list has too much spacing!
-
----
-
-
-
----
-
-
 
 ---
 
@@ -312,6 +310,8 @@ then we can have plugins for each file protocol:
 * GoogleDrive
 * OneDrive
 * FTP/FTPS/SFTP/SSH (currently using EDITOR.connections variable which the file explorer plugin checks in order to be able to swtich between connections/systems)
+
+What about search report files, etc ? eg. files that are temporary (not saved anywhere) ? should we prefix with /tmp/ or protocol tmp:// !?
 
 EDITOR.connections (used by file explorer)
 

@@ -100,6 +100,8 @@ var INFO = 3;
 
 var LOCALE = QUERY_STRING["locale"] || ((navigator.languages && navigator.languages.length) ? navigator.languages[0] : navigator.language) || "en";
 
+var FILE_WRITE_RECURSION = 0;
+
 function S(key, values, locale) {
 	
 	if(locale == undefined) locale = LOCALE;

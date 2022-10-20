@@ -11,6 +11,7 @@
 	var consoleWarnOriginal = console.warn;
 	var consoleErrorOriginal = console.error;
 	var logFile;
+	var buffer = "";
 
 	var debugConsoleMenu;
 
@@ -73,40 +74,44 @@
 
 	function captureConsoleLog(logType) {
 		return function() {
-			var str;
+			var str = "";
 			for (var i=0; i<arguments.length; i++) {
-				addArg(arguments[i]);
+				//consoleLogOriginal("captureConsoleLog: arg[" + i + "]=" + parseArg(arguments[i]));
+				str += parseArg(arguments[i]);
 			}
 
 
 			var message = timeStamp() + " " + logType + ": " + str + " " + stackTrace();
 
-			consoleLogOriginal(message);
+			consoleLogOriginal("captureConsoleLog: message=" + message);
 
-			logFile.write(message, true);
-		
-			function addArg(arg) {
+			if(!FILE_WRITE_RECURSION) logFile.write(buffer + message, true);
+			else buffer = buffer + message + logFile.lineBreak;
+			
+		}
+	}
 
-				if(typeof arg == "string") {
-					str += arg;
+	function parseArg(arg) {
+		if(typeof arg == "string") {
+			return arg;
+		}
+		if(typeof arg == "number") {
+			return arg.toString();
+		}
+		else if(typeof arg == "object") {
+			if(typeof arg.toString == "function") {
+				return arg.toString();
+			}
+			else {
+				var err = false;
+				try {
+					var str = JSON.stringify(arg, null, 2);
 				}
-				if(typeof arg == "number") {
-					str += arg.toString();
+				catch(err) {
+					err = true;
 				}
-				else if(typeof arg == "object") {
-					if(typeof arg.toString == "function") {
-						str += arg.toString();
-					}
-					else {
-						try {
-							str += JSON.stringify(arg, null, 2);
-						}
-						catch(err) {
-							// Force it to a string
-							str += (arg+"");
-						}
-					}
-				}
+				if(err) return arg+""; // Force it to a string
+				else return str;
 			}
 		}
 	}
@@ -124,10 +129,10 @@
 		var err = UTIL.parseErrorMessage( (new Error()).stack );
 		var stack = err.stack;
 		stack.shift();
-
+		stack.shift();
 		if(stack.lenth == 0) return "";
 
-		return stack[0].source + ":" + stack[0].line + " @" + stack[0].fun;
+		return "@" + stack[0].fun + " " + stack[0].source + ":" + stack[0].line;
 	}
 
 

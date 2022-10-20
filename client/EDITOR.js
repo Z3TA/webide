@@ -477,14 +477,15 @@ _editorInput = true;
 		var _endingColumn = 0;
 		Object.defineProperty(EDITOR.view, 'endingColumn', {
 			get: function () { return _endingColumn; },
-			set: function (newValue) {
+			set: function (newEndingColumn) {
 				if(EDITOR.currentFile) {
-					if( EDITOR.currentFile.startColumn + EDITOR.view.visibleColumns != newValue) {
-						throw new Error("Scroll bug: EDITOR.view.endingColumn=" + EDITOR.view.endingColumn + " new value for EDITOR.view.endingColumn " + newValue + " but EDITOR.view.visibleColumns=" + EDITOR.view.visibleColumns + " EDITOR.currentFile.startColumn =" + EDITOR.currentFile.startColumn );
+					if( (EDITOR.currentFile.startColumn + EDITOR.view.visibleColumns) != newEndingColumn) {
+						throw new Error("Scroll bug: EDITOR.view.endingColumn=" + EDITOR.view.endingColumn + " new value for EDITOR.view.endingColumn " + newEndingColumn + " but EDITOR.view.visibleColumns=" + EDITOR.view.visibleColumns + " EDITOR.currentFile.startColumn =" + EDITOR.currentFile.startColumn );
 					}
 				}
-				console.log(UTIL.getStack("Setting _endingColumn=" + _endingColumn + " to newValue=" + newValue));
-				_endingColumn = newValue;
+				var oldEndingColumn = _endingColumn;
+				_endingColumn = newEndingColumn;
+				console.log(UTIL.getStack("Did set oldEndingColumn=" + oldEndingColumn + " to newEndingColumn=" + newEndingColumn + " ... EDITOR.currentFile.path=" + (EDITOR.currentFile && EDITOR.currentFile.path) + " EDITOR.currentFile.startColumn=" + (EDITOR.currentFile && EDITOR.currentFile.startColumn) + " EDITOR.view=" + JSON.stringify(EDITOR.view) + ""));
 			},
 			enumerable: true // if this property shows up during enumeration of the properties
 		});
