@@ -83,11 +83,16 @@
 
 			var message = timeStamp() + " " + logType + ": " + str + " " + stackTrace();
 
-			consoleLogOriginal("captureConsoleLog: message=" + message);
+			consoleLogOriginal("captureConsoleLog: message.length=" + message.length + " " + UTIL.shortString(message));
 
-			if(!FILE_WRITE_RECURSION) logFile.write(buffer + message, true);
-			else buffer = buffer + message + logFile.lineBreak;
-			
+			if(!FILE_WRITE_RECURSION) {
+				logFile.write(buffer + message, true);
+				buffer = "";
+			}
+			else {
+				buffer = buffer + message + logFile.lineBreak;
+			}
+
 		}
 	}
 
@@ -118,9 +123,9 @@
 
 	function timeStamp() {
 		var d = new Date();
-		var h = d.getHours();
-		var m  = d.getMinutes();
-		var s = d.getSeconds();
+		var h = UTIL.zeroPad( d.getHours() );
+		var m  = UTIL.zeroPad( d.getMinutes() );
+		var s = UTIL.zeroPad( d.getSeconds() );
 
 		return h + ":" + m + ":" + s;
 	}

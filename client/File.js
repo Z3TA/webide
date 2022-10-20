@@ -872,18 +872,20 @@ var File; // File object is global
 	File.prototype.write = function(text, addLineBreak) {
 		// Writes text at EOF (faster then insertText)
 		
+		// Note: Try to avoid console.log in this function in order to prevent recursion with debug_console.js plugin
+
 		if(FILE_WRITE_RECURSION !== 0) throw new Error("File.write recursion! file.path=" + file.path + " text=" + text);
 
 		FILE_WRITE_RECURSION++;
 
-		console.log("File.write: text=" + text);
+		//console.log("File.write: text=" + text);
 
 		if(typeof text != "string") text = UTIL.toString(text);
 		
 		if(!UTIL.isString(text)) throw new Error("text is not a string! text=" + text);
 		
 		if(text.length == 0) {
-			console.warn("No text in write argument!");
+			//console.warn("No text in write argument!");
 			FILE_WRITE_RECURSION--;
 			return;
 		}
@@ -958,6 +960,9 @@ var File; // File object is global
 			Always add another row because it's more simple, sligly faster and less bug prone.
 			If you want to add text to the first row, open the file using that text.
 			Use File.insertTextRow() to insert a row before EOF.
+
+
+			Note: Try to avoid console.log in this function in order to prevent recursion with debug_console.js plugin
 		*/
 		
 		
@@ -965,7 +970,7 @@ var File; // File object is global
 		text = text + ''; // Convert to string if it's not already a string
 		
 		if(text.length == 0) {
-			console.warn("No text in writeLine argument!");
+			//console.warn("No text in writeLine argument!");
 			return;
 		}
 		
@@ -980,18 +985,21 @@ file.sanityCheck();
 			// Add the lines one by one
 			for(var i=0; i<rows.length; i++) {
 				rows[i].replace(/\n|\r/g, ""); // Remove all CR and LF
-				file.writeLine(rows[i]);
+				
+				insertGridRow(file, textIndex, rows[i]);
+				file.text += file.lineBreak;
+				file.text += rows[i];
+				textIndex += rows[i].length 
+				textIndex += file.lineBreak.length;
 			}
 			return;
 		}
 		
-		if(text.indexOf("\n") != -1) console.warn("Text contains a line break: " + text);
-		
-		var lastGridRow = grid[grid.length-1];
+		if(text.indexOf("\n") != -1) throw new Error("File.writeLine: Text contains a line break: " + text);
 		
 		insertGridRow(file, textIndex, text);
-		
-		file.text += file.lineBreak + text;
+		file.text += file.lineBreak
+		file.text += text;
 		
 		file.checkGrid();
 		
@@ -1050,7 +1058,7 @@ file.sanityCheck();
 		
 		if(text == undefined) throw new Error("File.insertTextOnRow: First parameter text is undefined!");
 		if(text.length == 0) {
-//throw new Error("File.insertTextOnRow: First parameter text has zero length!");
+			//throw new Error("File.insertTextOnRow: First parameter text has zero length!");
 			//console.warn("File.insertTextOnRow doing nothing because text.length=" + text.length);
 			return;
 		}
@@ -1233,7 +1241,7 @@ file.sanityCheck();
 		}
 		
 		return file.insertText(spaces, caret);
-		}
+	}
 	
 	File.prototype.insertText = function(text, caret) {
 		
@@ -4113,8 +4121,9 @@ if(startColumn-indentationWidth > minIndentation*EDITOR.settings.tabSpace) {
 		
 		var file = this;
 
-		if(!EDITOR.currentFile) {
-			// If no file yet open, just set the state.
+		if(EDITOR.currentFile != file) {
+			console.warn( "Scrolling in a file that is not the current file! file.path=" + file.path + " EDITOR.currentFile.path=" + (EDITOR.currentFile && EDITOR.currentFile.path) );
+			// If the file is not in view, just set the state.
 			if( UTIL.isNumeric(x) ) file.startColumn = parseInt(x);
 			if( UTIL.isNumeric(y) ) file.startRow = parseInt(y);
 			return;

@@ -7246,7 +7246,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		
 		if(!file) throw new Error("fileOrFilePath=" + fileOrFilePath + " need to be a File object or a path to an open file");
 		
-		//console.log("EDITOR.showFile: file.path=" + file.path + " " + UTIL.getStack("showFile"));
+		console.log("EDITOR.showFile: file.path=" + file.path + " " + UTIL.getStack("showFile"));
 
 		if(!overrideShowFile && showFile != undefined && showFile != file.path) {
 			console.warn("Not showing: file.path=" + file.path + " because showFile=" + showFile);
