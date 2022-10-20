@@ -485,7 +485,7 @@ _editorInput = true;
 				}
 				var oldEndingColumn = _endingColumn;
 				_endingColumn = newEndingColumn;
-				console.log(UTIL.getStack("Did set oldEndingColumn=" + oldEndingColumn + " to newEndingColumn=" + newEndingColumn + " ... EDITOR.currentFile.path=" + (EDITOR.currentFile && EDITOR.currentFile.path) + " EDITOR.currentFile.startColumn=" + (EDITOR.currentFile && EDITOR.currentFile.startColumn) + " EDITOR.view=" + JSON.stringify(EDITOR.view) + ""));
+				//console.log(UTIL.getStack("Did set oldEndingColumn=" + oldEndingColumn + " to newEndingColumn=" + newEndingColumn + " ... EDITOR.currentFile.path=" + (EDITOR.currentFile && EDITOR.currentFile.path) + " EDITOR.currentFile.startColumn=" + (EDITOR.currentFile && EDITOR.currentFile.startColumn) + " EDITOR.view=" + JSON.stringify(EDITOR.view) + ""));
 			},
 			enumerable: true // if this property shows up during enumeration of the properties
 		});

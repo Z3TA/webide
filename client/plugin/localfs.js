@@ -12,10 +12,12 @@
 
 	var protocol = "local";
 
-	var fileHandles = {}; // Temporarly store file handles
+	var fileHandles = {}; // Temporarily store file handles
 	var nativeFileSystemFileHandleDb; // For "permantely" storing file handles (able to read from the same file when browser is reopened) undefined means we have not yet tried to open it
 	var nativeFileSystemFileHandleDbWaitList = [];
-	var windowMenuOpenLocal;
+	var windowMenuOpenLocalFile;
+	var windowMenuOpenLocalDir
+	var directoryHandles = {}; // Temporarily store directory handles
 
 	EDITOR.plugin({
 		desc: "Web Native File System Access",
@@ -33,7 +35,8 @@
 			var charO = 79;
 			EDITOR.bindKey({desc: "Open a local file using native file select dialog", charCode: charO, combo: CTRL + SHIFT, fun: openLocalFileKeyboardShortcut});
 
-			windowMenuOpenLocal = EDITOR.windowMenu.add(S("open_local"), [S("File"), 1], openLocalFile, openLocalFileKeyboardShortcut);
+			windowMenuOpenLocalFile = EDITOR.windowMenu.add(S("open_local"), [S("File"), 1], openLocalFile, openLocalFileKeyboardShortcut);
+			windowMenuOpenLocalDir = EDITOR.windowMenu.add(S("open_local_dir"), [S("File"), 1], openLocalDir);
 
 		},
 		unload: function unloadWebNativeFs() {
@@ -52,7 +55,7 @@
 
 			EDITOR.unbindKey(openLocalFileKeyboardShortcut);
 
-			EDITOR.windowMenu.remove(windowMenuOpenLocal);
+			EDITOR.windowMenu.remove(windowMenuOpenLocalFile);
 		},
 		order: 100 // Load early 
 	});
@@ -221,12 +224,6 @@
 			};
 			objectStore.delete(filePath);
 		}
-	}
-
-	function localListFiles(pathToFolder, callback) {
-
-		callback(new Error("File list not yet implemented for Local File system!"));
-
 	}
 
 	function localReadFile(path, returnBuffer, encoding, callback) {
@@ -559,6 +556,179 @@ path = protocol + "://" + fileHandle.name; // Update the path with new filname!
 				var fileHandle = request.result.handle;
 				callback(null, fileSize, fileHandle);
 			};
+		});
+	}
+
+	function openLocalDir() {
+		localDirDialog(function(err, dirHandle) {
+			if(err) return alertBox(err.message);
+
+			UTIL.objInfo(dirHandle);
+
+			var dirPath = protocol + "://" + dirHandle.name + "/";
+			EDITOR.fileExplorer(dirPath);
+
+			listLocalDir(dirHandle, function(err, list) {
+				if(err) return alertBox(err.message);
+
+				console.log("list=", list);
+
+			});
+
+		});
+	}
+
+	function listLocalDir(dirHandle, callback) {
+		/*
+			Returns all files in a directory as an array. Each item is an object with these properties:
+
+			type - string - A single character denoting the entry type: 'd' for directory, '-' for file (or 'l' for symlink on *NIX only).
+			name - string - File or folder name
+			path - string - Full path to file/folder
+			size - float - The size of the entry in bytes.
+			date - Date - The last modified date of the entry.
+		*/
+
+		console.log("listLocalDir!");
+
+		console.log("listLocalDir: dirHandle=", dirHandle);
+
+		if(typeof dirHandle != "object" || typeof dirHandle.values != "function") {
+			return callback( new Error("Expected first parameter in listLocalDir to be a directory handle! dirHandle=" + dirHandle + " typeof " + (typeof dirHandle)) );
+		}
+		
+		var dirIterator = dirHandle.values();
+		var dirEntry;
+		var list = [];
+		var counter = 0;
+
+		console.log("listLocalDir: dirIterator=", dirIterator);
+
+		var promise = dirIterator.next();
+
+		console.log("listLocalDir: promise=", promise);
+
+		iterateNext(promise);
+
+		function iterateNext(promise) {
+			counter++;
+		promise.then(function (dirIteratorItem) {
+				counter--;
+
+				var item = {};
+
+				console.log("listLocalDir:iterateNext: dirIteratorItem=", dirIteratorItem);
+
+				//console.log("listLocalDir:iterateNext: dirIteratorItem.value=", dirIteratorItem.value);
+				//console.log("listLocalDir:iterateNext: dirIteratorItem.value.kind=", dirIteratorItem.value.kind);
+
+				var value = dirIteratorItem.value;
+
+				if(dirIteratorItem.done && value == undefined) return doneMaybe();
+
+				var kind = value.kind;
+				var name = value.name;
+
+				item.name = name;
+
+				if(kind == "directory") {
+					item.type = "d";
+					item.path = protocol + "://" + dirHandle.name + "/" + name + "/";
+				}
+				else if(kind == "file") {
+					item.type = "-";
+					counter++;
+					value.getFile().then(function(fileHandle) {
+						counter--;
+						console.log("listLocalDir:iterateNext: fileHandle=", fileHandle);
+
+						item.size = fileHandle.size;
+
+						item.date = new Date(fileHandle.lastModified);
+						item.path = protocol + "://" + dirHandle.name + "/" + fileHandle.name;
+
+						doneMaybe();
+
+					}).catch(error);
+				}
+				else throw new Error("Unknown kind=" + kind);
+
+				list.push(item);
+
+				if(!dirIteratorItem.done) iterateNext(dirIterator.next());
+
+				doneMaybe();
+
+			}).catch(error);
+		}
+		
+		function doneMaybe() {
+			if(counter === 0) {
+				CB(callback, null, list);
+				callback = null;
+			}
+		}
+
+		function error(err) {
+			console.warn(err.message);
+			if(callback) CB(callback, err);
+			callback = null;
+		}
+	}
+
+	function localDirDialog(callback) {
+
+		if(typeof window.showDirectoryPicker != "function") return callback(new Error("showDirectoryPicker nort supported in your browser=" + BROWSER));
+
+		window.showDirectoryPicker().then(function(dirHandle) {
+			CB(callback, null, dirHandle);
+		}).catch(function error(err) {
+			CB(callback, err);
+		});
+	}
+
+	function localListFiles(pathToFolder, callback) {
+		getDirectoryHandle(pathToFolder, function(err, directoryHandle) {
+			listLocalDir(directoryHandle, callback);
+		});
+	}
+
+	function getDirectoryHandle(pathToFolder, callback) {
+		console.warn( "localfs:getDirectoryHandle: pathToFolder=" + pathToFolder + " directoryHandles=" + JSON.stringify(Object.keys(directoryHandles)) );
+
+		var errorWithProperCallStack = new Error();
+
+		if( directoryHandles.hasOwnProperty(pathToFolder) ) {
+			console.warn("localfs:getDirectoryHandle: Handle exist in directoryHandles!");
+			var dirHandle = directoryHandles[pathToFolder];
+
+			//return callback(null, dirHandle);
+
+			verifyNativeFileSystemPermission(dirHandle, "readwrite", function(err) {
+				if(err) callback(err);
+				else callback(null, dirHandle);
+			});
+			return;
+		}
+
+		console.warn("localfs:getDirectoryHandle: Reading handle from IndexDb...");
+		readFileHandleFromIndexDb(pathToFolder, function(err, fileSize, dirHandle) {
+			if(err) {
+				errorWithProperCallStack.message = "Unable to find a directory handle for pathToFolder=" + pathToFolder + "\nError: " + err.message + "";
+				return callback(errorWithProperCallStack);
+			}
+
+			verifyNativeFileSystemPermission(dirHandle, "readwrite", function(err) {
+				if(err) callback(err);
+				else {
+
+					directoryHandles[pathToFolder] = dirHandle;
+					console.log("localfs:getDirectoryHandle: Updated directoryHandles=" + JSON.stringify(Object.keys(directoryHandles)) );
+
+					callback(null, dirHandle);
+
+				}
+			});
 		});
 	}
 
