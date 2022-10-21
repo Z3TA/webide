@@ -30,7 +30,9 @@
 				read: localReadFile, 
 				write: localWriteFile, 
 				hash: localHashFromDisk, 
-				size: localFileSizeOnDisk
+				size: localFileSizeOnDisk,
+				move: localMove,
+				del: localDelete
 			});
 
 			EDITOR.on("fileOpen", nativeFileOpen, 1);
@@ -158,7 +160,7 @@
 		var fileHandle = fileHandles[path];
 
 		if(fileHandle) {
-			saveHandleToIndexedDB(path, fileHandle)
+			saveHandleToIndexedDB(path, fileHandle);
 		}
 		else {
 			console.warn( "localfs: No fileHandle found for path=" + path + " in Object.keys(fileHandles)=" + JSON.stringify(Object.keys(fileHandles)) );
@@ -172,8 +174,8 @@
 		var errorWithProperCallStack = new Error();
 
 		if( fileHandles.hasOwnProperty(path) ) {
-			console.warn("localfs:getFileHandle: Handle exist in fileHandles!");
 			var fileHandle = fileHandles[path];
+			console.log("localfs:getFileHandle: Found file handle in fileHandles! fileHandle=", fileHandle);
 			verifyNativeFileSystemPermission(fileHandle, "readwrite", function(err) {
 				if(err) callback(err);
 				else callback(null, fileHandle);
@@ -450,6 +452,38 @@
 		});
 	}
 
+	function localMove(oldPath, newPath, callback) {
+		/*
+
+			2022-10-21: Only file handles has a move method... arguments (newName), (dirHandle), (dirHandle, newName)
+			But the move method doesn't work - we get a "The user aborted a request." message
+
+		*/
+
+		var oldDir = UTIL.getDirectoryFromPath(oldPath);
+		var newDir = UTIL.getDirectoryFromPath(newPath);
+
+		var newName = UTIL.getFilenameFromPath(newPath);
+
+		if(oldDir == newDir) {
+			// We can use fileHandle.move
+			return getFileHandle(oldPath, function(err, fileHandle) {
+				if(err) return callback(err);
+
+				fileHandle.move(newName).then(function() {
+					CB( callback, null );
+				}).catch(function(err) {
+					CB( callback, new Error("Problems calling move method on File System Access API fileHandle. Error: " + err.message) );
+				});
+			});
+		}
+
+		callback(new Error("The File System Access API can not move " + oldPath + " to " + newPath));
+	}
+
+	function localDelete() {
+
+	}
 
 	function verifyNativeFileSystemPermission(fileHandle, mode, callback) {
 		
@@ -575,13 +609,13 @@
 			var transaction = db.transaction(["handles"], "readwrite");
 			var objectStore = transaction.objectStore("handles");
 			transaction.oncomplete = function(event) {
-				console.log("localfs: nativeFileSystemFileHandle=" + fileHandle + " for path="+ file.path + " saved in indexedDB! ");
+				console.log("localfs: handle=" + handle + " for path="+ path + " saved in indexedDB! ");
 			};
 			transaction.onerror = function(event) {
-				console.error("localfs: Failed to save nativeFileSystemFileHandle for path="+ file.path + " in indexedDB!");
+				console.error("localfs: Failed to save handle=" + handle + " for path="+ path + " in indexedDB!");
 			};
 			// Use put in case for some reaso (crash?) it already exist in the indexedDB (we want to save the latest handle)
-			objectStore.put({path: file.path, handle: fileHandle, size: file.getFileSize()});
+			objectStore.put({path: path, handle: handle});
 
 		});
 	}
@@ -621,13 +655,11 @@
 		localDirDialog(function(err, dirHandle) {
 			if(err) return alertBox("Could not open local directory! Error: " + err.message);
 
-			UTIL.objInfo(dirHandle);
-
 			var dirPath = protocol + "://" + dirHandle.name + "/";
 			directoryHandles[dirPath] = dirHandle;
+			saveHandleToIndexedDB(dirPath, dirHandle);
 
 			EDITOR.fileExplorer(dirPath);
-
 		});
 	}
 
@@ -807,17 +839,6 @@
 		});
 	}
 
-	function saveFileHandle(path, fileHandle) {
-		console.log("localfs: Saving fileHandle in indexedDB: path=" + path + " fileHandle=" + fileHandle + " typeof fileHandle = " + (typeof fileHandle));
-
-		saveHandleToIndexedDB(path, fileHandle);
-		
-	}
-
-	function saveDirHandle(path, fileHandle) {
-		saveHandleToIndexedDB
-	}
-	
 	function openLocalFile(directory) {
 
 		if(directory instanceof File) directory = UTIL.getDirectoryFromPath(directory.path);

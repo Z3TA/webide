@@ -8814,8 +8814,15 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		
 		//console.log("Deleting filePath=" + filePath);
 		
+		var protocol = UTIL.urlProtocol(path);
+		if(protocol != "" && EDITOR.remoteProtocols.indexOf(protocol) == -1) {
+			if(!_protocols.hasOwnProperty(protocol)) return callback(new Error("protocol=" + protocol + " is not supported!"));
+			if(typeof _protocols[protocol].del != "function") return callback(new Error("protocol=" + protocol + " does not have a del method!"));
+			_protocols[protocol].del(path, callback);
+			return;
+		}
+
 		var json = {filePath: filePath};
-		
 		CLIENT.cmd("deleteFile", json, function(err, json) {
 			if(err) {
 				if(callback) callback(err);
@@ -9110,38 +9117,46 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		
 		//if(!file.saved || !file.savedAs) return callback(new Error("Save the file before renaming it!"));
 		
-		CLIENT.cmd("move", {oldPath: oldPath, newPath: newPath}, function(err, json) {
+		var protocol = UTIL.urlProtocol(newPath);
+		if(protocol != "" && EDITOR.remoteProtocols.indexOf(protocol) == -1) {
+			if(!_protocols.hasOwnProperty(protocol)) return callback(new Error("protocol=" + protocol + " is not supported!"));
+			if(typeof _protocols[protocol].move != "function") return callback(new Error("protocol=" + protocol + " does not have a move method!"));
+			return _protocols[protocol].move(oldPath, newPath, moved);
+		}
+
+		CLIENT.cmd("move", {oldPath: oldPath, newPath: newPath}, moved);
+
+		function moved(err) {
 			if(err) return callback(err);
-			
+
 			if(EDITOR.files.hasOwnProperty(oldPath)) {
 				// File is opened in the editor!
 				// We must close and reopen the file so that plugins keeping track of open files do not go nuts.
-				
+
 				var file = EDITOR.files[oldPath];
-				
+
 				// Save the text, do not count on the garbage collector the be "slow"
-				var text = file.text; 
+				var text = file.text;
 				var state = {
 					isSaved: file.isSaved,
 					changed: file.changed,
 					savedAs: file.savedAs
 				}
-			
+
 				var doNotSwitchFile = true;
 				EDITOR.closeFile(file.path, doNotSwitchFile);
 				EDITOR.openFile(newPath, text, state, function(openFileErr, newFile) {
-				
+
 					if(openFileErr) throw openFileErr;
-				
+
 					callback(null, newFile.path);
-				
+
 					EDITOR.fireEvent("move", [oldPath, newPath]);
-				
+
 				});
 			}
 			else callback(null, newPath);
-		
-		});
+		}
 	
 	}
 
