@@ -988,8 +988,9 @@ ul#tabList button.closeFileTab {
 ul#tabList button.closeFileTab:before {
 	/* note: some browsers (Opera) doesn't work well with unicode characters like ❌ it can't be resized with font-size!! */
 	content: 'x';
-	font-family: monospace;
+	font-family: arial, monospace;
 	font-size: 0.8em;
+	line-height: 0.3em;
 	position: relative;
 	display: inline-block;
 	
@@ -1006,6 +1007,7 @@ ul#tabList button.closeFileTab:hover {
 ul#tabList button.closeFileTab:hover:before {
 	/* give back the red color (doesn't matter what color you use below) */
 	color: #fdf7f7;
+	color: #b80000;
 }
 
 
