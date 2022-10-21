@@ -184,7 +184,7 @@ function CB() {
 
 	if(typeof callback == "function") {
 		// Using setTimeout to escape the promise
-		setTimeout(function() {
+		setTimeout(function escapePromise() {
 			callback.apply(undefined, args);
 		}, 0);
 	}
@@ -192,7 +192,7 @@ function CB() {
 		// It's allowed for callback to be undefined, but if it's not undefined, it's probably a bug!
 		if(typeof callback != "undefined") var callbackNotUndefinedError = new Error("First parameter passed to CB is not a function nor undefined: " + callback);
 
-		setTimeout(function() { // Escape the promise jail so the arror is not swallowed silently
+		setTimeout(function escapePromise() { // Escape the promise jail so the arror is not swallowed silently
 			if(notAnErrorError) throw notAnErrorError;
 			if(callbackNotUndefinedError) throw callbackNotUndefinedError;
 			if(error === null) return; // If there is no error and the CB parameters look OK we don't have to do anything

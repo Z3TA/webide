@@ -8814,11 +8814,11 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		
 		//console.log("Deleting filePath=" + filePath);
 		
-		var protocol = UTIL.urlProtocol(path);
+		var protocol = UTIL.urlProtocol(filePath);
 		if(protocol != "" && EDITOR.remoteProtocols.indexOf(protocol) == -1) {
 			if(!_protocols.hasOwnProperty(protocol)) return callback(new Error("protocol=" + protocol + " is not supported!"));
 			if(typeof _protocols[protocol].del != "function") return callback(new Error("protocol=" + protocol + " does not have a del method!"));
-			_protocols[protocol].del(path, callback);
+			_protocols[protocol].del(filePath, callback);
 			return;
 		}
 

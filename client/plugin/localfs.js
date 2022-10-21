@@ -2,8 +2,6 @@
 
 	Native file system API: https://web.dev/file-system-access/
 
-	todo: Implement directory access so we can create new files, delete files, and list directory content!!
-
 	showDirectoryPicker()
 
 */
@@ -189,18 +187,18 @@
 				var dirPath = UTIL.getDirectoryFromPath(path);
 				
 				if(dirPath != (protocol + ":///")) {
-					return getDirectoryHandle(dirPath, function(err, dirHandle) {
+					return getDirectoryHandle(dirPath, function gotDirectoryHandleMaybeAfterFileHandleNotFound(err, dirHandle) {
 						if(err) {
 							var error = new Error("Could not get file handle for " + path + " nor a directory handle for " + dirPath + "\nError: " + err.message + " (error code=" + err.code + ")");
 							return callback(error);
 						}
 
 						var fileName = UTIL.getFilenameFromPath(path);
-						dirHandle.getFileHandle(fileName).then(function(fileHandle) {
+						dirHandle.getFileHandle(fileName).then(function getFileHandleFromDirectoryHandleSucceeded(fileHandle) {
 							CB(callback, null, fileHandle);
-						}).catch(function(err) {
+						}).catch(function getFileHandleFromDirectoryHandleFailed(err) {
 							var error = new Error("Directory handle for " + dirPath + " could not get file handle for " + path + "\nError: " + err.message + " (error code=" + err.code + ")");
-							
+							error.code = "ENOENT"; // We are pretty sure 
 							CB(callback, error);
 						});
 					});
@@ -406,10 +404,15 @@
 	function localHashFromDisk(path, callback) {
 		console.log("localfs:localHashFromDisk: path=" + path);
 
-		getFileHandle(path, function(err, fileHandle) {
-			if(err && err.code == "PERMISSION_DENIED") return alertBox(err.message);
-			else if(err) throw err;
+		getFileHandle(path, function gotFileHandleMaybe(err, fileHandle) {
+			if(err) {
+				var error = new Error("Could not hash " + path + " on disk because we could not acquire a file handle. Error: " + err.message);
+				error.code = err.code;
+				return callback(error);
+			}
 
+			//if(err && err.code == "PERMISSION_DENIED") return alertBox(err.message);
+			
 			fileHandle.getFile().then(function readText(localFile) {
 				localFile.text().then(function(fileContent) {
 
@@ -481,8 +484,41 @@
 		callback(new Error("The File System Access API can not move " + oldPath + " to " + newPath));
 	}
 
-	function localDelete() {
+	function localDelete(path, callback) {
+		// Should call back with the path if successful
+	
+		var isDirectory = UTIL.isDirectory(path);
+		if(isDirectory) {
+			var dir = UTIL.parentFolder(path);
+			var name = UTIL.getFolderName(path);
+		}
+		else {
+			var dir = UTIL.getDirectoryFromPath(path);
+			var name = UTIL.getFilenameFromPath(path);
+		}
 
+		getDirectoryHandle(dir, function(err, dirHandle) {
+			if(err) return callback(err);
+
+			var options = { recursive: true };
+			dirHandle.removeEntry(name, options).then(function() {
+				console.log("nativefs:localDelete: Successfully deleted " + path);
+
+				if(isDirectory) {
+					delete directoryHandles[path];
+				}
+				else {
+					delete fileHandles[path];
+				}
+
+				removeHandleFromIndexedDB(path);
+				
+				CB( callback, null );
+
+			}).catch(function(err) {
+				CB( new Error("The File System Access API could not delete " + path + " using directory handle for " + dir + " Error: " + err.message) );
+			});
+		});
 	}
 
 	function verifyNativeFileSystemPermission(fileHandle, mode, callback) {
@@ -503,7 +539,7 @@
 		var options = {mode: mode};
 
 		// Check if permission was already granted
-		fileHandle.queryPermission(options).then(function(permission) {
+		fileHandle.queryPermission(options).then(function fileHandlePermissionQueried(permission) {
 			console.log("localfs:verifyNativeFileSystemPermission: permission=" + permission);
 			if(permission == "granted") {
 				CB(callback, null);
@@ -651,6 +687,23 @@
 		});
 	}
 
+	function removeHandleFromIndexedDB(path) {
+		openNativeFileSystemFileHandleDb(function(err, db) {
+			if(err) return console.error(err);
+
+			var transaction = db.transaction(["handles"], "readwrite");
+			var objectStore = transaction.objectStore("handles");
+			transaction.oncomplete = function(event) {
+				console.log("localfs:removeHandleFromIndexedDB: handle for path="+ path + " removed from indexedDB! ");
+			};
+			transaction.onerror = function(event) {
+				console.error("localfs:removeHandleFromIndexedDB: Failed to remove handle for path="+ path + " in indexedDB!");
+			};
+			
+			objectStore.delete(path);
+		});
+	}
+
 	function openLocalDir() {
 		localDirDialog(function(err, dirHandle) {
 			if(err) return alertBox("Could not open local directory! Error: " + err.message);
@@ -794,7 +847,7 @@
 
 			//return callback(null, dirHandle);
 
-			verifyNativeFileSystemPermission(dirHandle, "readwrite", function(err) {
+			verifyNativeFileSystemPermission(dirHandle, "readwrite", function verifiedDirHandlePermission(err) {
 				if(err) callback(err);
 				else callback(null, dirHandle);
 			});
@@ -809,11 +862,11 @@
 					// Ask the parent folder if we can get a directory handle from it
 					var parentFolder = folders[folders.length-2];
 					// note: Recursion!
-					return getDirectoryHandle(parentFolder, function(err, parentDirHandle) {
+					return getDirectoryHandle(parentFolder, function gotDirHandleFromParentDirMaybe(err, parentDirHandle) {
 						if(err) return callback( new Error("Could not get a directory handle for " + pathToFolder + " nor from the parent folders. Error: " + err.message) )
 						
 						var folderName = UTIL.getFolderName(pathToFolder);
-						parentDirHandle.getDirectoryHandle(folderName).then(function(dirHandle) {
+						parentDirHandle.getDirectoryHandle(folderName).then(function getDirHandleFromParentDirSuccess(dirHandle) {
 							CB(callback, null, dirHandle);
 						}).catch(function(err) {
 							CB(callback, new Error("parentFolder=" + parentFolder + " could not give us a directory handle! Error: " + err.message));
