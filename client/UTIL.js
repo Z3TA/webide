@@ -12,6 +12,7 @@
 if(typeof EDITOR == "undefined") {
 	var EDITOR = {
 		workingDirectory: (typeof process == "object" && typeof process.cwd == "function") ? process.cwd() : "/",
+		protocols: [],
 		remoteProtocols: ["ftp", "ftps", "sftp"],
 		settings: {
 			defaultLineBreakCharacter: "\n"
@@ -401,7 +402,7 @@ if(protocolIndex != -1) slashes = slashes - 2;
 			
 			//console.log("protocol=" + protocol);
 			
-			if(EDITOR.remoteProtocols.indexOf(protocol) == -1) {
+			if( EDITOR.remoteProtocols.indexOf(protocol) == -1 && EDITOR.protocols.indexOf(protocol) == -1 ) {
 				console.warn("protocol=" + protocol + " is not a supported protocol! If it's a Windows path, use " + protocol + ":\\ instead!"); // eg C:\\
 			}
 			

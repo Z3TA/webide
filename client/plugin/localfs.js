@@ -25,7 +25,13 @@
 
 			console.log("localfs: loadWebNativeFs!");
 
-			EDITOR.addProtocol(protocol, {list: localListFiles, read: localReadFile, write: localWriteFile, hash: localHashFromDisk, size: localFileSizeOnDisk});
+			EDITOR.addProtocol(protocol, {
+				list: localListFiles, 
+				read: localReadFile, 
+				write: localWriteFile, 
+				hash: localHashFromDisk, 
+				size: localFileSizeOnDisk
+			});
 
 			EDITOR.on("fileOpen", nativeFileOpen, 1);
 			EDITOR.on("fileClose", nativeFileClose, 1);
@@ -155,8 +161,8 @@
 			saveHandleToIndexedDB(path, fileHandle)
 		}
 		else {
-			console.warn("localfs: No fileHandle found for path=" + path + " in Object.keys(fileHandles)=" + Object.keys(fileHandles));
-	}
+			console.warn( "localfs: No fileHandle found for path=" + path + " in Object.keys(fileHandles)=" + JSON.stringify(Object.keys(fileHandles)) );
+		}
 	}
 
 	function getFileHandle(path, callback) {
@@ -176,14 +182,14 @@
 		}
 
 		console.warn("localfs:getFileHandle: Reading handle from indexedDB...");
-		readHandleFromIndexedDB(path, function(err, fileHandle) {
+		readHandleFromIndexedDB(path, function gotFileHandleFromIndexedDbMaybe(err, fileHandle) {
 			if(err) {
 				var dirPath = UTIL.getDirectoryFromPath(path);
 				
 				if(dirPath != (protocol + ":///")) {
 					return getDirectoryHandle(dirPath, function(err, dirHandle) {
 						if(err) {
-							var error = new Error("Could not get file handle for " + path + " nor a directory handle for " + dirPath + "\nError: " + err.message);
+							var error = new Error("Could not get file handle for " + path + " nor a directory handle for " + dirPath + "\nError: " + err.message + " (error code=" + err.code + ")");
 							return callback(error);
 						}
 
@@ -191,7 +197,8 @@
 						dirHandle.getFileHandle(fileName).then(function(fileHandle) {
 							CB(callback, null, fileHandle);
 						}).catch(function(err) {
-							var error = new Error("Could not get file handle for " + path + "\nError: " + err.message);
+							var error = new Error("Directory handle for " + dirPath + " could not get file handle for " + path + "\nError: " + err.message + " (error code=" + err.code + ")");
+							
 							CB(callback, error);
 						});
 					});
@@ -309,42 +316,64 @@
 
 		getFileHandle(path, function gotHandle(err, fileHandle) {
 			if(err) {
-				var chooseFile = "Choose file";
-				var cancel = "Cancel";
-				return confirmBox("Do you want to save " + path + " locally?", [chooseFile, cancel], function(answer) {
-					if(answer == cancel) return;
-					else if(answer == chooseFile) {
 
-						var fileName = UTIL.getFilenameFromPath(path);
-						var fileExtension = "." + UTIL.getFileExtension(path);
+				// the write function is supposed to write to the file, so if we can't get an handle for it, try creating it!
+				var folderPath = UTIL.getDirectoryFromPath(path);
+				return getDirectoryHandle(folderPath, function(err, dirHandle) {
+					if(err) {
+						var chooseFile = "Choose file";
+						var cancel = "Cancel";
+						return confirmBox("Do you want to save " + path + " locally?", [chooseFile, cancel], function(answer) {
+							if(answer == cancel) return;
+							else if(answer == chooseFile) {
 
-						window.showSaveFilePicker({
-							suggestedName: fileName,
-							types: [{
-									description: 'Development',
-									accept: {
-										'text/plain': [fileExtension],
-									},
-							}],
-						}).then(function(fileHandle) {
+								var fileName = UTIL.getFilenameFromPath(path);
+								var fileExtension = "." + UTIL.getFileExtension(path);
 
-							console.log("localfs:localWriteFile: path=" + path + " fileHandle.name=" + fileHandle.name);
-path = protocol + "://" + fileHandle.name; // Update the path with new filname!
-							fileHandles[path] = fileHandle;
+								window.showSaveFilePicker({
+									suggestedName: fileName,
+									types: [{
+											description: 'Development',
+											accept: {
+												'text/plain': [fileExtension],
+											},
+									}],
+								}).then(function(fileHandle) {
 
-							console.log("localfs:localWriteFile: Updated fileHandles=" + JSON.stringify(Object.keys(fileHandles)) );
+									console.log("localfs:localWriteFile: path=" + path + " fileHandle.name=" + fileHandle.name);
+									path = protocol + "://" + fileHandle.name; // Update the path with new filname!
+									fileHandles[path] = fileHandle;
 
-							CB(gotHandle, null, fileHandle);
+									console.log("localfs:localWriteFile: Updated fileHandles=" + JSON.stringify(Object.keys(fileHandles)) );
 
-						}).catch(function(err) {
-							console.error(err);
-							alertBox("localfs: Error from showSaveFilePicker: " + err.message);
+									CB(gotHandle, null, fileHandle);
+
+								}).catch(function(err) {
+									console.error(err);
+									alertBox("localfs: Error from showSaveFilePicker: " + err.message);
+								});
+
+							}
 						});
-
 					}
+
+					var options = {
+						create: true
+					};
+					var fileName = UTIL.getFilenameFromPath(path);
+					dirHandle.getFileHandle(fileName, options).then(writeToFileHandle).catch(function(err) {
+						var error = new Error("Unable to create new file when writing to " + path + " Error: " + err.message);
+						if(callback) CB(callback, error);
+						else alertBox(error.message);
+					});
 				});
 			}
 
+			writeToFileHandle(fileHandle);
+
+		});
+
+		function writeToFileHandle(fileHandle) {
 			console.log("localfs:localWriteFile: path=" + path + " fileHandle.name=" + fileHandle.name + " creating writeable...");
 			fileHandle.createWritable().then(function(writer) {
 				// Make sure we start with an empty file
@@ -364,10 +393,12 @@ path = protocol + "://" + fileHandle.name; // Update the path with new filname!
 					});
 				});
 			}).catch(function(err) {
-				if(callback) CB(callback, err);
-				else alertBox(err.message); // Can't throw inside a promise chain
+				var error = new Error("Unable to write to " + path + " via fileHandle.createWritable! Error: " + err.message)
+				if(callback) CB( callback, error );
+				else alertBox(error.message); // Can't throw inside a promise chain
 			});
-		});
+		}
+
 	}
 
 	function localHashFromDisk(path, callback) {
@@ -562,22 +593,23 @@ path = protocol + "://" + fileHandle.name; // Update the path with new filname!
 		if(typeof path != "string") throw new Error("readHandleFromIndexedDB: First parameter needs to be the file path!");
 		if(typeof callback != "function") throw new Error("readHandleFromIndexedDB: Second parameter needs to be a callback function!");
 
-		openNativeFileSystemFileHandleDb(function(err, db) {
+		openNativeFileSystemFileHandleDb(function handleDbOpened(err, db) {
 			var transaction = db.transaction(["handles"]);
 			var objectStore = transaction.objectStore("handles");
 			var request = objectStore.get(path);
-			request.onerror = function(err) {
+			request.onerror = function handleDbError(err) {
 				// Handle errors!
 				console.error(err);
 				callback(new Error("Error when reading file handle from IndexedDB: " + err.message));
 			};
-			request.onsuccess = function() {
-				console.log("localfs: Got file handle etc for path=" + path + " request.result=", request.result);
+			request.onsuccess = function handleDbSuccess() {
 				if(typeof request.result == "undefined") {
 					var error = new Error("No result in request to indexedDB when reading file handle for path=" + path + " request=" + JSON.stringify(request));
 					error.code = "ENOENT";
 					return callback(error);
 				}
+
+				console.log("localfs: Got handle for path=" + path + " request.result=", request.result);
 
 				var handle = request.result.handle;
 				callback(null, handle);
@@ -725,7 +757,7 @@ path = protocol + "://" + fileHandle.name; // Update the path with new filname!
 		var errorWithProperCallStack = new Error();
 
 		if( directoryHandles.hasOwnProperty(pathToFolder) ) {
-			console.warn("localfs:getDirectoryHandle: Handle exist in directoryHandles!");
+			console.log("localfs:getDirectoryHandle: Handle for pathToFolder=" + pathToFolder + " exist in directoryHandles!");
 			var dirHandle = directoryHandles[pathToFolder];
 
 			//return callback(null, dirHandle);
@@ -738,7 +770,7 @@ path = protocol + "://" + fileHandle.name; // Update the path with new filname!
 		}
 		
 		console.warn("localfs:getDirectoryHandle: Reading handle from IndexedDB...");
-		readHandleFromIndexedDB(pathToFolder, function(err, dirHandle) {
+		readHandleFromIndexedDB(pathToFolder, function handleReadFromIndexedDB(err, dirHandle) {
 			if(err) {
 				var folders = UTIL.getFolders(pathToFolder);
 				if(folders.length > 1) {
