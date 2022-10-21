@@ -31,7 +31,8 @@
 	var gotoLine = null;
 	var discoveryBarIcon;
 	var selectedItem;
-	
+	var _findFiles;
+
 	EDITOR.plugin({
 		desc: "Open any file ...",
 		load: gotoFile_load,
@@ -86,9 +87,7 @@ if(CHROMEBOOK) {
 		
 		EDITOR.on("openFileTool", openAnyFileTool);
 		
-		CLIENT.on("findFilesStatus", gotoFileProgressStatus);
-		CLIENT.on("fileFound", gotoFileFileFound);
-		CLIENT.on("pathGlob", gotoFilePathGlob);
+		
 		
 		menuItem = EDITOR.ctxMenu.add(S("open_search_file"), show_gotoFileInput, 4);
 		
@@ -113,9 +112,6 @@ EDITOR.unbindKey(show_gotoFileInput2);
 		
 		EDITOR.removeEvent("openFileTool", openAnyFileTool);
 		
-		CLIENT.removeEvent("findFilesStatus", gotoFileProgressStatus);
-		CLIENT.removeEvent("fileFound", gotoFileFileFound);
-		CLIENT.removeEvent("pathGlob", gotoFilePathGlob);
 		
 		 EDITOR.ctxMenu.remove(menuItem);
 		
@@ -124,6 +120,8 @@ EDITOR.unbindKey(show_gotoFileInput2);
 		EDITOR.discoveryBar.remove(discoveryBarIcon);
 		
 		hide_gotoFileInput();
+
+		_findFiles = undefined;
 	}
 	
 	
@@ -467,26 +465,28 @@ EDITOR.unbindKey(show_gotoFileInput2);
 		}
 		else {
 			//console.log("goto_file: abortFindFiles because: trySearch() isSearching=" + isSearching + " (is true)");
-			CLIENT.cmd("abortFindFiles", function findFilesAborted(err, resp) {
+			
+			if(_findFiles) _findFiles.abort(function findFilesAborted(err, resp) {
 				if(err) throw err;
-				
+
 				//console.log("goto_file: Trying search because resp.foldersBeingSearched=" + resp.foldersBeingSearched);
-				
+
 				if(typeof resp.foldersBeingSearched != "number") throw new Error("typeof resp.foldersBeingSearched is " + (typeof resp.foldersBeingSearched) + " = " + resp.foldersBeingSearched);
-				
+
 				if(resp.foldersBeingSearched == 0) {
 					isSearching = false;
 					trySearch();
 				}
 				else searchTimer = setTimeout(trySearch, 500);
-				
+
 			});
+
 		}
 	}
 	
 	function search(searchString, ignore) {
 
-if(maxResults <= 0) {
+		if(maxResults <= 0) {
 			//console.log("goto_file: Not searching because maxResults=" + maxResults);
 			return;
 		}
@@ -496,8 +496,22 @@ if(maxResults <= 0) {
 		//console.time("goto_file: findFiles"); // Edit server's cuncurrencty setting to fine tune!
 		//console.log("goto_file: Search begun! searchString=" + searchString + " searchPath=" + searchPath + " ignore=" + JSON.stringify(ignore));
 		lastSearchText = searchString;
-		CLIENT.cmd("findFiles", {folder: searchPath, name: searchString, useRegexp: true, maxResults: maxResults, ignore: ignore}, function searchFinish(err, resp) {
-			
+
+
+		var options = {folder: searchPath, 
+			name: searchString, 
+			useRegexp: true, 
+			maxResults: maxResults, 
+			ignore: ignore, 
+			found: gotoFileFileFound, 
+			glob: gotoFilePathGlob, 
+			progress: gotoFileProgressStatus,
+			finish: searchFinish
+		};
+		_findFiles = EDITOR.findFiles(options);
+
+		function searchFinish(err, resp) {
+
 			if(err) {
 				if(err.code == "ETIMEDOUT") {
 					// Does it matter if we timed out!?
@@ -508,16 +522,16 @@ if(maxResults <= 0) {
 				else throw err;
 			}
 			//console.timeEnd("goto_file: findFiles");
-			
+
 			//console.log("goto_file: Search finish! searchString=" + searchString + " resp=" + JSON.stringify(resp));
-			
+
 			if(resp && resp.buzy == true) searchTimer = setTimeout(trySearch, 500);
 			else isSearching = false;
-			
+
 			progressBar.style.display = "none";
 			EDITOR.resizeNeeded();
-			
-		});
+
+		}
 	}
 	
 	function appendResult(filePath, matchArr) {
@@ -1036,15 +1050,15 @@ abortFindFiles();
 	function abortFindFiles() {
 		
 		if(CLIENT.connected) {
-			CLIENT.cmd("abortFindFiles", function findFilesAborted(err, resp) {
+			if(_findFiles) _findFiles.abort(function findFilesAborted(err, resp) {
 				if(err) throw err;
-				
+
 				if(typeof resp.foldersBeingSearched != "number") throw new Error("typeof resp.foldersBeingSearched is " + (typeof resp.foldersBeingSearched) + " = " + resp.foldersBeingSearched);
-				
+
 				if(resp.foldersBeingSearched == 0) isSearching = false;
-				
+
 				//console.log("goto_file: Aborted FindFiles: " + JSON.stringify(resp) + " isSearching=" + isSearching);
-				
+
 			});
 		}
 	}

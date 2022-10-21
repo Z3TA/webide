@@ -10049,9 +10049,90 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		});
 	}
 
-	EDITOR.findFileReverseRecursive = function findFiles(names, startDir, callback) {
+	var _findFiles = {
+		found: [],
+		finish: [],
+		glob: [],
+		progress: []
+	};
+	EDITOR.findFiles = function findFilesInTree(settings) {
+
+		console.log("EDITOR.findFiles: settings=" + JSON.stringify(settings));
+
+		/*
+
+		*/
+
+		if(typeof settings != "object") throw new Error("First argument to EDITOR.findFiles must be a settings object!");
+		
+		if(typeof settings.found != "function") throw new Error("settings must have method found - that will be called whenever a file is found");
+		
+
+
+		var validSettings = ["folder", "name", "useRegexp", "maxResults", "ignore", "allowGlob", "found", "finish", "glob", "progress"];
+		for(var prop in settings) {
+			if( validSettings.indexOf(prop) == -1 ) throw new Error("prop=" + prop + " not a valid setting to EDITOR.findFiles !");
+		}
+
+		if(settings.folder == undefined) throw new Error("folder is a requried setting in EDITOR.findFiles !");
+		if(settings.name == undefined) throw new Error("name is a requried setting in EDITOR.findFiles !");
+
+		var protocol = UTIL.urlProtocol(settings.folder);
+		if(protocol != "" && EDITOR.remoteProtocols.indexOf(protocol) == -1) {
+			if(!_protocols.hasOwnProperty(protocol))throw new Error("protocol=" + protocol + " is not supported!");
+			if(typeof _protocols[protocol].findFiles != "function") throw new Error("protocol=" + protocol + " does not have a findFiles method!");
+		}
+
+		// ********************************** Do not throw errors below **********************************
+ 
+		if(typeof settings.found == "function")_findFiles.found.push(settings.found);
+		if(typeof settings.finish == "function") _findFiles.finish.push(settings.finish);
+		if(typeof settings.glob == "function") _findFiles.glob.push(settings.glob);
+		if(typeof settings.progress == "function") _findFiles.progress.push(settings.progress);
+
+		if(protocol != "" && EDITOR.remoteProtocols.indexOf(protocol) == -1) {
+			return _protocols[protocol].findFiles(settings);
+		}
+
+		CLIENT.cmd("findFiles",settings, function searchFinish(err, resp) {
+			if(typeof settings.finish == "function") settings.finish(err, resp);
+
+			if(typeof settings.found == "function") removeFrom(_findFiles.found, settings.found);
+			if(typeof settings.finish == "function") removeFrom(_findFiles.finish, settings.finish);
+			if(typeof settings.glob == "function") removeFrom(_findFiles.glob, settings.glob);
+			if(typeof settings.progress == "function") removeFrom(_findFiles.progress, settings.progress);
+		});
+
+		return {
+			abort: function abortFindFiles(callback) {
+				CLIENT.cmd("abortFindFiles", callback);
+			}
+		}
+	}
+
+	CLIENT.on("findFilesStatus", function(resp) {
+		for (var i=0; i<_findFiles.progress.length; i++) {
+			_findFiles.progress[i](resp);
+		}
+	});
+
+	CLIENT.on("fileFound", function(resp) {
+		for (var i=0; i<_findFiles.found.length; i++) {
+			_findFiles.found[i](resp);
+		}
+	});
+
+	CLIENT.on("pathGlob", function(resp) {
+		for (var i=0; i<_findFiles.glob.length; i++) {
+			_findFiles.glob[i](resp);
+		}
+	});
+
+	EDITOR.findFileReverseRecursive = function findFilesDown(names, startDir, callback) {
 		/*
 			Searches down towards the root, looking for file names
+			Compared to EDITOR.findFiles which searches sibling folders as well!
+			EDITOR.findFileReverseRecursive only searches downwards, while EDITOR.findFiles search the whole tree
 		*/
 		if(typeof names == "string") names = [names];
 

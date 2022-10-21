@@ -30,7 +30,8 @@
 				hash: localHashFromDisk, 
 				size: localFileSizeOnDisk,
 				move: localMove,
-				del: localDelete
+				del: localDelete,
+				findFiles: localFindFiles
 			});
 
 			EDITOR.on("fileOpen", nativeFileOpen, 1);
@@ -521,6 +522,137 @@
 		});
 	}
 
+	function localFindFiles(options) {
+		/*
+			["folder", "name", "useRegexp", "maxResults", "ignore", "allowGlob", "found", "finish", "glob", "progress"];
+		*/
+
+		console.log("nativefs:localFindFiles! options=" + JSON.stringify(options));
+
+		var folders = UTIL.getFolders(options.folder);
+
+		var foldersToSearch = [folders.pop()];
+		var results = 0;
+		var aborted = false;
+		var foldersBeingSearched = 0;
+		var filesFound = 0;
+		var maxConcurrency = 1;
+		var totalFoldersToSearch = 1;
+		var totalFoldersSearched = 0;
+
+		if(!options.useRegexp) options.name = UTIL.escapeRegExp(options.name);
+		var reName = new RegExp(options.name, "ig");
+
+		search(foldersToSearch.pop());
+
+		return {
+			abort: function(abortCallback) {
+				aborted = true;
+				var json = {foldersBeingSearched: foldersBeingSearched}
+				console.log("nativefs:localFindFiles:abort! " + JSON.stringify(json));
+				abortCallback(null, json);
+			}
+		}
+
+		function search(pathToFolder) {
+			if(typeof pathToFolder != "string") throw new Error("Something went wrong: pathToFolder=" + pathToFolder);
+
+			console.log("nativefs:localFindFiles:search! pathToFolder=" + pathToFolder);
+			if(aborted) return finish();
+
+			foldersBeingSearched++;
+			getDirectoryHandle(pathToFolder, function(err, dirHandle) {
+				if(err) return error(err);
+
+				listLocalDir(pathToFolder, dirHandle, function(err, fileList) {
+					if(err) return error(err);
+
+					// type, name, path, size, date
+
+					for (var i=0; i<fileList.length; i++) {
+						if(fileList[i].type == "d") {
+							totalFoldersToSearch++;
+							foldersToSearch.push(fileList[i].path);
+						}
+						else {
+							match(fileList[i].name, fileList[i].path);
+						}
+					}
+
+					foldersBeingSearched--;
+					totalFoldersSearched++;
+					
+					doneMaybe();
+
+				});
+			});
+		}
+
+		function doneMaybe() {
+			console.log("nativefs:localFindFiles:doneMaybe? aborted=" + aborted + " foldersBeingSearched=" + foldersBeingSearched + " maxConcurrency=" + maxConcurrency + " foldersToSearch.length=" + foldersToSearch.length);
+			if(aborted) return finish();
+			if(foldersBeingSearched >= maxConcurrency) return;
+			if(foldersBeingSearched == 0 && foldersToSearch.length == 0) {
+				if(options.allowGlob == false) return finish();
+				if(folders.length == 0) return finish();
+
+				var parentFolder = folders.pop();
+
+				console.log("nativefs:localFindFiles:doneMaybe? glob! parentFolder=" + parentFolder);
+
+				if(typeof options.glob == "function") {
+					options.glob(parentFolder);
+				}
+
+				totalFoldersToSearch++;
+				foldersToSearch.push(parentFolder);
+			}
+			
+			if(foldersToSearch.length > 0) search(foldersToSearch.pop());
+
+		}
+
+		function match(name, path) {
+			if(aborted) return; // Don't call any callbacks after aborting!
+
+			var matchArr = name.match(reName);
+			if(matchArr) {
+				console.log("nativefs:localFindFiles:match! matchArr=" + JSON.stringify(matchArr));
+				options.found({
+					path: path,
+					match: matchArr,
+					totalFoldersToSearch: totalFoldersToSearch,
+					totalFoldersSearched: totalFoldersSearched,
+					foldersBeingSearched: foldersBeingSearched,
+					found: filesFound,
+					maxResults: options.maxResults,
+				});
+				filesFound++;
+				if(options.maxResults && filesFound >= options.maxResults) {
+					aborted = true;
+					foldersBeingSearched = 0;
+					finish();
+				}
+			}
+		}
+	
+
+		function error(err) {
+			finish(err);
+			aborted = true;
+		}
+
+		function finish(err) {
+			if(typeof options.finish == "function") {
+				options.finish(err || null, {buzy: foldersBeingSearched > 0});
+			}
+			options.finish = null; // So that it's not called again
+			aborted = true; // Just to make sure
+		}
+
+	}
+
+
 	function verifyNativeFileSystemPermission(fileHandle, mode, callback) {
 		
 		console.warn("nativefs:verifyNativeFileSystemPermission!", fileHandle);
@@ -660,7 +792,7 @@
 
 		console.warn("localfs:readHandleFromIndexedDB: path=" + path);
 
-		if(typeof path != "string") throw new Error("readHandleFromIndexedDB: First parameter needs to be the file path!");
+		if(typeof path != "string") throw new Error("readHandleFromIndexedDB: First parameter path=" + path + " needs to be the file path!");
 		if(typeof callback != "function") throw new Error("readHandleFromIndexedDB: Second parameter needs to be a callback function!");
 
 		openNativeFileSystemFileHandleDb(function handleDbOpened(err, db) {
@@ -838,6 +970,8 @@
 
 	function getDirectoryHandle(pathToFolder, callback) {
 		console.warn( "localfs:getDirectoryHandle: pathToFolder=" + pathToFolder + " directoryHandles=" + JSON.stringify(Object.keys(directoryHandles)) );
+
+		if(typeof pathToFolder != "string") throw new Error("getDirectoryHandle: First parameter pathToFolder=" + pathToFolder + " needs to be a path to a folder!");
 
 		var errorWithProperCallStack = new Error();
 
