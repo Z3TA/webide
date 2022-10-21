@@ -54,7 +54,7 @@
 		var index = currentScript.indexOf("/plugin/");
 		if(index == -1) {
 			alertBox("Unable to hot reload plugin! Current opened file is not in the plugin folder: " + currentScript);
-			return true;
+			return PREVENT_DEFAULT;
 		}
 		currentScript = currentScript.slice(index+1); // Don't include the first slash (because we use relative paths)
 		
@@ -74,7 +74,7 @@ pluginDescription = EDITOR.plugins[i].desc;
 		
 		if(!pluginDescription) {
 			alertBox("Did not find a plugin description in " + currentFile.path);
-			return true;
+			return PREVENT_DEFAULT;
 		}
 		
 		// Find the script ...
@@ -99,7 +99,7 @@ pluginDescription = EDITOR.plugins[i].desc;
 		else if(reloaded === true) alertBox("Successfully reloaded " + currentScript);
 		else throw new Error("reloaded=" + reloaded);
 		
-		return false;
+		return PREVENT_DEFAULT;
 		
 		function append(script, parent) {
 			//console.log("Reloading script: " + currentScript);

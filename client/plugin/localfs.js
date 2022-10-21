@@ -56,6 +56,9 @@
 			EDITOR.unbindKey(openLocalFileKeyboardShortcut);
 
 			EDITOR.windowMenu.remove(windowMenuOpenLocalFile);
+			EDITOR.windowMenu.remove(windowMenuOpenLocalDir);
+
+
 		},
 		order: 100 // Load early 
 	});
@@ -149,37 +152,21 @@
 		var fileHandle = fileHandles[path];
 
 		if(fileHandle) {
-			console.log("localfs: Saving fileHandle in indexedDB: path=" + path + " fileHandle=" + fileHandle + " typeof fileHandle = " + (typeof fileHandle));
-
-			openNativeFileSystemFileHandleDb(function(err, db) {
-				if(err) return console.error(err);
-
-				var transaction = db.transaction(["fileHandles"], "readwrite");
-				var objectStore = transaction.objectStore("fileHandles");
-				transaction.oncomplete = function(event) {
-					console.log("localfs: nativeFileSystemFileHandle=" + fileHandle + " for path="+ file.path + " saved in indexedDB! ");
-				};
-				transaction.onerror = function(event) {
-					console.error("localfs: Failed to save nativeFileSystemFileHandle for path="+ file.path + " in indexedDB!");
-				};
-				// Use put in case for some reaso (crash?) it already exist in the indexdb (we want to save the latest handle)
-				objectStore.put({path: file.path, handle: fileHandle, size: file.getFileSize()});
-
-			});
+			saveHandleToIndexedDB(path, fileHandle)
 		}
 		else {
 			console.warn("localfs: No fileHandle found for path=" + path + " in Object.keys(fileHandles)=" + Object.keys(fileHandles));
 	}
 	}
 
-	function getHandle(path, callback) {
+	function getFileHandle(path, callback) {
 
-		console.warn( "localfs:getHandle: path=" + path + " fileHandles=" + JSON.stringify(Object.keys(fileHandles)) );
+		console.warn( "localfs:getFileHandle: path=" + path + " fileHandles=" + JSON.stringify(Object.keys(fileHandles)) );
 
 		var errorWithProperCallStack = new Error();
 
 		if( fileHandles.hasOwnProperty(path) ) {
-			console.warn("localfs:getHandle: Handle exist in fileHandles!");
+			console.warn("localfs:getFileHandle: Handle exist in fileHandles!");
 			var fileHandle = fileHandles[path];
 			verifyNativeFileSystemPermission(fileHandle, "readwrite", function(err) {
 				if(err) callback(err);
@@ -188,23 +175,39 @@
 			return;
 		}
 
-		console.warn("localfs:getHandle: Reading handle from IndexDb...");
-		readFileHandleFromIndexDb(path, function(err, fileSize, fileHandle) {
+		console.warn("localfs:getFileHandle: Reading handle from indexedDB...");
+		readHandleFromIndexedDB(path, function(err, fileHandle) {
 			if(err) {
+				var dirPath = UTIL.getDirectoryFromPath(path);
+				
+				if(dirPath != (protocol + ":///")) {
+					return getDirectoryHandle(dirPath, function(err, dirHandle) {
+						if(err) {
+							var error = new Error("Could not get file handle for " + path + " nor a directory handle for " + dirPath + "\nError: " + err.message);
+							return callback(error);
+						}
+
+						var fileName = UTIL.getFilenameFromPath(path);
+						dirHandle.getFileHandle(fileName).then(function(fileHandle) {
+							CB(callback, null, fileHandle);
+						}).catch(function(err) {
+							var error = new Error("Could not get file handle for " + path + "\nError: " + err.message);
+							CB(callback, error);
+						});
+					});
+				}
+
 				errorWithProperCallStack.message = "Unable to find a fileHandle for path=" + path + "\nError: " + err.message + "\n(The file might still exist, but we need to ask the user for it, try EDITOR.openLocalFile)";
 				return callback(errorWithProperCallStack);
 			}
 
 			verifyNativeFileSystemPermission(fileHandle, "readwrite", function(err) {
-				if(err) callback(err);
-				else {
+				if(err) return callback(err);
+				
+				fileHandles[path] = fileHandle;
+				console.log("localfs:getFileHandle: Updated fileHandles=" + JSON.stringify(Object.keys(fileHandles)) );
 
-					fileHandles[path] = fileHandle;
-					console.log("localfs:getHandle: Updated fileHandles=" + JSON.stringify(Object.keys(fileHandles)) );
-
-					callback(null, fileHandle);
-			
-				}
+				callback(null, fileHandle);
 			});
 		});
 	}
@@ -241,7 +244,7 @@
 
 		if(callback == undefined || typeof callback != "function") throw new Error("No callback function! callback=" + callback);
 
-		getHandle(path, function(err, fileHandle) {
+		getFileHandle(path, function(err, fileHandle) {
 			if(err) {
 				if(!err.code) err.code = "ENOENT";
 				return callback(err);
@@ -304,7 +307,7 @@
 			});
 		}
 
-		getHandle(path, function gotHandle(err, fileHandle) {
+		getFileHandle(path, function gotHandle(err, fileHandle) {
 			if(err) {
 				var chooseFile = "Choose file";
 				var cancel = "Cancel";
@@ -370,7 +373,7 @@ path = protocol + "://" + fileHandle.name; // Update the path with new filname!
 	function localHashFromDisk(path, callback) {
 		console.log("localfs:localHashFromDisk: path=" + path);
 
-		getHandle(path, function(err, fileHandle) {
+		getFileHandle(path, function(err, fileHandle) {
 			if(err && err.code == "PERMISSION_DENIED") return alertBox(err.message);
 			else if(err) throw err;
 
@@ -391,7 +394,7 @@ path = protocol + "://" + fileHandle.name; // Update the path with new filname!
 	function localFileSizeOnDisk(path, callback) {
 		console.log("localfs:localFileSizeOnDisk: path=" + path);
 
-		getHandle(path, function(err, fileHandle) {
+		getFileHandle(path, function(err, fileHandle) {
 			if(err) {
 				if(!err.code) err.code = "ENOENT";
 				return callback(err);
@@ -419,14 +422,18 @@ path = protocol + "://" + fileHandle.name; // Update the path with new filname!
 
 	function verifyNativeFileSystemPermission(fileHandle, mode, callback) {
 		
-		console.warn("nativefs:verifyNativeFileSystemPermission!");
+		console.warn("nativefs:verifyNativeFileSystemPermission!", fileHandle);
 
 		if(typeof mode == "function") {
 			callback = mode;
 			mode = "readwrite";
 		}
 
-		if(typeof fileHandle != "object") throw new Error("Does not seem like a fileHandle: fileHandle=" + fileHandle + " typeof fileHandle = " + (typeof fileHandle));
+		if(typeof fileHandle != "object") throw new Error("verifyNativeFileSystemPermission: Does not seem like a fileHandle: fileHandle=" + fileHandle + " typeof fileHandle = " + (typeof fileHandle));
+		if(typeof fileHandle.queryPermission != "function") {
+			console.log(fileHandle);
+			throw new Error("verifyNativeFileSystemPermission: File handle does not have a queryPermission function: " + fileHandle);
+		}
 
 		var options = {mode: mode};
 
@@ -492,7 +499,7 @@ path = protocol + "://" + fileHandle.name; // Update the path with new filname!
 
 		nativeFileSystemFileHandleDbWaitList.push(callback);
 
-		var nativeFileSystemFileHandleDbVersion = 1; // Increment after making changes to the db structure!
+		var nativeFileSystemFileHandleDbVersion = 2; // Increment after making changes to the db structure!
 		var requestToUseDb = indexedDB.open("nativeFileSystemFileHandleDb", nativeFileSystemFileHandleDbVersion);
 		requestToUseDb.onerror = function(event) {
 			nativeFileSystemFileHandleDb = false; // We have tried opening it but failed
@@ -519,7 +526,7 @@ path = protocol + "://" + fileHandle.name; // Update the path with new filname!
 
 			//console.log("localfs: onupgradeneeded triggered for indexedDB nativeFileSystemFileHandleDb");
 
-			var objectStore = db.createObjectStore("fileHandles", { keyPath: "path" });
+			var objectStore = db.createObjectStore("handles", { keyPath: "path" }); // Increment nativeFileSystemFileHandleDbVersion if you change these!
 
 			objectStore.transaction.oncomplete = function(event) {
 				//console.log("localfs: Finished creating indexedDB nativeFileSystemFileHandleDb!");
@@ -528,57 +535,71 @@ path = protocol + "://" + fileHandle.name; // Update the path with new filname!
 
 	}
 
-	function readFileHandleFromIndexDb(path, callback) {
-
-		console.warn("localfs:readFileHandleFromIndexDb: path=" + path);
-
-		if(typeof path != "string") throw new Error("readFileHandleFromIndexDb: First parameter needs to be the file path!");
-		if(typeof callback != "function") throw new Error("readFileHandleFromIndexDb: Second parameter needs to be a callback function!");
+	function saveHandleToIndexedDB(path, handle) {
+		console.log("localfs: Saving handle in indexedDB: path=" + path + " handle=" + handle + " typeof handle = " + (typeof handle));
 
 		openNativeFileSystemFileHandleDb(function(err, db) {
-			var transaction = db.transaction(["fileHandles"]);
-			var objectStore = transaction.objectStore("fileHandles");
+			if(err) return console.error(err);
+
+			var transaction = db.transaction(["handles"], "readwrite");
+			var objectStore = transaction.objectStore("handles");
+			transaction.oncomplete = function(event) {
+				console.log("localfs: nativeFileSystemFileHandle=" + fileHandle + " for path="+ file.path + " saved in indexedDB! ");
+			};
+			transaction.onerror = function(event) {
+				console.error("localfs: Failed to save nativeFileSystemFileHandle for path="+ file.path + " in indexedDB!");
+			};
+			// Use put in case for some reaso (crash?) it already exist in the indexedDB (we want to save the latest handle)
+			objectStore.put({path: file.path, handle: fileHandle, size: file.getFileSize()});
+
+		});
+	}
+
+	function readHandleFromIndexedDB(path, callback) {
+
+		console.warn("localfs:readHandleFromIndexedDB: path=" + path);
+
+		if(typeof path != "string") throw new Error("readHandleFromIndexedDB: First parameter needs to be the file path!");
+		if(typeof callback != "function") throw new Error("readHandleFromIndexedDB: Second parameter needs to be a callback function!");
+
+		openNativeFileSystemFileHandleDb(function(err, db) {
+			var transaction = db.transaction(["handles"]);
+			var objectStore = transaction.objectStore("handles");
 			var request = objectStore.get(path);
 			request.onerror = function(err) {
 				// Handle errors!
 				console.error(err);
-				callback(new Error("Error when reading file handle from indexDb: " + err.message));
+				callback(new Error("Error when reading file handle from IndexedDB: " + err.message));
 			};
 			request.onsuccess = function() {
 				console.log("localfs: Got file handle etc for path=" + path + " request.result=", request.result);
 				if(typeof request.result == "undefined") {
-					var error = new Error("No result in request when reading file handle for path=" + path + " request=" + JSON.stringify(request));
+					var error = new Error("No result in request to indexedDB when reading file handle for path=" + path + " request=" + JSON.stringify(request));
 					error.code = "ENOENT";
 					return callback(error);
 				}
 
-				var fileSize = request.result.size;
-				var fileHandle = request.result.handle;
-				callback(null, fileSize, fileHandle);
+				var handle = request.result.handle;
+				callback(null, handle);
 			};
 		});
 	}
 
 	function openLocalDir() {
 		localDirDialog(function(err, dirHandle) {
-			if(err) return alertBox(err.message);
+			if(err) return alertBox("Could not open local directory! Error: " + err.message);
 
 			UTIL.objInfo(dirHandle);
 
 			var dirPath = protocol + "://" + dirHandle.name + "/";
+			directoryHandles[dirPath] = dirHandle;
+
 			EDITOR.fileExplorer(dirPath);
-
-			listLocalDir(dirHandle, function(err, list) {
-				if(err) return alertBox(err.message);
-
-				console.log("list=", list);
-
-			});
 
 		});
 	}
 
-	function listLocalDir(dirHandle, callback) {
+	function listLocalDir(pathToFolder, dirHandle, callback) {
 		/*
 			Returns all files in a directory as an array. Each item is an object with these properties:
 
@@ -612,7 +633,7 @@ path = protocol + "://" + fileHandle.name; // Update the path with new filname!
 
 		function iterateNext(promise) {
 			counter++;
-		promise.then(function (dirIteratorItem) {
+			promise.then(function (dirIteratorItem) {
 				counter--;
 
 				var item = {};
@@ -633,25 +654,27 @@ path = protocol + "://" + fileHandle.name; // Update the path with new filname!
 
 				if(kind == "directory") {
 					item.type = "d";
-					item.path = protocol + "://" + dirHandle.name + "/" + name + "/";
+					item.path = UTIL.joinPaths(pathToFolder, name + "/");
 				}
 				else if(kind == "file") {
 					item.type = "-";
 					counter++;
-					value.getFile().then(function(fileHandle) {
+					value.getFile().then(function(fileObject) { // note: A file object, not a file handle!
 						counter--;
-						console.log("listLocalDir:iterateNext: fileHandle=", fileHandle);
+						console.log("listLocalDir:iterateNext: fileObject=", fileObject);
 
-						item.size = fileHandle.size;
+						item.size = fileObject.size;
 
-						item.date = new Date(fileHandle.lastModified);
-						item.path = protocol + "://" + dirHandle.name + "/" + fileHandle.name;
+						item.date = new Date(fileObject.lastModified);
+						item.path = UTIL.joinPaths(pathToFolder, fileObject.name);
 
 						doneMaybe();
 
-					}).catch(error);
+					}).catch(function(err) {
+						CB( callback, new Error("Problem when listing local folder content for " + pathToFolder + "\nCOuld not get file infor for " + name + ". Error: " + err.message) );
+					});
 				}
-				else throw new Error("Unknown kind=" + kind);
+				else throw new Error("Unknown kind=" + kind + " for " + name + " when listing local directory content in " + pathToFolder);
 
 				list.push(item);
 
@@ -659,7 +682,9 @@ path = protocol + "://" + fileHandle.name; // Update the path with new filname!
 
 				doneMaybe();
 
-			}).catch(error);
+			}).catch(function(err) {
+				CB( callback, new Error("Problems iterating items in " + pathToFolder + "\nError: " + err.message) );
+			});
 		}
 		
 		function doneMaybe() {
@@ -671,7 +696,7 @@ path = protocol + "://" + fileHandle.name; // Update the path with new filname!
 
 		function error(err) {
 			console.warn(err.message);
-			if(callback) CB(callback, err);
+			if(callback) CB( callback, new Error("Unable to list local directory " + pathToFolder + "\nError: " + err.message) );
 			callback = null;
 		}
 	}
@@ -689,7 +714,8 @@ path = protocol + "://" + fileHandle.name; // Update the path with new filname!
 
 	function localListFiles(pathToFolder, callback) {
 		getDirectoryHandle(pathToFolder, function(err, directoryHandle) {
-			listLocalDir(directoryHandle, callback);
+			if(err) return callback(err);
+			listLocalDir(pathToFolder, directoryHandle, callback);
 		});
 	}
 
@@ -710,10 +736,27 @@ path = protocol + "://" + fileHandle.name; // Update the path with new filname!
 			});
 			return;
 		}
-
-		console.warn("localfs:getDirectoryHandle: Reading handle from IndexDb...");
-		readFileHandleFromIndexDb(pathToFolder, function(err, fileSize, dirHandle) {
+		
+		console.warn("localfs:getDirectoryHandle: Reading handle from IndexedDB...");
+		readHandleFromIndexedDB(pathToFolder, function(err, dirHandle) {
 			if(err) {
+				var folders = UTIL.getFolders(pathToFolder);
+				if(folders.length > 1) {
+					// Ask the parent folder if we can get a directory handle from it
+					var parentFolder = folders[folders.length-2];
+					// note: Recursion!
+					return getDirectoryHandle(parentFolder, function(err, parentDirHandle) {
+						if(err) return callback( new Error("Could not get a directory handle for " + pathToFolder + " nor from the parent folders. Error: " + err.message) )
+						
+						var folderName = UTIL.getFolderName(pathToFolder);
+						parentDirHandle.getDirectoryHandle(folderName).then(function(dirHandle) {
+							CB(callback, null, dirHandle);
+						}).catch(function(err) {
+							CB(callback, new Error("parentFolder=" + parentFolder + " could not give us a directory handle! Error: " + err.message));
+						});
+					});
+				}
+
 				errorWithProperCallStack.message = "Unable to find a directory handle for pathToFolder=" + pathToFolder + "\nError: " + err.message + "";
 				return callback(errorWithProperCallStack);
 			}
@@ -732,6 +775,17 @@ path = protocol + "://" + fileHandle.name; // Update the path with new filname!
 		});
 	}
 
+	function saveFileHandle(path, fileHandle) {
+		console.log("localfs: Saving fileHandle in indexedDB: path=" + path + " fileHandle=" + fileHandle + " typeof fileHandle = " + (typeof fileHandle));
+
+		saveHandleToIndexedDB(path, fileHandle);
+		
+	}
+
+	function saveDirHandle(path, fileHandle) {
+		saveHandleToIndexedDB
+	}
+	
 	function openLocalFile(directory) {
 
 		if(directory instanceof File) directory = UTIL.getDirectoryFromPath(directory.path);

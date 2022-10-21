@@ -1324,7 +1324,7 @@ usePseudoClipboard = false;
 				// note: If the server crashes, we will still get a callback! (a timeout error)
 				
 			}
-			else alertBox("Please wait ... Opening file: " + path);
+			else alertBox(path + " is in the file open queue. Please wait ...");
 			
 			
 			return; // Wait for the file to be opened!
