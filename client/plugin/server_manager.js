@@ -544,7 +544,8 @@
 				inputKey.value = path;
 });
 }
-		}
+
+	}
 	
 	function copyPublicKey() {
 		EDITOR.getSSHPublicKey(function(err, pubkey) {

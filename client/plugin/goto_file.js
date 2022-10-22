@@ -36,7 +36,8 @@
 	EDITOR.plugin({
 		desc: "Open any file ...",
 		load: gotoFile_load,
-		unload: gotoFile_unload
+		unload: gotoFile_unload,
+		order: 500
 	});
 	
 	function gotoFile_load() {
@@ -132,9 +133,10 @@ EDITOR.unbindKey(show_gotoFileInput2);
 		inputFolder.value = directory;
 	}
 
-	function openAnyFileTool(options, filePath) {
+	function openAnyFileTool(options) {
 		
 		var directory = options.directory;
+		var filePath = options.filePath;
 		
 		if(directory) {
 			if(inputFolder) setInputFolder(directory);
@@ -212,7 +214,7 @@ EDITOR.unbindKey(show_gotoFileInput2);
 		localButton.setAttribute("class", "button");
 		localButton.innerHTML = 'Open file from <i title="computer/phone/usb">device</i>...';
 		localButton.onclick = function(ev) {
-			EDITOR.localFileDialog(undefined, ev);
+			EDITOR.openLocalFile();
 		}
 
 		gotoList = document.createElement("ul");
@@ -592,8 +594,10 @@ EDITOR.unbindKey(show_gotoFileInput2);
 		return show_gotoFileInput(file, combo);
 	}
 	
-	function gotoFileFromDiscoveryBar(file, combo) {
+	function gotoFileFromDiscoveryBar(file, combo, ev) {
 		//console.log("goto_file: gotoFileFromDiscoveryBar: gotoInputIsVisible=" + gotoInputIsVisible);
+		if(EDITOR.offlineMode) return EDITOR.localFolderDialog(undefined, ev);
+
 		if(!gotoInputIsVisible) show_gotoFileInput(file, combo);
 		else hide_gotoFileInput();
 	}

@@ -999,11 +999,14 @@ for(var i=0; i<options.length; i++) {
 		buttonCancel.setAttribute("value", "Cancel");
 		buttonCancel.addEventListener("click", cancelEdit, false);
 		
-		var buttonBrowseKey = document.createElement("input");
-		buttonBrowseKey.setAttribute("type", "button");
-		buttonBrowseKey.setAttribute("class", "button half");
-		buttonBrowseKey.setAttribute("value", "Browse");
-		buttonBrowseKey.addEventListener("click", browseKey, false);
+		/*
+			var buttonBrowseKey = document.createElement("input");
+			buttonBrowseKey.setAttribute("type", "button");
+			buttonBrowseKey.setAttribute("class", "button half");
+			buttonBrowseKey.setAttribute("value", "Browse");
+			buttonBrowseKey.addEventListener("click", browseKey, false);
+		*/
+		
 		
 		//editView.setAttribute("style", "border: 3px solid red;");
 		
@@ -1136,7 +1139,7 @@ for(var i=0; i<options.length; i++) {
 		
 		td = document.createElement("td");
 		td.appendChild(inputPubAuthKey);
-		td.appendChild(buttonBrowseKey);
+		//td.appendChild(buttonBrowseKey);
 		tr.appendChild(td);
 		
 		editView.appendChild(tr);

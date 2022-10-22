@@ -413,7 +413,7 @@ EDITOR.on("mouseMove", fifmousemove);
 		
 	}
 	
-function findInFilesTool(file) {
+function findInFilesTool(file, combo) {
 findInFiles(file);
 return true;
 }

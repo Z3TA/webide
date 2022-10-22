@@ -235,7 +235,9 @@ EDITOR.eventListeners = { // Use EDITOR.on to add listeners to these events:
 	wrapText: [], // Call EDITOR.wrapText() to format code, because there might be many code formatters/wrappers and we only want to run one of them
 	findInFiles: [], // Starts a find-in-files tool when calling EDITOR.findInFiles()
 	virtualDisplay: [], // Listen for state changes of the virtual display (open, close, start, stop)
-	localFileDialog: [] // Brings up a dialog for opening local files (from the browser file api)
+	localFileDialog: [], // For tools that can show a local file dialog and callback with the file path
+	openLocalFile: [], // For tools that can open local files
+	openLocalFolder: [] // For tools that can open a local folder
 };
 
 EDITOR.renderFunctions = [];
@@ -8958,18 +8960,19 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		disabledBy: []
 	}
 	
-	EDITOR.openFileTool = function fileOpenTool(options, filePath) {
+	// If you want to get a dialog that helps opening a file
+	EDITOR.openFileTool = function fileOpenTool(options) { // Use an option object if we decide to add more options later (currently: directory, filePath)
 		var f = EDITOR.eventListeners.openFileTool.map(funMap);
 		//console.log("Calling openFileTool listeners (" + f.length + ")");
 		
 		var ret = false;
 		
 		for(var i=0; i<f.length; i++) {
-			ret = f[i](options, filePath);
+			ret = f[i](options);
 			if(ret === true) break; // Only open one tool
 		}
 		
-		if(!ret) EDITOR.statInfo("tool_openFileTool_enoext", UTIL.getFileExtension(filePath));
+		if(!ret && options.filePath) EDITOR.statInfo("tool_openFileTool_enoext", UTIL.getFileExtension(options.filePath));
 		
 		return ret;
 	}
@@ -9025,21 +9028,68 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		}
 	}
 	
-	EDITOR.previewTool = tool("previewTool", false);
-	
-	EDITOR.runScript = tool("runScript", false);
-	
-	EDITOR.stopScript = tool("stopScript", false);
-	
-	EDITOR.share = tool("share", false);
-	
-	EDITOR.wrapText = tool("wrapText", false);
-	
-	EDITOR.findInFiles = tool("findInFiles", false);
-	
-	EDITOR.localFileDialog = tool("localFileDialog", false);
+	// For when running locally, we want to callback with the file path
+	EDITOR.localFileDialog = function(defaultPath, callback) {
+		var f = EDITOR.eventListeners.localFileDialog.map(funMap);
+		//console.log("Calling localFileDialog listeners (" + f.length + ")");
 
-	function tool(eventListenerName) {
+		var ret = false;
+		for(var i=0; i<f.length; i++) {
+			ret = f[i](defaultPath, callback);
+			if(ret === HANDLED) return; // Only open one tool
+		}
+
+		alertBox("Could not get a local file dialog!", "MISSING_TOOL", "error");
+	}
+
+	// Opens a local file into the editor
+	EDITOR.openLocalFile = function(directory) {
+		var f = EDITOR.eventListeners.openLocalFile.map(funMap);
+		//console.log("Calling openLocalFile listeners (" + f.length + ")");
+
+		var ret = false;
+		for(var i=0; i<f.length; i++) {
+			ret = f[i](directory);
+			if(ret === HANDLED) return; // Only open one tool
+		}
+
+		alertBox("Could not find a tool able to open a local file!", "MISSING_TOOL", "error");
+	}
+
+	// Loads a local folder into the editor
+	EDITOR.openLocalFolder = function() {
+		var f = EDITOR.eventListeners.openLocalFolder.map(funMap);
+		//console.log("Calling openLocalFolder listeners (" + f.length + ")");
+
+		var ret = false;
+		for(var i=0; i<f.length; i++) {
+			ret = f[i]();
+			if(ret === HANDLED) return; // Only open one tool
+		}
+
+		alertBox("Could not find a tool able to open a local folder!", "MISSING_TOOL", "error");
+	}
+
+	EDITOR.previewTool = fileTool("previewTool", false);
+	
+	EDITOR.runScript = fileTool("runScript", false);
+	
+	EDITOR.stopScript = fileTool("stopScript", false);
+	
+	EDITOR.share = fileTool("share", false);
+	
+	EDITOR.wrapText = fileTool("wrapText", false);
+	
+	EDITOR.findInFiles = fileTool("findInFiles", false);
+	
+	/*
+		Only use the fileTool() function for functions that takes the file as first argument and combo as second argument!
+		If you for example want the first parameter to be something else then a file, then define your own function
+
+		Also add the event name in EDITOR.eventListeners
+	*/
+	
+	function fileTool(eventListenerName) {
 		return function(file, ev) {
 			if(file == undefined && EDITOR.currentFile) file = EDITOR.currentFile;
 			

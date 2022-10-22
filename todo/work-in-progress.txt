@@ -7,6 +7,13 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
+Possible performance issue with file.moveCaretToIndex when editing EDITOR.js ... lag (in Firefox)
+
+---
+
+
+todo: test localFileDialog
+
 Polish Work on local files experience:
 * Able to toggle offline mode via Editor menu (EDITOR.changeOfflineMode)
 
@@ -16,6 +23,7 @@ note: We might be "offline" if the editor is running locally!!! so offline=can't
 
 When clicking the open icon on the discovery bar - open local folder if in offlinemode or disconnected (navigator.onLine==false)!
 
+todo: open the open-file dialog after opening a local folder!
 
 File explorer should show another option in the select if we are exploring the local fs!?
 

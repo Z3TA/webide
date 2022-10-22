@@ -37,8 +37,9 @@
 
 			EDITOR.on("fileOpen", nativeFileOpen, 1);
 			EDITOR.on("fileClose", nativeFileClose, 1);
-			EDITOR.on("openFileTool", openLocalFileTool);
-			EDITOR.on("localFileDialog", localFileDialogTool);
+			EDITOR.on("localFileDialog", localFileDialog);
+			EDITOR.on("openLocalFile", openLocalFileTool);
+			EDITOR.on("openLocalFolder", openLocalFolderTool);
 
 			var charO = 79;
 			EDITOR.bindKey({desc: "Open a local file using native file select dialog", charCode: charO, combo: CTRL + SHIFT, fun: openLocalFileKeyboardShortcut});
@@ -56,10 +57,11 @@
 			nativeFileSystemFileHandleDb = undefined;
 			nativeFileSystemFileHandleDbWaitList.length = 0;
 
-			EDITOR.removeEvent("fileOpen", nativeFileOpen, 1);
-			EDITOR.removeEvent("fileClose", nativeFileClose, 1);
-			EDITOR.removeEvent("openFileTool", openLocalFileTool);
-			EDITOR.removeEvent("localFileDialog", localFileDialogTool);
+			EDITOR.removeEvent("fileOpen", nativeFileOpen);
+			EDITOR.removeEvent("fileClose", nativeFileClose);
+			EDITOR.removeEvent("localFileDialog", localFileDialog);
+			EDITOR.removeEvent("openLocalFile", openLocalFileTool);
+			EDITOR.removeEvent("openLocalFolder", openLocalFolderTool);
 
 			EDITOR.unbindKey(openLocalFileKeyboardShortcut);
 
@@ -68,12 +70,17 @@
 
 
 		},
-		order: 100 // Load early 
+		order: 100 // Load before reopen_files so it can hash files etc
 	});
 
-	function localFileDialogTool(file, ev) {
-		openLocalFileKeyboardShortcut(file);
-		return true;
+	function openLocalFileTool() {
+		openLocalFile();
+		return HANDLED;
+	}
+
+	function openLocalFolderTool() {
+		openLocalDir();
+		return HANDLED;
 	}
 
 	function openLocalFileKeyboardShortcut(file) {
@@ -1204,6 +1211,9 @@
 			saveHandleToIndexedDB(dirPath, dirHandle);
 
 			EDITOR.fileExplorer(dirPath);
+			EDITOR.changeWorkingDir(dirPath);
+			EDITOR.openFileTool({directory: dirPath});
+
 		});
 	}
 
@@ -1391,7 +1401,7 @@
 
 		//console.log("localfs: Telling the editor to open the file dialog window ...");
 		localFileDialog(directory, function after_dialog_open_file(err, filePath, content) {
-			if(err) throw err;
+			if(err) return alertBox("Could not open local file! Error: " + err.message);
 
 			//console.log("localfs: filePath=" + filePath);
 			//console.log("localfs: content=" + content);
@@ -1417,16 +1427,6 @@
 
 			});
 		});
-	}
-
-	function openLocalFileTool(options) {
-		// Only answer on openFileTool events if we are running locally/"native"
-		if(EDITOR.user.homeDir == "/") return false;
-
-		var directory = options.directory;
-
-		openLocalFile(directory);
-
 	}
 
 	function localFileDialog(defaultPath, callback) {
@@ -1475,7 +1475,7 @@
 			});
 
 
-			return true;
+			return HANDLED;
 		}
 		//else console.warn("localfs: Local file system API not supported in " + BROWSER);
 
@@ -1503,7 +1503,7 @@
 
 		fileOpen.click(); // Bring up the OS path selector window
 
-		return true; // true means we handled it
+		return HANDLED;
 	}
 
 
