@@ -28,42 +28,62 @@
 	
 	var mouseMoveEventRegistered = false;
 	
-	EDITOR.on("start", function find_in_files_main() {
-		
+	var _findReplace;
+
+
+	EDITOR.plugin({
+		desc: "Find and replace in files",
+		load: findReplaceInFiles_load,
+		unload: findReplaceInFiles_unload
+	});
+
+
+	function findReplaceInFiles_load() {
 		var keyF = 70;
 		var keyEnter = 13;
 		var keyEscape = 27;
-		
+
 		// Pressing Ctrl + shift + F should hide or show the search window
 		EDITOR.bindKey({desc: S("find_in_files"), charCode: keyF, combo: SHIFT + CTRL, fun: findInFiles}); // Ctrl + Shift + F
-		
-if(CHROMEBOOK) {
-		EDITOR.bindKey({desc: S("find_in_files"), key: "Meta", combo: CTRL+SHIFT, fun: findInFilesViaChromebookSearch});
+
+		if(CHROMEBOOK) {
+			EDITOR.bindKey({desc: S("find_in_files"), key: "Meta", combo: CTRL+SHIFT, fun: findInFilesViaChromebookSearch});
 		}
 
 		EDITOR.bindKey({desc: S("hide_find_in_files_widget"), charCode: keyEscape, fun: hideFindInFilesGui});
-		
+
 		winMenuFindInFiles = EDITOR.windowMenu.add(S("find_in_files"), [S("File"), 8], findInFiles);
-		
+
 		EDITOR.registerAltKey({char: "f", alt:2, label: S("search"), fun: findInFiles});
-		
-		
+
 		// Point variables to the document object model
 		footer = document.getElementById("footer");
-		
+
 		//buildDiv();
-		
+
 		EDITOR.on("dblclick", fifdblclick);
-		
 		EDITOR.on("findInFiles", findInFilesTool);
-		
 		EDITOR.on("fileShow", fiffileshow);
-		
-		
-		CLIENT.on("foundInFile", foundInFile);
-		CLIENT.on("findInFilesStatus", findInFilesProgressStatus);
-		
-	});
+	}
+
+	function findReplaceInFiles_unload() {
+	
+		EDITOR.unbindKey(findInFiles);
+		EDITOR.unbindKey(findInFilesViaChromebookSearch);
+		EDITOR.unbindKey(hideFindInFilesGui);
+
+		EDITOR.windowMenu.remove(winMenuFindInFiles);
+
+		EDITOR.unregisterAltKey(findInFiles);
+
+		EDITOR.removeEvent("dblclick", fifdblclick);
+		EDITOR.removeEvent("findInFiles", findInFilesTool);
+		EDITOR.removeEvent("fileShow", fiffileshow);
+
+		_findReplace = undefined;
+
+	}
+
 	
 	function foundInFile(json) {
 		
@@ -438,9 +458,9 @@ return findInFiles(file);
 	
 	function hideFindInFilesGui() {
 		
-CLIENT.cmd("abortFindInFiles", function(err) {
-if(err) console.error(err);
-});
+		if(_findReplace) _findReplace.abort(function(err) {
+			if(err) console.error(err);
+		});
 
 		if(divVisible) {
 			hide_find_in_files();
@@ -474,9 +494,10 @@ if(err) console.error(err);
 			EDITOR.renderNeeded();
 		}
 		
-		CLIENT.cmd("abortFindInFiles", function(err) {
+		if(_findReplace) _findReplace.abort(function(err) {
 			if(err) alertBox("Failed to cancel find in files: " + err.message, "CMD_FAIL", "error");
 		});
+		
 	}
 	
 	function buildDiv() {
@@ -569,7 +590,7 @@ if(typeof searchFolder != "string") throw new Error("searchFolder=" + searchFold
 		buttonCancel.setAttribute("value", "Cancel search");
 		buttonCancel.onclick = function() {
 			
-			CLIENT.cmd("abortFindInFiles", function(err) {
+			if(_findReplace) _findReplace.abort(function(err) {
 				if(err) alertBox("Failed to cancel find in files!", "CMD_FAIL", "error");
 				else alertBox("Find in files canceled!");
 			});
@@ -825,42 +846,15 @@ savedAs: false,
 				searchPath: searchPath,
 				fileFilter: fileFilter,
 				caseSensitive: caseSensitive,
-				id: searchReportCounter
+				id: searchReportCounter,
+				found: foundInFile,
+				progress: findInFilesProgressStatus,
+				finish: findReplaceFinish
 			};
 			
 			if(replaceWith) json.replaceWith = replaceWith;
 			var timeout = (1000 * 60 * 3);
-			CLIENT.cmd("findReplaceInFiles", json, timeout, function(err, json) {
-				if(err) {
-					alertBox(err.message);
-					reportFile.writeLine(err.message);
-EDITOR.renderNeeded();
-					
-					//inputInDir.setAttribute("class", "inputtext indir error");
-					//return alert("Can't do a search in a path that don't exist");
-					
-				}
-				else {
-					
-					reportFile.writeLine(json.msg);
-					
-					// Highlight the matches
-					var matches = json.matches;
-					//console.log("matches=" + matches);
-					for(var i=0; i<matches.length; i++) {
-						reportFile.highlightText(matches[i]);
-					}
-					
-					progressBar.style.display = "none";
-					
-					EDITOR.renderNeeded();
-					
-					EDITOR.stat("find_in_files");
-					
-				}
-				
-				
-			});
+			_findReplace = EDITOR.findReplace(json, timeout);
 			
 		});
 		
@@ -868,6 +862,38 @@ EDITOR.renderNeeded();
 		
 		return false;
 		
+		function findReplaceFinish(err, json) {
+			if(err) {
+				alertBox(err.message);
+				reportFile.writeLine(err.message);
+				EDITOR.renderNeeded();
+
+				//inputInDir.setAttribute("class", "inputtext indir error");
+				//return alert("Can't do a search in a path that don't exist");
+
+			}
+			else {
+
+				reportFile.writeLine(json.msg);
+
+				// Highlight the matches
+				var matches = json.matches;
+				//console.log("matches=" + matches);
+				for(var i=0; i<matches.length; i++) {
+					reportFile.highlightText(matches[i]);
+				}
+
+				progressBar.style.display = "none";
+
+				EDITOR.renderNeeded();
+
+				EDITOR.stat("find_in_files");
+
+			}
+
+
+		}
+
 	}
 	
 	function linePad(nr) {

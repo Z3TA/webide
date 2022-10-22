@@ -6,7 +6,7 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
-need to implement EDTIOR.findFiles and abortFindFiles so that goto_file.js can open local files!
+File explorer should show another option in the select if we are exploring the local fs!?
 
 Also findReplaceInFiles need to be abstracted so that it can be done via a protocol!
 

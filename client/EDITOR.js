@@ -39,7 +39,7 @@ EDITOR.plainTextFileExtensions = [
 EDITOR.settings = {
 	maxOpenFilesOnLowRam: 5,
 	nativeFileSystemPathPrefix: "/~local/",
-	devMode: true,  // devMode: true will spew out debug info and make sanity checks (that will make the editor run slower, mostly because of all the console.log's) Set devMode to false when measuring performance!!!
+	devMode: true,  // devMode: true will spew out debug info and make sanity checks (that will make the editor run slower, mostly because of all the console.log's) Set devMode to false when measuring performance!!! devMode=true do not load any files from service worker cache!
 	enableSpellchecker: false, // The spell-checker use a lot of CPU power!
 	enableDocumentPreview: false, // Use the zoom function instead!? (Alt+Z)
 	indentAfterTags: [  // Intendent after these XML tags
@@ -10085,7 +10085,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 
 		// ********************************** Do not throw errors below **********************************
  
-		if(typeof settings.found == "function")_findFiles.found.push(settings.found);
+		if(typeof settings.found == "function") _findFiles.found.push(settings.found);
 		if(typeof settings.finish == "function") _findFiles.finish.push(settings.finish);
 		if(typeof settings.glob == "function") _findFiles.glob.push(settings.glob);
 		if(typeof settings.progress == "function") _findFiles.progress.push(settings.progress);
@@ -10174,6 +10174,75 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 			});
 		}
 	}
+
+	var _findReplace = {
+		found: [],
+		finish: [],
+		//glob: [],
+		progress: []
+	};
+	EDITOR.findReplace = function findReplaceInFiles(settings, timeout) {
+
+		console.log("EDITOR.findReplace: settings=" + JSON.stringify(settings));
+
+		if(typeof settings != "object") throw new Error("First argument to EDITOR.findReplace must be a settings object!");
+
+		if(typeof settings.found != "function") throw new Error("settings must have method found - that will be called whenever a match is found");
+
+		var validSettings = ["searchPath", "searchString", "fileFilter", "searchSubfolders", "maxFolderDepth", "searchMaxFiles", "maxTotalMatches", "caseSensitive", "id", "showSurroundingLines", "replaceWith", "found", "finish", "progress"];
+		for(var prop in settings) {
+			if( validSettings.indexOf(prop) == -1 ) throw new Error("prop=" + prop + " not a valid setting to EDITOR.findReplace !");
+		}
+
+		if(settings.searchPath == undefined) throw new Error("searchPath is a requried setting in EDITOR.findReplace !");
+		if(settings.searchString == undefined) throw new Error("searchString is a requried setting in EDITOR.findReplace !");
+		if(settings.fileFilter == undefined) throw new Error("fileFilter is a requried setting in EDITOR.findReplace !");
+
+		var protocol = UTIL.urlProtocol(settings.searchPath);
+		if(protocol != "" && EDITOR.remoteProtocols.indexOf(protocol) == -1) {
+			if(!_protocols.hasOwnProperty(protocol))throw new Error("protocol=" + protocol + " is not supported!");
+			if(typeof _protocols[protocol].findReplace != "function") throw new Error("protocol=" + protocol + " does not have a findReplace method!");
+		}
+
+		// ********************************** Do not throw errors below **********************************
+		if(typeof settings.found == "function") _findReplace.found.push(settings.found);
+		if(typeof settings.finish == "function") _findReplace.finish.push(settings.finish);
+		//if(typeof settings.glob == "function") _findReplace.glob.push(settings.glob);
+		if(typeof settings.progress == "function") _findReplace.progress.push(settings.progress);
+
+		if(protocol != "" && EDITOR.remoteProtocols.indexOf(protocol) == -1) {
+			return _protocols[protocol].findReplace(settings);
+		}
+
+		CLIENT.cmd("findReplaceInFiles", settings, timeout, function(err, json) {
+			if(typeof settings.finish == "function") settings.finish(err, json);
+
+			if(typeof settings.found == "function") removeFrom(_findReplace.found, settings.found);
+			if(typeof settings.finish == "function") removeFrom(_findReplace.finish, settings.finish);
+			//if(typeof settings.glob == "function") removeFrom(_findReplace.glob, settings.glob);
+			if(typeof settings.progress == "function") removeFrom(_findReplace.progress, settings.progress);
+		});
+
+		return {
+			abort: function(callback) {
+				CLIENT.cmd("abortFindInFiles", callback);
+			}
+		}
+	}
+
+	CLIENT.on("foundInFile", function(resp) {
+		for (var i=0; i<_findReplace.found.length; i++) {
+			_findReplace.found[i](resp);
+		}
+	});
+
+	CLIENT.on("findInFilesStatus", function(resp) {
+		for (var i=0; i < _findReplace.progress.length; i++) {
+			_findReplace.progress[i](resp);
+		}
+	});
+
+
 
 	// ## Eval worker
 	try {
