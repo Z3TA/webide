@@ -43,7 +43,7 @@
 			var charO = 79;
 			EDITOR.bindKey({desc: "Open a local file using native file select dialog", charCode: charO, combo: CTRL + SHIFT, fun: openLocalFileKeyboardShortcut});
 
-			windowMenuOpenLocalFile = EDITOR.windowMenu.add(S("open_local"), [S("File"), 1], openLocalFile, openLocalFileKeyboardShortcut);
+			windowMenuOpenLocalFile = EDITOR.windowMenu.add(S("open_local_file"), [S("File"), 1], openLocalFile, openLocalFileKeyboardShortcut);
 			windowMenuOpenLocalDir = EDITOR.windowMenu.add(S("open_local_dir"), [S("File"), 1], openLocalDir);
 
 		},
@@ -539,6 +539,8 @@
 			console.log(foundInFile);
 		}
 
+		var progressCallback = json.progress;
+
 		var searchPath = json.searchPath;
 		if(searchPath == undefined) return findReplaceInFilesCallback(new Error("localfs:localFindReplace: searchPath=" + searchPath + " is not defined!"));
 
@@ -857,10 +859,11 @@
 		}
 
 		function sendProgress() {
+			if(typeof progressCallback != "function") return;
+
 			var now = new Date();
 			if(now - lastProgress > progressInterval) {
-				user.send({
-					findInFilesStatus: {
+				progressCallback({
 						totalFoldersToSearch: totalFoldersToSearch,
 						totalFoldersSearched: totalFoldersSearched,
 						foldersBeingSearched: foldersToRead,
@@ -872,12 +875,11 @@
 						maxTotalMatches: maxTotalMatches,
 						searchString: searchString,
 						folder: searchPath
-					}
 				});
 				lastProgress = now;
 			}
 		}
-}
+	}
 
 	function localFindFiles(options) {
 		/*
