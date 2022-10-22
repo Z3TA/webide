@@ -992,6 +992,10 @@ file.sanityCheck();
 				textIndex += rows[i].length 
 				textIndex += file.lineBreak.length;
 			}
+
+			file.checkGrid();
+			fixCaretIfNeeded();
+			file.sanityCheck();
 			return;
 		}
 		
@@ -1003,19 +1007,22 @@ file.sanityCheck();
 		
 		file.checkGrid();
 		
-		if(file.caret.eof) {
-			// Move the caret (only have to do that if it's EOF)
-			file.caret.index = file.text.length;
-			file.caret.row = grid.length - 1;
-			file.caret.col = grid[grid.length-1].length;
-			
-			file.checkCaret();
-			
-			file.scrollToCaret();
-		}
-		
+		fixCaretIfNeeded();
+
 		file.sanityCheck();
 		
+		function fixCaretIfNeeded() {
+			if(file.caret.eof) {
+				// Move the caret (only have to do that if it's EOF)
+				file.caret.index = file.text.length;
+				file.caret.row = grid.length - 1;
+				file.caret.col = grid[grid.length-1].length;
+
+				file.checkCaret();
+
+				file.scrollToCaret();
+			}
+		}
 	}
 	
 	File.prototype.writeLineBreak = function() {
