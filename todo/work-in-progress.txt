@@ -6,9 +6,13 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
-File explorer should show another option in the select if we are exploring the local fs!?
+idea: Go to top of function (Shift+Home), if already at top goto top of parent function
 
-Also findReplaceInFiles need to be abstracted so that it can be done via a protocol!
+idea: Goto line - check clipboard and if it contains a number, goto that line
+
+---
+
+File explorer should show another option in the select if we are exploring the local fs!?
 
 ---
 

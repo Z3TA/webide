@@ -31,7 +31,8 @@
 				size: localFileSizeOnDisk,
 				move: localMove,
 				del: localDelete,
-				findFiles: localFindFiles
+				findFiles: localFindFiles,
+				findReplace: localFindReplace
 			});
 
 			EDITOR.on("fileOpen", nativeFileOpen, 1);
@@ -280,16 +281,16 @@
 
 		console.log("localfs:localWriteFile: path=" + path);
 
-		if(typeof inputBuffer == "function" && saveToDiskCallback == undefined) {
-			saveToDiskCallback = inputBuffer;
+		if(typeof inputBuffer == "function" && callback == undefined) {
+			callback = inputBuffer;
 			inputBuffer = undefined;
 		}
-		else if(typeof encoding == "function" && saveToDiskCallback == undefined) {
-			saveToDiskCallback = encoding;
+		else if(typeof encoding == "function" && callback == undefined) {
+			callback = encoding;
 			encoding = undefined;
 		}
-		else if(typeof timeout == "function" && saveToDiskCallback == undefined) {
-			saveToDiskCallback = timeout;
+		else if(typeof timeout == "function" && callback == undefined) {
+			callback = timeout;
 			timeout = undefined;
 		}
 
@@ -503,7 +504,7 @@
 
 			var options = { recursive: true };
 			dirHandle.removeEntry(name, options).then(function() {
-				console.log("nativefs:localDelete: Successfully deleted " + path);
+				console.log("localfs:localDelete: Successfully deleted " + path);
 
 				if(isDirectory) {
 					delete directoryHandles[path];
@@ -522,12 +523,368 @@
 		});
 	}
 
+	function localFindReplace(json) {
+		/*
+			["searchPath", "searchString", "fileFilter", "searchSubfolders", "maxFolderDepth", "searchMaxFiles", "maxTotalMatches", "caseSensitive", "id", "showSurroundingLines", "replaceWith", "found", "finish", "progress"];
+		*/
+
+		var findReplaceAborted = false;
+
+		var findReplaceInFilesCallback = json.finish || function(err, resp) {
+			if(err) console.error(err);
+			if(resp) console.log(resp);
+		}
+
+		var foundInFileCallback = json.found || function(foundInFile) {
+			console.log(foundInFile);
+		}
+
+		var searchPath = json.searchPath;
+		if(searchPath == undefined) return findReplaceInFilesCallback(new Error("localfs:localFindReplace: searchPath=" + searchPath + " is not defined!"));
+
+		var searchString = json.searchString;
+		if(searchString == undefined) return findReplaceInFilesCallback(new Error("localfs:localFindReplace: searchString=" + searchString + " is not defined!"));
+		if(searchString == "") return findReplaceInFilesCallback(new Error("localfs:localFindReplace: searchString=" + searchString + " can not be empty!"));
+
+		try {
+			var testSearchString = new RegExp(fileFilter);
+		}
+		catch(err) {
+			return findReplaceInFilesCallback(new Error("localfs:localFindReplace: Bad RegExp: searchString=" + searchString + ": " + err.message));
+		}
+
+		var fileFilter = json.fileFilter;
+		if(fileFilter == undefined) return findReplaceInFilesCallback(new Error("localfs:localFindReplace: fileFilter=" + fileFilter + " is not defined!"));
+
+		try {
+			var fileFilterRegExp = new RegExp(fileFilter);
+		}
+		catch(err) {
+			return findReplaceInFilesCallback(new Error("localfs:localFindReplace: Bad RegExp: fileFilter=" + fileFilter + ": " + err.message));
+		}
+
+		var searchSubfolders = json.searchSubfolders || false;
+		var maxFolderDepth = json.maxFolderDepth || 20;
+		var searchMaxFiles = json.searchMaxFiles || 100000;
+		var maxTotalMatches = json.maxTotalMatches || 500;
+		var caseSensitive = json.caseSensitive || false;
+		var searchSessionId = json.id || 0;
+		var showSurroundingLines = json.showSurroundingLines || 2;
+		var replaceWith = json.replaceWith;
+
+		var totalFiles = 0;
+		var filesSearched = 0;
+
+		var fileQueue = []; // Files to be searched
+		var foldersToRead = 0;
+		var totalMatches = 0;
+		var totalFilesFound = 0;
+		var matches = [];
+		var flags = "g"; // Always make a global search!
+		var filesBeingSearched = 0;
+		var abort = false;
+		var done = false;
+		var doneStack = undefined;
+		var doneReason = undefined;
+		var searchSymLinks = true;
+		var maxFilesToSearchAtTheSameTime = 20; // Hard drivers are really bad at multi tasking
+		var totalFoldersSearched = 0;
+		var totalFoldersToSearch = 0;
+		var progressInterval = 350;
+		var lastProgress = new Date();
+		var searchBegin = new Date();
+		var totalFilesSearched = 0;
+
+		if(!caseSensitive) flags += "i";
+
+		findReplaceAborted = false;
+
+		searchDir(searchPath, 0);
+
+		function searchDir(folderPath, folderDepth) {
+
+			console.log("localfs:localFindReplace: Searching: " + folderPath);
+
+			if(folderDepth > maxFolderDepth) {
+				console.log("localfs:localFindReplace: Max folder depth reached! maxFolderDepth=" + maxFolderDepth + " folderDepth=" + folderDepth + " folderPath=" + folderPath);
+				return;
+			}
+
+			foldersToRead++;
+			folderDepth++;
+			totalFoldersToSearch++;
+
+			localListFiles(folderPath, function gotFileList(err, fileList) {
+
+				if(findReplaceAborted) return aborted();
+
+				if(err) return abortError(err);
+
+				/*
+					type - string - A single character denoting the entry type: 'd' for directory, '-' for file (or 'l' for symlink on *NIX only).
+					name - string - File or folder name
+					path - string - Full path to file/folder
+					size - float - The size of the entry in bytes.
+					date - Date - The last modified date of the entry.
+				*/
+				for (var i=0; i<fileList.length; i++) {
+					if(fileList[i].type == "d" && searchSubfolders) {
+						searchDir(fileList[i].path, folderDepth);
+					}
+					else if(fileList[i].type == "-" || (fileList[i].type == "l" && searchSymLinks)) {
+						totalFilesFound++;
+						if(fileFilterRegExp.test(fileList[i].path)) fileQueue.push(fileList[i].path);
+					}
+				}
+
+				foldersToRead--;
+				totalFoldersSearched++;
+
+				doWeHaveAllFiles();
+
+			});
+
+		}
+
+		function doWeHaveAllFiles() {
+			if(foldersToRead == 0) {
+				// All folders have now been searched!
+				totalFiles = fileQueue.length;
+				if(fileQueue.length == 0) {
+					doneFinish("Found " + totalFilesFound + " files. But none of them math the file filter!");
+				}
+				else {
+					continueSearchFiles();
+				}
+			}
+		}
+
+		function continueSearchFiles() {
+
+			console.log("localfs:localFindReplace:continueSearchFiles: fileQueue.length=" + fileQueue.length + " filesBeingSearched=" + filesBeingSearched);
+
+			if(done) return console.log("localfs:localFindReplace:continueSearchFiles: Already done! from continueSearchFiles()");
+			if(findReplaceAborted) return aborted();
+
+			if(totalFiles >= searchMaxFiles) {
+				doneFinish("Aborted the search because we reached searchMaxFiles=" + searchMaxFiles + " limit!");
+				return;
+			}
+			else if(totalMatches >= maxTotalMatches) {
+				doneFinish("Aborted the search because we reached maxTotalMatches=" + maxTotalMatches + " limit!");
+				return;
+			}
+			else while(fileQueue.length > 0 && filesBeingSearched < maxFilesToSearchAtTheSameTime) searchNextFileInQueue();
+
+			doneMaybe();
+
+		}
+
+		function doneMaybe() {
+
+			console.log("localfs:localFindReplace:doneMaybe: fileQueue.length=" + fileQueue.length + " filesBeingSearched=" + filesBeingSearched);
+
+			if(findReplaceAborted) return aborted();
+			if(done) throw new Error("localfs:localFindReplace: We should not be calling doneMaybe() if done!");
+
+			sendProgress();
+
+			if(fileQueue.length == 0 && filesBeingSearched == 0) doneFinish();
+			else {
+				//continueSearchFiles(); // RangeError: Maximum call stack size exceeded
+				setTimeout(continueSearchFiles, 500); // Give a few milliseconds of rest
+			}
+		}
+
+		function searchNextFileInQueue() {
+
+			console.log("localfs:localFindReplace:searchNextFileInQueue: fileQueue.length=" + fileQueue.length + " filesBeingSearched=" + filesBeingSearched);
+
+			if(findReplaceAborted) return aborted();
+			if(done) throw new Error("localfs:localFindReplace: We should not be calling searchNextFileInQueue() if done==" + done + "!");
+
+			var filePath = fileQueue.pop(); // Last in, first out
+
+			if(filePath == undefined) {
+				if(fileQueue.length == 0) doneFinish();
+				else throw new Error("localfs:localFindReplace: filePath=" + filePath + " fileQueue.length=" + fileQueue.length);
+			}
+			else searchFile(filePath);
+
+		}
+
+		function searchFile(filePath) {
+			filesBeingSearched++;
+
+			localReadFile(filePath, function readFile(err, filePath, fileContent) {
+				if(err) return abortError(err);
+
+				var myRe = new RegExp(searchString, flags); // Create a new RegExp for each file!
+
+				console.log("localfs:localFindReplace:searchFile: Searching file: " + filePath);
+
+				var result;
+				var lastIndex = 0;
+				var lastLine = 1;
+				var rowsAbove = [];
+				var rowsBeneath = [];
+
+				while ((result = myRe.exec(fileContent)) !== null) {
+
+					totalMatches++;
+
+					// Figure out what the line number is
+					// Select all text up until the first line break after the search match index
+					var firstLineBreakAfterResult = fileContent.indexOf("\n", result.index + result[0].length);
+					var textAboveInludingResult = fileContent.slice(  result.lastIndex, firstLineBreakAfterResult  );
+					if(textAboveInludingResult.charAt(textAboveInludingResult.length-1) == "\r") textAboveInludingResult = textAboveInludingResult.slice(0, -1);
+					var resultRows =  result[0].split(/\r\n|\n/);
+					var textAboveInludingResultRows = textAboveInludingResult.split(/\r\n|\n/);
+					var lineNr = textAboveInludingResultRows.length - resultRows.length + 1;
+
+					lastLine = lineNr;
+
+					var lineText = "";
+					// Line text can be many lines!
+					for (var i=0; i<resultRows.length; i++) {
+						lineText = textAboveInludingResultRows.pop() + "\n" + lineText;
+					}
+					lineText = lineText.trim();
+
+					if(matches.indexOf(result[0]) == -1) matches.push(result[0]); // Highlight these later
+
+					if(showSurroundingLines) {
+						rowsAbove = textAboveInludingResultRows.slice( -showSurroundingLines );
+						var index = firstLineBreakAfterResult;
+						if(fileContent.charAt(index) == "\r") index++;
+						if(fileContent.charAt(index) == "\n") index++;
+						rowsBeneath = [];
+						for (var i=index; i<fileContent.length; i++) {
+							if(fileContent.charAt(i) == "\n") {
+								rowsBeneath.push(fileContent.slice(index, i).trim());
+								index = i+1;
+								if(rowsBeneath.length >= showSurroundingLines) break;
+							}
+						}
+
+					}
+
+					//console.log("localfs:localFindReplace: textAboveInludingResultRows=" + JSON.stringify(textAboveInludingResultRows));
+					//console.log("localfs:localFindReplace: rowsAbove=" + JSON.stringify(rowsAbove));
+
+					console.log("localfs:localFindReplace:searchFile Found " + result[0] + " on index=" + result.index + " lastIndex=" + result.lastIndex + " showSurroundingLines=" + showSurroundingLines + " lineNr=" + lineNr + " in file=" + filePath);
+
+					var foundInFile = {
+						id: searchSessionId,
+						text: result[0],
+						lineText: lineText,
+						index: result.index,
+						lineNr: lineNr,
+						file: filePath,
+						rowsAbove: rowsAbove,
+						rowsBeneath: rowsBeneath,
+						regExp: myRe.toString()
+					};
+
+					if(replaceWith) {
+						foundInFile.replaceWith = replaceWith;
+						// Run replace op on client side, not twice here.
+						//foundInFile.replacedWith = result[0].replace(myRe, replaceWith);
+					}
+
+					foundInFileCallback(foundInFile);
+					
+				}
+
+				if(replaceWith) {
+
+					console.log("localfs:localFindReplace: Replacing in file: " + filePath);
+
+					fileContent = fileContent.replace(myRe, replaceWith);
+
+					localWriteFile(filePath, fileContent, function writeFile(err) {
+						if(err) return abortError(err);
+
+						filesBeingSearched--;
+						totalFilesSearched++;
+						doneMaybe();
+					});
+
+				}
+				else {
+					filesBeingSearched--;
+					totalFilesSearched++;
+					doneMaybe();
+				}
+
+
+			});
+		}
+
+		function doneFinish(msg) {
+			if(done) throw new Error("localfs:localFindReplace: Already done! doneReason=" + doneReason + " doneStack=" + doneStack + "\n\n\n");
+
+			done = true;
+			doneStack = (new Error()).stack;
+			doneReason = msg;
+
+			if(msg == undefined) {
+				var totalTime = Math.round(((new Date()) - searchBegin) / 10) / 100;
+				msg = "Found " + totalMatches + " match(es) in " + totalFiles + "/" + totalFilesFound + " file(s) searched in " + totalTime + "s.\n";
+			}
+
+			findReplaceInFilesCallback(null, {msg: msg, matches: matches});
+			findReplaceInFilesCallback = null;
+
+		}
+
+		function aborted() {
+			console.log("Aborting file search/replace");
+
+			var msg = "Search was canceled! "
+			var totalTime = Math.round(((new Date()) - searchBegin) / 10) / 100;
+			msg = "Found " + totalMatches + " match(es) in " + totalFiles + "/" + totalFilesFound + " file(s) searched in " + totalTime + "s.\n";
+
+			doneFinish(msg);
+		}
+
+		function abortError(err) {
+			if(findReplaceInFilesCallback) {
+				findReplaceInFilesCallback(err);
+				findReplaceInFilesCallback = null;
+			}
+			done = true;
+		}
+
+		function sendProgress() {
+			var now = new Date();
+			if(now - lastProgress > progressInterval) {
+				user.send({
+					findInFilesStatus: {
+						totalFoldersToSearch: totalFoldersToSearch,
+						totalFoldersSearched: totalFoldersSearched,
+						foldersBeingSearched: foldersToRead,
+						fileQueue: fileQueue.length,
+						totalFiles: totalFiles,
+						totalFilesSearched: totalFilesSearched,
+						filesBeingSearched: filesBeingSearched,
+						totalMatches: totalMatches,
+						maxTotalMatches: maxTotalMatches,
+						searchString: searchString,
+						folder: searchPath
+					}
+				});
+				lastProgress = now;
+			}
+		}
+}
+
 	function localFindFiles(options) {
 		/*
 			["folder", "name", "useRegexp", "maxResults", "ignore", "allowGlob", "found", "finish", "glob", "progress"];
 		*/
 
-		console.log("nativefs:localFindFiles! options=" + JSON.stringify(options));
+		console.log("localfs:localFindFiles! options=" + JSON.stringify(options));
 
 		var folders = UTIL.getFolders(options.folder);
 
@@ -549,7 +906,7 @@
 			abort: function(abortCallback) {
 				aborted = true;
 				var json = {foldersBeingSearched: foldersBeingSearched}
-				console.log("nativefs:localFindFiles:abort! " + JSON.stringify(json));
+				console.log("localfs:localFindFiles:abort! " + JSON.stringify(json));
 				abortCallback(null, json);
 			}
 		}
@@ -557,7 +914,7 @@
 		function search(pathToFolder) {
 			if(typeof pathToFolder != "string") throw new Error("Something went wrong: pathToFolder=" + pathToFolder);
 
-			console.log("nativefs:localFindFiles:search! pathToFolder=" + pathToFolder);
+			console.log("localfs:localFindFiles:search! pathToFolder=" + pathToFolder);
 			if(aborted) return finish();
 
 			foldersBeingSearched++;
@@ -589,7 +946,7 @@
 		}
 
 		function doneMaybe() {
-			console.log("nativefs:localFindFiles:doneMaybe? aborted=" + aborted + " foldersBeingSearched=" + foldersBeingSearched + " maxConcurrency=" + maxConcurrency + " foldersToSearch.length=" + foldersToSearch.length);
+			console.log("localfs:localFindFiles:doneMaybe? aborted=" + aborted + " foldersBeingSearched=" + foldersBeingSearched + " maxConcurrency=" + maxConcurrency + " foldersToSearch.length=" + foldersToSearch.length);
 			if(aborted) return finish();
 			if(foldersBeingSearched >= maxConcurrency) return;
 			if(foldersBeingSearched == 0 && foldersToSearch.length == 0) {
@@ -598,7 +955,7 @@
 
 				var parentFolder = folders.pop();
 
-				console.log("nativefs:localFindFiles:doneMaybe? glob! parentFolder=" + parentFolder);
+				console.log("localfs:localFindFiles:doneMaybe? glob! parentFolder=" + parentFolder);
 
 				if(typeof options.glob == "function") {
 					options.glob(parentFolder);
@@ -617,7 +974,7 @@
 
 			var matchArr = name.match(reName);
 			if(matchArr) {
-				console.log("nativefs:localFindFiles:match! matchArr=" + JSON.stringify(matchArr));
+				console.log("localfs:localFindFiles:match! matchArr=" + JSON.stringify(matchArr));
 				options.found({
 					path: path,
 					match: matchArr,
@@ -655,7 +1012,7 @@
 
 	function verifyNativeFileSystemPermission(fileHandle, mode, callback) {
 		
-		console.warn("nativefs:verifyNativeFileSystemPermission!", fileHandle);
+		console.warn("localfs:verifyNativeFileSystemPermission!", fileHandle);
 
 		if(typeof mode == "function") {
 			callback = mode;
