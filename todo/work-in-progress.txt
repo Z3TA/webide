@@ -4,15 +4,7 @@ Reporting a bug ? Make sure it's repeatable!
 note: When committing only non-whitespace using git:
 git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-zero -
 
-
 ---
-
-Possible performance issue with file.moveCaretToIndex when editing EDITOR.js ... lag (in Firefox)
-
----
-
-
-todo: test localFileDialog
 
 Polish Work on local files experience:
 * Able to toggle offline mode via Editor menu (EDITOR.changeOfflineMode)
@@ -26,6 +18,18 @@ When clicking the open icon on the discovery bar - open local folder if in offli
 todo: open the open-file dialog after opening a local folder!
 
 File explorer should show another option in the select if we are exploring the local fs!?
+
+todo: test localFileDialog
+
+---
+
+Possible performance issue with file.moveCaretToIndex when editing EDITOR.js ... lag (in Firefox)
+
+---
+
+idea: Detect if we are working on a Frontend browser project - then supply global browser variables for auto-complete! For example navigator.onLine 
+
+---
 
 ---
 

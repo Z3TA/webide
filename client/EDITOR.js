@@ -38,7 +38,6 @@ EDITOR.plainTextFileExtensions = [
 // Make your custom settings in settings_overload.js !	These settings should not be changed unless you are adding/changing functionality
 EDITOR.settings = {
 	maxOpenFilesOnLowRam: 5,
-	nativeFileSystemPathPrefix: "/~local/",
 	devMode: true,  // devMode: true will spew out debug info and make sanity checks (that will make the editor run slower, mostly because of all the console.log's) Set devMode to false when measuring performance!!! devMode=true do not load any files from service worker cache!
 	enableSpellchecker: false, // The spell-checker use a lot of CPU power!
 	enableDocumentPreview: false, // Use the zoom function instead!? (Alt+Z)

@@ -246,9 +246,9 @@ function updateCache(latestVersionMaybe, forceRefresh) {
 			return false;
 		}
 		else {
-		VERSION = latestVersionMaybe;
+			VERSION = latestVersionMaybe;
 		
-		console.log("serviceWorker Filling cacheVersion=" + cacheVersion + " because it's newer then highestVersion=" + highestVersion + "");
+			console.log("serviceWorker Filling cacheVersion=" + cacheVersion + " because it's newer then highestVersion=" + highestVersion + "");
 			return refreshCache(cacheVersion);
 		}
 	});
@@ -298,8 +298,8 @@ function deleteAllCachesExcept(currentCacheVersion) {
 		return Promise.all(keys.map(function(key) {
 			if(key != currentCacheVersion) {
 				console.log("serviceWorker deleteAllCachesExcept: Deleting old cache: " + key);
-					return caches.delete(key);
-				}
+				return caches.delete(key);
+			}
 			else {
 				console.log("serviceWorker deleteAllCachesExcept: Keeping key=" + key + " because currentCacheVersion=" + currentCacheVersion);
 			}
@@ -425,18 +425,22 @@ self.addEventListener('activate', function serviceWorkerActivate(event) {
 */
 var reWebide = /\/webide\//;
 self.addEventListener('fetch', function serviceWorkerFetch(event) {
-	//console.log("serviceWorker fetch url=" + event.request.url + " * v=" + VERSION + " dev=" + DEV_MODE);
+	var websocketRequest = !!event.request.url.match(reWebide);
+
+	console.log("serviceWorker fetch url=" + event.request.url + " * v=" + VERSION + " dev=" + DEV_MODE + "websocketRequest=" + websocketRequest);
 	
-	if( DEV_MODE || event.request.url.match(reWebide) ) { // Skip cache
+	if( DEV_MODE || websocketRequest ) { // Skip cache
 		
-		if(DEV_MODE && !event.request.url.match(reWebide)) {
+		if(DEV_MODE && !websocketRequest) {
 			var cacheVersion = "webide_v" + VERSION;
 			if(navigator.onLine) {
 				// Fetch fresh files and put everything in the cache so that we can test out offline capabilities in devMode
 				event.respondWith(caches.open(cacheVersion).then(function(cache) {
 					return fetch(event.request).then(function(response) {
+						if(response.status == 200) {
 						cache.put(event.request, response.clone());
-						//console.log("Added to cache becasue DEV_MODE=" + DEV_MODE + " url=" + event.request.url + "");
+						console.log("serviceWorker Added to cache becasue DEV_MODE=" + DEV_MODE + " url=" + event.request.url + "");
+						}
 						return response;
 					});
 				}));
@@ -515,7 +519,7 @@ function versionNrFromKey(key) {
 	var prefix = "webide_v";
 	var nr = key.replace(prefix, "");
 	if(key == nr) {
-		console.warn("Not a cache key=" + key);
+		console.warn("serviceWorker Not a cache key=" + key);
 		return -1;
 	}
 	return parseInt(nr);

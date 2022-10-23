@@ -329,6 +329,8 @@ var UTIL = {
 		// Returns the root folder
 		if(path == undefined && typeof EDITOR == "object") path = EDITOR.workingDirectory;
 		
+		if(path == undefined) path = "/";
+
 		var folders = UTIL.getFolders(path);
 		
 		return folders[0];

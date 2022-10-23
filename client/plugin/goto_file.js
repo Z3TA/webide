@@ -595,8 +595,8 @@ EDITOR.unbindKey(show_gotoFileInput2);
 	}
 	
 	function gotoFileFromDiscoveryBar(file, combo, ev) {
-		//console.log("goto_file: gotoFileFromDiscoveryBar: gotoInputIsVisible=" + gotoInputIsVisible);
-		if(EDITOR.offlineMode) return EDITOR.localFolderDialog(undefined, ev);
+		console.log("goto_file: gotoFileFromDiscoveryBar: gotoInputIsVisible=" + gotoInputIsVisible);
+		if(EDITOR.offlineMode || !navigator.onLine) return EDITOR.openLocalFolder();
 
 		if(!gotoInputIsVisible) show_gotoFileInput(file, combo);
 		else hide_gotoFileInput();
@@ -700,7 +700,7 @@ folderToSearchIn = EDITOR.workingDirectory;
 
 		//console.log("goto_file: folderToSearchIn=" + folderToSearchIn);
 
-		if( folderToSearchIn == EDITOR.settings.nativeFileSystemPathPrefix || folderToSearchIn == UTIL.root()) folderToSearchIn = EDITOR.workingDirectory;
+		if( folderToSearchIn == UTIL.root()) folderToSearchIn = EDITOR.workingDirectory;
 		
 
 		//console.log("goto_file: gotoInputIsVisible=" + gotoInputIsVisible + " before showing");
