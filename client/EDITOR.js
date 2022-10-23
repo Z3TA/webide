@@ -1124,12 +1124,13 @@ usePseudoClipboard = false;
 		
 		var json = {path: workingDirectory};
 		
+		if(!EDITOR.offlineMode) {
 		// Update the server
 		// The server will check if the directory exists
 		CLIENT.cmd("setWorkingDirectory", json, function(err, json) {
 			if(err) throw err;
 		});
-		
+		}
 	}
 	
 	EDITOR.sortFileList = function() {
@@ -10375,15 +10376,13 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		}
 	}
 
-	EDITOR.changeOfflineMode = function(offline, callback) {
+	EDITOR.changeOfflineMode = function(offlineMode, callback) {
 
-		if(_offlineMode == offline) return callback(new Error("_offlineMode is already offline=" + offline));
+		if(_offlineMode == offlineMode) return callback(new Error("_offlineMode is already offlineMode=" + offlineMode));
 
-		_offlineMode = offline;
+		_offlineMode = offlineMode;
 
-		if(offline) var options = {};
-
-		EDITOR.fireEvent("offlineMode", [offline], callback);
+		EDITOR.fireEvent("offlineMode", [offlineMode], callback);
 	}
 
 	EDITOR.changeProject = function(projectName) {

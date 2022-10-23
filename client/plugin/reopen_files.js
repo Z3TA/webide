@@ -78,7 +78,8 @@
 			reopenFilesCalled = false;
 			allFilesOpenedAlreadyCalled = false;
 			
-			CLIENT.on("loginSuccess", reopenFiles);
+			if(typeof navigator.onLine == "boolean" && navigator.onLine) CLIENT.on("loginSuccess", reopenFiles);
+			else reopenFiles();
 			/*
 				problem: storageReady can be called many times, for example if the user re-login (as another user)
 				
@@ -127,7 +128,7 @@
 	
 	
 	function reopenFiles() {
-		//console.log("reopenFiles: Opening files ...");
+		console.log("reopenFiles: Opening files ...");
 		
 		if(reopenFilesCalled) {
 			// Happens when you get disconnected, and storageReady is called.
@@ -141,7 +142,7 @@
 		
 		//console.log("reopenFiles: serverUrl=" + serverUrl + " CLIENT.url=" + CLIENT.url + " serverUser=" + serverUser + " EDITOR.user.name=" + EDITOR.user.name);
 		
-		if(serverUrl != CLIENT.url || serverUser != EDITOR.user.name) {
+		if(serverUrl != CLIENT.url || (EDITOR.user && serverUser != EDITOR.user.name) ) {
 			// Logged in as another user
 			EDITOR.removeEvent("exit", saveStateOfOpenFiles);
 			clearInterval(saveStateIntervalTimer);
@@ -169,6 +170,7 @@
 		
 		firstRun = false;
 		
+		console.log("reopenFiles: calling reopenFilesMain!");
 		reopenFilesMain(function allFilesHaveReopened() {
 			// Save state when exiting the editor
 
@@ -190,7 +192,7 @@
 	
 	function reopenFilesMain(reopenFilesCallback) {
 		
-		//console.log("reopenFiles: ... reopenFilesMain");
+		console.log("reopenFiles: ... reopenFilesMain");
 		
 		/*
 			What might have happaned:
@@ -201,9 +203,12 @@
 			so try to recover the last session ...
 		*/
 		
+		console.log("reopenFiles: get openedFiles from EDITOR.localStorage ...");
 		EDITOR.localStorage.getItem("openedFiles", function(err, openedFilesString) {
 			if(err) throw err;
 			
+			console.log("reopenFiles: Got openedFiles from EDITOR.localStorage!");
+
 			if(openedFilesString == null) openedFilesString = "";
 			
 			/*
@@ -213,6 +218,33 @@
 				
 			*/
 			
+			if(typeof navigator.onLine == "boolean" && !navigator.onLine) {
+				console.log("reopenFiles: navigator.onLine=" + navigator.onLine + " reopening from client state (skipping server) ...");
+				findBugs(false, function(err, openedFilesString) {
+					if(err) throw err;
+
+					var files = openedFilesString.split(fileDelimiter);
+					//console.log("reopenFiles: files=" + JSON.stringify(files));
+
+					if(openedFilesString.length > 0) { // openedFilesString is a string with path's separated by fileDelimiter
+						//console.log("reopenFiles: Opening " + files.length + " files ...");
+
+						// Note: the file tab plugin will sort the tabs by file.order every time a new file is opened!
+						for(var i=0; i<files.length; i++) {
+							// Problem: The editor might already have the file open, and we are here because of a server reconnect
+							if(!EDITOR.files.hasOwnProperty(files[i])) {
+								console.log("reopenFiles: gonna open when offline files[" + i + "]=" + files[i]);
+								openFile(files[i], fileInListOpened);
+							}
+						}
+					}
+					else {
+						allFilesOpened();
+					}
+
+				});
+			}
+
 			EDITOR.once("storageReady", function combineOpenedFilesString() {
 				
 				var server = [];
@@ -391,8 +423,11 @@
 				}
 				
 				// Load both the server saved state and the locally saved state, then compare them and resolve...
-				var serverState = EDITOR.storage.getItem("state_" + path);
-				
+
+				if(typeof navigator.onLine == "boolean" && navigator.onLine) {
+					var serverState = EDITOR.storage.getItem("state_" + path);
+				}
+
 				loadState(path, function stateLoaded(err, localState) {
 					
 					//console.log("reopen_files:gotFileSize:stateLoaded: localState=" + JSON.stringify(localState, null, 2));

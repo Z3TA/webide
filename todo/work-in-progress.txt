@@ -6,6 +6,24 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
+
+need a shorter alternative for:
+typeof navigator.onLine == "boolean" && navigator.onLine && window.location.origin.indexOf(":8099") == -1
+
+we only want to be offline if the editor is really disconnected from the backend!
+and we want to have actually tried to connect to the backend before we can certainly say we are offline!??
+we need an CLEINT event for "connectAttempt" !?
+
+we are only fully offline if:
+* we have attempted to connect ot the backend and failed
+* navigator.onLine === false
+
+
+
+Trying to make reopen_files work when offline!
+
+todo: test what reopen_files.js does when the editor is started offline then goes online
+
 Polish Work on local files experience:
 * Able to toggle offline mode via Editor menu (EDITOR.changeOfflineMode)
 
@@ -20,6 +38,10 @@ todo: open the open-file dialog after opening a local folder!
 File explorer should show another option in the select if we are exploring the local fs!?
 
 todo: test localFileDialog
+
+---
+
+pressing Escp should deselect all selection
 
 ---
 

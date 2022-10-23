@@ -40,6 +40,7 @@
 		CLIENT.on("loginNeeded", serverLoginLoginNeeded);
 		CLIENT.on("saveLogin", saveLogin);
 		
+		EDITOR.on("offlineMode", offlineModeHide);
 		
 		var char_Esc = 27;
 		EDITOR.bindKey({desc: S("hide_login_widget"), charCode: char_Esc, fun: hideLoginDialog});
@@ -70,6 +71,8 @@
 		CLIENT.removeEvent("loginNeeded", serverLoginLoginNeeded);
 		CLIENT.removeEvent("saveLogin", saveLogin);
 		
+		EDITOR.removeEvent("offlineMode", offlineModeHide);
+
 		EDITOR.unbindKey(hideLoginDialog);
 		
 		EDITOR.windowMenu.remove(winMenuLogin);
@@ -77,6 +80,11 @@
 		//if(menuItem) EDITOR.ctxMenu.remove(menuItem);
 	}
 	
+	function offlineModeHide(offlineMode) {
+		if(offlineMode) hideLoginDialog();
+		return ALLOW_DEFAULT;
+	}
+
 	function serverLoginLoginNeeded(loginNeededByCommand) {
 		//console.log("Login needed because of command: " + loginNeededByCommand);
 
@@ -242,6 +250,8 @@
 			//console.log("Not showing login dialog because serverLoginDialog.visible=" + serverLoginDialog.visible);
 			return true;
 		}
+
+		if(EDITOR.offlineMode) return true;
 		
 		//console.log("Showing login dialog! options=" + JSON.stringify(options))
 		return serverLoginDialog.show(options);

@@ -33,7 +33,7 @@
 
 		var runningLocally = window.location.origin.indexOf(":8099") != -1; // 
 
-		if(!navigator.onLine && !CLIENT.connected && !runningLocally || 1==1) {
+		if(!navigator.onLine && !CLIENT.connected && !runningLocally) {
 			var enterOfflineMode = "Enter offline mode";
 			var continueTrying = "Continue trying to re-connect";
 
