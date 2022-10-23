@@ -1954,7 +1954,7 @@ for(var i=0; i<options.length; i++) {
 		var folders = UTIL.getFolders(site.projectFolder);
 		
 		var temporaryPassword = "";
-		if( selectedSite.repoPw == "") {
+		if( selectedSite.repoPw == "" && selectedSite.repoUser != "") {
 			return promptBox("Password for " + selectedSite.repoUser + " on " + selectedSite.repository + ":", {isPassword: true, dialogDelay: 0}, function(pw) {
 				if(pw) {
 					temporaryPassword = pw;
