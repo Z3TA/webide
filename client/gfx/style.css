@@ -1629,6 +1629,13 @@ div.gotoFile li:hover {
 	margin: 4px;
 	font-size: 0.9em;
 	font-family: Segoe UI, sans-serif;
+	padding-left: 1.5em; /* center the text. note  the ↵ needs to always be there in order so that the buttons takes up the same width even if it has focus or not! (to prevent nasty bug where the button moves when you try to click on it)*/
+}
+
+.dialog button:after {
+	content: " ↵";
+	color: transparent;
+	text-shadow: none;
 }
 
 .dialog button:focus {
@@ -1636,7 +1643,8 @@ div.gotoFile li:hover {
 	/*text-decoration: underline;*/
 }
 .dialog button:focus:after {
-	content: " ↵";
+	color: inherit;
+	text-shadow: 0px -1px 0px #1f2020;
 }
 
 .dialog button.alert {
