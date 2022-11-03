@@ -8127,8 +8127,8 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		
 		if(protocol != "" && EDITOR.remoteProtocols.indexOf(protocol) == -1) {
 
-			if(!_protocols.hasOwnProperty(protocol)) return saveToDiskCallback(new Error("protocol=" + protocol + " is not supported!"));
-			if(typeof _protocols[protocol].list != "function") return saveToDiskCallback(new Error("protocol=" + protocol + " does not have a list method!"));
+			if(!_protocols.hasOwnProperty(protocol)) return listFilesCallback(new Error("protocol=" + protocol + " is not supported!"));
+			if(typeof _protocols[protocol].list != "function") return listFilesCallback(new Error("protocol=" + protocol + " does not have a list method!"));
 
 			_protocols[protocol].list(pathToFolder, listFilesCallback);
 
