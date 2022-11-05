@@ -26,7 +26,8 @@
 	//EDITOR.on("fileChange", selfDebugFileChange);
 	
 	var winMenuBugreport;
-	
+	var resetErrorsTimeout;
+
 	EDITOR.plugin({
 		desc: "Send bug reports",
 		load: bugReportLoad,
@@ -194,6 +195,12 @@ sendit();
 			
 			UTIL.httpPost("https://www.webtigerteam.com/mailform.nodejs", { meddelande: miniReport, namn: 'WebIDE', subject: message, robot: "42" }, function (err, respStr) {});
 		}
+
+		clearTimeout(resetErrorsTimeout);
+
+		resetErrorsTimeout = setTimeout(function() {
+			JS_ERROR_COUNTER = 0;
+		}, 60000);
 	}
 	
 	function findSourcePath(source, callback) {
