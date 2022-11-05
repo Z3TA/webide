@@ -6,6 +6,32 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
+Projects!
+
+About to quickly switch project (opened files) and working dir
+
+---
+
+Annoying when we have scrolled in a file and get text in another file (terminal file) the editor throws a scrolling error! Is this fixed!?
+
+---
+
+Need to test API.download !
+
+Error: saveToDisk: Error: text (object) should be a string when inputBuffer is false
+    at Object.saveToDisk (/srv/webide/server/server_api.js:1605:49)
+    at save (/srv/webide/server/server_api.js:475:8)
+    at pathCreated (/srv/webide/server/server_api.js:460:10)
+    at listFileResult (/srv/webide/server/server_api.js:2139:5)
+    at readdir (/srv/webide/server/server_api.js:1895:6)
+    at FSReqCallback.oncomplete (node:fs:188:23)
+
+
+----
+
+
+
+----
 
 need a shorter alternative for:
 typeof navigator.onLine == "boolean" && navigator.onLine && window.location.origin.indexOf(":8099") == -1
@@ -18,6 +44,7 @@ we are only fully offline if:
 * we have attempted to connect ot the backend and failed
 * navigator.onLine === false
 
+EDITOR.once("connectionStatus"
 
 
 Trying to make reopen_files work when offline!

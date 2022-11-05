@@ -136,7 +136,8 @@ network_problem: "network problem",
 previous_filetab: "previous file/tab",
 	print: "print",
 	print_to_pdf: "print to PDF",
-	
+	"Project/session": "Project/session",
+
 	quit: "quit",
 	
 reconnecting: "reconnecting...",
