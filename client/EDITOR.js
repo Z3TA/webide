@@ -118,7 +118,7 @@ EDITOR.settings = {
 		currentLineColor: "rgb(255, 255, 230)",
 		highlightTextBg: "rgb(155, 255, 155)",    // For text highlighting
 
-// Colors for the terminal emulator (and highlighters)
+		// Colors for the terminal emulator (and highlighters)
 		colorBlack: "rgb(0, 0, 0)",
 		colorRed: "rgb(255, 0, 0)",
 		colorGreen: "rgb(0, 128, 0)",
@@ -186,36 +186,36 @@ EDITOR.eventListeners = { // Use EDITOR.on to add listeners to these events:
 	beforeSave: [],
 	afterSave: [],
 	fileChange: [], 
-		mouseScroll: [], 
-		mouseClick: [], 
-		dblclick: [],
-		mouseMove: [],
-		paste: [],  // You get a chance to format the pasted data ...
-		beforeResize: [],
-		afterResize: [],
-		exit: [],
-		start: [],
-		interaction: [],
-		keyDown: [],
-		moveCaret: [],
-		autoComplete: [],
-		keyPressed: [],
-		changeWorkingDir: [],
+	mouseScroll: [], 
+	mouseClick: [], 
+	dblclick: [],
+	mouseMove: [],
+	paste: [],  // You get a chance to format the pasted data ...
+	beforeResize: [],
+	afterResize: [],
+	exit: [],
+	start: [],
+	interaction: [],
+	keyDown: [],
+	moveCaret: [],
+	autoComplete: [],
+	keyPressed: [],
+	changeWorkingDir: [],
 	changeProject: [],
 	changeBranch: [], // I'ts up to the SCM plugins (mercurial/git) to send a changeSCMBranch event to the client!
 	checkoutSCMBranch: [], // Client SCM plugins must listen to this event, which can be called/triggered by any client plugin in order to change SCM branch
 	bootstrap: [],
-		storageReady: [], // When server storage is ready to be used
-		commitTool: [],
-		resolveTool: [],
-		mergeTool: [],
-		fileDrop: [], // Needs to handle drop event
+	storageReady: [], // When server storage is ready to be used
+	commitTool: [],
+	resolveTool: [],
+	mergeTool: [],
+	fileDrop: [], // Needs to handle drop event
 	filesDropped: [], // Gives a list of uploaded files
-		openFileTool: [],
+	openFileTool: [],
 	ctxMenu: [],
-		voiceCommand: [],
-		fileExplorer: [], // Plugins can register themselves as a file explorer (and return true if it thinks it's the right tool for the current state)
-		previewTool: [],
+	voiceCommand: [],
+	fileExplorer: [], // Plugins can register themselves as a file explorer (and return true if it thinks it's the right tool for the current state)
+	previewTool: [],
 	pathPickerTool: [], // Tools that allow picking a path should listen for this event (and return true if it thinks it can handle the job). See EDITOR.pathPickerTool
 	select: [], // Selecting text. note: The select event will be spammed when the user is selecting using the mouse as it will keep deselecting and selecting while moving the mouse
 	// Don't implement deselect and deselectAll events because deselect and select will be spammed while the user select using the mouse
@@ -358,7 +358,7 @@ EDITOR.env = {}; // Plugins can set custom env values that will be passed to ter
 	
 	var recognition = undefined;
 	
-var connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+	var connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
 	EDITOR.saveBandwith = (connection && connection.saveData) ? true : false;
 
 	var fadeInCaretAnimation;
@@ -385,7 +385,7 @@ var connection = navigator.connection || navigator.mozConnection || navigator.we
 	
 	// Don't show the firendly message on how to show the context menu if the menu is disabled
 	if(QUERY_STRING["disable"] && (QUERY_STRING["disable"].indexOf("ctxMenu") != -1 || QUERY_STRING["disable"].indexOf("trmb") != -1) || EDITOR.startedCounter > 20) {
-ctxMenuVisibleOnce = true;
+		ctxMenuVisibleOnce = true;
 	}
 	
 	var lastMouseDownEventType = "";
@@ -465,7 +465,7 @@ ctxMenuVisibleOnce = true;
 				//console.warn("Set EDITOR.input to " + newValue);
 				//console.log(UTIL.getStack("Set EDITOR.input to " + newValue));
 				if(newValue) {
-_editorInput = true;
+					_editorInput = true;
 					EDITOR.canvas.focus(); // Need to have focus if user are using a screen reader
 				}
 				else _editorInput = false;
@@ -517,16 +517,44 @@ _editorInput = true;
 		return workingDirectory;
 	}
 	
+	/*
+		
+		Both EDITOR.storage and EDITOR.localStorage is considered low level functions for storing a string!
+		EDITOR.storage stores the string on the server you are currently connected to
+		EDITOR.localStorage stores the string on the client you are currently on
+
+		It's highly recommended to use a higher level function like EDITOR.loadSettings to save data that needs to be synced between local client and server!
+
+		EDITOR.storage and EDITOR.localStorage use the same interface and can be used both sync and async for convinience.
+
+		Q: Why would you ever like to use the async callback convention when you can get the value sync !?
+		A: When there is already code that use the callback convention it will make refactoring easier
+
+		Q: Will you guarantee that EDITOR.storage and EDITOR.localStorage will always be sync, so that we don't have to refactor yet again?
+		A: We hope current browsers wont break the web by depricating window.localStorage just because it's sync. But if they do we will still keep the interface sync (and async in the background)
+
+	*/
 	
-	// # Server Storage (to replace localStorage)
 	var _serverStorage = null; // Will be populated once the data is received from the server
 	var serverStorageWaitingItems = {};
 	EDITOR.storage = {
-		setItem: function storageSetItem(id, val, wait, callback) {
+		setItem: function storageSetItem(idOrKey, val, wait, callback) { // idOrKey can be a string, or key:values
 			if(EDITOR.settings.devMode) {
 				var stack = UTIL.getStack("EDITOR.storage.setItem");
 			}
 			
+			if(typeof idOrKey == "object") {
+				var itemsObject = idOrKey;
+				if(typeof val == "function" && callback == undefined) {
+					callback = val;
+				}
+			}
+			else {
+				if(typeof val != "string") throw new Error("val=" + val + " needs to be a string when id=" + idOrKey + " is a string");
+				var itemsObject = {};
+				itemsObject[idOrKey] = val;
+			}
+
 			if(typeof wait == "function" && callback == undefined) {
 				callback = wait;
 				wait = true;
@@ -538,45 +566,80 @@ _editorInput = true;
 				throw new Error("wait=" + wait + " needs to be a Boolean!");
 			}
 			
-			if(serverStorageWaitingItems === null) throw new Error("serverStorageWaitingItems=" + serverStorageWaitingItems + " id=" + id + " val=" + val + " wait=" + wait + " callback=" + callback.toString());
-
-			// Wait one second before storing the value, in case it gets deleted right away, or we get another change
-			if(serverStorageWaitingItems.hasOwnProperty(id)) clearTimeout(serverStorageWaitingItems[id]);
-			
-			var string = String(val)
-			
-			var retryCount = 3;
-			
-			if(wait) serverStorageWaitingItems[id] = setTimeout(update, 2000);
-			else update();
-			
-			
-			return string;
-			
-			function update() {
-				if(wait && !CLIENT.connected && --retryCount>0) {
-					console.warn("Disconnected when trying to save id=" + id + " retrying...");
-					serverStorageWaitingItems[id] = setTimeout(update, 2000);
-					return;
-				} 
-				
-				CLIENT.cmd("storageSet", {item: id, value: string}, function(err, json) {
-					if(callback) callback(err, json);
-					else if(err) {
-						//console.error(err);
-					console.log(stack);
-						throw new Error("Unable to save id=" + id + " value=" + string + " to server storage! Error: " + err.message + " code=" + err.code);
-				}
-					
-					if(!err) {
-						_serverStorage[id] = string;
-					}
-				});
-				
-				delete serverStorageWaitingItems[id];
+			for(var name in itemsObject) {
+				if(typeof itemsObject[name] != "string") throw new Error("name=" + name + " in " + JSON.stringify(itemsObject) + " should be a string!");
+				save(name, itemsObject[name]);
 			}
-			
+
+			var itemsToSave = 0;
+			var itemsSaved = 0;
+
+			var errors = [];
+
+			return String(val);
+
+			function doneMaybe() {
+				if( callback && itemsToSave == itemsSaved) {
+
+					if(errors.length === 0) callback(null);
+					else if(errors.length === 1) callback(errors[0]);
+					else {
+						var errorMessages = errors.map(function(err) {
+							return err.message;
+						});
+						callback(  new Errror("Problems saving:\n" + errorMessages.join("\n"))  );
+					}
+
+					callback = null;
+				}
+			}
+
+			function saveServerString(id, string) {
+				itemsToSave++;
+
+				if(serverStorageWaitingItems === null) throw new Error("serverStorageWaitingItems=" + serverStorageWaitingItems + " id=" + id + " val=" + val + " wait=" + wait + " callback=" + callback.toString());
+
+				// If wait=true Sleep two seconds before storing the value, in case it gets deleted right away, or we get another change ... (to prevent server spam)
+
+				if(serverStorageWaitingItems.hasOwnProperty(id)) clearTimeout(serverStorageWaitingItems[id]);
+
+				var retryCount = 3;
+
+				if(wait) serverStorageWaitingItems[id] = setTimeout(update, 2000);
+				else update();
+
+				function update() {
+					if(wait && !CLIENT.connected && --retryCount>0) {
+						console.warn("Disconnected when trying to save id=" + id + " retrying...");
+						serverStorageWaitingItems[id] = setTimeout(update, 2000);
+						return;
+					}
+
+					CLIENT.cmd("storageSet", {item: id, value: string}, function(err, json) {
+						itemsSaved++;
+
+						if(err) {
+							var error = new Error("Unable to save id=" + id + " value=" + string + " to server storage! Error: " + err.message + " code=" + err.code);
+							console.error(error);
+							errors.push(error);
+						}
+						else{
+							_serverStorage[id] = string; // Only want to update this if we actually managed to save it to the server !?
+						}
+
+						doneMaybe();
+					});
+
+					delete serverStorageWaitingItems[id];
+				}
+			}
+
+			function save(id, val) {
+				var string = String(val); // Turns numbers etc into a string
+				saveServerString(id, string);
+			}
 		},
+
 		getItem: function storageGetItem(id, trap) {
 			if(!this.ready()) throw new Error('Storage is not yet ready. Use EDITOR.on("storageReady", yourFunction)'); 
 			
@@ -587,38 +650,37 @@ _editorInput = true;
 				return null;
 			}
 			else return _serverStorage[id];
-			
 		},
 		
 		removeItem: function storageRemoveItem(id, callback) {
 			
 			if(callback !== undefined && typeof callback != "function") throw new Error("Second argument to EDITOR.storage.removeItem should be a callback function (optional)");
 			
-if(EDITOR.settings.devMode) {
-			// Save the stack in case we get an error
-			var stack = UTIL.getStack("EDITOR.storage.removeItem");
+			if(EDITOR.settings.devMode) {
+				// Save the stack in case we get an error
+				var stack = UTIL.getStack("EDITOR.storage.removeItem");
 			}
 			
-if(serverStorageWaitingItems.hasOwnProperty(id)) {
+			if(serverStorageWaitingItems.hasOwnProperty(id)) {
 				// No need to save it if it's going to get deleted!
-clearTimeout(serverStorageWaitingItems[id]);
+				clearTimeout(serverStorageWaitingItems[id]);
 				delete serverStorageWaitingItems[id];
 			}
 			
 			if(_serverStorage.hasOwnProperty(id)) {
 				CLIENT.cmd("storageRemove", {item: id}, function(err, json) {
 					if(callback) {
-callback(err, json);
-					callback = null;
-return;
-}
+						callback(err, json);
+						callback = null;
+						return;
+					}
 					
-if(err && err.code != "ENOENT") {
+					if(err && err.code != "ENOENT") {
 						console.log(stack);
 						console.log("storageRemove err.code=" + err.code)
-					throw err;
-				}
-			});
+						throw err;
+					}
+				});
 			}
 			else {
 				console.warn("Server storage had no item with id=" + id);
@@ -645,29 +707,7 @@ if(err && err.code != "ENOENT") {
 		}
 	};
 	
-	/*
-		
-		The big difference between EDITOR.localStorage and EDITOR.storage is that EDITOR.localStorage works offline!
-		
-		First I made EDITOR.storage work like window.localStorage, then I started making a Packaged chrome app, 
-		but chrome.storage is async, so I had to refactor everything that used localStorage.
-		Now when I've decided to use Hosted Chrome app instead, 
-		I haven't bothered to refactor back to sync window.localStorage.
-		
-		So now EDITOR.localStorage is async while EDITOR.storage is sync.
-		But we should mainly use EDITOR.storage in order to not depend on which client/device is used,
-		eg. you should be able to jump from one device to another and the working state should be the same!
-		
-		todo: refactor: Always use EDITOR.storage, but sync data with localStorage and fallback to localStorage if offline!
-		when user comes back from being offline, data should be synced with the server,
-		hash the data and save lastServerHash, then compare when overloading data to make sure no data is lost,
-		if the data on the server has changed while the user was offline and the user changed the data,
-		ask the user what value they want to use.
-		
-	*/
-	
 	// You can sometimes get a "Access is denied" error when trying to access window.localStorage for example if the page is running in an iframe
-	
 	try {
 		var localStorageAvailable = !!window.localStorage;
 	}
@@ -675,74 +715,101 @@ if(err && err.code != "ENOENT") {
 		var localStorageAvailable = false;
 	}
 	
-	if(localStorageAvailable) {
-		// Use window.localStorage but with the same interface as chrome.storage (web app API for ChromeOS)
-		EDITOR.localStorage = {
-			setItem: function localStorageSetItem(key, value, callback) {
-				if(typeof key == "object") {
-					var itemsObject = key;
-					if(typeof value == "function" && callback == undefined) {
-callback = value; 
-					}
+	// Uses window.localStorage but with the same interface as chrome.storage (web app API for ChromeOS) but if no callback is specified, the value will be returned
+	var _localStorage = {}; // Fallback for browsers that don't support localStorage
+	EDITOR.localStorage = {
+		setItem: function localStorageSetItem(key, value, callback) {
+			if(typeof key == "object") {
+				var itemsObject = key;
+				if(typeof value == "function" && callback == undefined) {
+					callback = value; 
 				}
-				else if(typeof key == "string") {
-					if(typeof value != "string") throw new Error("value=" + value + " needs to be a string when key:" + key + " is a key string");
-					var itemsObject = {};
-					itemsObject[key] = value;
-				}
-				
-				for(var name in itemsObject) {
-					if(typeof itemsObject[name] != "string") throw new Error("name=" + name + " in " + JSON.stringify(itemsObject) + " should be a string!");
-					window.localStorage.setItem(name, itemsObject[name]);
-				}
-				
-				if(callback) callback(null);
-			},
-			getItem: function localStorageGetItem(key, callback) {
-				if(typeof callback != "function") throw new Error("getItem is async and needs a callback function!");
-				if(Array.isArray(key)) {
-					var itemsArray = key;
-					var itemsObject = {};
-					for (var i=0; i<itemsArray.length; i++) {
-						itemsObject[itemsArray[i]] =  window.localStorage.getItem(itemsArray[i]);
-					}
-					var value = itemsObject;
-				}
-				else if(typeof key == "string") {
-					var value = window.localStorage.getItem(key);
-				}
-				else throw new Error("Epected first argument/parameter to be a string or array, not " + (typeof key) + " " + key);
-				
-				if(value === undefined) throw new Error("value=" + value); // Sanity check
-				
-				callback(null, value);
-			},
-			removeItem: function localStorageRemoveItem(key, callback) {
-				if(Array.isArray(key)) {
-					var itemsArray = key;
-					for (var i=0; i<itemsArray.length; i++) {
-						window.localStorage.removeItem(itemsArray[i]);
-					}
-				}
-				else if(typeof key == "string") {
-					window.localStorage.removeItem(key);
-				}
-				else throw new Error("Epected first argument/parameter to be a string or array, not " + (typeof key) + " " + key);
-				
-				if(callback) callback(null);
-			},
-			clear: function storageClear(callback) {
-				console.warn("Clearing ALL data from window.localStorage!");
-				window.localStorage.clear();
-				if(callback) callback(null);
 			}
-		};
-	}
-	else {
-		EDITOR.localStorage = null;
-		console.warn("window.localStorage not available!");
-	}
+			else if(typeof key == "string") {
+				if(typeof value != "string") throw new Error("value=" + value + " needs to be a string when key:" + key + " is a key string");
+				var itemsObject = {};
+				itemsObject[key] = value;
+			}
+				
+			for(var name in itemsObject) {
+				if(typeof itemsObject[name] != "string") throw new Error("name=" + name + " in " + JSON.stringify(itemsObject) + " should be a string!");
+					
+				if(localStorageAvailable) window.localStorage.setItem(name, itemsObject[name]);
+				else _localStorage[name] = itemsObject[name]
+			}
+
+			if(callback) callback(null);
+		},
+		getItem: function localStorageGetItem(key, callback) {
+			
+			if(Array.isArray(key)) {
+				var itemsArray = key;
+				var itemsObject = {};
+				for (var i=0; i<itemsArray.length; i++) {
+					if(localStorageAvailable) itemsObject[itemsArray[i]] =  window.localStorage.getItem(itemsArray[i]);
+					else temsObject[itemsArray[i]] = _localStorage[itemsArray[i]];
+				}
+				var value = itemsObject;
+			}
+			else if(typeof key == "string") {
+				if(localStorageAvailable) var value = window.localStorage.getItem(key);
+				else var value = _localStorage[key];
+			}
+			else throw new Error("Expected first argument/parameter to be a string or array, not " + (typeof key) + " " + key);
+				
+			if(value === undefined) throw new Error("Failed to get value from localStorage! value=" + value); // Sanity check
+				
+			// note: if nothing is safed it will return null
+
+			if(callback) callback(null, value);
+			else return value;
+		},
+		removeItem: function localStorageRemoveItem(key, callback) {
+			if(Array.isArray(key)) {
+				var itemsArray = key;
+				for (var i=0; i<itemsArray.length; i++) {
+					if(localStorageAvailable) window.localStorage.removeItem(itemsArray[i]);
+					else delete _localStorage[itemsArray[i]];
+				}
+			}
+			else if(typeof key == "string") {
+				if(localStorageAvailable) window.localStorage.removeItem(key);
+				else delete _localStorage[key];
+			}
+			else throw new Error("Epected first argument/parameter to be a string or array, not " + (typeof key) + " " + key);
+				
+			if(callback) callback(null);
+		},
+		clear: function storageClear(callback) {
+			console.warn("Clearing ALL data from window.localStorage!");
+			if(localStorageAvailable) window.localStorage.clear();
+			else {
+				for(var key in _localStorage) delete _localStorage[key];
+			}
+			if(callback) callback(null);
+		}
+	};
 	
+	function _unpack(fromString) {
+		try {
+			var pkg = JSON.parse(fromString);
+		}
+		catch(err) {
+			throw new Error("Unable to unpack string! Error: " + err.message + "\n string=" + fromString);
+		}
+		return pkg;
+	}
+
+	function _repack(string, updatedObjects) {
+		var obj = _unpack(string);
+
+		for(var key in updatedObjects) {
+			obj[key] = updatedObjects[key];
+		}
+
+		return JSON.stringify(obj);
+	}
+
 	EDITOR.loadSettings = function loadSettings(settings, defaults, callback) {
 		//console.log("settings: load: settings=" + settings + " ...");
 
@@ -751,43 +818,127 @@ callback = value;
 			defaults = null;
 		}
 
-		if(EDITOR.storage.ready()) loadSettingOnceStorageReady();
+		var serverPackage;
+
+		var localString = EDITOR.localStorage.getItem(settings);
+		if(localString !== null) { 
+			try {
+				var localPackage = JSON.parse(localString);
+			}
+			catch(err) {
+				throw new Error("Unable to unpack localPackage! Error: " + err.message + "\nlocalPackage=" + localPackage);
+			}
+
+			console.log("EDITOR.loadSettings: settings=" + settings + " localPackage=" + JSON.stringify(localPackage, null, 2));
+		}
+
+		if( EDITOR.offline || EDITOR.offlineMode ) {
+			// Don't wait for the server to come back online
+			if(localPackage) gotSettingsString(localPackage.string);
+			else gotSettingsString(null);
+		}
+		else if(EDITOR.storage.ready()) loadSettingOnceStorageReady();
 		else EDITOR.once("storageReady", loadSettingOnceStorageReady);
 		
-		function loadSettingOnceStorageReady() {
-			
-			var value = EDITOR.storage.getItem(settings);
 
+		function gotSettingsString(value) {
 			// note: value is either null or a string!! eg. it can be "null" and "undefined" or null
 			// also note: We can not JSON.parse("undefined") (string "undefined")
-			
+
+			console.log("EDITOR.loadSettings:gotSettingsString: settings=" + settings + " value=" + value + "\n localPackage=" + JSON.stringify(localPackage, null, 2) + "\n serverPackage=" + JSON.stringify(serverPackage, null, 2));
+
 			if(value=="undefined") {
-				console.warn("settings: load: settings=" + settings + " value=" + value + " (something probably went wrong when saving the settings)");
+				console.warn("EDITOR.loadSettings:gotSettingsString: settings=" + settings + " value=" + value + " (something probably went wrong when saving the settings)");
 			}
-			
-			//console.log("settings: load: settings=" + settings + " value=" + value + " defaults=" + defaults + "   " + value + "==null?" + (value==null) + " " + defaults + "=== undefined?" + (defaults === undefined) + "  ");
+
+			console.log("EDITOR.loadSettings:gotSettingsString: settings=" + settings + " value=" + value + " defaults=" + defaults + "   " + value + "==null?" + (value==null) + " " + defaults + "=== undefined?" + (defaults === undefined) + "  ");
 
 			if((value === null || value=="undefined") && defaults !== undefined) {
+				console.log("EDITOR.loadSettings:gotSettingsString: Calling back with default=" + defaults);
 				callback(defaults);
 			}
 			else if((value === null || value=="undefined") && defaults === undefined) { // Cant parse "undefined"!
 				var error = new Error("Could not find " + settings + " in EDITOR.storage!");
 				error.code == "ENOENT";
 				throw error;
-}
+			}
 			else if(value !== null) {
 				try {
 					var obj = JSON.parse(value);
 				}
 				catch(err) {
-					var error = new Error("Failed to parse value=" + value + " Error: " + err.message);
+					var error = new Error(  "Failed to parse value=" + value + " Error: " + err.message + "\n settings=" + settings + "\n localPackage=" + JSON.stringify(localPackage, null, 2) + "\n serverPackage=" + JSON.stringify(serverPackage, null, 2)  );
 					throw error;
 				}
 				//console.log("settings: load: settings=" + settings + " obj=", obj);
+				console.log("EDITOR.loadSettings:gotSettingsString: Calling back with obj=" + JSON.stringify(obj, null, 2));
 				callback(obj);
 			}
-			else throw new Error("Unsuspected: value=" + value + " defaults=" + defaults);
+			else throw new Error("Unexpected: value=" + value + " defaults=" + defaults);
+		}
+
+
+		function loadSettingOnceStorageReady() {
 			
+			var serverString = EDITOR.storage.getItem(settings);
+
+			// Unpack and compare
+
+			// note: We might not have the settings saved on the client, but it might still be saved on the server!
+
+			if(serverString === null) {
+				if(!localPackage) return gotSettingsString(null); // Can't find settings on client nor the server
+				
+				EDITOR.storage.setItem(settings, localString); // Store local version on the server
+				
+				if(localPackage) return gotSettingsString(localPackage.string);
+
+			}
+			
+			try {
+				serverPackage = JSON.parse(serverString);
+			}
+			catch(err) {
+				throw new Error("Unable to unpack serverPackage! Error: " + err.message + "\n serverPackage=" + serverPackage);
+			}
+
+			console.log("EDITOR.loadSettings: settings=" + settings + " serverPackage=" + JSON.stringify(serverPackage, null, 2));
+
+			if(typeof serverPackage.string == "undefined" || typeof serverPackage.date == "undefined" || typeof serverPackage.hash == "undefined") {
+				// We used to store settings without packaging it with a date and hash (and only on the server)
+				serverPackage = {string: serverString};
+			}
+
+			if(!localPackage) return gotSettingsString(serverPackage.string);
+
+			if(localPackage.hash == serverPackage.hash) return gotSettingsString(serverPackage.string); // Everything is fine!
+
+			// Hash missmatch!
+
+			if(localPackage.lastServerhash == serverPackage.hash) {
+				// It's safe to sync (overwrite) the local value to the server because we know the client value was once synced to the server !?
+				// Is there is some edge cases though, like the server having an updated value and the common hash was many versions back ? No, then the server hash would have changed!
+				
+				EDITOR.storage.setItem(settings, localString); // Store local version on the server
+				return gotSettingsString(localPackage.string);
+			}
+
+			var useServer = "Use server";
+			var useLocal = "Use local"
+
+			if(localPackage.date > serverPackage.date) {
+				useLocal += " (newer)";
+			}
+			else if(localPackage.date < serverPackage.date) {
+				useServer += " (newer)";
+			}
+
+			confirmBox("Which version do you want to load ?<br>Server version (" + serverPackage.date + "):<br><textarea>" + serverPackage.string + "</textarea><br>" +
+			"<br>Local version (" + localPackage.date + "):<br><textarea>" + localPackage.string + "</textarea>", [useLocal, useServer], function(answer) {
+				if(answer == useLocal) gotSettingsString(localPackage.string);
+				else if(answer == useServer) gotSettingsString(serverPackage.string);
+			});
+
 		}
 	}
 	
@@ -797,18 +948,91 @@ callback = value;
 		if(value === undefined) throw new Error("Can not save settings=" + settings + " because value=" + value);
 		if(value == "undefined") throw new Error("Can not save settings=" + settings + " because value=" + value + " cannot be parsed");
 		
-		var str = JSON.stringify(value);
+		var string = JSON.stringify(value);
 		
-		if(str == undefined || str == "undefined" || typeof str != "string") throw new Error("Error when stringifying value=" + value + " str=" + str);
+		if(string == undefined || string == "undefined" || typeof string != "string") throw new Error("Error when stringifying value=" + value + " string=" + string);
 		
 		//console.log("settings: save: settings=" + settings + " str=" + str + " ...");
 		
-if(EDITOR.storage.ready()) saveSettingOnceStorageReady();
-else EDITOR.once("storageReady", saveSettingOnceStorageReady);
 
-		function saveSettingOnceStorageReady() {
-			//console.log("settings: save: settings=" + settings + " str=" + str + " !");
-			EDITOR.storage.setItem(settings, str);
+		var clientStringsToSave = 0;
+		var clientStringsSaved = 0;
+
+		var serverStringsToSave = 0;
+		var serverStringsSaved = 0;
+
+		var packageStrServer;
+		var packageStrClient;
+
+		var date = new Date();
+
+		UTIL.hash(string, function(err, hash) {
+			if(err) throw new Error("Failed to hash settings! Error: " + err.message + "\nstringr=" + string);
+
+			var pkg = {
+				string: string,
+				hash: hash,
+				date: date
+			};
+
+			var packageStrServer = JSON.stringify(pkg);
+			var packageStrClient = JSON.stringify(pkg);
+
+			saveClientString(settings, packageStrClient);
+
+			if( EDITOR.offline || EDITOR.offlineMode ) {
+				// Don't wait for the server to come back online
+				return;
+			}
+			else if(EDITOR.storage.ready()) saveSettingOnceStorageReady();
+			else EDITOR.once("storageReady", saveSettingOnceStorageReady);
+
+			function saveSettingOnceStorageReady() {
+				//console.log("settings: save: settings=" + settings + " str=" + str + " !");
+				saveServerString(settings, packageStrServer);
+			}
+
+		});
+
+		var callback = undefined;
+		function doneMaybe() {
+			if( callback && clientStringsSaved == clientStringsToSave && serverStringsToSave == serverStringsSaved) {
+				callback(null);
+				callback = null;
+			}
+		}
+
+		function saveClientString(id, string) {
+			clientStringsToSave++;
+			EDITOR.localStorage.setItem(id, string, function (err) {
+				clientStringsSaved++;
+				if(err) throw err; // As of writing EDITOR.localStorage is sync, and don't call back with an error
+				doneMaybe();
+			});
+		}
+
+		function saveServerString(id, string) {
+			serverStringsToSave++
+			EDITOR.storage.setItem(id, string, function(err) {
+				serverStringsSaved++;
+
+				if(err) {
+					var error = new Error("Unable to save id=" + id + " string=" + string + " to server storage! Error: " + err.message + " code=" + err.code);
+					console.error(error);
+				}
+				else {
+					// We want to save the last *successfully* saved hash to the client - so that we can check if it's safe to overwrite the server version later
+
+					// Update and repack the local value
+					var currentLocalString = EDITOR.localStorage.getItem(id);
+					var currentLocalPackage = _unpack(currentLocalString);
+					currentLocalPackage.lastServerhash = hash;
+					currentLocalString= JSON.stringify(currentLocalPackage);
+					EDITOR.localStorage.setItem(id, currentLocalString);
+				}
+
+				doneMaybe();
+			});
 		}
 	}
 	
@@ -819,13 +1043,13 @@ else EDITOR.once("storageReady", saveSettingOnceStorageReady);
 		if(inheritKeyBindingsFrom) {
 			for(var i=0, b; i<keyBindings.length; i++) {
 				if(keyBindings[i].mode == inheritKeyBindingsFrom) {
-b = {};
-for(var prop in keyBindings[i]) {
-b[prop] = keyBindings[i][prop];
-}
-b.mode = modeName;
-EDITOR.bindKey(b);
-}
+					b = {};
+					for(var prop in keyBindings[i]) {
+						b[prop] = keyBindings[i][prop];
+					}
+					b.mode = modeName;
+					EDITOR.bindKey(b);
+				}
 			}
 		}
 	}
@@ -974,7 +1198,7 @@ EDITOR.bindKey(b);
 							return pseudo();
 						}
 						else if(answer == manualCopy) {
-usePseudoClipboard = false;
+							usePseudoClipboard = false;
 							return prm();
 						}
 						else if(answer == alwaysAsk) {
@@ -1125,11 +1349,11 @@ usePseudoClipboard = false;
 		var json = {path: workingDirectory};
 		
 		if(!EDITOR.offlineMode) {
-		// Update the server
-		// The server will check if the directory exists
-		CLIENT.cmd("setWorkingDirectory", json, function(err, json) {
-			if(err) throw err;
-		});
+			// Update the server
+			// The server will check if the directory exists
+			CLIENT.cmd("setWorkingDirectory", json, function(err, json) {
+				if(err) throw err;
+			});
 		}
 	}
 	
@@ -3774,7 +3998,8 @@ throw new Error("Second or third argument to EDITOR.on: callback=" + callback + 
 		function removeEvent() {
 			EDITOR.removeEvent(eventName, fEv);
 		}
-		
+
+		return removeEvent; // Call this function to "cancel"
 	}
 	
 	
