@@ -29,7 +29,8 @@ Error: saveToDisk: Error: text (object) should be a string when inputBuffer is f
 
 ----
 
-
+Unable to autocomplete for variable in for loop
+example: (var projectName in menuItems) { // can't autocomplete projectName
 
 ----
 

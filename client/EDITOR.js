@@ -5297,7 +5297,7 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 			}
 			
 			if(separator !== undefined) {
-				if(separator != "top" && separator != "bottom") throw new Error("Fourth argument separator=" + separator + " should be either top or bottom!")
+				if(separator != "top" && separator != "bottom") throw new Error("EDITOR.windowMenu.add: Fourth argument separator should be a string with the value top or bottom! (not " + typeof separator + " " + separator + ")")
 			}
 			
 			if(!dropdownMenuRoot) {
@@ -5403,6 +5403,8 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 			
 			
 			var action = function menuItemClick(clickEvent) {
+				clickEvent.preventDefault(); // We don't for example want Ctrl-clicking to open something in a new browser tab
+
 				var file = EDITOR.currentFile;
 				var combo = getCombo(clickEvent);
 				var character = null;
