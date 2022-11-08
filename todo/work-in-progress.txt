@@ -6,6 +6,11 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
+
+---
+
+Able to edit settings !? open in a file and then save to storage ?
+
 Projects!
 
 About to quickly switch project (opened files) and working dir
@@ -66,6 +71,11 @@ todo: open the open-file dialog after opening a local folder!
 File explorer should show another option in the select if we are exploring the local fs!?
 
 todo: test localFileDialog
+
+---
+
+todo: Able to open the terminal emulator in a new window! (split screen)
+concerning "split screen" we can just open a new window and let the window manager handle the splitting
 
 ---
 

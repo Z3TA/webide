@@ -14,7 +14,7 @@
 
 	var projectsMenuOrder = 1;
 
-	var settingsName = "settings";
+	var settingsName = "projects";
 	var currentProject; // points to an object inside the projectSettings object
 	var projectSettings;
 
@@ -25,10 +25,10 @@
 		projects: [
 			{
 				name: "My web site (demo static site generator)",
-				workingDir: "~/my_web_site/",
+				workingDir: "~/ssg_blog_example/",
 				openFiles: [
-					{path: "~/my_web_site/source/index.htm", order: 100},
-					{path: "~/my_web_site/source/about.htm", order: 200}
+					{path: "~/ssg_blog_example/source/index.htm", order: 100},
+					{path: "~/ssg_blog_example/source/about.htm", order: 200}
 				]
 			}
 		]
@@ -41,12 +41,12 @@
 
 			// label, where, whenClicked, separator, keyComboFunction
 
-			var saveProjectMenuItem = EDITOR.windowMenu.add("Save current session", [S("File"), S("Project/session"), 100, 10], function() {
+			saveProjectMenuItem = EDITOR.windowMenu.add("Save current session", [S("File"), S("Project/session"), 100, 10], function() {
 				EDITOR.windowMenu.hide();
 				saveProject(currentProject);
 			});
 
-			var renameProjectMenuItem = EDITOR.windowMenu.add("Rename current session", [S("File"), S("Project/session"), 200, 20], function() {
+			renameProjectMenuItem = EDITOR.windowMenu.add("Rename current session", [S("File"), S("Project/session"), 200, 20], function() {
 				EDITOR.windowMenu.hide();
 				renameProject();
 			}, "bottom");

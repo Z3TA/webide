@@ -1036,6 +1036,11 @@ EDITOR.env = {}; // Plugins can set custom env values that will be passed to ter
 		}
 	}
 	
+	EDITOR.deleteSettings = function deleteSettings(setting) {
+		EDITOR.localStorage.removeItem(setting);
+		EDITOR.storage.removeItem(setting);
+	}
+
 	EDITOR.addMode = function addMode(modeName, inheritKeyBindingsFrom) {
 		if(EDITOR.modes.indexOf(modeName) != -1) throw new Error(modeName + " mode is already registered!");
 		EDITOR.modes.push(modeName);
@@ -1422,6 +1427,9 @@ EDITOR.env = {}; // Plugins can set custom env values that will be passed to ter
 		
 		// Convert path delimters !? 
 		
+		if(path.slice(0,2) == "~/" && EDITOR.user && EDITOR.user.homeDir) {
+			path = path.replace("~/", EDITOR.user.homeDir);
+		}
 		
 		// Just so that we are consistent
 		if(text === null) throw new Error("text is null! It should be undefined for the file to open from disk"); // note: null == undefined = true
