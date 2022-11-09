@@ -1429,6 +1429,7 @@ EDITOR.env = {}; // Plugins can set custom env values that will be passed to ter
 		
 		if(path.slice(0,2) == "~/" && EDITOR.user && EDITOR.user.homeDir) {
 			path = path.replace("~/", EDITOR.user.homeDir);
+			pathToBeOpened = path;
 		}
 		
 		// Just so that we are consistent

@@ -6,6 +6,19 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
+Editor wont load on low-end devices (the compiled/optimized version loads though)
+But the editor has become too bloated!
+Place plugins in two folders, 
+core/ = load at startup 
+opt/ = loads dynamicly via action
+
+
+---
+
+ide: app där man kan söka jobb-banken på sökord, samt negativa sökord och prenumerera om det kommer in ett matchande jobb
+
+https://platsbanken-api.arbetsformedlingen.se/jobs/v1/job/26745147
+
 
 ---
 
