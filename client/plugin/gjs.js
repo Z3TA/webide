@@ -8,7 +8,7 @@
 	
 	Script hello.js threw an exception
 	
-	todo: Add test the checks if gjs is installed!
+	todo: Add test that checks if gjs is installed!
 */
 
 (function() {

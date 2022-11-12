@@ -6,6 +6,13 @@ Polishing (only existing features)
 
 ---
 
+undo/redo/colab:
+A range/slider that allows you to playback backwards or forwards, so that you don't have to click Ctrl+Z a hundre times
+it becomes visible when you press Ctrl+Z
+Save file history in .history files, so that you can playback from earlier sessions, all back to the first edit!
+
+---
+
 Typing .. in the file open widget should change to parent (serch) dir!
 
 ---

@@ -6,12 +6,18 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
+currently looking at download_file.js
+
+should first make one pass and move plugins that we rarely use to opt/
+then another pass to move useful but unfinished/not polished editor plugins/features  to opt??
+
 Editor wont load on low-end devices (the compiled/optimized version loads though)
 But the editor has become too bloated!
 Place plugins in two folders, 
 core/ = load at startup 
 opt/ = loads dynamicly via action
 
+Also only load the tests files before running tests
 
 ---
 
