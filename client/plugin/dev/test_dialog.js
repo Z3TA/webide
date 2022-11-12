@@ -6,11 +6,15 @@
 
 //EDITOR.on("start", mock);
 
+	console.log("testDialog: Loaded the file!");
+
 	// Add plugin to editor
 	EDITOR.plugin({
 		desc: "Test stuff",
 		load: function loadTestDialog() {
 			var charCode_D = 68;
+
+			console.log("testDialog: Loading dialog testing plugin!");
 
 			EDITOR.bindKey({desc: "Show a dialog window", charCode: charCode_D, combo: ALT + SHIFT, fun: testDialogs});
 			

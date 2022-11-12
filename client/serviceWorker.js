@@ -427,7 +427,7 @@ var reWebide = /\/webide\//;
 self.addEventListener('fetch', function serviceWorkerFetch(event) {
 	var websocketRequest = !!event.request.url.match(reWebide);
 
-	console.log("serviceWorker fetch url=" + event.request.url + " * v=" + VERSION + " dev=" + DEV_MODE + "websocketRequest=" + websocketRequest);
+	console.log("serviceWorker fetch url=" + event.request.url + " * v=" + VERSION + " dev=" + DEV_MODE + " websocketRequest=" + websocketRequest);
 	
 	if( DEV_MODE || websocketRequest ) { // Skip cache
 		

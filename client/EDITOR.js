@@ -7983,11 +7983,14 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		p.loaded = false;
 		
 		if(windowLoaded) { // && EDITOR.settings.devMode
-			//alertBox("Gonna reload unload and load " + UTIL.getFunctionName(p.load));
+			console.log("EDITOR.plugin: Gonna reload unload and load " + UTIL.getFunctionName(p.load));
 			EDITOR.disablePlugin(p.desc, true); // Unload plugin before loading it 
 			console.log("EDITOR.plugin: Loading plugin p.desc=" + p.desc + " ...");
 			p.load(); // Load the plugin right away if the editor has already started. 
 			p.loaded = true;
+		}
+		else {
+			console.log("EDITOR.plugin: Window has not yet loaded!");
 		}
 		
 		for(var i=0; i<EDITOR.plugins.length; i++) {
@@ -7996,10 +7999,10 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		
 		if( EDITOR.disabledPlugins.indexOf(p.disc) != -1 ) {
 			if( typeof EDITOR.disabledPluginsBy[desc] == "object" ) {
-				console.warn(p.disc + " has been disabled by " + EDITOR.disabledPluginsBy[desc].join(","));
+				console.warn("EDITOR.plugin: " + p.disc + " has been disabled by " + EDITOR.disabledPluginsBy[desc].join(","));
 			}
 			else {
-				console.warn(p.disc + " has been disabled! ");
+				console.warn("EDITOR.plugin: " + p.disc + " has been disabled! ");
 			}
 			return;
 		}
@@ -9530,10 +9533,16 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 
 	EDITOR.loadScript = function loadScript(src, dontAsk, callback) {
 	
+		console.log("EDITOR.loadScript: src=" + src);
+
 		if(typeof dontAsk == "function" && callback == undefined) {
 			callback = dontAsk;
 			dontAsk = undefined;
 		}
+
+		// When using forEach, additional parameters index, array is passed
+		if(typeof callback != "function") callback = undefined;
+		if(typeof dontAsk != "boolean") dontAsk = undefined;
 	
 		if(dontAsk == undefined) dontAsk = false;
 	
@@ -9557,6 +9566,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		else load();
 	
 		function load() {
+			console.log("EDITOR.loadScript: Creating script element for src=" + src);
 			var script = document.createElement('script');
 			script.setAttribute("async", "true");
 
@@ -11413,7 +11423,8 @@ window.addEventListener("mousemove", mouseMove, false);
 		//console.log("Loading plugins (length=" + pluginLoaders.length + ")");
 		for(var i=0; i<pluginLoaders.length; i++) {
 			
-			console.log("Load plugin: desc=" + pluginDesc[i] + " load function-name=" + UTIL.getFunctionName(pluginLoaders[i]) + " (" + i + " of " + (pluginLoaders.length-1) + ")" );
+			console.log("(EDITOR.plugin) Load plugin: desc=" + pluginDesc[i] + " load function-name=" + UTIL.getFunctionName(pluginLoaders[i]) + " (" + i + " of " + (pluginLoaders.length-1) + ")" );
+
 
 			//console.time("Load plugin: desc=" + pluginDesc[i] + " load function-name=" + UTIL.getFunctionName(pluginLoaders[i]));
 			
