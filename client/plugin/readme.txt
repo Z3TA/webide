@@ -18,6 +18,14 @@ Do not modify file.text directly. Instead add an abstraction layer method to Fil
 Also feel free to add new methods and functions in EDITOR.js and global.js
 
 
+Structure of the plugin folder
+------------------------------
+core = These plugins will be loaded first
+dev = These plugins are only loaded if EDITOR.settings.devMode is set to true
+opt = These plugins are loaded in a few seconds after the editor has started
+not_used = Plugins that has been "demoted" and no longer used, but might come in handy in the future
+
+
 Testing
 -------
 Add automatic tests using: EDITOR.addTest(function nameOfYourTest(callback) { .... })

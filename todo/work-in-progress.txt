@@ -21,6 +21,18 @@ Also only load the tests files before running tests
 
 ---
 
+todo: Make a plugin manager
+Load plugins of choise from opt/
+Load third party plugins from external URL's ? No all plugins need to be submitted as pull requests!
+
+
+---
+
+todo: plugin/t9_prediction.js does not work on KaiOS! Make it work on Kaios
+
+
+---
+
 ide: app där man kan söka jobb-banken på sökord, samt negativa sökord och prenumerera om det kommer in ett matchande jobb
 
 https://platsbanken-api.arbetsformedlingen.se/jobs/v1/job/26745147

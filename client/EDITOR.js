@@ -9558,7 +9558,8 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 	
 		function load() {
 			var script = document.createElement('script');
-			
+			script.setAttribute("async", "true");
+
 			if(callback) {
 				script.onload = function () {
 					callback(null);

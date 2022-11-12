@@ -124,7 +124,7 @@
 		if(initiated) throw new Error("highlight: Already initiated!");
 		
 		if(window.Worker) {
-			worker = new Worker('/plugin/highlightjs_worker.js');
+			worker = new Worker('/plugin/core/highlightjs/highlightjs_worker.js');
 			
 			worker.onmessage = highlightWorkerMessage;
 			

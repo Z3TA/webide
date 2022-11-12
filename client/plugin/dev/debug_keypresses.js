@@ -1,3 +1,9 @@
+/*
+	Useful when debugging
+
+	!DO:NOT:BUNDLE!
+*/
+
 (function() {
 	"use strict";
 
