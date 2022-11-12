@@ -41,7 +41,7 @@
 
 		order++;
 
-		menuItems[filePath] = EDITOR.windowMenu.add(filePath, [S("File"), "Recent files", 1, order], function() {
+		menuItems[filePath] = EDITOR.windowMenu.add(filePath, [S("File"), "Recent files", 9000, order], function() {
 			EDITOR.windowMenu.hide();
 			if( EDITOR.files.hasOwnProperty(filePath) ) EDITOR.showFile(filePath);
 			else EDITOR.openFile(filePath);
