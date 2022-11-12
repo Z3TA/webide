@@ -427,7 +427,7 @@ var reWebide = /\/webide\//;
 self.addEventListener('fetch', function serviceWorkerFetch(event) {
 	var websocketRequest = !!event.request.url.match(reWebide);
 
-	console.log("serviceWorker fetch url=" + event.request.url + " * v=" + VERSION + " dev=" + DEV_MODE + " websocketRequest=" + websocketRequest);
+	//console.log("serviceWorker fetch url=" + event.request.url + " * v=" + VERSION + " dev=" + DEV_MODE + " websocketRequest=" + websocketRequest);
 	
 	if( DEV_MODE || websocketRequest ) { // Skip cache
 		
@@ -439,7 +439,7 @@ self.addEventListener('fetch', function serviceWorkerFetch(event) {
 					return fetch(event.request).then(function(response) {
 						if(response.status == 200) {
 						cache.put(event.request, response.clone());
-						console.log("serviceWorker Added to cache becasue DEV_MODE=" + DEV_MODE + " url=" + event.request.url + "");
+						//console.log("serviceWorker Added to cache becasue DEV_MODE=" + DEV_MODE + " url=" + event.request.url + "");
 						}
 						return response;
 					});

@@ -1,5 +1,7 @@
 "use strict";
 
+//alert("EDITOR.js");
+
 //var testfile = "test/testfile.txt";
 
 // The EDITOR object lives in global scope, so that it can be accessed everywhere.
@@ -829,7 +831,7 @@ EDITOR.env = {}; // Plugins can set custom env values that will be passed to ter
 				throw new Error("Unable to unpack localPackage! Error: " + err.message + "\nlocalPackage=" + localPackage);
 			}
 
-			console.log("EDITOR.loadSettings: settings=" + settings + " localPackage=" + JSON.stringify(localPackage, null, 2));
+			//console.log("EDITOR.loadSettings: settings=" + settings + " localPackage=" + JSON.stringify(localPackage, null, 2));
 		}
 
 		if( EDITOR.offline || EDITOR.offlineMode ) {
@@ -845,16 +847,16 @@ EDITOR.env = {}; // Plugins can set custom env values that will be passed to ter
 			// note: value is either null or a string!! eg. it can be "null" and "undefined" or null
 			// also note: We can not JSON.parse("undefined") (string "undefined")
 
-			console.log("EDITOR.loadSettings:gotSettingsString: settings=" + settings + " value=" + value + "\n localPackage=" + JSON.stringify(localPackage, null, 2) + "\n serverPackage=" + JSON.stringify(serverPackage, null, 2));
+			//console.log("EDITOR.loadSettings:gotSettingsString: settings=" + settings + " value=" + value + "\n localPackage=" + JSON.stringify(localPackage, null, 2) + "\n serverPackage=" + JSON.stringify(serverPackage, null, 2));
 
 			if(value=="undefined") {
 				console.warn("EDITOR.loadSettings:gotSettingsString: settings=" + settings + " value=" + value + " (something probably went wrong when saving the settings)");
 			}
 
-			console.log("EDITOR.loadSettings:gotSettingsString: settings=" + settings + " value=" + value + " defaults=" + defaults + "   " + value + "==null?" + (value==null) + " " + defaults + "=== undefined?" + (defaults === undefined) + "  ");
+			//console.log("EDITOR.loadSettings:gotSettingsString: settings=" + settings + " value=" + value + " defaults=" + defaults + "   " + value + "==null?" + (value==null) + " " + defaults + "=== undefined?" + (defaults === undefined) + "  ");
 
 			if((value === null || value=="undefined") && defaults !== undefined) {
-				console.log("EDITOR.loadSettings:gotSettingsString: Calling back with default=" + defaults);
+				//console.log("EDITOR.loadSettings:gotSettingsString: Calling back with default=" + defaults);
 				callback(defaults);
 			}
 			else if((value === null || value=="undefined") && defaults === undefined) { // Cant parse "undefined"!
@@ -871,7 +873,7 @@ EDITOR.env = {}; // Plugins can set custom env values that will be passed to ter
 					throw error;
 				}
 				//console.log("settings: load: settings=" + settings + " obj=", obj);
-				console.log("EDITOR.loadSettings:gotSettingsString: Calling back with obj=" + JSON.stringify(obj, null, 2));
+				//console.log("EDITOR.loadSettings:gotSettingsString: Calling back with obj=" + JSON.stringify(obj, null, 2));
 				callback(obj);
 			}
 			else throw new Error("Unexpected: value=" + value + " defaults=" + defaults);
@@ -902,7 +904,7 @@ EDITOR.env = {}; // Plugins can set custom env values that will be passed to ter
 				throw new Error("Unable to unpack serverPackage! Error: " + err.message + "\n serverPackage=" + serverPackage);
 			}
 
-			console.log("EDITOR.loadSettings: settings=" + settings + " serverPackage=" + JSON.stringify(serverPackage, null, 2));
+			//console.log("EDITOR.loadSettings: settings=" + settings + " serverPackage=" + JSON.stringify(serverPackage, null, 2));
 
 			if(typeof serverPackage.string == "undefined" || typeof serverPackage.date == "undefined" || typeof serverPackage.hash == "undefined") {
 				// We used to store settings without packaging it with a date and hash (and only on the server)
@@ -4795,11 +4797,11 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 		
 		var item = this;
 		
-		if(options.parentMenu === undefined) throw new Error("No parentMenu specified in options=" + JSON.stringify(options));
+		if(options.parentMenu === undefined) throw new Error("DropdownMenuItem: No parentMenu specified in options=" + JSON.stringify(options));
 		item.parentMenu = options.parentMenu;
 		
 		var label = options.label;
-		if(!label) throw new Error("No label specified in options=" + JSON.stringify(options));
+		if(!label) throw new Error("DropdownMenuItem: No label specified in options=" + JSON.stringify(UTIL.objInfo(options, true)));
 		
 		item.whenClicked = options.whenClicked;
 		
@@ -7983,9 +7985,9 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		p.loaded = false;
 		
 		if(windowLoaded) { // && EDITOR.settings.devMode
-			console.log("EDITOR.plugin: Gonna reload unload and load " + UTIL.getFunctionName(p.load));
+			//console.log("EDITOR.plugin: Gonna reload unload and load " + UTIL.getFunctionName(p.load));
 			EDITOR.disablePlugin(p.desc, true); // Unload plugin before loading it 
-			console.log("EDITOR.plugin: Loading plugin p.desc=" + p.desc + " ...");
+			//console.log("EDITOR.plugin: Loading plugin p.desc=" + p.desc + " ...");
 			p.load(); // Load the plugin right away if the editor has already started. 
 			p.loaded = true;
 		}
@@ -8016,7 +8018,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 	EDITOR.disablePlugin = function(desc, removedBy) {
 		var plugin;
 
-		console.warn("EDITOR.disablePlugin: desc=" + desc + "");
+		//console.warn("EDITOR.disablePlugin: desc=" + desc + "");
 
 		for(var i=0; i<EDITOR.plugins.length; i++) {
 			plugin = EDITOR.plugins[i];
@@ -8038,7 +8040,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 				}
 				
 				if(removedBy) {
-					console.warn("EDITOR.disablePlugin: Disabling already existing plugin permanently: desc=" + desc);
+					//console.warn("EDITOR.disablePlugin: Disabling already existing plugin permanently: desc=" + desc);
 					EDITOR.plugins.splice(i, 1);
 				}
 				//console.log("EDITOR.disablePlugin: Plugin disabled" + (remove ? " and removed": "") + ": " + desc);
@@ -8047,10 +8049,10 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 			}
 		}
 		
-		console.log("EDITOR.disablePlugin: Not yet registered: desc=" + desc);
+		//console.log("EDITOR.disablePlugin: Not yet registered: desc=" + desc);
 
 		if( removedBy ) { // Make sure it will never load
-			console.warn("EDITOR.disablePlugin: Disabling not yet registered plugin permanently: desc=" + desc);
+			//console.warn("EDITOR.disablePlugin: Disabling not yet registered plugin permanently: desc=" + desc);
 			EDITOR.disabledPlugins.push(desc);
 			if(typeof removeOrWho == "string") {
 				if( typeof EDITOR.disabledPluginsBy[desc] != "object") EDITOR.disabledPluginsBy[desc] = [];
@@ -9145,7 +9147,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		},
 		show: function showDashboard() {
 			
-			console.log("Showing the dashboard! stayHidden=" + EDITOR.dashboard.stayHidden);
+			//console.log("EDITOR.dashboard.show: Showing the dashboard! stayHidden=" + EDITOR.dashboard.stayHidden);
 			
 			if(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("dashboard") != -1) throw new Error("dashboard disabled via query string!");
 			if(!EDITOR.dashboard.enabled) throw new Error("dashboard disable by " + EDITOR.dashboard.disabledBy.join(","));
@@ -9533,7 +9535,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 
 	EDITOR.loadScript = function loadScript(src, dontAsk, callback) {
 	
-		console.log("EDITOR.loadScript: src=" + src);
+		//console.log("EDITOR.loadScript: src=" + src);
 
 		if(typeof dontAsk == "function" && callback == undefined) {
 			callback = dontAsk;
@@ -9566,7 +9568,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		else load();
 	
 		function load() {
-			console.log("EDITOR.loadScript: Creating script element for src=" + src);
+			//console.log("EDITOR.loadScript: Creating script element for src=" + src);
 			var script = document.createElement('script');
 			script.setAttribute("async", "true");
 
@@ -11423,7 +11425,7 @@ window.addEventListener("mousemove", mouseMove, false);
 		//console.log("Loading plugins (length=" + pluginLoaders.length + ")");
 		for(var i=0; i<pluginLoaders.length; i++) {
 			
-			console.log("(EDITOR.plugin) Load plugin: desc=" + pluginDesc[i] + " load function-name=" + UTIL.getFunctionName(pluginLoaders[i]) + " (" + i + " of " + (pluginLoaders.length-1) + ")" );
+			//console.log("(EDITOR.plugin) Load plugin: desc=" + pluginDesc[i] + " load function-name=" + UTIL.getFunctionName(pluginLoaders[i]) + " (" + i + " of " + (pluginLoaders.length-1) + ")" );
 
 
 			//console.time("Load plugin: desc=" + pluginDesc[i] + " load function-name=" + UTIL.getFunctionName(pluginLoaders[i]));
