@@ -124,6 +124,7 @@
 	var winMenuVibration, vibrationEnabled = true;
 	var checkActiveElementInterval;
 	var virtualKeyboardIsVisible = false;
+	var winMenuBlackKeyboard, winMenuWhiteKeyboard;
 
 	if(preferredKeyboard == "physical") usePhysical = true;
 
@@ -165,7 +166,14 @@
 			winMenuOnScreen = EDITOR.windowMenu.add(S("native_onscreen"), [S("Editor"), S("keyboard_input")], menuPickOnScreen);
 			winMenuPhysical = EDITOR.windowMenu.add(S("physical_keyboard"), [S("Editor"), S("keyboard_input")], menuPickPhysical);
 			winMenuVibration = EDITOR.windowMenu.add(S("vibration"), [S("Editor"), S("keyboard_input")], toggleVibration);
-			
+			winMenuBlackKeyboard = EDITOR.windowMenu.add("Black", [S("Editor"), S("keyboard_input"), "Style"], keyboardStyleBlack);
+			winMenuWhiteKeyboard = EDITOR.windowMenu.add("White", [S("Editor"), S("keyboard_input"), "Style"], keyboardStyleWhite);
+
+			if( EDITOR.settings.style.keyboardBackground == undefined ) EDITOR.settings.style.keyboardBackground = "#000000";
+			if( EDITOR.settings.style.keyboardText == undefined ) EDITOR.settings.style.keyboardText = "#FFFFFF";
+			if( EDITOR.settings.style.keyboardButtonGradientStart == undefined ) EDITOR.settings.style.keyboardButtonGradientStart = "#656565";
+			if( EDITOR.settings.style.keyboardButtonGradientEnd == undefined ) EDITOR.settings.style.keyboardButtonGradientEnd = "#000000";
+
 			EDITOR.on("registerAltKey", updateAltKey);
 			EDITOR.on("unregisterAltKey", removeAltKey);
 			EDITOR.on("storageReady", loadVirtualKeyboardSettings);
@@ -206,7 +214,31 @@
 			
 		}
 	});
+
+	function keyboardStyleBlack() {
+		winMenuBlackKeyboard.activate();
+		winMenuWhiteKeyboard.deactivate();
+
+		EDITOR.settings.style.keyboardBackground = "#000000";
+		EDITOR.settings.style.keyboardText = "#FFFFFF";
+		EDITOR.settings.style.keyboardButtonGradientStart = "#656565";
+		EDITOR.settings.style.keyboardButtonGradientEnd = "#000000";
+
+		if(buttons.length > 0) renderVirtualKeyboard();
+	}
 	
+	function keyboardStyleWhite() {
+		winMenuWhiteKeyboard.activate();
+		winMenuBlackKeyboard.deactivate();
+
+		EDITOR.settings.style.keyboardBackground = "#FFFFFF";
+		EDITOR.settings.style.keyboardText = "#000000";
+		EDITOR.settings.style.keyboardButtonGradientStart = "#b9b9b9";
+		EDITOR.settings.style.keyboardButtonGradientEnd = "#FFFFFF";
+
+		if(buttons.length > 0) renderVirtualKeyboard();
+	}
+
 	function vrkeyboardDetectElement(mouseX, mouseY, caret, mouseDirection, button, target, keyboardCombo, mouseUpEvent) {
 		
 		/*
@@ -690,7 +722,7 @@ return false;
 		*/
 		
 		// Background
-		ctx.fillStyle = "#000000";
+		ctx.fillStyle = EDITOR.settings.style.keyboardBackground;
 		ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 		
 		var cX = 0;
@@ -706,7 +738,7 @@ return false;
 		
 		// ### Button backgrounds
 		
-		ctx.strokeStyle="white";
+		ctx.strokeStyle=EDITOR.settings.style.keyboardText;
 		ctx.lineWidth=lineWidth;
 		
 		for (var i=0; i<buttons.length; i++) {
@@ -746,12 +778,12 @@ return false;
 			// A gradient background
 			//gradient=ctx.createLinearGradient(cX-buttonWidth/2, cY-buttonHeight/2, buttonWidth, buttonHeight);
 			gradient=ctx.createLinearGradient(x2, y1, x2, y2);
-			gradient.addColorStop(0,"#656565");
+			gradient.addColorStop(0, EDITOR.settings.style.keyboardButtonGradientStart);
 			
 			if(ALT1 && ALT2 && buttons[i].highlightAlt3) gradient.addColorStop(1,"orange");
 			else if(ALT1 && buttons[i].highlightAlt1) gradient.addColorStop(1,"green");
 			else if(ALT2 && buttons[i].highlightAlt2) gradient.addColorStop(1,"yellow");
-			else gradient.addColorStop(1,"black");
+			else gradient.addColorStop(1, EDITOR.settings.style.keyboardButtonGradientEnd);
 			
 			ctx.fillStyle=gradient;
 			
@@ -764,7 +796,7 @@ return false;
 		}
 		
 		// ### Button letters
-		ctx.fillStyle = "#FFFFFF";
+		ctx.fillStyle = EDITOR.settings.style.keyboardText;
 		ctx.textAlign = "center";
 		ctx.font=  Math.floor(buttonHeight * 0.6)  + "px Arial";
 		
@@ -848,7 +880,7 @@ return false;
 		
 		if(IOS_SAFARI) {
 			// Trick iOS to show a black line instead of a white line
-			ctx.fillStyle="#ffffff";
+			ctx.fillStyle=EDITOR.settings.style.keyboardText;
 			ctx.fillRect(canvasWidth/2-90,canvasHeight - iOS_bottomLineCompensation, 180, 5);
 		}
 
