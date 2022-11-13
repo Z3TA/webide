@@ -935,7 +935,7 @@ EDITOR.env = {}; // Plugins can set custom env values that will be passed to ter
 				useServer += " (newer)";
 			}
 
-			confirmBox("Which version do you want to load ?<br>Server version (" + serverPackage.date + "):<br><textarea>" + serverPackage.string + "</textarea><br>" +
+			confirmBox("<h3>Settings for " + settings + "</h3>Which version do you want to load ?<br>Server version (" + serverPackage.date + "):<br><textarea>" + serverPackage.string + "</textarea><br>" +
 			"<br>Local version (" + localPackage.date + "):<br><textarea>" + localPackage.string + "</textarea>", [useLocal, useServer], function(answer) {
 				if(answer == useLocal) gotSettingsString(localPackage.string);
 				else if(answer == useServer) gotSettingsString(serverPackage.string);
@@ -11666,13 +11666,13 @@ window.addEventListener("mousemove", mouseMove, false);
 		
 		// Sort the tests by parallel and order
 		EDITOR.tests.sort(function sortTests(a, b) {
-			if(a.parallel && !b.parallel) return 1; // Tests with parallel==false should be first!
-			else if(b.parallel && !a.parallel) return -1;
-			else if(a.parallel == b.parallel) {
-				if(a.order > b.order) return 1;
-				if(b.order > a.order) return -1;
-				else return 0;
-			}
+			if(a.parallel===false && b.parallel!==false) return -1; // Tests with parallel==false should be first!
+			if(b.parallel===false && a.parallel!==false) return 1;
+			
+			if(a.order < b.order) return -1;
+			if(b.order < a.order) return 1;
+			
+			return 0;
 		});
 		
 		if(!onlyOne) {

@@ -47,6 +47,8 @@ todo: Run vttest
 	var BUFFER = {}; // termid: [data]
 	var vimTip = true;
 	var resizeOnShow = false;
+	var ignoreUnknownTerminalErrors = false; // Set to true when running tests
+
 
 	EDITOR.plugin({
 		desc: "Terminal emulator",
@@ -296,7 +298,10 @@ EDITOR.unbindKey(startTerminalFromKeyboard);
 		if(!EDITOR.input) return true;
 		
 		CLIENT.cmd("terminal.write", {id: id, data: text}, function terminalWrite(err) {
-			if(err) alertBox("Unable to write to terminal: " + err.message, err.code);
+			if(err) {
+				if(err.code == "UNKNOWN_TERMINAL_ID" && ignoreUnknownTerminalErrors) return;
+				alertBox("Unable to write pasted data to terminal: data=" + data + " error=" + err.message, err.code || "TERMINAL_ERROR");
+			}
 		});
 		
 		return false;
@@ -406,10 +411,12 @@ EDITOR.unbindKey(startTerminalFromKeyboard);
 		}
 		
 		function resizeTerminal(id) {
+			console.warn("terminal:resizeTerminal: id=" + id);
 			if(CLIENT.connected) {
 				CLIENT.cmd("terminal.resize", {id: id, cols: cols, rows: rows}, function terminalResized(err) {
 					if(err && err.code == "UNKNOWN_TERMINAL_ID") {
 						// The server might have restarted
+						if(ignoreUnknownTerminalErrors) return;
 						terminalCloseFile(termPrefix + id);
 					}
 					else if(err) {
@@ -1699,7 +1706,10 @@ EDITOR.unbindKey(startTerminalFromKeyboard);
 		else return ALLOW_DEFAULT;
 		
 		CLIENT.cmd("terminal.write", {id: id, data: data}, function terminalWrite(err) {
-			if(err) alertBox("Unable to write to terminal: data=" + data + " error=" + err.message, err.code || "TERMINAL_ERROR");
+			if(err) {
+				if(err.code == "UNKNOWN_TERMINAL_ID" && ignoreUnknownTerminalErrors) return;
+				alertBox("Unable to write to terminal: data=" + data + " error=" + err.message, err.code || "TERMINAL_ERROR");
+			}
 		});
 		
 		return PREVENT_DEFAULT;
@@ -1713,23 +1723,28 @@ EDITOR.unbindKey(startTerminalFromKeyboard);
 		
 		if(terminalFiles.indexOf(file) != -1) {
 		
+			console.warn( "terminal:terminalCloseFile: Closing terminal '" + file.path + "' terminalFiles=" + JSON.stringify(terminalFiles.map(function(f){return f.path})) + " EDITOR.files=" + JSON.stringify(Object.keys(EDITOR.files)) );
+
 			var id = file.path.match(reTerm)[1];
 		
-		file.write("\n\nClosing " + file.path + " session " + new Date());
-		EDITOR.renderNeeded();
+			file.write("\n\nClosing " + file.path + " session " + new Date());
+			EDITOR.renderNeeded();
 		
-		CLIENT.cmd("terminal.close", {id: id}, function terminalClose(err) {
-			if(err && err.code != "UNKNOWN_TERMINAL_ID") alertBox("Unable to close terminal id=" + id + " error=" + err.message);
-		});
+			CLIENT.cmd("terminal.close", {id: id}, function terminalClose(err) {
+				if(err && err.code != "UNKNOWN_TERMINAL_ID") {
+					if(ignoreUnknownTerminalErrors) return;
+					alertBox("Unable to close terminal id=" + id + " error=" + err.message);
+				}
+			});
 		
-		while(terminalFiles.indexOf(file) != -1) terminalFiles.splice(terminalFiles.indexOf(file), 1);
+			while(terminalFiles.indexOf(file) != -1) terminalFiles.splice(terminalFiles.indexOf(file), 1);
 		}
 
 		var matchTerminalId = file.path.match(reTerm);
 		if(matchTerminalId != null) delete BUFFER[matchTerminalId[1]]
 
 
-		// Terminal event are removed in the fileSHow event, 
+		// Terminal event are removed in the fileShow event, 
 		// but if the terminal is the only file open, we will not get a fileshow event!
 	
 		if(terminalFiles.length == 0 && Object.keys(EDITOR.files).length <= 1) removeTerminalEvents();
@@ -1764,21 +1779,33 @@ EDITOR.unbindKey(startTerminalFromKeyboard);
 	// Need to be sync because files opened via terminal get showFile priority (which lasts for five seconds)
 	EDITOR.addTest(false, function openFileFromTerminal(callback) {
 		
-		EDITOR.openFile("terminal1337", '', function(err, file) {
+		ignoreUnknownTerminalErrors = true;
+
+		EDITOR.openFile("terminal1337", '', function terminalTestFileOpened(err, file) {
 			
 			file.lineBreak = "\n"; // Default line-break on Windows is \r\n. But we always use just \n in the terminal (also pty on Windows!)
 			
 			terminalFiles.push(file);
-			terminalFileShow(file)
+			terminalFileShow(file);
 			
 			var testFile = "testOpenFileFromTerminal"
 			var filesOpened = 0;
 			var filesClosed = 0;
 			
-			bash("ltest1@zpc:/repo/tensorflow$", "/repo/tensorflow/" + testFile);
-			bash("bash-4.3$", "/" + testFile);
-			
-			function bash(bashPrompt, filePath) {
+			bash("ltest1@zpc:/repo/tensorflow$", "/repo/tensorflow/" + testFile, function() {
+				bash("bash-4.3$", "/" + testFile, function() {
+
+					EDITOR.closeFile(file.path);
+
+					EDITOR.showFileReset(); // Because files opened from the editor get show state to prevent other files to get shown
+					ignoreUnknownTerminalErrors = false;
+
+					callback(true);
+					
+				});
+			});
+
+			function bash(bashPrompt, filePath, bashCallback) {
 				
 				filesOpened++;
 				
@@ -1786,42 +1813,25 @@ EDITOR.unbindKey(startTerminalFromKeyboard);
 				
 				file.write(bashPrompt + ' open ' + testFile + filesOpened);
 				
-				
 				EDITOR.mock("keydown", {charCode: 13, target: "canvas"}); // Simulate Press enter
 				
-				if(! (filePath in EDITOR.files) && EDITOR.openFileQueue.indexOf(filePath) == -1) throw new Error("Expected " + filePath + " to be opened! bashPrompt=" + bashPrompt);
-				
-				file.writeLineBreak();
-				
-				// Wait until the file have been opened, then close it
-				setTimeout(function closeTheFile() {
-					//console.log( "openFileFromTerminal: EDITOR.files=" + JSON.stringify(Object.keys(EDITOR.files)) + " closing " + filePath + " ..." );
-					
-					EDITOR.closeFile(filePath);
-					
-					filesClosed++;
-					if(filesClosed==filesOpened) {
-						// Test finished!
-						
-						EDITOR.closeFile(file.path);
-						
-						EDITOR.showFileReset(); // Because files opened from the editor get show state to prevent other files to get shown
-						
-						setTimeout(function() {
-							EDITOR.closeAllDialogs("UNKNOWN_TERMINAL_ID");
-							setTimeout(function() {
-								EDITOR.closeAllDialogs("UNKNOWN_TERMINAL_ID");
-								callback(true);
+				// Opening files can be async !?
+				setTimeout(function() {
 
-							}, 2000);
-
-						}, 2000);
-						
-						
-					}
-					
-				}, 1000);
+					if( !(filePath in EDITOR.files) && EDITOR.openFileQueue.indexOf(filePath) == -1 ) throw new Error("Expected " + filePath + " to be opened! bashPrompt=" + bashPrompt);
 				
+					file.writeLineBreak();
+				
+					// Wait until the file have been opened, then close it
+					setTimeout(function closeTheFile() {
+						//console.log( "openFileFromTerminal: EDITOR.files=" + JSON.stringify(Object.keys(EDITOR.files)) + " closing " + filePath + " ..." );
+					
+						EDITOR.closeFile(filePath);
+					
+						bashCallback();
+
+					}, 500);
+				},500);
 			}
 		});
 	});

@@ -692,13 +692,14 @@
 		return false;
 	}
 	
-	function runNodeJsScript() {
+	function runNodeJsScript(callback) {
 		var file = EDITOR.currentFile;
 		
 		EDITOR.ctxMenu.hide();
 		
 		if(!file) {
 			alertBox("No file open!");
+			if(callback) callback(new Error("Unable to run Node.js script because no file is open"));
 			return ALLOW_DEFAULT;
 		}
 		
@@ -726,10 +727,16 @@
 			var saveButDontRun = "Save the file, but do not run";
 			var cancel = "Cancel";
 			return confirmBox(message, [saveThenRun, saveButDontRun, cancel], {defaultOption: saveThenRun}, function(answer) {
-				if(answer == cancel) return;
+				if(answer == cancel) {
+					if(callback) callback(new Error("User clicked cancel on the question to save the file."));
+					return;
+				}
 				else if(answer == saveThenRun || answer == saveButDontRun) {
 					EDITOR.pathPickerTool({defaultPath: UTIL.joinPaths(EDITOR.user.homeDir, filePath)}, function(err, path) {
-						if(err && err.code == "CANCEL") return;
+						if(err && err.code == "CANCEL") {
+							if(callback) callback(new Error("When saving the file the path picker tool returned error code=CANCEL"));
+							return;
+						}
 						else if(err) throw err;
 
 						//console.log("Run nodejs script: pathPickerTool err=", err, " path=" + path)
@@ -751,7 +758,10 @@
 			var runOld = "Run without new changes";
 			var cancel = "Do not run";
 			return confirmBox(message, [saveThenRun, runOld, cancel], function(answer) {
-				if(answer == cancel) return;
+				if(answer == cancel) {
+					if(callback) callback(new Error("User choose not to the script because " + fileName + " is not saved"));
+					return;
+				}
 				else if(answer == runOld) prepare(filePath);
 				else if(answer == saveThenRun) {
 					EDITOR.saveFile(file, filePath, function(err, path) {
@@ -771,7 +781,10 @@
 			// Check if the file requires arguments
 			if(file.text.indexOf("process.argv") != -1) {
 				promptBox("Use these arguments (process.argv): ", {defaultValue: defaultArguments, dialogDelay: 0}, function(args) {
-					if(args==null) return;
+					if(args==null) {
+						if(callback) callback(new Error("User clicked cancel or arguments dialog"));
+						return;
+					}
 					json.args = args;
 					defaultArguments = args;
 					start(json);
@@ -797,13 +810,18 @@
 			//console.time("Run nodejs script: run_nodejs");
 			CLIENT.cmd("run_nodejs", json, function(err, json) {
 				//console.timeEnd("Run nodejs script: run_nodejs");
-				if(err) throw err;
+				if(err) {
+					if(callback) return callback(err);
+					throw err;
+				}
 				else {
 					
 					scriptStarted(filePath);
 					
 					//console.log("Started script: " + json.filePath);
 					EDITOR.stat("run_nodejs_script");
+				
+					if(callback) callback(null);
 				}
 			});
 		}
@@ -918,26 +936,31 @@
 			EDITOR.openFile(filePath, function(err, file) {
 				if(err) throw err;
 				
-				runNodeJsScript();
-				
-				setTimeout(function() {
+				runNodeJsScript(function(err) {;
+					if(err) throw err;
+
+					// It takes some time for the info image to load
+					setTimeout(function() {
+
+						var info = EDITOR.info[0];
 					
-					var info = EDITOR.info[0];
+						if(!info) throw new Error("No info bubble visible!");
 					
-					if(!info) throw new Error("No info bubble visible!");
+						if(info.row != 1) throw new Error("info=" + JSON.stringify(info))
 					
-					if(info.row != 1) throw new Error("info=" + JSON.stringify(info))
+						// Cleanup
+						EDITOR.closeFile(file.path);
+						EDITOR.closeFile(UTIL.joinPaths(EDITOR.user.homeDir, "/nodeJsInlineConsoleLogTest.js.stdout"));
 					
-					// Cleanup
-					EDITOR.closeFile(file.path);
-					EDITOR.closeFile(UTIL.joinPaths(EDITOR.user.homeDir, "/nodeJsInlineConsoleLogTest.js.stdout"));
+						if(nodeJsBanner) nodeJsBanner.hide();
 					
-					if(nodeJsBanner) nodeJsBanner.hide();
+						EDITOR.deleteFile(file.path);
 					
-					EDITOR.deleteFile(file.path);
-					
-					callback(true);
-				}, 1000);
+						callback(true);
+
+					}, 1000);
+
+				});
 				
 			});
 			

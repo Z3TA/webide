@@ -1914,6 +1914,8 @@
 						
 						EDITOR.closeFile(file);
 						
+						// Wait in order to avoid a bug test that checks if the file is still open after being closed
+						setTimeout(function() {
 						console.log("(Re)opening " + testFile + " ...");
 						EDITOR.openFile(testFile, function(err, file) {
 							if(err) throw err;
@@ -1950,6 +1952,8 @@
 								});
 							}
 						});
+						}, 1000);
+
 					});
 				});
 			});

@@ -59,7 +59,7 @@
 
 	// TEST-CODE-START
 
-	EDITOR.addTest(1, false, function testScrollHorizontally(callback) {
+	EDITOR.addTest(false, function testScrollHorizontally(callback) {
 
 		var str = "";
 

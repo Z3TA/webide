@@ -17,6 +17,8 @@ Only interact with the core files (EDITOR.js or File.js). Do NOT interface with 
 Do not modify file.text directly. Instead add an abstraction layer method to File.js which properly call file event listeners.
 Also feel free to add new methods and functions in EDITOR.js and global.js
 
+All file paths to dependencies specified within plugins need the be absolute because plugins (the main script) will be bundled and put in the root folder!
+
 
 Structure of the plugin folder
 ------------------------------

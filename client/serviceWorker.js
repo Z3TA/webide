@@ -74,7 +74,9 @@ console.log("serviceWorker with cache VERSION=" + VERSION + " and DEV_MODE=" + D
 var CACHE_FILES = [
 	'/', // Root / is a bundle, while index.htm is a html file with script tags used for debugging
 	// Assume the bundle is loaded, and don't cache each induvidual .js files!
-	
+	// Some dependencies are also loaded on demand, and will be cached once they are first loaded (so don't put them here)
+
+
 	//'/gfx/style.css',
 	// style.css' should be inlined in bundle.htm
 	"/gfx/dark-theme.css",

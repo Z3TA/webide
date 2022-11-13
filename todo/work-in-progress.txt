@@ -6,7 +6,38 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
-currently looking at download_file.js
+Make release!
+
+
+---
+
+Problem when different divices/OS/browsers renders the same font differently, aldo depning on font-antialias, the width of the monospace character differs!
+meaning gridWidth is off.
+can be detected by drawing a line (caret) where you think the text ends, then measure the distance between the last character and the line
+Could use the pipe char ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+---
+
+Text width is off on on lowend tablet. Should we detect text with automatically and adjust grid with !?
+
+var measure = ctx.measureText('console.log("hello world");');
+
+---
+
+Issue on tablet: Got a dialog with a textarea, but the Android keyboard covers the screns, so can't see submit button
+and default action for "submitting" on the Android keyboard is Enter (inserts new line)
+Clicking anywhere on the dialog wont make the textarea loose focus. So it's impossible to do anything (besides navigator to another address in Firefox)
+
+
+
+---
+
+
+
+OMG. Was the problem that I got directed to 80.name.webide.se ... I thought I was on d80.johan.webide.se !!
+
+
+
 
 should first make one pass and move plugins that we rarely use to opt/
 then another pass to move useful but unfinished/not polished editor plugins/features  to opt??

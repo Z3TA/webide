@@ -6,6 +6,9 @@
 	It can't capture syntax errors in this file, but it can capture syntax errors in fies that load after it!
 	
 */
+
+//alert("capture_errors.js");
+
 var JAVASCRIPT_ERRORS = [];
 
 (function captureErrors() {
