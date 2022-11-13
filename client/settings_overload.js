@@ -199,7 +199,7 @@ EDITOR.settings.style.font = "Fira Code";
 			whenFontLoaded = function() {
 				if(webFontLoading == "ubuntu") {
 
-					debug("browser=" + browser + " loaded ubuntu font");
+					//debug("browser=" + browser + " loaded ubuntu font");
 
 					EDITOR.settings.style.font = "ubuntu";
 					EDITOR.settings.style.highlightMatchFont = "bold 15px ubuntu";
@@ -223,8 +223,9 @@ EDITOR.settings.style.font = "Fira Code";
 							EDITOR.settings.gridWidth = 7.5;
 						}
 						
+						//EDITOR.settings.gridWidth = 8.33;
+
 					}
-					
 					
 					if(BROWSER == "Chrome" && DISPLAY_MODE == "standalone" && isAndroid) {
 						// Weird bug when added to desktop from Chrome on Android where we get different kerning...
@@ -235,7 +236,11 @@ EDITOR.settings.style.font = "Fira Code";
 						EDITOR.settings.gridWidth = 8;
 					}
 
+					var measure = measureText();
+					debug("measureText=" + measure); // 7.5, 6.4, 7.5, 
 
+					// Adjust for the difference in font rendering
+					EDITOR.settings.gridWidth = Math.round(EDITOR.settings.gridWidth * measure / 6.810763888 * 1000) / 1000;
 
 					
 					// mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmoxx
@@ -469,4 +474,61 @@ EDITOR.settings.style.font = "Fira Code";
 		return false;
 	}
 	
+	function measureText() {
+		// Might return different values depedning on browser!
+
+		var docElem = document.documentElement;
+		var body = document.getElementsByTagName('body')[0];
+		var x = window.innerWidth || docElem.clientWidth || body.clientWidth;
+		var y = window.innerHeight|| docElem.clientHeight|| body.clientHeight;
+
+		var canvasNode = document.createElement("canvas");
+		canvasNode.width = x;
+		canvasNode.height = y;
+
+		// We must put this node into the body, otherwise
+		// Safari Windows does not report correctly.
+		//canvasNode.style.display = "none";
+		//document.body.appendChild(canvasNode);
+		var ctx = canvasNode.getContext("2d");
+
+		ctx.font = "16px Arial"; // Use a safe font so we can compare between devices!
+		ctx.textBaseline = "middle";
+
+		var measure = ctx.measureText('console.log("hello world");');
+
+		console.log("measureText: measure=", measure);
+
+		/*
+			
+			Chromium on Arch Linux, pixel-ratio:1
+			6.810763888
+			EDITOR.settings.gridWidth = 7.5;
+			7.5/6.810763888=1.101198063
+
+			Firefox on Arch Linux, pixel-ration:1
+			6.81172858344184
+			EDITOR.settings.gridWidth = 8.3;
+			8.3/6.81172858344184=1.2184866
+
+			8.3/7.5=1.106666667
+			6.81172858344184/6.810763888=1.000141643
+
+
+
+			Android Tablet:
+			6.83888
+			6.81172858344184/6.83888=0.996
+			//EDITOR.settings.gridWidth = 8.33;
+
+			6.810763888/6.83888
+
+
+
+		*/
+
+		return measure.width/27;
+
+	}
+
 })();

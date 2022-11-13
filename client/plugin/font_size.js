@@ -46,6 +46,9 @@
 
 					load[savedFont]();
 				}
+				else {
+					winMenu["default"].activate();
+				}
 			});
 		},
 		unload: function unloadFontSizePlugin() {
