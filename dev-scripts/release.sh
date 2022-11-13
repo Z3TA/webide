@@ -91,6 +91,7 @@ cp temp/release/linux/documentation/about.htm temp/release/linux/client/about/
 cd temp/release/linux/
 node dev-scripts/makebundle.js
 gzip client/bundle.htm --best --keep
+node dev-scripts/makeOptBundle.js
 cd ../../../
 
 
