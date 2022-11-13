@@ -8,6 +8,10 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 Make release!
 
+Google speed score before opt bundle:
+Mobile: 82 (First Contentful Paint 3.0 s, 
+Desktop: 94 (First Contentful Paint 0.7 s)
+
 
 ---
 

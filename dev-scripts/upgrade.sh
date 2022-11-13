@@ -35,6 +35,10 @@ echo -n "Have you manually tested the happy path ? And does All automatic tests 
 read answer
 if echo "$answer" | grep -iq "^n" ;then exit;fi
 
+echo -n "Have you created a snapshot/backup on $SERVER (y/n)? "
+read answer
+if echo "$answer" | grep -iq "^n" ;then echo 'zfs snapshot rpool/ROOT/debian@upgrade';exit;fi
+
 # Make sure we are in the webide folder
 if ! ([[ "$(pwd)" =~ /webide$ ]] || [[ "$(pwd)" =~ /jzedit$ ]])
   then
