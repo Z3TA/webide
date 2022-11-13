@@ -1131,7 +1131,6 @@
 				//console.log("localfs: Finished creating indexedDB nativeFileSystemFileHandleDb!");
 			};
 		};
-
 	}
 
 	function saveHandleToIndexedDB(path, handle) {
@@ -1162,6 +1161,12 @@
 		if(typeof callback != "function") throw new Error("readHandleFromIndexedDB: Second parameter needs to be a callback function!");
 
 		openNativeFileSystemFileHandleDb(function handleDbOpened(err, db) {
+			if(err) {
+				if(callback) callback(err);
+				else alertBox(err.message);
+				return;
+			}
+
 			var transaction = db.transaction(["handles"]);
 			var objectStore = transaction.objectStore("handles");
 			var request = objectStore.get(path);
