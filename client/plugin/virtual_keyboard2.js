@@ -118,7 +118,6 @@
 	var useBuiltin = false; // is built-in keyboard activated
 	var usePhysical = false;
 	var lastUsedKeyboard = "builtin"; // builtin, native or physical
-	var preferredKeyboard = UTIL.getCookie("preferredKeyboard");
 	var nativeKeyboardCatcher;
 	var winMenuVirtual, winMenuOnScreen, winMenuPhysical;
 	var winMenuVibration, vibrationEnabled = true;
@@ -126,7 +125,7 @@
 	var virtualKeyboardIsVisible = false;
 	var winMenuBlackKeyboard, winMenuWhiteKeyboard;
 
-	if(preferredKeyboard == "physical") usePhysical = true;
+	
 
 	canvas.onmousedown = canvasMouseDown;
 	canvas.onmouseup = canvasMouseUp;
@@ -141,6 +140,11 @@
 	
 	var winMenuKeyboard;
 	
+	var virtualKeyboardSettings = {
+		preferredKeyboard: lastUsedKeyboard,
+		vibration: true,
+	}
+
 	EDITOR.plugin({
 		desc: "Testing canvas based virtual keyboard",
 		load: function loadVirtualKeyboard() {
@@ -157,6 +161,23 @@
 			
 			EDITOR.on("fileOpen", showVirtualKeyboardMaybe);
 			
+			EDITOR.loadSettings("virtualKeyboard", virtualKeyboardSettings, function(settings) {
+
+				virtualKeyboardSettings = settings;
+
+				if(settings.preferredKeyboard == "physical") usePhysical = true;
+			
+				if(settings.vibration===true) vibrationEnabled = true;
+				else if(settings.vibration===false) vibrationEnabled = false;
+
+				if( vibrationEnabled ) winMenuVibration.activate();
+				else winMenuVibration.deactivate();
+
+				if(settings.style == "white") keyboardStyleWhite();
+				else if(settings.style == "black") keyboardStyleBlack();
+			});
+
+
 			addButtons();
 			
 			menuItem = EDITOR.ctxMenu.add(labelShowBuiltin, toggleBetweenKeyboards, 26);
@@ -176,7 +197,6 @@
 
 			EDITOR.on("registerAltKey", updateAltKey);
 			EDITOR.on("unregisterAltKey", removeAltKey);
-			EDITOR.on("storageReady", loadVirtualKeyboardSettings);
 			
 			var wrapper = document.getElementById("virtualKeyboard2");
 			wrapper.style.display="none";
@@ -196,7 +216,6 @@
 			EDITOR.removeEvent("fileOpen", showVirtualKeyboardMaybe);
 			
 			EDITOR.removeEvent("registerAltKey", updateAltKey);
-			EDITOR.removeEvent("storageReady", loadVirtualKeyboardSettings);
 			
 			hideBuiltinKeyboard();
 			hideNativeKeyboard();
@@ -225,6 +244,10 @@
 		EDITOR.settings.style.keyboardButtonGradientEnd = "#000000";
 
 		if(buttons.length > 0) renderVirtualKeyboard();
+
+		var oldStyle = virtualKeyboardSettings.style;
+		virtualKeyboardSettings.style = "black";
+		if(oldStyle != virtualKeyboardSettings.style) EDITOR.saveSettings("virtualKeyboard", virtualKeyboardSettings);
 	}
 	
 	function keyboardStyleWhite() {
@@ -237,6 +260,10 @@
 		EDITOR.settings.style.keyboardButtonGradientEnd = "#FFFFFF";
 
 		if(buttons.length > 0) renderVirtualKeyboard();
+
+		var oldStyle = virtualKeyboardSettings.style;
+		virtualKeyboardSettings.style = "white";
+		if(oldStyle != virtualKeyboardSettings.style) EDITOR.saveSettings("virtualKeyboard", virtualKeyboardSettings);
 	}
 
 	function vrkeyboardDetectElement(mouseX, mouseY, caret, mouseDirection, button, target, keyboardCombo, mouseUpEvent) {
@@ -273,21 +300,12 @@
 		return inputTypes.indexOf(type) >= 0;
 	}
 	
-	function loadVirtualKeyboardSettings() {
-		
-		var storageVibration = EDITOR.storage.getItem("virtual_keyboard_vibration");
-		if(storageVibration=="1") vibrationEnabled = true;
-		else if(storageVibration)  vibrationEnabled = false;
-		
-		if( vibrationEnabled ) winMenuVibration.activate();
-		else winMenuVibration.deactivate();
-	}
-	
 	function toggleVibration() {
 		vibrationEnabled = !vibrationEnabled;
 		
-		if(EDITOR.storage.ready()) EDITOR.storage.setItem("virtual_keyboard_vibration", (vibrationEnabled?"1":"0"));
-		
+		virtualKeyboardSettings.vibration = vibrationEnabled;
+		EDITOR.saveSettings("virtualKeyboard", virtualKeyboardSettings);
+
 		if( vibrationEnabled ) winMenuVibration.activate();
 		else winMenuVibration.deactivate();
 		
@@ -318,7 +336,8 @@
 		hideNativeKeyboard();
 		showBuiltinKeyboard(); // Will set useBuiltin to true
 
-		UTIL.setCookie("preferredKeyboard", lastUsedKeyboard, 999);
+		virtualKeyboardSettings.preferredKeyboard = lastUsedKeyboard;
+		EDITOR.saveSettings("virtualKeyboard", virtualKeyboardSettings);
 	}
 	
 	function menuPickOnScreen() {
@@ -344,7 +363,8 @@
 		hideBuiltinKeyboard();
 		showNativeKeyboard(); // Will set useNative to true
 
-		UTIL.setCookie("preferredKeyboard", lastUsedKeyboard, 999);
+		virtualKeyboardSettings.preferredKeyboard = lastUsedKeyboard;
+		EDITOR.saveSettings("virtualKeyboard", virtualKeyboardSettings);
 	}
 	
 	function menuPickPhysical() {
@@ -367,9 +387,10 @@
 		
 		/*
 			problem: On laptops with both a physical keyboard and touch screen, the editor always displays the editor's keyboard (builtin/virtual), and you have to manually disable it every time you open the editor...
-			solution: Remember to use the physical keyboard for this device (save in cookies)
+			solution: Remember to use the physical keyboard for this device
 		*/
-		UTIL.setCookie("preferredKeyboard", lastUsedKeyboard, 999);
+		virtualKeyboardSettings.preferredKeyboard = lastUsedKeyboard;
+		EDITOR.saveSettings("virtualKeyboard", virtualKeyboardSettings);
 
 
 		// If the key presses are not captured; Android will do weird annoying stuff.
