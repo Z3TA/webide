@@ -18,7 +18,7 @@
 	*/
 
 	var checkTimer;
-	var reAssert = /assert:(.*)$/;
+	var reAssert = /assert:(.*)/;
 	var render = [];
 
 	EDITOR.plugin({
@@ -68,7 +68,7 @@
 
 		for(var i=0; i<comment.length; i++) {
 
-			//console.log("doCheck: ", comment[i]);
+			//console.log("inline-assert: doCheck: ", comment[i]);
 			checkComment(file, comment[i].start, comment[i].end);
 
 		}
@@ -79,19 +79,22 @@
 	function checkComment(file, start, end) {
 		var str = file.text.slice(start, end);
 
-		//console.log("checkComment: ", str);
+		//console.log("inline-assert: checkComment: ", str);
 
 		var match = str.match(reAssert);
-		if(!match) return;
+		if(!match) {
+			//console.log("inline-assert: checkComment: str=" + str + " did not match reAssert=" + reAssert);
+			return;
+		}
 
 		var test = parseStr(match[1]);
 		if(!test) return;
 
-		//console.log("checkComment: ", test);
+		//console.log("inline-assert:checkComment: ", test);
 
 		var scope = UTIL.scope(start, file.parsed.functions);
 
-		//console.log("checkComment: scope=", scope);
+		//console.log("inline-assert:checkComment: scope=", scope);
 
 		var func = scope.functions[test.fname];
 
@@ -113,7 +116,7 @@
 			var fBody = "function " + test.fname + "(" + func.arguments + ")" + file.text.slice(func.start, func.end+1);
 		}
 
-		//console.log("checkComment: fBody=", fBody);
+		//console.log("inline-assert: checkComment: fBody=", fBody);
 		// First test the function to make sure it's parseable
 		EDITOR.eval(fBody, function(err, result) {
 			if(err) {
@@ -149,7 +152,7 @@
 	}
 
 	function parseStr(str) {
-		//console.log("parseStr: ", str);
+		//console.log("inline-assert: parseStr: ", str);
 
 		var lastEq = str.lastIndexOf("=");
 
@@ -167,7 +170,7 @@
 
 	function inlineAssertChecks(ctx, buffer, file, screenStartRow, containSpecialWidthCharacters, bufferStartRow) {
 
-		//console.log("inlineAssertChecks: ", render);
+		//console.log("inline-assert: inlineAssertChecks: ", render);
 
 		if(render.length == 0) return;
 
@@ -185,7 +188,7 @@
 				middle = top + Math.floor(EDITOR.settings.gridHeight/2);
 				left = EDITOR.settings.leftMargin + (file.startColumn + render[i].pos.col) * EDITOR.settings.gridWidth;
 
-				//console.log("inlineAssertChecks: screenStartRow=" + screenStartRow + " bufferStartRow=" + bufferStartRow + " render[" + i + "].pos.row=" + render[i].pos.row + " left=" + left + " top=" + top + " middle=" + middle + " EDITOR.settings.gridHeight=" + EDITOR.settings.gridHeight);
+				//console.log("inline-assert: inlineAssertChecks: screenStartRow=" + screenStartRow + " bufferStartRow=" + bufferStartRow + " render[" + i + "].pos.row=" + render[i].pos.row + " left=" + left + " top=" + top + " middle=" + middle + " EDITOR.settings.gridHeight=" + EDITOR.settings.gridHeight);
 
 				ctx.fillText(render[i].text, left, middle);
 
@@ -193,6 +196,26 @@
 		}
 
 	}
+
+	// TEST-CODE-START
+
+	EDITOR.addTest(1, function testInlineAssertInFileWithWindowsLinebreak(callback) {
+		// inline-assert did not work because the file has window style line breaks
+		EDITOR.openFile("testInlineAssert.js", 'function foo() {return "bar"}\r\n// assert: foo()="baz"\r\n', function terminalTestFileOpened(err, file) {
+
+			// Give the eval function time to run
+			setTimeout(function() {
+				if( render.length == 0 ) throw new Error("Expected non empty array render=" + JSON.stringify(render, null, 2) + "");
+				EDITOR.closeFile(file);
+
+				callback(true);
+			}, 1000);
+
+		});
+			
+	});
+
+	// TEST-CODE-END
 
 
 })();
