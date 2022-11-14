@@ -937,8 +937,14 @@ EDITOR.env = {}; // Plugins can set custom env values that will be passed to ter
 
 			confirmBox("<h3>Settings for " + settings + "</h3>Which version do you want to load ?<br>Server version (" + serverPackage.date + "):<br><textarea>" + serverPackage.string + "</textarea><br>" +
 			"<br>Local version (" + localPackage.date + "):<br><textarea>" + localPackage.string + "</textarea>", [useLocal, useServer], function(answer) {
-				if(answer == useLocal) gotSettingsString(localPackage.string);
-				else if(answer == useServer) gotSettingsString(serverPackage.string);
+				if(answer == useLocal) {
+					EDITOR.storage.setItem(settings, localString);
+					gotSettingsString(localPackage.string);
+				}
+				else if(answer == useServer) {
+					EDITOR.localStorage.setItem(settings, serverString);
+					gotSettingsString(serverPackage.string);
+				}
 			});
 
 		}
@@ -1450,6 +1456,8 @@ EDITOR.env = {}; // Plugins can set custom env values that will be passed to ter
 			state = undefined;
 		}
 		
+		if(callback && typeof callback != "function") throw new Error("EDITOR.openFile: callback=" + callback + " is not a function!");
+
 		/*
 			Using the state variable is unintuitive... So throw an error if we use it wrong!
 		*/
