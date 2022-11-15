@@ -223,8 +223,6 @@ EDITOR.settings.style.font = "Fira Code";
 							EDITOR.settings.gridWidth = 7.5;
 						}
 						
-						//EDITOR.settings.gridWidth = 8.33;
-
 					}
 					
 					if(BROWSER == "Chrome" && DISPLAY_MODE == "standalone" && isAndroid) {
@@ -236,13 +234,18 @@ EDITOR.settings.style.font = "Fira Code";
 						EDITOR.settings.gridWidth = 8;
 					}
 
-					var measure = measureText();
-					debug("measureText=" + measure); // 7.5, 6.4, 7.5, 
 
-					// Adjust for the difference in font rendering
-					EDITOR.settings.gridWidth = Math.round(EDITOR.settings.gridWidth * measure / 6.810763888 * 1000) / 1000;
+					// Need to wait to make sure the font has really loaded!
+					setTimeout(function() {
+						var calibratedGridWith = measureCharacterWidth();
 
-					
+						debug("calibratedGridWith=" + calibratedGridWith + " EDITOR.settings.gridWidth=" + EDITOR.settings.gridWidth);
+
+						EDITOR.settings.gridWidth = calibratedGridWith;
+						EDITOR.renderNeeded();
+
+					}, 1000 + slowBrowser*2000 + verySlowBrowser*3000);
+
 					// mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmoxx
 				}
 			};
@@ -529,6 +532,117 @@ EDITOR.settings.style.font = "Fira Code";
 
 		return measure.width/27;
 
+	}
+
+
+	function measureCharacterWidth(test) {
+		/*
+			Different devices/OS/browsers renders *the same font* differently!
+			So instead of manually testing all possible combination of device/OS/browser
+			we will just check what the actual glyph width is and update gridWith accordingly
+		*/
+
+		var canvas = document.createElement("canvas");
+		canvas.width = 1500; // Need to be long enough to fit 100 characters!
+		canvas.height = 60;
+
+		//canvas.style="position: absolute; top: " + test*60 + "px; left: 0px; z-index: 9999; border: 1px solid red;";
+
+		// We must put this node into the body, otherwise
+		// Safari Windows does not report correctly!?!?!?
+		//canvasNode.style.display = "none";
+		///document.body.appendChild(canvas);
+		var ctx = canvas.getContext("2d");
+
+		ctx.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
+		ctx.textBaseline = "middle";
+
+		var bgColor = "#FFFFFF";
+		var textColor = "#000000";
+
+		ctx.fillStyle = bgColor;
+		ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+		ctx.fillStyle = textColor;
+		var text = "abcdefghijklmnopqrstuvwxyz(){}+-*$%/@<>abcdefghijklmnopqrstuvwxyz(){}+-*$%/@<>abcdefghijklmnopqrst||";
+		var measure = ctx.measureText(text);
+
+		return measure / text.length;
+	}
+
+
+	function measureCharacterWidthOld(test) {
+		/*
+			Different devices/OS/browsers renders *the same font* differently!
+			So instead of manually testing all possible combination of device/OS/browser 
+			we will just check what the actual glyph width is and update gridWith accordingly
+		*/
+
+		var canvas = document.createElement("canvas");
+		canvas.width = 1500; // Need to be long enough to fit 100 characters! 
+		canvas.height = 60;
+
+		//canvas.style="position: absolute; top: " + test*60 + "px; left: 0px; z-index: 9999; border: 1px solid red;";
+
+		// We must put this node into the body, otherwise
+		// Safari Windows does not report correctly!?!?!?
+		//canvasNode.style.display = "none";
+		///document.body.appendChild(canvas);
+		var ctx = canvas.getContext("2d");
+
+		ctx.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
+		ctx.textBaseline = "middle";
+
+		var bgColor = "#FFFFFF";
+		var textColor = "#000000";
+
+		ctx.fillStyle = bgColor;
+		ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+		ctx.fillStyle = textColor;
+		var text = "abcdefghijklmnopqrstuvwxyz(){}+-*$%/@<>abcdefghijklmnopqrstuvwxyz(){}+-*$%/@<>abcdefghijklmnopqrst||";
+		ctx.fillText(text, 1, 30); // Starts at pixel 1
+		
+		var pipes = [];
+		var pipeIndex = 0;
+
+		var measure = ctx.measureText(text);
+
+		var imageData, alpha, y = 30, insidePipe = false;
+		for (var x=canvas.width-1; x>0; x--) { // first pixel is on 0, last on canvas.width-1
+			imageData = ctx.getImageData(x, y, 1, 1).data
+			var r = imageData[0];
+		
+			console.log("measureCharacterWidth: x=" + x + " r=" + imageData[0] + " g=" + imageData[1] + " b=" + imageData[2] + " a=" + imageData[3]);
+
+			if(r < 255) { // It's not white
+				if(!insidePipe) {
+					pipeIndex = pipes.push({end: x, start: 0}) - 1;
+					insidePipe = true;
+				}
+			}
+			else {
+				if(insidePipe) {
+					pipes[pipeIndex].start = x+1;
+					if(pipes.length>=2) break;
+				}
+				insidePipe = false;
+			}
+		}
+
+		console.log("measureCharacterWidth: pipes=" + JSON.stringify(pipes, null, 2));
+
+		var whiteSpaceDistance = pipes[0].start - pipes[1].end - 1;
+		var pipeWidth = pipes[0].end - pipes[0].start + 1;
+		var charWdith = whiteSpaceDistance + pipeWidth;
+		var endOfLastChar = Math.ceil(pipes[0].end + whiteSpaceDistance / 2);
+		var avarageCharWidth = endOfLastChar / text.length;
+
+		debug("measure.width=" + measure.width);
+
+		console.log("measureCharacterWidth: whiteSpaceDistance=" + whiteSpaceDistance + " pipeWidth=" + pipeWidth + " charWdith=" + charWdith + " text.length=" + text.length + " text=" + text + " measure.width=" + measure.width + " avarageCharWidth=" + avarageCharWidth + " EDITOR.settings.gridWidth=" + EDITOR.settings.gridWidth);
+
+		return avarageCharWidth;
 	}
 
 })();
