@@ -567,7 +567,7 @@ EDITOR.settings.style.font = "Fira Code";
 		var text = "abcdefghijklmnopqrstuvwxyz(){}+-*$%/@<>abcdefghijklmnopqrstuvwxyz(){}+-*$%/@<>abcdefghijklmnopqrst||";
 		var measure = ctx.measureText(text);
 
-		return measure / text.length;
+		return measure.width / text.length;
 	}
 
 
