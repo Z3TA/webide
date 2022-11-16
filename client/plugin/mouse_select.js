@@ -624,7 +624,7 @@ if(!EDITOR.currentFile || !caret) {
 			
 			//console.log("mouseSelect: letter=" + letter);
 			
-			var nonLetters = [" ", "\n", "\r", "\t", "'", '"', "+", "-", "/", "*", "=", "(", ")", "[", "]", ",", ".", "<", ">", ";", "{", "}", ":", "!", "\\"];
+			var nonLetters = [" ", "\n", "\r", "\t", "'", '"', "+", "-", "/", "*", "=", "(", ")", "[", "]", ",", ".", "<", ">", ";", "{", "}", ":", "!", "\\", "`"];
 				
 				for(var i=0; i<nonLetters.length; i++) {
 					if(letter == nonLetters[i]) {
@@ -758,6 +758,22 @@ if(!EDITOR.currentFile || !caret) {
 			callback(true);
 		});
 		
+	});
+
+	EDITOR.addTest(1, function dblClickOnWordInStringLiteral(callback) {
+		EDITOR.openFile("copyPasteManyLines.txt", 'console.log(`hello $(variable)`)', function(err, file) {
+			var y = Math.round(EDITOR.settings.topMargin + EDITOR.settings.gridHeight / 2);
+			var x = EDITOR.settings.leftMargin + EDITOR.settings.gridWidth * 15;
+
+			EDITOR.mock("doubleClick", {x:x, y:y});
+
+			var text = file.getSelectedText();
+
+			if(text.slice(0,1) == '`') throw new Error("Did not expect ` to be included in the selection!");
+
+			EDITOR.closeFile(file);
+			callback(true);
+		});
 	});
 
 	// TEST-CODE-END
