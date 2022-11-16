@@ -1873,14 +1873,14 @@ EDITOR.env = {}; // Plugins can set custom env values that will be passed to ter
 				else callback(null, json.size);
 			});
 		}
-		else if(_protocols.hasOwnProperty(protocol) == -1) {
+		else if(!_protocols.hasOwnProperty(protocol)) {
 			callback(new Error("Unsupported protocol: " + protocol + " (have the plugin been loaded!?)"));
 			return;
 		}
 		else {
 
 			if( typeof _protocols[protocol].size != "function" ) return callback("protocol=" + protocol + " has no size function!");
-
+			
 			_protocols[protocol].size(path, callback);
 			return;
 
@@ -2102,10 +2102,10 @@ EDITOR.env = {}; // Plugins can set custom env values that will be passed to ter
 		});
 			return;
 		}
-		else if(_protocols.hasOwnProperty(protocol) == -1) {
-			callback(new Error("Unsupported protocol: " + protocol + " (have the plugin been loaded!?)"));
-			return;
-		}
+			else if(!_protocols.hasOwnProperty(protocol)) {
+				callback(new Error("Unsupported protocol: " + protocol + " (have the plugin been loaded!?)"));
+				return;
+			}
 		else {
 
 			if( typeof _protocols[protocol].read != "function" ) return callback("protocol=" + protocol + " has no read function!");
@@ -2186,7 +2186,7 @@ EDITOR.env = {}; // Plugins can set custom env values that will be passed to ter
 			});
 			return;
 		}
-		else if(_protocols.hasOwnProperty(protocol) == -1) {
+		else if(!_protocols.hasOwnProperty(protocol)) {
 			callback(new Error("Unsupported protocol: " + protocol + " (have the plugin been loaded!?)"));
 			return;
 		}
