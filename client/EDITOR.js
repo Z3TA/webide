@@ -338,7 +338,7 @@ EDITOR.env = {}; // Plugins can set custom env values that will be passed to ter
 	discoveryBar.setAttribute("aria-label", "Discovery bar");
 	discoveryBar.setAttribute("place", "vertical");
 	
-	var showDisoveryBarWindowMenuItem, showDisoveryBarCaptions;
+	var showDiscoveryBarWindowMenuItem, showDiscoveryBarCaptions;
 	
 	var enableVoiceCommands, voiceCommandsEnabled = false;
 	
@@ -4344,7 +4344,7 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 				return;
 			}
 			
-			//console.log("discoveryBar:show: showDisoveryBarWindowMenuItem=", showDisoveryBarWindowMenuItem);
+			//console.log("discoveryBar:show: showDiscoveryBarWindowMenuItem=", showDiscoveryBarWindowMenuItem);
 			
 			if(!discoveryBar.parentElement) {
 				var editorWidth = window.innerWidth || parseInt(EDITOR.canvas.width);
@@ -4391,11 +4391,11 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 			
 			discoveryBar.style.display = "inline-block";
 			
-			if(showDisoveryBarWindowMenuItem) showDisoveryBarWindowMenuItem.activate();
+			if(showDiscoveryBarWindowMenuItem) showDiscoveryBarWindowMenuItem.activate();
 			else {
-				//console.log("discoveryBar: No showDisoveryBarWindowMenuItem? ", showDisoveryBarWindowMenuItem);
+				//console.log("discoveryBar: No showDiscoveryBarWindowMenuItem? ", showDiscoveryBarWindowMenuItem);
 				setTimeout(function() {
-					if(showDisoveryBarWindowMenuItem) showDisoveryBarWindowMenuItem.activate();
+					if(showDiscoveryBarWindowMenuItem) showDiscoveryBarWindowMenuItem.activate();
 				}, 1000);
 				
 			}
@@ -4418,9 +4418,9 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 		},
 		hide: function hideDiscoveryBar() {
 			// Hides the whole discovery bar
-			//console.log("discoveryBar:hide: showDisoveryBarWindowMenuItem=", showDisoveryBarWindowMenuItem);
+			//console.log("discoveryBar:hide: showDiscoveryBarWindowMenuItem=", showDiscoveryBarWindowMenuItem);
 			discoveryBar.style.display = "none";
-			if(showDisoveryBarWindowMenuItem) showDisoveryBarWindowMenuItem.deactivate();
+			if(showDiscoveryBarWindowMenuItem) showDiscoveryBarWindowMenuItem.deactivate();
 			EDITOR.discoveryBar.isVisible = false;
 			if(EDITOR.storage.ready() && EDITOR.storage.getItem("showDiscoveryBar") != "false") EDITOR.storage.setItem("showDiscoveryBar", "false");
 			EDITOR.resizeNeeded();
@@ -4451,7 +4451,7 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 				}
 				
 				EDITOR.discoveryBar.captions = false;
-				if(showDisoveryBarCaptions) showDisoveryBarCaptions.deactivate();
+				if(showDiscoveryBarCaptions) showDiscoveryBarCaptions.deactivate();
 				if(EDITOR.storage.ready() && EDITOR.storage.getItem("showDiscoveryBarCaptions") != "false") EDITOR.storage.setItem("showDiscoveryBarCaptions", "false");
 			}
 			else {
@@ -4461,7 +4461,7 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 				}
 				
 				EDITOR.discoveryBar.captions = true;
-				if(showDisoveryBarCaptions) showDisoveryBarCaptions.activate();
+				if(showDiscoveryBarCaptions) showDiscoveryBarCaptions.activate();
 				if(EDITOR.storage.ready() && EDITOR.storage.getItem("showDiscoveryBarCaptions") != "true") EDITOR.storage.setItem("showDiscoveryBarCaptions", "true");
 				
 			}
@@ -11298,7 +11298,7 @@ window.addEventListener("mousemove", mouseMove, false);
 				if(_serverStorage.showDiscoveryBar == "false") {
 					EDITOR.discoveryBar.hide();
 				}
-				else if(_serverStorage.showDiscoveryBar == "true" && !discoveryBarDisabledByQueryString) {
+				else if(_serverStorage.showDiscoveryBar == "true" && !discoveryBarDisabledByQueryString && EDITOR.discoveryBar.enabled) {
 					EDITOR.discoveryBar.show();
 				}
 				
@@ -11479,9 +11479,9 @@ window.addEventListener("mousemove", mouseMove, false);
 		// note: resizeAndRender will be called on each interaction, but we also need to call it on regular interval in case something changes that was not caused by a user interaction!
 		
 		
-		showDisoveryBarWindowMenuItem = EDITOR.windowMenu.add(S("discovery_bar"), [S("View"), 130], EDITOR.discoveryBar.toggle);
-		showDisoveryBarCaptions = EDITOR.windowMenu.add(S("discovery_bar_captions"), [S("View"), 135], EDITOR.discoveryBar.toggleCaptions);
-		showDisoveryBarCaptions.activate();
+		showDiscoveryBarWindowMenuItem = EDITOR.windowMenu.add(S("discovery_bar"), [S("View"), 130], EDITOR.discoveryBar.toggle);
+		showDiscoveryBarCaptions = EDITOR.windowMenu.add(S("discovery_bar_captions"), [S("View"), 135], EDITOR.discoveryBar.toggleCaptions);
+		showDiscoveryBarCaptions.activate();
 		
 		var hideDiscoveryBarButton = document.createElement("button");
 		hideDiscoveryBarButton.title = "Hide discovery bar icons";

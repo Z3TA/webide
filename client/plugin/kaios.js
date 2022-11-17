@@ -140,7 +140,7 @@
 
 		EDITOR.resizeNeeded();
 
-		alertBox("Hello KaiOS/FirefoxOS user. Use the green phone button to switch editor mode. Support is experimental, please leave feedback :)");
+		//alertBox("Hello KaiOS/FirefoxOS user. Use the green phone button to switch editor mode. Support is experimental, please leave feedback :)");
 
 	}
 

@@ -6,41 +6,70 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
-Make release!
+Editor is starting very slow on very slow (and cheap) Android tablet...
+You see the text-inputs for a few seconds...
+
+Will it help if we only load the core plugins in the first go ?
+
+Only load stuff that is neccesary for the first render first !?
+Suprisingly few plugins are needed for the first render.
+But removing the rest doesn't seem to matter a tiny bit for the loading speed!???
+
+Time to load without many of the plugins: (time to see welcome.htm)
+Chrome on Denver Tablet: 14.5s, 7.6, 7.2, 7.3, 7.0, 7.1, 8.1s
+Firefox on Denver Tablet: 7.1, 8.5, 7.2, 6.8, 7.3, 6.7s
+Firefox on Nokia 8000: 5.4, 9.9, 4.6, 5.1, 4.9, 5.6 (starting from history)
+Firefox on Nokia 8000: 2.8, 3, 2.6, 2.5 (refreshing, with windowMenu disabled)
+Firefox on Denver Tablet: 7.1, 7.5, 7.2, 7, 7.4 (refreshing, with windowMenu disabled)
+
+Time to load all plugins: (time to see welcome.htm)
+Chrome on Denver Tablet: 26.9, 25.8, 24.6, 26.9
+Firefox on Denver Tablet: 21.1, 20.9, 21.3, 20.2
+Firefox on Nokia 8000: 8.4, 7.4, 11.7, 9.5, 9.9 (starting from history)
+
+(time measured from hitting the reload button to a file (welcome.htm) rendered on the canvas)
+
+So on the Denver Tablet we got a significant speedup by removing most of the plugins...
+No noticable different on other devices though, for example Nokia 8000 (Firefox OS) loaded the page just as fast/slow...
+When measuring there actually where a big difference also on the Nokia 8000 !
+
+Can we speed it up?
+For example disabling the window menu?
+
+After changing a little things here and there KaiOS got much slower... !?!?!?!?!
+from 7-10s to 30+s ...
+
+
+
+---
+
+The parser doesn't seem to end JS line comments on \r ... only on \n ... !?
+
+---
+
+When converting indentation, don't add tab/spaces to empty lines!!
+
+---
+
+Footer jumps lika a rabiatic frog when typing in the the goto_file plugin
+
+---
 
 Google speed score before opt bundle:
 Mobile: 82 (First Contentful Paint 3.0 s, 
 Desktop: 94 (First Contentful Paint 0.7 s)
 
-
----
-
-Problem when different divices/OS/browsers renders the same font differently, aldo depning on font-antialias, the width of the monospace character differs!
-meaning gridWidth is off.
-can be detected by drawing a line (caret) where you think the text ends, then measure the distance between the last character and the line
-Could use the pipe char ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-
----
-
-Text width is off on on lowend tablet. Should we detect text with automatically and adjust grid with !?
-
-var measure = ctx.measureText('console.log("hello world");');
+Google speed score after opt bundle:
+Mobile: 67 (First Contentful Paint 3.3 s) - the screenshot does show the login screen though, while before it just got the server login widget
+Desktop: 97 (First Contentful Paint 0.7 s)
 
 ---
 
 Issue on tablet: Got a dialog with a textarea, but the Android keyboard covers the screns, so can't see submit button
 and default action for "submitting" on the Android keyboard is Enter (inserts new line)
-Clicking anywhere on the dialog wont make the textarea loose focus. So it's impossible to do anything (besides navigator to another address in Firefox)
-
-
+Clicking anywhere on the dialog wont make the textarea loose focus. So it's impossible to do anything (besides navigate to another site/address in Firefox)
 
 ---
-
-
-
-OMG. Was the problem that I got directed to 80.name.webide.se ... I thought I was on d80.johan.webide.se !!
-
-
 
 
 should first make one pass and move plugins that we rarely use to opt/
