@@ -6,57 +6,6 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
-Editor is starting very slow on very slow (and cheap) Android tablet...
-You see the text-inputs for a few seconds...
-
-Will it help if we only load the core plugins in the first go ?
-
-Only load stuff that is neccesary for the first render first !?
-Suprisingly few plugins are needed for the first render.
-But removing the rest doesn't seem to matter a tiny bit for the loading speed!???
-
-Time to load without many of the plugins: (time to see welcome.htm)
-Chrome on Denver Tablet: 14.5s, 7.6, 7.2, 7.3, 7.0, 7.1, 8.1s
-Firefox on Denver Tablet: 7.1, 8.5, 7.2, 6.8, 7.3, 6.7s
-Firefox on Nokia 8000: 5.4, 9.9, 4.6, 5.1, 4.9, 5.6 (starting from history)
-Firefox on Nokia 8000: 2.8, 3, 2.6, 2.5 (refreshing, with windowMenu disabled)
-Firefox on Denver Tablet: 7.1, 7.5, 7.2, 7, 7.4 (refreshing, with windowMenu disabled)
-
-Time to load all plugins: (time to see welcome.htm)
-Chrome on Denver Tablet: 26.9, 25.8, 24.6, 26.9
-Firefox on Denver Tablet: 21.1, 20.9, 21.3, 20.2
-Firefox on Nokia 8000: 8.4, 7.4, 11.7, 9.5, 9.9 (starting from history)
-
-Time to load all plogin bundled to bundle.js
-Chrome on Denver Tablet: 10.5, 9.3, 8.5s
-
-Time to load without many of the plugins bundled into bundle.js:
-Chrome on Denver Tablet: 4.1, 5.6, 4.5, 5s
-Firefox on Nokia 8000: 4.7, 13, 5, 17
-
-
-Optimiziation: Try adding the window menu after the plugins have been loaded in order to not force the browser to re-render for each item added...
-before on Chromium: 858ms, 1347, 882, 1000, 1030, 959 to first render (via reload on Performance dev toools tab)
-after on Chromium: 907, 965, 975, 911, not much difference but it didn't hurt
-
-
-
-(time measured from hitting the reload button to a file (welcome.htm) rendered on the canvas)
-
-So on the Denver Tablet we got a significant speedup by removing most of the plugins...
-No noticable different on other devices though, for example Nokia 8000 (Firefox OS) loaded the page just as fast/slow...
-When measuring there actually where a big difference also on the Nokia 8000 !
-
-Can we speed it up?
-For example disabling the window menu?
-
-After changing a little things here and there (rev 6999) KaiOS got much slower... !?!?!?!?!
-from 7-10s to 30+s ... 
-and now we are back to 7-10s ... Maybe we got low on battery or something !?!?
-
-
-
-
 ---
 
 The parser doesn't seem to end JS line comments on \r ... only on \n ... !?
@@ -71,13 +20,7 @@ Footer jumps lika a rabiatic frog when typing in the the goto_file plugin
 
 ---
 
-Google speed score before opt bundle:
-Mobile: 82 (First Contentful Paint 3.0 s, 
-Desktop: 94 (First Contentful Paint 0.7 s)
 
-Google speed score after opt bundle:
-Mobile: 67 (First Contentful Paint 3.3 s) - the screenshot does show the login screen though, while before it just got the server login widget
-Desktop: 97 (First Contentful Paint 0.7 s)
 
 ---
 
@@ -88,22 +31,7 @@ Clicking anywhere on the dialog wont make the textarea loose focus. So it's impo
 ---
 
 
-should first make one pass and move plugins that we rarely use to opt/
-then another pass to move useful but unfinished/not polished editor plugins/features  to opt??
-
-Editor wont load on low-end devices (the compiled/optimized version loads though)
-But the editor has become too bloated!
-Place plugins in two folders, 
-core/ = load at startup 
-opt/ = loads dynamicly via action
-
-Also only load the tests files before running tests
-
 ---
-
-todo: Make a plugin manager
-Load plugins of choise from opt/
-Load third party plugins from external URL's ? No all plugins need to be submitted as pull requests!
 
 
 ---
