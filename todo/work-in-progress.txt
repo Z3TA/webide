@@ -27,6 +27,20 @@ Chrome on Denver Tablet: 26.9, 25.8, 24.6, 26.9
 Firefox on Denver Tablet: 21.1, 20.9, 21.3, 20.2
 Firefox on Nokia 8000: 8.4, 7.4, 11.7, 9.5, 9.9 (starting from history)
 
+Time to load all plogin bundled to bundle.js
+Chrome on Denver Tablet: 10.5, 9.3, 8.5s
+
+Time to load without many of the plugins bundled into bundle.js:
+Chrome on Denver Tablet: 4.1, 5.6, 4.5, 5s
+Firefox on Nokia 8000: 4.7, 13, 5, 17
+
+
+Optimiziation: Try adding the window menu after the plugins have been loaded in order to not force the browser to re-render for each item added...
+before on Chromium: 858ms, 1347, 882, 1000, 1030, 959 to first render (via reload on Performance dev toools tab)
+after on Chromium: 907, 965, 975, 911, not much difference but it didn't hurt
+
+
+
 (time measured from hitting the reload button to a file (welcome.htm) rendered on the canvas)
 
 So on the Denver Tablet we got a significant speedup by removing most of the plugins...
@@ -36,8 +50,10 @@ When measuring there actually where a big difference also on the Nokia 8000 !
 Can we speed it up?
 For example disabling the window menu?
 
-After changing a little things here and there KaiOS got much slower... !?!?!?!?!
-from 7-10s to 30+s ...
+After changing a little things here and there (rev 6999) KaiOS got much slower... !?!?!?!?!
+from 7-10s to 30+s ... 
+and now we are back to 7-10s ... Maybe we got low on battery or something !?!?
+
 
 
 

@@ -365,6 +365,8 @@ EDITOR.env = {}; // Plugins can set custom env values that will be passed to ter
 
 	var fadeInCaretAnimation;
 
+	var _windowMenu;
+
 	function funMap(f){return f.fun}
 	
 	/*
@@ -1749,7 +1751,8 @@ EDITOR.env = {}; // Plugins can set custom env values that will be passed to ter
 				removeFromQueue(path);
 				
 				// Always render (and resize) after opening a file! (where=here, when=now!)
-				EDITOR.renderNeeded();
+				// Place it upon the caller (who calls EDITOR.openFile) to call EDITOR.renderNeeded() !? For editor startup optimization (didn't help much so OK to render here if needed)
+				//EDITOR.renderNeeded();
 				
 				if(tooBig) alertBox(UTIL.getFilenameFromPath(path) + ' has been opened in "stream mode"!\nSome editor operations/plugins might not work.', "BIG_FILE");
 				
@@ -3532,7 +3535,7 @@ ca 20ms to render, ca 13ms to render without creating new objects
 	EDITOR.renderNeeded = function renderNeeded() {
 		// Tell the editor that it needs to render
 		
-		//console.warn("Render needed!");
+		console.warn("Render needed!");
 		
 		/*
 			The reason why we want functions to call EDITOR.renderNeeded() is to "buffer" the render so we don't make unneccesary renders
@@ -4530,8 +4533,8 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 		menu.domElement.addEventListener("mouseover", stillActive);
 		
 		
-		var windowMenu = document.getElementById("windowMenu");
-		windowMenu.appendChild(menu.domElement); // All menus goes into the windowMenu div (no nested lists!)
+		//var windowMenu = document.getElementById("windowMenu");
+		_windowMenu.appendChild(menu.domElement); // All menus goes into the windowMenu div (no nested lists!)
 		
 		function stillActive(mouseEvent) {
 			if(!mouseEvent) mouseEvent = event;
@@ -5320,14 +5323,24 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 			}
 			
 			if(!dropdownMenuRoot) {
-				var windowMenu = document.getElementById("windowMenu");
-				if(!windowMenu) {
+				//var windowMenu = document.getElementById("windowMenu");
+				// <div id="windowMenu" class="windowMenu" aria-label="Window menu" role="menubar"></div>
+				_windowMenu = document.createElement("div");
+				_windowMenu.setAttribute("id", "windowMenu");
+				_windowMenu.setAttribute("aria-label", "Window menu");
+				_windowMenu.setAttribute("role", "menubar");
+				_windowMenu.setAttribute("class", "windowMenu");
+
+				/*
+					if(!windowMenu) {
 					// Wait for HTML to load
 					setTimeout(function() {
-						addWindowMenuItem(label, where, whenClicked);
+					addWindowMenuItem(label, where, whenClicked);
 					}, 300);
 					return;
-				}
+					}
+				*/
+				
 				
 				dropdownMenuRoot = new DropdownMenu({orientation: "horizontal", parentMenu: null});
 				
@@ -5467,8 +5480,8 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 			
 		},
 		enable: function disableWindowMenu() {
-			var windowMenu = document.getElementById("windowMenu");
-			windowMenu.style.display="block";
+			//var windowMenu = document.getElementById("windowMenu");
+			_windowMenu.style.display="block";
 			
 			var windowMenuHeight = document.getElementById("windowMenuHeight");
 			windowMenuHeight.style.display="block";
@@ -5477,8 +5490,8 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 			
 		},
 		disable: function enableWindowMenu() {
-			var windowMenu = document.getElementById("windowMenu");
-			windowMenu.style.display="none";
+			//var windowMenu = document.getElementById("windowMenu");
+			_windowMenu.style.display="none";
 			
 			var windowMenuHeight = document.getElementById("windowMenuHeight");
 			windowMenuHeight.style.display="none";
@@ -11510,6 +11523,13 @@ window.addEventListener("mousemove", mouseMove, false);
 		// Loading styles reset
 		setTimeout(removeBeforeloadClasses, 850);
 		
+		var header = document.getElementById("header");
+		var windowMenuHeightDiv = document.getElementById("windowMenuHeight");
+		header.insertBefore(_windowMenu, windowMenuHeightDiv)
+		
+
+
+
 		sendStatistics();
 		
 		
