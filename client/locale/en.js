@@ -98,7 +98,8 @@ font: "font",
 	js_beautify: "Code format (js-beautify)",
 	
 	keyboard_input: "keyboard/input",
-	
+	"keyboard sound": "keyboard sound",
+
 	last_tab: "last tab",
 	live_preview: "Live/preview",
 	

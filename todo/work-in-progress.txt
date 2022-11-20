@@ -6,7 +6,8 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
-Don't load the discovery bar until we have got the settings wheter to disable it or not...
+Thinking about buying a Galaxy fold and use it for programming ...
+Testing on a small tablet first to see if it nice or not...
 
 
 ---

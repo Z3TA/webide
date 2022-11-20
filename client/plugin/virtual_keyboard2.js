@@ -121,6 +121,7 @@
 	var nativeKeyboardCatcher;
 	var winMenuVirtual, winMenuOnScreen, winMenuPhysical;
 	var winMenuVibration, vibrationEnabled = true;
+	var winMenuKeyboardSound, keyboardSoundEnabled = true;
 	var checkActiveElementInterval;
 	var virtualKeyboardIsVisible = false;
 	var winMenuBlackKeyboard, winMenuWhiteKeyboard;
@@ -143,6 +144,7 @@
 	var virtualKeyboardSettings = {
 		preferredKeyboard: lastUsedKeyboard,
 		vibration: true,
+		keyboardSound: true
 	}
 
 	EDITOR.plugin({
@@ -169,9 +171,16 @@
 			
 				if(settings.vibration===true) vibrationEnabled = true;
 				else if(settings.vibration===false) vibrationEnabled = false;
-
 				if( vibrationEnabled ) winMenuVibration.activate();
 				else winMenuVibration.deactivate();
+
+				if(settings.keyboardSound===true) keyboardSoundEnabled = true;
+				else if(settings.keyboardSound===false) keyboardSoundEnabled = false;
+				if( keyboardSoundEnabled ) winMenuKeyboardSound.activate();
+				else winMenuKeyboardSound.deactivate();
+				
+
+
 
 				if(settings.style == "white") keyboardStyleWhite();
 				else if(settings.style == "black") keyboardStyleBlack();
@@ -187,6 +196,8 @@
 			winMenuOnScreen = EDITOR.windowMenu.add(S("native_onscreen"), [S("Editor"), S("keyboard_input")], menuPickOnScreen);
 			winMenuPhysical = EDITOR.windowMenu.add(S("physical_keyboard"), [S("Editor"), S("keyboard_input")], menuPickPhysical);
 			winMenuVibration = EDITOR.windowMenu.add(S("vibration"), [S("Editor"), S("keyboard_input")], toggleVibration);
+			winMenuKeyboardSound = EDITOR.windowMenu.add(S("keyboard sound"), [S("Editor"), S("keyboard_input")], toggleKeyboardSound);
+
 			winMenuBlackKeyboard = EDITOR.windowMenu.add("Black", [S("Editor"), S("keyboard_input"), "Style"], keyboardStyleBlack);
 			winMenuWhiteKeyboard = EDITOR.windowMenu.add("White", [S("Editor"), S("keyboard_input"), "Style"], keyboardStyleWhite);
 
@@ -310,6 +321,18 @@
 		else winMenuVibration.deactivate();
 		
 		winMenuVibration.hide();
+	}
+
+	function toggleKeyboardSound() {
+		keyboardSoundEnabled = !keyboardSoundEnabled;
+
+		virtualKeyboardSettings.keyboardSound = keyboardSoundEnabled;
+		EDITOR.saveSettings("virtualKeyboard", virtualKeyboardSettings);
+
+		if( keyboardSoundEnabled ) winMenuKeyboardSound.activate();
+		else winMenuKeyboardSound.deactivate();
+
+		winMenuKeyboardSound.hide();
 	}
 	
 	function menuPickVirtual() {
@@ -951,13 +974,21 @@ return false;
 		mouseDownEvent.preventDefault();
 		mouseDownEvent.stopPropagation();
 		
+		var vibrateSuccess = false;
+
 		if (vibrationEnabled && navigator.vibrate) {
 			// vibration API supported
-			var vibrateSuccess = navigator.vibrate([1]);
+			vibrateSuccess = navigator.vibrate([1]);
+			//alert("vibrating! vibrateSuccess=" + vibrateSuccess);
 		}
 		
-		if(vibrationEnabled && !vibrateSuccess) EDITOR.beep(0.1, 120, "sine", 39);
-		
+		// Some devices lie about their vibration capabilities!!! Should we play a sound anyway !?
+		if(1==1) {
+			//if(vibrationEnabled && !vibrateSuccess) {
+			//alert("playing a beep sound");
+			EDITOR.beep(0.1, 120, "sine", 39);
+		}
+
 		return false;
 	}
 	
