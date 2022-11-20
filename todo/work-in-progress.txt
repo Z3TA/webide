@@ -6,9 +6,26 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
+When should we calibratedGridWith !?
+It seems Chrome lie about when the font has been loaded ...
+
+---
+
 Thinking about buying a Galaxy fold and use it for programming ...
 Testing on a small tablet first to see if it nice or not...
 
+
+
+Test different JS game engines... Make it easy to use webide for development:
+* https://melonjs.github.io/melonJS/docs/
+* https://www.babylonjs.com/
+* https://phaser.io/
+* https://pixijs.com/
+* https://github.com/gamelab/kiwi.js/
+* https://playcanvas.com/
+* https://gdevelop.io/
+* https://impactjs.com/
+* 
 
 ---
 

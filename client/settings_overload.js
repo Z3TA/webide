@@ -197,6 +197,9 @@ EDITOR.settings.style.font = "Fira Code";
 				UTIL.loadCSS("gfx/font/ubuntu/ubuntu.css", cssLoadedMaybe);
 			};
 			whenFontLoaded = function() {
+
+				//console.log("calibratedGridWith=" + measureCharacterWidth() + " (whenFontLoaded called)");
+
 				if(webFontLoading == "ubuntu") {
 
 					//debug("browser=" + browser + " loaded ubuntu font");
@@ -233,18 +236,6 @@ EDITOR.settings.style.font = "Fira Code";
 						EDITOR.settings.gridHeight = 22;
 						EDITOR.settings.gridWidth = 8;
 					}
-
-
-					// Need to wait to make sure the font has really loaded!
-					setTimeout(function() {
-						var calibratedGridWith = measureCharacterWidth();
-
-						debug("calibratedGridWith=" + calibratedGridWith + " EDITOR.settings.gridWidth=" + EDITOR.settings.gridWidth);
-
-						EDITOR.settings.gridWidth = calibratedGridWith;
-						EDITOR.renderNeeded();
-
-					}, 1000 + slowBrowser*2000 + verySlowBrowser*3000);
 
 					// mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmoxx
 				}
@@ -360,12 +351,18 @@ EDITOR.settings.style.font = "Fira Code";
 
 	// note: The css file is loaded in the window.onload event.
 	function cssLoadedMaybe(err) {
-
+		/*
+			It's all lies, the font has not properly loaded! Need to use a setTimeout to make sure it has really loaded.
+		*/
 		var time = 300;
 		if(slowBrowser) time = 1000;
 		if(verySlowBrowser) time = 5000;
 
+		console.log("calibratedGridWith=" + measureCharacterWidth() + " (cssLoadedMaybe) ");
+
 		if(err) {
+			// An error here probably means the font have not loaded!?
+			EDITOR.renderNeeded(); // See comments in makeGlyphWidthDetector()
 			console.error(err);
 			loadCSS_error = err;
 			setTimeout(function() {
@@ -374,57 +371,86 @@ EDITOR.settings.style.font = "Fira Code";
 			return;
 		}
 
-		if(typeof whenFontLoaded != "function") return makeGlyphWidthDetector();
-
 		if(document.fonts && document.fonts.ready) {
 			document.fonts.ready.then(function () {
 
 				//console.log("settings_overload: All fonts ready!");
 
+				console.log("calibratedGridWith=" + measureCharacterWidth() + " (after font loaded)");
+				
+				/*
+					setTimeout(function() {
+					console.log("calibratedGridWith? calibratedGridWith=" + measureCharacterWidth() + " (after setTimeout after font loaded)");
+					}, 50);
+				*/
+				
 				CB(whenFontLoaded);
 
-				setTimeout(function() {
 				CB(makeGlyphWidthDetector);
-				}, time);
 
 			});
 		}
 		else {
-			// Re-render after the font have fully loaded (we never know when)
-
-			setTimeout(function renderAfterFontLoad() {
-
-				//console.log("settings_overload: All fonts ready maybe!?");
+			setTimeout(function() { // Give the font some time to load ...
 
 				whenFontLoaded();
 
-				return makeGlyphWidthDetector();
+				//console.log("settings_overload: All fonts ready maybe!?");
 
+				makeGlyphWidthDetector();
+				
 			}, time);
 		}
 	}
 
 	function makeGlyphWidthDetector() {
-		EDITOR.fontLoaded = true;
-		EDITOR.glyphWidth = EDITOR.makeGlyphWidthDetector();
-
 		/*
-			This function is always called!
-			If we did load the font, it should now have finished loaded,
-		*/
+			We always call this function.
+			But we must be sure that the canvas will use the font we loaded ...
 
-		/*
-			Issue in Chrome: Even though the font is set on the canvas context font prop, it wont use the font unless we do a full render...
-			tried running canvasContextReset, tried changing canvas width/height, running ctx.fillTex etc, but it still uses some standard font, not even our fallback font!
-			So therefore we must force full re-render (in Chrome) after we have loaded the custom font
+			Weird issue in both Chrome and Firefox: 
+			We must first load the font, then render at least once, then wait some time, and then we can measure the glyph width...
 
-			Unfortunately this means that the editor will resize/rerender twice during startup, once now, then once again when resizing because beforeload classes are removed
+			- Measuring before the font has loaded: Always get the wrong measurment (doh)
+			- Measuring directly after the font has loaded (before render): Always get the wrong measurement!
+			- Measuring after the font has loaded and directly after a new render: Always get the wrong measurement!
+			- Measuring after the font has loaded, then rendering with the new font, then *waiting* for 100+ ms: We most of the time get the corrent measurment =)
+
+			This means we must make a render efter the font has loaded, then wait some arbitary time...
+
 		*/
-		if(BROWSER == "Chrome") {
-			EDITOR.renderNeeded();
-			//EDITOR.resize(true);
-		}
 		
+		var calibratedGridWithOld = measureCharacterWidth();
+
+		EDITOR.renderNeeded(); // Will make a render once everything has loaded. No need to force a render (eg. no need to call EDITOR.render() here)
+
+		var counter = 0;
+		var testMeasureInterval = setInterval(function () { // Normally takes 1-3 tries (it seems we dont have to trigger more renders!)
+			var calibratedGridWith = measureCharacterWidth();
+			console.log("calibratedGridWithOld=" + calibratedGridWithOld + " calibratedGridWith=" + calibratedGridWith + " (debug " + (++counter) + ")");
+			
+			if(calibratedGridWith != calibratedGridWithOld || counter > 10) {
+				clearInterval(testMeasureInterval);
+				canvasUpdated(calibratedGridWith);
+				return;
+			}
+
+		}, 100);
+
+		function canvasUpdated(calibratedGridWith) {
+
+			var oldGridWidth = EDITOR.settings.gridWidth;
+			//var calibratedGridWith = measureCharacterWidth();
+			if(oldGridWidth != calibratedGridWith) {
+				EDITOR.settings.gridWidth = calibratedGridWith;
+				EDITOR.renderNeeded();
+			}
+			console.log("oldGridWidth=" + oldGridWidth + " calibratedGridWith=" + calibratedGridWith + "");
+
+			EDITOR.fontLoaded = true;
+			EDITOR.glyphWidth = EDITOR.makeGlyphWidthDetector();
+		}
+
 	}
 
 	function debug(msg) {
@@ -550,8 +576,8 @@ EDITOR.settings.style.font = "Fira Code";
 		*/
 
 		var canvas = document.createElement("canvas");
-		canvas.width = 1500; // Need to be long enough to fit 100 characters!
-		canvas.height = 60;
+		//canvas.width = 1500; // Need to be long enough to fit 100 characters!
+		//canvas.height = 60;
 
 		//canvas.style="position: absolute; top: " + test*60 + "px; left: 0px; z-index: 9999; border: 1px solid red;";
 
@@ -562,19 +588,19 @@ EDITOR.settings.style.font = "Fira Code";
 		var ctx = canvas.getContext("2d");
 
 		ctx.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
-		ctx.textBaseline = "middle";
+		//ctx.textBaseline = "middle";
 
-		var bgColor = "#FFFFFF";
-		var textColor = "#000000";
+		//var bgColor = "#FFFFFF";
+		//var textColor = "#000000";
 
-		ctx.fillStyle = bgColor;
-		ctx.fillRect(0, 0, canvas.width, canvas.height);
+		//ctx.fillStyle = bgColor;
+		//ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-		ctx.fillStyle = textColor;
+		//ctx.fillStyle = textColor;
 		var text = "abcdefghijklmnopqrstuvwxyz(){}+-*$%/@<>abcdefghijklmnopqrstuvwxyz(){}+-*$%/@<>abcdefghijklmnopqrst||";
 		var measure = ctx.measureText(text);
 
-		return measure.width / text.length;
+		return Math.round(measure.width / text.length * 100) / 100;
 	}
 
 

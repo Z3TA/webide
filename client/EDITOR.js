@@ -2987,6 +2987,9 @@ EDITOR.env = {}; // Plugins can set custom env values that will be passed to ter
 		
 		//console.warn("rendering ...");
 		
+		//console.log("calibratedGridWith=" + measureCharacterWidth() + " (before render)");
+		console.log("calibratedGridWith? (render)");
+
 		// if(EDITOR.currentFile && ctxMenuVisibleOnce) {
 		if(EDITOR.currentFile) {
 			
@@ -3211,7 +3214,15 @@ EDITOR.env = {}; // Plugins can set custom env values that will be passed to ter
 			//console.log("No file open");
 		}
 		
+		//console.log("calibratedGridWith=" + measureCharacterWidth() + " (after render)");
+
+		/*
+			setTimeout(function() {
+			console.log("calibratedGridWith=" + measureCharacterWidth() + " (some milliseconds after render)");
+			}, 10);
+		*/
 		
+
 		//console.log("rendering finish");
 	}
 	
@@ -3590,6 +3601,18 @@ ca 20ms to render, ca 13ms to render without creating new objects
 		}
 	}
 	
+	/*
+		function measureCharacterWidth() {
+		var canvas = document.createElement("canvas");
+		var ctx = canvas.getContext("2d");
+		ctx.font=EDITOR.settings.style.fontSize + "px " + EDITOR.settings.style.font;
+		var text = "abcdefghijklmnopqrstuvwxyz(){}+-*$%/@<>abcdefghijklmnopqrstuvwxyz(){}+-*$%/@<>abcdefghijklmnopqrst||";
+		var measure = ctx.measureText(text);
+
+		return Math.round(measure.width / text.length * 100) / 100;
+		}
+	*/
+
 	EDITOR.resize = function(resizeOverride) {
 		/*
 			
@@ -3611,10 +3634,13 @@ ca 20ms to render, ca 13ms to render without creating new objects
 			removeBeforeloadClasses();
 			removeBeforeloadClasses = null;
 
+			//console.log("calibratedGridWith=" + measureCharacterWidth() + " (on first resize)");
+
 			// Start the resizeAndRender interval after the first resize to prevent rendering before we have had our first resize
 			//console.log("Setting mainLoopInterval because first load!");
 			mainLoopInterval = setInterval(resizeAndRender, 1000); // So that we always see the latest and greatest
 			// note: resizeAndRender will be called on each interaction, but we also need to call it on regular interval in case something changes that was not caused by a user interaction!
+		
 		}
 
 		//if(EDITOR.lastKeyPressed=="a") throw new Error("why resize now?");
@@ -10977,6 +11003,7 @@ window.addEventListener("mousemove", mouseMove, false);
 	
 		//alert("window.innerHeight=" + window.innerHeight + " window.innerWidth=" + window.innerWidth + " screen.width=" + screen.width + " screen.height=" + screen.height);
 	
+		EDITOR.renderNeeded();
 
 		EDITOR.localStorage.getItem(["editorServerUrl", "editorServerUser", "editorServerPw"], function gotLoginFromLocalStorage(err, stored) {
 			if(err) {
