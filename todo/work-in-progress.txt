@@ -6,6 +6,9 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
+Don't load the discovery bar until we have got the settings wheter to disable it or not...
+
+
 ---
 
 The parser doesn't seem to end JS line comments on \r ... only on \n ... !?

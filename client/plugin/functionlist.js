@@ -635,6 +635,8 @@ functionListSelect.setAttribute("filePath", file.path);
 			
 		*/
 		
+		console.warn("buildFunctionList!");
+
 		//console.time("buildFunctionList");
 		
 		if(!functionListWrap && !forcedSingleRow) {

@@ -83,13 +83,17 @@
 
 		EDITOR.registerAltKey({char: "space", alt:1, label: S("last_tab"), fun: switchTab});
 
-		setTimeout(function hideIfEmpty() {
+		/*
+			setTimeout(function hideIfEmpty() {
 			if(Object.keys(EDITOR.files).length == 0) {
-				//console.log("file_tabs: Hiding file tabs because no files are open!");
-				hiddenBecauseEmty = true;
-				hideFileTabs();
+			//console.log("file_tabs: Hiding file tabs because no files are open!");
+			hiddenBecauseEmty = true;
+			hideFileTabs();
 			}
-		}, 1000);
+			}, 1000);
+		*/
+		// There will likely always be a file open ... Not hiding the file tabs as load optimization - to prevent it from first hiding then showing again on slow device  
+
 	}
 
 	function unloadFileTabs() {

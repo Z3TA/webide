@@ -367,6 +367,21 @@ EDITOR.env = {}; // Plugins can set custom env values that will be passed to ter
 
 	var _windowMenu;
 
+	var removeBeforeloadClassesTimeout;
+
+	function removeBeforeloadClasses() {
+		// It seems we can't interact with the editor before these classes are removed!!
+		// By having the beforeload classes we hopefully can avoid the flickering caused by header resize due to file tabs
+		document.getElementById("wireframe").classList.remove("beforeload");
+		document.getElementById("header").classList.remove("beforeload");
+		document.getElementById("columns").classList.remove("beforeload");
+		document.getElementById("leftColumn").classList.remove("beforeload");
+		document.getElementById("editorCanvas").classList.remove("beforeload");
+
+		//EDITOR.resize();
+		EDITOR.resizeNeeded();
+	}
+
 	function funMap(f){return f.fun}
 	
 	/*
@@ -1431,7 +1446,7 @@ EDITOR.env = {}; // Plugins can set custom env values that will be passed to ter
 		
 		if(path == undefined) path = "new file";
 		
-		//console.log("EDITOR.openFile: " + path + " typeof text=" + typeof text + " LOW_RAM=" + LOW_RAM);
+		//console.warn("EDITOR.openFile: " + path + " typeof text=" + typeof text + " LOW_RAM=" + LOW_RAM);
 		
 		var pathToBeOpened = path;
 		
@@ -1506,7 +1521,7 @@ EDITOR.env = {}; // Plugins can set custom env values that will be passed to ter
 					return fileOpenError(new Error("EDITOR.openFile: There are files opened, but EDITOR.currentFile=" + EDITOR.currentFile + " EDITOR.files=" + Object.keys(EDITOR.files)));
 				}
 				
-				if(EDITOR.currentFile != file && (showFile == undefined || showFile == path)) {
+				if(EDITOR.currentFile != file && (showFile == undefined || showFile == path) && (state == undefined || state.show!==false )) {
 					// Switch to it ...
 					
 					if(text != undefined && text != file.text) throw new Error("File already opened. But the text argument is not the same as the text in the file! path=" + file.path);
@@ -1735,7 +1750,7 @@ EDITOR.env = {}; // Plugins can set custom env values that will be passed to ter
 					f[i](file); // Call function
 				}
 				
-				//console.log("EDITOR.openFile: state?" + !!state + " state.show=" + (state && state.show) + " showFile=" + showFile + " path=" + path);
+				//console.warn("EDITOR.openFile: state?" + !!state + " state.show=" + (state && state.show) + " showFile=" + showFile + " path=" + path);
 				if( (!state || state.show !== false) && (showFile == undefined || showFile == path) ) {
 					// Switch to this file
 					//console.log("EDITOR.openFile: Showing file.path=" + file.path + " " + UTIL.getStack("showing file"));
@@ -2738,6 +2753,8 @@ EDITOR.env = {}; // Plugins can set custom env values that will be passed to ter
 	EDITOR.resizeNeeded = function() {
 		// Tell the editor that it needs to resize
 		
+		//alert(UTIL.getStack("EDITOR.resizeNeeded!"));
+
 		//console.warn(UTIL.getStack("EDITOR.resizeNeeded!"));
 		
 		if(EDITOR.settings.devMode && EDITOR.shouldResize == false) {
@@ -3535,6 +3552,7 @@ ca 20ms to render, ca 13ms to render without creating new objects
 	EDITOR.renderNeeded = function renderNeeded() {
 		// Tell the editor that it needs to render
 		
+		//alert(UTIL.getStack("renderNeeded!"));
 		console.warn("Render needed!");
 		
 		/*
@@ -3559,8 +3577,12 @@ ca 20ms to render, ca 13ms to render without creating new objects
 		//console.warn("EDITOR.shouldRender!");
 
 		clearTimeout(renderTimer);
-		renderTimer = setTimeout(function renderMaybe() {
-			resizeAndRender();
+		renderTimer = setTimeout(function renderMaybeNeeded() {
+
+			if(EDITOR.shouldRender) {
+				//alert("renderMaybeNeeded calling resizeAndRender");
+				resizeAndRender();
+			}
 		}, 10);
 
 		if(EDITOR.animationFunctions.length > 0 && !isAnimating && window.requestAnimationFrame) {
@@ -3584,6 +3606,17 @@ ca 20ms to render, ca 13ms to render without creating new objects
 		
 		EDITOR.shouldResize = false; // Prevent this function from running again
 		
+		if(removeBeforeloadClasses) {
+			clearTimeout(removeBeforeloadClassesTimeout);
+			removeBeforeloadClasses();
+			removeBeforeloadClasses = null;
+
+			// Start the resizeAndRender interval after the first resize to prevent rendering before we have had our first resize
+			//console.log("Setting mainLoopInterval because first load!");
+			mainLoopInterval = setInterval(resizeAndRender, 1000); // So that we always see the latest and greatest
+			// note: resizeAndRender will be called on each interaction, but we also need to call it on regular interval in case something changes that was not caused by a user interaction!
+		}
+
 		//if(EDITOR.lastKeyPressed=="a") throw new Error("why resize now?");
 		
 		if(oldFullScreenWidget) {
@@ -4335,6 +4368,9 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 		},
 		show: function showDiscoveryBar() {
 			// Shows the whole discovery bar
+
+			console.warn("discoveryBar.show");
+
 			if(!EDITOR.discoveryBar.enabled) {
 				throw new Error("Discovery bar not enabled!");
 				return;
@@ -4421,7 +4457,11 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 		},
 		hide: function hideDiscoveryBar() {
 			// Hides the whole discovery bar
-			//console.log("discoveryBar:hide: showDiscoveryBarWindowMenuItem=", showDiscoveryBarWindowMenuItem);
+			console.warn("discoveryBar:hide: showDiscoveryBarWindowMenuItem=", showDiscoveryBarWindowMenuItem);
+			if(EDITOR.discoveryBar.isVisible === false) {
+				console.warn("discoveryBar:hide: Discovery bar not visible!");
+				return;
+			}
 			discoveryBar.style.display = "none";
 			if(showDiscoveryBarWindowMenuItem) showDiscoveryBarWindowMenuItem.deactivate();
 			EDITOR.discoveryBar.isVisible = false;
@@ -4474,14 +4514,16 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 		disable: function disableDiscoveryBar(who) {
 			if(who == undefined) throw new Error("First argument must be an identification so that we know who disabled the discovery bar");
 
+			console.warn("Discovery bar disabled");
+
 			// Disables the entire discovery bar
 			EDITOR.discoveryBar.hide();
 			EDITOR.discoveryBar.enabled = false;
 
 			EDITOR.discoveryBar.disabledBy.push(who);
 		},
-		isVisible: true,
-		enabled: true,
+		isVisible: false, // Default is hidden. Someone must call EDITOR.discoveryBar.show() to show it (when storage is loaded)
+		enabled: true, // It is enabled by default, but invisible
 		captions: true,
 		disabledBy: []
 	}
@@ -6677,6 +6719,12 @@ console.warn(err.message);
 	EDITOR.interact = function(interaction, options) {
 		// This function will be called on every interaction
 		
+		if(!windowLoaded) {
+			//alert("Interact before windowLoaded!");
+			return;
+		}
+
+		//alert("EDITOR.interact wants to resize/render!");
 		// Calling render here (efter each key event) seems to be the fastest (faster then waiting for requestAnimationFrame)
 		resizeAndRender();
 
@@ -7487,6 +7535,8 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 	
 	EDITOR.showFile = function(fileOrFilePath, focus, overrideShowFile) {
 		
+		console.warn("EDITOR.showFile!");
+
 		if(fileOrFilePath instanceof File) {
 			var file = fileOrFilePath;
 		}
@@ -11148,8 +11198,9 @@ window.addEventListener("mousemove", mouseMove, false);
 			// TEST-CODE-END
 		*/
 		
-		EDITOR.resizeNeeded(); // We must call the resize function at least once at editor startup.
-	
+		//EDITOR.resizeNeeded(); // We must call the resize function at least once at editor startup.
+		// Let some of the plugins call EDITOR.resizeNeeded, so that we don't do uneccesary computation before editor has fully loaded
+
 		EDITOR.bindKey({desc: "Autocomplete", charCode: EDITOR.settings.autoCompleteKey, fun: EDITOR.autoComplete, combo: 0});
 		//keyBindings.push({charCode: EDITOR.settings.autoCompleteKey, fun: EDITOR.autoComplete, combo: 0});
 	
@@ -11308,15 +11359,14 @@ window.addEventListener("mousemove", mouseMove, false);
 
 				var discoveryBarDisabledByQueryString = QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("discoveryBar") != -1;
 
-				if(_serverStorage.showDiscoveryBar == "false") {
+				if(_serverStorage.showDiscoveryBar === "false") {
 					EDITOR.discoveryBar.hide();
 				}
-				else if(_serverStorage.showDiscoveryBar == "true" && !discoveryBarDisabledByQueryString && EDITOR.discoveryBar.enabled) {
+				else if(  (!_serverStorage.hasOwnProperty("showDiscoveryBar") || _serverStorage.showDiscoveryBar === "true")  && !discoveryBarDisabledByQueryString && EDITOR.discoveryBar.enabled) {
 					EDITOR.discoveryBar.show();
 				}
 				
 				if(_serverStorage.showDiscoveryBarCaptions) EDITOR.discoveryBar.toggleCaptions(_serverStorage.showDiscoveryBarCaptions);
-				
 				
 				// Many plugins depend on the storage being available ...
 				// They need to be refactored to start on EDITOR.on("storageReady" ... !!
@@ -11487,10 +11537,6 @@ window.addEventListener("mousemove", mouseMove, false);
 		pluginsCopy.length = 0; // Empty the array
 
 	
-		//console.log("Setting mainLoopInterval because first load!");
-		mainLoopInterval = setInterval(resizeAndRender, 1000); // So that we always see the latest and greatest
-		// note: resizeAndRender will be called on each interaction, but we also need to call it on regular interval in case something changes that was not caused by a user interaction!
-		
 		
 		showDiscoveryBarWindowMenuItem = EDITOR.windowMenu.add(S("discovery_bar"), [S("View"), 130], EDITOR.discoveryBar.toggle);
 		showDiscoveryBarCaptions = EDITOR.windowMenu.add(S("discovery_bar_captions"), [S("View"), 135], EDITOR.discoveryBar.toggleCaptions);
@@ -11507,8 +11553,9 @@ window.addEventListener("mousemove", mouseMove, false);
 			Always show the discovery bar! Even if it will be hidden later when user settings is loaded
 			This will make it "blink".
 			But we want to show the discovery bar by default if the user has not logged in (for a first time user)
+			Update 19/11-22: Waiting to show the discoverybar until we got settings from server due to startup time optimization 
 		*/
-		if(EDITOR.discoveryBar.enabled && !(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("discoveryBar") != -1)) EDITOR.discoveryBar.show();
+		//if(EDITOR.discoveryBar.enabled && !(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("discoveryBar") != -1)) EDITOR.discoveryBar.show();
 		
 		
 		// Voice recognition only works for some people...
@@ -11521,33 +11568,17 @@ window.addEventListener("mousemove", mouseMove, false);
 		}
 		
 		// Loading styles reset
-		setTimeout(removeBeforeloadClasses, 850);
+		removeBeforeloadClassesTimeout = setTimeout(removeBeforeloadClasses, 12850);
 		
 		var header = document.getElementById("header");
 		var windowMenuHeightDiv = document.getElementById("windowMenuHeight");
 		header.insertBefore(_windowMenu, windowMenuHeightDiv)
 		
 
-
-
 		sendStatistics();
 		
 		
-		
 		windowLoaded = true;
-
-		function removeBeforeloadClasses() {
-			// It seems we can't interact with the editor before these classes are removed!!
-			// By having the beforeload classes we hopefully can avoid the flickering caused by header resize due to file tabs
-			document.getElementById("wireframe").classList.remove("beforeload");
-			document.getElementById("header").classList.remove("beforeload");
-			document.getElementById("columns").classList.remove("beforeload");
-			document.getElementById("leftColumn").classList.remove("beforeload");
-			document.getElementById("editorCanvas").classList.remove("beforeload");
-
-			EDITOR.resize();
-
-		}
 	}
 	
 	function toggleVoiceCommands() {
@@ -13072,13 +13103,21 @@ function paste(pasteEvent) {
 
 function resizeAndRender(afterResize) {
 	
+		if(!windowLoaded) {
+			//alert(  UTIL.getStack("resizeAndRender before windowLoaded!")  );
+			return;
+		}
+
+		//alert(UTIL.getStack("resizeAndRender! shouldResize=" + EDITOR.shouldResize + " shouldRender=" + EDITOR.shouldRender));
+
 		//console.log("resizeAndRender: EDITOR.shouldResize=" + EDITOR.shouldResize + " EDITOR.shouldRender=" + EDITOR.shouldRender + " EDITOR.isScrolling=" + EDITOR.isScrolling + " windowLoaded=" + windowLoaded);
 	
-	// Only do the resize or render if it's actually needed
-	if(EDITOR.shouldResize) return EDITOR.resize(); // EDITOR.resize() will call resizeAndRender()
+		// Only do the resize or render if it's actually needed
+		// Do we need to resize if we don't need to render !? Probably not, so only resize if we also need to render!
+		if(EDITOR.shouldResize && EDITOR.shouldRender) return EDITOR.resize(); // EDITOR.resize() will call resizeAndRender()
 	
-	//if(EDITOR.shouldRender) window.requestAnimationFrame(EDITOR.render);
-	if(EDITOR.shouldRender) {
+		//if(EDITOR.shouldRender) window.requestAnimationFrame(EDITOR.render);
+		if(EDITOR.shouldRender) {
 		
 		//if(EDITOR.isScrolling) console.time("Scrolling optimization");
 		

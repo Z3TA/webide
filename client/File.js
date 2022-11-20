@@ -310,7 +310,7 @@ var File; // File object is global
 
 			if(caret == file.caret) {
 				EDITOR.fireEvent("moveCaret", [file, file.caret]);
-				EDITOR.renderNeeded();
+				if(EDITOR.currentFile == file) EDITOR.renderNeeded();
 			}
 			return caret;
 		}

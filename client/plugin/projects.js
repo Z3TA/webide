@@ -26,6 +26,7 @@
 			{
 				name: "My web site (demo static site generator)",
 				workingDir: "~/ssg_blog_example/",
+				lastOpenFile: "~/ssg_blog_example/source/about.htm",
 				openFiles: [
 					{path: "~/ssg_blog_example/source/index.htm", order: 100},
 					{path: "~/ssg_blog_example/source/about.htm", order: 200}
@@ -122,6 +123,7 @@
 
 		function saveData(project) {
 			project.workingDir = EDITOR.workingDirectory;
+			project.lastOpenFile = EDITOR.currentFile.path;
 
 			project.openFiles.length = 0;
 			for(var path in EDITOR.files) {
@@ -160,14 +162,19 @@
 
 		console.log("projects:loadedProjectSettings: settings=" + JSON.stringify(settings, null, 2));
 
-		for (var i=0, name=""; i<projectSettings.projects.length; i++) {
+		// Don't load the last project when editor starts, let the "reopenFiles" plugin reopen the files,
+		// and if the user wants to load a particular project he/she does so manually
+
+		/*
+			for (var i=0, name=""; i<projectSettings.projects.length; i++) {
 			name = projectSettings.projects[i].name;
 			if( projectSettings.currentProjectName == name ) {
-				switchToProject(projectSettings.projects[i], false);
-				return; // Switching project will reload menus!
+			switchToProject(projectSettings.projects[i], false);
+			return; // Switching project will reload menus!
 			}
-		}
-
+			}
+		*/
+		
 		addMenus();
 	}
 
@@ -212,7 +219,7 @@
 				if(typeof project.openFiles[i] != "object") throw new Error("projects:switchToProject:switchProject: Wrong formatting in project=" + JSON.stringify(project) + " Each item in openFiles should be an object with path and order!");
 
 				console.log("projects:switchToProject:switchProject: Opening file path=" + project.openFiles[i].path);
-				EDITOR.openFile(project.openFiles[i].path);
+				EDITOR.openFile(project.openFiles[i].path, {show: project.lastOpenFile==project.openFiles[i].path});
 			}
 
 			projectSettings.currentProjectName = project.name;

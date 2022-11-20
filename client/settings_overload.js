@@ -360,10 +360,18 @@ EDITOR.settings.style.font = "Fira Code";
 
 	// note: The css file is loaded in the window.onload event.
 	function cssLoadedMaybe(err) {
+
+		var time = 300;
+		if(slowBrowser) time = 1000;
+		if(verySlowBrowser) time = 5000;
+
 		if(err) {
 			console.error(err);
 			loadCSS_error = err;
-			return makeGlyphWidthDetector();
+			setTimeout(function() {
+				makeGlyphWidthDetector();
+			}, time);
+			return;
 		}
 
 		if(typeof whenFontLoaded != "function") return makeGlyphWidthDetector();
@@ -375,16 +383,14 @@ EDITOR.settings.style.font = "Fira Code";
 
 				CB(whenFontLoaded);
 
+				setTimeout(function() {
 				CB(makeGlyphWidthDetector);
+				}, time);
 
 			});
 		}
 		else {
 			// Re-render after the font have fully loaded (we never know when)
-
-			var time = 300;
-			if(slowBrowser) time = 1000;
-			if(verySlowBrowser) time = 5000;
 
 			setTimeout(function renderAfterFontLoad() {
 
@@ -414,9 +420,10 @@ EDITOR.settings.style.font = "Fira Code";
 
 			Unfortunately this means that the editor will resize/rerender twice during startup, once now, then once again when resizing because beforeload classes are removed
 		*/
-
-		EDITOR.resize(true);
-		
+		if(BROWSER == "Chrome") {
+			EDITOR.renderNeeded();
+			//EDITOR.resize(true);
+		}
 		
 	}
 

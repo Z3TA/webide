@@ -395,7 +395,7 @@ EDITOR.unbindKey(show_gotoFileInput2);
 			if(isSearching && 1==2) {
 				//console.log("goto_file: abortFindFiles because: typing() and isSearching=" + isSearching + " (is true)");
 				abortFindFiles();
-				setInputFolder( nputFolder.getAttribute("default") )
+				setInputFolder( inputFolder.getAttribute("default") )
 			}
 			
 			trySearch();

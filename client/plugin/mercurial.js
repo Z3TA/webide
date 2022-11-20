@@ -94,8 +94,9 @@
 		
 		CLIENT.on("mercurialProgress", mercurialProgressStatus);
 		// Make the progress bar appear on top:
-		progressBarWidget.show();
-		progressBarWidget.hide();
+		//progressBarWidget.show();
+		//progressBarWidget.hide();
+		// todo: use editors built in progress bar
 		
 		repoCloneMenuItem = EDITOR.ctxMenu.add("Clone a repository ...", showCloneDialog, 12);
 		
