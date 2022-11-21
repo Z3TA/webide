@@ -6,7 +6,12 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
+Some major lag while typing in large file!
 
+
+---
+
+Get deploy working again...!
 
 ---
 

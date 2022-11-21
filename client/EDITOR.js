@@ -585,19 +585,22 @@ EDITOR.env = {}; // Plugins can set custom env values that will be passed to ter
 				throw new Error("wait=" + wait + " needs to be a Boolean!");
 			}
 			
+			var itemsToSave = 0;
+			var itemsSaved = 0;
+
 			for(var name in itemsObject) {
 				if(typeof itemsObject[name] != "string") throw new Error("name=" + name + " in " + JSON.stringify(itemsObject) + " should be a string!");
 				save(name, itemsObject[name]);
 			}
 
-			var itemsToSave = 0;
-			var itemsSaved = 0;
+			//console.log("EDITOR.storage.setItem: itemsToSave=" + itemsToSave);
 
 			var errors = [];
 
-			return String(val);
+			return "" + val;
 
 			function doneMaybe() {
+				//console.log("EDITOR.storage.setItem:doneMaybe: callback=" + typeof callback + " itemsToSave=" + itemsToSave + " itemsSaved=" + itemsSaved + "");
 				if( callback && itemsToSave == itemsSaved) {
 
 					if(errors.length === 0) callback(null);
@@ -615,6 +618,7 @@ EDITOR.env = {}; // Plugins can set custom env values that will be passed to ter
 
 			function saveServerString(id, string) {
 				itemsToSave++;
+				//console.log("EDITOR.storage.setItem:saveServerString: itemsToSave=" + itemsToSave);
 
 				if(serverStorageWaitingItems === null) throw new Error("serverStorageWaitingItems=" + serverStorageWaitingItems + " id=" + id + " val=" + val + " wait=" + wait + " callback=" + callback.toString());
 
@@ -654,7 +658,9 @@ EDITOR.env = {}; // Plugins can set custom env values that will be passed to ter
 			}
 
 			function save(id, val) {
-				var string = String(val); // Turns numbers etc into a string
+				//console.log("EDITOR.storage.setItem:save: itemsToSave=" + itemsToSave);
+
+				var string = "" + val; // Turns numbers etc into a string
 				saveServerString(id, string);
 			}
 		},
@@ -1014,7 +1020,7 @@ EDITOR.env = {}; // Plugins can set custom env values that will be passed to ter
 
 			function saveSettingOnceStorageReady() {
 				//console.log("settings: save: settings=" + settings + " str=" + str + " !");
-				saveServerString(settings, packageStrServer);
+				saveServerString(settings, packageStrServer, hash);
 			}
 
 		});
@@ -1036,7 +1042,7 @@ EDITOR.env = {}; // Plugins can set custom env values that will be passed to ter
 			});
 		}
 
-		function saveServerString(id, string) {
+		function saveServerString(id, string, hash) {
 			serverStringsToSave++
 			EDITOR.storage.setItem(id, string, function(err) {
 				serverStringsSaved++;

@@ -981,6 +981,11 @@
 	
 	function saveCurrentFile(file, lastCurrentFile, saveRightAway) {
 		if(file == undefined) return;
+
+		//console.log("reopenFiles:saveCurrentFile: currentFileOnServer=" + (currentFileOnServer && currentFileOnServer.path));
+		//console.log("reopenFiles:saveCurrentFile: file=" + (file && file.path));
+		//console.log("reopenFiles:saveCurrentFile: EDITOR.currentFile=" + (EDITOR.currentFile && EDITOR.currentFile.path));
+
 		EDITOR.localStorage.setItem("currentFile", file.path, function(err) {
 			if(err) throw err;
 
@@ -989,15 +994,30 @@
 			else setTimeout(updateCurrentFileOnServer, 10000);
 
 			function updateCurrentFileOnServer() {
-				if(file == currentFileOnServer) return;
-				if(EDITOR.currentFile != file) return;
+				if(file == currentFileOnServer) {
+					//console.log("reopenFiles:saveCurrentFile: Not saving current file on server because file is already currentFileOnServer!");
+					return;
+				}
+				if(EDITOR.currentFile != file) {
+					//console.log("reopenFiles:saveCurrentFile: Not saving current file on server because file is no longer the current file!");
+					return;
+				}
 
 				if(EDITOR.storage.ready() && CLIENT.connected && CLIENT.ping < 2000) {
 					EDITOR.storage.setItem("currentFile", file.path, function(err) {
+
+						//console.log("reopenFiles:saveCurrentFile: EDITOR.storage.setItem: err=" + (err && err.message));
+
 						// Swallow this error because it's too annoying when you get spammed lots of these if we lose connection to the server'
 						if(err) console.error(err);
-						else currentFileOnServer = file;
+						else {
+							currentFileOnServer = file;
+							//console.log("reopenFiles:saveCurrentFile: Updated currentFileOnServer=" + (currentFileOnServer && currentFileOnServer.path));
+						}
 					});
+				}
+				else {
+					//console.log("reopenFiles:saveCurrentFile: Not saving current file because storage is not ready, or we have high ping!?");
 				}
 			}
 		});
