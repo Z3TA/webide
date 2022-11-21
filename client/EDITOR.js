@@ -2994,7 +2994,7 @@ EDITOR.env = {}; // Plugins can set custom env values that will be passed to ter
 		//console.warn("rendering ...");
 		
 		//console.log("calibratedGridWith=" + measureCharacterWidth() + " (before render)");
-		console.log("calibratedGridWith? (render)");
+		//console.log("calibratedGridWith? (render)");
 
 		// if(EDITOR.currentFile && ctxMenuVisibleOnce) {
 		if(EDITOR.currentFile) {
@@ -3570,7 +3570,7 @@ ca 20ms to render, ca 13ms to render without creating new objects
 		// Tell the editor that it needs to render
 		
 		//alert(UTIL.getStack("renderNeeded!"));
-		console.warn("Render needed!");
+		//console.warn("Render needed!");
 		
 		/*
 			The reason why we want functions to call EDITOR.renderNeeded() is to "buffer" the render so we don't make unneccesary renders
