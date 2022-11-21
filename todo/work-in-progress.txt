@@ -8,6 +8,9 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 Some major lag while typing in large file!
 
+---
+
+todo: Fill fileopen file list (with empty lines) so that we don't have to do a resize on every key stroke!
 
 ---
 
