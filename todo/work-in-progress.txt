@@ -6,6 +6,10 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
+
+
+---
+
 When should we calibratedGridWith !?
 It seems Chrome lie about when the font has been loaded ...
 

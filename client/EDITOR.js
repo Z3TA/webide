@@ -5954,7 +5954,7 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 		},
 		hide: function hideCtxMenu() {
 			
-			//console.log(UTIL.getStack("Hide context menu"));
+			console.log(UTIL.getStack("ctxMenu: Hide context menu"));
 			
 			var menu = document.getElementById("contextmenu");
 			
@@ -5992,7 +5992,7 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 			if(clickEventOrTargetElement == undefined && typeof event != "undefined") clickEventOrTargetElement = event;
 			if(clickEventOrTargetElement == undefined) throw new Error("First argument to EDITOR.ctxMenu.show() needs to be a mouse/click event or a DOM target element!");
 			
-			//console.log("showCtxMenu: Showing context menu! clickEventOrTargetElement=" + clickEventOrTargetElement + " ctrl?" + clickEventOrTargetElement.ctrlKey + " callStack:" + UTIL.getStack("showCtxMenu"));
+			console.log("ctxMenu: Showing context menu! clickEventOrTargetElement=" + clickEventOrTargetElement + " ctrl?" + clickEventOrTargetElement.ctrlKey + " callStack:" + UTIL.getStack("showCtxMenu"));
 			
 			if(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("ctxMenu") != -1) return new Error("Menu is disabled by query string!");;
 			
@@ -6128,6 +6128,8 @@ posX = EDITOR.width - offsetWidth;
 				fullScreenMenuMaybe();
 			}
 			
+			menu.style.display="block";
+
 			menu.classList.add("visible");
 			
 			
