@@ -13147,9 +13147,13 @@ function resizeAndRender(afterResize) {
 
 		//console.log("resizeAndRender: EDITOR.shouldResize=" + EDITOR.shouldResize + " EDITOR.shouldRender=" + EDITOR.shouldRender + " EDITOR.isScrolling=" + EDITOR.isScrolling + " windowLoaded=" + windowLoaded);
 	
-		// Only do the resize or render if it's actually needed
-		// Do we need to resize if we don't need to render !? Probably not, so only resize if we also need to render!
-		if(EDITOR.shouldResize && EDITOR.shouldRender) return EDITOR.resize(); // EDITOR.resize() will call resizeAndRender()
+		/*
+			Only do the resize or render if it's actually needed
+
+			Q: Do we need to resize if we don't need to render
+			A: yes, when adding stuff to the footer etc, we need to resize
+		*/
+		if(EDITOR.shouldResize) return EDITOR.resize(); // EDITOR.resize() will call resizeAndRender()
 	
 		//if(EDITOR.shouldRender) window.requestAnimationFrame(EDITOR.render);
 		if(EDITOR.shouldRender) {

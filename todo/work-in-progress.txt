@@ -6,6 +6,15 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
+Busboy was upgraded to new major version when running npm audit.
+Try using the share function to share files to webide to see if it still works!
+
+---
+
+When using SCM tool to show file history, then switching to show file history on another file - you get an error every time you click somewhere!! (on the change list)
+
+---
+
 When we are hammering the keyboard the editor stops rendering! ...
 but when recording Performance in dev tools it looks like (on the screenshots) that it keeps rendering!
 
