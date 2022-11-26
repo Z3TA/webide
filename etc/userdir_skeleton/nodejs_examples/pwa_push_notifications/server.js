@@ -123,7 +123,7 @@ function getKeys(cb) {
 function startServer(httpServer, cb) {
 	if(process.env.myName) {
 		var appName = "PushNoti".toLowerCase();
-		var unixSocket = "/sock/" + appName;
+		var unixSocket = "/home/" + process.env.myName + "/sock/" + appName;
 	}
 	else {
 		var port = 8000;

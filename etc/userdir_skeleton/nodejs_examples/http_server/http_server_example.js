@@ -1,27 +1,23 @@
 /*
-	Boilerplate code to get a http server running.
-	Can for example be used to create a REST API.
+	This script contain boilerplate code to get a HTTP server running.
 	
 	Press F2 to run this Node.JS program
-	Then press F4 (or close the editor) to stop it.
+	Then press F4 to stop it.
 	
 	All HTTP requests to app.%USERNAME%.%DOMAIN% will be proxied
-	to the corresponding unix socket at /sock/app .
-	Instead of a port number, use the path to the unix socket:
-	For example port 80 can be replaced with /sock/test 
-	which can be accessed from test.%USERNAME%.%DOMAIN%
-	
-	When the script is started in the editor, process.env.dev will exist.
-	When the script is started in "production", process.env.prod will exist.
+	to the corresponding unix socket at %HOMEDIR%sock/app
+	(in most Node.JS libraries you can replace the port nr with a unix socket)
 
 	Press Ctrl+F2 to deploy into production.
-	
+	(the project root folder will be copied to a production environment)
+
+	When the script is started in the editor, process.env.dev will exist.
+	When the script is started in production, process.env.prod will exist.
+
 	Scripts deployed to production will keep running even if you close the editor.
 	Press Ctrl+F4 to stop a in-production script.
-	(note: A script in production will be automatically restarted after 
-	a server machine reboot, even if it was stopped!)
+	(note: A script in production will be automatically restarted)
 	Press Shift+Ctrl+F4 to remove a script from production.
-	
 	
 */
 
