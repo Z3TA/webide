@@ -278,7 +278,7 @@ function startNodejsInitWorker(homeDir, username, uid, gid) {
 	
 	function restart() {
 		// Check the .prod folder
-		var prodFolder = homeDir + ".prod";
+		var prodFolder = homeDir + ".webide/prod/";
 		var fs = require("fs");
 		log("Reading " + prodFolder + " ...");
 		fs.readdir(prodFolder, function(err, filesInProdDir) {

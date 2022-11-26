@@ -73,7 +73,7 @@ var HOME = getArg(["home", "home"]) || '/home/' + USERNAME;
 
 HOME = UTIL.trailingSlash(HOME);
 
-var USER_PROD_FOLDER = UTIL.joinPaths(HOME, ".prod/");
+var USER_PROD_FOLDER = UTIL.joinPaths(HOME, "./webide/prod/");
 
 var module_os = require("os");
 

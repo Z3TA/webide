@@ -58,7 +58,7 @@ catch(err) {
 function startDelete() {
 	
 	// First empty the prod folder so that processes wont respawn when killed
-	var prodDir = UTIL.joinPaths([HOME, username, ".prod/"]);
+	var prodDir = UTIL.joinPaths([HOME, username, ".webide/prod/"]);
 	child_process.execSync("rm -rf " + prodDir);
 	
 // Kill all processes owned by this user (for example scripts "in production")

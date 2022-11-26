@@ -6,6 +6,8 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
+ mangkronyok2018/.prod/
+
 Make it so you can deploy into production!
 Do not restart stopped scripts when rebooting server!
 

@@ -7,7 +7,7 @@
 	* Set uid and gid to the user's id.
 	* Open log file in user's home dir ~/log/deamon_manager.log
 	
-	* traverse the USER_PROD_FOLDER (~/.prod/) and look for a package.json file.
+	* traverse the USER_PROD_FOLDER (~/.webide/prod/) and look for a package.json file.
 	* look for main script and start it
 	* restart the script if it exits, and notify the user via e-mail or sms
 	
@@ -27,7 +27,7 @@ var DEFAULT = require("./server/default_settings.js");
 var ADMIN_EMAIL = getArg(["email", "email", "mail", "admin", "admin_email", "admin_mail"]) || DEFAULT.admin_email; // Errors with This script is sent here
 
 var UTIL = require("./client/UTIL.js");
-var HOME = getArg(["home", "home", "homeDir"]) || process.env.homeDir;
+var HOMEDIR = getArg(["home", "home", "homeDir"]) || process.env.homeDir;
 var EMAIL = getArg(["email", "email"]) || process.env.email; // E-mail address of the user
 var UID = getArg(["uid", "uid"]) || process.env.uid;
 var GID = getArg(["gid", "gid"]) || process.env.gid;
@@ -54,7 +54,7 @@ var SMTP_TRANSPORT = require('nodemailer-smtp-transport');
 
 var TLD = DEFAULT.domain;
 
-if(!HOME) return initError(new Error("No path specified. Use argument: --path=/path/to/folder/"));
+if(!HOMEDIR) return initError(new Error("No path specified. Use argument: --path=/path/to/folder/"));
 if(!UID) return initError(new Error("No UID specified. Use argument: --uid=123"));
 if(!GID) return initError(new Error("No UID specified. Use argument: --gid=123"));
 
@@ -69,9 +69,9 @@ var WARN = 4;
 var ERR = 3; // <3>This is an ERR level message
 var ERROR = 3;
 
-var USER_PROD_FOLDER = HOME + "/.prod/";
+HOMEDIR = UTIL.trailingSlash(HOMEDIR); // Make sure it ends with a slash
 
-HOME = UTIL.trailingSlash(HOME); // Make sure it ends with a slash
+var USER_PROD_FOLDER = UTIL.joinPaths(HOMEDIR, ".webide/prod/");
 
 // What happens if we open a file stream before chroot ?
 // answer: the file stream will be kept open =)
@@ -104,7 +104,7 @@ process.setuid(UID);
 if(process.getuid && process.getuid() === 0) throw new Error("Failed to change user! Worker process is still root! process.getuid()=" + process.getuid());
 
 
-var initLogFilePath = HOME + "log/nodejs_init_worker.log";
+var initLogFilePath = UTIL.joinPaths(HOMEDIR, "log/nodejs_init_worker.log");
 var fs = require("fs");
 var initLogStream = fs.createWriteStream(initLogFilePath, {'flags': 'a'});
 
@@ -237,7 +237,7 @@ function start(pathToFolder) {
 							var path = require("path");
 							var scriptFilePath = path.join(pathToFolder, fileName);
 							
-							if(fileName == findFile + ".js") startService(scriptFilePath, findFile, pathToFolder, HOME+"log/" + fileName + ".log");
+							if(fileName == findFile + ".js") startService(scriptFilePath, findFile, pathToFolder, HOMEDIR+"log/" + fileName + ".log");
 							
 						});
 					}
@@ -259,7 +259,7 @@ function start(pathToFolder) {
 				var name = json.name || findFile;
 				var path = require("path");
 				var mainFile = path.join(pathToFolder, json.main);
-				startService(mainFile, name, pathToFolder, HOME+"log/" + name + ".log", json.email);
+				startService(mainFile, name, pathToFolder, HOMEDIR+"log/" + name + ".log", json.email);
 			}
 			else return log(packageJson + " has no main file entry!");
 		}
@@ -280,7 +280,7 @@ function shutdownInitWorker() {
 		initLogStream.end();
 		process.disconnect();
 		process.exit(0);
-		}
+	}
 	
 	SHUTDOWN = true;
 	
@@ -404,7 +404,7 @@ function findScripts(pathToFolder, callback) {
 								
 								var scriptFilePath = path.join(pathToFolder, fileName);
 								
-								if(fileName == findFile + ".js") scripts.push({main: scriptFilePath, name: findFile, pathToFolder: pathToFolder, log: HOME + "log/" + fileName + ".log"});
+								if(fileName == findFile + ".js") scripts.push({main: scriptFilePath, name: findFile, pathToFolder: pathToFolder, log: HOMEDIR + "log/" + fileName + ".log"});
 								
 							});
 						}
@@ -428,7 +428,7 @@ function findScripts(pathToFolder, callback) {
 				if(json.main) {
 					var name = json.name || findFile;
 					var mainFile = path.join(pathToFolder, json.main);
-					scripts.push({main: mainFile, name: name, pathToFolder: pathToFolder, log: HOME + "log/" + name + ".log", email: json.email});
+					scripts.push({main: mainFile, name: name, pathToFolder: pathToFolder, log: HOMEDIR + "log/" + name + ".log", email: json.email});
 				}
 				else return log(packageJson + " has no main file entry!");
 				

@@ -3605,7 +3605,7 @@ function checkMounts(options, checkMountsCallback) {
 		});
 	
 		// Create a directory for putting "in production" files
-		createIfNotExist(HOME_DIR + username + "/.prod/", uid, gid, "0770", function(err) {
+		createIfNotExist(HOME_DIR + username + "/.webide/prod/", uid, gid, "0770", function(err) {
 			if(err) throw err;
 			else prodDirCreated = true;
 		});
@@ -3966,7 +3966,7 @@ function checkMounts(options, checkMountsCallback) {
 				if(!wwwpubCreated)  log(username + " wwwpub folder not yet checked/created...", DEBUG);
 				if(!sockDirCreated)  log(username + " sock folder not yet checked/created...", DEBUG);
 				if(!logDirCreated)  log(username + " log folder not yet checked/created...", DEBUG);
-				if(!prodDirCreated)  log(username + ".prod folder not yet checked/created...", DEBUG);
+				if(!prodDirCreated)  log(username + ".webide/prod folder not yet checked/created...", DEBUG);
 				if(!npmDirCreated)  log(username + ".npm-packages folder not yet checked/created...", DEBUG);
 			
 			}

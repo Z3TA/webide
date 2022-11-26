@@ -102,9 +102,9 @@ createApparmorProfile("./etc/apparmor/home.someuser.bin.bash", user.name);
 	chownrDirSync(UTIL.joinPaths([user.homeDir, "log/"]), user.uid, user.gid);
 		
 		// Create a directory for putting "in production" files
-	try { fs.mkdirSync(UTIL.joinPaths([user.homeDir, ".prod/"])); } catch(err) { console.log(err.message); }
-	chmodrSync(UTIL.joinPaths([user.homeDir, ".prod/"]), "770");
-	chownrDirSync(UTIL.joinPaths([user.homeDir, ".prod/"]), user.uid, user.gid);
+		try { fs.mkdirSync(UTIL.joinPaths([user.homeDir, ".webide/", "prod/"])); } catch(err) { console.log(err.message); }
+		chmodrSync(UTIL.joinPaths([user.homeDir, ".webide/", "prod/"]), "770");
+		chownrDirSync(UTIL.joinPaths([user.homeDir, ".webide/", "prod/"]), user.uid, user.gid);
 		
 		// wwwpub folder should be public
 		try { fs.mkdirSync(UTIL.joinPaths([user.homeDir, "wwwpub/"])); } catch(err) { console.log(err.message); }
