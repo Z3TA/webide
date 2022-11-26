@@ -132,7 +132,7 @@
 		if(ext == "js" || ext == "stdout") {
 			EDITOR.saveFile(file, function(err, path) {
 				if(err) return alertBox("Problem saving file: " + err.message);
-				else runNodeJsScript();
+				else runNodeJsScript(file);
 			});
 		}
 		else return alertBox("Not a JavaScript file: " + file.path);
@@ -198,7 +198,7 @@
 		//console.log("Run nodejs script: runNodeJsScriptMaybe: ext=" + ext + " isNodejsScript(file)=" + isNodejsScript(file));
 
 		if( ext != "txt" && ext != "md" && ext!="htm" && ext!="html" && (ext == "js" || ext == "stdout" || isNodejsScript(file))) {
-			runNodeJsScript();
+			runNodeJsScript(file);
 			return HANDLED;
 		}
 		
@@ -692,9 +692,12 @@
 		return false;
 	}
 	
-	function runNodeJsScript(callback) {
-		var file = EDITOR.currentFile;
+	function runNodeJsScript(file, callback) {
 		
+		if(file == undefined) file = EDITOR.currentFile;
+		
+		if(callback && typeof callback != "function") callback = undefined; // Most events pass file as first argument...
+
 		EDITOR.ctxMenu.hide();
 		
 		if(!file) {
@@ -936,7 +939,7 @@
 			EDITOR.openFile(filePath, function(err, file) {
 				if(err) throw err;
 				
-				runNodeJsScript(function(err) {;
+				runNodeJsScript(file, function(err) {;
 					if(err) throw err;
 
 					// It takes some time for the info image to load

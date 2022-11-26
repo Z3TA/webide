@@ -6,6 +6,12 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
+Make it so you can deploy into production!
+Do not restart stopped scripts when rebooting server!
+
+Make a GUI for scripts in production!
+---
+
 Busboy was upgraded to new major version when running npm audit.
 Try using the share function to share files to webide to see if it still works!
 
@@ -25,6 +31,12 @@ todo: Fill fileopen file list (with empty lines) so that we don't have to do a r
 ---
 
 Get deploy working again...!
+
+---
+
+Support for React, Aurelia
+
+Support for Jasmine, Cypress (testing frameworks)
 
 ---
 
