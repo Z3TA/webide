@@ -54,9 +54,12 @@ var SMTP_TRANSPORT = require('nodemailer-smtp-transport');
 
 var TLD = DEFAULT.domain;
 
-if(!HOMEDIR) return initError(new Error("No path specified. Use argument: --path=/path/to/folder/"));
+if(!HOMEDIR) return initError(new Error("No HOMEDIR specified. Use argument: --homeDir=/home/username/"));
 if(!UID) return initError(new Error("No UID specified. Use argument: --uid=123"));
 if(!GID) return initError(new Error("No UID specified. Use argument: --gid=123"));
+if(!USERNAME) return initError(new Error("No USERNAME specified. Use argument: --user=123"));
+
+
 
 // tip: type "id -u username" and "id -g username" in a terminal to get some user's user id and group id
 
@@ -117,11 +120,13 @@ else {
 	
 	findScripts(USER_PROD_FOLDER, function(scripts) {
 		
+		//log("scripts.length=" + scripts.length);
+
 		if(scripts.length == 0) {
-			log("No nodejs services found!");
+			log("No scripts found in " + USER_PROD_FOLDER);
 			// Make sure there's nothing to do and gracefully exit
-			initLogStream.end(0);
-			process.disconnect();
+			initLogStream.end(); // note:log() sends to initLogStream
+			if(typeof process.disconnect == "function") process.disconnect(); // Only available when we get spawned from another proces!?
 		}
 		
 		for (var i=0; i<scripts.length; i++) {
@@ -232,12 +237,12 @@ function start(pathToFolder) {
 				fs.readdir(pathToFolder, function (err, folderItems) {
 					if(err) initError(err);
 					else {
-						folderItems.forEach(function(fileName) {
+						folderItems.forEach(function(folderItem) {
 							
 							var path = require("path");
-							var scriptFilePath = path.join(pathToFolder, fileName);
+							var scriptFilePath = path.join(pathToFolder, folderItem);
 							
-							if(fileName == findFile + ".js") startService(scriptFilePath, findFile, pathToFolder, HOMEDIR+"log/" + fileName + ".log");
+							if(folderItem == findFile + ".js") startService(scriptFilePath, findFile, pathToFolder, HOMEDIR+"log/" + folderItem + ".log");
 							
 						});
 					}
@@ -338,7 +343,7 @@ function findScripts(pathToFolder, callback) {
 	var filesToStat = 0;
 	var readingFiles = 0;
 	
-	log("Reading directory pathToFolder=" + pathToFolder, 7);
+	log("Looking for scripts in " + pathToFolder, 7);
 	
 	fs.readdir(pathToFolder, function readdir(err, folderItems) {
 		if(err) {
@@ -350,13 +355,13 @@ function findScripts(pathToFolder, callback) {
 			process.exit(0); // A clean exit, because we have nothing to do 
 		}
 		else {
-			folderItems.forEach(function(fileName) {
+			folderItems.forEach(function(folderItem) {
 				
-				var filePath = path.join(pathToFolder, fileName)
+				var filePath = path.join(pathToFolder, folderItem)
 				
-				if(fileName.indexOf("�") != -1) log("Encoding problem in filePath=" + filePath, 4);
+				if(folderItem.indexOf("�") != -1) log("Encoding problem in filePath=" + filePath, 4);
 				
-				stat(fileName, filePath);
+				stat(folderItem, filePath);
 				
 			});
 		}
@@ -365,8 +370,8 @@ function findScripts(pathToFolder, callback) {
 		
 	});
 	
-	function stat(fileName, filePath) {
-		log("Making stat filePath=" + filePath + "", 7);
+	function stat(folderItem, filePath) {
+		//log("Making stat filePath=" + filePath + "", 7);
 		
 		filesToStat++;
 		
@@ -374,7 +379,7 @@ function findScripts(pathToFolder, callback) {
 			
 			if(err) initError(err);
 			else if(stats.isDirectory()) {
-				lookForScript(fileName, filePath);
+				lookForScript(folderItem, filePath);
 			}
 			
 			filesToStat--;
@@ -396,15 +401,15 @@ function findScripts(pathToFolder, callback) {
 					log("File not found: " + packageJson, DEBUG);
 					// See if there is a file with the same name as the folder, then use that file
 					foldersToLookIn++;
-					log("Looking for " + findFile + ".js in " + pathToFolder + " ...", DEBUG);
+					log("Looking for " + findFile + ".js in " + pathToFolder + "", DEBUG);
 					fs.readdir(pathToFolder, function (err, folderItems) {
 						if(err) initError(err);
 						else {
-							folderItems.forEach(function(fileName) {
+							folderItems.forEach(function(folderItem) {
 								
-								var scriptFilePath = path.join(pathToFolder, fileName);
+								var scriptFilePath = path.join(pathToFolder, folderItem);
 								
-								if(fileName == findFile + ".js") scripts.push({main: scriptFilePath, name: findFile, pathToFolder: pathToFolder, log: HOMEDIR + "log/" + fileName + ".log"});
+								if(folderItem == findFile + ".js") scripts.push({main: scriptFilePath, name: findFile, pathToFolder: pathToFolder, log: HOMEDIR + "log/" + folderItem + ".log"});
 								
 							});
 						}

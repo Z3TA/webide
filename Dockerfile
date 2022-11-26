@@ -38,7 +38,7 @@ RUN apt-get install curl gcc g++ make -y
 RUN apt-get install nano -y
 RUN apt-get install git -y
 
-RUN curl -fsSL https://deb.nodesource.com/setup_16.x | bash -
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
 RUN apt-get update
 RUN apt-get install -y nodejs
 

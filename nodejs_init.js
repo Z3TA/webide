@@ -25,6 +25,8 @@ var HTTP_PORT = getArg(["p", "port"]) || DEFAULT.nodejs_deamon_manager_port;
 var HTTP_IP = getArg(["ip", "ip"]) || DEFAULT.http_ip;
 var DOMAIN = getArg(["domain", "domain", "tld"]) || DEFAULT.domain;
 
+var INSIDE_DOCKER = getArg(["insidedocker", "insidedocker", "insidecontainer"]);
+
 var NODE_INIT_WORKER = {}; // username:childProcess
 
 var UTC = false;
@@ -231,12 +233,12 @@ function httpServerListening() {
 	
 	
 	if(isNaN(parseInt(HTTP_PORT)) && typeof HTTP_PORT == "string") {
-		log("Listening on http://" + HTTP_PORT);
+		log("Listening on " + HTTP_PORT);
 		
 		var fs = require("fs");
 		fs.chmod(HTTP_PORT, 0o777, function(err) {
 			if (err) throw err;
-			log('The permissions for ' + HTTP_PORT + ' have been changed!', DEBUG);
+			log('The permissions for ' + HTTP_PORT + ' successfully set!', DEBUG);
 		});
 		
 	}
@@ -306,8 +308,7 @@ function startNodejsInitWorker(homeDir, username, uid, gid) {
 				}
 				
 				var workerScript = "./nodejs_init_worker.js";
-			log("Starting init worker for " + username + ": Forking " + workerScript + " workerArgs=" + JSON.stringify(workerArgs) + " spawnOptions=" + JSON.stringify(spawnOptions));
-				
+			
 			var workerNode = process.argv[0]; // First argument is the path to the nodejs executable!
 			var command = "/sbin/ip";
 			//var args = ["netns", "exec", username, "sudo -u " + username, workerNode, workerScript].concat(workerArgs);
@@ -322,22 +323,41 @@ function startNodejsInitWorker(homeDir, username, uid, gid) {
 			// stdio: inherit sends log message to this process stdout, but that doesn't work when using network namespaces!
 			var stdioPipe = true;
 			
+			if(INSIDE_DOCKER) {
+				command = workerNode;
+				args = [workerScript].concat(workerArgs);
+			}
+
+			log("Starting init worker for " + username + ": Forking " + workerScript + " by running command=" + command + " args=" + JSON.stringify(args) + " spawnOptions=" + JSON.stringify(spawnOptions));
+
 			var module_child_process = require("child_process");
-			NODE_INIT_WORKER[username] = module_child_process.spawn(command, args, spawnOptions);
-				// We might get a seg fault here - which we can not try-catch!
-				// Then try with a new version of nodejs ... lets hope this doesn't happen in prod
+			NODE_INIT_WORKER[username] = module_child_process.spawn(command, args, spawnOptions, function spawnCallback(err, stdout, stderr) {
+				log("Spawn callback for ");
+				if(err) log(err.message, ERROR);
+				else if(stderr) log(stderr, WARN);
+				else if(stdout) log(stdout);
+				else log("Spawn success!");
+			});
+
+			// We might get a seg fault here - which we can not try-catch!
+			// Then try with a new version of nodejs ... lets hope this doesn't happen in prod
 				
+			/*
+				Might also get: Cannot open network namespace "ltest1": No such file or directory
+				How do we capture those errors !?!?!?
+			*/
+
 			var worker = NODE_INIT_WORKER[username];
 				
-				worker.on("close", workerClose);
-				worker.on("disconnect", workerDisconnect);
-				worker.on("error", workerError);
-				worker.on("message", messageFromWorker);
-				worker.on("exit", workerExitHandler);
+			worker.on("close", workerClose);
+			worker.on("disconnect", workerDisconnect);
+			worker.on("error", workerError);
+			worker.on("message", messageFromWorker);
+			worker.on("exit", workerExitHandler);
 				
-				log("worker.connected=" + worker.connected + " worker.killed=" + worker.killed + " worker.pid=" + worker.pid + " ", DEBUG);
+			log("worker.connected=" + worker.connected + " worker.killed=" + worker.killed + " worker.pid=" + worker.pid + " ", DEBUG);
 				
-				worker.send({ping: firstPing});
+			worker.send({ping: firstPing});
 				
 		});
 	}

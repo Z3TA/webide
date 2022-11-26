@@ -73,7 +73,7 @@ var HOME = getArg(["home", "home"]) || '/home/' + USERNAME;
 
 HOME = UTIL.trailingSlash(HOME);
 
-var USER_PROD_FOLDER = UTIL.joinPaths(HOME, "./webide/prod/");
+var USER_PROD_FOLDER = UTIL.joinPaths(HOME, "/.webide/prod/");
 
 var module_os = require("os");
 
@@ -1267,13 +1267,20 @@ function httpGet(options, callback) {
 	}
 	else if(options.port == undefined) options.port = 80;
 	
+	var endPoint = options.socketPath || options.hostname + ":" + options.port;
+
 	var http = require("http");
+	log("Connecting to " + endPoint + " ...", DEBUG);
 	var req = http.request(options, function (res) {
 		
 		res.setEncoding('utf8');
 		var rawData = '';
-		res.on('data', function http_data(chunk) { rawData += chunk; });
+		res.on('data', function http_data(chunk) {
+			log("Got data from " + endPoint + ": " + chunk, DEBUG);
+			rawData += chunk;
+		});
 		res.on('end', function http_req_end() {
+			log("" + endPoint + " status=" + res.statusCode, DEBUG);
 			if(res.statusCode != 200) {
 				callback(new Error("Failed to get " + options.path + " statusCode=" + res.statusCode + " data=" + rawData));
 			}
