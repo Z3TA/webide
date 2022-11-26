@@ -6,6 +6,13 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
+ mangkronyok2018/.prod/
+
+
+Make a GUI for scripts in production!
+Make it possible to add your own domains! CNAME to webide.se
+---
+
 Terminal always seem to hide under something! Issues with editor height
 (it either hides under a editor widget, or when working in Dex its  below the dex bar. (normal files also show text below the dex bar)
 the last line is correct in normal files though (the last line is the line above the line getting hidden)
@@ -24,15 +31,6 @@ For example Ctrl+G go to the function definiton or the variable definition of th
 
 update to node 18.12.1 LTS
 
----
-
- mangkronyok2018/.prod/
-
-Make it so you can deploy into production!
-Do not restart stopped scripts when rebooting server!
-
-Make a GUI for scripts in production!
-Make it possible to add your own domains! CNAME to webide.se
 ---
 
 Busboy was upgraded to new major version when running npm audit.

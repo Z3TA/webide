@@ -47,6 +47,8 @@ var ERROR = 3;
 
 var HTTP_SERVER;
 
+var sigIntCount = 0;
+
 process.on("SIGINT", sigint);
 
 var fs = require("fs");
@@ -115,15 +117,24 @@ function sigint() {
 	TIMERS.forEach(clearTimeout);
 	
 	for(var name in NODE_INIT_WORKER) {
-		NODE_INIT_WORKER[name].kill('SIGTERM');
 		NODE_INIT_WORKER[name].kill('SIGINT');
 		NODE_INIT_WORKER[name].kill('SIGQUIT');
 		NODE_INIT_WORKER[name].kill('SIGHUP');
+		NODE_INIT_WORKER[name].kill('SIGTERM');
+
+		if(NODE_INIT_WORKER[name].connected) NODE_INIT_WORKER[name].disconnect();
+
+		log("Worker: " + name + ": connected=" + NODE_INIT_WORKER[name].connected + " exitCode=" + NODE_INIT_WORKER[name].exitCode + " killed=" + NODE_INIT_WORKER[name].killed + " pid=" + NODE_INIT_WORKER[name].pid + " signalCode=" + NODE_INIT_WORKER[name].signalCode + "");
+	
+		NODE_INIT_WORKER[name].unref();
 	}
 	
 	HTTP_SERVER.close();
 	
 	// The process should now exit by itself as there is nothing left to do
+
+	if(++sigIntCount > 2) process.exit();
+
 }
 
 function httpRequest(request, response) {
@@ -186,12 +197,15 @@ response.end('Authorization failed! Unknown username=' + username + "\n");
 				
 				if(err) throw err;
 				
+				var message = {};
+				message[pathToFolder] = action;
+
 				if(!NODE_INIT_WORKER.hasOwnProperty(username) && action != "stop") {
-					startNodejsInitWorker(user.homeDir, user.name, user.uid, user.gid);
+					startNodejsInitWorker(user.homeDir, user.name, user.uid, user.gid, message);
 					isStarting = true;
 				}
 				else if(!NODE_INIT_WORKER[username].connected && action != "stop") {
-					startNodejsInitWorker(user.homeDir, user.name, user.uid, user.gid);
+					startNodejsInitWorker(user.homeDir, user.name, user.uid, user.gid, message);
 					isStarting = true;
 				}
 				
@@ -250,7 +264,7 @@ function httpServerListening() {
 	
 }
 
-function startNodejsInitWorker(homeDir, username, uid, gid) {
+function startNodejsInitWorker(homeDir, username, uid, gid, messageToWorker) {
 	
 	if(typeof homeDir != "string") throw new Error("homeDir=" + homeDir + " needs to be a string (folder)!");
 	if(typeof username != "string") throw new Error("username=" + username + " needs to be a string!");
@@ -276,11 +290,15 @@ function startNodejsInitWorker(homeDir, username, uid, gid) {
 		}
 	};
 	
+	if(messageToWorker) {
+		spawnOptions.env.messageToInitWorker = JSON.stringify(messageToWorker);
+	}
+
 	restart();
 	
 	function restart() {
 		// Check the .prod folder
-		var prodFolder = homeDir + ".webide/prod/";
+		var prodFolder = UTIL.joinPaths(homeDir, ".webide/prod/");
 		var fs = require("fs");
 		log("Reading " + prodFolder + " ...");
 		fs.readdir(prodFolder, function(err, filesInProdDir) {
@@ -301,13 +319,13 @@ function startNodejsInitWorker(homeDir, username, uid, gid) {
 			
 				
 			if(NODE_INIT_WORKER.hasOwnProperty(username)) {
-					// Make sure it's dead
+				// Make sure it's dead
 				log("Making sure init worker for " + username + " is dead ...");
 				if(NODE_INIT_WORKER[username].connected) NODE_INIT_WORKER[username].disconnect();
 				NODE_INIT_WORKER[username].kill('SIGKILL');
-				}
+			}
 				
-				var workerScript = "./nodejs_init_worker.js";
+			var workerScript = "./nodejs_init_worker.js";
 			
 			var workerNode = process.argv[0]; // First argument is the path to the nodejs executable!
 			var command = "/sbin/ip";

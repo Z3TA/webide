@@ -32,6 +32,12 @@ var EMAIL = getArg(["email", "email"]) || process.env.email; // E-mail address o
 var UID = getArg(["uid", "uid"]) || process.env.uid;
 var GID = getArg(["gid", "gid"]) || process.env.gid;
 var USERNAME = getArg(["user", "user", "username"]) || process.env.user;
+var INIT_MESSAGE = getArg(["action", "action", "msg", "message"]) || process.env.messageToInitWorker;
+
+if(INIT_MESSAGE) {
+	INIT_MESSAGE = JSON.parse(INIT_MESSAGE);
+	log("INIT_MESSAGE: \n" + JSON.stringify(INIT_MESSAGE, null, 2));
+}
 
 // For sending errors via email to an admin
 var SMTP_PORT = getArg(["mp", "smtp_port"]) || DEFAULT.smtp_port;
@@ -124,15 +130,57 @@ else {
 
 		if(scripts.length == 0) {
 			log("No scripts found in " + USER_PROD_FOLDER);
+			exit();
+		}
+		
+		scripts.forEach(startMaybe);
+
+		function startMaybe(script) {
+			var statusFile = UTIL.joinPaths(script.pathToFolder, ".webide_init_status");
+			fs.readFile(statusFile, "utf8", function(err, status){
+				if(err) {
+					if(err.code != "ENOENT") throw err;
+					log("Setting status to start for " + script.pathToFolder + " because there was an error when opening " + statusFile + ". Error:" + err.message);
+					setStatus(script.pathToFolder, "start");
+					status ="start";
+				}
+				else if(INIT_MESSAGE) {
+					if(INIT_MESSAGE.hasOwnProperty(script.pathToFolder)) {
+						var action = INIT_MESSAGE[script.pathToFolder];
+						if(action=="start" || action=="restart") {
+							setStatus(script.pathToFolder, "start");
+							status ="start";
+						}
+						else {
+							log("Unknown action=" + action + " in INIT_MESSAGE=" + JSON.stringify(INIT_MESSAGE, null, 2));
+						}
+					}
+					else {
+						log("Did not find " + script.pathToFolder + " in " + JSON.stringify(Object.keys(INIT_MESSAGE)) );
+					}
+				}
+
+				status = status.trim();
+
+				if(status=="stop") {
+					log("Not starting " + script.pathToFolder + " because last status was stop!");
+					
+					scripts.splice(scripts.indexOf(script), 1);
+					if(scripts.length == 0) exit();
+
+					return;
+				}
+
+				startService(script.main, script.name, script.pathToFolder, script.log, script.email); 
+			});
+		}
+
+		function exit() {
 			// Make sure there's nothing to do and gracefully exit
 			initLogStream.end(); // note:log() sends to initLogStream
 			if(typeof process.disconnect == "function") process.disconnect(); // Only available when we get spawned from another proces!?
 		}
-		
-		for (var i=0; i<scripts.length; i++) {
-			startService(scripts[i].main, scripts[i].name, scripts[i].pathToFolder, scripts[i].log, scripts[i].email);
-		}
-		
+
 	});
 }
 
@@ -175,8 +223,8 @@ function restart(pathToFolder) {
 	}
 
 	if(CHILD[pathToFolder].connected) {
-	//log("Sending stop signals and disconnecting from: " + pathToFolder);
-	closeChild(CHILD[pathToFolder]);
+		//log("Sending stop signals and disconnecting from: " + pathToFolder);
+		closeChild(CHILD[pathToFolder]);
 		// it will be automatically restarted!
 	}
 	else {
@@ -208,6 +256,8 @@ function stop(pathToFolder) {
 	
 	log("Recieved stop command for " + pathToFolder);
 	
+	setStatus(pathToFolder, "stop");
+
 	if(!CHILD.hasOwnProperty(pathToFolder)) return log( "Service is not running: " + pathToFolder + " Running services: " + Object.getOwnPropertyNames(CHILD) );
 	
 	STOP.push(pathToFolder);
@@ -238,12 +288,20 @@ function stop(pathToFolder) {
 	
 }
 
+function setStatus(pathToFolder, status) {
+	if(status != "start" && status != "stop") throw new Error("status=" + status + " should be either start or stop!");
+	var statusFile = UTIL.joinPaths(pathToFolder, ".webide_init_status");
+	fs.writeFileSync(statusFile, status);
+}
+
 function start(pathToFolder) {
 	
 	pathToFolder = UTIL.trailingSlash(pathToFolder);
 	
 	log("Recieved start command for project folder: " + pathToFolder);
 	
+	setStatus(pathToFolder, "start");
+
 	// Look up start parameters ...
 	
 	pathToFolder = UTIL.trailingSlash(pathToFolder);
@@ -430,7 +488,7 @@ function findScripts(pathToFolder, callback) {
 								
 								var scriptFilePath = path.join(pathToFolder, folderItem);
 								
-								if(folderItem == findFile + ".js") scripts.push({main: scriptFilePath, name: findFile, pathToFolder: pathToFolder, log: HOMEDIR + "log/" + folderItem + ".log"});
+								if(folderItem == findFile + ".js") scripts.push({main: scriptFilePath, name: findFile, pathToFolder: UTIL.trailingSlash(pathToFolder), log: HOMEDIR + "log/" + folderItem + ".log"});
 								
 							});
 						}
@@ -454,7 +512,7 @@ function findScripts(pathToFolder, callback) {
 				if(json.main) {
 					var name = json.name || findFile;
 					var mainFile = path.join(pathToFolder, json.main);
-					scripts.push({main: mainFile, name: name, pathToFolder: pathToFolder, log: HOMEDIR + "log/" + name + ".log", email: json.email});
+					scripts.push({main: mainFile, name: name, pathToFolder: UTIL.trailingSlash(pathToFolder), log: HOMEDIR + "log/" + name + ".log", email: json.email});
 				}
 				else return log(packageJson + " has no main file entry!");
 				
