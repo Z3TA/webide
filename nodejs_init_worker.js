@@ -167,15 +167,36 @@ function restart(pathToFolder) {
 	
 	log("Recieved restart command for " + pathToFolder);
 	
-	if(!CHILD.hasOwnProperty(pathToFolder)) return start(pathToFolder);
-	
+	//log("restart: pathToFolder=" + pathToFolder + " CHILD=" + JSON.stringify(Object.keys(CHILD)));
+
+	if(!CHILD.hasOwnProperty(pathToFolder)) {
+		//log("pathToFolder=" + pathToFolder + " not in CHILD=" + JSON.stringify(Object.keys(CHILD)) + " so calling start() ...");
+		return start(pathToFolder);
+	}
+
 	if(CHILD[pathToFolder].connected) {
-	log("Sending stop signals and disconnecting from: " + pathToFolder);
+	//log("Sending stop signals and disconnecting from: " + pathToFolder);
 	closeChild(CHILD[pathToFolder]);
-		// it will be restarted!
+		// it will be automatically restarted!
 	}
 	else {
-		closeChild(CHILD[pathToFolder]); // Just in case
+		/*
+			There is a respawn timer waiting ...
+			But we want to restart it right away!
+			We can't call the respawn function because it can only be called inside startService()
+			Stopping is slow because we are making sure it's really dead by sending additional kill commands
+
+		*/
+		
+		//log("pathToFolder=" + pathToFolder + " not connected, so closing and then starting ...");
+		closeChild(CHILD[pathToFolder]); // Send kill signal and disconnect just in case
+		
+		for(var timer in TIMERS[pathToFolder]) {
+			clearTimeout(TIMERS[pathToFolder][timer]);
+		}
+
+		delete CHILD[pathToFolder];
+
 		start(pathToFolder);
 	}
 	
@@ -191,7 +212,7 @@ function stop(pathToFolder) {
 	
 	STOP.push(pathToFolder);
 	
-	log("Clearing " + TIMERS[pathToFolder].length + " timers from " + pathToFolder);
+	//log("Clearing " + TIMERS[pathToFolder].length + " timers from " + pathToFolder);
 	TIMERS[pathToFolder].forEach(clearTimeout);
 	TIMERS[pathToFolder].length = 0;
 	
@@ -460,6 +481,8 @@ function startService(scriptPath, projectName, pathToFolder, logFilePath, email)
 	
 	pathToFolder = UTIL.trailingSlash(pathToFolder);
 	
+	log("startService: scriptPath=" + scriptPath + " CHILD=" + JSON.stringify(Object.keys(CHILD)));
+
 	if(CHILD.hasOwnProperty(pathToFolder)) return log("Already initiated: " + pathToFolder + " (try stopping it)"); 
 	if(STOP.indexOf(pathToFolder) != -1) return log("Can not start Script while it's being stopped: " + pathToFolder + "");
 	
@@ -467,8 +490,7 @@ function startService(scriptPath, projectName, pathToFolder, logFilePath, email)
 	
 	TIMERS[pathToFolder] = [];
 	
-	var waitRestart = [2000,5000,10000,30000,60000,1800000];
-	var waitKill = 1000; // How long to wait from SIGHUB to SIGKILL
+	var waitRestart = [0, 2000,5000,10000,30000,60000,1800000];
 	
 	var restarts = 0;
 	var respawnTimer;
@@ -586,9 +608,8 @@ function startService(scriptPath, projectName, pathToFolder, logFilePath, email)
 		
 		if(SHUTDOWN || STOP.indexOf(pathToFolder) != -1) return;
 		
-		var waitForRespawn = 2000;
-		if(restarts < waitRestart.length-1) waitForRespawn = waitRestart[restarts];
-		else waitForRespawn = waitRestart[waitRestart.length-1];
+		if(restarts < waitRestart.length-1) var waitForRespawn = waitRestart[restarts];
+		else var waitForRespawn = waitRestart[waitRestart.length-1];
 		
 		//if(email) sendMail(email, projectName + ": Exit code=" + code + " signal=" + signal, stdHistory.join("\n"));
 		// Only send mail on errors (not restarts)
@@ -613,7 +634,7 @@ function startService(scriptPath, projectName, pathToFolder, logFilePath, email)
 			
 			resetRestartsTimer = setTimeout(function() {
 				resetRestartsTimerCounter--;
-				log("Resetting respawntime for " + pathToFolder);
+				//log("Resetting respawntime for " + pathToFolder);
 				TIMERS[pathToFolder].splice(TIMERS[pathToFolder].indexOf(resetRestartsTimer), 1);
 				
 				// Reset the restarts counter if the service has been running for more then 60 seconds ...

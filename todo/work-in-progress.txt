@@ -26,10 +26,6 @@ update to node 18.12.1 LTS
 
 ---
 
-Restarting a script in production that has exited and are waiting for a restart - don't restart , 
-because init_worker is still waiting for the long timeout in order to restart it...
-
-
  mangkronyok2018/.prod/
 
 Make it so you can deploy into production!
