@@ -1,9 +1,13 @@
 (function() {
 	"use strict";
 	
-	var winMenuProdDeploy, winMenuProdRestart, winMenuProdStop, winMenuProdRemove;
+	var winMenuProdDeploy, winMenuProdRestart, winMenuProdStop, winMenuProdRemove, winMenuProdList;
 	var activated = false;
-	
+	var deployedScriptWidget;
+	var scriptList;
+	var pwDate = new Date();
+	var tmpPw = "";
+
 	EDITOR.plugin({
 		desc: "Allows deoploying Node.js scripts",
 		load: function loadNodeJsDeploy() {
@@ -43,7 +47,8 @@
 						winMenuProdRestart = EDITOR.windowMenu.add(S("restart_production"), ["Node.js", 5], nodejsProdRestart);
 						winMenuProdStop= EDITOR.windowMenu.add(S("stop_production"), ["Node.js", 5], nodejsProdStop);
 						winMenuProdRemove = EDITOR.windowMenu.add(S("remove_from_production"), ["Node.js", 5], nodejsProdRemove, "bottom");
-						
+						winMenuProdList = EDITOR.windowMenu.add("List deployed scripts", ["Node.js", 5], nodejsProdList, "bottom");
+
 						var discoveryItem = document.createElement("img");
 						discoveryItem.setAttribute("id", "deployDiscovery");
 						discoveryItem.src = "gfx/upload.svg"; // Icon created by: https://www.flaticon.com/authors/phatplus
@@ -69,9 +74,56 @@
 			EDITOR.windowMenu.remove(winMenuProdRestart);
 			EDITOR.windowMenu.remove(winMenuProdStop);
 			EDITOR.windowMenu.remove(winMenuProdRemove);
+			EDITOR.windowMenu.remove(winMenuProdList);
+
 		},
 	});
 	
+	function askForPassword(msg, callback) {
+
+		var expireTime = 10*60*1000;
+
+		if(tmpPw && (new Date())-pwDate < expireTime) return callback(null, tmpPw);
+
+		promptBox("Enter password " + (msg ? msg:""), {isPassword: true, dialogDelay: 0}, function(pw) {
+			tmpPw = pw;
+			pwDate = new Date();
+
+			callback(null, pw);
+		});
+	}
+
+	function nodejsProdList() {
+		if(!deployedScriptWidget) deployedScriptWidget = EDITOR.createWidget(buildDeployedScriptManager);
+
+		deployedScriptWidget.show();
+		winMenuProdList.hide();
+
+		askForPassword(" in order to list scripts:", function (err, pw) {
+			if(err) return alertBox(err.message);
+			CLIENT.cmd("nodejs_init_list", {pw: pw}, function(err, resp) {
+				if(err) {
+					throw err;
+				}
+
+				alertBox(JSON.stringify(resp));
+
+			});
+		});
+	}
+
+	function buildDeployedScriptManager() {
+
+		var main = document.createElement("div");
+
+		scriptList = document.createElement("ul");
+
+		main.appendChild(scriptList);
+
+		return main;
+	}
+
+
 	function nodejsDeployFromDiscoveryBar() {
 		nodejsDeploy(EDITOR.currentFile);
 	}

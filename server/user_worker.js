@@ -932,6 +932,10 @@ API.install_nodejs_module = function install_nodejs_module(user, json, callback)
 	
 }
 
+API.nodejs_init_list = function nodejs_init_list(user, json, callback) {
+	nodejs_init_action("list", USER_PROD_FOLDER, json.pw, callback);
+}
+
 API.nodejs_init_stop = function nodejs_init_stop(user, json, callback) {
 	
 	var folder = json.folder;

@@ -205,8 +205,31 @@ function commandMessage(message) {
 	else if(message.start) start(message.start);
 	else if(message.shutdown) shutdownInitWorker();
 	else if(message.ping) process.send({pong: message.ping});
+	else if(message.list) list(message.id);
+
 	else throw new Error("Unknown message=" + JSON.stringify(message));
 	
+}
+
+function list(reqId) {
+	findScripts(USER_PROD_FOLDER, function(scripts) {
+
+		var json = scripts.map(function(script) {
+			/*
+				{main: scriptFilePath, name: findFile, pathToFolder: UTIL.trailingSlash(pathToFolder), log: HOMEDIR + "log/" + folderItem + ".log"}
+			*/
+
+			return {
+				main: script.main,
+				name: script.name,
+				pathToFolder: script.pathToFolder,
+				log: script.log,
+				running: CHILD.hasOwnProperty(pathToFolder)
+			}
+		});
+
+		process.send({id: reqId, data: json});
+	});
 }
 
 function restart(pathToFolder) {

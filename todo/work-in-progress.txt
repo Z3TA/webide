@@ -6,10 +6,25 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
+
+problem: init is spawning the worker we want to send a message to ...
+
+/srv/webide/nodejs_init.js:237
+                    NODE_INIT_WORKER[username].send({list: pathToFolder, id: REQUEST_ID});
+                                               ^
+
+TypeError: Cannot read properties of undefined (reading 'send')
+    at /srv/webide/nodejs_init.js:237:33
+    at readPwFile (/srv/webide/shared/userInfo.js:36:6)
+    at FSReqCallback.readFileAfterClose [as oncomplete] (node:internal/fs/read_file_context:68:3)
+    
+    
+
  mangkronyok2018/.prod/
 
 
 Make a GUI for scripts in production!
+
 Make it possible to add your own domains! CNAME to webide.se
 ---
 

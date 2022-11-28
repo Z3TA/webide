@@ -35,6 +35,8 @@ var SHUTDOWN = false;
 
 var TIMERS = [];
 
+var REQUESTS = []; // id: For recieving answers from workers
+var REQUEST_ID = 0;
 
 // Systemd console message leveles
 var DEBUG = 7; // <7>This is a DEBUG level message
@@ -226,7 +228,14 @@ response.end('Authorization failed! Unknown username=' + username + "\n");
 					response.writeHead(200);
 					response.end('Restarting ' + pathToFolder + "\n");
 				}
-				// debug ?
+				else if(action == "list") {
+					response.writeHead(200);
+					REQUEST_ID++;
+					REQUESTS[REQUEST_ID] = function (json) {
+						response.end(JSON.stringify(json));
+					}
+					NODE_INIT_WORKER[username].send({list: pathToFolder, id: REQUEST_ID});
+				}
 				else {
 					response.writeHead(400);
 					response.end('Unknown action: ' + action + "\n");
@@ -395,6 +404,11 @@ function startNodejsInitWorker(homeDir, username, uid, gid, messageToWorker) {
 		else if(msg.pong) {
 			if(msg.pong == firstPing) {
 				firstPing = randomNr(6);
+			}
+		}
+		else if (msg.response) {
+			if(REQUESTS.hasOwnProperty(msg.response.id)) {
+				REQUESTS[msg.response.id](msg.response.data);
 			}
 		}
 	}

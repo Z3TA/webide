@@ -12,7 +12,9 @@
 # Inside the container:
 # ip a
 # (take note of the ip and change it below)
-# node server/server.js --hostname=d80.johan.webide.se -noguest -insidedocker -nonginx -pp 80 --port=80 -ip 172.17.0.2
+# node server/server.js --hostname=d80.johan.webide.se -noguest -insidedocker -nonginx -pp 80 --port=80 -ip 172.17.0.2 &
+# node nodejs_init.js &
+#
 # Access from: https://d80.johan.webide.se/
 #
 # Before running tests: Run ssh-keygen in the "d80.johan.webide.se" terminal (not docker) and cat /home/ltest1/.ssh/id_rsa.pub - then add the ssh public key to the Github test account
