@@ -7,11 +7,19 @@
 	var originalTopMargin = EDITOR.settings.topMargin;
 	var deltaNext = 0;
 	
-	EDITOR.on("mouseScroll", onScroll);
-	
 	var lastScroll = new Date();
 	var lastSmoothScroller;
 	
+	EDITOR.plugin({
+		desc: "Scroll using mouse wheel",
+		load: function loadMouseWheelScroll() {
+			EDITOR.on("mouseScroll", onScroll);
+		},
+		unload: function unloadMouseWheelScroll() {
+			EDITOR.removeEvent("mouseScroll", onScroll);
+		},
+	});
+
 	function onScroll(dir, steps, combo, scrollEvent) {
 		
 		var time = new Date();
@@ -19,19 +27,40 @@
 		
 		if(!deltaY) deltaY = 53; // Some browsers (Firefox) don't give deltaY
 		
+		/*
+			Sometimes the deltaY can be wicked, which causes a big jump...
+
+			it seem wheelDelta and wheelDeltaY are also wicked when deltaY is wicked
+
+			it happens more often if you scroll agressively,
+			but it's very annoying when it happens when you want to scroll slowly...
+
+			Macbooks probably works in a stupid way, so make sure you test on a Macbook when trying to fix...
+		*/
+
+		if(deltaY > 100) {
+			UTIL.objInfo(scrollEvent);
+		}
+
+
 		var scrollSpeed = Math.floor((deltaY + deltaNext) * EDITOR.settings.scrollSpeedMultiplier);
 		
-		console.log("onScroll: dir=" + dir + " time=" + (time - lastScroll) + " scrollSpeed=" + scrollSpeed + " deltaNext=" + deltaNext + " deltaY=" + deltaY + " scrollEvent.deltaY=" + scrollEvent.deltaY);
+		console.log("onScroll: scrollEvent{deltaY:" + scrollEvent.deltaY + "wheelDelta:" + scrollEvent.wheelDelta + " wheelDeltaY:" + scrollEvent.wheelDeltaY + "} scrollSpeed=" + scrollSpeed + " deltaY=" + deltaY + " deltaNext=" + deltaNext + " EDITOR.settings.scrollSpeedMultiplier=" + EDITOR.settings.scrollSpeedMultiplier + " dir=" + dir + " ");
+
+		//console.log("onScroll: dir=" + dir + " time=" + (time - lastScroll) + " scrollSpeed=" + scrollSpeed + " deltaNext=" + deltaNext + " deltaY=" + deltaY + " scrollEvent.deltaY=" + scrollEvent.deltaY);
 		
 		//if((time - lastScroll) < 58 && navigator.platform.indexOf("Mac") != -1) {
-			// It's annoying if we limit scroll speed on most systems
-			// But on Mac it's super fast, so it's more annoying because it's too fast.
-			//console.log("onScroll: skipped scroll dir!");
-			//return; // Fix insane fast scrolling
+		// It's annoying if we limit scroll speed on most systems
+		// But on Mac it's super fast, so it's more annoying because it's too fast.
+		//console.log("onScroll: skipped scroll dir!");
+		//return; // Fix insane fast scrolling
 		//}
 		
 		
-		if(scrollSpeed == 0) deltaNext += deltaY;
+		if(scrollSpeed == 0) {
+			console.warn("onScroll: Incrementing deltaNext=" + deltaNext + " with deltaY=" + deltaY + " because scrollSpeed=" + scrollSpeed);
+			deltaNext += deltaY;
+		}
 		else deltaNext = 0;
 		
 		var timeDiff = time - lastScroll;
@@ -67,9 +96,9 @@ if(file == undefined) return;
 					startRow = maxStartRow;
 				}
 				
-				console.log("onScroll: file.startRow=" + file.startRow);
-			console.log("onScroll: maxStartRow=" + maxStartRow);
-			console.log("onScroll: startRow=" + startRow);
+				//console.log("onScroll: file.startRow=" + file.startRow);
+			//console.log("onScroll: maxStartRow=" + maxStartRow);
+			//console.log("onScroll: startRow=" + startRow);
 			//console.log("onScroll: EDITOR.settings.topMargin=" + EDITOR.settings.topMargin);
 			//console.log("onScroll: originalTopMargin=" + originalTopMargin);
 				

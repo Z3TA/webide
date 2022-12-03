@@ -4225,7 +4225,7 @@ if(startColumn-indentationWidth > minIndentation*EDITOR.settings.tabSpace) {
 		
 		function doTheScrolling(scrolled) {
 			
-			console.log("File.scrollTo: Doing the scrolling ... file.startRow=" + file.startRow + " startRow=" + startRow + " file.startColumn=" + file.startColumn + " startColumn=" + startColumn);
+			//console.log("File.scrollTo: Doing the scrolling ... file.startRow=" + file.startRow + " startRow=" + startRow + " file.startColumn=" + file.startColumn + " startColumn=" + startColumn);
 			
 			if(file.startColumn != startColumn || file.startRow != startRow) {
 				file.startColumn = startColumn;
@@ -4261,7 +4261,7 @@ if(startColumn-indentationWidth > minIndentation*EDITOR.settings.tabSpace) {
 					Error: Scroll bug: EDITOR.view.endingColumn=211 new value for EDITOR.view.endingColumn 203 but EDITOR.view.visibleColumns=203 EDITOR.currentFile.startColumn =8 (code=undefined)
 				*/
 
-				console.log("File.scrollTo: Going to set newEndingColumnValue=" + newEndingColumnValue + " file.startColumn=" + file.startColumn + " EDITOR.view.visibleColumns=" + EDITOR.view.visibleColumns + " EDITOR.view.endingColumn=" + EDITOR.view.endingColumn + " file.path=" + file.path + " EDITOR.currentFile.path=" + EDITOR.currentFile.path + " file.isBig=" + file.isBig );
+				//console.log("File.scrollTo: Going to set newEndingColumnValue=" + newEndingColumnValue + " file.startColumn=" + file.startColumn + " EDITOR.view.visibleColumns=" + EDITOR.view.visibleColumns + " EDITOR.view.endingColumn=" + EDITOR.view.endingColumn + " file.path=" + file.path + " EDITOR.currentFile.path=" + EDITOR.currentFile.path + " file.isBig=" + file.isBig );
 
 				EDITOR.view.endingColumn = newEndingColumnValue;
 				scrolled = true;
