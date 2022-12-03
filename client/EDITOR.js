@@ -1761,7 +1761,6 @@ EDITOR.env = {}; // Plugins can set custom env values that will be passed to ter
 					// Switch to this file
 					//console.log("EDITOR.openFile: Showing file.path=" + file.path + " " + UTIL.getStack("showing file"));
 					EDITOR.showFile(file);
-					EDITOR.view.endingColumn = EDITOR.view.visibleColumns; // Because file.startColumn = 0;
 				}
 				else if(showFile != undefined) {
 					//console.warn("Not switching to " + path + " because showFile is set to " + showFile);
@@ -7647,7 +7646,10 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 			f[i](file, EDITOR.lastFileShowed); // Call function
 		}
 		
-		EDITOR.resizeNeeded(); // Update the view
+		// Update the view
+		EDITOR.view.endingColumn = EDITOR.view.visibleColumns + file.startColumn;
+
+
 		EDITOR.renderNeeded();
 		
 		//EDITOR.interact("showFile", window.event);
