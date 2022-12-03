@@ -99,6 +99,24 @@ var File; // File object is global
 		file.startRow = 0;    // Scrolling up/down
 		file.startColumn = 0; // Scrolling left/right
 		
+		// Trying to figure out annying bug for when you scroll and you scroll several pages away (when using the mouse scroll wheel)
+		var _startRow = 0;
+		if(Object.defineProperty && EDITOR.settings.devMode) {
+			Object.defineProperty(file, 'startRow', {
+				get: function() { return _startRow; },
+				set: function(newValue) {
+					var diff = Math.abs(_startRow - newValue);
+					_startRow = newValue;
+					if(diff > 10) {
+						//var stack = UTIL.getStack("startRow");
+						console.warn("Scrolled many bug ?");
+					}
+				},
+				enumerable: true
+			});
+		}
+
+
 		file.selected = []; // Selected text boxes
 		file.highlighted = []; // Highlighted text boxes
 		
@@ -129,7 +147,7 @@ var File; // File object is global
 		
 		var checkCaretError = null;
 		try {
-		file.caret = file.createCaret(0,0,0); // Create the caret, even if it's a stream
+			file.caret = file.createCaret(0,0,0); // Create the caret, even if it's a stream
 		}
 		catch(err) {
 			checkCaretError = err;
@@ -160,7 +178,7 @@ var File; // File object is global
 			// A: Callback needs to be called *after* new File constructor has returned!
 			// (otherwise the variable that new File will be assigned to will still be undefined when the callback functions runs) 
 			if(callback) setTimeout(function newFileConstructorFinished() {
-			callback(checkGridError || checkCaretError);
+				callback(checkGridError || checkCaretError);
 			}, 0);
 			
 		}
@@ -433,7 +451,7 @@ var File; // File object is global
 				if(grid[row].length == 0 && row == (grid.length-1)) caret.eof = true;
 				
 			}
-			}
+		}
 		else if(index == undefined && col != undefined) {
 			//console.log("File:createCaret: We have only the col=" + col + " ! index=" + index + " row=" + row);
 			if(isNaN(col)) {
@@ -4101,7 +4119,7 @@ if(startColumn-indentationWidth > minIndentation*EDITOR.settings.tabSpace) {
 		}
 		
 		if(startRow < 0) {
-			file.startRow = 0;
+			startRow = 0;
 		}
 		
 		file.scrollTo(undefined, startRow);
@@ -4129,7 +4147,7 @@ if(startColumn-indentationWidth > minIndentation*EDITOR.settings.tabSpace) {
 		var file = this;
 
 		if(EDITOR.currentFile != file) {
-			console.warn( "Scrolling in a file that is not the current file! file.path=" + file.path + " EDITOR.currentFile.path=" + (EDITOR.currentFile && EDITOR.currentFile.path) );
+			console.warn( "File.scrollTo: Scrolling in a file that is not the current file! file.path=" + file.path + " EDITOR.currentFile.path=" + (EDITOR.currentFile && EDITOR.currentFile.path) );
 			// If the file is not in view, just set the state.
 			if( UTIL.isNumeric(x) ) file.startColumn = parseInt(x);
 			if( UTIL.isNumeric(y) ) file.startRow = parseInt(y);
@@ -4146,11 +4164,11 @@ if(startColumn-indentationWidth > minIndentation*EDITOR.settings.tabSpace) {
 		var oldPartStartRow = file.partStartRow;
 		
 		if((x == undefined || x == startColumn) && (y == undefined || y == startRow)) {
-			//console.warn("No need to scroll! x=" + x + " y=" + y + " startRow=" + startRow + " startColumn=" + startColumn + "");
+			//console.warn("File.scrollTo: No need to scroll! x=" + x + " y=" + y + " startRow=" + startRow + " startColumn=" + startColumn + "");
 			return;
 		}
 		
-		//console.log("scrollTo: x=" + x + " y=" + y);
+		//console.log("File.scrollTo: scrollTo: x=" + x + " y=" + y);
 		
 		if(x != undefined) startColumn = parseInt(x);
 		
@@ -4174,10 +4192,10 @@ if(startColumn-indentationWidth > minIndentation*EDITOR.settings.tabSpace) {
 				
 				//console.log(UTIL.getStack("scrollTo"));
 				
-				//console.log("Scrolling in big file: file.isStreaming=" + file.isStreaming + " file.totalRows=" + file.totalRows + " file.startRow=" + file.startRow + " file.partStartRow=" + file.partStartRow + " y=" + y + " high=" + high + " low=" + low + " middle=" + middle);
+				//console.log("File.scrollTo: Scrolling in big file: file.isStreaming=" + file.isStreaming + " file.totalRows=" + file.totalRows + " file.startRow=" + file.startRow + " file.partStartRow=" + file.partStartRow + " y=" + y + " high=" + high + " low=" + low + " middle=" + middle);
 				
 				if(file.isStreaming) {
-					console.warn("Scrolling while the file is streaming ...");
+					console.warn("File.scrollTo: Scrolling while the file is streaming ...");
 				}
 				else if(y > high && !file.tail) {
 					file.loadFilePart(file.partStartRow + moveRows, streamLoaded);
@@ -4198,7 +4216,7 @@ if(startColumn-indentationWidth > minIndentation*EDITOR.settings.tabSpace) {
 			startRow = Math.min(y, maxY);
 			
 			if(startRow < 0) {
-				//console.warn("y=" + y + " maxY=" + maxY + " file.grid.length=" + file.grid.length);
+				//console.warn("File.scrollTo: y=" + y + " maxY=" + maxY + " file.grid.length=" + file.grid.length);
 				startRow = 0;
 			}
 		}
@@ -4207,7 +4225,7 @@ if(startColumn-indentationWidth > minIndentation*EDITOR.settings.tabSpace) {
 		
 		function doTheScrolling(scrolled) {
 			
-			//console.log("Doing the scrolling ... file.startRow=" + file.startRow + " startRow=" + startRow + " file.startColumn=" + file.startColumn + " startColumn=" + startColumn);
+			console.log("File.scrollTo: Doing the scrolling ... file.startRow=" + file.startRow + " startRow=" + startRow + " file.startColumn=" + file.startColumn + " startColumn=" + startColumn);
 			
 			if(file.startColumn != startColumn || file.startRow != startRow) {
 				file.startColumn = startColumn;
@@ -4217,13 +4235,13 @@ if(startColumn-indentationWidth > minIndentation*EDITOR.settings.tabSpace) {
 			
 			/*
 				if(file.startRow > maxY) {
-				console.warn("Attempted to scroll below visible veiw");
+				console.warn("File.scrollTo: Attempted to scroll below visible veiw");
 				file.startRow = maxY;
 				scrolled = true;
 				}
 				
 				if(file.startRow < 0) {
-				console.warn("We can not scroll up higher then the first row."); // But we can increase the top margin!? erm noo
+				console.warn("File.scrollTo: We can not scroll up higher then the first row."); // But we can increase the top margin!? erm noo
 				file.startRow = 0;
 				scrolled = true;
 				}
@@ -4249,7 +4267,7 @@ if(startColumn-indentationWidth > minIndentation*EDITOR.settings.tabSpace) {
 				scrolled = true;
 			}
 			
-			//console.log("scrolled=" + scrolled + " file.startColumn=" + file.startColumn + " file.startRow=" + file.startRow);
+			//console.log("File.scrollTo: scrolled=" + scrolled + " file.startColumn=" + file.startColumn + " file.startRow=" + file.startRow);
 			
 			if(scrolled) EDITOR.renderNeeded();
 			
@@ -4260,23 +4278,23 @@ if(startColumn-indentationWidth > minIndentation*EDITOR.settings.tabSpace) {
 			
 			var diff = oldPartStartRow - file.partStartRow;
 			
-			//console.log("streamLoaded scroll y=" + y + " file.partStartRow=" + file.partStartRow + " oldPartStartRow=" + oldPartStartRow + " diff=" + diff + " file.startRow=" + file.startRow);
+			//console.log("File.scrollTo: streamLoaded scroll y=" + y + " file.partStartRow=" + file.partStartRow + " oldPartStartRow=" + oldPartStartRow + " diff=" + diff + " file.startRow=" + file.startRow);
 			
 			y = y + diff;
 			
-			//if(diff < 0) {console.log("We scrolled up y--");y--;}
+			//if(diff < 0) {console.log("File.scrollTo: We scrolled up y--");y--;}
 			
 			
 			//console.log("y=" + y + " low=" + low + " diff=" + diff);
 			
-			if(y < low) console.warn("You are scrolling too fast ... Or Increase EDITOR.settings.bigFileLoadRows=" + EDITOR.settings.bigFileLoadRows + " to at least " + ( EDITOR.settings.bigFileLoadRows + (low-y) )  );
+			if(y < low) console.warn("File.scrollTo: You are scrolling too fast ... Or Increase EDITOR.settings.bigFileLoadRows=" + EDITOR.settings.bigFileLoadRows + " to at least " + ( EDITOR.settings.bigFileLoadRows + (low-y) )  );
 			
 			// Allow user to scroll so that the last line appears at the middle, but not so that the text get invisible
 			var maxY = Math.floor(file.grid.length - EDITOR.view.visibleRows / 2);
 			
 			startRow = Math.max(Math.min(y, maxY), 0);
 			
-			//console.log("startRow=" + startRow + " maxY=" + maxY);
+			//console.log("File.scrollTo: startRow=" + startRow + " maxY=" + maxY);
 			
 			doTheScrolling(true);
 			
