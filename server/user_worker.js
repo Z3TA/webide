@@ -1067,10 +1067,10 @@ API.nodejs_init_ping = function nodejs_init_ping(user, json, callback) {
 		else {
 			console.log(resp);
 			var online = false;
-			if(resp.text.indexOf("Pong " + rnd) == 0) {
+			if(resp.pong == rnd) {
 				online = true;
 			}
-			callback(null, {online: online, message: resp.text, code: 200})
+			callback(null, {online: online});
 		}
 	});
 }
@@ -1227,7 +1227,8 @@ function nodejs_init_action(action, prodFolder, pw, callback) {
 		auth: user.name + ":" + pw,
 		hostname: "127.0.0.1",
 		port: nodejsDeamonManagerPort,
-		path: prodFolder + "?" + action
+		path: prodFolder + "?" + action,
+		timeout: 5000
 	};
 	log("Connecting to " + options.hostname + " port=" + options.port + " path=" + options.path + " ...", DEBUG);
 	httpGet(options, function nodejsInitActionCommand(err, resp) {
@@ -1237,7 +1238,24 @@ function nodejs_init_action(action, prodFolder, pw, callback) {
 			return callback(error);
 		}
 		else {
-			return callback(null, {prodFolder: prodFolder, text: resp});
+
+			// A successful response is always a JSON object!
+
+			try {
+				var json = JSON.parse(resp);
+			}
+			catch(err) {
+				return callback(new Error("Failed to parse resp=" + resp + " returned from " + options.path + " Error: " + err.message));
+			}
+
+			if(json.error) {
+				var error = new Error(json.error);
+			}
+			else {
+				var error = null;
+			}
+
+			return callback(error, json);
 		}
 	});
 }
@@ -1295,7 +1313,15 @@ function httpGet(options, callback) {
 	});
 	
 	req.on('error', function (err) {
-		callback(err);
+		// After a timeout we will get a socket hangup error...
+		if(callback) callback(err);
+		callback = null;
+	});
+
+	req.on("timeout", function() {
+		req.destroy(); 
+		callback(new Error("Request to " + endPoint + " timed ut!"));
+		callback = null;
 	});
 	
 	req.end();

@@ -37,6 +37,24 @@ Feature list (Not ordered/prioritized)
 --------------------------------------
 
 
+Terminal automation API & Macro code (able to write editor code that runs on a keycombo or menu entry)
+- Always wait for a prompt before writing next line (write queu)
+
+var t = terminal.new()
+t.write("cd /home/johan/repo/jzedit/")
+t.write("docker run -it -v /home/$(whoami)/repo/jzedit/:/srv/webide/ -p 80:80 cloudide");
+t.matchOnce(/root@(\w+):/srv/webide#/, startTerminal2);
+t.write("mkdir /home/ltest1/.webide/prod/ && chown ltest1:ltest1 /home/ltest1/.webide/prod/");
+t.write("node server/server.js --hostname=d80.johan.webide.se -noguest -insidedocker -nonginx -pp 80 --port=80 -ip 172.17.0.2");
+function startTerminal2(match) {
+	var t2 = terminal.new();
+	t2.write("docker exec -it f22f9c7ab4ae /bin/bash");
+	t2.write("node nodejs_init.js -insidedocker");
+}
+
+
+
+
 
 
 ---

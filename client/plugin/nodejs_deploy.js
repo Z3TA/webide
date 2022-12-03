@@ -29,7 +29,7 @@
 					}
 					
 					if(!resp.online) {
-						console.warn("loadNodeJsDeploy: Init serivice not online! " + resp.message);
+						console.warn("loadNodeJsDeploy: Init serivice not online! " + JSON.stringify(resp));
 					}
 					else {
 						

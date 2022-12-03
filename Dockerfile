@@ -12,8 +12,9 @@
 # Inside the container:
 # ip a
 # (take note of the ip and change it below)
+# mkdir /home/ltest1/.webide/prod/ && chown ltest1:ltest1 /home/ltest1/.webide/prod/
 # node server/server.js --hostname=d80.johan.webide.se -noguest -insidedocker -nonginx -pp 80 --port=80 -ip 172.17.0.2 &
-# node nodejs_init.js &
+# node nodejs_init.js -insidedocker &
 #
 # Access from: https://d80.johan.webide.se/
 #

@@ -143,10 +143,12 @@ function httpRequest(request, response) {
 	
 	log("Request to " + request.url + " from " + (request.headers["x-real-ip"] || request.connection.remoteAddress || HTTP_PORT));
 	
+	// note: All successful requests should respond with a JSON string!
+
 	var arr = request.url.split("?");
 	if(arr[0] == "/ping") {
 		response.writeHead(200);
-		response.end("Pong " + arr[1] + "\n");
+		response.end('{"pong":' + arr[1] + '}');
 		return;
 	}
 	else console.log(arr);
@@ -199,46 +201,28 @@ response.end('Authorization failed! Unknown username=' + username + "\n");
 				
 				if(err) throw err;
 				
-				var message = {};
-				message[pathToFolder] = action;
-
-				if(!NODE_INIT_WORKER.hasOwnProperty(username) && action != "stop") {
-					startNodejsInitWorker(user.homeDir, user.name, user.uid, user.gid, message);
-					isStarting = true;
-				}
-				else if(!NODE_INIT_WORKER[username].connected && action != "stop") {
-					startNodejsInitWorker(user.homeDir, user.name, user.uid, user.gid, message);
-					isStarting = true;
-				}
-				
-				if(action == "start") {
-					if(isStarting) return;
-					NODE_INIT_WORKER[username].send({restart: pathToFolder});
-					response.writeHead(200);
-					response.end('Starting ' + pathToFolder + "\n");
-				}
-				else if(action == "stop") {
-					NODE_INIT_WORKER[username].send({stop: pathToFolder});
-					response.writeHead(200);
-					response.end('Stopping ' + pathToFolder + "\n");
-				}
-				else if(action == "restart") {
-					if(isStarting) return;
-					NODE_INIT_WORKER[username].send({restart: pathToFolder});
-					response.writeHead(200);
-					response.end('Restarting ' + pathToFolder + "\n");
-				}
-				else if(action == "list") {
-					response.writeHead(200);
-					REQUEST_ID++;
-					REQUESTS[REQUEST_ID] = function (json) {
-						response.end(JSON.stringify(json));
-					}
-					NODE_INIT_WORKER[username].send({list: pathToFolder, id: REQUEST_ID});
-				}
-				else {
+				var validActions = ["start", "stop", "restart", "list"];
+				if(validActions.indexOf(action) == -1) {
 					response.writeHead(400);
 					response.end('Unknown action: ' + action + "\n");
+					return;
+				}
+
+				response.writeHead(200);
+
+				var message = {};
+				message[pathToFolder] = {action: action, id: ++REQUEST_ID};
+				REQUESTS[REQUEST_ID] = function (json) {
+					response.end(JSON.stringify(json));
+				}
+				
+				if(  (!NODE_INIT_WORKER.hasOwnProperty(username) || !NODE_INIT_WORKER[username].connected) && action != "stop"  ) {
+					log("No NODE_INIT_WORKER for username=" + username + " ...");
+					startNodejsInitWorker(user.homeDir, user.name, user.uid, user.gid, message);
+				}
+				else {
+					log("Sending to NODE_INIT_WORKER[" + username + "] message=" + JSON.stringify(message));
+					NODE_INIT_WORKER[username].send(message);
 				}
 				
 			});
@@ -274,7 +258,8 @@ function httpServerListening() {
 }
 
 function startNodejsInitWorker(homeDir, username, uid, gid, messageToWorker) {
-	
+	log("startNodejsInitWorker: homeDir=" + homeDir + " username=" + username + " uid=" + uid + " gid=" + gid + " messageToWorker=" + JSON.stringify(messageToWorker));
+
 	if(typeof homeDir != "string") throw new Error("homeDir=" + homeDir + " needs to be a string (folder)!");
 	if(typeof username != "string") throw new Error("username=" + username + " needs to be a string!");
 	if(typeof uid != "number") throw new Error("uid=" + uid + " needs to be a number!");
@@ -305,28 +290,46 @@ function startNodejsInitWorker(homeDir, username, uid, gid, messageToWorker) {
 
 	restart();
 	
+	function respondWithErrorMaybe(err) {
+		log("startNodejsInitWorker:respondWithErrorMaybe: messageToWorker=" + JSON.stringify(messageToWorker) + " err.message=" + err.message);
+		if(!messageToWorker) return;
+
+		if(err==undefined) throw new Error("Expected err=" + err + " to be defined");
+
+		var resp = {error: err.message};
+
+		for(var pathToFolder in messageToWorker) {
+			var id = messageToWorker[pathToFolder].id;
+			if( REQUESTS.hasOwnProperty(id) ) {
+				REQUESTS[id](resp);
+				delete REQUESTS[id];
+			}
+		}
+	}
+
 	function restart() {
+		log("startNodejsInitWorker:restart...");
 		// Check the .prod folder
 		var prodFolder = UTIL.joinPaths(homeDir, ".webide/prod/");
 		var fs = require("fs");
 		log("Reading " + prodFolder + " ...");
 		fs.readdir(prodFolder, function(err, filesInProdDir) {
 			if(err) {
+				var error = new Error("Failed to start init worker for " + username + " because we can't find " + prodFolder + " ! " + err.message + " (" + err.code + ")");
 				log(err.message, NOTICE);
-				log("Failed to start init worker for " + username + " because we can't find " + prodFolder + " !");
+				log(error.message);
 				delete NODE_INIT_WORKER[username];
-				return;
+				return respondWithErrorMaybe(error);
 			}
 			
 			// Don't bother starting the worker if prod is empty
 			if(filesInProdDir.length == 0) {
-				log("No files in " + prodFolder + " wont bother to start the init worker for " + username);
+				var error = new Error("No files in " + prodFolder + " wont bother to start the init worker for " + username);
+				log(error.message);
 				delete NODE_INIT_WORKER[username];
-				return;
+				return respondWithErrorMaybe(error);
 			}
 			
-			
-				
 			if(NODE_INIT_WORKER.hasOwnProperty(username)) {
 				// Make sure it's dead
 				log("Making sure init worker for " + username + " is dead ...");
@@ -406,9 +409,12 @@ function startNodejsInitWorker(homeDir, username, uid, gid, messageToWorker) {
 				firstPing = randomNr(6);
 			}
 		}
-		else if (msg.response) {
-			if(REQUESTS.hasOwnProperty(msg.response.id)) {
-				REQUESTS[msg.response.id](msg.response.data);
+		else if (msg.id) { // It's a response'
+			var id = msg.id;
+			if(REQUESTS.hasOwnProperty(id)) {
+				delete msg["id"];
+				REQUESTS[id](msg);
+				delete REQUESTS[id];
 			}
 		}
 	}

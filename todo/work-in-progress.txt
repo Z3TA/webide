@@ -152,6 +152,11 @@ Projects!
 
 About to quickly switch project (opened files) and working dir
 
+Projects should be in the editor core so that plugins can integrate with projects
+EDITOR.currentProject
+EDITOR.on("switchProject")
+
+
 ---
 
 Annoying when we have scrolled in a file and get text in another file (terminal file) the editor throws a scrolling error! Is this fixed!?

@@ -13,12 +13,17 @@
 	
 	* open a scriptname.stdout.log and scriptname.stderr.log file for each micro-service
 	
+	note: We might have to move the nodejs_init to another server, so we should not depend on the users home dir too much! 
+	(and vice versa, client should not depend on the .prod files being stored in .webide/prod/ !!)
+
 	Arguments: --home=/home/ltest1 --uid=120 --gid=127 --email=zeta@zetafiles.org
-	sudo node nodejs_init_worker.js -home /home/ltest1 -uid 1001 -gid 1001 -user ltest1
-	
+	sudo node nodejs_init_worker.js -home /home/ltest1 -uid 1000 -gid 1000 -user ltest1 
+
 */
 
 "use strict"
+
+process.on('uncaughtException', initError);
 
 var getArg = require("./shared/getArg.js");
 
@@ -32,7 +37,7 @@ var EMAIL = getArg(["email", "email"]) || process.env.email; // E-mail address o
 var UID = getArg(["uid", "uid"]) || process.env.uid;
 var GID = getArg(["gid", "gid"]) || process.env.gid;
 var USERNAME = getArg(["user", "user", "username"]) || process.env.user;
-var INIT_MESSAGE = getArg(["action", "action", "msg", "message"]) || process.env.messageToInitWorker;
+var INIT_MESSAGE = getArg(["action", "action", "msg", "message"]) || process.env.messageToInitWorker; // JSON: {action: action, id:id}
 
 if(INIT_MESSAGE) {
 	INIT_MESSAGE = JSON.parse(INIT_MESSAGE);
@@ -82,6 +87,8 @@ HOMEDIR = UTIL.trailingSlash(HOMEDIR); // Make sure it ends with a slash
 
 var USER_PROD_FOLDER = UTIL.joinPaths(HOMEDIR, ".webide/prod/");
 
+var module_ps = require("ps-node");
+
 // What happens if we open a file stream before chroot ?
 // answer: the file stream will be kept open =)
 // We need to wait after setuid though, unless we want to allow dac_read_search (allows root to override read-file permission)
@@ -117,7 +124,7 @@ var initLogFilePath = UTIL.joinPaths(HOMEDIR, "log/nodejs_init_worker.log");
 var fs = require("fs");
 var initLogStream = fs.createWriteStream(initLogFilePath, {'flags': 'a'});
 
-log("Starting nodejs init worker ...");
+log("Starting ...");
 
 if(getArg(["runtests"]) !== undefined) {
 	runTests();
@@ -132,7 +139,16 @@ else {
 			log("No scripts found in " + USER_PROD_FOLDER);
 			exit();
 		}
-		
+
+		if(INIT_MESSAGE && INIT_MESSAGE.hasOwnProperty(USER_PROD_FOLDER)) {
+			var action = INIT_MESSAGE[USER_PROD_FOLDER].action;
+			var reqId = INIT_MESSAGE[USER_PROD_FOLDER].id;
+			if(action == "list") {
+				list(reqId, scripts);
+				INIT_MESSAGE = null; // Remove after use to prevent re-run
+			}
+		}
+
 		scripts.forEach(startMaybe);
 
 		function startMaybe(script) {
@@ -146,14 +162,18 @@ else {
 				}
 				else if(INIT_MESSAGE) {
 					if(INIT_MESSAGE.hasOwnProperty(script.pathToFolder)) {
-						var action = INIT_MESSAGE[script.pathToFolder];
+						var action = INIT_MESSAGE[script.pathToFolder].action;
+						var reqId = INIT_MESSAGE[script.pathToFolder].id;
 						if(action=="start" || action=="restart") {
 							setStatus(script.pathToFolder, "start");
 							status ="start";
+							if(reqId) process.send({id: reqId, restarting: pathToFolder});
 						}
 						else {
 							log("Unknown action=" + action + " in INIT_MESSAGE=" + JSON.stringify(INIT_MESSAGE, null, 2));
+							if(reqId) process.send({id: reqId, error: "Unknown action=" + action});
 						}
+						INIT_MESSAGE = null; // Remove after use
 					}
 					else {
 						log("Did not find " + script.pathToFolder + " in " + JSON.stringify(Object.keys(INIT_MESSAGE)) );
@@ -166,8 +186,10 @@ else {
 					log("Not starting " + script.pathToFolder + " because last status was stop!");
 					
 					scripts.splice(scripts.indexOf(script), 1);
-					if(scripts.length == 0) exit();
-
+					if(scripts.length == 0) {
+						log("Nothing else to do");
+						exit();
+					}
 					return;
 				}
 
@@ -177,15 +199,19 @@ else {
 
 		function exit() {
 			// Make sure there's nothing to do and gracefully exit
-			initLogStream.end(); // note:log() sends to initLogStream
-			if(typeof process.disconnect == "function") process.disconnect(); // Only available when we get spawned from another proces!?
+
+			setTimeout(function() { // Make sure log messages are sent before disconnecting
+				initLogStream.end(); // note:log() sends to initLogStream
+				if(typeof process.disconnect == "function") process.disconnect(); // Only available when we get spawned from another proces!?
+				process.exit(0);
+			}, 1000);
+			
 		}
 
 	});
 }
 
 process.on("SIGINT", sigint);
-
 
 process.on('message', commandMessage);
 
@@ -196,43 +222,59 @@ function sigint() {
 
 function commandMessage(message) {
 	
-	log("Recieved rcp: " + JSON.stringify(message));
+	log("Recieved: " + JSON.stringify(message));
 	
 	if(message == undefined) throw new Error("User worker message=" + message);
-	
-	if(message.restart) restart(message.restart);
-	else if(message.stop) stop(message.stop);
-	else if(message.start) start(message.start);
-	else if(message.shutdown) shutdownInitWorker();
-	else if(message.ping) process.send({pong: message.ping});
-	else if(message.list) list(message.id);
 
-	else throw new Error("Unknown message=" + JSON.stringify(message));
-	
+	if(message.ping) {
+		process.send({pong: message.ping});
+		return;
+	}
+
+	var item = "", id = 0;
+	for(var pathToFolder in message) {
+		item = message[pathToFolder];
+
+		log("Recieved item: " + JSON.stringify(item));
+
+		if(item.id == undefined) throw new Error("Worker command " + JSON.stringify(message) + " does not have an id!");
+
+		if(item.action=="restart") restart(pathToFolder, item.id);
+		else if(item.action=="stop") stop(pathToFolder, item.id);
+		else if(item.action=="start") start(pathToFolder, item.id);
+		else if(item.action=="shutdown") shutdownInitWorker(item.id);
+		else if(item.action=="list") findScriptList(item.id);
+
+		else throw new Error("Unknown message=" + JSON.stringify(message));
+	}
+
 }
 
-function list(reqId) {
+function findScriptList(reqId) {
 	findScripts(USER_PROD_FOLDER, function(scripts) {
-
-		var json = scripts.map(function(script) {
-			/*
-				{main: scriptFilePath, name: findFile, pathToFolder: UTIL.trailingSlash(pathToFolder), log: HOMEDIR + "log/" + folderItem + ".log"}
-			*/
-
-			return {
-				main: script.main,
-				name: script.name,
-				pathToFolder: script.pathToFolder,
-				log: script.log,
-				running: CHILD.hasOwnProperty(pathToFolder)
-			}
-		});
-
-		process.send({id: reqId, data: json});
+		list(reqId, scripts);
 	});
 }
 
-function restart(pathToFolder) {
+function list(reqId, scripts) {
+	var json = scripts.map(function(script) {
+		/*
+			{main: scriptFilePath, name: findFile, pathToFolder: UTIL.trailingSlash(pathToFolder), log: HOMEDIR + "log/" + folderItem + ".log"}
+		*/
+
+		return {
+			main: script.main,
+			name: script.name,
+			pathToFolder: script.pathToFolder,
+			log: script.log,
+			running: CHILD.hasOwnProperty(script.pathToFolder)
+		}
+	});
+
+	process.send({id: reqId, scripts: json});
+}
+
+function restart(pathToFolder, reqId) {
 	
 	pathToFolder = UTIL.trailingSlash(pathToFolder);
 	
@@ -242,13 +284,14 @@ function restart(pathToFolder) {
 
 	if(!CHILD.hasOwnProperty(pathToFolder)) {
 		//log("pathToFolder=" + pathToFolder + " not in CHILD=" + JSON.stringify(Object.keys(CHILD)) + " so calling start() ...");
-		return start(pathToFolder);
+		return start(pathToFolder, reqId);
 	}
 
 	if(CHILD[pathToFolder].connected) {
 		//log("Sending stop signals and disconnecting from: " + pathToFolder);
 		closeChild(CHILD[pathToFolder]);
 		// it will be automatically restarted!
+		process.send({id: reqId, restarting: pathToFolder});
 	}
 	else {
 		/*
@@ -268,12 +311,12 @@ function restart(pathToFolder) {
 
 		delete CHILD[pathToFolder];
 
-		start(pathToFolder);
+		start(pathToFolder, reqId);
 	}
 	
 }
 
-function stop(pathToFolder) {
+function stop(pathToFolder, reqId) {
 	
 	pathToFolder = UTIL.trailingSlash(pathToFolder);
 	
@@ -281,8 +324,15 @@ function stop(pathToFolder) {
 	
 	setStatus(pathToFolder, "stop");
 
-	if(!CHILD.hasOwnProperty(pathToFolder)) return log( "Service is not running: " + pathToFolder + " Running services: " + Object.getOwnPropertyNames(CHILD) );
-	
+	if(!CHILD.hasOwnProperty(pathToFolder)) {
+		log( "Service is not running: " + pathToFolder + " Running services: " + Object.getOwnPropertyNames(CHILD) );
+		process.send({id: reqId, stopping: pathToFolder});
+		/*
+			Look for ghost scripts !? module_ps
+		*/
+		return;
+	}
+
 	STOP.push(pathToFolder);
 	
 	//log("Clearing " + TIMERS[pathToFolder].length + " timers from " + pathToFolder);
@@ -308,6 +358,8 @@ function stop(pathToFolder) {
 		
 	}, 5000);
 	GLOBTMERS.push(killTimeout);
+
+	process.send({id: reqId, stopping: pathToFolder});
 	
 }
 
@@ -317,8 +369,9 @@ function setStatus(pathToFolder, status) {
 	fs.writeFileSync(statusFile, status);
 }
 
-function start(pathToFolder) {
-	
+function start(pathToFolder, reqId) {
+	if(reqId == undefined) throw new Error("Did not expect reqId=" + reqId + " to be undefined!");
+
 	pathToFolder = UTIL.trailingSlash(pathToFolder);
 	
 	log("Recieved start command for project folder: " + pathToFolder);
@@ -337,21 +390,23 @@ function start(pathToFolder) {
 				// See if there is a file with the same name as the folder, then use that file
 				log("Looking for " + findFile + ".js in " + pathToFolder + " ...", DEBUG);
 				fs.readdir(pathToFolder, function (err, folderItems) {
-					if(err) initError(err);
+					if(err) initError(err, reqId);
 					else {
 						folderItems.forEach(function(folderItem) {
 							
 							var path = require("path");
 							var scriptFilePath = path.join(pathToFolder, folderItem);
 							
-							if(folderItem == findFile + ".js") startService(scriptFilePath, findFile, pathToFolder, HOMEDIR+"log/" + folderItem + ".log");
-							
+							if(folderItem == findFile + ".js") {
+								startService(scriptFilePath, findFile, pathToFolder, HOMEDIR+"log/" + folderItem + ".log");
+								process.send({id: reqId, starting: pathToFolder});
+							}
 						});
 					}
 				});
 				
 			}
-			else initError(err);
+			else initError(err, reqId);
 		}
 		else {
 			
@@ -359,7 +414,7 @@ function start(pathToFolder) {
 				var json = JSON.parse(data);
 			}
 			catch(err) {
-				return initError(new Error("Unable to parse " + packageJson + " : " + err.message));
+				return initError(new Error("Unable to parse " + packageJson + " : " + err.message), reqId);
 			}
 			
 			if(json.main) {
@@ -367,12 +422,14 @@ function start(pathToFolder) {
 				var path = require("path");
 				var mainFile = path.join(pathToFolder, json.main);
 				startService(mainFile, name, pathToFolder, HOMEDIR+"log/" + name + ".log", json.email);
+				process.send({id: reqId, starting: pathToFolder});
 			}
-			else return log(packageJson + " has no main file entry!");
+			else {
+				var error = new Error(packageJson + " has no main file entry!");
+				process.send({id: reqId, error: error.message});
+			}
 		}
-		
 	});
-	
 }
 
 function shutdownInitWorker() {
@@ -800,8 +857,9 @@ function sendMail(to, subject, text, from, callback) {
 }
 
 
-function initError(err) {
-	
+function initError(err, reqId) {
+	// Only use this function for hard errors!
+
 	// Get the proper position for this error
 	var callsites = callsite();
 	var callstack = "";
@@ -811,13 +869,16 @@ function initError(err) {
 	
 	//console.log(callstack);
 	
-	log(position + "\n    " + err.message, 3);
+	log(position + "\n\n" + err.stack + "\n\n" + err.message, 3);
 	
-	sendMail(ADMIN_EMAIL, "Init error: " + err.message, "Message: " + err.message + "\n\nStack:\n" + callstack + "\n\n Arguments:\n" + process.argv.join("\n"));
+	sendMail(ADMIN_EMAIL, "Init error: " + err.message, "Message: " + err.message + "\n\nStack:\n" + callstack + "\n\nerr.stack:\n" + err.stack + "\n\n Arguments:\n" + process.argv.join("\n"));
 	
-	process.exit(1);
-}
+	if(reqId) process.send({id: reqId, error: err.message});
 
+	setTimeout(function() {
+		process.exit(err.code == 0 ? 1 : err.code);
+	}, 3000);
+}
 
 function log(msg, level) {
 	
