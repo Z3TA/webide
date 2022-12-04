@@ -242,13 +242,14 @@ if(typeof CustomEvent == "undefined" || typeof Event == "object") {
 		Note: IE has Event, but you can't use new Event() or IE will throw an error! 
 		If CustomEvent exist, likely you can use new Event() as expected!?
 	*/
-	Event.prototype = window.Event.prototype;
+	var winEventProto = window.Event.prototype;
 	Event = function CustomEvent ( event, params ) {
 		params = params || { bubbles: false, cancelable: false, detail: undefined };
 		var evt = document.createEvent( 'CustomEvent' );
 		evt.initCustomEvent( event, params.bubbles, params.cancelable, params.detail );
 		return evt;
 	}
+	Event.prototype = winEventProto;
 }
 
 
