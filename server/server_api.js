@@ -3177,7 +3177,7 @@ searchDir(fileList[i].path, folderDepth);
 
 		if(msg == undefined) {
 			var totalTime = Math.round(((new Date()) - searchBegin) / 10) / 100;
-			msg = "Found " + totalMatches + " match(es) in " + totalFiles + "/" + totalFilesFound + " file(s) searched in " + totalTime + "s.\n";
+			msg = "Found " + totalMatches + " match(es) in " + totalFiles + "/" + totalFilesFound + " file(s) searched in " + totalTime + "s.";
 			}
 		
 		findReplaceInFilesCallback(null, {msg: msg, matches: matches});

@@ -1017,7 +1017,7 @@ file.sanityCheck();
 			return;
 		}
 		
-		if(text.indexOf("\n") != -1) throw new Error("File.writeLine: Text contains a line break: " + text);
+		if(text.indexOf("\n") != -1) throw new Error("File.writeLine: Text contains a line break: " + UTIL.lbChars(text));
 		
 		insertGridRow(file, textIndex, text);
 		file.text += file.lineBreak
