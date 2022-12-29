@@ -6,12 +6,6 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
-weird speaker noise when typing on 
-virtual keybord on huave p40
-
-cant turn off the noise
-nothing happens when disabling via menu
-
 cant scroll in full acreen file explorer
 
 getting an error in file open tool

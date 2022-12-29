@@ -121,7 +121,7 @@
 	var nativeKeyboardCatcher;
 	var winMenuVirtual, winMenuOnScreen, winMenuPhysical;
 	var winMenuVibration, vibrationEnabled = true;
-	var winMenuKeyboardSound, keyboardSoundEnabled = true;
+	var winMenuKeyboardSoundOff, winMenuKeyboardSound1, winMenuKeyboardSound2, winMenuKeyboardSound3;
 	var checkActiveElementInterval;
 	var virtualKeyboardIsVisible = false;
 	var winMenuBlackKeyboard, winMenuWhiteKeyboard;
@@ -163,30 +163,6 @@
 			
 			EDITOR.on("fileOpen", showVirtualKeyboardMaybe);
 			
-			EDITOR.loadSettings("virtualKeyboard", virtualKeyboardSettings, function(settings) {
-
-				virtualKeyboardSettings = settings;
-
-				if(settings.preferredKeyboard == "physical") usePhysical = true;
-			
-				if(settings.vibration===true) vibrationEnabled = true;
-				else if(settings.vibration===false) vibrationEnabled = false;
-				if( vibrationEnabled ) winMenuVibration.activate();
-				else winMenuVibration.deactivate();
-
-				if(settings.keyboardSound===true) keyboardSoundEnabled = true;
-				else if(settings.keyboardSound===false) keyboardSoundEnabled = false;
-				if( keyboardSoundEnabled ) winMenuKeyboardSound.activate();
-				else winMenuKeyboardSound.deactivate();
-				
-
-
-
-				if(settings.style == "white") keyboardStyleWhite();
-				else if(settings.style == "black") keyboardStyleBlack();
-			});
-
-
 			addButtons();
 			
 			menuItem = EDITOR.ctxMenu.add(labelShowBuiltin, toggleBetweenKeyboards, 26);
@@ -196,7 +172,10 @@
 			winMenuOnScreen = EDITOR.windowMenu.add(S("native_onscreen"), [S("Editor"), S("keyboard_input")], menuPickOnScreen);
 			winMenuPhysical = EDITOR.windowMenu.add(S("physical_keyboard"), [S("Editor"), S("keyboard_input")], menuPickPhysical);
 			winMenuVibration = EDITOR.windowMenu.add(S("vibration"), [S("Editor"), S("keyboard_input")], toggleVibration);
-			winMenuKeyboardSound = EDITOR.windowMenu.add(S("keyboard sound"), [S("Editor"), S("keyboard_input")], toggleKeyboardSound);
+			winMenuKeyboardSoundOff = EDITOR.windowMenu.add("Disable", [S("Editor"), S("keyboard_input"), S("keyboard sound")], keyboardSoundOff);
+			winMenuKeyboardSound1 = EDITOR.windowMenu.add("Sound 1", [S("Editor"), S("keyboard_input"), S("keyboard sound")], setKeyboardSound1);
+			winMenuKeyboardSound2 = EDITOR.windowMenu.add("Sound 2", [S("Editor"), S("keyboard_input"), S("keyboard sound")], setKeyboardSound2);
+			winMenuKeyboardSound3 = EDITOR.windowMenu.add("Sound 3", [S("Editor"), S("keyboard_input"), S("keyboard sound")], setKeyboardSound3);
 
 			winMenuBlackKeyboard = EDITOR.windowMenu.add("Black", [S("Editor"), S("keyboard_input"), "Style"], keyboardStyleBlack);
 			winMenuWhiteKeyboard = EDITOR.windowMenu.add("White", [S("Editor"), S("keyboard_input"), "Style"], keyboardStyleWhite);
@@ -209,6 +188,26 @@
 			EDITOR.on("registerAltKey", updateAltKey);
 			EDITOR.on("unregisterAltKey", removeAltKey);
 			
+			EDITOR.loadSettings("virtualKeyboard", virtualKeyboardSettings, function(settings) {
+
+				virtualKeyboardSettings = settings;
+
+				if(settings.preferredKeyboard == "physical") usePhysical = true;
+
+				if(settings.vibration===true) vibrationEnabled = true;
+				else if(settings.vibration===false) vibrationEnabled = false;
+				if( vibrationEnabled ) winMenuVibration.activate();
+				else winMenuVibration.deactivate();
+
+				if(settings.keyboardSound==true) winMenuKeyboardSound1.activate();
+				else if(settings.keyboardSound==false) winMenuKeyboardSoundOff.activate();
+				else if(settings.keyboardSound==2) winMenuKeyboardSound2.activate();
+				else if(settings.keyboardSound==3) winMenuKeyboardSound3.activate();
+
+				if(settings.style == "white") keyboardStyleWhite();
+				else if(settings.style == "black") keyboardStyleBlack();
+			});
+
 			var wrapper = document.getElementById("virtualKeyboard2");
 			wrapper.style.display="none";
 			wrapper.appendChild(canvas);
@@ -307,7 +306,7 @@
 		var type = element.getAttribute('type');
 		var type = (typeof type == "string") && type.toLowerCase();
 		// if any of these input types is not supported by a browser, it will behave as input type text.
-		var inputTypes = ['text', 'password', 'number', 'email', 'tel', 'url', 'search', 'date', 'datetime', 'datetime-local', 'time', 'month', 'week']
+		var inputTypes = ['text', 'password', 'number', 'email', 'tel', 'url', 'search', 'date', 'datetime', 'datetime-local', 'time', 'month', 'week'];
 		return inputTypes.indexOf(type) >= 0;
 	}
 	
@@ -323,18 +322,59 @@
 		winMenuVibration.hide();
 	}
 
-	function toggleKeyboardSound() {
-		keyboardSoundEnabled = !keyboardSoundEnabled;
+	var saveSettingsTimer;
 
-		virtualKeyboardSettings.keyboardSound = keyboardSoundEnabled;
-		EDITOR.saveSettings("virtualKeyboard", virtualKeyboardSettings);
+	function keyboardSoundOff() {
+		virtualKeyboardSettings.keyboardSound = false;
+		clearTimeout(saveSettingsTimer);
+		saveSettingsTimer = setTimeout(saveSettings, 5000);
 
-		if( keyboardSoundEnabled ) winMenuKeyboardSound.activate();
-		else winMenuKeyboardSound.deactivate();
-
-		winMenuKeyboardSound.hide();
+		winMenuKeyboardSoundOff.activate();
+		winMenuKeyboardSound1.deactivate();
+		winMenuKeyboardSound2.deactivate();
+		winMenuKeyboardSound3.deactivate();
 	}
-	
+
+	function setKeyboardSound1() {
+		virtualKeyboardSettings.keyboardSound = 1;
+		clearTimeout(saveSettingsTimer);
+		saveSettingsTimer = setTimeout(saveSettings, 5000);
+
+		playSound1();
+		winMenuKeyboardSoundOff.deactivate();
+		winMenuKeyboardSound1.activate();
+		winMenuKeyboardSound2.deactivate();
+		winMenuKeyboardSound3.deactivate();
+	}
+
+	function setKeyboardSound2() {
+		virtualKeyboardSettings.keyboardSound = 2;
+		clearTimeout(saveSettingsTimer);
+		saveSettingsTimer = setTimeout(saveSettings, 5000);
+
+		playSound2();
+		winMenuKeyboardSoundOff.deactivate();
+		winMenuKeyboardSound1.deactivate();
+		winMenuKeyboardSound2.activate();
+		winMenuKeyboardSound3.deactivate();
+	}
+
+	function setKeyboardSound3() {
+		virtualKeyboardSettings.keyboardSound = 3;
+		clearTimeout(saveSettingsTimer);
+		saveSettingsTimer = setTimeout(saveSettings, 5000);
+
+		playSound3();
+		winMenuKeyboardSoundOff.deactivate();
+		winMenuKeyboardSound1.deactivate();
+		winMenuKeyboardSound2.deactivate();
+		winMenuKeyboardSound3.activate();
+	}
+
+	function saveSettings() {
+		EDITOR.saveSettings("virtualKeyboard", virtualKeyboardSettings);
+	}
+
 	function menuPickVirtual() {
 		if(useBuiltin) {
 			// It's already active, so deactivate it
@@ -983,15 +1023,36 @@ return false;
 		}
 		
 		// Some devices lie about their vibration capabilities!!! Should we play a sound anyway !?
-		if(1==1) {
-			//if(vibrationEnabled && !vibrateSuccess) {
-			//alert("playing a beep sound");
-			EDITOR.beep(0.1, 120, "sine", 39);
+		// answer: Very annoying when you can't turn off the sound, so let the user choose sound vs vibration!
+		if(winMenuKeyboardSound1.activated) {
+			playSound1();
+		}
+		else if(winMenuKeyboardSound2.activated) {
+			playSound2();
+		}
+		else if(winMenuKeyboardSound3.activated) {
+			playSound3();
 		}
 
 		return false;
 	}
 	
+	function playSound1() {
+		EDITOR.beep(0.1, 120, "sine", 39);
+	}
+
+	// Some speekers have problems with the frequency or the duration (volume, frequency, type, duration)
+	// We basically just want the speeker to move to replace vibration
+	// type is sine, sawtooth, square or triangle
+	function playSound2() {
+		EDITOR.beep(0.01, 60, "sawtooth", 50);
+	}
+
+	function playSound3() {
+		EDITOR.beep(0.03, 600, "sine", 100);
+	}
+
+
 	//var COL = 0;
 	function canvasMouseUp(mouseUpEvent) {
 		
