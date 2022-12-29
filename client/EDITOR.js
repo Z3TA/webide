@@ -4802,9 +4802,20 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 				}
 				else {
 					//console.warn("Pullout " + menu.pullout + " menu doesn't fit on the left side either! parentItemRect.left=" + parentItemRect.left + " menuWidth=" + menuWidth + " (" + (parentItemRect.left - menuWidth) + ") ");
-					// Place it below parent
+					
 					menuLeft = windowWidth - menuWidth + 1;
-					menuTop = parentItemRect.bottom;
+
+					// Do we have enough height ?
+					var windowHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHight;
+					var menuHeight = Math.max(parentItemRect.height, menuRect.height);
+					if( parentItemRect.bottom + menuHeight > windowHeight) {
+						menuTop = windowHeight - menuHeight;
+					}
+					else {
+						// Place it below parent
+					
+						menuTop = parentItemRect.bottom;
+					}
 				}
 			}
 		}
@@ -4823,6 +4834,8 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 		//var item = menu.firstItem;
 		var label = item.domElement.getElementsByTagName("a")[0];
 		label.focus();
+
+
 		
 	}
 	DropdownMenu.prototype.hide = function hide(hideChildren, hideParents) {
