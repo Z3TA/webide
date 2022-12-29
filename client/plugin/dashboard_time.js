@@ -115,26 +115,31 @@ EDITOR.plugin({
 			var date = new Date();
 			
 			var hours = date.getHours();
-			ampm.innerText = hours >= 12 ? 'pm' : 'am';
+			var strAmPm = hours >= 12 ? 'pm' : 'am';
+			if(ampm.innerText != strAmPm) ampm.innerText = strAmPm;
 			
 			hours = hours % 12;
 			hours = hours ? hours : 12; // the hour '0' should be '12'
 			
 			var minutes = date.getMinutes();
 			minutes = minutes < 10 ? '0'+minutes : minutes;
-			
-			time.innerText = hours + ':' + minutes;
+			var strTime = hours + ':' + minutes
+			if(time.innerText != strTime) time.innerText = strTime;
 			
 			var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-			weekDay.innerText = days[date.getDay()];
+			var strWeekDay = days[date.getDay()]
+			if(weekDay.innerText != strWeekDay) weekDay.innerText = strWeekDay;
 			
 			
 			var dayOfMonth = date.getDate();
 			var monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 			
-			formattedDate.innerText = dayOfMonth + " " + monthNames[date.getMonth()] + " " + date.getFullYear();
+			var strDate = dayOfMonth + " " + monthNames[date.getMonth()] + " " + date.getFullYear();
+			if(formattedDate.innerText != strDate) formattedDate.innerText = strDate;
 			
-			timeZone.innerText = "Time Zone: UTC " + date.getTimezoneOffset() / 60;
+			var strTimeZone = "Time Zone: UTC " + date.getTimezoneOffset() / 60;
+			if(timeZone.innerText != strTimeZone) timeZone.innerText = strTimeZone;
+
 		}
 	}
 	
