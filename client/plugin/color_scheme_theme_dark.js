@@ -89,7 +89,7 @@ setDarkTheme(); // use ?darkTheme=true to force the darke theme
 		
 		//console.log("dark_theme: Set dark theme! ...");
 		
-		
+
 		// Backgrounds
 		EDITOR.settings.style.bgColor = "rgb(41, 42, 48)";
 		EDITOR.settings.style.currentLineColor = "rgb(47, 50, 57)";
