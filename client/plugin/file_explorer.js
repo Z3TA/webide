@@ -83,8 +83,9 @@
 		fsSelect.onchange = changeFs;
 		
 		/*
-			fileExplorer.addEventListener("scroll", function() {
-			console.log(UTIL.getStack("You scrolled"));
+			fileExplorerWrap.addEventListener("scroll", function() {
+			//console.log(UTIL.getStack("You scrolled"));
+			alert("You scrolled!");
 			});
 		*/
 		

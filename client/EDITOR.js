@@ -10929,14 +10929,14 @@ window.addEventListener("keypress",keyPressed,false); // Writes to the document 
 	Your function should return false to prevent default action.
 */
 
-
+	
 // Capture mobile events
 window.addEventListener("touchstart", mouseDown, false);
 window.addEventListener("touchend", mouseUp, false);
 window.addEventListener("touchmove", mouseMove, false);
 
-
-//window.addEventListener("touchcancel", mouseUp, false);
+	
+	//window.addEventListener("touchcancel", mouseUp, false);
 //window.addEventListener("touchleave", mouseUp, false);
 
 window.addEventListener("click", mouseclick, false);
@@ -10944,14 +10944,15 @@ window.addEventListener("mousedown", mouseDown, false);
 window.addEventListener("mouseup", mouseUp, false);
 
 window.addEventListener("mousemove", mouseMove, false);
-
+	
 	// Disable Zooming in iOS Safari
 	document.addEventListener('gesturestart', function (e) {
 		e.preventDefault();
 	});
-
+	
 	// Prevent dragging the page in iOS Safari
 	document.addEventListener("touchmove", function(e) {
+		if(EDITOR.scrollingEnabled) return true;
 		e.preventDefault();
 	}, {passive: false});
 
