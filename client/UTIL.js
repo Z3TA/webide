@@ -2858,11 +2858,11 @@ else {
 		
 		// Node.js on Windows
 		if(a.indexOf("file:///") == 0) {
-a = a.slice(8);
+			a = a.slice(8);
 			if(!a.match(reDriveLetter) && a[0] != "/") a = "/" + a;
 		}
 		if(b.indexOf("file:///") == 0) {
-b = b.slice(8);
+			b = b.slice(8);
 			if(!b.match(reDriveLetter) && b[0] != "/") b = "/" + b;
 		}
 		
@@ -2949,6 +2949,9 @@ b = b.slice(8);
 			Gets the character code from a key event or a string
 			Special buttons like delete and backspace returns the keyCode!
 			
+			note: Only use this function to figure out which button was pressed.
+			Do NOT use this function to figure out the letter being inserted! (some languages/keyboards use several key strokes to generate a letter)
+
 			Note: charCode is not the same as keyCode, but mostly the same :P
 			keyCode represents an actual key on the keyboard, while charCode is compatible with the Ascii and unicode character set.
 			For example key code 38 is the keyboard up arrow (key=ArrowUp charCode=38 code=ArrowUp keyCode=38)
@@ -2983,9 +2986,15 @@ b = b.slice(8);
 			if(str == "SoftRight") return 9; // Tab
 			if(str == "MicrophoneToggle") return 13; // Main button on KaiOS, means Enter most of the time. 13=Enter
 			if(str == "deleteContentBackward") return 8; // Backspace
+			if(str == "insertCompositionText") return 8; // Backspace on some Android keyboard
 
 			else if(str.length == 2 && str.codePointAt) return str.codePointAt(0); // For unicode higher then 65535
-			else if(str.length != 1) throw new Error("UTIL.charCode: str=" + str + " length=" + str.length);
+			else if(str.length != 1) {
+				var error = new Error("UTIL.charCode: str=" + str + " length=" + str.length);
+				// It's tempting to return the char code for "?" and silently report the error...
+				// If we throw the error in your face it's easier to debug because you might know what you where doing ... although errors always happens when you are demoing for a potential customer
+				throw error;
+			}
 			else return str.charCodeAt(0);
 		}
 	},

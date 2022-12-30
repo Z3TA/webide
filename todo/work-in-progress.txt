@@ -6,13 +6,11 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
-cant scroll in full acreen file explorer
-
-getting an error in file open tool
+When typing in the function list, everything is deselected after one second or so...
 
 ---
 
-Sometimes when scrolling it scrolls to many pages away!
+Sometimes when scrolling it scrolls too many pages away!
 it seems very random, sometimes it scrolls to two screens away, and sometimes several pages away ...
 
 ---
