@@ -10956,6 +10956,8 @@ window.addEventListener("mousemove", mouseMove, false);
 		e.preventDefault();
 	}, {passive: false});
 
+	// note: if you add more measures to prevent scrolling, test if EDITOR.fullScreenWidget() works afterwards! (hint: use EDITOR.scrollingEnabled)
+
 	// When the browser tab becomes a "background tab"
 	document.addEventListener('visibilitychange', function(){
 		if(document.hidden) triggerAFK("background tab");

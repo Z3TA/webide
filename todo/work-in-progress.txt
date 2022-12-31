@@ -15,8 +15,9 @@ it seems very random, sometimes it scrolls to two screens away, and sometimes se
 
 ---
 
-Let prod know the original path of the main file, so we can open it from the script list!
+Let prod know the original path of the main file, so we can open it from the script list! (when listing scripts in production) !?
 .webide_init_origin
+
 
 mangkronyok2018/.prod/
 
