@@ -7968,7 +7968,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		return null;
 		
 	}
-	
+	// note: We want to avoid using the Window key (reserved by the window manager), except on Mac which does everything using the meta/cmd key...
 	function comboSumToString(sum) {
 		var combo = "";
 		switch(sum) {
@@ -7979,6 +7979,14 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 			case 5: combo = "SHIFT + ALT"; break;
 			case 6: combo = "CTRL + ALT"; break;
 			case 7: combo = "SHIFT + CTRL + ALT"; break;
+			case 8: combo = MAC ? "cmd" : "win"; break; // META
+			case 9: combo = "SHIFT + " + (MAC ? "cmd" : "win"); break;
+			case 10: combo = "CTRL + " + (MAC ? "cmd" : "win"); break;
+			case 11: combo = "SHIFT + CTRL + " + (MAC ? "cmd" : "win"); break;
+			case 12: combo = "ALT + " + (MAC ? "cmd" : "win"); break;
+			case 13: combo = "SHIFT + ALT + " + (MAC ? "cmd" : "win"); break;
+			case 14: combo = "CTRL + ALT + " + (MAC ? "cmd" : "win"); break;
+			case 15: combo = "SHIFT + CTRL + ALT + " + (MAC ? "cmd" : "win"); break;
 		}
 		return combo;
 	}
