@@ -61,6 +61,10 @@ var module_mount = require("./shared/mount.js");
 	var eachUser = require("./shared/eachUser.js");
 	eachUser(HOME_DIR, userFound, allUsersFound);
 	
+setInterval(function() {
+	console.log("REQUESTS: " + JSON.stringify(Object.keys(REQUESTS)) );
+}, 3000);
+
 
 function userFound(user) {
 	startNodejsInitWorker(user.homeDir, user.name, user.uid, user.gid);
@@ -184,8 +188,8 @@ response.end('Authorization failed! Unknown username=' + username + "\n");
 			function executeOrder() {
 			// example: /service-name/restart
 			var arr = request.url.split("?");
-			var pathToFolder = arr[0];
-			var action = arr[1];
+		var pathToFolder = UTIL.trailingSlash(arr[0]);
+		var action = arr[1];
 			var isStarting = false;
 		var userInfo = require("./shared/userInfo.js");
 		

@@ -131,30 +131,50 @@
 		console.log("nodejs_deploy:makeListItem: script=" + JSON.stringify(script));
 		// {"main":"/home/ltest1/.webide/prod/hello_world/hello.js","name":"hello_world","pathToFolder":"/home/ltest1/.webide/prod/hello_world/","log":"/home/ltest1/log/hello_world.log","running":true}
 
-		var stats = "stopped";
-		if(script.running) status = "enabled";
+		var status = "enabled";
+		if(script.running) status = "running";
 
 		var tr = document.createElement("tr");
 
 		var name = document.createElement("td");
 		name.innerText = script.name;
 
+		var tdStatus = document.createElement("td");
+		tdStatus.innerText = status;
 
-		var mainScript = document.createElement("a");
-		mainScript.innerText = script.main;
-		mainScript.onclick = function openFile() {
-			EDITOR.openFile(script.main);
+		var actions = document.createElement("td");
+		
+		var openLog = document.createElement("button");
+		openLog.onclick = function() {
+			EDITOR.openFile(script.log);
 		}
 
-		var main = document.createElement("td");
-		main.appendChild(mainScript);
+		var restart = document.createElement("button");
+		restart.innerText = "(Re)start";
+		restart.onclick = function() {
+			
+		}
 
-		var status = document.createElement("td");
-		status.innerText = "Entry point";
+		var stop = document.createElement("button");
+		stop.innerText = "Stop";
+		stop.onclick = function() {
+
+		}
+
+		var remove = document.createElement("button");
+		remove.innerText = "Remove";
+		remove.onclick = function() {
+
+		}
+
+		actions.appendChild(openLog);
+		actions.appendChild(restart);
+		actions.appendChild(stop);
+		actions.appendChild(remove);
 
 		tr.appendChild(name);
-		tr.appendChild(main);
-		tr.appendChild(status);
+		tr.appendChild(tdStatus);
+		tr.appendChild(actions);
 
 		return tr;
 	}
@@ -174,16 +194,16 @@
 		var name = document.createElement("th");
 		name.innerText = "Name";
 
-		var mainScript = document.createElement("th");
-		mainScript.innerText = "Entry point";
-
 		var status = document.createElement("th");
-		status.innerText = "Entry point";
+		status.innerText = "Status";
+
+		var actions = document.createElement("th");
+		actions.innerText = "Actions";
 
 		tr.appendChild(name);
-		tr.appendChild(mainScript);
 		tr.appendChild(status);
-
+		tr.appendChild(actions);
+		
 		thead.appendChild(tr);
 		
 		table.appendChild(thead);
@@ -222,6 +242,7 @@
 			if(err) alertBox(err.message);
 			else promptBox("Enter password to remove " + pj.name + " from production:", {isPassword: true, dialogDelay: 0}, function(pw) {
 				if(pw != null) CLIENT.cmd("nodejs_init_remove", {folder: folder, pw: pw}, function(err, resp) {
+					console.log( JSON.stringify(resp, null, 2) );
 					if(err) alertBox(err.message);
 					else alertBox(pj.name + " removed from production!");
 				});
@@ -332,8 +353,8 @@
 								});
 								
 							}
-							});
-						}
+						});
+					}
 					else {
 						throw readFileErr;
 					}
@@ -354,7 +375,9 @@
 						if(pw != null) CLIENT.cmd("nodejs_init_deploy", {folder: folder, pw: pw}, function(err, resp) {
 							if(err) alertBox(err.message);
 							else {
-alertBox(pj.name + " deployed to production: " + resp.prodFolder);
+
+								//console.log( JSON.stringify(resp, null, 2) );
+								alertBox(pj.name + " deployed to production!");
 								EDITOR.stat("nodejs_deploy");
 							}
 						});

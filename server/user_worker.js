@@ -1227,7 +1227,7 @@ function nodejs_init_action(action, prodFolder, pw, callback) {
 		auth: user.name + ":" + pw,
 		hostname: "127.0.0.1",
 		port: nodejsDeamonManagerPort,
-		path: prodFolder + "?" + action,
+		path: UTIL.trailingSlash(prodFolder) + "?" + action,
 		timeout: 5000
 	};
 	log("Connecting to " + options.hostname + " port=" + options.port + " path=" + options.path + " ...", DEBUG);
@@ -1247,6 +1247,14 @@ function nodejs_init_action(action, prodFolder, pw, callback) {
 			catch(err) {
 				return callback(new Error("Failed to parse resp=" + resp + " returned from " + options.path + " Error: " + err.message));
 			}
+
+			console.log("nodejs_init_action: Response json=" + JSON.stringify(json, null, 2));
+			/*
+				{
+				"restarting": "/home/ltest1/.webide/prod/http_server/"
+				}
+			*/
+
 
 			if(json.error) {
 				var error = new Error(json.error);

@@ -19,6 +19,8 @@
 	Arguments: --home=/home/ltest1 --uid=120 --gid=127 --email=zeta@zetafiles.org
 	sudo node nodejs_init_worker.js -home /home/ltest1 -uid 1000 -gid 1000 -user ltest1 
 
+
+	Don't call log until initLogStream has been initialized! (or messages wont be logged)
 */
 
 "use strict"
@@ -39,10 +41,6 @@ var GID = getArg(["gid", "gid"]) || process.env.gid;
 var USERNAME = getArg(["user", "user", "username"]) || process.env.user;
 var INIT_MESSAGE = getArg(["action", "action", "msg", "message"]) || process.env.messageToInitWorker; // JSON: {action: action, id:id}
 
-if(INIT_MESSAGE) {
-	INIT_MESSAGE = JSON.parse(INIT_MESSAGE);
-	log("INIT_MESSAGE: \n" + JSON.stringify(INIT_MESSAGE, null, 2));
-}
 
 // For sending errors via email to an admin
 var SMTP_PORT = getArg(["mp", "smtp_port"]) || DEFAULT.smtp_port;
@@ -93,7 +91,7 @@ var module_ps = require("ps-node");
 // answer: the file stream will be kept open =)
 // We need to wait after setuid though, unless we want to allow dac_read_search (allows root to override read-file permission)
 
-log("GID=" + GID + " UID=" + UID);
+
 
 
 // Must be numbers!
@@ -124,7 +122,13 @@ var initLogFilePath = UTIL.joinPaths(HOMEDIR, "log/nodejs_init_worker.log");
 var fs = require("fs");
 var initLogStream = fs.createWriteStream(initLogFilePath, {'flags': 'a'});
 
-log("Starting ...");
+log("Starting nodejs init worker...");
+log("GID=" + GID + " UID=" + UID);
+
+if(INIT_MESSAGE) {
+	INIT_MESSAGE = JSON.parse(INIT_MESSAGE);
+	log("INIT_MESSAGE: \n" + JSON.stringify(INIT_MESSAGE, null, 2));
+}
 
 if(getArg(["runtests"]) !== undefined) {
 	runTests();
@@ -137,7 +141,8 @@ else {
 
 		if(scripts.length == 0) {
 			log("No scripts found in " + USER_PROD_FOLDER);
-			exit();
+			shutdown(0);
+			return;
 		}
 
 		if(INIT_MESSAGE && INIT_MESSAGE.hasOwnProperty(USER_PROD_FOLDER)) {
@@ -145,7 +150,7 @@ else {
 			var reqId = INIT_MESSAGE[USER_PROD_FOLDER].id;
 			if(action == "list") {
 				list(reqId, scripts);
-				INIT_MESSAGE = null; // Remove after use to prevent re-run
+				delete INIT_MESSAGE[USER_PROD_FOLDER]; // Remove after use to prevent re-run
 			}
 		}
 
@@ -153,30 +158,40 @@ else {
 
 		function startMaybe(script) {
 			var statusFile = UTIL.joinPaths(script.pathToFolder, ".webide_init_status");
+			
+			if(INIT_MESSAGE && INIT_MESSAGE.hasOwnProperty(script.pathToFolder)) {
+				var action = INIT_MESSAGE[script.pathToFolder].action;
+				var reqId = INIT_MESSAGE[script.pathToFolder].id;
+			}
+			else if(INIT_MESSAGE) {
+				log("Did not find " + script.pathToFolder + " in INIT_MESSAGE:" + JSON.stringify(Object.keys(INIT_MESSAGE)) );
+			}
+			else {
+				log("INIT_MESSAGE=" + INIT_MESSAGE);
+			}
+
 			fs.readFile(statusFile, "utf8", function(err, status){
+				
 				if(err) {
 					if(err.code != "ENOENT") throw err;
+					// ENOENT means that the script has never been run! We will thus set the status to the default status=start
 					log("Setting status to start for " + script.pathToFolder + " because there was an error when opening " + statusFile + ". Error:" + err.message);
 					setStatus(script.pathToFolder, "start");
 					status ="start";
 				}
-				else if(INIT_MESSAGE) {
-					if(INIT_MESSAGE.hasOwnProperty(script.pathToFolder)) {
-						var action = INIT_MESSAGE[script.pathToFolder].action;
-						var reqId = INIT_MESSAGE[script.pathToFolder].id;
-						if(action=="start" || action=="restart") {
-							setStatus(script.pathToFolder, "start");
-							status ="start";
-							if(reqId) process.send({id: reqId, restarting: pathToFolder});
-						}
-						else {
-							log("Unknown action=" + action + " in INIT_MESSAGE=" + JSON.stringify(INIT_MESSAGE, null, 2));
-							if(reqId) process.send({id: reqId, error: "Unknown action=" + action});
-						}
-						INIT_MESSAGE = null; // Remove after use
+				else if(action) {
+					// Init actions overrides the statusfile
+					if(action=="start" || action=="restart") {
+						setStatus(script.pathToFolder, "start");
+						status ="start";
+					}
+					else if(action=="stop") { // The init action will unlikely be "stop", but we have it here anyway so we can override the statusfile
+						setStatus(script.pathToFolder, "stop");
+						status ="stop";
 					}
 					else {
-						log("Did not find " + script.pathToFolder + " in " + JSON.stringify(Object.keys(INIT_MESSAGE)) );
+						log("Unexpected init action=" + action + " in INIT_MESSAGE=" + JSON.stringify(INIT_MESSAGE, null, 2));
+						if(reqId) process.send({id: reqId, error: "Unexpected init action=" + action});
 					}
 				}
 
@@ -188,26 +203,21 @@ else {
 					scripts.splice(scripts.indexOf(script), 1);
 					if(scripts.length == 0) {
 						log("Nothing else to do");
-						exit();
+						shutdown(0);
 					}
 					return;
 				}
 
-				startService(script.main, script.name, script.pathToFolder, script.log, script.email); 
+				startService(script.main, script.name, script.pathToFolder, script.log, script.email);
+
+				if(reqId && (action=="start" || action=="restart")) {
+					process.send({id: reqId, restarting: script.pathToFolder});
+				}
+
+				if(INIT_MESSAGE) delete INIT_MESSAGE[script.pathToFolder]; // Remove after use
+				
 			});
 		}
-
-		function exit() {
-			// Make sure there's nothing to do and gracefully exit
-
-			setTimeout(function() { // Make sure log messages are sent before disconnecting
-				initLogStream.end(); // note:log() sends to initLogStream
-				if(typeof process.disconnect == "function") process.disconnect(); // Only available when we get spawned from another proces!?
-				process.exit(0);
-			}, 1000);
-			
-		}
-
 	});
 }
 
@@ -291,7 +301,6 @@ function restart(pathToFolder, reqId) {
 		//log("Sending stop signals and disconnecting from: " + pathToFolder);
 		closeChild(CHILD[pathToFolder]);
 		// it will be automatically restarted!
-		process.send({id: reqId, restarting: pathToFolder});
 	}
 	else {
 		/*
@@ -314,6 +323,8 @@ function restart(pathToFolder, reqId) {
 		start(pathToFolder, reqId);
 	}
 	
+	process.send({id: reqId, restarting: pathToFolder}); // Tell parent process we are handeling the request
+
 }
 
 function stop(pathToFolder, reqId) {
@@ -441,9 +452,7 @@ function shutdownInitWorker() {
 		
 		for(var name in CHILD) CHILD[name].kill('SIGKILL');
 		
-		initLogStream.end();
-		process.disconnect();
-		process.exit(0);
+		shutdown(0);
 	}
 	
 	SHUTDOWN = true;
@@ -511,7 +520,7 @@ function findScripts(pathToFolder, callback) {
 		}
 		if(folderItems.length == 0) {
 			log("No files found in pathToFolder=" + pathToFolder, ERR); 
-			process.exit(0); // A clean exit, because we have nothing to do 
+			shutdown(0); // A clean exit, because we have nothing to do 
 		}
 		else {
 			folderItems.forEach(function(folderItem) {
@@ -871,17 +880,21 @@ function initError(err, reqId) {
 	
 	log(position + "\n\n" + err.stack + "\n\n" + err.message, 3);
 	
-	sendMail(ADMIN_EMAIL, "Init error: " + err.message, "Message: " + err.message + "\n\nStack:\n" + callstack + "\n\nerr.stack:\n" + err.stack + "\n\n Arguments:\n" + process.argv.join("\n"));
-	
-	if(reqId) process.send({id: reqId, error: err.message});
+	if(reqId && process.connected) process.send({id: reqId, error: err.message});
 
-	setTimeout(function() {
-		process.exit(err.code == 0 ? 1 : err.code);
-	}, 3000);
+	var os = require("os");
+	var hostname = os.hostname();
+
+	sendMail(ADMIN_EMAIL, hostname + " Node.js Init error: " + err.message, "Message: " + err.message + "\n\nStack:\n" + callstack + "\n\nerr.stack:\n" + err.stack + "\n\n Arguments:\n" + process.argv.join("\n"), function(err) {
+		shutdown(err.code == 0 ? 1 : err.code)
+	});
+	
 }
 
 function log(msg, level) {
 	
+	if(SHUTDOWN) return; // Prevent EPIPE on process.send and  write after end on initLogStream
+
 	if(!initLogStream) {
 		console.warn("initLogStream=" + initLogStream);
 		console.log(msg + "\n");
@@ -945,4 +958,20 @@ function callsite() {
 	var stack = err.stack;
 	Error.prepareStackTrace = orig;
 	return stack;
+}
+
+function shutdown(exitCode) {
+
+	initLogStream.end(function() {
+
+		SHUTDOWN = true;
+
+		if(typeof process.disconnect == "function") process.disconnect(); // Only available when we get spawned from another proces!?
+
+		setTimeout(function() {
+			process.exit(exitCode);
+		}, 100);
+
+	});
+
 }
