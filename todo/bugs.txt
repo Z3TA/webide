@@ -37,7 +37,11 @@ BUGS (and issues)
 =================
 
 
+---
 
+When you change the mouse/caret position in the terminal emulator, for example when you want to copy something,
+new terminal messages are spitted out at the caret position! 
+Would be great if new stuff always shows at the bottom, and only auto scroll to the bottom we are already scrolled to the bottom
 
 ---
 

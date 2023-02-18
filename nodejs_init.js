@@ -62,7 +62,7 @@ var module_mount = require("./shared/mount.js");
 	eachUser(HOME_DIR, userFound, allUsersFound);
 	
 setInterval(function() {
-	console.log("REQUESTS: " + JSON.stringify(Object.keys(REQUESTS)) );
+	console.log("nodejs_init(debug):REQUESTS: " + JSON.stringify(Object.keys(REQUESTS)) );
 }, 3000);
 
 

@@ -36,6 +36,10 @@ Optimize if needed
 Feature list (Not ordered/prioritized)
 --------------------------------------
 
+Able to use the editor for quick note-taking, seamlessly copy screenshots like in OneNote
+WYSIWYG HTML mode !?
+
+---
 
 Terminal automation API & Macro code (able to write editor code that runs on a keycombo or menu entry)
 - Always wait for a prompt before writing next line (write queu)
