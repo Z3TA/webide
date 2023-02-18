@@ -760,7 +760,7 @@ if(!EDITOR.currentFile || !caret) {
 		
 	});
 
-	EDITOR.addTest(1, function dblClickOnWordInStringLiteral(callback) {
+	EDITOR.addTest(function dblClickOnWordInStringLiteral(callback) {
 		EDITOR.openFile("copyPasteManyLines.txt", 'console.log(`hello $(variable)`)', function(err, file) {
 			var y = Math.round(EDITOR.settings.topMargin + EDITOR.settings.gridHeight / 2);
 			var x = EDITOR.settings.leftMargin + EDITOR.settings.gridWidth * 15;

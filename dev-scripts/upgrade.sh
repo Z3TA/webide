@@ -99,7 +99,7 @@ then
   ssh $SERVER "cd /srv/webide/ && npm install"
   # skip npm audit fix because it will likely return and exit code meaning this script will exit
   # && npm audit fix --force
-
+  echo "do NOT run npm audit fix on the server! If the modules need updating test everything on dev first!"
 else
   rsync -r --delete node_modules/ $SERVER:/srv/webide/node_modules/
 fi
@@ -129,3 +129,4 @@ fi
 
 echo "Now visit the site in incognito mode and make sure everything works!"
 
+echo "PS. do NOT run npm audit fix - it will introduce breaking changes! (update and test the modules in dev)"

@@ -4,16 +4,68 @@ Reporting a bug ? Make sure it's repeatable!
 note: When committing only non-whitespace using git:
 git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-zero -
 
----
-
-When typing in the function list, everything is deselected after one second or so...
 
 ---
 
-Sometimes when scrolling it scrolls too many pages away!
-it seems very random, sometimes it scrolls to two screens away, and sometimes several pages away ...
+Write a test for the SSG compiler!!! 
+Breaking changes when upgrading to new version of marked module!!
+
+/srv/webide/server/plugin/static_site_generator/ssg-build.js:1007
+ data = module_marked(data); // Convert markdown to html
+       ^
+TypeError: module_marked is not a function
+at /srv/webide/server/plugin/static_site_generator/ssg-build.js:1007:12
 
 ---
+
+Auto import SSG sites !?
+
+I had a SSG site (my personal blog), but after cloning and started writing a new article, then clicking preview or WYSIWYG did not work...
+
+
+---
+
+
+---
+goto file need resizeneeded,
+actually the widget that shows folder buttons
+because cant see third row of buttons on mobile
+
+also would like to scroll the list of files to open
+and the text is way too big so only a few lines fit
+and long paths line wraps... so remove the part with the foler being searched
+
+the line numbers are off on screen that is scaled
+
+---
+
+When trying to use the bookmarklet: https://webide.se/about/bookmarklet.htm
+
+Failed to (fully) run:
+"loadUserFeedback (Get user feedback)"
+Error: t.domElement.style is undefined
+
+/srv/webide/client/:20
+TypeError: Node.insertBefore: Argument 1 is not an object. (code=undefined)
+
+And it doesn't even work!!!!
+
+Can we write a test !?
+
+Also embed doesn't work!
+https://webide.se/about/embedExample.htm
+
+---
+
+
+Did not write http:// infront of URL and got:
+Server: API error: abort: repository hg.webtigerteam.com/repo/johan_blog not found!
+
+Auto try with https:// URL, or ask if user want to try with https:// infront !?
+
+---
+
+Working on Node.js init functionality... currently the list currently running scripts
 
 Let prod know the original path of the main file, so we can open it from the script list! (when listing scripts in production) !?
 .webide_init_origin
@@ -35,6 +87,15 @@ but in the terminal, the last line is the line being hidden
 ---
 
 The f script menu is hard to click on in Samsung Dex
+
+---
+
+When typing in the function list, everything is deselected after one second or so...
+
+---
+
+Sometimes when scrolling it scrolls too many pages away!
+it seems very random, sometimes it scrolls to two screens away, and sometimes several pages away ...
 
 ---
 

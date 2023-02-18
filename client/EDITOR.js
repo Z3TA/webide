@@ -9205,6 +9205,35 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		});
 	}
 	
+	EDITOR.deleteFolder = function(directory, recursive, callback) {
+		if(typeof recursive == "function") {
+			callback = recursive;
+			recursive = false;
+		}
+
+		//console.log("Deleting directory=" + directory);
+
+		/*
+			folder vs directory
+			In most GUI's directories are called folders,
+			while on most file systems they are called directories...
+
+		*/
+
+		var protocol = UTIL.urlProtocol(directory);
+		if(protocol != "" && EDITOR.remoteProtocols.indexOf(protocol) == -1) {
+			if(!_protocols.hasOwnProperty(protocol)) return callback(new Error("protocol=" + protocol + " is not supported!"));
+			if(typeof _protocols[protocol].rmdir != "function") return callback(new Error("protocol=" + protocol + " does not have a rmdir method!"));
+			_protocols[protocol].rmdir(directory, recursive, callback);
+			return;
+		}
+
+		CLIENT.cmd("deleteDirectory", {recursive: recursive, directory: directory}, function(err) {
+			if(err) return callback(err);
+
+			callback(null);
+		});
+	}
 	
 	EDITOR.dashboard = {
 		announcedWidgets: [],

@@ -2510,7 +2510,7 @@ whenAllFilesReloaded();
 	
 	function compile(source, destination, publish, callback) {
 		
-		var opt = {source: source, destination: destination, publish: publish, pubUser: selectedSite.pubUser, pubPw: selectedSite.pubPw, pubKey: resolvePath(selectedSite, selectedSite.key)};
+		var opt = {source: source, destination: destination, publish: publish, pubUser: publish && selectedSite.pubUser, pubPw: publish && publish && selectedSite.pubPw, pubKey: publish && resolvePath(selectedSite, selectedSite.key)};
 		
 		CLIENT.cmd("SSG.compile", opt, function(err, json) {
 			
@@ -2718,4 +2718,26 @@ whenAllFilesReloaded();
 		return true;
 	}
 	
+	// TEST-CODE-START
+
+	// # Tests
+
+	EDITOR.addTest(function testGenerateStaticSite(callback) {
+		var source = UTIL.joinPaths(EDITOR.user.homeDir, "ssg_blog_example/source/");
+		var destination = UTIL.joinPaths(EDITOR.user.homeDir, "wwwpub/ssg_blog_example/");
+		var publish = false;
+
+		compile(source, destination, publish, function buildDone(err) {
+			if(err) throw err;
+
+			EDITOR.deleteFolder(destination, true, function(err) {
+				if(err) throw err;
+				callback(true);
+			});
+		});
+	});
+
+
+	// TEST-CODE-END
+
 })();
