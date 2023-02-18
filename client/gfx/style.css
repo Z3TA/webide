@@ -723,6 +723,11 @@ input[type=button]:hover, button.button:hover, input[type=submit]:hover {
 	}
 
 
+.footer textarea {
+	padding: 3px;
+	overflow-y: auto;
+}
+
 /* For showing key-combo shortcut for the button functionality */
 button .key {
 	color: #919191;
