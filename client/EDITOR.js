@@ -8768,90 +8768,14 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		}
 		
 		widget.create = function(grid) {
-			// Add input elements in a grid, which is a multi dimentional array or rows and columns
+			/*
+				One issue when auto-generating a GUI is that the caller probably want to attach click handers to buttons and be able to see the value of input elements ...
+				So build the GUI in the callsite/plugin and use local variables - that way all state is contained
 			
-			// each item can have {type=(input,button), class=(half), label=(text on button or input label)
-			
-			var mainElement = document.createElement("div");
-			
-			var table = document.createElement("table");
-			
-			var tr, td, item, element;
-			for(var row=0; row<grid.length; row++) {
-				tr = document.createElement("tr");
-				for(var col=0; col<grid[row].length; col++) {
-					
-					element = makeItem(grid[row][col]);
-					
-					if(Array.isArray(element)) {
-						// Element contain many things, for example a label and a input field
-						for(var el=0; el<element.length; el++) {
-							td = document.createElement("td");
-							
-							if(element[el].nodeName == "LABEL") td.setAttribute("align", "right");
-							
-							td.appendChild(element[el]);
-							tr.appendChild(td);
-						}
-					}
-					else {
-						td = document.createElement("td");
-						td.appendChild(element);
-						tr.appendChild(td);
-					}
-				}
-				table.appendChild(tr);
-			}
-			
-			return mainElement;
-			
-			function makeItem(item) {
-				var element;
-				
-				if(item.type == undefined) item.type = "input";
-				
-				if(item.type == "input" || item.type == "text") {
-					if(item.label == undefined) throw new Error("text input's must have a label!");
-					element = [];
-					
-					var id = "widgetIdXYZ-0" + (++widgetElementIdCounter); // Must be unique
-					
-					var label = document.createElement("input");
-					label.setAttribute("for", id); // Must be the id for click auto focus to work
-					label.appendChild(document.createTextNode(item.label));
-					element.push(label);
-					
-					var classy = item.class ? item.class + " inputtext" : "inputtext";
-					
-					var input = document.createElement("input");
-					input.setAttribute("type", "text");
-					input.setAttribute("id", id);
-					input.setAttribute("class", classy);
-					if(item.title) input.setAttribute("title", item.title);
-					if(item.size) input.setAttribute("size", item.size);
-					if(item.value) input.setAttribute("value", item.value);
-					element.push(input);
-					
-				}
-				else if(item.type == "button") {
-					if(item.label == undefined) throw new Error("Button must have a label!");
-					element = document.createElement("input");
-					// Icon support ?
-					
-					var classy = item.class ? item.class + " button" : "button";
-					
-					element.setAttribute("type", "button");
-					element.setAttribute("class", classy);
-					element.setAttribute("value", item.label);
-					if(item.title) element.setAttribute("title", item.title);
-					
-				}
-				
-				
-				return element;
-			}
-			
-			
+				As for compability with different GUI libraries, we will use the web Web/DOM forever!
+				It would be nice to also support a terminal interface, but if we have to choose we choose GUI
+			*/
+			throw new Error("widget.create is deprecated!");
 		}
 		
 		
@@ -11031,7 +10955,7 @@ window.addEventListener("mousemove", mouseMove, false);
 		window.attachEvent('onpaste', paste);
 	}
 
-	window.onpaste = function() {alert("paste window");};
+	//window.onpaste = function() {alert("paste window");};
 
 	window.addEventListener('copy', copy);
 	//window.addEventListener('paste', paste);

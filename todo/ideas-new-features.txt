@@ -36,6 +36,15 @@ Optimize if needed
 Feature list (Not ordered/prioritized)
 --------------------------------------
 
+
+
+---
+
+make sure n (the nodejs version manager we use) has the latest path version for every prior major version!
+and that we sort the list (presented in the editor window meny when selecting n version) by using the major version, (now it's sorted alhabetically so 9 is after 10)
+
+---
+
 Able to use the editor for quick note-taking, seamlessly copy screenshots like in OneNote
 WYSIWYG HTML mode !?
 

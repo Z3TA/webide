@@ -289,14 +289,6 @@
 	}
 	
 	function buildServerLoginDialog(widget) {
-		/*
-			return widget.create([
-			[{type: "text", label: "Hostname/IP:", value: "localhost"}],
-			[{type: "text", label: "Username:", value: "admin"}],
-			[{type: "password", label: "Password:", value: "admin"}],
-			[{type: "button", label: "Connect", onclick: connectToServer}]
-			]);
-		*/
 		
 		var form = document.createElement("form");
 		form.onsubmit = connectToServer;

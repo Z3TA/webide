@@ -113,7 +113,11 @@ createApparmorProfile("./etc/apparmor/home.someuser.bin.bash", user.name);
 		run("find " + UTIL.joinPaths([user.homeDir, "wwwpub/"]) + " -type f -exec chmod 744 {} +" ); // Files does not need execute permission
 		run("find " + UTIL.joinPaths([user.homeDir, "wwwpub/"]) + " -type d -exec chmod 2755 {} +" ); // Folders need execute permission for Nginx to list files. New created files will get the same group as parent directory group
 		
-		
+		// Should be able to edit stuff in .webide folder
+		run("chown -R " + user.name + ":" + user.name + " " + UTIL.joinPaths([user.homeDir, ".webide/"]));
+		run("find " + UTIL.joinPaths([user.homeDir, ".webide/"]) + " -type f -exec chmod 640 {} +" ); // Files does not need execute permission
+		run("find " + UTIL.joinPaths([user.homeDir, ".webide/"]) + " -type d -exec chmod 750 {} +" ); // Folders need execute permission 
+
 	
 	}, function allUsersFound() {
 

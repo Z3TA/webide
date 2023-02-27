@@ -77,6 +77,8 @@ var USER_PROD_FOLDER = UTIL.joinPaths(HOME, "/.webide/prod/");
 
 var module_os = require("os");
 
+var module_pwHash = require("./pwHash.js");
+var module_fs = require("fs"); // todo: Replace all var fs = require("fs");
 
 console.log("================================== user_worker.js ==================================");
 
@@ -1083,6 +1085,31 @@ API.identify = function identify(user, json, callback) {
 	if(!user.name) throw new Error("Unexpected: user.name=" + user.name);
 	
 	callback(new Error("Already identified as " + user.name));
+}
+
+API.changePassword = function changePassword(user, json, callback) {
+	var oldPw = module_pwHash(json.old_password);
+	var newPw = module_pwHash(json.new_password);
+
+	var passwordFile = UTIL.joinPaths([user.homeDir, ".webide/", "password"]);
+
+	module_fs.readFile(passwordFile, "utf8", function readPw(err, pwstringFromFile) {
+		if(err) throw err;
+
+		if(pwstringFromFile.slice(-1) == "\n") {
+			log("Ignoring line-feed in " + passwordFile + "", DEBUG);
+			pwstringFromFile = pwstringFromFile.slice(0, -1);
+		}
+
+		if(oldPw != pwstringFromFile) {
+			return callback(new Error("Old password did not match!"));
+		}
+
+		module_fs.writeFile(passwordFile, newPw, function(err) {
+			if(err) throw err;
+			callback(null);
+		});
+	});
 }
 
 API.serve = function serve(user, json, callback) {

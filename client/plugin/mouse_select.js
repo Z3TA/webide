@@ -717,7 +717,7 @@ if(!EDITOR.currentFile || !caret) {
 		});
 	});
 	
-	EDITOR.addTest(function testCopyPasteManyLines(callback) {
+	EDITOR.addTest(1, function testCopyPasteManyLines(callback) {
 		var fileContent = 'lineA\n\nlineB\n\nlineC';
 		EDITOR.openFile("copyPasteManyLines.txt", fileContent, function(err, file) {
 
@@ -762,6 +762,8 @@ if(!EDITOR.currentFile || !caret) {
 
 	EDITOR.addTest(function dblClickOnWordInStringLiteral(callback) {
 		EDITOR.openFile("copyPasteManyLines.txt", 'console.log(`hello $(variable)`)', function(err, file) {
+			if(err) throw err;
+
 			var y = Math.round(EDITOR.settings.topMargin + EDITOR.settings.gridHeight / 2);
 			var x = EDITOR.settings.leftMargin + EDITOR.settings.gridWidth * 15;
 

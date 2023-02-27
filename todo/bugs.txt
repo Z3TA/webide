@@ -37,6 +37,29 @@ BUGS (and issues)
 =================
 
 
+
+---
+
+regression:
+When at a shell prompt in terminal, using the keyboard arrow keys to naviage, and then entering letters, you no longer see the letters!
+example: type echo abc
+press arrow key twice, then insert letter q
+expected: aqbc
+what you get: abc (nothing changes)
+stepping back only once it works, eg: abqc works
+
+---
+
+regression:
+When you turn on annotations via SCM, and have the terminal emulator open at the same time,
+the messages seem to hide when there is a new message in the terminal!
+(something to do with screen resize!?)
+
+---
+
+When chaning node.js version it's not sorted.
+SHould split each semver and sort breaking, then feature, minor fix breaking:feature.minor
+
 ---
 
 When you change the mouse/caret position in the terminal emulator, for example when you want to copy something,

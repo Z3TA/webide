@@ -487,6 +487,11 @@ function confirmBox(msg, userOptions, dialogSettings, callback, recursionCount) 
 	
 }
 
+/*
+	Q: Should we have a multi prompt dialog ? Eg. input boxes for example oldPw, newPw, repeatNewP ...!?
+	A: No, create a widget instead.
+*/
+
 function promptBox(msg, options, callback, recursionCount) {
 	
 	//console.log("promptBox: typeof isPassword = " + (typeof isPassword));

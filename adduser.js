@@ -349,6 +349,33 @@ function adduser() {
 			skeleton.update({username: username, homeDir: homeDir, domain: DOMAIN, netnsIP: netnsIP, dockerVMIP: dockerVMIP, uid: uid, gid: gid});
 			console.timeEnd("Update skeleton files");
 		
+
+		// Try Copy over the test file (only exist in dev)
+		try {
+			copyFileSync("./testfile.txt", HOME + username + "/testfile.txt");
+		}
+		catch(err) {
+			if(err.code != "ENOENT") throw err;
+		}
+
+		// Enable hggit
+		fs.writeFileSync(homeDir + ".hgrc", '\n[extensions]\nhgext.bookmarks =\nhggit =\n\n[ui]\nusername = ' + username + "\n\n", ENCODING);
+
+
+
+		// Activate the user by creating the password file
+		if(NO_PW_HASH) {
+			var hashedPassword = password;
+		}
+		else {
+			console.time("hashing password");
+			var pwHash = require("./server/pwHash.js");
+			var hashedPassword = pwHash(password);
+			console.timeEnd("hashing password");
+		}
+
+		fs.writeFileSync(UTIL.joinPaths([HOME, username, ".webide/", "password"]), hashedPassword, ENCODING);
+
 		
 console.time("chownrSync " + homeDir);
 		// The user owns his files
@@ -394,16 +421,8 @@ console.time("chownrSync " + homeDir);
 		// .ssh folder is secret!
 		child_process.execSync("chmod 700 -R " + homeDir + ".ssh/");
 		
-		
-		
-		// Try Copy over the test file (only exist in dev)
-		try {
-			copyFileSync("./testfile.txt", HOME + username + "/testfile.txt");
-	}
-	catch(err) {
-		if(err.code != "ENOENT") throw err;
-	}
-	
+
+
 		if(!NOZFS) {
 			
 			//var userSkeletonNetnsIP = UTIL.int2ip(167772162 + 1005);
@@ -439,26 +458,6 @@ replaceUsername(homeDir + ".npmrc");
 		function replaceUsername(path) {
 			replaceInFile(path, "userskeleton", username);
 		}
-		
-		
-		// Enable hggit
-		fs.writeFileSync(homeDir + ".hgrc", '\n[extensions]\nhgext.bookmarks =\nhggit =\n\n[ui]\nusername = ' + username + "\n\n", ENCODING);
-		
-		
-		
-		// Activate the user by creating the password file
-		if(NO_PW_HASH) {
-			var hashedPassword = password;
-		}
-		else {
-console.time("hashing password");
-			var pwHash = require("./server/pwHash.js");
-			var hashedPassword = pwHash(password);
-console.timeEnd("hashing password");
-		}
-		
-		fs.writeFileSync(UTIL.joinPaths([HOME, username, ".webide/", "password"]), hashedPassword, ENCODING);
-		
 		
 		console.log("User with username=" + username + ", password=" + password + ", uid=" + uid + ", gid=" + gid + ", homeDir=" + homeDir + " successfully added! ");
 		
