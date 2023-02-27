@@ -6,13 +6,6 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
-Able to change password
-
-chown -R ltest1:ltest1 /home/ltest1/.webide/
-find /home/ltest1/.webide/ -type f -exec chmod 640 {} +
-find /home/ltest1/.webide/ -type d -exec chmod 750 {} +
----
-
 Ooops, I installed a new version of nodejs in prod, and n automatically switched to it, 
 resulting in (when trying to start a user worker):
 Error: The module '/srv/webide/node_modules/posix/build/Release/posix.node'
@@ -22,6 +15,15 @@ NODE_MODULE_VERSION 108. Please try re-compiling or re-installing
 How do I prevent this from happening in the future!?
 
 Make an automatic test that does some trivial with the editor and send an SMS if it fails!?
+
+Make performance test(s) while I'm at it
+
+performance-test-monitor
+
+I guess the issue will solve it self with a lot of users, as they will call you if things stop working...
+
+healthcheck
+
 
 ---
 

@@ -1,3 +1,10 @@
+/*
+
+	todo: Able to reset password!
+	Store the email alias in a file that are not readable by normal users
+
+
+*/
 (function() {
 	"use strict";
 

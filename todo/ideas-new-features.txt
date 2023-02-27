@@ -36,7 +36,7 @@ Optimize if needed
 Feature list (Not ordered/prioritized)
 --------------------------------------
 
-
+Push notifications when a script "added to production" crashes
 
 ---
 
