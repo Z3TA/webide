@@ -12,7 +12,7 @@ module.exports = {
 	signup_http_port: 8100,
 	nodejs_deamon_manager_port: "/run/node_init_manager.sock",
 	smtp_port: 25,
-	smtp_host: "epost.zetafiles.org",
+	smtp_host: "selma.100m.se", // (can only send to ourself)
 	http_ip: "127.0.0.1", // use 0.0.0.0 to bind to all IP's'
 	stdin_channel_port: 13379,
 	remote_file_port: 8103,
