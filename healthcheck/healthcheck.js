@@ -84,8 +84,9 @@ async function check() {
 
 	var interval = setInterval(function() { screenshot(page) }, 1000);
 
-	var t = new Timer("Load page", 500);
+	var t = new Timer("Load page", 2500);
 	await page.goto(WEBIDE_URL);
+	await page.waitForSelector("#username");
 	await t.stop();
 
 	await screenshot(page);
