@@ -6,6 +6,10 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
+Test on slow connection
+
+---
+
 Ooops, I installed a new version of nodejs in prod, and n automatically switched to it, 
 resulting in (when trying to start a user worker):
 Error: The module '/srv/webide/node_modules/posix/build/Release/posix.node'
@@ -87,6 +91,11 @@ menu: Editor->Edit settings is not very intuitive ...
 
 Able to find/search open file in settings://
 When changing the search dir it autocompletes to linux fs dir if it ends with a slash/1
+
+---
+
+Bad contrast on commit select box (when screen is in sunlight) for selected items. (light theme)
+It's better when you click on the items! why!? shouln't the default selection have the same color!?
 
 ---
 goto file need resizeneeded,

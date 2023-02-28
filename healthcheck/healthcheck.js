@@ -84,9 +84,9 @@ async function check() {
 
 	var interval = setInterval(function() { screenshot(page) }, 1000);
 
-	var t = new Timer("Load page", 2500);
+	var t = new Timer("Load page", 4000);
 	await page.goto(WEBIDE_URL);
-	await page.waitForSelector("#username");
+	await page.waitForSelector("#loginButton", {visible: true});
 	await t.stop();
 
 	await screenshot(page);
@@ -103,7 +103,7 @@ async function check() {
 
 	await screenshot(page);
 
-	var t = new Timer("Open file widget", 100);
+	var t = new Timer("Open file widget", 500);
 	await page.keyboard.down('Control');
 	await page.keyboard.press('O');
 	await page.keyboard.up('Control');
@@ -114,7 +114,7 @@ async function check() {
 
 	await page.type('#inputGoto', 'welcome.htm');
 
-	var t = new Timer("Open file");
+	var t = new Timer("Open file", 1000);
 	await page.waitForSelector("#gotoList li");
 	await page.keyboard.press('Enter');
 	await page.waitForSelector("#tab_folder_list_wwwpub");
