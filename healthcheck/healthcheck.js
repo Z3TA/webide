@@ -14,7 +14,7 @@ var module_nodemailer = require('nodemailer');
 var module_smtpTransport = require('nodemailer-smtp-transport');
 
 var WEBIDE_URL = process.env.WEBIDE_URL || "https://webide.se/";
-var DEBUG = process.env.hasOwnProperty("DEBUG") ? process.env.DEBUG : true;
+var DEBUG = process.env.hasOwnProperty("DEBUG") ? process.env.DEBUG=="true" : true;
 var SMTP_PORT = process.env.SMTP_PORT || 255;
 var SMTP_HOST = process.env.SMTP_HOST || "zetafiles.org";
 var SMTP_USER = process.env.SMTP_USER;
@@ -36,20 +36,20 @@ var shreenshotCounter = 0;
 check().then(success).catch(fail);
 
 async function success() {
-	console.log("success!");
 	
 	if(DEBUG) {
 		var msg = "Healtcheck completed";
-		console.log("Waiting for sendMail...");
+		console.log(msg);
+		//console.log("Waiting for sendMail...");
 		await sendMail(MAIL_SENDER, ADMIN_EMAIL, "Healthcheck completed: " + WEBIDE_URL, msg); // from, to, subject, text
-		console.log("sendMail completed!");
+		//console.log("sendMail completed!");
 	}
 
 	// sendMail resolves too early!! so wait for graceful exit. eg. don't call process.exit here
 }
 
 async function fail(err) {
-	console.log("fail!");
+	console.log("Healthcheck failed:");
 	console.error(err);
 
 	var msg = err.stack || ("typeof err=" + typeof err + " err=" + err);
