@@ -3,6 +3,12 @@
 
 	Add to crontab or make a Upstart/systemD config (run on another server)
 
+	Crontab example:
+	# m  h  dom mon dow   command
+	* /10 *  *   *   *     su - nodejs -s /bin/bash -c 'DEBUG=false /usr/bin/node /srv/jzedit/healthcheck/healthcheck.js'
+	(remove space between first * and /10)
+
+
 */
 
 //console.log(process.env);
@@ -173,13 +179,13 @@ async function sendMail(from, to, subject, text) {
 
 	var screenshots = module_fs.readdirSync(SCREENSHOT_FOLDER);
 
-	console.log("screenshots=" + JSON.stringify(screenshots));
+	//console.log("screenshots=" + JSON.stringify(screenshots));
 
 	screenshots = screenshots.map(function (filePath) {
 		return {path: module_path.join(SCREENSHOT_FOLDER, filePath)};
 	});
 
-	console.log("screenshots=" + JSON.stringify(screenshots));
+	//console.log("screenshots=" + JSON.stringify(screenshots));
 
 	await transporter.sendMail({
 		from: from,
