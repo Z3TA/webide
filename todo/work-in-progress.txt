@@ -6,33 +6,13 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
-Ooops, I installed a new version of nodejs in prod, and n automatically switched to it, 
-resulting in (when trying to start a user worker):
-Error: The module '/srv/webide/node_modules/posix/build/Release/posix.node'
-was compiled against a different Node.js version using
-NODE_MODULE_VERSION 93. This version of Node.js requires
-NODE_MODULE_VERSION 108. Please try re-compiling or re-installing
-How do I prevent this from happening in the future!?
-
-Make an automatic test that does some trivial with the editor and send an SMS if it fails!?
-
-Make performance test(s) while I'm at it
-
-performance-test-monitor
-
-I guess the issue will solve it self with a lot of users, as they will call you if things stop working...
-
-healthcheck
-
-
----
-
 Run same version of Node.js on prod and dev!
 
 Upgrade modules (npm audit)
 
 in the release (and or upgrade script?) check https://nodejs.org/en/ for lattest LTS nodejs version, then make sure that version is both on the dev env and prod target.
 if not tell the dev to, re-install nodejs modules and re-run tests using that that version,
+
 
 
 ---
