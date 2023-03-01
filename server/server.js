@@ -1421,8 +1421,9 @@ function main() {
 	}
 
 	if(info.uid == 0 && !USERNAME && HOSTNAME) {
-		// When typing open in the terminal emulator we always want the file to be open in the editor! And not give confusing errors like: /usr/bin/open: 811: : Permission denied
-		module_child_process.exec("unlink /usr/bin/open", EXEC_OPTIONS, function(err, stdout, stderr) {
+		// When typing open in the terminal emulator we always want the file to be open in the editor! 
+		// And not give confusing errors like: /usr/bin/open: 811: : Permission denied
+		module_child_process.exec("mv /usr/bin/open /usr/bin/moved_by_webide_open", EXEC_OPTIONS, function(err, stdout, stderr) {
 			if(err) console.error( err );
 			if(stderr) log(stderr, NOTICE);
 			if(stdout) log(stdout, INFO);
