@@ -6,17 +6,6 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
-Run same version of Node.js on prod and dev!
-
-Upgrade modules (npm audit)
-
-in the release (and or upgrade script?) check https://nodejs.org/en/ for lattest LTS nodejs version, then make sure that version is both on the dev env and prod target.
-if not tell the dev to, re-install nodejs modules and re-run tests using that that version,
-
-
-
----
-
 Write a test for the SSG compiler!!! 
 Breaking changes when upgrading to new version of marked module!!
 

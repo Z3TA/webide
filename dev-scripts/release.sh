@@ -12,8 +12,21 @@ set -e
 # Make sure the folder containing the script is the working dir
 cd $(dirname $0)
 
+
+CURRENT=$(node -v)
+LATEST=$(./get-latest-node-version.js)
+
+if [$CURRENT != $LATEST]
+then
+  echo "Install latest Node.JS $LATEST in the dev enviroment and re-run tests before upgrading/releasing!"
+  echo "(run ./update-node-version.js on the webIDE server)"
+  exit 1
+fi
+
+
 # Move to the webide directory
 cd ..
+
 
 # Delete dependency of dependency to force dependencies to use our patched dependency
 rm -rf node_modules/mysql2/node_modules/iconv-lite
