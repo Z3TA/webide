@@ -89,7 +89,12 @@ async function check() {
 	const browser = await module_puppeteer.launch()
 	const page = await browser.newPage()
 
-	var interval = setInterval(function() { screenshot(page) }, 1000);
+	var interval = setInterval(async function() {
+		var x = Math.floor(Math.random() * 500); 
+		var y = Math.floor(Math.random() * 500); 
+		await page.mouse.move(x, y);
+		await screenshot(page);
+	}, 1000);
 
 	var t = new Timer("Load page", 4000);
 	await page.goto(WEBIDE_URL);
@@ -98,18 +103,16 @@ async function check() {
 
 	await screenshot(page);
 
-	var t = new Timer("Login", 1000);
+	var t = new Timer("Login", 3000);
 	await page.type('#username', 'demo');
 	await page.type('#password', 'demo');
 	await page.click('#loginButton');
 	await page.waitForSelector("#dropdownMenu_save"); // todo: change to open file
+	// Nothing actually happens on the screen until we move the mouse!
+	await page.mouse.move(100, 100);
+	// Can't do anything until we are fully logged in, and we are only fully logged in when we see the dashboard!
+	await page.waitForSelector("#dashboard .smallGraph .graph"); // CPU graph
 	await t.stop();
-
-	//var t = new Timer("Load dashboard", 1000);
-	//await page.waitForSelector("#dashboard .smallGraph .graph"); // CPU graph
-	//await t.stop();
-
-	//throw new Error("test error");
 
 	await screenshot(page);
 
@@ -159,10 +162,10 @@ Timer.prototype.stop = async function stop_timer() {
 	}
 }
 
-Timer.prototype.report = function() {
-	console.warn(this.name + " " + this.diff + " > " + this.max);
+Timer.prototype.report = async function() {
+	if(DEBUG) console.warn(this.name + " " + this.diff + " > " + this.max);
 	var msg = this.name + " took " + this.diff + "ms. Max is " + this.max + "ms"
-	return sendMail(MAIL_SENDER, ADMIN_EMAIL, "Performance alert: " + WEBIDE_URL + " " + msg.split("\n")[0].slice(0, 100), msg); // from, to, subject, text
+	await sendMail(MAIL_SENDER, ADMIN_EMAIL, "Performance alert: " + WEBIDE_URL + " " + msg.split("\n")[0].slice(0, 100), msg); // from, to, subject, text
 }
 
 async function sendMail(from, to, subject, text) {
