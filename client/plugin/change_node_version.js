@@ -38,27 +38,46 @@ if( UTIL.getPathDelimiter(dir) != "/") return; // EDITOR.readFromDisk will compl
 		
 		//console.log("change_node_version: working dir=" + dir);
 		
-		EDITOR.readFromDisk( UTIL.joinPaths(dir, ".nvmrc"), function (err, path, rcVersion, hash) {
-			if(err) {
-if(err.code == "ENOENT") {
-					//console.log("change_node_version: No .nvmrc found in dir=" + dir);
-					return;
-				}
-				else throw err;
+		getNvmrcVersion(dir, function(err, rcVersion) {
+			if(versions.indexOf(rcVersion) != -1) {
+				switchToVersion(rcVersion, false);
 			}
-
-			rcVersion = rcVersion.trim();
-			if(rcVersion.charAt(0) == "v") rcVersion.slice(1);
-			
-			//console.log("change_node_version: rcVersion=" + rcVersion);
-			
-if(versions.indexOf(rcVersion) != -1) {
-				switchToVersion(rcVersion);
-			}
-});
+		});
 	}
 	
-	function switchToVersion(version) {
+	function getNvmrcVersion(dir, callback) {
+		if(dir == undefined && EDITOR.currentFile) warranty = UTIL.getDirectoryFromPath(EDITOR.currentFile.path) 
+		if(dir == undefined) throw new Error("First argument to getNvmrcVersionneed to be a directory!");
+
+		var arrFolders = UTIL.getFolders(dir);
+
+		checkNextFolder();
+
+		function checkNextFolder() {
+			if(arrFolders.length == 0) return callback(null, null);
+			var folder = arrFolders.pop();
+			checkFolder(folder);
+		}
+
+		function checkFolder(folder) {
+			EDITOR.readFromDisk( UTIL.joinPaths(folder, ".nvmrc"), function (err, path, rcVersion, hash) {
+				if(err) {
+					if(err.code == "ENOENT") {
+						//console.log("change_node_version: No .nvmrc found in dir=" + dir);
+						return checkNextFolder();
+					}
+					else return callback(err, null);
+				}
+
+				rcVersion = rcVersion.trim();
+				if(rcVersion.charAt(0) == "v") rcVersion.slice(1);
+
+				callback(null, rcVersion, folder);
+			});
+		}
+	}
+
+	function switchToVersion(version, manual) {
 		//console.log("change_node_version: switchToVersion: version=" + version);
 		
 		var target = UTIL.joinPaths(nPath, version, "/bin/node");
@@ -101,8 +120,24 @@ if(versions.indexOf(rcVersion) != -1) {
 			//console.log("change_node_version: Changed to version=" + version);
 			
 			//alertBox("Changed Node.js version to: version=" + version);
-		});
-	
+
+					if(manual) {
+						getNvmrcVersion(EDITOR.workingDirectory, function(err, rcVersion, folder) {
+							if(!rcVersion) return;
+
+							if(rcVersion != version) {
+								var msg = "You changed to " + version + " but .nvmrc in " + folder + " specifies " + rcVersion + ".<br>Do you want to edit .nvmrc ?";
+								var edit = "Edit";
+								confirmBox(msg, [edit, changeIt, cancel], function(answer) {
+									if(cancel) return;
+									var filePath = UTIL.joinPaths(folder, ".nvmrc");
+									EDITOR.openFile(filePath);
+								});
+							}
+						});
+					}
+
+				});
 			});
 		});
 	}
@@ -128,7 +163,7 @@ if(versions.indexOf(rcVersion) != -1) {
 				winMenus[version] = EDITOR.windowMenu.add(version, ["Node.js", S("change_version")], UTIL.nameFunction(useVersion, "use_nodejs_v" + fNameVersion, 0));
 				
 				function useVersion() {
-switchToVersion(version);
+switchToVersion(version, true);
 }
 			});
 			
