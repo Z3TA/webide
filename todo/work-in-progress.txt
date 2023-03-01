@@ -6,10 +6,6 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
-Test on slow connection
-
----
-
 Ooops, I installed a new version of nodejs in prod, and n automatically switched to it, 
 resulting in (when trying to start a user worker):
 Error: The module '/srv/webide/node_modules/posix/build/Release/posix.node'
@@ -84,6 +80,24 @@ Error code: undefined
 fromString@https://d80.johan.webide.se/UTIL.js:2993:17
 charCode@https://d80.johan.webide.se/UTIL.js:2980:33
 typing@https://d80.johan.webide.se/plugin/goto_file.js:339:20
+
+---
+
+Performance tests!
+
+paintLineNumbers performance regression!
+
+---
+
+Try following https://webide.se/about/hosting_tutorial.htm
+Make a new release
+Test on Windows!
+
+Auto test install script !?
+
+---
+
+Test on slow connection
 
 ---
 

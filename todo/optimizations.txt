@@ -4,6 +4,7 @@ This file contains a list of things that should be optimized...
 Optimization
 ============
 
+paintLineNumbers performance regression!
 
 ---
 
