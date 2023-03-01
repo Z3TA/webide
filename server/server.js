@@ -6914,7 +6914,7 @@ function checkMounts(options, checkMountsCallback) {
 				resultList.forEach(function( p ){
 					if( p ) {
 					
-						log(username + " Found Dropbox daemon process: " + JSON.stringify(p) + "");
+					log(username + " Found Dropbox daemon process: " + JSON.stringify(p) + " (programPath=" + programPath + ")");
 					
 						found = true;
 					
