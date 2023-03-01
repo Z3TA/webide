@@ -28,8 +28,6 @@ var SMTP_PW = process.env.SMTP_PW;
 var ADMIN_EMAIL = process.env.ADMIN_EMAIL || "zeta@zetafiles.org";
 var MAIL_SENDER = process.env.MAIL_SENDER || "healthcheck@webide.se";
 
-var log = console.log;
-
 if( process.env.TLD=="webide.se" ) {
 	var SCREENSHOT_FOLDER = process.env.HOME + "wwwpub/pup/";
 }
@@ -51,7 +49,7 @@ async function success() {
 		//console.log("sendMail completed!");
 	}
 
-	// sendMail resolves too early!! so wait for graceful exit. eg. don't call process.exit here
+	process.exit(0);
 }
 
 async function fail(err) {
@@ -62,11 +60,7 @@ async function fail(err) {
 
 	await sendMail(MAIL_SENDER, ADMIN_EMAIL, "Healthcheck error: " + WEBIDE_URL + " " + msg.split("\n")[0].slice(0, 100), msg); // from, to, subject, text
 
-	// sendMail resolves too early!! So we need to wait. But if we don't exit we might be stuck here forever waiting for some Promise...
-	setTimeout(function() {
-		process.exit(1);
-	}, 3000);
-
+	process.exit(1);
 }
 
 
@@ -82,6 +76,8 @@ async function clearScreenshots() {
 }
 
 async function check() {
+
+	//throw new Error("Failed!");
 
 	await clearScreenshots();
 
@@ -163,7 +159,7 @@ Timer.prototype.report = function() {
 
 async function sendMail(from, to, subject, text) {
 
-	log( "Sending mail from=" + from + " to=" + to + " subject=" + subject + " text.length=" + text.length + "" );
+	if(DEBUG) console.log( "Sending mail from=" + from + " to=" + to + " subject=" + subject + " text.length=" + text.length + "" );
 
 	var mailSettings = {
 		port: SMTP_PORT,
@@ -172,8 +168,8 @@ async function sendMail(from, to, subject, text) {
 
 	if(SMTP_USER) mailSettings.auth = {user: SMTP_USER, pass: SMTP_PW};
 
-	if(!module_nodemailer) return log("Module nodemailer not loaded!");
-	if(!module_smtpTransport) return log("Module smtpTransport not loaded!");
+	if(!module_nodemailer) return console.log("Module nodemailer not loaded!");
+	if(!module_smtpTransport) return console.log("Module smtpTransport not loaded!");
 
 	var transporter = module_nodemailer.createTransport(module_smtpTransport(mailSettings));
 
@@ -187,26 +183,24 @@ async function sendMail(from, to, subject, text) {
 
 	//console.log("screenshots=" + JSON.stringify(screenshots));
 
-	await transporter.sendMail({
-		from: from,
-		to: to,
-		subject: subject,
-		text: text,
-		attachments: screenshots
-
-	}, function(err, info) {
-		if(err) {
-			//if(err.message.match(/Hostname\/IP doesn't match certificate's altnames: "IP: (192\.168\.0\.1)|(127\.0\.0\.1) is not in the cert's list/)) {
-			console.error(err);
-			console.log("Unable to send e-mail (" + subject + "): " + err.message);
-			//}
-			//else throw new Error(err);
-		}
-		else {
-			log("Mail sent: " + info.response);
-		}
+	return new Promise(function(resolve, reject) {
+		transporter.sendMail({
+			from: from,
+			to: to,
+			subject: subject,
+			text: text,
+			attachments: screenshots
+		}, function(err, info) {
+			if(err) {
+				if(DEBUG) console.log("Unable to send e-mail (" + subject + "): " + err.message);
+				reject(err, info);
+			}
+			else {
+				if(DEBUG) console.log("Mail sent: " + info.response);
+				resolve("Mail sent: " + info.response);
+			}
+		});
 	});
 
 }
-
 
