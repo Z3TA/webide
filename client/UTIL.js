@@ -3561,8 +3561,14 @@ else return false;
 		return false;
 		
 	},
+
+	validDomId: function domName(name) {
+		// HTML4 standard: ID and NAME tokens must begin with a letter ([A-Za-z]) and may be followed by any number of letters, digits ([0-9]), hyphens ("-"), underscores ("_"), colons (":"), and periods (".").
+		return name.replace(" ", "_").replace(/[^a-zA-Z0-9-_]/g, ''); // We'll leave out colons and periods just in case
+	}
+
 	ini: function ini(eol) {
-// Returns parse and stringify functions for .ini files
+		// Returns parse and stringify functions for .ini files
 
 		if(eol != '\r\n' && eol != '\n') {
 			throw new Error("First argument to UTIL.ini() needs to be the new-line characters! eol=" + UTIL.lbChars(eol));

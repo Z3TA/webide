@@ -4924,12 +4924,12 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 		item.separator = options.separator ? " separator" + options.separator : ""; // top or bottom
 		
 		item.domElement.setAttribute("class", "item" + item.separator);
-		item.domElement.setAttribute("id", "dropdownMenu_" + label);
+		item.domElement.setAttribute("id", "dropdownMenu_" + UTIL.validDomId(label)); // Need ID to be able to target when recording !?
 		item.domElement.setAttribute("role", "menuitem");
 		
 		if(options.parentMenu && options.parentMenu.parentMenu === null) {
 			// Make it easier to target
-			item.domElement.setAttribute("id", "menu_" + options.label);
+			item.domElement.setAttribute("id", "menu_" + UTIL.validDomId(options.label));
 		}
 
 		
@@ -5737,7 +5737,7 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 				// An id is needed so that the menu item can be targeted while recording
 				var fName = UTIL.getFunctionName(options.callback);
 				if(fName.length == 0) throw new Error("callback function has no name!");
-				var liId = "ctxMenu_" + fName;
+				var liId = "ctxMenu_" + UTIL.validDomId(fName);
 				if(document.getElementById(liId)) {
 					throw new Error("fName=" + fName + " is not a unique function name among context menu items! Or there is still a reference to an old element!");
 				}
