@@ -9,6 +9,9 @@
 	(remove space between first * and /10)
 
 
+	ida: auto deploy (copy to test server) when this file updates in the repo!?
+
+
 */
 
 //console.log(process.env);
@@ -97,9 +100,12 @@ async function check() {
 	await page.type('#username', 'demo');
 	await page.type('#password', 'demo');
 	await page.click('#loginButton');
-	await page.waitForSelector("#windowMenu");
-	await page.waitForSelector("#dashboard .smallGraph .graph"); // CPU graph
+	await page.waitForSelector("#dropdownMenu_save"); // todo: change to open file
 	await t.stop();
+
+	//var t = new Timer("Load dashboard", 1000);
+	//await page.waitForSelector("#dashboard .smallGraph .graph"); // CPU graph
+	//await t.stop();
 
 	//throw new Error("test error");
 
@@ -114,7 +120,7 @@ async function check() {
 
 	await screenshot(page);
 
-	await page.type('#inputGoto', 'welcome.htm');
+	await page.type('#inputGoto', 'welcome.html');
 
 	var t = new Timer("Open file", 1000);
 	await page.waitForSelector("#gotoList li");
