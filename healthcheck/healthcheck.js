@@ -56,9 +56,11 @@ async function success() {
 }
 
 async function fail(err) {
-	console.log("Healthcheck failed:");
-	console.error(err);
-
+	if(DEBUG) {
+		console.log("Healthcheck failed:");
+		console.error(err);
+	}
+	
 	var msg = err.stack || ("typeof err=" + typeof err + " err=" + err);
 
 	await sendMail(MAIL_SENDER, ADMIN_EMAIL, "Healthcheck error: " + WEBIDE_URL + " " + msg.split("\n")[0].slice(0, 100), msg); // from, to, subject, text
