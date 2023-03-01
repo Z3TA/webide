@@ -177,6 +177,17 @@ async function sendMail(from, to, subject, text) {
 
 	//console.log("screenshots=" + JSON.stringify(screenshots));
 
+	// Highest number first
+	var reNum = /s(\d+)\.png/;
+	screenshots.sort(function(a, b) {
+		var nA = parseInt(a.match(reNum)[1]);
+		var nB = parseInt(b.match(reNum)[1]);
+
+		if(nA > nB) return -1;
+		else if(nB > nA) return 1;
+		else return 0;
+	});
+
 	screenshots = screenshots.map(function (filePath) {
 		return {path: module_path.join(SCREENSHOT_FOLDER, filePath)};
 	});
