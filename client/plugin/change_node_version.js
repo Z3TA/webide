@@ -156,6 +156,37 @@ if( UTIL.getPathDelimiter(dir) != "/") return; // EDITOR.readFromDisk will compl
 				return file.name;
 			});
 			
+			//console.log("unsorted: " + JSON.stringify(versions));
+
+			var reVersion = /(\d+)\.(\d+)\.(\d+)/;
+			versions.sort(function(a, b) {
+
+				var Amatch = a.match(reVersion);
+				var Bmatch = b.match(reVersion);
+
+
+				var nA_major = parseInt(Amatch[1]);
+				var nB_major = parseInt(Bmatch[1]);
+
+				var nA_minor = parseInt(Amatch[2]);
+				var nB_minor = parseInt(Bmatch[2]);
+
+				var nA_patch = parseInt(Amatch[2]);
+				var nB_patch = parseInt(Bmatch[2]);
+
+				if(nA_major < nB_major) return -1;
+				if(nA_minor < nB_minor) return -1;
+				if(nA_patch < nB_patch) return -1;
+
+				if(nA_major > nB_major) return 1;
+				if(nA_minor > nB_minor) return 1;
+				if(nA_patch > nB_patch) return 1;
+
+				return 0;
+			});
+
+			//console.log("sorted: " + JSON.stringify(versions));
+
 			//console.log("change_node_version: Found versions=" + JSON.stringify(versions));
 			
 			versions.forEach(function(version) {
