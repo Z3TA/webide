@@ -1045,7 +1045,14 @@ virsh change-media docker hda --eject
 
 Logout and relogin (make sure you can't login with a password)
 `sudo ssh -i /root/.ssh/dockervm docker@192.168.122.96`
+(if user docker cant login, try with root)
 
+Clean up precious hdd space on the DockerVM:
+````
+dpkg --list | grep linux-image
+apt-get --purge remove linux-image-5.10.0-10-amd64
+apt autoremove --purge
+````
 
 Force restart in case shutdown doesn't work:
 ````
