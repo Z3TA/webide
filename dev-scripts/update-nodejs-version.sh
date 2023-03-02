@@ -1,10 +1,17 @@
+#!/bin/bash
+
+# Exit if anything fails
+set -e
+
 echo "It's important that we don't switch to the latest version right away "
 echo "as the running Node.JS scripts module version will break!"
 
-CURRENT=$(node -v)
-LATEST=$(./get-latest-node-version.js)
+__dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-if ["$CURRENT" = "$LATEST"]
+LATEST=$("${__dir}"/get-latest-node-version.js)
+CURRENT=$(node -v)
+
+if [ "$CURRENT" = "$LATEST" ]
 then
   echo "Already running $LATEST" 
   exit 0
@@ -12,10 +19,10 @@ fi
 
 read -p "Current version is $CURRENT Press any key to install $LATEST or Ctrl+C to abort"
 
-n install $LATEST
-n $CURRENT
+n install "$LATEST"
+n "$CURRENT"
 
-if [$(node -v) = "$CURRENT"]
+if [ "$(node -v)" = "$CURRENT" ]
 then
   echo "Great, we are still on $CURRENT (and can switch to $LATEST using n)"
 else

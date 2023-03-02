@@ -16,7 +16,7 @@ cd $(dirname $0)
 CURRENT=$(node -v)
 LATEST=$(./get-latest-node-version.js)
 
-if [$CURRENT != $LATEST]
+if [ $CURRENT != $LATEST ]
 then
   echo "Install latest Node.JS $LATEST in the dev enviroment and re-run tests before upgrading/releasing!"
   echo "(run ./update-node-version.js on the webIDE server)"
