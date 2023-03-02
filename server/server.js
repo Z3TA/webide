@@ -737,7 +737,7 @@ process.on("exit", function () {
 	log("Program exit\n\n", DEBUG, true);
 });
 
-process.on('warning', (warning) => {
+process.on('warning', function(warning) {
 	console.log(warning.stack);
 });
 
@@ -2665,7 +2665,7 @@ function sockJsConnection(connection) {
 				var arr = message.split(GS);
 				var req_id = arr[0];
 				
-				function send(resp) {
+				var send = function send(resp) {
 					resp.id = req_id;
 					var str = JSON.stringify(resp);
 
@@ -4938,74 +4938,74 @@ function checkMounts(options, checkMountsCallback) {
 
 		log("github2s: Cloning git(hub) repo=" + repo);
 
+	var base8Permission = 777; // 0777 or 0o777 in ES6 (node converts it from number to octal?)
+	module_fs.mkdir(tmpDir, {mode: base8Permission}, function(err) {
+		if(err && err.code != "EEXIST") throw err;
 
-		module_fs.mkdir(tmpDir, {mode: 0o777}, function(err) {
-			if(err && err.code != "EEXIST") throw err;
+		log("github2s: Created tmpDir=" + tmpDir);
 
-			log("github2s: Created tmpDir=" + tmpDir);
+		module_fs.chown(tmpDir, uid, gid, function(err) {
+			if(err) throw err;
 
-			module_fs.chown(tmpDir, uid, gid, function(err) {
-				if(err) throw err;
+			log("github2s: chowned uid=" + uid + " gid=" + gid + " tmpDir=" + tmpDir);
 
-				log("github2s: chowned uid=" + uid + " gid=" + gid + " tmpDir=" + tmpDir);
+			var execOptions = {
+				shell: EXEC_OPTIONS.shell,
+				cwd: tmpDir,
+				uid: uid,
+				gid: gid
+			};
 
-				var execOptions = {
-					shell: EXEC_OPTIONS.shell,
-					cwd: tmpDir,
-					uid: uid,
-					gid: gid
-				};
+			var gitArg = ["clone"];
 
-				var gitArg = ["clone"];
+			if(branch && !isSHA1hash(branch)) {
+				gitArg = gitArg.concat( ["--single-branch", "--branch", branch] );
+			}
 
-				if(branch && !isSHA1hash(branch)) {
-					gitArg = gitArg.concat( ["--single-branch", "--branch", branch] );
+			// hopefully make cloning faster
+			gitArg = gitArg.concat( ["--depth", "1"] );
+
+			gitArg = gitArg.concat([repo, tempDirRepo]);
+
+			log("github2s: cloning gitArg=" + JSON.stringify(gitArg) );
+
+			module_child_process.execFile("git", gitArg, execOptions, function gitclone(err, stdout, stderr) {
+				log("github2s: git err=" + err + " err.code=" + (err && err.code) + " stderr=" + stderr + " stdout=" + stdout + " arg=" + JSON.stringify(gitArg));
+
+				if(stderr) {
+
+					stderr = stderr.replace("Cloning into '" + tempDirRepo + "'...", "").trim();
+					stderr = stderr.replace("warning: unable to access '/root/.config/git/attributes': Permission denied", "").trim();
+
+					if(stderr.indexOf("already exists") != -1) {
+						log("github2s: Pulling new commits ...");
+						var gitArg = ["pull"];
+						execOptions.cwd = tempDirRepo;
+						return module_child_process.execFile("git", gitArg, execOptions, function gitclone(err, stdout, stderr) {
+							log("github2s: git err=" + err + " err.code=" + (err && err.code) + " stderr=" + stderr + " stdout=" + stdout + " arg=" + JSON.stringify(gitArg));
+
+							delete GITHUB_CLONING[repoBranch];
+
+						});
+					}
+					else if(stderr.indexOf("Already up to date") != -1) {
+						log("github2s: " + stderr);
+					}
+					else if(stderr.indexOf("Checking out files:") != -1) {
+						log("github2s: " + stderr);
+					}
+					else if(stderr) {
+
+						log("github2s: Unknown error: " + stderr);
+						console.error(err);
+						reportError( "Unknown git error: stderr=" + stderr + " gitArg=" + JSON.stringify(gitArg) + " dirs=" + JSON.stringify(dirs) );
+					}
 				}
 
-				// hopefully make cloning faster
-				gitArg = gitArg.concat( ["--depth", "1"] );
-
-				gitArg = gitArg.concat([repo, tempDirRepo]);
-
-				log("github2s: cloning gitArg=" + JSON.stringify(gitArg) );
-
-				module_child_process.execFile("git", gitArg, execOptions, function gitclone(err, stdout, stderr) {
-					log("github2s: git err=" + err + " err.code=" + (err && err.code) + " stderr=" + stderr + " stdout=" + stdout + " arg=" + JSON.stringify(gitArg));
-
-					if(stderr) {
-
-						stderr = stderr.replace("Cloning into '" + tempDirRepo + "'...", "").trim();
-						stderr = stderr.replace("warning: unable to access '/root/.config/git/attributes': Permission denied", "").trim();
-
-						if(stderr.indexOf("already exists") != -1) {
-							log("github2s: Pulling new commits ...");
-							var gitArg = ["pull"];
-							execOptions.cwd = tempDirRepo;
-							return module_child_process.execFile("git", gitArg, execOptions, function gitclone(err, stdout, stderr) {
-								log("github2s: git err=" + err + " err.code=" + (err && err.code) + " stderr=" + stderr + " stdout=" + stdout + " arg=" + JSON.stringify(gitArg));
-
-								delete GITHUB_CLONING[repoBranch];
-
-							});
-						}
-						else if(stderr.indexOf("Already up to date") != -1) {
-							log("github2s: " + stderr);
-						}
-						else if(stderr.indexOf("Checking out files:") != -1) {
-							log("github2s: " + stderr);
-						}
-						else if(stderr) {
-
-							log("github2s: Unknown error: " + stderr);
-							console.error(err);
-							reportError( "Unknown git error: stderr=" + stderr + " gitArg=" + JSON.stringify(gitArg) + " dirs=" + JSON.stringify(dirs) );
-						}
-					}
-
-					delete GITHUB_CLONING[repoBranch];
-				});
+				delete GITHUB_CLONING[repoBranch];
 			});
 		});
+	});
 
 		return githubRepoName;
 	}
