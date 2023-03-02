@@ -13,9 +13,11 @@
 	Remove a user:
 	sudo ./removeuser.js nameOfUser
 	
-	
-	
-	todo: Move as much as possible to server.js to make it easier to move user's between servers
+	We want to have as little as possible in this file, and have server.js handle the rest!
+	So for example prod, logs, sock, etc folders will be created by server.js
+	That way we can move users between servers and users created by old versions will be updated.
+
+	todo: Move as much as possible to server.js to make it easier to move user's between servers!
 	For moving users between servers, username, uid, and gid need to be globally unique!
 	
 */
@@ -58,8 +60,6 @@ var NO_PW_HASH = getArg(["nopwhash"]);
 var DOMAIN = getArg(["d", "domain"]) || defaultDomain;
 var NOZFS = !!getArg(["nozfs", "nozfs"]);
 var HOME = getArg(["home", "home"]) || defaultHome;
-var ADMIN_EMAIL = getArg(["email", "email", "mail", "admin_email", "admin_mail"]) || DEFAULT.admin_email;
-var NO_CERT = !!getArg(["nocert", "no_cert"]);
 
 if(HOME.charAt(0) != "/") throw new Error("HOME needs to be an absolute path! (start with a slash) HOME=" + HOME);
 // Only linux or other unix-like systems are supported (sorry Windows)
@@ -81,7 +81,6 @@ if(scriptArguments) {
 	username = scriptArguments.username;
 	password = scriptArguments.password;
 	NO_PW_HASH = scriptArguments.noPwHash;
-	NO_CERT = scriptArguments.noCert;
 	DOMAIN = scriptArguments.domain || defaultDomain;
 	HOME = scriptArguments.home || defaultHome;
 	UID = scriptArguments.uid || undefined;

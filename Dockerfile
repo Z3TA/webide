@@ -25,7 +25,7 @@
 
 # FROM must be the first instruction!
 #FROM ubuntu:bionic
-FROM debian:11.3
+FROM debian:11.6
 
 ARG DOMAIN=d80.johan.webide.se
 ENV DOMAIN=${DOMAIN}
@@ -34,17 +34,15 @@ ARG EMAIL=editor@webtigerteam.com
 ENV EMAIL=${EMAIL}
 
 RUN apt-get update
-RUN apt-get update
 RUN apt-get upgrade -y
-RUN apt-get update
 RUN apt-get install curl gcc g++ make -y
 RUN apt-get install nano -y
 RUN apt-get install git -y
 
-RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
-RUN apt-get update
-RUN apt-get install -y nodejs
-
+# Node.js will be installed by ./cloudide_install.sh
+#RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+#RUN apt-get update
+#RUN apt-get install -y nodejs
 
 ADD . /srv/webide/
 
@@ -54,7 +52,7 @@ RUN ./cloudide_install.sh ${DOMAIN} ${EMAIL} -test
 
 RUN ./adduser.js ltest1 123 -nozfs
 
-RUN echo true > /home/ltest1/.webide/storage/jsx
+RUN echo -n true > /home/ltest1/.webide/storage/jsx
 
 RUN rm -rf /srv/webide
 # Will be mounted when running the container

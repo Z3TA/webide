@@ -161,22 +161,21 @@ cp etc/systemd/webide_nodejs_init.service /etc/systemd/system/webide_nodejs_init
 systemctl enable webide_nodejs_init
 
 
-# Install Node.js
+# Install Node.js ( just so we can then install n )
 apt install curl -y
-curl -sL https://deb.nodesource.com/setup_16.x | bash -
+curl -sL https://deb.nodesource.com/setup_18.x | bash -
 apt update && apt install -y nodejs
 
 
 # Allow users to swtich between Node.js versions
 npm install -g n
 #chmod 700 /usr/lib/node_modules/n/bin/n
+n 0
 n 10
 n 12
-n 13
 n 14
-n 15
 n 16
-n 17
+n 18
 
 # Install Nginx (needed to let users have their own home page under user.yourdomain.com)
 echo "#webide: Installing Nginx"
