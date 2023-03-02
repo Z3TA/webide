@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# Exit if anything fails
-set -e
-
 echo "It's important that we don't switch to the latest version right away "
 echo "as the running Node.JS scripts module version will break!"
 
