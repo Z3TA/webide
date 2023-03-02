@@ -45,13 +45,13 @@
 						
 						EDITOR.bindKey({desc: S("restart_nodejs_project_in_production"), fun: nodejsProdRestart, charCode: keyF1, combo: SHIFT + CTRL});
 						
-						EDITOR.bindKey({desc: S("stop_nodejs_project_in_production"), fun: nodejsProdStop, charCode: keyF3, combo: CTRL});
+						EDITOR.bindKey({desc: S("stop_nodejs_project_in_production"), fun: nodejsProdStopFromMenu, charCode: keyF3, combo: CTRL});
 						
 						EDITOR.bindKey({desc: S("remove_nodejs_project_from_production"), fun: nodejsProdRemove, charCode: keyF3, combo: SHIFT + CTRL});
 						
 						winMenuProdDeploy = EDITOR.windowMenu.add(S("deploy_to_production"), ["Node.js", 5], nodejsDeploy, "top");
 						winMenuProdRestart = EDITOR.windowMenu.add(S("restart_production"), ["Node.js", 5], nodejsProdRestart);
-						winMenuProdStop= EDITOR.windowMenu.add(S("stop_production"), ["Node.js", 5], nodejsProdStop);
+						winMenuProdStop= EDITOR.windowMenu.add(S("stop_production"), ["Node.js", 5], nodejsProdStopFromMenu);
 						winMenuProdRemove = EDITOR.windowMenu.add(S("remove_from_production"), ["Node.js", 5], nodejsProdRemove, "bottom");
 						winMenuProdList = EDITOR.windowMenu.add("List deployed scripts", ["Node.js", 5], nodejsProdList, "bottom");
 
@@ -88,14 +88,17 @@
 	function askForPassword(msg, callback) {
 
 		var expireTime = 10*60*1000;
+		var timeSinceLastPrompt = pwDate && (new Date())-pwDate;
 
-		if(tmpPw && (new Date())-pwDate < expireTime) return callback(null, tmpPw);
+		console.log("nodejs_deploy: askForPassword: pwDate=" + pwDate + " timeSinceLastPrompt=" + timeSinceLastPrompt + " expireTime=" + expireTime);
+
+		if(tmpPw && timeSinceLastPrompt < expireTime) return callback(tmpPw);
 
 		promptBox("Enter password " + (msg ? msg:""), {isPassword: true, dialogDelay: 0}, function(pw) {
 			tmpPw = pw;
 			pwDate = new Date();
 
-			callback(null, pw);
+			callback(pw);
 		});
 	}
 
@@ -104,8 +107,7 @@
 
 		winMenuProdList.hide();
 
-		askForPassword(" in order to list scripts:", function (err, pw) {
-			if(err) return alertBox(err.message);
+		askForPassword(" in order to list scripts:", function (pw) {
 			CLIENT.cmd("nodejs_init_list", {pw: pw}, function(err, resp) {
 				if(err) {
 					return alertBox(err.message);
@@ -221,15 +223,25 @@
 		nodejsDeploy(EDITOR.currentFile);
 	}
 	
-	function nodejsProdStop(currentFile) {
-		
+	function nodejsProdStopFromMenu(currentFile) {
 		getProjFolder(currentFile, function(err, folder, pj) {
-			if(err) alertBox(err.message);
-			else promptBox("Enter password to stop " + pj.name + " in production:", {isPassword: true, dialogDelay: 0}, function(pw) {
-				if(pw != null) CLIENT.cmd("nodejs_init_stop", {folder: folder, pw: pw}, function(err, resp) {
-					if(err) alertBox(err.message);
-					else alertBox(pj.name + " stopped!");
-				});
+			if(err) return alertBox(err.message);
+
+			var nameOfFolder = UTIL.getFolderName(folder);
+			nodejsProdStop(nameOfFolder);
+		});
+	}
+
+	// stop and start should only require the name (of the folder)
+
+	function nodejsProdStop(nameOfFolder) {
+		var msg = "Enter password to stop " + nameOfFolder+ " in production:";
+		askForPassword(msg, function(pw) {
+			if(pw != null) CLIENT.cmd("nodejs_init_stop", {folder: UTIL.trailingSlash(nameOfFolder), pw: pw}, function(err, resp) {
+				console.log("nodejs_deploy: nodejs_init_stop: err=" + JSON.stringify(err) + " resp=" + JSON.stringify(resp));
+
+				if(err) alertBox(err.message);
+				else alertBox(pj.name + " stopped!");
 			});
 		});
 		
@@ -239,10 +251,12 @@
 	function nodejsProdRemove(currentFile) {
 		
 		getProjFolder(currentFile, function(err, folder, pj) {
-			if(err) alertBox(err.message);
-			else promptBox("Enter password to remove " + pj.name + " from production:", {isPassword: true, dialogDelay: 0}, function(pw) {
+			if(err) return alertBox(err.message);
+
+			var msg = "Enter password to remove " + pj.name + " from production:"
+			askForPassword(msg, function(pw) {
 				if(pw != null) CLIENT.cmd("nodejs_init_remove", {folder: folder, pw: pw}, function(err, resp) {
-					console.log( JSON.stringify(resp, null, 2) );
+					console.log("nodejs_deploy: " + JSON.stringify(resp, null, 2) );
 					if(err) alertBox(err.message);
 					else alertBox(pj.name + " removed from production!");
 				});
@@ -255,8 +269,10 @@
 	function nodejsProdRestart(currentFile) {
 		
 		getProjFolder(currentFile, function(err, folder, pj) {
-			if(err) alertBox(err.message);
-			else promptBox("Enter password to restart " + pj.name + " in production:", {isPassword: true, dialogDelay: 0}, function(pw) {
+			if(err) return alertBox(err.message);
+
+			var msg = "Enter password to restart " + pj.name + " in production:";
+			askForPassword(msg, function(pw) {
 				if(pw != null) CLIENT.cmd("nodejs_init_restart", {folder: folder, pw: pw}, function(err, resp) {
 					if(err) alertBox(err.message);
 					else alertBox(pj.name + " restarted!");
@@ -282,7 +298,7 @@
 						readPj(folder);
 					}
 					else if(folders.length == 0) {
-						callback(new Error("Unable to find package.json"));
+						callback(new Error("Unable to find package.json in " + folder));
 					}
 					else {
 						throw readFileErr;
@@ -295,7 +311,7 @@
 						var json = JSON.parse(fileContent);
 					}
 					catch(parseErr) {
-						return callback("Failed the parse " + filePath + "! " + parseErr.message);
+						return callback(new Error("Failed the parse " + filePath + "! " + parseErr.message));
 					}
 					
 					callback(null, folder, json);

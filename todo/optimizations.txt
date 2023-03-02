@@ -8,6 +8,11 @@ paintLineNumbers performance regression!
 
 ---
 
+Hitting Ctrl+A and then delete in terminal file that had 13k lines was so slow it crashed the browser!
+(doing the same in a normal file later worked just fine)
+
+---
+
 <script nomodule src="main.es5.js"></script>
 "modern" browsers does not load this file, so we can place the polyfills there!
 

@@ -150,12 +150,14 @@ function httpRequest(request, response) {
 	// note: All successful requests should respond with a JSON string!
 
 	var arr = request.url.split("?");
-	if(arr[0] == "/ping") {
+	if(arr[0] == "/ping/") {
 		response.writeHead(200);
-		response.end('{"pong":' + arr[1] + '}');
+		response.end('{"pong":"' + arr[1] + '"}');
 		return;
 	}
-	else console.log(arr);
+	else {
+		console.log(arr);
+	}
 	
 	var auth = getAuth(request.headers["authorization"]);
 	var username = auth.username;

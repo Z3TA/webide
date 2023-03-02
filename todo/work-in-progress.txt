@@ -6,6 +6,20 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
+Working on nodejs init system ...
+(while we probably should make a proper system prod/deploy system, we'll due with the local one for now...!?) 
+
+Thinking about the builtin node.js/init/deploy function:
+Should we build a proper prod deployment service !?
+Should we support other apps that are not node.js !?
+(We probably should require static linking of the main executable! or require that all deps in lib/modules folder)
+Should be able to deploy using rsync
+
+
+does the nodejs init worker auto start when we push something to prod !?
+
+---
+
 Write a test for the SSG compiler!!! 
 Breaking changes when upgrading to new version of marked module!!
 
@@ -25,6 +39,14 @@ Working on deamon for handeling nodejs scripts in "prod"
 Auto import SSG sites !?
 
 I had a SSG site (my personal blog), but after cloning and started writing a new article, then clicking preview or WYSIWYG did not work...
+
+---
+
+Sometimes when scrolling using mouse wheel it scrolls way too much... sometimes to the end of file!
+
+---
+
+Whenever I get a message in a terminal file, the function list is deselected (when looking at other file)!
 
 ---
 
