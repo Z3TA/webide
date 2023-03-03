@@ -101,7 +101,7 @@ function getAuth(authorization_header_string) {
 			var authType = arr[0];
 			var base64str = arr[1];
 			
-			var buf = new Buffer(base64str, 'base64');
+			var buf = Buffer.from(base64str, 'base64');
 			var str = buf.toString("utf8");
 			var arrAuth = str.split(":");
 			
@@ -207,7 +207,7 @@ response.end('Authorization failed! Unknown username=' + username + "\n");
 // Make shure path exist
 		fs.stat(pathToFolder, function(err) {
 			if(err) {
-				response.writeHead(400);
+				response.writeHead(err.code == "ENOENT" ? 404 : 400);
 				response.end('Error: ' + err.message + "\n");
 				return;
 			}
@@ -393,6 +393,8 @@ function startNodejsInitWorker(homeDir, username, uid, gid, messageToWorker) {
 				command = workerNode;
 				args = [workerScript].concat(workerArgs);
 			}
+
+			args.push("--trace-deprecation");
 
 			log("Starting init worker for " + username + ": Forking " + workerScript + " by running command=" + command + " args=" + JSON.stringify(args) + " spawnOptions=" + JSON.stringify(spawnOptions));
 

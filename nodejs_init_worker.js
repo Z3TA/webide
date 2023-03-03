@@ -308,7 +308,7 @@ function findScriptList(reqId) {
 				name: script.name,
 				pathToFolder: script.pathToFolder,
 				log: script.log,
-				running: CHILD.hasOwnProperty(script.pathToFolder)
+				running: CHILD.hasOwnProperty(script.pathToFolder) && STOP.indexOf(script.pathToFolder) == -1
 			}
 		});
 
@@ -559,14 +559,14 @@ function shutdownInitWorker() {
 
 
 function closeChild(childProcess) {
+	
 	// Allow the process to gracefully shut down
-	
 	if(childProcess.connected) childProcess.disconnect();
-	
 	childProcess.kill('SIGTERM');
 	childProcess.kill('SIGINT');
 	childProcess.kill('SIGQUIT');
 	childProcess.kill('SIGHUP');
+
 }
 
 
@@ -1046,6 +1046,8 @@ function callsite() {
 	Error.prepareStackTrace = orig;
 	return stack;
 }
+
+
 
 function shutdown(exitCode) {
 	if(exitCode) process.exitCode = exitCode;

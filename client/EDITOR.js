@@ -1466,6 +1466,10 @@ EDITOR.env = {}; // Plugins can set custom env values that will be passed to ter
 		// Just so that we are consistent
 		if(text === null) throw new Error("text is null! It should be undefined for the file to open from disk"); // note: null == undefined = true
 		
+		if(typeof text === "object" && state == undefined) {
+			state = text;
+			text = undefined;
+		}
 		
 		if(typeof text === "function" && callback == undefined) {
 			callback = text;
@@ -1485,7 +1489,7 @@ EDITOR.env = {}; // Plugins can set custom env values that will be passed to ter
 			Using the state variable is unintuitive... So throw an error if we use it wrong!
 		*/
 		if(state != undefined) {
-			var allowedInState = ["props", "show", "image", "isSaved", "savedAs", "changed"];
+			var allowedInState = ["props", "show", "tail", "image", "isSaved", "savedAs", "changed"];
 			for(var prop in state) {
 				if(allowedInState.indexOf(prop) == -1) throw new Error("EDITOR.openFile error: Not allowed: prop=" + prop + "\nAllowed states are " + allowedInState.join(",") + ". For all other new File properties, put them in {props:{x:x, y:y, z:z}}");
 			}
@@ -1803,6 +1807,11 @@ EDITOR.env = {}; // Plugins can set custom env values that will be passed to ter
 					//console.log("EDITOR.openFile: (path=" + path + ") Removed bug trap for file.disableParsing as set original file.disableParsing=", file.disableParsing)
 				}
 				
+				if(state && state.tail) file.moveCaretToEndOfFile(file.caret, function() {
+					file.scrollToCaret();
+					EDITOR.renderNeeded();
+				});
+
 			}
 		}
 		

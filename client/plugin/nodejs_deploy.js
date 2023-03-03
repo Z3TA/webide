@@ -41,40 +41,37 @@
 						
 						var keyF1 = 112;
 						var keyF3 = 114;
-						EDITOR.bindKey({desc: S("deploy_current_nodejs_project"), fun: nodejsDeploy, charCode: keyF1, combo: CTRL});
+						EDITOR.bindKey({desc: S("deploy_current_nodejs_project"), fun: prodDeployFile, charCode: keyF1, combo: CTRL});
+						EDITOR.bindKey({desc: S("restart_nodejs_project_in_production"), fun: prodRestartFile, charCode: keyF1, combo: SHIFT + CTRL});
+						EDITOR.bindKey({desc: S("stop_nodejs_project_in_production"), fun: prodStopFile, charCode: keyF3, combo: CTRL});
+						EDITOR.bindKey({desc: S("remove_nodejs_project_from_production"), fun: prodRemoveFile, charCode: keyF3, combo: SHIFT + CTRL});
 						
-						EDITOR.bindKey({desc: S("restart_nodejs_project_in_production"), fun: nodejsProdRestart, charCode: keyF1, combo: SHIFT + CTRL});
-						
-						EDITOR.bindKey({desc: S("stop_nodejs_project_in_production"), fun: nodejsProdStopFromMenu, charCode: keyF3, combo: CTRL});
-						
-						EDITOR.bindKey({desc: S("remove_nodejs_project_from_production"), fun: nodejsProdRemove, charCode: keyF3, combo: SHIFT + CTRL});
-						
-						winMenuProdDeploy = EDITOR.windowMenu.add(S("deploy_to_production"), ["Node.js", 5], nodejsDeploy, "top");
-						winMenuProdRestart = EDITOR.windowMenu.add(S("restart_production"), ["Node.js", 5], nodejsProdRestart);
-						winMenuProdStop= EDITOR.windowMenu.add(S("stop_production"), ["Node.js", 5], nodejsProdStopFromMenu);
-						winMenuProdRemove = EDITOR.windowMenu.add(S("remove_from_production"), ["Node.js", 5], nodejsProdRemove, "bottom");
+						winMenuProdDeploy = EDITOR.windowMenu.add(S("deploy_to_production"), ["Node.js", 5], prodDeployFile, "top");
+						winMenuProdRestart = EDITOR.windowMenu.add(S("restart_production"), ["Node.js", 5], prodRestartFile);
+						winMenuProdStop= EDITOR.windowMenu.add(S("stop_production"), ["Node.js", 5], prodStopFile);
+						winMenuProdRemove = EDITOR.windowMenu.add(S("remove_from_production"), ["Node.js", 5], prodRemoveFile, "bottom");
 						winMenuProdList = EDITOR.windowMenu.add("List deployed scripts", ["Node.js", 5], nodejsProdList, "bottom");
 
 						var discoveryItem = document.createElement("img");
 						discoveryItem.setAttribute("id", "deployDiscovery");
 						discoveryItem.src = "gfx/upload.svg"; // Icon created by: https://www.flaticon.com/authors/phatplus
-						discoveryItem.title = S("nodejs_deploy") + " (" + EDITOR.getKeyFor(nodejsDeploy) + ")";
-						discoveryItem.onclick = nodejsDeployFromDiscoveryBar;
+						discoveryItem.title = S("nodejs_deploy") + " (" + EDITOR.getKeyFor(prodDeployFile) + ")";
+						discoveryItem.onclick = deployFromDiscoveryBar;
 						EDITOR.discoveryBar.add(discoveryItem, 90);
 						
 						activated = true;
 					}
 				});
 			}
-			
-			
-			
-		},
+			},
 		unload: function unloadNodeJsDeploy() {
 			
 			if(!activated) return;
 			
-			EDITOR.unbindKey(nodejsDeploy);
+			EDITOR.unbindKey(prodDeployFile);
+			EDITOR.unbindKey(prodRestartFile);
+			EDITOR.unbindKey(prodStopFile);
+			EDITOR.unbindKey(prodRemoveFile);
 			
 			EDITOR.windowMenu.remove(winMenuProdDeploy);
 			EDITOR.windowMenu.remove(winMenuProdRestart);
@@ -146,27 +143,47 @@
 
 		var actions = document.createElement("td");
 		
+		var nameOfFolder = UTIL.getFolderName(script.pathToFolder);
+
 		var openLog = document.createElement("button");
+		openLog.innerText = "Open log";
+		openLog.classList.add("button");
+		openLog.classList.add("small");
 		openLog.onclick = function() {
-			EDITOR.openFile(script.log);
+			EDITOR.openFile(script.log, {show: true, tail: true});
 		}
 
 		var restart = document.createElement("button");
 		restart.innerText = "(Re)start";
+		restart.classList.add("button");
+		restart.classList.add("small");
 		restart.onclick = function() {
-			
+			prodRestart(nameOfFolder, function() {
+				// ignore callback error because we already got a dialog about it
+				nodejsProdList(); // Refresh list
+			});
 		}
 
 		var stop = document.createElement("button");
 		stop.innerText = "Stop";
+		stop.classList.add("button");
+		stop.classList.add("small");
 		stop.onclick = function() {
-
+			prodStop(nameOfFolder, function() {
+				// ignore callback error because we already got a dialog about it
+				nodejsProdList(); // Refresh list
+			});
 		}
 
 		var remove = document.createElement("button");
 		remove.innerText = "Remove";
+		remove.classList.add("button");
+		remove.classList.add("small");
 		remove.onclick = function() {
-
+			prodRemove(nameOfFolder, function() {
+				// ignore callback error because we already got a dialog about it
+				nodejsProdList(); // Refresh list
+			});
 		}
 
 		actions.appendChild(openLog);
@@ -219,74 +236,95 @@
 	}
 
 
-	function nodejsDeployFromDiscoveryBar() {
-		nodejsDeploy(EDITOR.currentFile);
+	function deployFromDiscoveryBar() {
+		prodDeployFile(EDITOR.currentFile);
 	}
 	
-	function nodejsProdStopFromMenu(currentFile) {
-		console.log("nodejsProdStopFromMenu: currentFile=" + currentFile && currentFile.path);
+	function prodStopFile(currentFile) {
+		console.log("prodStopFile: currentFile=" + currentFile && currentFile.path);
 		getProjFolder(currentFile, function(err, folder, pj) {
 			if(err) return alertBox(err.message);
 
 			var nameOfFolder = UTIL.getFolderName(folder);
-			nodejsProdStop(nameOfFolder);
+			prodStop(nameOfFolder);
 		});
+		return false;
 	}
 
 	// stop and start should only require the name (of the folder)
 
-	function nodejsProdStop(nameOfFolder) {
-		console.log("nodejs_deploy:nodejsProdStop: nameOfFolder=" + nameOfFolder);
+	function prodStop(nameOfFolder, callback) {
+		console.log("nodejs_deploy:prodStop: nameOfFolder=" + nameOfFolder);
 		var msg = "Enter password to stop " + nameOfFolder+ " in production:";
 		askForPassword(msg, function(pw) {
 			if(pw == null) {
-				console.log("nodejs_deploy:nodejsProdStop: nameOfFolder=" + nameOfFolder + " No password provided!");
+				console.log("nodejs_deploy:prodStop: nameOfFolder=" + nameOfFolder + " No password provided!");
+				if(callback) callback(new Error("No password given"));
 				return;
 			}
 			CLIENT.cmd("nodejs_init_stop", {folder: UTIL.trailingSlash(nameOfFolder), pw: pw}, function(err, resp) {
-				console.log("nodejs_deploy:nodejs_init_stop: err=" + JSON.stringify(err) + " resp=" + JSON.stringify(resp));
+				console.log("nodejs_deploy:prodStop:nodejs_init_stop: err=" + JSON.stringify(err) + " resp=" + JSON.stringify(resp));
 
-				if(err) alertBox("Unable to stop " + nameOfFolder + "\nError: " + err.message);
+				if(err) alertBox("Unable to stop " + nameOfFolder + ": " + err.message);
 				else alertBox(nameOfFolder + " stopped!");
+
+				if(callback) callback(err);
 			});
 		});
-		
-		return false;
 	}
 	
-	function nodejsProdRemove(currentFile) {
-		
+	function prodRemoveFile(currentFile) {
+		getProjFolder(currentFile, function(err, folder, pj) {
+			if(err) return alertBox(err.message);
+			var nameOfFolder = UTIL.getFolderName(folder);
+			 prodRemove(nameOfFolder);
+		});
+		return false;
+	}
+
+	function prodRemove(nameOfFolder, callback) {
+		var msg = "Enter password to remove " + pj.name + " from production:"
+		askForPassword(msg, function(pw) {
+			if(pw == null) {
+				if(callback) callback(new Error("No password given"));
+				return;
+			}
+
+			CLIENT.cmd("nodejs_init_remove", {folder: UTIL.trailingSlash(nameOfFolder), pw: pw}, function(err, resp) {
+				console.log("nodejs_deploy:nodejs_init_remove: " + JSON.stringify(resp, null, 2) );
+				if(err) alertBox("Unable to remove " + nameOfFolder + ": " + err.message);
+				else alertBox(pj.name + " removed from production!");
+
+				if(callback) callback(err);
+			});
+			});
+	}
+	
+	function prodRestartFile(currentFile) {
 		getProjFolder(currentFile, function(err, folder, pj) {
 			if(err) return alertBox(err.message);
 
-			var msg = "Enter password to remove " + pj.name + " from production:"
-			askForPassword(msg, function(pw) {
-				if(pw != null) CLIENT.cmd("nodejs_init_remove", {folder: folder, pw: pw}, function(err, resp) {
-					console.log("nodejs_deploy: " + JSON.stringify(resp, null, 2) );
-					if(err) alertBox(err.message);
-					else alertBox(pj.name + " removed from production!");
-				});
-			});
+			var nameOfFolder = UTIL.getFolderName(folder);
+			prodRestart(nameOfFolder);
 		});
-		
 		return false;
 	}
-	
-	function nodejsProdRestart(currentFile) {
-		
-		getProjFolder(currentFile, function(err, folder, pj) {
-			if(err) return alertBox(err.message);
 
-			var msg = "Enter password to restart " + pj.name + " in production:";
-			askForPassword(msg, function(pw) {
-				if(pw != null) CLIENT.cmd("nodejs_init_restart", {folder: folder, pw: pw}, function(err, resp) {
-					if(err) alertBox(err.message);
-					else alertBox(pj.name + " restarted!");
-				});
+	function prodRestart(nameOfFolder, callback) {
+		var msg = "Enter password to restart " + nameOfFolder + " in production:";
+		askForPassword(msg, function(pw) {
+			if(pw == null) {
+				if(callback) callback(new Error("No password given"));
+				return;
+			}
+
+			CLIENT.cmd("nodejs_init_restart", {folder: UTIL.trailingSlash(nameOfFolder), pw: pw}, function(err, resp) {
+				if(err) alertBox("Unable to restart " + nameOfFolder + ": " + err.message);
+				else alertBox(nameOfFolder + " restarted!");
+
+				if(callback) callback(err);
 			});
 		});
-		
-		return false;
 	}
 	
 	function getProjFolder(currentFile, callback) {
@@ -331,8 +369,7 @@
 		}
 	}
 	
-	
-	function nodejsDeploy(currentFile) {
+	function prodDeployFile(currentFile) {
 		
 		// Figure out what folder (project) the user wants to deploy ...
 		
@@ -350,13 +387,13 @@
 			if(folder == undefined) throw new Error("folder=" + folder);
 			
 			//console.log("nodejs_deploy: Looking for package.json in folder=" + folder + " ..."); 
-		EDITOR.readFromDisk(folder + "package.json", function fileRead(readFileErr, filePath, fileContent) {
+			EDITOR.readFromDisk(folder + "package.json", function fileRead(readFileErr, filePath, fileContent) {
 				if(folder == undefined) throw new Error("folder=" + folder);
 				
 				if(readFileErr) {
 					if(readFileErr.code == "ENOENT" && folders.length > 0) {
 						folder = folders.pop();
-					readPj(folder);
+						readPj(folder);
 					}
 					else if(folders.length == 0) {
 						var createPj = "Create package.json";
@@ -403,7 +440,8 @@
 							else {
 
 								//console.log( JSON.stringify(resp, null, 2) );
-								alertBox(pj.name + " deployed to production!\nLog files can be found in " + UTIL.joinPaths(EDITOR.user.homdDir, "log/"));
+								var logDir = UTIL.joinPaths(EDITOR.user.homeDir, "log/");
+								alertBox(pj.name + ' deployed to production!\nLog files can be found in <a href="JavaScript:EDITOR.fileExplorer(\'' + logDir + '\');">' + logDir + '</a>');
 								EDITOR.stat("nodejs_deploy");
 							}
 						});
