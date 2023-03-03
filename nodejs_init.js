@@ -6,6 +6,13 @@
 	
 	When incomming HTTP, send cmd to nodejs_init_worker.js or start it if it's not running
 	
+	WARNING: There be dragons! Writing an init service turned out to be hard due to all asyncness and passing of messages between client and workers
+	The reason why we use workers is that we want to run in the users network namespace and as the user (not root)
+
+	This service runs on the same server as the editor server for the convencience of being able to just copy the files from dev to prod.
+	The reason why we use HTTP however, is that we could later move this service to another server. (then we would have to use rsync to copy files)
+	We could also open up this service for people that just want to use our network and computer resources without using the editor
+
 */
 
 "use strict";
@@ -62,13 +69,13 @@ var SMTP_TRANSPORT = require('nodemailer-smtp-transport');
 
 process.on("SIGINT", sigint);
 
-var fs = require("fs");
+var module_fs = require("fs");
 
 var module_mount = require("./shared/mount.js");
 
 	// Start a nodejs init worker for each user
 	var eachUser = require("./shared/eachUser.js");
-	eachUser(HOME_DIR, userFound, allUsersFound);
+eachUser(HOME_DIR, userFound, startHttpServer);
 	
 setInterval(function() {
 	console.log("nodejs_init(debug):REQUESTS=" + JSON.stringify(Object.keys(REQUESTS)) );
@@ -79,13 +86,39 @@ function userFound(user) {
 	startNodejsInitWorker(user.homeDir, user.name, user.uid, user.gid);
 }
 
-function allUsersFound() {
+function startHttpServer() {
 	var http = require('http');
 	HTTP_SERVER = http.createServer();
 	HTTP_SERVER.on("request", httpRequest);
 	HTTP_SERVER.on("error", httpServerError);
 	HTTP_SERVER.on("listening", httpServerListening);
 	HTTP_SERVER.listen(HTTP_PORT, HTTP_IP);
+
+	var gotServerError = false; // Prevent restart loop
+
+	function httpServerError(err) {
+		
+		console.error(err);
+
+		if(err.code == "EADDRINUSE" && !gotServerError) {
+
+			if(UTIL.isLocalPath(HTTP_PORT)) {
+				// If nodejs_init.js does not exit cleanly the .sock file will still exist!
+				var unixSocket = HTTP_PORT;
+				module_fs.unlinkSync(unixSocket);
+				HTTP_SERVER.listen(HTTP_PORT, HTTP_IP);
+			}
+			return;
+		}
+
+		sendMail(ADMIN_EMAIL, DOMAIN + " Node.js Init error: " + err.message, "Message: " + err.message + "\n\nerr.stack:\n" + err.stack + "\n\n Arguments:\n" + process.argv.join("\n"), function(err) {
+			process.exit(1);
+		});
+
+		gotServerError = true;
+
+	}
+
 }
 
 function getAuth(authorization_header_string) {
@@ -180,13 +213,13 @@ function httpRequest(request, response) {
 	var homeDir = UTIL.trailingSlash(UTIL.joinPaths([HOME_DIR, username]));
 	var pwFilePath = UTIL.joinPaths([homeDir, ".webide", "password"]);
 	
-	fs.readFile(pwFilePath, "utf8", function(err, pwFileContent) {
+	module_fs.readFile(pwFilePath, "utf8", function(err, pwFileContent) {
 		if(err) {
 			if(err.code != "ENOENT") throw err;
 
-response.writeHead(401);
-response.end('Authorization failed! Unknown username=' + username + "\n");
-}
+			response.writeHead(401);
+			response.end('Authorization failed! Unknown username=' + username + "\n");
+		}
 			
 		if(pwFileContent == password) return executeOrder();
 		else {
@@ -204,8 +237,8 @@ response.end('Authorization failed! Unknown username=' + username + "\n");
 			var isStarting = false;
 		var userInfo = require("./shared/userInfo.js");
 		
-// Make shure path exist
-		fs.stat(pathToFolder, function(err) {
+// Make sure path exist
+		module_fs.stat(pathToFolder, function(err) {
 			if(err) {
 				response.writeHead(err.code == "ENOENT" ? 404 : 400);
 				response.end('Error: ' + err.message + "\n");
@@ -229,17 +262,22 @@ response.end('Authorization failed! Unknown username=' + username + "\n");
 				message[pathToFolder] = {action: action, id: ++REQUEST_ID};
 				REQUESTS[REQUEST_ID] = {
 					respond: function (json) {
-					response.end(JSON.stringify(json));
-				},
+						response.end(JSON.stringify(json));
+					},
 					owner: username,
 					time: new Date()
 				}
 				
 				console.log("Did just add REQUEST_ID=" + REQUEST_ID + " to REQUESTS=" + JSON.stringify(Object.keys(REQUESTS)));
 
-				if( ( !NODE_INIT_WORKER.hasOwnProperty(username) || !NODE_INIT_WORKER[username].connected )) {
+				if( !NODE_INIT_WORKER.hasOwnProperty(username) ) {
 					log("No NODE_INIT_WORKER for username=" + username + " ...");
 					startNodejsInitWorker(user.homeDir, user.name, user.uid, user.gid, message);
+				}
+				else if(!NODE_INIT_WORKER[username].connected) {
+					log("username has a init worker. But it is not connected!");
+					REQUESTS[REQUEST_ID].respond({error: "Not connected to init worker process!"});
+					delete REQUESTS[id];
 				}
 				else {
 					log("Sending to NODE_INIT_WORKER[" + username + "] message=" + JSON.stringify(message) + " REQUESTS=" + JSON.stringify(Object.keys(REQUESTS)));
@@ -258,25 +296,12 @@ response.end('Authorization failed! Unknown username=' + username + "\n");
 	}
 }
 
-function httpServerError(err) {
-
-	console.error(err);
-
-	sendMail(ADMIN_EMAIL, DOMAIN + " Node.js Init error: " + err.message, "Message: " + err.message + "\n\nerr.stack:\n" + err.stack + "\n\n Arguments:\n" + process.argv.join("\n"), function(err) {
-		process.exit(1);
-	});
-
-}
-
 function httpServerListening() {
-	
-	
 	
 	if(isNaN(parseInt(HTTP_PORT)) && typeof HTTP_PORT == "string") {
 		log("Listening on " + HTTP_PORT);
 		
-		var fs = require("fs");
-		fs.chmod(HTTP_PORT, 0o777, function(err) {
+		module_fs.chmod(HTTP_PORT, 0o777, function(err) {
 			if (err) throw err;
 			log('The permissions for ' + HTTP_PORT + ' successfully set!', DEBUG);
 		});
@@ -347,9 +372,9 @@ function startNodejsInitWorker(homeDir, username, uid, gid, messageToWorker) {
 		log("startNodejsInitWorker:restart...");
 		// Check the .prod folder
 		var prodFolder = UTIL.joinPaths(homeDir, ".webide/prod/");
-		var fs = require("fs");
+		
 		log("Reading " + prodFolder + " ...");
-		fs.readdir(prodFolder, function(err, filesInProdDir) {
+		module_fs.readdir(prodFolder, function(err, filesInProdDir) {
 			if(err) {
 				var error = new Error("Failed to start init worker for " + username + " because we can't find " + prodFolder + " ! " + err.message + " (" + err.code + ")");
 				log(err.message, NOTICE);
@@ -431,7 +456,7 @@ function startNodejsInitWorker(homeDir, username, uid, gid, messageToWorker) {
 	}
 	
 	function workerDisconnect() {
-		log(username + " worker disconnect: worker.connected=" + NODE_INIT_WORKER[username].connected);
+		log(username + " worker disconnect! worker.connected=" + (NODE_INIT_WORKER.hasOwnProperty(username) && NODE_INIT_WORKER[username].connected));
 	}
 	
 	function workerError(err) {
@@ -480,7 +505,14 @@ function startNodejsInitWorker(homeDir, username, uid, gid, messageToWorker) {
 		log(username + " worker exit: code=" + code + " signal=" + signal);
 		
 		// A non zero exit code is fatal and we need to restart the worker
-		if(parseInt(code) !== 0) {
+		
+		if(parseInt(code) === 0) {
+			log(username + " worker process clean exit");
+			delete NODE_INIT_WORKER[username];
+			if(TIMERS.indexOf(restartTimer) != -1) TIMERS.splice(TIMERS.indexOf(restartTimer), 1);
+			if(TIMERS.indexOf(resetRestartWaitTime) != -1) TIMERS.splice(TIMERS.indexOf(resetRestartWaitTime), 1);
+		}
+		else {
 			log(username + " worker process exited with code=" + code, ERR);
 			
 			if(SHUTDOWN) return;
@@ -491,9 +523,16 @@ function startNodejsInitWorker(homeDir, username, uid, gid, messageToWorker) {
 				sendMail(ADMIN_EMAIL, hostname + " Node.js Init worker for " + username + " has restarted " + restartCounter + " times in a row!", "Try starting the worker process manually to see what's wrong (see nodejs_init_worker.js)", function(err) {
 					log("Sent e-mail to " + ADMIN_EMAIL+ " about " + username + " init worker process");
 				});
+				return; // Don't restart it any more!
 			}
 
 			log("Waiting " + restartWaitTime + "ms until restarting worker process for " + username + " it has been restarted " + restartCounter + " time(s) in a row.");
+			
+			clearTimeout(restartTimer);
+			if(TIMERS.indexOf(restartTimer) != -1) TIMERS.splice(TIMERS.indexOf(restartTimer), 1);
+
+			clearTimeout(resetRestartWaitTime);
+			if(TIMERS.indexOf(resetRestartWaitTime) != -1) TIMERS.splice(TIMERS.indexOf(resetRestartWaitTime), 1);
 
 			restartTimer = setTimeout(function () {
 				restartWaitTime = restartWaitTime * 2;
@@ -505,11 +544,11 @@ function startNodejsInitWorker(homeDir, username, uid, gid, messageToWorker) {
 					// If the worker has not crashed in 30 seconds
 					restartWaitTime = 1000;
 					log("Reset restartWaitTime=" + restartWaitTime + " for " + username);
-					TIMERS.splice(TIMERS.indexOf(resetRestartWaitTime), 1);
+					if(TIMERS.indexOf(resetRestartWaitTime) != -1) TIMERS.splice(TIMERS.indexOf(resetRestartWaitTime), 1);
 				}, 30000);
 				TIMERS.push(resetRestartWaitTime);
 				
-				TIMERS.splice(TIMERS.indexOf(restartTimer), 1);
+				if(TIMERS.indexOf(restartTimer) != -1) TIMERS.splice(TIMERS.indexOf(restartTimer), 1);
 				
 			}, restartWaitTime);
 			TIMERS.push(restartTimer);

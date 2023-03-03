@@ -6,6 +6,17 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
+Ending up with many init worker processes:
+
+ltest1      1850 11.7  3.0 925680 62332 pts/1    Rl   14:19   7:00 /usr/local/bin/node ./nodejs_init_worker.js --trace-deprecation
+ltest1      1889 12.6  3.0 926704 62544 pts/1    Rl   14:20   7:27 /usr/local/bin/node ./nodejs_init_worker.js --trace-deprecation
+ltest1      1942 11.7  3.1 926960 64192 pts/1    Rl   14:23   6:36 /usr/local/bin/node ./nodejs_init_worker.js --trace-deprecation
+ltest1      2162 15.5  2.8 926960 56916 pts/1    Rl   14:39   6:11 /usr/local/bin/node ./nodejs_init_worker.js --trace-deprecation
+ltest1      2394 57.3 26.5 1393292 539188 pts/1  Rl   14:51  16:15 /usr/local/bin/node ./nodejs_init_worker.js --trace-deprecation
+
+What happens if we send a message to the init worker when it's about to exit !?
+
+
 Working on nodejs init system ...
 (while we probably should make a proper system prod/deploy system, we'll due with the local one for now...!?) 
 
