@@ -17,7 +17,8 @@
 	(and vice versa, client should not depend on the .prod files being stored in .webide/prod/ !!)
 
 	Arguments: --home=/home/ltest1 --uid=120 --gid=127 --email=zeta@zetafiles.org
-	sudo node nodejs_init_worker.js -home /home/ltest1 -uid 1000 -gid 1000 -user ltest1 
+
+	messageToInitWorker=$(printf '{"/home/ltest1/.webide/prod/hello_world":{"action":"stop","id":1}}') node nodejs_init_worker.js -home /home/ltest1 -uid 1000 -gid 1000 -user ltest1 --trace-deprecation
 
 
 	Don't call log until initLogStream has been initialized! (or messages wont be logged)
@@ -46,7 +47,7 @@ var EMAIL = getArg(["email", "email"]) || process.env.email; // E-mail address o
 var UID = getArg(["uid", "uid"]) || process.env.uid;
 var GID = getArg(["gid", "gid"]) || process.env.gid;
 var USERNAME = getArg(["user", "user", "username"]) || process.env.user;
-var INIT_MESSAGE = getArg(["action", "action", "msg", "message"]) || process.env.messageToInitWorker; // JSON: {action: action, id:id}
+var INIT_MESSAGE = getArg(["action", "action", "msg", "message"]) || process.env.messageToInitWorker; // JSON: {pathToFolder: {action: action, id:id}}
 
 
 // For sending errors via email to an admin
@@ -133,7 +134,18 @@ log("Starting nodejs init worker...");
 log("GID=" + GID + " UID=" + UID);
 
 if(INIT_MESSAGE) {
+
+	//log("INIT_MESSAGE=" + INIT_MESSAGE);
+	//log("\nprocess.env.messageToInitWorker=" + process.env.messageToInitWorker);
+
+	try {
 	INIT_MESSAGE = JSON.parse(INIT_MESSAGE);
+	}
+	catch(err) {
+		log("Unable to parse INIT_MESSAGE=" + INIT_MESSAGE + " error: " + err.message, ERROR);
+		process.exit(1);
+	}
+
 	log("INIT_MESSAGE: \n" + JSON.stringify(INIT_MESSAGE, null, 2));
 }
 
@@ -175,8 +187,10 @@ else {
 				log("Did not find " + script.pathToFolder + " in INIT_MESSAGE:" + JSON.stringify(Object.keys(INIT_MESSAGE)) );
 			}
 			else {
-				log("INIT_MESSAGE=" + INIT_MESSAGE);
+				log("Empty INIT_MESSAGE=" + INIT_MESSAGE);
 			}
+
+			log("startMaybe: script.pathToFolder=" + script.pathToFolder + " action=" + action + " reqId=" + reqId + " INIT_MESSAGE=" + JSON.stringify(INIT_MESSAGE), DEBUG);
 
 			fs.readFile(statusFile, "utf8", function(err, status){
 				
@@ -958,7 +972,7 @@ function hardError(err, reqId) {
 	var os = require("os");
 	var hostname = os.hostname();
 
-	sendMail(ADMIN_EMAIL, hostname + " Node.js Init error: " + err.message, "Message: " + err.message + "\n\nStack:\n" + callstack + "\n\nerr.stack:\n" + err.stack + "\n\n Arguments:\n" + process.argv.join("\n"), function(err) {
+	sendMail(ADMIN_EMAIL, hostname + " Node.js Init error: " + err.message, "Message: " + err.message + "\n\nStack:\n" + callstack + "\n\nerr.stack:\n" + err.stack + "\n\n Arguments:\n" + process.argv.join("\n"), function(mailError) {
 		shutdown(err.code == 0 ? 1 : err.code)
 	});
 	
