@@ -1257,11 +1257,12 @@ function nodejs_init_action(action, prodFolder, pw, callback) {
 		path: UTIL.trailingSlash(prodFolder) + "?" + action,
 		timeout: 5000
 	};
-	log("Connecting to " + options.hostname + " port=" + options.port + " path=" + options.path + " ...", DEBUG);
+	log("nodejs_init_action: Connecting to " + options.hostname + " port=" + options.port + " path=" + options.path + " ...", DEBUG);
 	httpGet(options, function nodejsInitActionCommand(err, resp) {
 		if(err) {
 			var error = new Error("Failed to " + action + " " + prodFolder + "\n" + err.message)
 			err.code = err.code;
+			log("nodejs_init_action: " + error.message);
 			return callback(error);
 		}
 		else {
@@ -1275,13 +1276,12 @@ function nodejs_init_action(action, prodFolder, pw, callback) {
 				return callback(new Error("Failed to parse resp=" + resp + " returned from " + options.path + " Error: " + err.message));
 			}
 
-			console.log("nodejs_init_action: Response json=" + JSON.stringify(json, null, 2));
+			log("nodejs_init_action: Response json=" + JSON.stringify(json));
 			/*
 				{
 				"restarting": "/home/ltest1/.webide/prod/http_server/"
 				}
 			*/
-
 
 			if(json.error) {
 				var error = new Error(json.error);

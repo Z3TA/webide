@@ -224,6 +224,7 @@
 	}
 	
 	function nodejsProdStopFromMenu(currentFile) {
+		console.log("nodejsProdStopFromMenu: currentFile=" + currentFile && currentFile.path);
 		getProjFolder(currentFile, function(err, folder, pj) {
 			if(err) return alertBox(err.message);
 
@@ -235,13 +236,18 @@
 	// stop and start should only require the name (of the folder)
 
 	function nodejsProdStop(nameOfFolder) {
+		console.log("nodejs_deploy:nodejsProdStop: nameOfFolder=" + nameOfFolder);
 		var msg = "Enter password to stop " + nameOfFolder+ " in production:";
 		askForPassword(msg, function(pw) {
-			if(pw != null) CLIENT.cmd("nodejs_init_stop", {folder: UTIL.trailingSlash(nameOfFolder), pw: pw}, function(err, resp) {
-				console.log("nodejs_deploy: nodejs_init_stop: err=" + JSON.stringify(err) + " resp=" + JSON.stringify(resp));
+			if(pw == null) {
+				console.log("nodejs_deploy:nodejsProdStop: nameOfFolder=" + nameOfFolder + " No password provided!");
+				return;
+			}
+			CLIENT.cmd("nodejs_init_stop", {folder: UTIL.trailingSlash(nameOfFolder), pw: pw}, function(err, resp) {
+				console.log("nodejs_deploy:nodejs_init_stop: err=" + JSON.stringify(err) + " resp=" + JSON.stringify(resp));
 
-				if(err) alertBox(err.message);
-				else alertBox(pj.name + " stopped!");
+				if(err) alertBox("Unable to stop " + nameOfFolder + "\nError: " + err.message);
+				else alertBox(nameOfFolder + " stopped!");
 			});
 		});
 		
@@ -284,7 +290,11 @@
 	}
 	
 	function getProjFolder(currentFile, callback) {
-		var folders = UTIL.getFolders(currentFile.path);
+		if(!currentFile) throw new Error("currentFile=" + currentFile);
+
+		var filePath = currentFile.path;
+
+		var folders = UTIL.getFolders(filePath);
 		
 		var folder = folders.pop();
 		
@@ -298,7 +308,7 @@
 						readPj(folder);
 					}
 					else if(folders.length == 0) {
-						callback(new Error("Unable to find package.json in " + folder));
+						callback(new Error("Unable to find a package.json in " + UTIL.getDirectoryFromPath(filePath) + " and it's parent directories" ));
 					}
 					else {
 						throw readFileErr;
@@ -393,7 +403,7 @@
 							else {
 
 								//console.log( JSON.stringify(resp, null, 2) );
-								alertBox(pj.name + " deployed to production!");
+								alertBox(pj.name + " deployed to production!\nLog files can be found in " + UTIL.joinPaths(EDITOR.user.homdDir, "log/"));
 								EDITOR.stat("nodejs_deploy");
 							}
 						});

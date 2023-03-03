@@ -35,7 +35,7 @@ var SHUTDOWN = false;
 
 var TIMERS = [];
 
-var REQUESTS = []; // id: For recieving answers from workers
+var REQUESTS = {}; // id: For recieving answers from workers
 var REQUEST_ID = 0;
 
 // Systemd console message leveles
@@ -51,6 +51,15 @@ var HTTP_SERVER;
 
 var sigIntCount = 0;
 
+var ADMIN_EMAIL = getArg(["email", "email", "mail", "admin", "admin_email", "admin_mail"]) || DEFAULT.admin_email; // Errors with This script is sent here
+var SMTP_PORT = getArg(["mp", "smtp_port"]) || DEFAULT.smtp_port;
+var SMTP_HOST = getArg(["mh", "smtp_host"]) || DEFAULT.smtp_host;
+var SMTP_USER = getArg(["mu", "smtp_user"]) || "";
+var SMTP_PW = getArg(["mpw", "smtp_pass"]) || "";
+var NODE_MAILER = require('nodemailer');
+var SMTP_TRANSPORT = require('nodemailer-smtp-transport');
+
+
 process.on("SIGINT", sigint);
 
 var fs = require("fs");
@@ -62,8 +71,8 @@ var module_mount = require("./shared/mount.js");
 	eachUser(HOME_DIR, userFound, allUsersFound);
 	
 setInterval(function() {
-	console.log("nodejs_init(debug):REQUESTS: " + JSON.stringify(Object.keys(REQUESTS)) );
-}, 3000);
+	console.log("nodejs_init(debug):REQUESTS=" + JSON.stringify(Object.keys(REQUESTS)) );
+}, 5000);
 
 
 function userFound(user) {
@@ -218,17 +227,29 @@ response.end('Authorization failed! Unknown username=' + username + "\n");
 
 				var message = {};
 				message[pathToFolder] = {action: action, id: ++REQUEST_ID};
-				REQUESTS[REQUEST_ID] = function (json) {
+				REQUESTS[REQUEST_ID] = {
+					respond: function (json) {
 					response.end(JSON.stringify(json));
+				},
+					owner: username,
+					time: new Date()
 				}
 				
-				if(  (!NODE_INIT_WORKER.hasOwnProperty(username) || !NODE_INIT_WORKER[username].connected) && action != "stop"  ) {
+				console.log("Did just add REQUEST_ID=" + REQUEST_ID + " to REQUESTS=" + JSON.stringify(Object.keys(REQUESTS)));
+
+				if( ( !NODE_INIT_WORKER.hasOwnProperty(username) || !NODE_INIT_WORKER[username].connected )) {
 					log("No NODE_INIT_WORKER for username=" + username + " ...");
 					startNodejsInitWorker(user.homeDir, user.name, user.uid, user.gid, message);
 				}
 				else {
-					log("Sending to NODE_INIT_WORKER[" + username + "] message=" + JSON.stringify(message));
+					log("Sending to NODE_INIT_WORKER[" + username + "] message=" + JSON.stringify(message) + " REQUESTS=" + JSON.stringify(Object.keys(REQUESTS)));
 					NODE_INIT_WORKER[username].send(message);
+
+					/*
+						problem: If send() fails we will get the error in the latest worker process
+						solution: Check if there is a request owned by the user and then call respond
+					*/
+
 				}
 				
 			});
@@ -238,7 +259,13 @@ response.end('Authorization failed! Unknown username=' + username + "\n");
 }
 
 function httpServerError(err) {
-	throw err;
+
+	console.error(err);
+
+	sendMail(ADMIN_EMAIL, DOMAIN + " Node.js Init error: " + err.message, "Message: " + err.message + "\n\nerr.stack:\n" + err.stack + "\n\n Arguments:\n" + process.argv.join("\n"), function(err) {
+		process.exit(1);
+	});
+
 }
 
 function httpServerListening() {
@@ -275,7 +302,8 @@ function startNodejsInitWorker(homeDir, username, uid, gid, messageToWorker) {
 	var restartTimer;
 	var resetRestartWaitTime;
 	var firstPing = randomNr(6);
-	
+	var restartCounter = 0;
+
 	homeDir = UTIL.trailingSlash(homeDir);
 	
 	var workerArgs = [];
@@ -307,13 +335,15 @@ function startNodejsInitWorker(homeDir, username, uid, gid, messageToWorker) {
 		for(var pathToFolder in messageToWorker) {
 			var id = messageToWorker[pathToFolder].id;
 			if( REQUESTS.hasOwnProperty(id) ) {
-				REQUESTS[id](resp);
+				REQUESTS[id].respond(resp);
+				console.log("respondWithErrorMaybe: Deleting REQUESTS id=" + id + " because err: " + err.message);
 				delete REQUESTS[id];
 			}
 		}
 	}
 
 	function restart() {
+		restartCounter++;
 		log("startNodejsInitWorker:restart...");
 		// Check the .prod folder
 		var prodFolder = UTIL.joinPaths(homeDir, ".webide/prod/");
@@ -403,11 +433,33 @@ function startNodejsInitWorker(homeDir, username, uid, gid, messageToWorker) {
 	}
 	
 	function workerError(err) {
-		log(username + " worker error: err.message=" + err.message);
+		log(username + " worker error: err.message=" + err.message + " messageToWorker=" + JSON.stringify(messageToWorker));
+
+		for(var id in REQUESTS) {
+			if(REQUESTS[id].owner == username) {
+				// The worker error is likely due to the a request ...
+				// This is a bit fishy because we don't know *which* request caused the error...
+				// But it's better to respond then leave the request haning!?
+				var resp = {error: err.message};
+				REQUESTS[id].respond(resp);
+				console.log("workerError: Deleting REQUESTS id=" + id + " because err: " + err.message);
+				delete REQUESTS[id];
+			}
+		}
 	}
 	
 	function messageFromWorker(msg, handle) {
-		if(msg.message) {
+		if (msg.id) { // It's a response'
+			var id = msg.id;
+			if(REQUESTS.hasOwnProperty(id)) {
+				delete msg["id"];
+				REQUESTS[id].respond(msg);
+
+				console.log("messageFromWorker: Deleting REQUESTS id=" + id + " after we got msg=" + JSON.stringify(msg));
+				delete REQUESTS[id];
+			}
+		}
+		else if(msg.message) {
 			log(username + " worker message: " + msg.message.msg, msg.message.level);
 		}
 		else if(msg.pong) {
@@ -415,14 +467,7 @@ function startNodejsInitWorker(homeDir, username, uid, gid, messageToWorker) {
 				firstPing = randomNr(6);
 			}
 		}
-		else if (msg.id) { // It's a response'
-			var id = msg.id;
-			if(REQUESTS.hasOwnProperty(id)) {
-				delete msg["id"];
-				REQUESTS[id](msg);
-				delete REQUESTS[id];
-			}
-		}
+		
 	}
 	
 	function workerClose(code, signal) {
@@ -438,6 +483,16 @@ function startNodejsInitWorker(homeDir, username, uid, gid, messageToWorker) {
 			
 			if(SHUTDOWN) return;
 			
+			if(restartCounter > 3) {
+				var os = require("os");
+				var hostname = os.hostname();
+				sendMail(ADMIN_EMAIL, hostname + " Node.js Init worker for " + username + " has restarted " + restartCounter + " times in a row!", "Try starting the worker process manually to see what's wrong (see nodejs_init_worker.js)", function(err) {
+					log("Sent e-mail to " + ADMIN_EMAIL+ " about " + username + " init worker process");
+				});
+			}
+
+			log("Waiting " + restartWaitTime + "ms until restarting worker process for " + username + " it has been restarted " + restartCounter + " time(s) in a row.");
+
 			restartTimer = setTimeout(function () {
 				restartWaitTime = restartWaitTime * 2;
 				clearTimeout(resetRestartWaitTime);
@@ -447,6 +502,7 @@ function startNodejsInitWorker(homeDir, username, uid, gid, messageToWorker) {
 				resetRestartWaitTime = setTimeout(function() {
 					// If the worker has not crashed in 30 seconds
 					restartWaitTime = 1000;
+					log("Reset restartWaitTime=" + restartWaitTime + " for " + username);
 					TIMERS.splice(TIMERS.indexOf(resetRestartWaitTime), 1);
 				}, 30000);
 				TIMERS.push(resetRestartWaitTime);
@@ -517,4 +573,45 @@ function randomNr(n) {
 	return parseInt(nr);
 }
 
+function sendMail(to, subject, text, from, callback) {
+
+	if(typeof from == "function") {
+		callback = from;
+		from = undefined;
+	}
+
+	if(from == undefined) from = "nodejs_init@" + DOMAIN;
+
+	text = String(text);
+
+	log("Sending mail from=" + from + " to=" + to + " subject=" + subject + " text=\n********************************************\n* " + text.replace(/\n/g, "\n* ") + "\n********************************************\n", 7);
+
+	var mailSettings = {
+		port: SMTP_PORT,
+		host: SMTP_HOST
+	};
+
+	if(SMTP_USER) mailSettings.auth = {user: SMTP_USER, pass: SMTP_PW};
+
+	var transporter = NODE_MAILER.createTransport(SMTP_TRANSPORT(mailSettings));
+
+	transporter.sendMail({
+		from: from,
+		to: to,
+		subject: subject,
+		text: text
+
+	}, function(err, info){
+
+		if(err){
+			log("Failed to send send e-mail! " + err.message, 2);
+		}
+		else{
+			log("Mail sent: " + info.response);
+		}
+
+		if(callback) callback(err, info);
+
+	});
+}
 

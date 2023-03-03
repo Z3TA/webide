@@ -21,15 +21,22 @@
 
 
 	Don't call log until initLogStream has been initialized! (or messages wont be logged)
+
+	problem: If we have a syntax error in this script, nodejs_init.js will just keep restarting it!
+	solution: Report if it restarts more then 3 times!?
+
+
 */
 
 "use strict"
 
-process.on('uncaughtException', initError);
+process.on('uncaughtException', hardError);
 
 var getArg = require("./shared/getArg.js");
 
 var DEFAULT = require("./server/default_settings.js");
+
+var DOMAIN = getArg(["domain", "domain", "tld"]) || DEFAULT.domain;
 
 var ADMIN_EMAIL = getArg(["email", "email", "mail", "admin", "admin_email", "admin_mail"]) || DEFAULT.admin_email; // Errors with This script is sent here
 
@@ -63,10 +70,10 @@ var SMTP_TRANSPORT = require('nodemailer-smtp-transport');
 
 var TLD = DEFAULT.domain;
 
-if(!HOMEDIR) return initError(new Error("No HOMEDIR specified. Use argument: --homeDir=/home/username/"));
-if(!UID) return initError(new Error("No UID specified. Use argument: --uid=123"));
-if(!GID) return initError(new Error("No UID specified. Use argument: --gid=123"));
-if(!USERNAME) return initError(new Error("No USERNAME specified. Use argument: --user=123"));
+if(!HOMEDIR) return hardError(new Error("No HOMEDIR specified. Use argument: --homeDir=/home/username/"));
+if(!UID) return hardError(new Error("No UID specified. Use argument: --uid=123"));
+if(!GID) return hardError(new Error("No UID specified. Use argument: --gid=123"));
+if(!USERNAME) return hardError(new Error("No USERNAME specified. Use argument: --user=123"));
 
 
 
@@ -103,8 +110,8 @@ try {
 	process.setgid(GID);
 }
 catch(err) {
-	if(err.code == "EPERM") return initError(new Error("Not running as root! (try using sudo)"));
-	else throw err;
+	if(err.code == "EPERM") return hardError(new Error("Not running as root! (try using sudo)"));
+	else hardError(err);
 }
 
 
@@ -135,23 +142,24 @@ if(getArg(["runtests"]) !== undefined) {
 }
 else {
 	
-	findScripts(USER_PROD_FOLDER, function(scripts) {
+	if(INIT_MESSAGE && INIT_MESSAGE.hasOwnProperty(USER_PROD_FOLDER)) {
+		var action = INIT_MESSAGE[USER_PROD_FOLDER].action;
+		var reqId = INIT_MESSAGE[USER_PROD_FOLDER].id;
+		if(action == "list") {
+			findScriptList(reqId);
+			delete INIT_MESSAGE[USER_PROD_FOLDER]; // Remove after use to prevent re-run
+		}
+	}
+
+	findScripts(USER_PROD_FOLDER, reqId, function(scripts) {
 		
 		//log("scripts.length=" + scripts.length);
 
 		if(scripts.length == 0) {
 			log("No scripts found in " + USER_PROD_FOLDER);
+			if(reqId) process.send({id: reqId, error: "No scripts found in " + USER_PROD_FOLDER});
 			shutdown(0);
 			return;
-		}
-
-		if(INIT_MESSAGE && INIT_MESSAGE.hasOwnProperty(USER_PROD_FOLDER)) {
-			var action = INIT_MESSAGE[USER_PROD_FOLDER].action;
-			var reqId = INIT_MESSAGE[USER_PROD_FOLDER].id;
-			if(action == "list") {
-				list(reqId, scripts);
-				delete INIT_MESSAGE[USER_PROD_FOLDER]; // Remove after use to prevent re-run
-			}
 		}
 
 		scripts.forEach(startMaybe);
@@ -200,6 +208,11 @@ else {
 				if(status=="stop") {
 					log("Not starting " + script.pathToFolder + " because last status was stop!");
 					
+					if(reqId) {
+						makeSureItsDead(script.pathToFolder, reqId);
+						delete INIT_MESSAGE[script.pathToFolder]; // Remove after use
+					}
+
 					scripts.splice(scripts.indexOf(script), 1);
 					if(scripts.length == 0) {
 						log("Nothing else to do");
@@ -261,28 +274,35 @@ function commandMessage(message) {
 }
 
 function findScriptList(reqId) {
-	findScripts(USER_PROD_FOLDER, function(scripts) {
+	findScripts(USER_PROD_FOLDER, reqId, function(scripts) {
 		list(reqId, scripts);
-	});
-}
 
-function list(reqId, scripts) {
-	var json = scripts.map(function(script) {
-		/*
-			{main: scriptFilePath, name: findFile, pathToFolder: UTIL.trailingSlash(pathToFolder), log: HOMEDIR + "log/" + folderItem + ".log"}
-		*/
-
-		return {
-			main: script.main,
-			name: script.name,
-			pathToFolder: script.pathToFolder,
-			log: script.log,
-			running: CHILD.hasOwnProperty(script.pathToFolder)
+		if(scripts.length == 0) {
+			log("There are no longer any scripts, so we are shutting down...");
+			shutdown(0);
 		}
 	});
 
-	process.send({id: reqId, scripts: json});
+	function list(reqId, scripts) {
+		var json = scripts.map(function(script) {
+			/*
+				{main: scriptFilePath, name: findFile, pathToFolder: UTIL.trailingSlash(pathToFolder), log: HOMEDIR + "log/" + folderItem + ".log"}
+			*/
+
+			return {
+				main: script.main,
+				name: script.name,
+				pathToFolder: script.pathToFolder,
+				log: script.log,
+				running: CHILD.hasOwnProperty(script.pathToFolder)
+			}
+		});
+
+		process.send({id: reqId, scripts: json});
+	}
 }
+
+
 
 function restart(pathToFolder, reqId) {
 	
@@ -327,6 +347,51 @@ function restart(pathToFolder, reqId) {
 
 }
 
+function makeSureItsDead(pathToFolder, reqId) {
+	var ps = require('ps-node');
+
+	ps.lookup({
+		psargs: "lxa" // add a to show all
+	}, function(err, resultList ) {
+		if (err) throw err;
+
+		var found = false;
+
+		resultList.forEach(function( process ) {
+
+			log(JSON.stringify(process));
+
+			if( process && process.arguments ) {
+				log("process.arguments=" + process.arguments + " typeof " + typeof process.arguments);
+
+				process.arguments.forEach(function(arg) {
+					if(arg.indexOf(pathToFolder) != -1) {
+						log(pathToFolder + " is still running with pid=" + process.pid);
+						found = true;
+						ps.kill( process.pid, function( err ) {
+							if (err) {
+								throw err;
+							}
+							else {
+								log("Killed pid=" + process.pid);
+							}
+						});
+					}
+				});
+			}
+		});
+
+		if(found) {
+			process.send({id: reqId, stopping: pathToFolder});
+		}
+		else {
+			log(pathToFolder + " is definitely not running!");
+			process.send({id: reqId, error: pathToFolder + " was already stopped!"});
+		}
+
+	});
+}
+
 function stop(pathToFolder, reqId) {
 	
 	pathToFolder = UTIL.trailingSlash(pathToFolder);
@@ -337,11 +402,7 @@ function stop(pathToFolder, reqId) {
 
 	if(!CHILD.hasOwnProperty(pathToFolder)) {
 		log( "Service is not running: " + pathToFolder + " Running services: " + Object.getOwnPropertyNames(CHILD) );
-		process.send({id: reqId, stopping: pathToFolder});
-		/*
-			Look for ghost scripts !? module_ps
-		*/
-		return;
+		return makeSureItsDead(pathToFolder, reqId);
 	}
 
 	STOP.push(pathToFolder);
@@ -360,7 +421,7 @@ function stop(pathToFolder, reqId) {
 		
 		GLOBTMERS.splice(GLOBTMERS.indexOf(killTimeout), 1);
 		
-		if(TIMERS[pathToFolder].length > 0) initError( new Error(pathToFolder + " has " + TIMERS[pathToFolder].length + " timers!") );
+		if(TIMERS[pathToFolder].length > 0) hardError( new Error(pathToFolder + " has " + TIMERS[pathToFolder].length + " timers!") );
 		
 		delete TIMERS[pathToFolder];
 		delete CHILD[pathToFolder];
@@ -401,7 +462,7 @@ function start(pathToFolder, reqId) {
 				// See if there is a file with the same name as the folder, then use that file
 				log("Looking for " + findFile + ".js in " + pathToFolder + " ...", DEBUG);
 				fs.readdir(pathToFolder, function (err, folderItems) {
-					if(err) initError(err, reqId);
+					if(err) return hardError(err, reqId);
 					else {
 						folderItems.forEach(function(folderItem) {
 							
@@ -417,7 +478,7 @@ function start(pathToFolder, reqId) {
 				});
 				
 			}
-			else initError(err, reqId);
+			else return hardError(err, reqId);
 		}
 		else {
 			
@@ -425,7 +486,7 @@ function start(pathToFolder, reqId) {
 				var json = JSON.parse(data);
 			}
 			catch(err) {
-				return initError(new Error("Unable to parse " + packageJson + " : " + err.message), reqId);
+				return hardError(new Error("Unable to parse " + packageJson + " : " + err.message), reqId);
 			}
 			
 			if(json.main) {
@@ -495,7 +556,7 @@ function closeChild(childProcess) {
 }
 
 
-function findScripts(pathToFolder, callback) {
+function findScripts(pathToFolder, reqId, callback) {
 	/*
 		Search each folder for a package.json file, 
 		read the package.json,
@@ -515,12 +576,18 @@ function findScripts(pathToFolder, callback) {
 	
 	fs.readdir(pathToFolder, function readdir(err, folderItems) {
 		if(err) {
-			if(err.code == "ENOENT") return callback(scripts);
-			else return initError(err);
+			if(err.code == "ENOENT") {
+				callback(scripts);
+				callback = null;
+				return;
+			}
+			else return hardError(err, reqId);
 		}
 		if(folderItems.length == 0) {
 			log("No files found in pathToFolder=" + pathToFolder, ERR); 
-			shutdown(0); // A clean exit, because we have nothing to do 
+			callback(scripts);
+			callback = null;
+			return;
 		}
 		else {
 			folderItems.forEach(function(folderItem) {
@@ -534,7 +601,7 @@ function findScripts(pathToFolder, callback) {
 			});
 		}
 		
-		checkDone();
+		checkDoneMaybe();
 		
 	});
 	
@@ -545,13 +612,13 @@ function findScripts(pathToFolder, callback) {
 		
 		fs.stat(filePath, function stat(err, stats) {
 			
-			if(err) initError(err);
+			if(err) return hardError(err, reqId);
 			else if(stats.isDirectory()) {
 				lookForScript(folderItem, filePath);
 			}
 			
 			filesToStat--;
-			checkDone();
+			checkDoneMaybe();
 		});
 		
 	}
@@ -571,7 +638,7 @@ function findScripts(pathToFolder, callback) {
 					foldersToLookIn++;
 					log("Looking for " + findFile + ".js in " + pathToFolder + "", DEBUG);
 					fs.readdir(pathToFolder, function (err, folderItems) {
-						if(err) initError(err);
+						if(err) return hardError(err, reqId);
 						else {
 							folderItems.forEach(function(folderItem) {
 								
@@ -583,11 +650,11 @@ function findScripts(pathToFolder, callback) {
 						}
 						
 						foldersToLookIn--;
-						checkDone();
+						checkDoneMaybe();
 					});
 					
 				}
-				else initError(err);
+				else return hardError(err, reqId);
 			}
 			else {
 				
@@ -595,7 +662,7 @@ function findScripts(pathToFolder, callback) {
 					var json = JSON.parse(data);
 				}
 				catch(err) {
-					return initError(new Error("Unable to parse " + packageJson + " : " + err.message));
+					return hardError(new Error("Unable to parse " + packageJson + " : " + err.message), reqId);
 				}
 				
 				if(json.main) {
@@ -605,7 +672,7 @@ function findScripts(pathToFolder, callback) {
 				}
 				else return log(packageJson + " has no main file entry!");
 				
-				checkDone();
+				checkDoneMaybe();
 			}
 			
 			
@@ -614,7 +681,7 @@ function findScripts(pathToFolder, callback) {
 		
 	}
 	
-	function checkDone() {
+	function checkDoneMaybe() {
 		if(foldersToLookIn == 0 && filesToStat == 0 && readingFiles == 0) callback(scripts);
 	}
 	
@@ -830,7 +897,13 @@ function getFileNameFromPath(path) {
 
 function sendMail(to, subject, text, from, callback) {
 	
-	if(from == undefined) from = "mailform@zetafiles.org";
+	if(typeof from == "function") {
+		callback = from;
+		from = undefined;
+	}
+
+	if(from == undefined) from = "nodejs_init@" + DOMAIN;
+
 	
 	text = String(text);
 	
@@ -866,7 +939,7 @@ function sendMail(to, subject, text, from, callback) {
 }
 
 
-function initError(err, reqId) {
+function hardError(err, reqId) {
 	// Only use this function for hard errors!
 
 	// Get the proper position for this error
@@ -961,6 +1034,9 @@ function callsite() {
 }
 
 function shutdown(exitCode) {
+	if(exitCode) process.exitCode = exitCode;
+
+	log("Waiting for graceful shutdown...");
 
 	initLogStream.end(function() {
 
@@ -968,9 +1044,7 @@ function shutdown(exitCode) {
 
 		if(typeof process.disconnect == "function") process.disconnect(); // Only available when we get spawned from another proces!?
 
-		setTimeout(function() {
-			process.exit(exitCode);
-		}, 100);
+		// setTimeout(function() { process.exit(exitCode);}, 100);
 
 	});
 
