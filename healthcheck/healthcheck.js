@@ -107,11 +107,8 @@ async function check() {
 	await page.type('#username', 'demo');
 	await page.type('#password', 'demo');
 	await page.click('#loginButton');
-	await page.waitForSelector("#dropdownMenu_save"); // todo: change to open file
-	// Nothing actually happens on the screen until we move the mouse!
-	await page.mouse.move(100, 100);
-	// Can't do anything until we are fully logged in, and we are only fully logged in when we see the dashboard!
-	await page.waitForSelector("#dashboard .smallGraph .graph"); // CPU graph
+
+	await page.evaluate(new Function('name', "return new Promise(function(resolve, reject) {CLIENT.on('loginSuccess', function() {resolve(123);});});"), "foobar");
 	await t.stop();
 
 	await screenshot(page);
