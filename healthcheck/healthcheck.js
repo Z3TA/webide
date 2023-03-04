@@ -89,10 +89,13 @@ async function check() {
 	const browser = await module_puppeteer.launch()
 	const page = await browser.newPage()
 
+	var done = false;
 	var interval = setInterval(async function() {
 		var x = Math.floor(Math.random() * 500); 
 		var y = Math.floor(Math.random() * 500); 
+		if(done) return;
 		await page.mouse.move(x, y);
+		if(done) return;
 		await screenshot(page);
 	}, 1000);
 
@@ -110,6 +113,16 @@ async function check() {
 
 	await page.evaluate(new Function('name', "return new Promise(function(resolve, reject) {CLIENT.on('loginSuccess', function() {resolve(123);});});"), "foobar");
 	await t.stop();
+
+	// Sometimes workingDir is undefined, resulting int he open file widget searching in folder=undefined ...
+	var workingDir = await page.evaluate(new Function('name', "return new Promise(function(resolve) {resolve(EDITOR.workingDirectory);});"), "foobar");
+	if(DEBUG) console.log("workingDir=" + workingDir);
+	var counter = 0;
+	while(workingDir == undefined && ++counter < 50) {
+		workingDir = await page.evaluate(new Function('name', "return new Promise(function(resolve) {resolve(EDITOR.workingDirectory);});"), "foobar");
+		if(DEBUG) console.log("workingDir=" + workingDir);
+		await new Promise(r => setTimeout(r, 100));
+	}
 
 	await screenshot(page);
 
@@ -131,6 +144,7 @@ async function check() {
 	await t.stop();
 
 	clearInterval(interval);
+	done = true;
 
 	await screenshot(page);
 
