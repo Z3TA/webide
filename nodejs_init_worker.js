@@ -65,7 +65,7 @@ var STOP = []; // List of processes being stopped, so they wont restart
 var SHUTDOWN = false;
 
 var PROCESS_TIMERS = {}; // Tracking all process specific timers so we can exit gracefully
-var GLOBTMERS = []; // Tracking all global setTimeout so that we can exit gracefully
+var GLOBTMERS = []; // Tracking all global setTimeout so that we can exit gracefully (note: you don't have to remove them from the array when they are cleared)'
 var UTC = false; // If set to true, use GMT+0 on time stamps
 
 // Require non-native modules before entering chroot!
@@ -103,8 +103,10 @@ var module_ps = require("ps-node");
 // We need to wait after setuid though, unless we want to allow dac_read_search (allows root to override read-file permission)
 
 
-var shutdownTimer;
-var lastMail;
+var shutdownWhenNothingTodoTimer;
+var lastMailDate;
+var mailQueue = {}; // to: {subject:subject, text:text, from:from}
+var sendMailInQueueTimer;
 
 // Must be numbers!
 GID = parseInt(GID);
@@ -284,7 +286,7 @@ function commandMessage(message) {
 	
 	log("Recieved: " + JSON.stringify(message));
 	
-	clearTimeout(shutdownTimer);
+	clearTimeout(shutdownWhenNothingTodoTimer);
 
 	if(message == undefined) return hardError(new Error("undefined user worker message=" + message));
 
@@ -919,13 +921,63 @@ function getFileNameFromPath(path) {
 	return file;
 }
 
+function sendMailInQueue(forceSendAll) {
+	if(!forceSendAll && lastMailDate && (lastMailDate - (new Date()) < 5000)) {
+		sendMailInQueueTimer = setTimeout(sendMailInQueue, 60000);
+		GLOBTMERS.push(sendMailInQueueTimer);
+		return;
+	}
+
+	var sendList = Object.keys(mailQueue);
+
+	if(!forceSendAll) {
+		var to = sendList[0];
+		concatAndSendEmails(mailQueue[to], to);
+		delete mailQueue[to];
+
+		if(Object.keys(mailQueue).length > 0) {
+			sendMailInQueueTimer = setTimeout(sendMailInQueue, 5500);
+			GLOBTMERS.push(sendMailInQueueTimer);
+		}
+	}
+	else {
+		clearTimeout(sendMailInQueueTimer);
+		sendList.forEach(function(to) {
+			concatAndSendEmails(mailQueue[to], to);
+			delete mailQueue[to];
+		});
+	}
+
+	function concatAndSendEmails(mails, to) {
+
+		var mailBody = [];
+		var mailSubject = "(" + mails.length + " mail) " + mails[0].subject;
+		var mailFrom = mails[0].from;
+
+		mails.forEach(function(mail) {
+			mailBody.push(mail.subject + "\n" + mail.text)
+		});
+
+		var mailText = mailBody.join("\n\n");
+
+		if(forceSendAll) lastMailDate = null;
+		sendMail(to, mailSubject, mailText, mailFrom);
+	}
+}
+
 function sendMail(to, subject, text, from, callback) {
 	
-	if(lastMail && (lastMail - (new Date()) < 5000)) {
-		console.error(new Error("Shutting down due to possible mail loop!"));
-		process.exit(666);
+	clearTimeout(sendMailInQueueTimer);
+
+	if(lastMailDate && (lastMailDate - (new Date()) < 5000)) {
+		if(!mailQueue.hasOwnProperty[to]) mailQueue[to] = [];
+		mailQueue.push({subject:subject, text:text, from:from});
+		log("Added mail to=" + to + " queue");
+		sendMailInQueueTimer = setTimeout(sendMailInQueue, 60000);
+		GLOBTMERS.push(sendMailInQueueTimer);
+		return callback(null);
 	}
-	lastMail = new Date();
+	lastMailDate = new Date();
 
 	if(typeof from == "function") {
 		callback = from;
@@ -1067,8 +1119,8 @@ function callsite() {
 
 function idle() {
 	log("idling");
-	//shutdownTimer = setTimeout(shutdownInitWorker, 600000);
-	//GLOBTMERS.push(shutdownTimer);
+	//shutdownWhenNothingTodoTimer = setTimeout(shutdownInitWorker, 600000);
+	//GLOBTMERS.push(shutdownWhenNothingTodoTimer);
 	shutdownInitWorker(0);
 }
 
@@ -1120,6 +1172,10 @@ function exit(exitCode) {
 	initLogStream.end(function() {
 
 		if(typeof process.disconnect == "function") process.disconnect(); // Only available when we get spawned from another proces!?
+
+		if(Object.keys(mailQueue).length > 0) {
+			sendMailInQueue(true);
+		}
 
 	});
 }
