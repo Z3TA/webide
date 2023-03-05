@@ -40,7 +40,7 @@ var UTC = false;
 
 var SHUTDOWN = false;
 
-var TIMERS = [];
+var TIMERS = []; // Tracking all setTimeout so that we can exit gracefully
 
 var REQUESTS = {}; // id: For recieving answers from workers
 var REQUEST_ID = 0;
@@ -526,7 +526,7 @@ function startNodejsInitWorker(homeDir, username, uid, gid, messageToWorker) {
 				return; // Don't restart it any more!
 			}
 
-			log("Waiting " + restartWaitTime + "ms until restarting worker process for " + username + " it has been restarted " + restartCounter + " time(s) in a row.");
+			log("Waiting " + restartWaitTime + "ms until restarting worker process for " + username + ". It has been restarted " + restartCounter + " time(s) in a row.");
 			
 			clearTimeout(restartTimer);
 			if(TIMERS.indexOf(restartTimer) != -1) TIMERS.splice(TIMERS.indexOf(restartTimer), 1);

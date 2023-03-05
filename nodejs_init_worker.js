@@ -64,8 +64,8 @@ var STOP = []; // List of processes being stopped, so they wont restart
 
 var SHUTDOWN = false;
 
-var TIMERS = {};
-var GLOBTMERS = [];
+var PROCESS_TIMERS = {}; // Tracking all process specific timers so we can exit gracefully
+var GLOBTMERS = []; // Tracking all global setTimeout so that we can exit gracefully
 var UTC = false; // If set to true, use GMT+0 on time stamps
 
 // Require non-native modules before entering chroot!
@@ -227,7 +227,9 @@ else {
 					log("Not starting " + script.pathToFolder + " because last status was stop!");
 					
 					var afterStop = function() {
-						scripts.splice(scripts.indexOf(script), 1);
+						if(scripts.indexOf(script) != -1) scripts.splice(scripts.indexOf(script), 1);
+						else return hardError("Did not find script=" + script + " in scripts=" + JSON.stringify(scripts, null, 2));
+
 						if(scripts.length == 0) {
 							log("Nothing else to do");
 							idle();
@@ -271,7 +273,7 @@ function sigint() {
 function send(msg) {
 	 if(!process.send || !process.connected) {
 		log("No longer connected to parent process!");
-		shutdown(111);
+		shutdownInitWorker(111);
 		return;
 	}
 
@@ -381,8 +383,8 @@ function restart(pathToFolder, reqId) {
 		//log("pathToFolder=" + pathToFolder + " not connected, so closing and then starting ...");
 		closeChild(CHILD[pathToFolder]); // Send kill signal and disconnect just in case
 		
-		for(var timer in TIMERS[pathToFolder]) {
-			clearTimeout(TIMERS[pathToFolder][timer]);
+		for(var timer in PROCESS_TIMERS[pathToFolder]) {
+			clearTimeout(PROCESS_TIMERS[pathToFolder][timer]);
 		}
 
 		delete CHILD[pathToFolder];
@@ -455,15 +457,19 @@ function stop(pathToFolder, reqId) {
 		log( "Service is not running: " + pathToFolder + " Running services: " + Object.getOwnPropertyNames(CHILD) );
 		return makeSureItsDead(pathToFolder, reqId, function(err) {
 			if(err) return hardError(err);
-
 		});
+	}
+
+	if(STOP.indexOf(pathToFolder) != -1) {
+		if(reqId) send({id: reqId, stopping: pathToFolder});
+		return;
 	}
 
 	STOP.push(pathToFolder);
 	
-	//log("Clearing " + TIMERS[pathToFolder].length + " timers from " + pathToFolder);
-	TIMERS[pathToFolder].forEach(clearTimeout);
-	TIMERS[pathToFolder].length = 0;
+	//log("Clearing " + PROCESS_TIMERS[pathToFolder].length + " timers from " + pathToFolder);
+	PROCESS_TIMERS[pathToFolder].forEach(clearTimeout);
+	PROCESS_TIMERS[pathToFolder].length = 0;
 	
 	closeChild(CHILD[pathToFolder]);
 	
@@ -473,11 +479,11 @@ function stop(pathToFolder, reqId) {
 		
 		CHILD[pathToFolder].kill('SIGKILL');
 		
-		GLOBTMERS.splice(GLOBTMERS.indexOf(killTimeout), 1);
+		if(GLOBTMERS.indexOf(killTimeout) != -1) GLOBTMERS.splice(GLOBTMERS.indexOf(killTimeout), 1);
 		
-		if(TIMERS[pathToFolder].length > 0) hardError( new Error(pathToFolder + " has " + TIMERS[pathToFolder].length + " timers!") );
+		if(PROCESS_TIMERS[pathToFolder].length > 0) return hardError( new Error(pathToFolder + " has " + PROCESS_TIMERS[pathToFolder].length + " timers!") );
 		
-		delete TIMERS[pathToFolder];
+		delete PROCESS_TIMERS[pathToFolder];
 		delete CHILD[pathToFolder];
 		
 		while(STOP.indexOf(pathToFolder) != -1) STOP.splice(STOP.indexOf(pathToFolder), 1);
@@ -557,46 +563,6 @@ function start(pathToFolder, reqId) {
 		}
 	});
 }
-
-function shutdownInitWorker() {
-	
-	if(SHUTDOWN) {
-		// Second time receiving the SIGINT, kill all children and exit
-		
-		log("Killing all child processes!");
-		
-		for(var name in CHILD) CHILD[name].kill('SIGKILL');
-		
-		shutdown(0);
-	}
-	
-	SHUTDOWN = true;
-	
-	// Close all child processes ...
-	var closed = [];
-	
-	for(var name in CHILD) {
-		TIMERS[name].forEach(clearTimeout);
-		closeChild(CHILD[name]);
-		log("Closing " + name);
-		closed.push(name);
-	}
-	
-	if(closed.length > 0) {
-		// Tell what process was killed
-		if(EMAIL) sendMail(EMAIL, "Killing processes due to SIGINT", "The nodejs init script reaceaved a SIGINT ...\nThis is most likely due to a server reboot or upgrade.\nThe following nodejs services where stopped:\n * " + closed.join("\n * "), undefined, function() {
-			doneShutdown();
-		});
-	}
-	
-	GLOBTMERS.forEach(clearTimeout);
-	
-	function doneShutdown() {
-		
-	}
-	
-}
-
 
 function closeChild(childProcess) {
 	
@@ -756,7 +722,7 @@ function startService(scriptPath, projectName, pathToFolder, logFilePath, email)
 	
 	log("Starting service: " + pathToFolder + " ... ( main: " + scriptPath + " log: " + logFilePath + " )", 7);
 	
-	TIMERS[pathToFolder] = [];
+	PROCESS_TIMERS[pathToFolder] = [];
 	
 	var waitRestart = [0, 2000,5000,10000,30000,60000,1800000];
 	
@@ -887,14 +853,17 @@ function startService(scriptPath, projectName, pathToFolder, logFilePath, email)
 		clearTimeout(resetRestartsTimer);
 		resetRestartsTimerCounter--;
 		//log("Cleared a resetRestartsTimer! resetRestartsTimerCounter=" + resetRestartsTimerCounter);
-		TIMERS[pathToFolder].splice(TIMERS[pathToFolder].indexOf(resetRestartsTimer), 1);
+		if(PROCESS_TIMERS[pathToFolder].indexOf(resetRestartsTimer) != -1) PROCESS_TIMERS[pathToFolder].splice(PROCESS_TIMERS[pathToFolder].indexOf(resetRestartsTimer), 1);
+		else return hardError("Did not find resetRestartsTimer in PROCESS_TIMERS[" + pathToFolder + "]");
+
 		clearTimeout(respawnTimer);
 		//log("Cleared a respawnTimer!");
-		TIMERS[pathToFolder].splice(TIMERS[pathToFolder].indexOf(respawnTimer), 1);
-		
+		if(PROCESS_TIMERS[pathToFolder].indexOf(respawnTimer) != -1) PROCESS_TIMERS[pathToFolder].splice(PROCESS_TIMERS[pathToFolder].indexOf(respawnTimer), 1);
+		else return hardError("Did not find respawnTimer in PROCESS_TIMERS[" + pathToFolder + "]");
+
 		respawnTimer = setTimeout(function() {
 			//log("Executed a respawnTimer!");
-			TIMERS[pathToFolder].splice(TIMERS[pathToFolder].indexOf(respawnTimer), 1);
+			PROCESS_TIMERS[pathToFolder].splice(PROCESS_TIMERS[pathToFolder].indexOf(respawnTimer), 1);
 			
 			restarts++;
 			
@@ -903,23 +872,24 @@ function startService(scriptPath, projectName, pathToFolder, logFilePath, email)
 			resetRestartsTimer = setTimeout(function() {
 				resetRestartsTimerCounter--;
 				//log("Resetting respawntime for " + pathToFolder);
-				TIMERS[pathToFolder].splice(TIMERS[pathToFolder].indexOf(resetRestartsTimer), 1);
-				
+				if(PROCESS_TIMERS[pathToFolder].indexOf(resetRestartsTimer) != -1) PROCESS_TIMERS[pathToFolder].splice(PROCESS_TIMERS[pathToFolder].indexOf(resetRestartsTimer), 1);
+				else return hardError("Did not find resetRestartsTimer in PROCESS_TIMERS[" + pathToFolder + "]");
+
 				// Reset the restarts counter if the service has been running for more then 60 seconds ...
 				restarts = 0;
 				
 			}, 60000);
 			resetRestartsTimerCounter++;
 			//log("Started a resetRestartsTimer! resetRestartsTimerCounter=" + resetRestartsTimerCounter);
-			TIMERS[pathToFolder].push(resetRestartsTimer);
+			PROCESS_TIMERS[pathToFolder].push(resetRestartsTimer);
 			
 			
 		}, waitForRespawn);
 		//log("Started a respawnTimer!");
-		TIMERS[pathToFolder].push(respawnTimer);
+		PROCESS_TIMERS[pathToFolder].push(respawnTimer);
 		
 		
-		//log(pathToFolder + " timers=" + TIMERS[pathToFolder].length);
+		//log(pathToFolder + " timers=" + PROCESS_TIMERS[pathToFolder].length);
 		
 	}
 	
@@ -1022,7 +992,7 @@ function hardError(err, reqId) {
 	var hostname = os.hostname();
 
 	sendMail(ADMIN_EMAIL, hostname + " Node.js Init error: " + err.message, "Message: " + err.message + "\n\nStack:\n" + callstack + "\n\nerr.stack:\n" + err.stack + "\n\n Arguments:\n" + process.argv.join("\n"), function(mailError) {
-		shutdown(err.code == 0 ? 1 : err.code)
+		shutdownInitWorker(err.code == 0 ? 1 : err.code)
 	});
 	
 }
@@ -1097,23 +1067,59 @@ function callsite() {
 
 function idle() {
 	log("idling");
-	//shutdownTimer = setTimeout(shutdown, 600000);
-	shutdown(0);
+	//shutdownTimer = setTimeout(shutdownInitWorker, 600000);
+	//GLOBTMERS.push(shutdownTimer);
+	shutdownInitWorker(0);
 }
 
-function shutdown(exitCode) {
+function shutdownInitWorker() {
+
+	GLOBTMERS.forEach(clearTimeout);
+
+	if(SHUTDOWN === true) {
+		// Second time receiving the SIGINT, kill all children and exit
+
+		log("shutdownInitWorker() called yet again! Killing all child processes!");
+
+		for(var name in CHILD) CHILD[name].kill('SIGKILL');
+
+		return exit(0);
+	}
+
+	SHUTDOWN = true;
+
+	// Close all child processes ...
+	var closed = [];
+
+	for(var name in CHILD) {
+		PROCESS_TIMERS[name].forEach(clearTimeout);
+		closeChild(CHILD[name]);
+		log("Closing " + name);
+		closed.push(name);
+	}
+
+	if(closed.length > 0) {
+		// Tell what process was killed
+		if(EMAIL) sendMail(EMAIL, "Killing processes due to SIGINT", "The nodejs init script reaceaved a SIGINT ...\nThis is most likely due to a server reboot or upgrade.\nThe following nodejs services where stopped:\n * " + closed.join("\n * "), undefined, function() {
+			exit();
+		});
+	}
+	else {
+		exit();
+	}
+}
+
+function exit(exitCode) {
+
+	if(SHUTDOWN !== true) hardError("Called exit without calling shutdownInitWorker() first");
+
 	if(exitCode) process.exitCode = exitCode;
 
 	log("Waiting for graceful shutdown...");
 
 	initLogStream.end(function() {
 
-		SHUTDOWN = true;
-
 		if(typeof process.disconnect == "function") process.disconnect(); // Only available when we get spawned from another proces!?
 
-		// setTimeout(function() { process.exit(exitCode);}, 100);
-
 	});
-
 }
