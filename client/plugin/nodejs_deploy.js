@@ -282,7 +282,7 @@
 	}
 
 	function prodRemove(nameOfFolder, callback) {
-		var msg = "Enter password to remove " + pj.name + " from production:"
+		var msg = "Enter password to remove " + nameOfFolder + " from production:"
 		askForPassword(msg, function(pw) {
 			if(pw == null) {
 				if(callback) callback(new Error("No password given"));
@@ -292,7 +292,7 @@
 			CLIENT.cmd("nodejs_init_remove", {folder: UTIL.trailingSlash(nameOfFolder), pw: pw}, function(err, resp) {
 				console.log("nodejs_deploy:nodejs_init_remove: " + JSON.stringify(resp, null, 2) );
 				if(err) alertBox("Unable to remove " + nameOfFolder + ": " + err.message);
-				else alertBox(pj.name + " removed from production!");
+				else alertBox(nameOfFolder + " removed from production!");
 
 				if(callback) callback(err);
 			});
@@ -440,7 +440,7 @@
 
 								//console.log( JSON.stringify(resp, null, 2) );
 								var logDir = UTIL.joinPaths(EDITOR.user.homeDir, "log/");
-								alertBox(pj.name + ' deployed to production!\nLog files can be found in <a href="JavaScript:EDITOR.fileExplorer(\'' + logDir + '\');">' + logDir + '</a>');
+								alertBox(pj.name + ' deployed to production!\nLog files can be found in <a href="#" onclick="EDITOR.fileExplorer(\'' + logDir + '\');">' + logDir + '</a>');
 								EDITOR.stat("nodejs_deploy");
 							}
 						});

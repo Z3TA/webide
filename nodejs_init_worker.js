@@ -244,7 +244,7 @@ else {
 					
 					var afterStop = function() {
 						if(scripts.indexOf(script) != -1) scripts.splice(scripts.indexOf(script), 1);
-						else return hardError("Did not find script=" + script + " in scripts=" + JSON.stringify(scripts, null, 2));
+						else return hardError(new Error("Did not find script=" + script + " in scripts=" + JSON.stringify(scripts, null, 2)));
 
 						if(reqId) {
 							send({id: reqId, stopped: script.pathToFolder});
@@ -979,7 +979,6 @@ function startService(scriptPath, projectName, pathToFolder, logFilePath, email,
 	}
 	
 	function childProcessExit(code, signal) {
-		
 		log(pathToFolder + " exit! code=" + code + " signal=" + signal + "");
 		
 		logStream.end(myDate() + ": Exit: code=" + code + " signal=" + signal + "\n");
@@ -1009,16 +1008,16 @@ function startService(scriptPath, projectName, pathToFolder, logFilePath, email,
 		resetRestartsTimerCounter--;
 		//log("Cleared a resetRestartsTimer! resetRestartsTimerCounter=" + resetRestartsTimerCounter);
 		if(PROCESS_TIMERS[pathToFolder].indexOf(resetRestartsTimer) != -1) PROCESS_TIMERS[pathToFolder].splice(PROCESS_TIMERS[pathToFolder].indexOf(resetRestartsTimer), 1);
-		else return hardError("Did not find resetRestartsTimer in PROCESS_TIMERS[" + pathToFolder + "]");
+		
+		// note PROCESS_TIMERS are cleared and reset when stopping the service!
 
 		clearTimeout(respawnTimer);
 		//log("Cleared a respawnTimer!");
 		if(PROCESS_TIMERS[pathToFolder].indexOf(respawnTimer) != -1) PROCESS_TIMERS[pathToFolder].splice(PROCESS_TIMERS[pathToFolder].indexOf(respawnTimer), 1);
-		else return hardError("Did not find respawnTimer in PROCESS_TIMERS[" + pathToFolder + "]");
-
+		
 		respawnTimer = setTimeout(function() {
 			//log("Executed a respawnTimer!");
-			PROCESS_TIMERS[pathToFolder].splice(PROCESS_TIMERS[pathToFolder].indexOf(respawnTimer), 1);
+			if(PROCESS_TIMERS[pathToFolder].indexOf(respawnTimer) != -1) PROCESS_TIMERS[pathToFolder].splice(PROCESS_TIMERS[pathToFolder].indexOf(respawnTimer), 1);
 			
 			restarts++;
 			
@@ -1028,7 +1027,8 @@ function startService(scriptPath, projectName, pathToFolder, logFilePath, email,
 				resetRestartsTimerCounter--;
 				//log("Resetting respawntime for " + pathToFolder);
 				if(PROCESS_TIMERS[pathToFolder].indexOf(resetRestartsTimer) != -1) PROCESS_TIMERS[pathToFolder].splice(PROCESS_TIMERS[pathToFolder].indexOf(resetRestartsTimer), 1);
-				else return hardError("Did not find resetRestartsTimer in PROCESS_TIMERS[" + pathToFolder + "]");
+				
+				// note PROCESS_TIMERS are cleared and reset when stopping the service!
 
 				// Reset the restarts counter if the service has been running for more then 60 seconds ...
 				restarts = 0;
@@ -1042,11 +1042,7 @@ function startService(scriptPath, projectName, pathToFolder, logFilePath, email,
 		}, waitForRespawn);
 		//log("Started a respawnTimer!");
 		PROCESS_TIMERS[pathToFolder].push(respawnTimer);
-		
-		
-		//log(pathToFolder + " timers=" + PROCESS_TIMERS[pathToFolder].length);
-		
-	}
+		}
 	
 	function historyAdd(msg) {
 		
@@ -1378,7 +1374,7 @@ function exit(exitCode) {
 	// Note: The worker process is only restarted if we exit with a non zero exit code!
 	// so if we have nothing to do, exit with 0, but if there was an error, exit with that error code
 
-	if(SHUTDOWN !== true) hardError("Called exit without calling shutdownInitWorker() first");
+	if(SHUTDOWN !== true) hardError(new Error("Called exit without calling shutdownInitWorker() first"));
 
 	if(exitCode != undefined) process.exitCode = exitCode;
 

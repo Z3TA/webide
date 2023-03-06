@@ -545,7 +545,7 @@ function startNodejsInitWorker(homeDir, username, uid, gid, messageToWorker) {
 				resetRestartWaitTime = setTimeout(function() {
 					// If the worker has not crashed in 30 seconds
 					restartWaitTime = 1000;
-					log("Reset restartWaitTime=" + restartWaitTime + " for " + username);
+					log("Reset restartWaitTime=" + restartWaitTime + " for " + username + " init worker.");
 					if(TIMERS.indexOf(resetRestartWaitTime) != -1) TIMERS.splice(TIMERS.indexOf(resetRestartWaitTime), 1);
 				}, 30000);
 				TIMERS.push(resetRestartWaitTime);
