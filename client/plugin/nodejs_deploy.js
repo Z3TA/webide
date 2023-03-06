@@ -130,9 +130,8 @@
 		console.log("nodejs_deploy:makeListItem: script=" + JSON.stringify(script));
 		// {"main":"/home/ltest1/.webide/prod/hello_world/hello.js","name":"hello_world","pathToFolder":"/home/ltest1/.webide/prod/hello_world/","log":"/home/ltest1/log/hello_world.log","running":true}
 
-		var status = "enabled";
-		if(script.running) status = "running";
-
+		var status = script.status;
+		
 		var tr = document.createElement("tr");
 
 		var name = document.createElement("td");

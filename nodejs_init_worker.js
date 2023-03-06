@@ -34,7 +34,8 @@
 
 "use strict"
 
-//process.on('uncaughtException', hardError);
+// Need the following to detect syntax errors and other errors like trying to call a function that doesn't exist
+process.on('uncaughtException', hardError);
 
 var getArg = require("./shared/getArg.js");
 
@@ -99,6 +100,12 @@ HOMEDIR = UTIL.trailingSlash(HOMEDIR); // Make sure it ends with a slash
 
 var USER_PROD_FOLDER = UTIL.joinPaths(HOMEDIR, ".webide/prod/");
 
+
+var ERR_GENERAL_HARD_ERROR = 100;
+var ERR_DISCONNECTED_FROM_PARENT = 101
+var ERR_PARSING_INIT_MESSAGE = 102;
+
+
 var module_ps = require("ps-node");
 
 // What happens if we open a file stream before chroot ?
@@ -152,7 +159,7 @@ if(INIT_MESSAGE) {
 	}
 	catch(err) {
 		log("Unable to parse INIT_MESSAGE=" + INIT_MESSAGE + " error: " + err.message, ERROR);
-		exit(1);
+		exit(ERR_PARSING_INIT_MESSAGE);
 	}
 
 	log("INIT_MESSAGE: \n" + JSON.stringify(INIT_MESSAGE, null, 2));
@@ -167,7 +174,10 @@ else {
 		var action = INIT_MESSAGE[USER_PROD_FOLDER].action;
 		var reqId = INIT_MESSAGE[USER_PROD_FOLDER].id;
 		if(action == "list") {
-			findScriptList(reqId);
+			findScriptList(function(err, obj) {
+				if(err) send({id: reqId, error: err.message});
+				else send({id: reqId, scripts: obj.scripts});
+			});
 			delete INIT_MESSAGE[USER_PROD_FOLDER]; // Remove after use to prevent re-run
 		}
 	}
@@ -236,20 +246,21 @@ else {
 						if(scripts.indexOf(script) != -1) scripts.splice(scripts.indexOf(script), 1);
 						else return hardError("Did not find script=" + script + " in scripts=" + JSON.stringify(scripts, null, 2));
 
+						if(reqId) {
+							send({id: reqId, stopped: script.pathToFolder});
+							delete INIT_MESSAGE[script.pathToFolder]; // Remove after use
+						}
+
 						if(scripts.length == 0) {
 							log("Nothing else to do");
 							idle();
 						}
 					}
 
-					if(!reqId) return afterStop();
-
 					makeSureItsDead(script.pathToFolder, function(err) {
-						if(err) return hardError(err);
+						if(err && err.code != "IN_PROGRESS") return hardError(err);
 						afterStop();
 					});
-
-					delete INIT_MESSAGE[script.pathToFolder]; // Remove after use
 					
 					return;
 				}
@@ -279,7 +290,7 @@ function sigint() {
 function send(msg) {
 	if(!process.send || !process.connected) {
 		log("No longer connected to parent process!");
-		shutdownInitWorker(111);
+		shutdownInitWorker(ERR_DISCONNECTED_FROM_PARENT);
 		return;
 	}
 
@@ -338,6 +349,8 @@ function commandMessage(message) {
 			obj.id = item.id;
 			send(obj);
 
+			log("Answered request id=" + id + " with obj=" + JSON.stringify(obj));
+
 			if(err && err.code != "IN_PROGRESS") return hardError(err);
 		}
 	}
@@ -368,21 +381,27 @@ function findScriptList(callback) {
 			return;
 		}
 
-		json.forEach(attachStatus);
-
 		var statusToCollect = 0;
 		var statusCollected = 0;
 
+		json.forEach(attachStatus);
+
 		function attachStatus(script) {
 			statusToCollect++;
-			getStatus(script.pathToFolder, function(err) {
+			getStatus(script.pathToFolder, function(err, status) {
+				statusCollected++;
+
 				if(err) {
 					callback(err);
 					callback = null;
 					return;
 				}
 
-				if(++statusCollected == statusToCollect) {
+				script.status = status;
+
+				//log("statusToCollect=" + statusToCollect + " statusCollected=" + statusCollected);
+
+				if(statusCollected == statusToCollect) {
 					callback(null, {scripts: json});
 				}
 
@@ -392,6 +411,8 @@ function findScriptList(callback) {
 }
 
 function getStatus(pathToFolder, callback) {
+
+	log("getStatus: pathToFolder=" + pathToFolder + " ...");
 
 	var pidList = [];
 	var strStatus = "";
@@ -405,14 +426,14 @@ function getStatus(pathToFolder, callback) {
 
 		resultList.forEach(function( process ) {
 
-			log(JSON.stringify(process));
+			//log(JSON.stringify(process));
 
 			if( process && process.arguments ) {
-				log("process.arguments=" + process.arguments + " typeof " + typeof process.arguments);
+				//log("process.arguments=" + process.arguments + " typeof " + typeof process.arguments);
 
 				process.arguments.forEach(function(arg) {
 					if(arg.indexOf(pathToFolder) != -1) {
-						log(pathToFolder + " is still running with pid=" + process.pid);
+						log("Found " + pathToFolder + " with pid=" + process.pid);
 						found = true;
 						pidList.push(process.pid);
 					}
@@ -420,43 +441,55 @@ function getStatus(pathToFolder, callback) {
 			}
 		});
 
-		if(found) {
-			if(pidList.length > 1) {
-				strStatus = "" + pidList.length + " process "
+		var statusFile = UTIL.joinPaths(pathToFolder, ".webide_init_status");
+		log("getStatus: check default action ...");
+		fs.readFile(statusFile, "utf8", function(err, defaultStatus){
+			if(err) defaultStatus = "unknown";
+
+			if(found) {
+				if(pidList.length > 1) {
+					strStatus = "" + pidList.length + " processes "
+				}
+				else {
+					strStatus = "" + pidList.length + " process "
+				}
+				strStatus = strStatus + "(" + pidList.join(",") + ") ";
+
+				if(STOP.indexOf(pathToFolder) != -1) {
+					strStatus = strStatus + "about to be stopped "
+				}
+
+				if(START_DATE.hasOwnProperty(pathToFolder)) {
+					var diff = (new Date()) - START_DATE[pathToFolder];
+
+					if(diff < 60000) {
+						strStatus = strStatus + "started " + Math.round(diff/1000) + " second(s) ago "
+					}
+					else if(diff < 3600000) {
+						strStatus = strStatus + "started " + Math.round(diff/60000) + " minute(s) ago "
+					}
+					else if(diff < 864000000) {
+						strStatus = strStatus + "started " + Math.round(diff/3600000) + " hour(s) ago "
+					}
+					else {
+						strStatus = strStatus + "started " + Math.round(diff/864000000) + " day(s) ago "
+					}
+				}
+
 			}
 			else {
-				strStatus = "" + pidList.length + " processes "
+				strStatus = strStatus + "not started "
 			}
-			strStatus = strStatus + "(" + pidList.join(",") + ") ";
-		}
-		
-		if(STOP.indexOf(pathToFolder) == -1) {
-			strStatus = strStatus + "about to be stopped "
-		}
-		
-		if(START_DATE.hasOwnProperty(pathToFolder)) {
-			var diff = (new Date()) - START_DATE[pathToFolder];
 
-			if(diff < 60000) {
-				strStatus = strStatus + "(started " + Math.round(diff/1000) + " second(s) ago)"
-			}
-			else if(diff < 3600000) {
-				strStatus = strStatus + "(started " + Math.round(diff/60000) + " minute(s) ago)"
-			}
-			else if(diff < 864000000) {
-				strStatus = strStatus + "(started " + Math.round(diff/3600000) + " hour(s) ago)"
-			}
-			else {
-				strStatus = strStatus + "(started " + Math.round(diff/864000000) + " day(s) ago)"
-			}
-		}
-		else {
-			strStatus = strStatus + "not started "
-		}
+			strStatus = strStatus.trim() + ", default=" + defaultStatus + " ";
 
-		strStatus = strStatus.trim();
+			strStatus = strStatus.trim();
 
-		callback(null, strStatus);
+			//log("getStatus: calling back!");
+
+			callback(null, strStatus);
+
+		});
 
 	});
 
@@ -468,7 +501,7 @@ function restart(pathToFolder, waitForGracefulShutdown, callback) {
 	log("Recieved restart command for " + pathToFolder);
 	
 	stop(pathToFolder, false, waitForGracefulShutdown, function(err) {
-		if(err) return callback(err);
+		if(err && err.code != "IN_PROGRESS") return callback(err);
 		start(pathToFolder, function(err) {
 			callback(err);
 		});
@@ -487,10 +520,10 @@ function makeSureItsDead(pathToFolder, callback) {
 
 		resultList.forEach(function( process ) {
 
-			log(JSON.stringify(process));
+			//log(JSON.stringify(process));
 
 			if( process && process.arguments ) {
-				log("process.arguments=" + process.arguments + " typeof " + typeof process.arguments);
+				//log("process.arguments=" + process.arguments + " typeof " + typeof process.arguments);
 
 				process.arguments.forEach(function(arg) {
 					if(arg.indexOf(pathToFolder) != -1) {
@@ -1187,10 +1220,13 @@ function hardError(err) {
 
 	if(SHUTDOWN) return; // Prevent mail loop
 
+	var errorCode = ERR_GENERAL_HARD_ERROR;
+	if(UTIL.isNumeric(err.code)) errorCode = err.code;
+
 	sendMail(ADMIN_EMAIL, hostname + " Node.js Init error: " + err.message, "Message: " + err.message + "\n\nStack:\n" + callstack + "\n\nerr.stack:\n" + err.stack + "\n\n Arguments:\n" + process.argv.join("\n"), function(mailError) {
 		if(mailError) log("Error sending email: " + mailError.message);
 
-		shutdownInitWorker(err.code == 0 ? 1 : err.code)
+		shutdownInitWorker(errorCode);
 	});
 	
 }
@@ -1263,12 +1299,15 @@ function callsite() {
 
 function idle() {
 	log("idling");
-	//shutdownWhenNothingTodoTimer = setTimeout(shutdownInitWorker, 600000);
-	//GLOBTMERS.push(shutdownWhenNothingTodoTimer);
-	shutdownInitWorker(0);
+	// Don't shutdown right away in case we have more request coming...
+	shutdownWhenNothingTodoTimer = setTimeout(shutdownInitWorker, 600000);
+	GLOBTMERS.push(shutdownWhenNothingTodoTimer);
+	//shutdownInitWorker(0);
 }
 
 function shutdownInitWorker(exitCode, callback) {
+
+	log("shutdownInitWorker: exitCode=" + exitCode);
 
 	var childrenToClose = 0;
 	var childrenClosed = 0;
@@ -1302,8 +1341,6 @@ function shutdownInitWorker(exitCode, callback) {
 		closed.push(pathToFolder);
 	}
 
-	doneMaybe();
-
 	if(closed.length > 0 && EMAIL) {
 		// Tell what process was killed
 		mailToSend++;
@@ -1327,6 +1364,7 @@ function shutdownInitWorker(exitCode, callback) {
 	}
 
 	function doneMaybe() {
+		log("shutdownInitWorker:doneMaybe: childrenClosed=" + childrenClosed + " childrenToClose=" + childrenToClose + " mailToSend=" + mailToSend + " mailSent=" + mailSent + " processesToKill=" + processesToKill + " processesKilled=" + processesKilled + " ");
 		if(childrenClosed == childrenToClose && mailToSend == mailSent && processesToKill == processesKilled) {
 			if(callback) callback(null);
 			exit(exitCode);
@@ -1342,7 +1380,7 @@ function exit(exitCode) {
 
 	if(SHUTDOWN !== true) hardError("Called exit without calling shutdownInitWorker() first");
 
-	if(exitCode) process.exitCode = exitCode;
+	if(exitCode != undefined) process.exitCode = exitCode;
 
 	log("Shutting down init worker!");
 

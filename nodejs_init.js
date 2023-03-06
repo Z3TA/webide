@@ -78,7 +78,7 @@ var module_mount = require("./shared/mount.js");
 eachUser(HOME_DIR, userFound, startHttpServer);
 	
 var debugRequestsInterval = setInterval(function() {
-	console.log("nodejs_init(debug):REQUESTS=" + JSON.stringify(Object.keys(REQUESTS)) );
+	console.log("nodejs_init(debug): request id's: " + JSON.stringify(Object.keys(REQUESTS)) );
 }, 5000);
 TIMERS.push(debugRequestsInterval);
 
@@ -278,7 +278,7 @@ function httpRequest(request, response) {
 				else if(!NODE_INIT_WORKER[username].connected) {
 					log("username has a init worker. But it is not connected!");
 					REQUESTS[REQUEST_ID].respond({error: "Not connected to init worker process!"});
-					delete REQUESTS[id];
+					delete REQUESTS[REQUEST_ID];
 				}
 				else {
 					log("Sending to NODE_INIT_WORKER[" + username + "] message=" + JSON.stringify(message) + " REQUESTS=" + JSON.stringify(Object.keys(REQUESTS)));
