@@ -33,6 +33,9 @@ var SMTP_USER = process.env.SMTP_USER;
 var SMTP_PW = process.env.SMTP_PW;
 var ADMIN_EMAIL = process.env.ADMIN_EMAIL || "zeta@zetafiles.org";
 var MAIL_SENDER = process.env.MAIL_SENDER || "healthcheck@webide.se";
+var MAX_TIME = process.env.MAX_TIME || 30; // Max time in seconds before aborting the test
+
+var testCounter = 0;
 
 if( process.env.TLD=="webide.se" ) {
 	var SCREENSHOT_FOLDER = process.env.HOME + "wwwpub/pup/";
@@ -94,7 +97,9 @@ async function check() {
 
 	var done = false;
 	var interval = setInterval(async function() {
-		var x = Math.floor(Math.random() * 500); 
+		if(++testCounter > MAX_TIME) throw new Error("It has taken more then MAX_TIME=" + MAX_TIME + " seconds!");
+
+		var x = Math.floor(Math.random() * 500);
 		var y = Math.floor(Math.random() * 500); 
 		if(done) return;
 		await page.mouse.move(x, y);
