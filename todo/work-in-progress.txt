@@ -6,6 +6,10 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
+When we remove a script from prod it stops... but then wants to restart!
+
+
+
 Working on init service
 
 

@@ -597,6 +597,11 @@ function stop(pathToFolder, permanentStop, waitForGracefulShutdown, callback) {
 			clearTimeout(killTimeout);
 			if(GLOBTMERS.indexOf(killTimeout) != -1) GLOBTMERS.splice(GLOBTMERS.indexOf(killTimeout), 1);
 
+			PROCESS_TIMERS[pathToFolder].forEach(clearTimeout);
+
+			delete PROCESS_TIMERS[pathToFolder];
+			delete CHILD[pathToFolder];
+
 			closeChildCallback(null);
 			closeChildCallback = null;
 		};
