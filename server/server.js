@@ -2745,8 +2745,8 @@ function sockJsConnection(connection) {
 			MESSAGE_BUFFER[userConnectionName] = [];
 			
 			clearTimeout(USER_CLEANUP_TIMEOUT[userConnectionName]);
-			// Wait one hour and if the user has not logged back in; stop the user worker and do some cleanup
-			USER_CLEANUP_TIMEOUT[userConnectionName] = setTimeout(userCleanup, 60*60*1000); // 60*60*1000
+			// Wait five hours and if the user has not logged back in; stop the user worker and do some cleanup
+			USER_CLEANUP_TIMEOUT[userConnectionName] = setTimeout(userCleanup, 5*60*60*1000);
 			
 		}
 		else {
