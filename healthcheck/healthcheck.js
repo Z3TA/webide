@@ -21,6 +21,9 @@ var module_fs = require("fs");
 var module_path = require("path");
 var module_nodemailer = require('nodemailer');
 var module_smtpTransport = require('nodemailer-smtp-transport');
+var module_os = require("os");
+
+VAR HOSTNAME = module_os.hostname();
 
 var WEBIDE_URL = process.env.WEBIDE_URL || "https://webide.se/";
 var DEBUG = process.env.hasOwnProperty("DEBUG") ? process.env.DEBUG=="true" : true;
@@ -220,7 +223,7 @@ async function sendMail(from, to, subject, text) {
 		transporter.sendMail({
 			from: from,
 			to: to,
-			subject: subject,
+			subject: subject + " (" + HOSTNAME + ")",
 			text: text,
 			attachments: screenshots
 		}, function(err, info) {
