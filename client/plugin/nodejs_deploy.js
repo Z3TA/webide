@@ -453,5 +453,14 @@
 		
 	}
 	
+	// TEST-CODE-START
 	
+	EDITOR.addTest(function testNodejsDeployAddToProd(callback) {
+
+		callback(true);
+
+	});
+	
+	// TEST-CODE-END
+
 })();
