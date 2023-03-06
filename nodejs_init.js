@@ -77,9 +77,10 @@ var module_mount = require("./shared/mount.js");
 	var eachUser = require("./shared/eachUser.js");
 eachUser(HOME_DIR, userFound, startHttpServer);
 	
-setInterval(function() {
+var debugRequestsInterval = setInterval(function() {
 	console.log("nodejs_init(debug):REQUESTS=" + JSON.stringify(Object.keys(REQUESTS)) );
 }, 5000);
+TIMERS.push(debugRequestsInterval);
 
 
 function userFound(user) {
@@ -166,15 +167,15 @@ function sigint() {
 	
 	for(var name in NODE_INIT_WORKER) {
 		NODE_INIT_WORKER[name].kill('SIGINT');
-		NODE_INIT_WORKER[name].kill('SIGQUIT');
-		NODE_INIT_WORKER[name].kill('SIGHUP');
-		NODE_INIT_WORKER[name].kill('SIGTERM');
+		//NODE_INIT_WORKER[name].kill('SIGQUIT');
+		//NODE_INIT_WORKER[name].kill('SIGHUP');
+		//NODE_INIT_WORKER[name].kill('SIGTERM');
 
-		if(NODE_INIT_WORKER[name].connected) NODE_INIT_WORKER[name].disconnect();
+		//if(NODE_INIT_WORKER[name].connected) NODE_INIT_WORKER[name].disconnect();
 
 		log("Worker: " + name + ": connected=" + NODE_INIT_WORKER[name].connected + " exitCode=" + NODE_INIT_WORKER[name].exitCode + " killed=" + NODE_INIT_WORKER[name].killed + " pid=" + NODE_INIT_WORKER[name].pid + " signalCode=" + NODE_INIT_WORKER[name].signalCode + "");
 	
-		NODE_INIT_WORKER[name].unref();
+		//NODE_INIT_WORKER[name].unref();
 	}
 	
 	HTTP_SERVER.close();
@@ -271,7 +272,7 @@ function httpRequest(request, response) {
 				console.log("Did just add REQUEST_ID=" + REQUEST_ID + " to REQUESTS=" + JSON.stringify(Object.keys(REQUESTS)));
 
 				if( !NODE_INIT_WORKER.hasOwnProperty(username) ) {
-					log("No NODE_INIT_WORKER for username=" + username + " ...");
+					log("No NODE_INIT_WORKER for username=" + username + "!");
 					startNodejsInitWorker(user.homeDir, user.name, user.uid, user.gid, message);
 				}
 				else if(!NODE_INIT_WORKER[username].connected) {
@@ -504,6 +505,8 @@ function startNodejsInitWorker(homeDir, username, uid, gid, messageToWorker) {
 	function workerExitHandler(code, signal) {
 		log(username + " worker exit: code=" + code + " signal=" + signal);
 		
+		if(SHUTDOWN) return;
+
 		// A non zero exit code is fatal and we need to restart the worker
 		
 		if(parseInt(code) === 0) {
@@ -515,15 +518,14 @@ function startNodejsInitWorker(homeDir, username, uid, gid, messageToWorker) {
 		else {
 			log(username + " worker process exited with code=" + code, ERR);
 			
-			if(SHUTDOWN) return;
-			
 			if(restartCounter > 3) {
 				var os = require("os");
 				var hostname = os.hostname();
 				sendMail(ADMIN_EMAIL, hostname + " Node.js Init worker for " + username + " has restarted " + restartCounter + " times in a row!", "Try starting the worker process manually to see what's wrong (see nodejs_init_worker.js)", function(err) {
-					log("Sent e-mail to " + ADMIN_EMAIL+ " about " + username + " init worker process");
+					log("Sent e-mail to " + ADMIN_EMAIL+ " about " + username + " init worker process restart");
 				});
-				return; // Don't restart it any more!
+				log("Not restarting " + username + " worker process because it has restarted more then " + restartCounter + " times", WARN);
+				return;
 			}
 
 			log("Waiting " + restartWaitTime + "ms until restarting worker process for " + username + ". It has been restarted " + restartCounter + " time(s) in a row.");

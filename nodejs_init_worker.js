@@ -34,7 +34,7 @@
 
 "use strict"
 
-process.on('uncaughtException', hardError);
+//process.on('uncaughtException', hardError);
 
 var getArg = require("./shared/getArg.js");
 
@@ -60,6 +60,7 @@ var SMTP_USER = getArg(["mu", "smtp_user"]) || "";
 var SMTP_PW = getArg(["mpw", "smtp_pass"]) || "";
 
 var CHILD = {}; // Holds references to the child processes
+var START_DATE = []; // When the process was last (re)started
 var STOP = []; // List of processes being stopped, so they wont restart
 
 var SHUTDOWN = false;
@@ -67,6 +68,8 @@ var SHUTDOWN = false;
 var PROCESS_TIMERS = {}; // Tracking all process specific timers so we can exit gracefully
 var GLOBTMERS = []; // Tracking all global setTimeout so that we can exit gracefully (note: you don't have to remove them from the array when they are cleared)'
 var UTC = false; // If set to true, use GMT+0 on time stamps
+
+var CLOSE_CALLBACK = {}; // pathToFolder: function (call this function when child process exit)
 
 // Require non-native modules before entering chroot!
 var NODE_MAILER = require('nodemailer');
@@ -145,11 +148,11 @@ if(INIT_MESSAGE) {
 	//log("\nprocess.env.messageToInitWorker=" + process.env.messageToInitWorker);
 
 	try {
-	INIT_MESSAGE = JSON.parse(INIT_MESSAGE);
+		INIT_MESSAGE = JSON.parse(INIT_MESSAGE);
 	}
 	catch(err) {
 		log("Unable to parse INIT_MESSAGE=" + INIT_MESSAGE + " error: " + err.message, ERROR);
-		process.exit(1);
+		exit(1);
 	}
 
 	log("INIT_MESSAGE: \n" + JSON.stringify(INIT_MESSAGE, null, 2));
@@ -308,17 +311,21 @@ function commandMessage(message) {
 
 	var item = "", id = 0;
 
-	for(var pathToFolder in message) takeAction(message[pathToFolder]);
+	for(var pathToFolder in message) takeAction(pathToFolder);
 
-	function takeAction(item) {
+	function takeAction(pathToFolder) {
+		var item = message[pathToFolder];
+
 		log("Recieved item: " + JSON.stringify(item));
 
 		if(item.id == undefined) return hardError(new Error("Worker command " + JSON.stringify(message) + " does not have an id!"));
 
-		if(item.action=="restart") restart(pathToFolder, item.id);
-		else if(item.action=="stop") stop(pathToFolder, cb);
+		pathToFolder = UTIL.trailingSlash(pathToFolder);
+
+		if(item.action=="restart") restart(pathToFolder, 5000, cb);
+		else if(item.action=="stop") stop(pathToFolder, true, 5000, cb);
 		else if(item.action=="start") start(pathToFolder, cb);
-		else if(item.action=="shutdown") shutdownInitWorker(cb);
+		//else if(item.action=="shutdown") shutdownInitWorker(0, cb);
 		else if(item.action=="list") findScriptList(cb);
 
 		else cb(new Error("Unknown message=" + JSON.stringify(message)));
@@ -354,63 +361,42 @@ function findScriptList(callback) {
 			}
 		});
 
-		callback(null, {scripts: json});
-
 		if(scripts.length == 0) {
+			callback(null, {scripts: json});
 			log("There are no longer any scripts");
 			idle();
+			return;
+		}
+
+		json.forEach(attachStatus);
+
+		var statusToCollect = 0;
+		var statusCollected = 0;
+
+		function attachStatus(script) {
+			statusToCollect++;
+			getStatus(script.pathToFolder, function(err) {
+				if(err) {
+					callback(err);
+					callback = null;
+					return;
+				}
+
+				if(++statusCollected == statusToCollect) {
+					callback(null, {scripts: json});
+				}
+
+			});
 		}
 	});
 }
 
+function getStatus(pathToFolder, callback) {
 
+	var pidList = [];
+	var strStatus = "";
 
-function restart(pathToFolder, callback) {
-	
-	pathToFolder = UTIL.trailingSlash(pathToFolder);
-	
-	log("Recieved restart command for " + pathToFolder);
-	
-	//log("restart: pathToFolder=" + pathToFolder + " CHILD=" + JSON.stringify(Object.keys(CHILD)));
-
-	if(!CHILD.hasOwnProperty(pathToFolder)) {
-		//log("pathToFolder=" + pathToFolder + " not in CHILD=" + JSON.stringify(Object.keys(CHILD)) + " so calling start() ...");
-		return start(pathToFolder, callback);
-	}
-
-	if(CHILD[pathToFolder].connected) {
-		//log("Sending stop signals and disconnecting from: " + pathToFolder);
-		closeChild(CHILD[pathToFolder]);
-		// it will be automatically restarted!
-	}
-	else {
-		/*
-			There is a respawn timer waiting ...
-			But we want to restart it right away!
-			We can't call the respawn function because it can only be called inside startService()
-			Stopping is slow because we are making sure it's really dead by sending additional kill commands
-
-		*/
-		
-		//log("pathToFolder=" + pathToFolder + " not connected, so closing and then starting ...");
-		closeChild(CHILD[pathToFolder]); // Send kill signal and disconnect just in case
-		
-		for(var timer in PROCESS_TIMERS[pathToFolder]) {
-			clearTimeout(PROCESS_TIMERS[pathToFolder][timer]);
-		}
-
-		delete CHILD[pathToFolder];
-
-		start(pathToFolder, callback);
-	}
-	}
-
-function makeSureItsDead(pathToFolder, callback) {
-	var ps = require('ps-node');
-
-	log("Making sure it's dead: " + pathToFolder);
-
-	ps.lookup({
+	module_ps.lookup({
 		psargs: "lxa" // add a to show all
 	}, function(err, resultList ) {
 		if (err) return callback(err);
@@ -428,47 +414,125 @@ function makeSureItsDead(pathToFolder, callback) {
 					if(arg.indexOf(pathToFolder) != -1) {
 						log(pathToFolder + " is still running with pid=" + process.pid);
 						found = true;
-						ps.kill( process.pid, function( err ) {
-							if (err) {
-								return callback(err);
-							}
-							else {
-								log("Killed pid=" + process.pid);
-							}
-						});
+						pidList.push(process.pid);
 					}
 				});
 			}
 		});
 
 		if(found) {
-			callback(null, {stopping: pathToFolder});
+			if(pidList.length > 1) {
+				strStatus = "" + pidList.length + " process "
+			}
+			else {
+				strStatus = "" + pidList.length + " processes "
+			}
+			strStatus = strStatus + "(" + pidList.join(",") + ") ";
+		}
+		
+		if(STOP.indexOf(pathToFolder) == -1) {
+			strStatus = strStatus + "about to be stopped "
+		}
+		
+		if(START_DATE.hasOwnProperty(pathToFolder)) {
+			var diff = (new Date()) - START_DATE[pathToFolder];
+
+			if(diff < 60000) {
+				strStatus = strStatus + "(started " + Math.round(diff/1000) + " second(s) ago)"
+			}
+			else if(diff < 3600000) {
+				strStatus = strStatus + "(started " + Math.round(diff/60000) + " minute(s) ago)"
+			}
+			else if(diff < 864000000) {
+				strStatus = strStatus + "(started " + Math.round(diff/3600000) + " hour(s) ago)"
+			}
+			else {
+				strStatus = strStatus + "(started " + Math.round(diff/864000000) + " day(s) ago)"
+			}
 		}
 		else {
+			strStatus = strStatus + "not started "
+		}
+
+		strStatus = strStatus.trim();
+
+		callback(null, strStatus);
+
+	});
+
+}
+
+function restart(pathToFolder, waitForGracefulShutdown, callback) {
+	pathToFolder = UTIL.trailingSlash(pathToFolder);
+	
+	log("Recieved restart command for " + pathToFolder);
+	
+	stop(pathToFolder, false, waitForGracefulShutdown, function(err) {
+		if(err) return callback(err);
+		start(pathToFolder, function(err) {
+			callback(err);
+		});
+	});
+}
+
+function makeSureItsDead(pathToFolder, callback) {
+	log("Making sure it's dead: " + pathToFolder);
+
+	module_ps.lookup({
+		psargs: "lxa" // add a to show all
+	}, function(err, resultList ) {
+		if (err) return callback(err);
+
+		var found = false;
+
+		resultList.forEach(function( process ) {
+
+			log(JSON.stringify(process));
+
+			if( process && process.arguments ) {
+				log("process.arguments=" + process.arguments + " typeof " + typeof process.arguments);
+
+				process.arguments.forEach(function(arg) {
+					if(arg.indexOf(pathToFolder) != -1) {
+						log(pathToFolder + " is still running with pid=" + process.pid);
+						found = true;
+						module_ps.kill( process.pid, function( err ) {
+							if (err) {
+								log("Failed to kill pid=" + pid);
+							}
+							else {
+								log("Killed pid=" + process.pid);
+							}
+							callback(err);
+						});
+					}
+				});
+			}
+		});
+
+		if(!found) {
 			log(pathToFolder + " is definitely not running!");
 			var error = new Error( pathToFolder + " was already stopped!");
 			error.code = "IN_PROGRESS";
 			callback(error);
 		}
-
-		callback(null);
-
 	});
 }
 
-function stop(pathToFolder, callback) {
+function stop(pathToFolder, permanentStop, waitForGracefulShutdown, callback) {
 	
 	pathToFolder = UTIL.trailingSlash(pathToFolder);
 	
-	log("Recieved stop command for " + pathToFolder);
+	log("stop: " + pathToFolder);
 	
-	setStatus(pathToFolder, "stop");
+	if(permanentStop) setStatus(pathToFolder, "stop");
 
 	if(!CHILD.hasOwnProperty(pathToFolder)) {
 		log( "Service is not running: " + pathToFolder + " Running services: " + Object.getOwnPropertyNames(CHILD) );
-		return makeSureItsDead(pathToFolder, function(err) {
-			if(err) return callback(err);
-			});
+		makeSureItsDead(pathToFolder, function(err) {
+			callback(err);
+		});
+		return;
 	}
 
 	if(STOP.indexOf(pathToFolder) != -1) {
@@ -479,31 +543,67 @@ function stop(pathToFolder, callback) {
 
 	STOP.push(pathToFolder);
 	
-	//log("Clearing " + PROCESS_TIMERS[pathToFolder].length + " timers from " + pathToFolder);
-	PROCESS_TIMERS[pathToFolder].forEach(clearTimeout);
-	PROCESS_TIMERS[pathToFolder].length = 0;
-	
-	closeChild(CHILD[pathToFolder]);
-	
-	var killTimeout = setTimeout(function sendSigKill() {
-		
-		log("Sending SIGKILL to " + pathToFolder);
-		
-		CHILD[pathToFolder].kill('SIGKILL');
-		
-		if(GLOBTMERS.indexOf(killTimeout) != -1) GLOBTMERS.splice(GLOBTMERS.indexOf(killTimeout), 1);
-		
-		if(PROCESS_TIMERS[pathToFolder].length > 0) return hardError( new Error(pathToFolder + " has " + PROCESS_TIMERS[pathToFolder].length + " timers!") );
-		
-		delete PROCESS_TIMERS[pathToFolder];
-		delete CHILD[pathToFolder];
-		
+	closeChild(pathToFolder, waitForGracefulShutdown, function(err, code, signal) {
 		while(STOP.indexOf(pathToFolder) != -1) STOP.splice(STOP.indexOf(pathToFolder), 1);
-		
-	}, 5000);
-	GLOBTMERS.push(killTimeout);
+		callback(err);
+	});
 
-	callback(null, {stopping: pathToFolder});
+	function closeChild(pathToFolder, timeout, closeChildCallback) {
+
+		log("Closing " + pathToFolder);
+
+		var childProcess = CHILD[pathToFolder];
+
+		//log("Clearing " + PROCESS_TIMERS[pathToFolder].length + " timers from " + pathToFolder);
+		PROCESS_TIMERS[pathToFolder].forEach(clearTimeout);
+		PROCESS_TIMERS[pathToFolder].length = 0;
+
+		CLOSE_CALLBACK[pathToFolder] = function() {
+			log(pathToFolder + " closed gracefully");
+
+			clearTimeout(killTimeout);
+			if(GLOBTMERS.indexOf(killTimeout) != -1) GLOBTMERS.splice(GLOBTMERS.indexOf(killTimeout), 1);
+
+			closeChildCallback(null);
+			closeChildCallback = null;
+		};
+
+		// Allow the process to gracefully shut down by sending signals
+		if(childProcess.connected) childProcess.disconnect();
+		childProcess.kill('SIGTERM');
+		childProcess.kill('SIGINT');
+		childProcess.kill('SIGQUIT');
+		childProcess.kill('SIGHUP');
+
+		// If the process has not exited gracefully we need to force kill it ...
+		var killTimeout = setTimeout(finalKillTimeout, timeout);
+		GLOBTMERS.push(killTimeout);
+
+		function finalKillTimeout() {
+			log("finalKillTimeout: pathToFolder=" + pathToFolder);
+			delete CLOSE_CALLBACK[pathToFolder];
+			if(GLOBTMERS.indexOf(killTimeout) != -1) GLOBTMERS.splice(GLOBTMERS.indexOf(killTimeout), 1);
+			kill(pathToFolder, closeChildCallback);
+		}
+	}
+}
+
+function kill(pathToFolder, callback) {
+	// Force stop a process
+
+	log("Sending SIGKILL to " + pathToFolder);
+
+	var childProcess = CHILD[pathToFolder];
+	childProcess.kill('SIGKILL');
+
+	if(childProcess.connected) childProcess.disconnect();
+	
+	PROCESS_TIMERS[pathToFolder].forEach(clearTimeout);
+
+	delete PROCESS_TIMERS[pathToFolder];
+	delete CHILD[pathToFolder];
+
+	makeSureItsDead(pathToFolder, callback);
 }
 
 function setStatus(pathToFolder, status) {
@@ -542,8 +642,7 @@ function start(pathToFolder, callback) {
 							
 							if(folderItem == findFile + ".js") {
 								startService(scriptFilePath, findFile, pathToFolder, HOMEDIR+"log/" + folderItem + ".log", function(err) {
-									if(err) callback(err);
-									else callback(null, {starting: pathToFolder});
+									callback(err);
 								});
 							}
 						});
@@ -567,7 +666,7 @@ function start(pathToFolder, callback) {
 				var path = require("path");
 				var mainFile = path.join(pathToFolder, json.main);
 				startService(mainFile, name, pathToFolder, HOMEDIR+"log/" + name + ".log", json.email, function(err) {
-					callback({starting: pathToFolder});
+					callback(err);
 				});
 				
 			}
@@ -578,18 +677,6 @@ function start(pathToFolder, callback) {
 		}
 	});
 }
-
-function closeChild(childProcess) {
-	
-	// Allow the process to gracefully shut down
-	if(childProcess.connected) childProcess.disconnect();
-	childProcess.kill('SIGTERM');
-	childProcess.kill('SIGINT');
-	childProcess.kill('SIGQUIT');
-	childProcess.kill('SIGHUP');
-
-}
-
 
 function findScripts(pathToFolder, callback) {
 	/*
@@ -717,7 +804,7 @@ function findScripts(pathToFolder, callback) {
 	}
 	
 	function checkDoneMaybe() {
-		if(foldersToLookIn == 0 && filesToStat == 0 && readingFiles == 0) callback(scripts);
+		if(foldersToLookIn == 0 && filesToStat == 0 && readingFiles == 0) callback(null, scripts);
 	}
 	
 }
@@ -765,15 +852,27 @@ function startService(scriptPath, projectName, pathToFolder, logFilePath, email,
 	};
 	var childProcess;
 	
-	respawn(); // Starts the child process
-	
 	var logStream = fs.createWriteStream(logFilePath, {'flags': 'a'});
 	logStream.write(myDate() + ": Starting ...\n");
 	
+	respawn(); // Starts the child process
+
 	function respawn() {
 		
 		if(SHUTDOWN) return;
 		
+		if(STOP.indexOf(pathToFolder) != -1) {
+			var error = new Error("Not respawning " + pathToFolder + " because it's being stopped!");
+			log(error.message);
+			if(callback) {
+				callback(error);
+				callback = null;
+			}
+			return;
+		}
+
+		START_DATE[pathToFolder] = new Date();
+
 		if(childProcess) {
 			// Make sure the old one is really really dead
 			childProcess.kill('SIGKILL');
@@ -785,7 +884,7 @@ function startService(scriptPath, projectName, pathToFolder, logFilePath, email,
 		stdHistory.length = 0; // Reset the history
 		
 		logStream = fs.createWriteStream(logFilePath, {'flags': 'a'});
-		logStream.write(myDate() + ": Restarting ....\n");
+		logStream.write(myDate() + ": Starting " + scriptPath + " using argv=[" + arg.join(",") + "]\n");
 		
 		CHILD[pathToFolder] = cp.fork(scriptPath, arg, opt);
 		
@@ -798,7 +897,11 @@ function startService(scriptPath, projectName, pathToFolder, logFilePath, email,
 		childProcess.on('exit', childProcessExit);
 		
 		isRestarting= false;
-		
+
+		if(callback) {
+			callback(null);
+			callback = null;
+		}
 	}
 	
 	function stdout(data) {
@@ -826,7 +929,9 @@ function startService(scriptPath, projectName, pathToFolder, logFilePath, email,
 		
 		// Send the error message via email
 		var firstLineInErrMsg = txtArr[0];
-		if(email) sendMail(email, projectName + ": " + txtArr[4], data);
+		if(email) sendMail(email, projectName + ": " + txtArr[4], data, function(mailError) {
+			if(mailError) log("Error sending email: " + mailError.message);
+		});
 		
 		// Log the error
 		log(projectName + ": " + txtArr[0] + " " + txtArr[4], 3);
@@ -841,26 +946,28 @@ function startService(scriptPath, projectName, pathToFolder, logFilePath, email,
 	}
 	
 	function childProcessExit(code, signal) {
-		var finalExit = (code !== null);
 		
-		log(pathToFolder + " exit! code=" + code + " signal=" + signal + " finalExit=" + finalExit);
-		
-		// NodeJS errors will have a code, but if the process is killed via a signal, we wont get a final exit
-		// So always restart!
-		
-		if(!finalExit) closeChild(childProcess); // Make sure it's really dead, and disconnect from it
-		// (but do not send SIGKILL because we want to give it a chance to gracefully shut down)
+		log(pathToFolder + " exit! code=" + code + " signal=" + signal + "");
 		
 		logStream.end(myDate() + ": Exit: code=" + code + " signal=" + signal + "\n");
 		
+		if(CLOSE_CALLBACK.hasOwnProperty(pathToFolder)) CLOSE_CALLBACK[pathToFolder](null, code, signal);
+
+		if(STOP.indexOf(pathToFolder) != -1) {
+			log("No restarting " + pathToFolder + " because it's in STOP=" + JSON.stringify(STOP));
+			return;
+		}
+
+		if(SHUTDOWN) {
+			log("Not restarting " + pathToFolder + " becaused worker init service is shutting down!");
+			return;
+		}
+
 		isRestarting = true;
-		
-		if(SHUTDOWN || STOP.indexOf(pathToFolder) != -1) return;
-		
+
 		if(restarts < waitRestart.length-1) var waitForRespawn = waitRestart[restarts];
 		else var waitForRespawn = waitRestart[waitRestart.length-1];
 		
-		//if(email) sendMail(email, projectName + ": Exit code=" + code + " signal=" + signal, stdHistory.join("\n"));
 		// Only send mail on errors (not restarts)
 		
 		log("Waiting " + waitForRespawn + "ms to restart: " + scriptPath, 7);
@@ -936,6 +1043,8 @@ function getFileNameFromPath(path) {
 
 function sendMailInQueue(forceSendAll, callback) {
 
+	log("Sending mail in mail queue...", DEBUG);
+
 	if(typeof forceSendAll == "function") {
 		callback = forceSendAll;
 		forceSendAll = false;
@@ -984,8 +1093,8 @@ function sendMailInQueue(forceSendAll, callback) {
 
 		if(forceSendAll) lastMailDate = null;
 		mailToSend++;
-		sendMail(to, mailSubject, mailText, mailFrom, function(err) {
-			if(err) return hardError(err);
+		sendMail(to, mailSubject, mailText, mailFrom, function(mailError) {
+			if(mailError) log("Error sending email: " + mailError.message);
 			mailSent++;
 
 			if(mailToSend == mailSent) {
@@ -998,6 +1107,8 @@ function sendMailInQueue(forceSendAll, callback) {
 
 function sendMail(to, subject, text, from, callback) {
 	
+	log("sendMail:1");
+
 	clearTimeout(sendMailInQueueTimer);
 
 	if(lastMailDate && (lastMailDate - (new Date()) < 5000)) {
@@ -1060,8 +1171,6 @@ function sendMail(to, subject, text, from, callback) {
 function hardError(err) {
 	// Only use this function for hard errors! Eg. errors where we want send a report and stop the program
 
-	if(SHUTDOWN) return; // Want to prevent any kind of error loop. The first error is the important one, following errors are likely due to currupt state
-
 	// Get the proper position for this error
 	var callsites = callsite();
 	var callstack = "";
@@ -1076,7 +1185,11 @@ function hardError(err) {
 	var os = require("os");
 	var hostname = os.hostname();
 
+	if(SHUTDOWN) return; // Prevent mail loop
+
 	sendMail(ADMIN_EMAIL, hostname + " Node.js Init error: " + err.message, "Message: " + err.message + "\n\nStack:\n" + callstack + "\n\nerr.stack:\n" + err.stack + "\n\n Arguments:\n" + process.argv.join("\n"), function(mailError) {
+		if(mailError) log("Error sending email: " + mailError.message);
+
 		shutdownInitWorker(err.code == 0 ? 1 : err.code)
 	});
 	
@@ -1084,13 +1197,9 @@ function hardError(err) {
 
 function log(msg, level) {
 	
-	if(SHUTDOWN) return; // Prevent EPIPE on process.send and  write after end on initLogStream
+	//if(SHUTDOWN) return; // Prevent EPIPE on process.send and  write after end on initLogStream
 
-	if(!initLogStream) {
-		console.warn("initLogStream=" + initLogStream);
-		console.log(msg + "\n");
-	}
-	else initLogStream.write(myDate() + ": " + msg + "\n");
+	if(initLogStream && !initLogStream.ended) initLogStream.write(myDate() + ": " + msg + "\n");
 	
 	if(process.send && process.connected) {
 		// Forked from another nodejs process
@@ -1137,7 +1246,9 @@ function myDate() {
 }
 
 function runTests() {
-	sendMail(EMAIL, "test", "test text");
+	sendMail(EMAIL, "test", "test text", function(mailError) {
+		if(mailError) log("Error sending email: " + mailError.message);
+	});
 }
 
 function callsite() {
@@ -1157,67 +1268,104 @@ function idle() {
 	shutdownInitWorker(0);
 }
 
-function shutdownInitWorker(callback) {
+function shutdownInitWorker(exitCode, callback) {
+
+	var childrenToClose = 0;
+	var childrenClosed = 0;
+	var mailToSend = 0;
+	var mailSent = 0;
+	var processesToKill = 0;
+	var processesKilled = 0;
 
 	GLOBTMERS.forEach(clearTimeout);
 
 	if(SHUTDOWN === true) {
-		// Second time receiving the SIGINT, kill all children and exit
+		// Second time receiving the SIGINT, go directly for the kill (don't wait for graceful shutdown)
 
 		log("shutdownInitWorker() called yet again! Killing all child processes!");
 
-		for(var name in CHILD) CHILD[name].kill('SIGKILL');
+		for(var pathToFolder in CHILD) {
+			processesToKill++;
+			kill(pathToFolder, doneKill);
+		}
 
-		callback(null);
-
-		return exit(0);
+		return doneMaybe();
 	}
 
 	SHUTDOWN = true;
 
-	// Close all child processes ...
+	var waitForGracefulShutdown = 5000;
 	var closed = [];
-
-	for(var name in CHILD) {
-		PROCESS_TIMERS[name].forEach(clearTimeout);
-		closeChild(CHILD[name]);
-		log("Closing " + name);
-		closed.push(name);
+	for(var pathToFolder in CHILD) {
+		childrenToClose++;
+		stop(pathToFolder, false, waitForGracefulShutdown, whenChildClosed);
+		closed.push(pathToFolder);
 	}
 
-	callback(null);
+	doneMaybe();
 
-	if(closed.length > 0) {
+	if(closed.length > 0 && EMAIL) {
 		// Tell what process was killed
-		if(EMAIL) sendMail(EMAIL, "Killing processes due to SIGINT", "The nodejs init script reaceaved a SIGINT ...\nThis is most likely due to a server reboot or upgrade.\nThe following nodejs services where stopped:\n * " + closed.join("\n * "), undefined, function() {
-			exit();
+		mailToSend++;
+		sendMail(EMAIL, "Killing processes due to shutdown", "The nodejs init script reaceaved a SIGINT ...\nThis is most likely due to a server reboot or upgrade.\nThe following nodejs services where stopped:\n * " + closed.join("\n * "), undefined, function(mailError) {
+			if(mailError) log("Error sending email: " + mailError.message);
+			mailSent++;
+			doneMaybe();
 		});
 	}
 	else {
-		exit();
+		doneMaybe();
 	}
+
+	function whenChildClosed(err, code, signal) {
+		childrenClosed++;
+		doneMaybe();
+	}
+
+	function doneKill() {
+		processsesKilled++;
+	}
+
+	function doneMaybe() {
+		if(childrenClosed == childrenToClose && mailToSend == mailSent && processesToKill == processesKilled) {
+			if(callback) callback(null);
+			exit(exitCode);
+		}
+	}
+
 }
 
 function exit(exitCode) {
+
+	// Note: The worker process is only restarted if we exit with a non zero exit code!
+	// so if we have nothing to do, exit with 0, but if there was an error, exit with that error code
 
 	if(SHUTDOWN !== true) hardError("Called exit without calling shutdownInitWorker() first");
 
 	if(exitCode) process.exitCode = exitCode;
 
-	log("Shutting down...");
+	log("Shutting down init worker!");
 
-	initLogStream.end(function() {
+	if(Object.keys(mailQueue).length > 0) {
+		sendMailInQueue(true, endLog);
+	}
+	else endLog();
 
-		if(typeof process.disconnect == "function") process.disconnect(); // Only available when we get spawned from another proces!?
+	function endLog() {
+		initLogStream.ended = true;
+		initLogStream.end(function() {
 
-		if(Object.keys(mailQueue).length > 0) {
-			sendMailInQueue(true, exitNow);
-		}
-		else exitNow();
+			// note: initLogStream.closed is still false !..
 
-	});
+			if(typeof process.disconnect == "function") process.disconnect(); // Only available when we get spawned from another proces!?
+
+			exitNow();
+
+		});
+	}
 
 	function exitNow() {
-		process.exit(); // We havet to call this because we might be stuck in an error loop
+		log("Exit with exitCode=" + process.exitCode);
+		//process.exit(); // We havet to call this because we might be stuck in an error loop
 	}
 }
