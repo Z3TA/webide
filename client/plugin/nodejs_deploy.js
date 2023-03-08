@@ -7,6 +7,7 @@
 	var scriptList;
 	var pwDate = new Date();
 	var tmpPw = "";
+	var dialogCode = "PROD_DEPL";
 
 	EDITOR.plugin({
 		desc: "Allows deoploying Node.js scripts",
@@ -107,7 +108,7 @@
 		askForPassword(" in order to list scripts:", function (pw) {
 			CLIENT.cmd("nodejs_init_list", {pw: pw}, function(err, resp) {
 				if(err) {
-					return alertBox(err.message);
+					return alertBox(err.message, dialogCode);
 				}
 
 				console.log("nodejs_deploy: nodejsProdList: " + JSON.stringify(resp, null, 2));
@@ -242,7 +243,7 @@
 	function prodStopFile(currentFile) {
 		console.log("prodStopFile: currentFile=" + currentFile && currentFile.path);
 		getProjFolder(currentFile, function(err, folder, pj) {
-			if(err) return alertBox(err.message);
+			if(err) return alertBox(err.message, dialogCode);
 
 			var nameOfFolder = UTIL.getFolderName(folder);
 			prodStop(nameOfFolder);
@@ -264,8 +265,8 @@
 			CLIENT.cmd("nodejs_init_stop", {folder: UTIL.trailingSlash(nameOfFolder), pw: pw}, function(err, resp) {
 				console.log("nodejs_deploy:prodStop:nodejs_init_stop: err=" + JSON.stringify(err) + " resp=" + JSON.stringify(resp));
 
-				if(err) alertBox("Unable to stop " + nameOfFolder + ": " + err.message);
-				else alertBox(nameOfFolder + " stopped!");
+				if(err) alertBox("Unable to stop " + nameOfFolder + ": " + err.message, dialogCode);
+				else alertBox(nameOfFolder + " stopped!", dialogCode);
 
 				if(callback) callback(err);
 			});
@@ -274,7 +275,7 @@
 	
 	function prodRemoveFile(currentFile) {
 		getProjFolder(currentFile, function(err, folder, pj) {
-			if(err) return alertBox(err.message);
+			if(err) return alertBox(err.message, dialogCode);
 			var nameOfFolder = UTIL.getFolderName(folder);
 			 prodRemove(nameOfFolder);
 		});
@@ -291,8 +292,8 @@
 
 			CLIENT.cmd("nodejs_init_remove", {folder: UTIL.trailingSlash(nameOfFolder), pw: pw}, function(err, resp) {
 				console.log("nodejs_deploy:nodejs_init_remove: " + JSON.stringify(resp, null, 2) );
-				if(err) alertBox("Unable to remove " + nameOfFolder + ": " + err.message);
-				else alertBox(nameOfFolder + " removed from production!");
+				if(err) alertBox("Unable to remove " + nameOfFolder + ": " + err.message, dialogCode);
+				else alertBox(nameOfFolder + " removed from production!", dialogCode);
 
 				if(callback) callback(err);
 			});
@@ -301,7 +302,7 @@
 	
 	function prodRestartFile(currentFile) {
 		getProjFolder(currentFile, function(err, folder, pj) {
-			if(err) return alertBox(err.message);
+			if(err) return alertBox(err.message, dialogCode);
 
 			var nameOfFolder = UTIL.getFolderName(folder);
 			prodRestart(nameOfFolder);
@@ -318,8 +319,8 @@
 			}
 
 			CLIENT.cmd("nodejs_init_restart", {folder: UTIL.trailingSlash(nameOfFolder), pw: pw}, function(err, resp) {
-				if(err) alertBox("Unable to restart " + nameOfFolder + ": " + err.message);
-				else alertBox(nameOfFolder + " restarted!");
+				if(err) alertBox("Unable to restart " + nameOfFolder + ": " + err.message, dialogCode);
+				else alertBox(nameOfFolder + " restarted!", dialogCode);
 
 				if(callback) callback(err);
 			});
@@ -368,13 +369,21 @@
 		}
 	}
 	
-	function prodDeployFile(currentFile) {
+	function prodDeployFile(fileOrPath, callback) {
 		
 		// Figure out what folder (project) the user wants to deploy ...
 		
-		if(!currentFile) alertBox("No current file open!");
-		
-		var folders = UTIL.getFolders(currentFile.path);
+		if(typeof fileOrPath == "string") {
+			var filePath = fileOrPath;
+		}
+		else if(typeof fileOrPath.path != "undefined") {
+			var filePath = fileOrPath.path;
+		}
+		else {
+			throw new Error("prodDeployFile: " + typeof fileOrPath + " fileOrPath=" + fileOrPath);
+		}
+
+		var folders = UTIL.getFolders(filePath);
 		
 		var folder = folders.pop();
 		
@@ -397,7 +406,7 @@
 					else if(folders.length == 0) {
 						var createPj = "Create package.json";
 						var cancel = "No, cancel deployment";
-						folder = UTIL.getDirectoryFromPath(currentFile.path) || EDITOR.workingDirectory;
+						folder = UTIL.getDirectoryFromPath(filePath) || EDITOR.workingDirectory;
 						confirmBox("Unable to find a package.json in " + folder + ". Do you want to create it ?", [createPj, cancel], function(answer) {
 							if(answer == createPj) {
 							
@@ -406,12 +415,12 @@
 									"version": "1.0.0",
 									"description": "What this micro service does",
 									"author": EDITOR.user.name,
-									"main": UTIL.getFilenameFromPath(currentFile.path)
+									"main": UTIL.getFilenameFromPath(filePath)
 								};
 								
 								EDITOR.openFile(folder + "package.json", JSON.stringify(pjTemplate, null, 2), {savedAs: false, isSaved: false}, function(openFileErr, file) {
-									if(openFileErr) alertBox(openFileErr.message);
-									else alertBox("Try deploying again when you have saved package.json");
+									if(openFileErr) alertBox(openFileErr.message, dialogCode);
+									else alertBox("Try deploying again when you have saved package.json", dialogCode);
 								});
 								
 							}
@@ -428,20 +437,34 @@
 						var pj = JSON.parse(fileContent);
 					}
 					catch(parseErr) {
-						return alertBox("Failed the parse " + filePath + "! " + parseErr.message);
+						alertBox("Failed to parse " + filePath + "! " + parseErr.message, dialogCode);
+						if(callback) callback(parseErr);
+						return;
 					}
 					
-					if(pj.main == undefined) alertBox(filePath + " needs to have a main (file path entry)!");
+					if(pj.main == undefined) {
+						var error = filePath + " needs to have a main (file path entry)!"
+						alertBox(error.message, dialogCode);
+						if(callback) callback(error);
+						return;
+					}
+
 					else promptBox("Enter password to deploy " + pj.name + ":", {isPassword: true, dialogDelay: 0}, function(pw) {
 						
 						if(pw != null) CLIENT.cmd("nodejs_init_deploy", {folder: folder, pw: pw}, function(err, resp) {
-							if(err) alertBox(err.message);
+							if(err) {
+								alertBox(err.message, dialogCode);
+								if(callback) callback(err);
+							}
 							else {
 
 								//console.log( JSON.stringify(resp, null, 2) );
 								var logDir = UTIL.joinPaths(EDITOR.user.homeDir, "log/");
-								alertBox(pj.name + ' deployed to production!\nLog files can be found in <a href="#" onclick="EDITOR.fileExplorer(\'' + logDir + '\');">' + logDir + '</a>');
+								alertBox(pj.name + ' deployed to production!\nLog files can be found in <a href="#" onclick="EDITOR.fileExplorer(\'' + logDir + '\');">' + logDir + '</a>', dialogCode);
 								EDITOR.stat("nodejs_deploy");
+
+								if(callback) callback(null);
+
 							}
 						});
 						
@@ -455,7 +478,131 @@
 	
 	// TEST-CODE-START
 	
-	EDITOR.addTest(function testNodejsDeployAddToProd(callback) {
+	EDITOR.addTest(1, function testNodejsDeployAddToProd(testCallback) {
+
+		var dir = UTIL.joinPaths(EDITOR.user.homeDir, "nodejs/testProgram/");
+		var testFile = UTIL.joinPaths(dir, "testfile.txt");
+
+		var testProgram = 'var counter = 0;\nsetInterval(test, 500);\nfunction test() {\ncounter=counter+1;\nconsole.log("test " + counter);\n'
+		testProgram = testProgram + 'var fs = require("fs");\nfs.appendFile("' + testFile + '", "testfile " + counter, function dataAppended(err) {'
+		testProgram = testProgram + 'if (err) throw err;\n});});'
+		
+		var packageJson = '{"name": "testProgram",\n"version": "1.0.0",\n"description": "test nodejs deploy",\n"author": "ltest1",\n"main": "test.js"\n}';
+
+		tmpPw = "123"; // The password for the test account
+		pwDate = new Date();
+
+		EDITOR.createPath(dir, function(err) {
+			if(err) throw err;
+			EDITOR.saveToDisk(UTIL.joinPaths(dir, "test.js"), testProgram, function(err) {
+				if(err) throw err;
+				EDITOR.saveToDisk(UTIL.joinPaths(dir, "package.json"), packageJson, function(err) {
+					if(err) throw err;
+
+					prodDeployFile(dir, function(err) {
+						if(err) throw err;
+
+						setTimeout(testCheckLog, 1000);
+					});
+				});
+			});
+		})
+
+		function testCheckLog() {
+
+			EDITOR.closeAllDialogs(dialogCode);
+
+			var logFile = UTIL.joinPaths(EDITOR.user.homeDir, "log/testProgram.log");
+
+			EDITOR.doesFileExist(logFile, function(err, exist) {
+				if(err) throw err;
+
+				if(!exist) throw new Error("Log file was not created: " + logFile);
+
+				testStopProgram();
+			});
+		}
+
+		function testStopProgram() {
+			prodStop(dir, function(err) {
+				if(err) throw err;
+
+				makeSureItsStopped(function(err) {
+					if(err) throw err;
+
+					testStartAndRestart();
+				});
+				
+			});
+		}
+
+		function testStartAndRestart() {
+			prodStart(dir, function(err) {
+				if(err) throw err;
+
+				makeSureItsRunning(function(err) {
+					if(err) throw err;
+
+					testRemoveFromProd();
+				});
+			});
+		}
+
+		function testRemoveFromProd() {
+			prodRemove(dir, function(err) {
+				if(err) throw err;
+
+				makeSureItsStopped(function(err) {
+					if(err) throw err;
+
+					// Make sure it no longer exist
+					CLIENT.cmd("nodejs_init_list", {pw: tmpPw}, function(err, resp) {
+						if(err) throw err;
+
+						console.log("nodejs_deploy: test: scripts=" + JSON.stringify(resp.scripts, null, 2));
+
+						for(var script in resp.scripts) {
+							if(script.main == "test.js") throw new Error("testProgram still exist in prod!");
+						}
+
+						testCallback(true);
+					});
+				});
+			});
+		}
+
+		function makeSureItsRunning(callback) {
+			EDITOR.getFileSizeOnDisk(testFile, function(err, sizeA) {
+				if(err) return callback(err);
+
+				setTimeout(function() {
+					EDITOR.getFileSizeOnDisk(testFile, function(err, sizeB) {
+						if(err) return callback(err);
+
+						if(sizeB <= sizeA) return callback(new Error("It seems testProgram is not running!"));
+
+						callback(null);
+					});
+				}, 1000);
+			});
+		}
+
+
+		function makeSureItsStopped(callback) {
+			EDITOR.getFileSizeOnDisk(testFile, function(err, sizeA) {
+				if(err) return callback(err);
+
+				setTimeout(function() {
+					EDITOR.getFileSizeOnDisk(testFile, function(err, sizeB) {
+						if(err) return callback(err);
+
+						if(sizeA != sizeB) return callback(new Error("It seems testProgram is still running!"));
+
+						callback(null);
+					});
+				}, 1000);
+			});
+		}
 
 		callback(true);
 

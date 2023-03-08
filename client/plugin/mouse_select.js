@@ -717,7 +717,7 @@ if(!EDITOR.currentFile || !caret) {
 		});
 	});
 	
-	EDITOR.addTest(1, function testCopyPasteManyLines(callback) {
+	EDITOR.addTest(function testCopyPasteManyLines(callback) {
 		var fileContent = 'lineA\n\nlineB\n\nlineC';
 		EDITOR.openFile("copyPasteManyLines.txt", fileContent, function(err, file) {
 
