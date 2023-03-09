@@ -992,7 +992,11 @@ function startService(scriptPath, projectName, pathToFolder, logFilePath, email,
 		
 		logStream.end(myDate() + ": Exit: code=" + code + " signal=" + signal + "\n");
 		
-		if(CLOSE_CALLBACK.hasOwnProperty(pathToFolder)) CLOSE_CALLBACK[pathToFolder](null, code, signal);
+		if(CLOSE_CALLBACK.hasOwnProperty(pathToFolder)) {
+			CLOSE_CALLBACK[pathToFolder](null, code, signal);
+			// Let whoever ordered the close/kill decide whether to restart or not
+			return;
+		}
 
 		if(STOP.indexOf(pathToFolder) != -1) {
 			log("No restarting " + pathToFolder + " because it's in STOP=" + JSON.stringify(STOP));

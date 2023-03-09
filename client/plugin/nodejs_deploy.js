@@ -117,10 +117,18 @@
 
 				while (scriptList.firstChild) scriptList.removeChild(scriptList.lastChild); // Empty list
 				
-				for(var script in resp.scripts) {
+				if(resp.scripts.length == 0) {
+					var tr = document.createElement("tr");
+					var td = document.createElement("td");
+					td.innerText = "No deployed services found";
+					tr.appendChild(td);
+					scriptList.appendChild(tr);
+				}
+				else {
+					for(var script in resp.scripts) {
 					scriptList.appendChild( makeListItem(resp.scripts[script]) );
 				}
-
+				}
 				deployedScriptWidget.show(); // Will call EDITOR.resizeNeeded();
 
 			});
@@ -148,7 +156,7 @@
 		var openLog = document.createElement("button");
 		openLog.innerText = "Open log";
 		openLog.classList.add("button");
-		openLog.classList.add("small");
+		openLog.classList.add("half");
 		openLog.onclick = function() {
 			EDITOR.openFile(script.log, {show: true, tail: true});
 		}
@@ -156,7 +164,7 @@
 		var restart = document.createElement("button");
 		restart.innerText = "(Re)start";
 		restart.classList.add("button");
-		restart.classList.add("small");
+		restart.classList.add("half");
 		restart.onclick = function() {
 			prodRestart(nameOfFolder, function() {
 				// ignore callback error because we already got a dialog about it
@@ -167,7 +175,7 @@
 		var stop = document.createElement("button");
 		stop.innerText = "Stop";
 		stop.classList.add("button");
-		stop.classList.add("small");
+		stop.classList.add("half");
 		stop.onclick = function() {
 			prodStop(nameOfFolder, function() {
 				// ignore callback error because we already got a dialog about it
@@ -178,7 +186,7 @@
 		var remove = document.createElement("button");
 		remove.innerText = "Remove";
 		remove.classList.add("button");
-		remove.classList.add("small");
+		remove.classList.add("half");
 		remove.onclick = function() {
 			prodRemove(nameOfFolder, function() {
 				// ignore callback error because we already got a dialog about it
@@ -233,14 +241,16 @@
 		main.appendChild(table);
 
 
-		refreshButton = document.createElement("button");
-		button.innerText = "Refresh";
+		var refreshButton = document.createElement("button");
+		refreshButton.innerText = "Refresh";
+		refreshButton.classList.add("button");
 		refreshButton.onclick = function() {
 			nodejsProdList();
 		}
 
-		closeButton = document.createElement("button");
-		button.innerText = "Close";
+		var closeButton = document.createElement("button");
+		closeButton.innerText = "Close";
+		closeButton.classList.add("button");
 		closeButton.onclick = function() {
 			deployedScriptWidget.hide();
 		}
@@ -251,7 +261,6 @@
 
 		return main;
 	}
-
 
 	function deployFromDiscoveryBar() {
 		prodDeployFile(EDITOR.currentFile);
@@ -386,7 +395,16 @@
 		}
 	}
 	
-	function prodDeployFile(fileOrPath, callback) {
+
+	function prodDeployFile(file) {
+		if(!file) return alertBox("Open the file (main script) you want to deploy then try again");
+
+		prodDeploy(file.path, function(err) {
+			if(err) alertBox(err.message);
+		});
+	}
+
+	function prodDeploy(fileOrPath, callback) {
 		
 		// Figure out what folder (project) the user wants to deploy ...
 		
@@ -399,6 +417,8 @@
 		else {
 			throw new Error("prodDeployFile: " + typeof fileOrPath + " fileOrPath=" + fileOrPath);
 		}
+
+		if(callback && typeof callback != "function") throw new Error("prodDeployFile: Not a function: (" + typeof callback + ") callback=" + callback);
 
 		var folders = UTIL.getFolders(filePath);
 		
@@ -506,7 +526,7 @@
 
 		var testProgram = 'var counter = 0;\nsetInterval(test, 500);\nfunction test() {\ncounter=counter+1;\nconsole.log("test " + counter);\n'
 		testProgram = testProgram + 'var fs = require("fs");\nfs.appendFile("' + testFile + '", "testfile " + counter, function dataAppended(err) {\n'
-		testProgram = testProgram + 'if (err) throw err;\n});}\n'
+		testProgram = testProgram + 'if (err) throw err;\n});\n}\n'
 		
 		var packageJson = '{"name": "testProgram",\n"version": "1.0.0",\n"description": "test nodejs deploy",\n"author": "ltest1",\n"main": "test.js"\n}';
 
@@ -520,7 +540,7 @@
 				EDITOR.saveToDisk(UTIL.joinPaths(dir, "package.json"), packageJson, function(err) {
 					if(err) throw err;
 
-					prodDeployFile(dir, function(err) {
+					prodDeploy(dir, function(err) {
 						if(err) throw err;
 
 						setTimeout(testCheckLog, 1000);
@@ -530,10 +550,7 @@
 		})
 
 		function testCheckLog() {
-
-			EDITOR.closeAllDialogs(dialogCode);
-
-			var logFile = UTIL.joinPaths(EDITOR.user.homeDir, "log/testProgram.log");
+var logFile = UTIL.joinPaths(EDITOR.user.homeDir, "log/testProgram.log");
 
 			EDITOR.doesFileExist(logFile, function(err, exist) {
 				if(err) throw err;
@@ -585,6 +602,8 @@
 						for(var script in resp.scripts) {
 							if(script.main == "test.js") throw new Error("testProgram still exist in prod!");
 						}
+
+						EDITOR.closeAllDialogs(dialogCode);
 
 						testCallback(true);
 					});
