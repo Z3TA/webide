@@ -219,7 +219,9 @@
 
 		var currentAlias = UTIL.getCookie("deviceAlias");
 
-		var options = {};
+		var options = {
+			code: "COLLABORATION_NOTICE"
+		};
 
 		if(currentAlias) {
 			options.defaultValue = currentAlias;
@@ -2250,6 +2252,7 @@ isPlaying = true;
 			}
 			
 			var showCollaborationNotice = !(QUERY_STRING["disable"] && QUERY_STRING["disable"].indexOf("collaboration_notice") != -1);
+			
 			if(showCollaborationNotice) {
 
 				if(json.cId == userConnectionId) {

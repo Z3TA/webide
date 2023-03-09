@@ -509,7 +509,8 @@ function promptBox(msg, options, callback, recursionCount) {
 		"dialogDelay",
 		"selectAll",
 		"placeholder",
-		"rows"
+		"rows",
+		"code"
 	];
 	
 	for(var option in options) {
@@ -520,6 +521,7 @@ function promptBox(msg, options, callback, recursionCount) {
 	var defaultValue = options.defaultValue;
 	var dialogDelay = options.dialogDelay;
 	var selectAll = options.selectAll;
+	var code = options.code || "MISC_PROMPT";
 	
 	if(selectAll) {
 		dialogDelay = 0;
@@ -529,7 +531,7 @@ function promptBox(msg, options, callback, recursionCount) {
 	
 	//console.log("promptBox: msg=" + msg+ " isPassword=" + isPassword + " defaultValue=" + defaultValue + " dialogDelay=" + dialogDelay + " recursionCount=" + recursionCount);
 	
-	var dialog = new Dialog(msg, {icon: undefined, delay: dialogDelay, escapeable: false});
+	var dialog = new Dialog(msg, {icon: undefined, delay: dialogDelay, escapeable: false, code: code});
 	
 	if(!dialog.div) {
 		//console.log("promptBox: Waiting until the body element is available ...");

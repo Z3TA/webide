@@ -10170,8 +10170,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 
 	EDITOR.openDialogs = []; // dialog-code: [Dialog, Dialog, ...]
 
-	EDITOR.closeAllDialogs = function closeAllDialogs(dialogCode, retryCount) {
-
+	EDITOR.closeAllDialogs = function closeAllDialogs(dialogCode, noError) {
 		if(!dialogCode) throw new Error("No dialogCode given to closeAllDialogs! Use MISC to close all unspecified dialog, or close dialog specificly! Closing the wrong dialog(s) can be very confusing.");
 
 		var closedCount = 0;
@@ -10193,7 +10192,11 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 
 		if(closedCount == 0) {
 			var codes = EDITOR.openDialogs.map(function(dialog) { return dialog.code + " = " + UTIL.shortString(dialog.div.innerText, 50) });
-			throw new Error( "No dialogs where closed! dialogCode=" + dialogCode + " EDITOR.openDialogs.length=" + EDITOR.openDialogs.length + " codes=" + JSON.stringify(codes) );
+			console.warn("Unable to find " + dialogCode + " in " + codes.join("\n"));
+
+			if(!noError) {
+				throw new Error( "No dialogs where closed! dialogCode=" + dialogCode + " EDITOR.openDialogs.length=" + EDITOR.openDialogs.length + " codes=" + JSON.stringify(codes) );
+			}
 		}
 	}
 

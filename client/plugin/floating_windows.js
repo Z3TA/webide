@@ -178,6 +178,8 @@
 
 			function openFileOnceConnected() {
 				
+				closeCollabDialogs();
+
 				otherEditor.openFile(filePath, text, openFileOptions, function(err, fileInOtherWindow) {
 					if(err) throw err;
 				
@@ -242,13 +244,7 @@
 			}
 			
 			function closeCollabDialogs() {
-				// Close dialog about collaboratior leaving
-				
-				var dialogCodes = EDITOR.openDialogs.map(function(dialog) { return dialog.code });
-				if(dialogCodes.indexOf("COLLABORATION_NOTICE") != -1) EDITOR.closeAllDialogs("COLLABORATION_NOTICE");
-				
-				// Sometimes the dialog comes up late ...
-				setTimeout(closeCollabDialogs, 50);
+				EDITOR.closeAllDialogs("COLLABORATION_NOTICE", true);
 			}
 			
 		});
