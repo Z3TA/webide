@@ -12,35 +12,9 @@
 		desc: "Get user feedback",
 		load: function loadUserFeedback() {
 
-			windowMenuFeedbackPositive = EDITOR.windowMenu.add("☺", ["☺", 1], positive);
-			windowMenuFeedbackNegative = EDITOR.windowMenu.add("☹", ["☺", 2], negative);
+			windowMenuFeedbackPositive = EDITOR.windowMenu.add("New idea, etc", [S("editor"), "Feedback", 1], positive);
+			windowMenuFeedbackNegative = EDITOR.windowMenu.add("Something bad happaned", [S("editor"), "Feedback", 2], negative);
 			
-			//windowMenuFeedbackPositive.parentMenu.parentMenu.domElement.getElementsByTagName("a")[0]
-			
-			rootMenuItem = windowMenuFeedbackPositive.parentMenu && windowMenuFeedbackPositive.parentMenu.parentMenuItem;
-
-			var smilieMenu = document.getElementById("menu_☺");
-			if(smilieMenu) smilieMenu.title = "Send feedback, make a suggestion, or report a problem";;
-			
-			if(windowMenuFeedbackPositive.domElement) {
-				windowMenuFeedbackPositive.domElement.title = "Make a suggestion";
-				windowMenuFeedbackPositive.domElement.style.display = "block";
-				windowMenuFeedbackPositive.domElement.style.align = "center";
-			}
-
-			if(windowMenuFeedbackNegative.domElement) {
-				windowMenuFeedbackNegative.domElement.title = "Report a problem";
-				windowMenuFeedbackNegative.domElement.style.display = "block";
-				windowMenuFeedbackPositive.domElement.style.align = "left";
-			}
-
-			//UTIL.objInfo(rootMenuItem);
-
-			if(rootMenuItem.domElement) {
-				rootMenuItem.domElement.style.display = "block";
-				rootMenuItem.domElement.style.verticalAlign = "top";
-			}
-
 			if(QUERY_STRING["embed"]) return;
 			
 			CLIENT.on("loginCounter", expectations, 2000);
@@ -52,8 +26,7 @@
 			
 			EDITOR.windowMenu.remove(windowMenuFeedbackPositive);
 			EDITOR.windowMenu.remove(windowMenuFeedbackNegative);
-			EDITOR.windowMenu.remove(rootMenuItem);
-
+			
 		}
 	});
 	
