@@ -102,7 +102,7 @@
 
 	function nodejsProdList() {
 		if(!deployedScriptWidget) deployedScriptWidget = EDITOR.createWidget(buildDeployedScriptManager);
-
+		
 		winMenuProdList.hide();
 
 		askForPassword(" in order to list scripts:", function (pw) {
@@ -231,6 +231,23 @@
 		scriptList = tbody;
 
 		main.appendChild(table);
+
+
+		refreshButton = document.createElement("button");
+		button.innerText = "Refresh";
+		refreshButton.onclick = function() {
+			nodejsProdList();
+		}
+
+		closeButton = document.createElement("button");
+		button.innerText = "Close";
+		closeButton.onclick = function() {
+			deployedScriptWidget.hide();
+		}
+
+		main.appendChild(refreshButton);
+		main.appendChild(closeButton);
+
 
 		return main;
 	}
@@ -449,26 +466,30 @@
 						return;
 					}
 
-					else promptBox("Enter password to deploy " + pj.name + ":", {isPassword: true, dialogDelay: 0}, function(pw) {
+					else {
+						var message = "Enter password to deploy " + pj.name + ":";
+						askForPassword(message, function(pw) {
+							if(pw == null) return;
+
+							CLIENT.cmd("nodejs_init_deploy", {folder: folder, pw: pw}, function(err, resp) {
+								if(err) {
+									alertBox(err.message, dialogCode);
+									if(callback) callback(err);
+								}
+								else {
+
+									//console.log( JSON.stringify(resp, null, 2) );
+									var logDir = UTIL.joinPaths(EDITOR.user.homeDir, "log/");
+									alertBox(pj.name + ' deployed to production!\nLog files can be found in <a href="#" onclick="EDITOR.fileExplorer(\'' + logDir + '\');">' + logDir + '</a>', dialogCode);
+									EDITOR.stat("nodejs_deploy");
+
+									if(callback) callback(null);
+
+								}
+							});
 						
-						if(pw != null) CLIENT.cmd("nodejs_init_deploy", {folder: folder, pw: pw}, function(err, resp) {
-							if(err) {
-								alertBox(err.message, dialogCode);
-								if(callback) callback(err);
-							}
-							else {
-
-								//console.log( JSON.stringify(resp, null, 2) );
-								var logDir = UTIL.joinPaths(EDITOR.user.homeDir, "log/");
-								alertBox(pj.name + ' deployed to production!\nLog files can be found in <a href="#" onclick="EDITOR.fileExplorer(\'' + logDir + '\');">' + logDir + '</a>', dialogCode);
-								EDITOR.stat("nodejs_deploy");
-
-								if(callback) callback(null);
-
-							}
 						});
-						
-					});
+					}
 					
 				}
 			}); 
@@ -484,8 +505,8 @@
 		var testFile = UTIL.joinPaths(dir, "testfile.txt");
 
 		var testProgram = 'var counter = 0;\nsetInterval(test, 500);\nfunction test() {\ncounter=counter+1;\nconsole.log("test " + counter);\n'
-		testProgram = testProgram + 'var fs = require("fs");\nfs.appendFile("' + testFile + '", "testfile " + counter, function dataAppended(err) {'
-		testProgram = testProgram + 'if (err) throw err;\n});});'
+		testProgram = testProgram + 'var fs = require("fs");\nfs.appendFile("' + testFile + '", "testfile " + counter, function dataAppended(err) {\n'
+		testProgram = testProgram + 'if (err) throw err;\n});}\n'
 		
 		var packageJson = '{"name": "testProgram",\n"version": "1.0.0",\n"description": "test nodejs deploy",\n"author": "ltest1",\n"main": "test.js"\n}';
 
@@ -537,7 +558,7 @@
 		}
 
 		function testStartAndRestart() {
-			prodStart(dir, function(err) {
+			prodRestart(dir, function(err) {
 				if(err) throw err;
 
 				makeSureItsRunning(function(err) {
@@ -587,7 +608,6 @@
 			});
 		}
 
-
 		function makeSureItsStopped(callback) {
 			EDITOR.getFileSizeOnDisk(testFile, function(err, sizeA) {
 				if(err) return callback(err);
@@ -603,9 +623,6 @@
 				}, 1000);
 			});
 		}
-
-		callback(true);
-
 	});
 	
 	// TEST-CODE-END

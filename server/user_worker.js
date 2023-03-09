@@ -939,7 +939,6 @@ API.nodejs_init_list = function nodejs_init_list(user, json, callback) {
 }
 
 API.nodejs_init_stop = function nodejs_init_stop(user, json, callback) {
-	
 	var folder = json.folder;
 	var pw = json.pw;
 	
@@ -951,11 +950,9 @@ API.nodejs_init_stop = function nodejs_init_stop(user, json, callback) {
 	var prodFolder = USER_PROD_FOLDER + folderName + "/";
 	
 	nodejs_init_action("stop", prodFolder, pw, callback);
-	
 }
 
 API.nodejs_init_restart = function nodejs_init_restart(user, json, callback) {
-	
 	var folder = json.folder;
 	var pw = json.pw;
 	var folderName = UTIL.getFolderName(folder);
@@ -965,11 +962,9 @@ API.nodejs_init_restart = function nodejs_init_restart(user, json, callback) {
 	if(pw == undefined) return callback(new Error("User password needed to restart " + prodFolder + " !"));
 	
 	nodejs_init_action("restart", prodFolder, pw, callback);
-	
 }
 
 API.nodejs_init_remove = function nodejs_init_removet(user, json, callback) {
-	
 	var folder = json.folder;
 	var pw = json.pw;
 	var folderName = UTIL.getFolderName(folder);
@@ -980,15 +975,16 @@ API.nodejs_init_remove = function nodejs_init_removet(user, json, callback) {
 	
 	// Stop before deleting files
 	nodejs_init_action("stop", prodFolder, pw, function(stopErr, stopResp) {
+
+		if(stopErr && stopErr.code == "IN_PROGRESS") stopErr = null; // Ignore error about the process already being stopped
+
 		if(stopErr) log(stopErr.message, WARN);
 		
 		API.deleteDirectory(user, {directory: prodFolder, recursive: true}, function(delErr, delResp) {
 			if(delErr) log(delErr.message, WARN);
 			callback(stopErr || delErr, stopResp || delResp);
 		});
-		
 	});
-	
 }
 
 API.nodejs_init_deploy = function nodejs_init_deploy(user, json, callback) {
@@ -1255,7 +1251,7 @@ function nodejs_init_action(action, prodFolder, pw, callback) {
 		hostname: "127.0.0.1",
 		port: nodejsDeamonManagerPort,
 		path: UTIL.trailingSlash(prodFolder) + "?" + action,
-		timeout: 5000
+		timeout: 15000 // Stopping a service takes up to 5 seconds as we want to give it a chance to exist gracefully
 	};
 	log("nodejs_init_action: Connecting to " + options.hostname + " port=" + options.port + " path=" + options.path + " ...", DEBUG);
 	httpGet(options, function nodejsInitActionCommand(err, resp) {
@@ -1263,7 +1259,9 @@ function nodejs_init_action(action, prodFolder, pw, callback) {
 			var error = new Error("Failed to " + action + " " + prodFolder + "\n" + err.message)
 			err.code = err.code;
 			log("nodejs_init_action: " + error.message);
-			return callback(error);
+			callback(error);
+			callback = null;
+			return;
 		}
 		else {
 
@@ -1273,7 +1271,9 @@ function nodejs_init_action(action, prodFolder, pw, callback) {
 				var json = JSON.parse(resp);
 			}
 			catch(err) {
-				return callback(new Error("Failed to parse resp=" + resp + " returned from " + options.path + " Error: " + err.message));
+				callback(new Error("Failed to parse resp=" + resp + " returned from " + options.path + " Error: " + err.message));
+				callback = null;
+				return;
 			}
 
 			log("nodejs_init_action: Response json=" + JSON.stringify(json));
@@ -1285,12 +1285,14 @@ function nodejs_init_action(action, prodFolder, pw, callback) {
 
 			if(json.error) {
 				var error = new Error(json.error);
+				error.code = json.errorCode;
 			}
 			else {
 				var error = null;
 			}
 
-			return callback(error, json);
+			callback(error, json);
+			callback = null;
 		}
 	});
 }

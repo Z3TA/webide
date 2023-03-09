@@ -18,7 +18,7 @@
 
 	Arguments: --home=/home/ltest1 --uid=120 --gid=127 --email=zeta@zetafiles.org
 
-	messageToInitWorker=$(printf '{"/home/ltest1/.webide/prod/hello_world":{"action":"stop","id":1}}') node nodejs_init_worker.js -home /home/ltest1 -uid 1000 -gid 1000 -user ltest1 --trace-deprecation
+	messageToInitWorker=$(printf '{"/home/ltest1/.webide/prod/hello_world":{"action":"stop","id":1}}') node nodejs_init_worker.js -home /home/ltest1 -uid 1000 -gid 1000 -user ltest1 --trace-deprecation --email=
 
 
 	Don't call log until initLogStream has been initialized! (or messages wont be logged)
@@ -47,7 +47,7 @@ var ADMIN_EMAIL = getArg(["email", "email", "mail", "admin", "admin_email", "adm
 
 var UTIL = require("./client/UTIL.js");
 var HOMEDIR = getArg(["home", "home", "homeDir"]) || process.env.homeDir;
-var EMAIL = getArg(["email", "email"]) || process.env.email; // E-mail address of the user
+var EMAIL = getArg(["email", "email"]) || process.env.email || "johan@100m.se"; // E-mail address of the user. An service specific adress can also be specified in package.json!
 var UID = getArg(["uid", "uid"]) || process.env.uid;
 var GID = getArg(["gid", "gid"]) || process.env.gid;
 var USERNAME = getArg(["user", "user", "username"]) || process.env.user;
@@ -106,6 +106,8 @@ var ERR_DISCONNECTED_FROM_PARENT = 101
 var ERR_PARSING_INIT_MESSAGE = 102;
 
 
+var MAX_MAIL_RATE = 5000; // Queue up mails if a mail already has been sent within this time interval (in milliseconds)
+
 var module_ps = require("ps-node");
 
 // What happens if we open a file stream before chroot ?
@@ -148,6 +150,8 @@ var initLogStream = fs.createWriteStream(initLogFilePath, {'flags': 'a'});
 
 log("Starting nodejs init worker...");
 log("GID=" + GID + " UID=" + UID);
+log("EMAIL=" + EMAIL);
+
 
 if(INIT_MESSAGE) {
 
@@ -265,7 +269,7 @@ else {
 					return;
 				}
 
-				startService(script.main, script.name, script.pathToFolder, script.log, script.email, function(err) {
+				startService(script.main, script.name, script.pathToFolder, script.log, script.email || EMAIL, function(err) {
 					if(reqId && (action=="start" || action=="restart")) {
 						send({id: reqId, restarting: script.pathToFolder});
 					}
@@ -342,7 +346,7 @@ function commandMessage(message) {
 		else cb(new Error("Unknown message=" + JSON.stringify(message)));
 	
 		function cb(err, obj) {
-			if(err) obj = {error: err.message};
+			if(err) obj = {error: err.message, errorCode: err.code};
 			
 			if(typeof obj != "object") obj = {};
 
@@ -679,7 +683,7 @@ function start(pathToFolder, callback) {
 							var scriptFilePath = path.join(pathToFolder, folderItem);
 							
 							if(folderItem == findFile + ".js") {
-								startService(scriptFilePath, findFile, pathToFolder, HOMEDIR+"log/" + folderItem + ".log", function(err) {
+								startService(scriptFilePath, findFile, pathToFolder, HOMEDIR+"log/" + folderItem + ".log", EMAIL, function(err) {
 									callback(err);
 								});
 							}
@@ -703,7 +707,7 @@ function start(pathToFolder, callback) {
 				var name = json.name || findFile;
 				var path = require("path");
 				var mainFile = path.join(pathToFolder, json.main);
-				startService(mainFile, name, pathToFolder, HOMEDIR+"log/" + name + ".log", json.email, function(err) {
+				startService(mainFile, name, pathToFolder, HOMEDIR+"log/" + name + ".log", json.email || EMAIL, function(err) {
 					callback(err);
 				});
 				
@@ -967,7 +971,7 @@ function startService(scriptPath, projectName, pathToFolder, logFilePath, email,
 		
 		// Send the error message via email
 		var firstLineInErrMsg = txtArr[0];
-		if(email) sendMail(email, projectName + ": " + txtArr[4], data, function(mailError) {
+		if(email) sendMail(email, projectName + ": " + txtArr[4], txtArr.join("\n"), function(mailError) {
 			if(mailError) log("Error sending email: " + mailError.message);
 		});
 		
@@ -1077,7 +1081,14 @@ function getFileNameFromPath(path) {
 
 function sendMailInQueue(forceSendAll, callback) {
 
-	log("Sending mail in mail queue...", DEBUG);
+	// Each reciever has their own list
+	var sendList = Object.keys(mailQueue);
+
+	var howMany = sendList.map(function(to) {
+		return to + ": " + mailQueue[to].length;
+	});
+
+	log("Sending mail in mail queue " + JSON.stringify(howMany) + "...", DEBUG);
 
 	if(typeof forceSendAll == "function") {
 		callback = forceSendAll;
@@ -1087,13 +1098,11 @@ function sendMailInQueue(forceSendAll, callback) {
 	var mailToSend = 0;
 	var mailSent = 0;
 
-	if(!forceSendAll && lastMailDate && (lastMailDate - (new Date()) < 5000)) {
-		sendMailInQueueTimer = setTimeout(sendMailInQueue, 60000);
-		GLOBTMERS.push(sendMailInQueueTimer);
-		return;
-	}
+	var lastMailDiff = lastMailDate ? ((new Date()) - lastMailDate) : MAX_MAIL_RATE+1;
 
-	var sendList = Object.keys(mailQueue);
+	if(!forceSendAll && lastMailDiff < MAX_MAIL_RATE) {
+		return hardError("sendMailInQueue() called even though lastMailDiff=" + lastMailDiff + " < MAX_MAIL_RATE=" + MAX_MAIL_RATE);
+	}
 
 	if(!forceSendAll) {
 		var to = sendList[0];
@@ -1115,15 +1124,17 @@ function sendMailInQueue(forceSendAll, callback) {
 
 	function concatAndSendEmails(mails, to) {
 
+		log("concatAndSendEmails: to=" + to + " mails=" + JSON.stringify(mails, null, 2));
+
 		var mailBody = [];
-		var mailSubject = "(" + mails.length + " mail) " + mails[0].subject;
+		var mailSubject = mails[0].subject + " et.al";
 		var mailFrom = mails[0].from;
 
 		mails.forEach(function(mail) {
 			mailBody.push(mail.subject + "\n" + mail.text)
 		});
 
-		var mailText = mailBody.join("\n\n");
+		var mailText = "The following " + mails.length + " mail where queued up:\n\n" + mailBody.join("\n\n");
 
 		if(forceSendAll) lastMailDate = null;
 		mailToSend++;
@@ -1140,12 +1151,22 @@ function sendMailInQueue(forceSendAll, callback) {
 }
 
 function sendMail(to, subject, text, from, callback) {
-	
-	log("sendMail:1");
+	if(typeof from == "function") {
+		callback = from;
+		from = undefined;
+	}
+
+	if(from == undefined) from = "nodejs_init@" + DOMAIN;
+
+	if(typeof text != "string") return callback(new Error("Parameter text (" + (typeof text) + ") is not a string: " + text));
+
+	//log("sendMail:1");
 
 	clearTimeout(sendMailInQueueTimer);
 
-	if(lastMailDate && (lastMailDate - (new Date()) < 5000)) {
+	var lastMailDiff = lastMailDate ? ((new Date()) - lastMailDate) : MAX_MAIL_RATE+1;
+
+	if(lastMailDiff < MAX_MAIL_RATE) {
 		if(!mailQueue.hasOwnProperty[to]) mailQueue[to] = [];
 		
 		if(mailQueue[to].length > 10) {
@@ -1154,7 +1175,7 @@ function sendMail(to, subject, text, from, callback) {
 		}
 		
 		mailQueue[to].push({subject:subject, text:text, from:from});
-		log("Added mail to=" + to + " queue");
+		log("Added mail to=" + to + " queue. lastMailDiff=" + lastMailDiff);
 		sendMailInQueueTimer = setTimeout(sendMailInQueue, 60000);
 		GLOBTMERS.push(sendMailInQueueTimer);
 		
@@ -1162,15 +1183,8 @@ function sendMail(to, subject, text, from, callback) {
 	}
 	lastMailDate = new Date();
 
-	if(typeof from == "function") {
-		callback = from;
-		from = undefined;
-	}
-
-	if(from == undefined) from = "nodejs_init@" + DOMAIN;
-
 	
-	text = String(text);
+	//text = String(text); // WHY ???
 	
 	log("Sending mail from=" + from + " to=" + to + " subject=" + subject + " text=\n********************************************\n* " + text.replace(/\n/g, "\n* ") + "\n********************************************\n", 7);
 	

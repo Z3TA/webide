@@ -5,6 +5,8 @@ What I'm thinking
 ==================
 
 
+---
+
 Why run your IDE in the cloud?
 * You might be able to get higher bandwith, so uploads/downloads will be faster, 
 you do not have to download anything to your local computer/device
