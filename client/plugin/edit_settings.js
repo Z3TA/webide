@@ -17,7 +17,7 @@
 			
 			// label, where, whenClicked, separator, keyComboFunction
 
-			editSettingsMenu = EDITOR.windowMenu.add("Edit settings", [S("Editor"), 1500], editSettings);
+			editSettingsMenu = EDITOR.windowMenu.add("Edit settings", [S("Editor"), S("settings"), 1500], editSettings);
 
 			EDITOR.addProtocol(protocol, {
 				list: listSettings,

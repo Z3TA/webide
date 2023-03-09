@@ -3639,7 +3639,7 @@ ca 20ms to render, ca 13ms to render without creating new objects
 			return;
 		}
 		
-		//console.warn(UTIL.getStack("EDITOR.resize!"));
+		console.warn(UTIL.getStack("EDITOR.resize!"));
 		
 		EDITOR.shouldResize = false; // Prevent this function from running again
 		
@@ -11588,7 +11588,7 @@ window.addEventListener("mousemove", mouseMove, false);
 		
 		
 		// Voice recognition only works for some people...
-		enableVoiceCommands = EDITOR.windowMenu.add(S("enable_voice_commands"), [S("Editor"), 50], toggleVoiceCommands);
+		enableVoiceCommands = EDITOR.windowMenu.add(S("enable_voice_commands"), [S("Editor"), S("Settings"), 50], toggleVoiceCommands);
 		
 		
 		//console.log("typeof navigator.keyboard = " + (typeof navigator.keyboard));
@@ -11604,6 +11604,7 @@ window.addEventListener("mousemove", mouseMove, false);
 		var windowMenuHeightDiv = document.getElementById("windowMenuHeight");
 		header.insertBefore(_windowMenu, windowMenuHeightDiv)
 		}
+		
 
 		sendStatistics();
 		

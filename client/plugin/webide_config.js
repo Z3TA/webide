@@ -31,7 +31,7 @@
 		
 		EDITOR.on("afterSave", configurationMaybe);
 		
-		winMenuEditorCustomization = EDITOR.windowMenu.add(S("customization_scripts"), [S("Editor"), 16], showLocalCustomization);
+		winMenuEditorCustomization = EDITOR.windowMenu.add(S("customization_scripts"), [S("Editor"), S("Settings"), 16], showLocalCustomization);
 		
 		EDITOR.registerAltKey({char: "Compl", alt:3, label: S("customization_scripts"), fun: showLocalCustomization});
 		

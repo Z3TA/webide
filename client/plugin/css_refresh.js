@@ -17,7 +17,7 @@
 		var F6 = 117;
 		EDITOR.bindKey({desc: S("refresh_css"), charCode: F6, fun: refreshCss, combo: 0});
 		
-		winMenuCSS_refresh = EDITOR.windowMenu.add(S("refresh_css"), [S("Editor"), 7], refreshCss);
+		winMenuCSS_refresh = EDITOR.windowMenu.add(S("refresh_css"), [S("Editor"), "Debug", 7], refreshCss);
 		
 		}
 	

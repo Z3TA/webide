@@ -38,7 +38,7 @@
 			EDITOR.bindKey({desc: "DevMode on/off", charCode: keyD, fun: toggleDevMode, combo: CTRL + ALT});
 			
 			winMenuReloadEditor = EDITOR.windowMenu.add(S("Restart"), [S("Editor"), 11], reloadEditor);
-			winMenuToggleDevMode = EDITOR.windowMenu.add(S("developer_mode"), [S("Editor"), 9], toggleDevMode);
+			winMenuToggleDevMode = EDITOR.windowMenu.add(S("developer_mode"), [S("Editor"), "Debug", 9], toggleDevMode);
 			
 			// Test how the editor handles errors
 			EDITOR.bindKey({desc: "Throw a test error", charCode: keyE, fun: testErrorHandler, combo: SHIFT + CTRL + ALT});

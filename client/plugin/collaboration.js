@@ -140,7 +140,7 @@
 			winMenuInvite = EDITOR.windowMenu.add(S("invite_collaborator"), [S("Editor"), 3], invite);
 			winMenuRecord = EDITOR.windowMenu.add(S("screen_code_casting"), [S("Tools"), 100], recordWidget.show);
 			winMenuTutorials = EDITOR.windowMenu.add(S("first_intro"), [S("Editor"), S("Tutorials"), S("Intro"), 1], tutorialPlayFirstIntro);
-			winMenuSetAlias = EDITOR.windowMenu.add(S("set_alias"), [S("Editor"), 4], setAlias);
+			winMenuSetAlias = EDITOR.windowMenu.add(S("set_alias"), [S("Editor"), S("Settings"), 4], setAlias);
 
 			discoveryBarIcon = EDITOR.discoveryBar.addIcon("gfx/treaty.svg", 140, S("invite_collaborator"), "colab", inviteFromDiscoveryBar);
 			// Icon created by: https://www.flaticon.com/authors/phatplus

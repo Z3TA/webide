@@ -45,21 +45,9 @@ Whenever I get a message in a terminal file, the function list is deselected (wh
 
 ---
 
-Working on Node.js init functionality... currently the list currently running scripts
-
-Let prod know the original path of the main file, so we can open it from the script list! (when listing scripts in production) !?
-.webide_init_origin
-
-
-mangkronyok2018/.prod/
-
-
-Make a GUI for scripts in production!
-
-Make it possible to add your own domains! CNAME to webide.se
+todo: Upgrade some server and install /healthcheck/ on it !
 
 ---
-
 Error message: Error: UTIL.charCode: str=deleteByCut length=11
 Error code: undefined
 

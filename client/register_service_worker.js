@@ -35,7 +35,7 @@ if ('serviceWorker' in navigator) {
 		console.log('ServiceWorker Registration failed with ' + error);
 });
 
-			var windowMenuUnregisterServiceWorker = EDITOR.windowMenu.add(S("unregister_service_worker"), [S("Editor"), 90], unregisterServiceWorker);
+			var windowMenuUnregisterServiceWorker = EDITOR.windowMenu.add(S("unregister_service_worker"), [S("Editor"), "Debug", 90], unregisterServiceWorker);
 		}
 		else console.warn("Service worker not supported by " + (typeof BROWSER != "undefined" ? BROWSER : "browser"))
 		

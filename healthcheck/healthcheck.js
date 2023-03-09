@@ -3,13 +3,31 @@
 
 	Add to crontab or make a Upstart/systemD config (run on another server)
 
+	Tutorial for setting up the healthcheck on a fresh Linux/unix server:
+	mkdir /srv
+	cd /srv
+	apt update && apt upgrade
+	apt install mercurial
+	hg clone https://hg.webtigerteam.com/repo/jzedit
+	cd jzedit/healthcheck/
+	apt update && apt upgrade
+	apt install gcc g++ make
+	curl -L https://raw.githubusercontent.com/tj/n/master/bin/n -o n
+	bash n lts 
+	node -v || bash n 14
+	adduser nodejs --system
+	mkdir node_modules
+	chown nodejs:$(whoami) node_modules/
+	su - nodejs -s /bin/bash -c 'cd /srv/jzedit/healthcheck/ && npm install'
+	su - nodejs -s /bin/bash -c '/usr/local/bin/node /srv/jzedit/healthcheck/healthcheck.js'
+
 	Crontab example:
 	# m  h  dom mon dow   command
-	* /10 *  *   *   *     su - nodejs -s /bin/bash -c 'DEBUG=false /usr/bin/node /srv/jzedit/healthcheck/healthcheck.js'
+	* /10 *  *   *   *     su - nodejs -s /bin/bash -c 'DEBUG=false /usr/local/bin/node /srv/jzedit/healthcheck/healthcheck.js'
 	(remove space between first * and /10)
 
 
-	ida: auto deploy (copy to test server) when this file updates in the repo!?
+	idea: auto deploy (copy to test server) when this file updates in the repo!?
 
 
 */

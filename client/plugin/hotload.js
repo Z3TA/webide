@@ -27,7 +27,7 @@
 		
 		EDITOR.bindKey({desc: S("hotreload_plugin"), fun: reloadCurrentScript, charCode: keyF7, combo: 0});
 		
-		winMenuHotReload = EDITOR.windowMenu.add(S("hotreload_plugin"), [S("Editor"), 10], reloadCurrentScript);
+		winMenuHotReload = EDITOR.windowMenu.add(S("hotreload_plugin"), [S("Editor"), "Debug", 10], reloadCurrentScript);
 		
 	}
 	

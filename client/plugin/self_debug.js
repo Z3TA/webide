@@ -38,7 +38,7 @@
 		var key_S = 83;
 		EDITOR.bindKey({desc: S("send_bug_report"), charCode: key_S, fun: sendBugReport, combo: ALT + SHIFT});
 		
-		winMenuBugreport = EDITOR.windowMenu.add(S("send_bug_report"), [S("Editor"), 8], sendBugReport);
+		winMenuBugreport = EDITOR.windowMenu.add(S("send_bug_report"), [S("Editor"), "Debug", 8], sendBugReport);
 		
 		EDITOR.on("error", windowError);
 		EDITOR.on("ctxMenu", showSendBugReportMenuItem);
