@@ -740,7 +740,7 @@
 							//  f is a ref to the old function in oldParse
 							if(f.end < 0) throw new Error("Old function " + f.name + " did not have an ending! end=" + f.end);	
 							
-							if(newParse.functions.length==0) throw new Error("Parsed code contains no function! newParse.functions=" + JSON.stringify(newParse.functions) + " text=\n" + file.text.substring(parseStart, parseEnd) + "\n");
+							if(newParse.functions.length==0) throw new Error("Parsed code contains no function! newParse.functions=" + JSON.stringify(newParse.functions) + " path=" + file.path + " text=\n" + file.text.substring(parseStart, parseEnd) + "\n");
 							
 							var ff = newParse.functions[0]; // Ref to the same function in new parse
 							
