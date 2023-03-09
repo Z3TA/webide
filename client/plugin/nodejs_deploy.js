@@ -395,7 +395,6 @@
 		}
 	}
 	
-
 	function prodDeployFile(file) {
 		if(!file) return alertBox("Open the file (main script) you want to deploy then try again");
 

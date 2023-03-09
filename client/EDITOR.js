@@ -5374,6 +5374,9 @@ element.activate = function() {EDITOR.discoveryBar.activate(element)};
 						console.log(msg);
 					},
 					domElement: {
+					},
+					hide: function() {
+						console.log(msg);
 					}
 				}
 			},
@@ -11593,10 +11596,11 @@ window.addEventListener("mousemove", mouseMove, false);
 		// Loading styles reset
 		removeBeforeloadClassesTimeout = setTimeout(removeBeforeloadClasses, 12850);
 		
+		if(_windowMenu) {
 		var header = document.getElementById("header");
 		var windowMenuHeightDiv = document.getElementById("windowMenuHeight");
 		header.insertBefore(_windowMenu, windowMenuHeightDiv)
-		
+		}
 
 		sendStatistics();
 		

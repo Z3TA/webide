@@ -114,6 +114,11 @@
 	
 	function newFile() {
 		EDITOR.ctxMenu.hide();
+		
+		console.log("winMenuNewFile=", winMenuNewFile);
+		console.log(winMenuNewFile);
+		console.log("meh");
+
 		winMenuNewFile.hide();
 		EDITOR.dashboard.hide();
 		

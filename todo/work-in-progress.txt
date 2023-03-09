@@ -6,15 +6,7 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
-When we remove a script from prod it stops... but then wants to restart!
 
-What if there are syntax errors in the deployed script, how do we get notified!?
-
-
-Working on init service
-
-
-does the nodejs init worker auto start when we push something to prod !?
 
 ---
 
