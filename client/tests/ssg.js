@@ -4,7 +4,7 @@
 
 */
 
-EDITOR.addTest(function ssgCompileEmptyFile(callback) {
+EDITOR.addTest(1, function ssgCompileEmptyFile(callback) {
 	var testFolder = EDITOR.user.homeDir + "tmp/ssg-test/";
 	var srcDir = testFolder + "src/";
 	var previewDir = testFolder + "preview/";

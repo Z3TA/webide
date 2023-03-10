@@ -356,23 +356,23 @@
 	function getProjFolder(currentFile, callback) {
 		if(!currentFile) throw new Error("currentFile=" + currentFile);
 
-		var filePath = currentFile.path;
+		var projPath = currentFile.path;
 
-		var folders = UTIL.getFolders(filePath);
+		var folders = UTIL.getFolders(projPath);
 		
 		var folder = folders.pop();
 		
 		readPj(folder);
 		
 		function readPj(folder) {
-			EDITOR.readFromDisk(folder + "package.json", function fileRead(readFileErr, filePath, fileContent) {
+			EDITOR.readFromDisk(folder + "package.json", function fileRead(readFileErr, packagePath, fileContent) {
 				if(readFileErr) {
 					if(readFileErr.code == "ENOENT" && folders.length > 0) {
 						folder = folders.pop();
 						readPj(folder);
 					}
 					else if(folders.length == 0) {
-						callback(new Error("Unable to find a package.json in " + UTIL.getDirectoryFromPath(filePath) + " and it's parent directories" ));
+						callback(new Error("Unable to find a package.json in " + UTIL.getDirectoryFromPath(projPath) + " and it's parent directories" ));
 					}
 					else {
 						throw readFileErr;
@@ -385,7 +385,7 @@
 						var json = JSON.parse(fileContent);
 					}
 					catch(parseErr) {
-						return callback(new Error("Failed the parse " + filePath + "! " + parseErr.message));
+						return callback(new Error("Failed the parse " + packagePath + "! " + parseErr.message));
 					}
 					
 					callback(null, folder, json);
@@ -408,10 +408,10 @@
 		// Figure out what folder (project) the user wants to deploy ...
 		
 		if(typeof fileOrPath == "string") {
-			var filePath = fileOrPath;
+			var deployFilePath = fileOrPath;
 		}
 		else if(typeof fileOrPath.path != "undefined") {
-			var filePath = fileOrPath.path;
+			var deployFilePath = fileOrPath.path;
 		}
 		else {
 			throw new Error("prodDeployFile: " + typeof fileOrPath + " fileOrPath=" + fileOrPath);
@@ -419,7 +419,10 @@
 
 		if(callback && typeof callback != "function") throw new Error("prodDeployFile: Not a function: (" + typeof callback + ") callback=" + callback);
 
-		var folders = UTIL.getFolders(filePath);
+		//console.log("nodejs_deploy: prodDeploy: deployFilePath=" + deployFilePath);
+		//if(deployFilePath == undefined) throw new Error("deployFilePath=" + deployFilePath + " fileOrPath=" + fileOrPath + " (" + typeof fileOrPath + ")");
+
+		var folders = UTIL.getFolders(deployFilePath);
 		
 		var folder = folders.pop();
 		
@@ -431,7 +434,7 @@
 			if(folder == undefined) throw new Error("folder=" + folder);
 			
 			//console.log("nodejs_deploy: Looking for package.json in folder=" + folder + " ..."); 
-			EDITOR.readFromDisk(folder + "package.json", function fileRead(readFileErr, filePath, fileContent) {
+			EDITOR.readFromDisk(folder + "package.json", function fileRead(readFileErr, packageFilePath, fileContent) {
 				if(folder == undefined) throw new Error("folder=" + folder);
 				
 				if(readFileErr) {
@@ -442,7 +445,7 @@
 					else if(folders.length == 0) {
 						var createPj = "Create package.json";
 						var cancel = "No, cancel deployment";
-						folder = UTIL.getDirectoryFromPath(filePath) || EDITOR.workingDirectory;
+						folder = UTIL.getDirectoryFromPath(deployFilePath) || EDITOR.workingDirectory;
 						confirmBox("Unable to find a package.json in " + folder + ". Do you want to create it ?", [createPj, cancel], function(answer) {
 							if(answer == createPj) {
 							
@@ -451,7 +454,7 @@
 									"version": "1.0.0",
 									"description": "What this micro service does",
 									"author": EDITOR.user.name,
-									"main": UTIL.getFilenameFromPath(filePath)
+									"main": UTIL.getFilenameFromPath(deployFilePath)
 								};
 								
 								EDITOR.openFile(folder + "package.json", JSON.stringify(pjTemplate, null, 2), {savedAs: false, isSaved: false}, function(openFileErr, file) {
@@ -473,13 +476,13 @@
 						var pj = JSON.parse(fileContent);
 					}
 					catch(parseErr) {
-						alertBox("Failed to parse " + filePath + "! " + parseErr.message, dialogCode);
+						alertBox("Failed to parse " + packageFilePath + "! " + parseErr.message, dialogCode);
 						if(callback) callback(parseErr);
 						return;
 					}
 					
 					if(pj.main == undefined) {
-						var error = filePath + " needs to have a main (file path entry)!"
+						var error = packageFilePath + " needs to have a main (file path entry)!"
 						alertBox(error.message, dialogCode);
 						if(callback) callback(error);
 						return;
@@ -518,7 +521,7 @@
 	
 	// TEST-CODE-START
 	
-	EDITOR.addTest(1, function testNodejsDeployAddToProd(testCallback) {
+	EDITOR.addTest(function testNodejsDeployAddToProd(testCallback) {
 
 		var dir = UTIL.joinPaths(EDITOR.user.homeDir, "nodejs/testProgram/");
 		var testFile = UTIL.joinPaths(dir, "testfile.txt");
@@ -549,7 +552,7 @@
 		})
 
 		function testCheckLog() {
-var logFile = UTIL.joinPaths(EDITOR.user.homeDir, "log/testProgram.log");
+			var logFile = UTIL.joinPaths(EDITOR.user.homeDir, "log/testProgram.log");
 
 			EDITOR.doesFileExist(logFile, function(err, exist) {
 				if(err) throw err;

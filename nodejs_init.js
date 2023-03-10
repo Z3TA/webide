@@ -522,7 +522,7 @@ function startNodejsInitWorker(homeDir, username, uid, gid, messageToWorker) {
 				var os = require("os");
 				var hostname = os.hostname();
 				sendMail(ADMIN_EMAIL, hostname + " Node.js Init worker for " + username + " has restarted " + restartCounter + " times in a row!", "Try starting the worker process manually to see what's wrong (see nodejs_init_worker.js)", function(err) {
-					log("Sent e-mail to " + ADMIN_EMAIL+ " about " + username + " init worker process restart");
+					log("Sent e-mail to " + ADMIN_EMAIL + " about " + username + " init worker process restart");
 				});
 				log("Not restarting " + username + " worker process because it has restarted more then " + restartCounter + " times", WARN);
 				return;

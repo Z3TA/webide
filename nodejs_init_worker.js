@@ -11,24 +11,34 @@
 	* look for main script and start it
 	* restart the script if it exits, and notify the user via e-mail or sms
 	
-	* open a scriptname.stdout.log and scriptname.stderr.log file for each micro-service
+	* open a scriptname.stdout.log file for each micro-service
 	
 	note: We might have to move the nodejs_init to another server, so we should not depend on the users home dir too much! 
 	(and vice versa, client should not depend on the .prod files being stored in .webide/prod/ !!)
 
+
+	When running manually (for testing)
+	-----------------------------------
 	Arguments: --home=/home/ltest1 --uid=120 --gid=127 --email=zeta@zetafiles.org
 
 	messageToInitWorker=$(printf '{"/home/ltest1/.webide/prod/hello_world":{"action":"stop","id":1}}') node nodejs_init_worker.js -home /home/ltest1 -uid 1000 -gid 1000 -user ltest1 --trace-deprecation --email=
 
 
+	Notes
+	------
 	Don't call log until initLogStream has been initialized! (or messages wont be logged)
-
+	
 	problem: If we have a syntax error in this script, nodejs_init.js will just keep restarting it!
-	solution: Report if it restarts more then 3 times!?
+	solution: nodejs_init.js (our parent process) will email ADMIN_EMAIL if this script restarts more then 3 times
 
 
 	todo: Able to run any executable, not just Node.JS scripts.
-	todo: Able to run different apps with different versions of Node.js
+	
+
+	idea: Make sure it uses the correct nodejs version to run the script! (the version the dev used when testing, prompt the user if not sure!? use .nvmrc !?)
+	it always uses the same version as the server!
+	we can however use execPath in fork to change to /usr/local/n/versions/node/12.22.12/bin/node
+	and find nodejs version in package.json under engines.node
 
 */
 
@@ -47,7 +57,7 @@ var ADMIN_EMAIL = getArg(["email", "email", "mail", "admin", "admin_email", "adm
 
 var UTIL = require("./client/UTIL.js");
 var HOMEDIR = getArg(["home", "home", "homeDir"]) || process.env.homeDir;
-var EMAIL = getArg(["email", "email"]) || process.env.email || "johan@100m.se"; // E-mail address of the user. An service specific adress can also be specified in package.json!
+var EMAIL = getArg(["email", "email"]) || process.env.email; // E-mail address of the user. An service specific adress can also be specified in package.json!
 var UID = getArg(["uid", "uid"]) || process.env.uid;
 var GID = getArg(["gid", "gid"]) || process.env.gid;
 var USERNAME = getArg(["user", "user", "username"]) || process.env.user;

@@ -36,6 +36,13 @@ Optimize if needed
 Feature list (Not ordered/prioritized)
 --------------------------------------
 
+Warn when a variable is overshadowed.
+For example if a variable/parameter is used in a child function, that is also used in the parent scope,
+
+
+
+---
+
 Push notifications when a script "added to production" crashes
 
 ---

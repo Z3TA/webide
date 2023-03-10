@@ -4,25 +4,7 @@ Reporting a bug ? Make sure it's repeatable!
 note: When committing only non-whitespace using git:
 git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-zero -
 
----
 
-
-
----
-
-Write a test for the SSG compiler!!! 
-Breaking changes when upgrading to new version of marked module!!
-
-/srv/webide/server/plugin/static_site_generator/ssg-build.js:1007
- data = module_marked(data); // Convert markdown to html
-       ^
-TypeError: module_marked is not a function
-at /srv/webide/server/plugin/static_site_generator/ssg-build.js:1007:12
-
----
-
-Working on deamon for handeling nodejs scripts in "prod"
-+ make sure it uses the correct nodejs version to run the script! (the version the dev used when testing, prompt the user if not sure!? use .nvmrc !?)
 
 ---
 
