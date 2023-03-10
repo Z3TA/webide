@@ -167,6 +167,8 @@ function terminalResize(user, json, callback) {
 
 function terminalClose(user, json, callback) {
 	
+	//console.log("terminalClose: json=" + JSON.stringify(json));
+
 	var termId = json.id;
 	var term = TERMINALS[termId];
 	if(!term) {

@@ -5,12 +5,6 @@ note: When committing only non-whitespace using git:
 git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-zero -
 
 
-
----
-
-All docker containers seem to restart when we reload the editor!!
-We want them to continue running (for 5 hours) until the user is compleatly logged out!
-
 ---
 
 Auto import SSG sites !?
