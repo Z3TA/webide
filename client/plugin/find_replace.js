@@ -762,6 +762,8 @@ regexOptionLabel.insertBefore(regexOption, regexOptionLabel.firstChild);
 			
 		}
 		
+		console.log("find: start=" + start);
+
 		return start;
 		
 	}
