@@ -2822,7 +2822,7 @@
 				//console.log("Setting indentation on line=" + lineNumber + " : " + Math.max(0, codeBlock[codeBlockDepth].indentation + insideBlockComment + openXmlTags + baseIndentation));
 				
 				if(indentate) {
-					if(!file.grid[row]) error( new Error("Grid row=" + row + " does not exist!") );
+					if(!file.grid[row]) error( new Error("Grid row=" + row + " does not exist! file.grid.length=" + (file.grid && file.grid.length)) + " file.path=" + file.path );
 					file.grid[row].indentation = Math.max(0, codeBlock[codeBlockDepth].indentation + insideBlockComment + openXmlTags + baseIndentation + singleStatementContext);
 				}
 				
