@@ -1075,7 +1075,7 @@
 			if(err) throw err;
 
 			EDITOR.deleteFile(filePath, function(err) { // In case it already exist
-				if(err) throw err;
+				if(err && err.code != "ENOENT") throw err;
 
 				EDITOR.saveFile(file, function(err) {
 					if(err) throw err;
