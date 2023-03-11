@@ -811,7 +811,7 @@
 			}
 			
 			//console.time("Run nodejs script: run_nodejs");
-			CLIENT.cmd("run_nodejs", json, function(err, json) {
+			CLIENT.cmd("run_nodejs", json, function runNodejsScriptStartedCb(err, json) {
 				//console.timeEnd("Run nodejs script: run_nodejs");
 				if(err) {
 					if(callback) return callback(err);
