@@ -156,14 +156,17 @@ if( UTIL.getPathDelimiter(dir) != "/") return; // EDITOR.readFromDisk will compl
 				return file.name;
 			});
 			
-			//console.log("unsorted: " + JSON.stringify(versions));
+			//console.log("node_version: (before sort) versions=" + JSON.stringify(versions, null, 2));
 
 			var reVersion = /(\d+)\.(\d+)\.(\d+)/;
 			versions.sort(function(a, b) {
+				/*
+					if we return a negative number, it will sort a before b
+					if we return a posetive number, it will sort a after b
+				*/
 
 				var Amatch = a.match(reVersion);
 				var Bmatch = b.match(reVersion);
-
 
 				var nA_major = parseInt(Amatch[1]);
 				var nB_major = parseInt(Bmatch[1]);
@@ -174,20 +177,22 @@ if( UTIL.getPathDelimiter(dir) != "/") return; // EDITOR.readFromDisk will compl
 				var nA_patch = parseInt(Amatch[2]);
 				var nB_patch = parseInt(Bmatch[2]);
 
-				if(nA_major < nB_major) return -1;
-				if(nA_minor < nB_minor) return -1;
-				if(nA_patch < nB_patch) return -1;
+				
+				if(nA_major < nB_major) return 1;
+				if(nA_major > nB_major) return -1;
 
-				if(nA_major > nB_major) return 1;
-				if(nA_minor > nB_minor) return 1;
-				if(nA_patch > nB_patch) return 1;
+				if(nA_minor < nB_minor) return 1;
+				if(nA_minor > nB_minor) return -1;
 
+				if(nA_patch < nB_patch) return 1;
+				if(nA_patch > nB_patch) return -1;
+
+				
 				return 0;
 			});
 
-			//console.log("sorted: " + JSON.stringify(versions));
+			//console.log("node_version: (after sort) versions=" + JSON.stringify(versions, null, 2));
 
-			//console.log("change_node_version: Found versions=" + JSON.stringify(versions));
 			
 			versions.forEach(function(version) {
 				var fNameVersion = version.replace(/\./g, "_");
