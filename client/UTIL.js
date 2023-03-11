@@ -2989,11 +2989,21 @@ else {
 			if(str == "insertCompositionText") return 8; // Backspace on some Android keyboard
 
 			else if(str.length == 2 && str.codePointAt) return str.codePointAt(0); // For unicode higher then 65535
-			else if(str.length != 1) {
-				var error = new Error("UTIL.charCode: str=" + str + " length=" + str.length);
-				// It's tempting to return the char code for "?" and silently report the error...
-				// If we throw the error in your face it's easier to debug because you might know what you where doing ... although errors always happens when you are demoing for a potential customer
-				throw error;
+			else if(str.length > 2) {
+				/*
+					Some keyboards randomly sends all the characters prior to the composed character
+					The character just entered is most likely to be the last one... or the last two?
+				*/
+
+				console.warn("UTIL.charCode: str=" + str + " length=" + str.length);
+
+				if(str.codePointAt) {
+					str = str.slice(-2);
+					if( str.codePointAt(0) > 65535 ) return str.codePointAt(0);
+				}
+
+				str = str.slice(-1);
+				return str.charCodeAt(0);
 			}
 			else return str.charCodeAt(0);
 		}
