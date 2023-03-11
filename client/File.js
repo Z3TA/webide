@@ -3611,7 +3611,7 @@ file.sanityCheck();
 		
 		if(file.isCallingChangeEventListeners) {
 			throw new Error("fileChange event listeners (" + UTIL.getFunctionName(file.isCallingChangeEventListeners) + 
-			") are not allowed to change the file! Or it could cause a never ending loop. Try binding to a key event instead.")
+			") are not allowed to change the file! Or it could cause a never ending loop. This error is likely due to a prior error, so try restarting the editor.\n(If you are developing an editor plugin, try binding to a key event instead.)")
 		}
 		
 		file.changed = true;
