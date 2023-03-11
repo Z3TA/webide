@@ -399,14 +399,17 @@
 
 				*/
 
-				if(msg.stderr.indexOf("Error:") != 0) return;
-				if(msg.stderr.indexOf("  at ") == -1) return;
-
 				// Why doesn't this try block capture the thrown error in UTIL.parseErrorMessage !?!?!?!!?
 				try {
 					var messageShown = (EDITOR.showMessageFromStackTrace({stackTrace: msg.stderr, level: 1}) == SUCCESS);
 				}
 				catch(err) {
+
+					if(!infoHas({file: EDITOR.files[filePath], str: msg.stderr})) {
+						// nodejsDebug() has been called and inserted the info bubble, so we don't care if we coulnd't parse the error
+						return;
+					}
+
 					if(EDITOR.settings.devMode) {
 						throw err;
 					}
@@ -1061,6 +1064,44 @@
 				callback(true);
 			},1000);
 			
+		});
+	});
+
+	EDITOR.addTest(function inlineConsoleWarn(callback) {
+
+		var filePath = UTIL.joinPaths(EDITOR.user.homeDir, "/test_console_warn.js");
+
+		EDITOR.openFile(filePath, '\nconsole.warn("foo");\n', function(err, file) {
+			if(err) throw err;
+
+			EDITOR.deleteFile(filePath, function(err) { // In case it already exist
+				if(err) throw err;
+
+				EDITOR.saveFile(file, function(err) {
+					if(err) throw err;
+
+					var errMsg = '"foo"';
+
+					runNodeJsScript(file, function(err) {
+						if(err) throw err;
+
+						setTimeout(function checkEditorInfo() {
+							if(!infoHas({file: file, str: errMsg, row: 1, col: 8})) {
+								UTIL.objInfo(EDITOR.info);
+								throw new Error("Expected EDITOR.info to have errMsg: " + errMsg);
+							}
+							EDITOR.removeAllInfo(file);
+							EDITOR.closeFile(file.path + ".stdout");
+							EDITOR.closeFile(file.path);
+
+							EDITOR.deleteFile(filePath, function(err) { // In case it already exist
+								if(err) throw err;
+								callback(true);
+							});
+						},1000);
+					});
+				});
+			});
 		});
 	});
 	
