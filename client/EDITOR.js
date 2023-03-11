@@ -14487,6 +14487,25 @@ function getFile(url, callback) {
 
 		}
 		
+		img.onerror = function imageError(err) {
+			onErrorCalled = true;
+
+			clearTimeout(timeoutTimer);
+			//console.log("htmlToImage: Problem creating image! html=" + html + "\nError: " + (err.message || err))
+
+			if(!callback) {
+				console.warn("htmlToImage: Failed to create image. But we have already called back! BROWSER=" + BROWSER + " domurl.createObjectURL?" + (!!domurl.createObjectURL) + " onloadCalled=" + onloadCalled + " onErrorCalled=" + onErrorCalled + " timeoutOut=" + timeoutOut + "");
+				// Error: htmlToImage: Failed to create image. But we have already called back! BROWSER=Chrome domurl.createObjectURL?true onloadCalled=false onErrorCalled=true timeoutOut=true
+				return;
+			}
+
+			// Make sure we do not end up in a recursive loop
+			if(textOnly == true) throw new Error("htmlToImage: It seems we also failed to create a text based image! html=" + html + " BROWSER=" + BROWSER);
+
+			htmlToImage(html, true, callback);
+			callback = null; // JS pass references by-val, so pointing it to null here wont change the value passed into htmlToImage
+		}
+
 		if( domurl.createObjectURL && BROWSER != "Safari") { // Safari ends up with a zero width image
 			//console.log("htmlToImage: Creating image using domurl.createObjectURL")
 			var svg = new Blob([data], {type: 'image/svg+xml;charset=utf-8'});
@@ -14501,30 +14520,12 @@ function getFile(url, callback) {
 			//console.log("htmlToImage: SVG image created!? img.width=" + img.width + " img.height=" + img.height);
 		}
 		
-		img.onerror = function imageError(err) {
-			onErrorCalled = true;
-			
-			clearTimeout(timeoutTimer);
-			//console.log("htmlToImage: Problem creating image! html=" + html + "\nError: " + (err.message || err))
-			
-			if(!callback) {
-				throw new Error("htmlToImage: Failed to create image. But we have already called back! BROWSER=" + BROWSER + " domurl.createObjectURL?" + (!!domurl.createObjectURL) + " onloadCalled=" + onloadCalled + " onErrorCalled=" + onErrorCalled + " timeoutOut=" + timeoutOut + "");
-			}
-			
-			// Make sure we do not end up in a recursive loop
-			if(textOnly == true) throw new Error("htmlToImage: It seems we also failed to create a text based image! html=" + html + " BROWSER=" + BROWSER);
-			
-			htmlToImage(html, true, callback);
-			callback = null; // JS pass references by-val, so pointing it to null here wont change the value passed into htmlToImage
-		}
-		
 		/*
 			problem 1: Some browsers wont fire img.onload (when data url is used)
 			solution: Use a timeout
 			
 			problem 2: Some browsers wont show the massage if the timeout is fired before img.onload
 			solution: Skip the timeout on browsers where img.onload is confirmed to work
-			
 			
 		*/
 		
@@ -14536,7 +14537,7 @@ function getFile(url, callback) {
 				callback(img);
 				callback = null;
 				}
-			}, 500); // Make the timeout long enough so that the image has a chance to be created. If we call back befor it's created we will instead get an error when trying to paint the image!!
+			}, 500); // Make the timeout long enough so that the image has a chance to be created. If we call back before it's created we will instead get an error when trying to paint the image!!
 		}
 	}
 	
