@@ -39,9 +39,15 @@ BUGS (and issues)
 
 ---
 
+When in collaboration mode. A new client enters but has an old version of a file,
+others get the message "new client has made changes to X",
+then the new client reloads the file from disk,
+others now get a new message about "client has made changes to X"
 
+when clicking on the first dialog others get the same version as the new client
+but when clicking on the second dialog (first recieved) the file becomes the old version (before new client reloaded from disk)
 
-
+Whenever we get a message about "other client has made changes to file", we should close all old messages with the same info
 
 ---
 

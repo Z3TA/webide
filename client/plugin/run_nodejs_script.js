@@ -392,8 +392,17 @@
 				/*
 					problem: Some apps use stderr instead of stdout for faster logging... And will not have a callstack!
 					
-					
+					note: nodejsDebug() have likely already been called and have displayed the message!
+
+					problem: We see two info bubbles, one from nodejsDebug, and the second from here...
+					solution: Add to same info if they are on the same row!?
+
 				*/
+
+				if(msg.stderr.indexOf("Error:") != 0) return;
+				if(msg.stderr.indexOf("  at ") == -1) return;
+
+				// Why doesn't this try block capture the thrown error in UTIL.parseErrorMessage !?!?!?!!?
 				try {
 					var messageShown = (EDITOR.showMessageFromStackTrace({stackTrace: msg.stderr, level: 1}) == SUCCESS);
 				}

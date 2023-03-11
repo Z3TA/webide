@@ -6527,6 +6527,8 @@ console.warn(err.message);
 	EDITOR.addInfo = function(row, col, textString, file, lvl) {
 		// Will display a talk bubble (plugin/render_info.js)
 		
+		console.warn("EDITOR.addInfo!");
+
 		row = parseInt(row);
 		col = parseInt(col);
 		
@@ -6606,7 +6608,7 @@ console.warn(err.message);
 			
 			// Check if there's already info on that positioin
 			for(var i=0; i<info.length; i++) {
-				if(info[i].row == row && info[i].col == col) {
+				if(info[i].row == row) { // && info[i].col == col
 					
 					if(info[i].str == textString) {
 						//console.log("EDITOR.addInfo: Same text as in info[" + i + "]");
@@ -10044,7 +10046,9 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 			return SUCCESS;
 
 		}
-		else console.warn("showMessageFromStackTrace: file=" + file + " lineno=" + lineno + " Unable to locate an open file from stackLines=" + JSON.stringify(stackLines, null, 2));
+		else {
+			console.warn("showMessageFromStackTrace: file=" + file + " lineno=" + lineno + " Unable to locate an open file from stackLines=" + JSON.stringify(stackLines, null, 2));
+		}
 
 		return FAIL;
 	}
@@ -14491,7 +14495,7 @@ function getFile(url, callback) {
 		}
 		else {
 			//console.log("htmlToImage: Creating image using data src")
-			data = "data:image/svg+xml," + data;
+			data = "data:image/svg+xml;utf8," + data;
 			img.src = data;
 		
 			//console.log("htmlToImage: SVG image created!? img.width=" + img.width + " img.height=" + img.height);

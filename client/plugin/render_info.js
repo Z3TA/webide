@@ -107,7 +107,7 @@
 				var drawErrorIcon = function() {
 					//console.log("render_info: Rendering error.svg");
 					// IE error: "Unexpected call to method or property access", putting it behind setTimeout gets rid of the error
-					setTimeout(function() {
+					setTimeout(function drawErrorIcon() {
 						ctx.drawImage(iconError, x+textPadding, y + textHeight/2 - iconHeight/2 + textPadding, iconHeight,iconHeight);
 					}, 0);
 				}
@@ -128,7 +128,7 @@
 				var drawWarningIcon = function() {
 					//console.log("render_info: Rendering warning.svg");
 					// IE error: "Unexpected call to method or property access", putting it behind setTimeout gets rid of the error
-					setTimeout(function() {
+					setTimeout(function drawWarningIcon() {
 					ctx.drawImage(iconWarning, x+textPadding, y + textHeight/2 - iconHeight/2 - 2 + textPadding, iconHeight,iconHeight);
 					}, 0);
 				}
@@ -153,7 +153,12 @@
 				}
 			
 			for(var j=0; j<comment.text.length;j++) {
+				try {
 				ctx.drawImage(comment.text[j], x + textPadding + iconPadding + countTextWidth + countTextPadding, y + textPadding + j * fontHeight);
+				}
+				catch(err) {
+					throw new Error("Failed to draw text image(" + j + "): str=" + comment.str + " img.src=" + comment.text[j].src + "\n\nError: " + err.message);
+				}
 			}
 		}
 	}
@@ -176,7 +181,7 @@
 		}
 		else {
 			ctx.fillStyle="rgb(255, 255, 230)";
-ctx.strokeStyle="rgba(0,0,0, 0.5)";
+			ctx.strokeStyle="rgba(0,0,0, 0.5)";
 			ctx.lineWidth="1";
 		}
 		
