@@ -10421,6 +10421,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 
 	EDITOR.sendFeedback = function sendFeedback(feedback, subject, silent) {
 		feedback = feedback + "\n\nlastSrvRespCmdStack=" + JSON.stringify(CLIENT.lastSrvRespCmdStack, null, 2);
+		feedback = feedback + "\n\nhomeDir=" + (EDITOR.user && EDITOR.user.homeDir);
 		UTIL.httpPost("https://www.webtigerteam.com/mailform.nodejs", { meddelande: feedback, namn: 'WebIDE', subject: subject ? subject: "WebIDE feedback", robot: "42" }, function (err, respStr) {
 			if(silent) return;
 

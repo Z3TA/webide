@@ -190,6 +190,7 @@ sendit();
 			"Browser: " + ((typeof navigator == "object" && navigator.userAgent) || window.userAgent) + " (" + BROWSER + ")\n" +
 			"Version: " + EDITOR.version + "\n" +
 			"Dist: " + EDITOR.dist + "\n" +
+			"Homedir: " + (EDITOR.user && EDITOR.user.homeDir) + "\n" +
 			"Last server msg: " + UTIL.shortString(JSON.stringify(CLIENT.lastMsgFromServer, null, 2)) + "\n" + 
 			"";
 			
