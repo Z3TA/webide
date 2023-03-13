@@ -46,12 +46,20 @@ echo "IP=$IP"
 
 if [ -e "/var/run/netns/$1" ] ; then 
   echo "Network namespace for $1 already exist!"
-  exit 17
-  # 17=EXIST
+  
+  # Under some conditions the namespace might exist, but there are no veth!
+  if ip link | grep -q "br-$1"; then
+    echo "Link also exist"
+    exit 17
+    # 17=EXIST
+  fi  
+
+else 
+  sudo ip netns add $1
 fi
 
 ## add network namespace (guide: https://ops.tips/blog/using-network-namespaces-and-bridge-to-isolate-servers/)
-sudo ip netns add $1
+
 # create veth pair
 sudo ip link add $1 type veth peer name br-$1
 # Move one end of the "cable" to the namespace
