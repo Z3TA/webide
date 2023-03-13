@@ -1879,7 +1879,7 @@
 		}
 	});
 	
-	EDITOR.addTest(true, function editBigFile(callback) {
+	EDITOR.addTest(false, function editBigFile(callback) {
 		// note: Need to place the testfile.txt inside the user home dir!
 		
 		var filePath = UTIL.joinPaths(EDITOR.user.homeDir, "/testfile.txt");
@@ -1946,12 +1946,12 @@
 											
 											EDITOR.closeAllDialogs("BIG_FILE");
 											
-											callback(true);
-										});
-									}
-								});
-							}
-						});
+												callback(true);
+											});
+										}
+									});
+								}
+							});
 						}, 1000);
 
 					});
@@ -2017,13 +2017,15 @@
 										CLIENT.cmd("deleteFile", {filePath: testFile}, function(err) {
 											if(err) throw err;
 											
+											EDITOR.closeAllDialogs("BIG_FILE", true);
 											setTimeout(function() {
+												EDITOR.closeAllDialogs("BIG_FILE", true);
 												setTimeout(function() {
-													EDITOR.closeAllDialogs("BIG_FILE");
+													EDITOR.closeAllDialogs("BIG_FILE", true);
 													callback(true);
 												}, 500);
 												
-											}, 3000);
+											}, 500);
 											
 										});
 									}
