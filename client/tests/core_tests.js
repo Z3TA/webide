@@ -1961,7 +1961,7 @@
 	});
 	
 	// Run this test early or it will slow down too much 
-	EDITOR.addTest(10, true, function editBigFile2(callback) {
+	EDITOR.addTest(10, false, function editBigFile2(callback) {
 		var filePath = UTIL.joinPaths(EDITOR.user.homeDir, "/testfile.txt");
 		var testFile = UTIL.joinPaths(EDITOR.user.homeDir, "/editBigFileTest2.txt");
 		
