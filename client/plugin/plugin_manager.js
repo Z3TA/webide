@@ -1,6 +1,7 @@
 /*
 
-	todo: Bundle the opt plugins
+	We have trouble loading the editor on less powerful devices such as feature phones... (KaiOS)
+
 
 */
 
