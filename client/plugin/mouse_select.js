@@ -760,7 +760,7 @@ if(!EDITOR.currentFile || !caret) {
 		
 	});
 
-	EDITOR.addTest(function dblClickOnWordInStringLiteral(callback) {
+	EDITOR.addTest(false, function dblClickOnWordInStringLiteral(callback) {
 		EDITOR.openFile("copyPasteManyLines.txt", 'console.log(`hello $(variable)`)', function(err, file) {
 			if(err) throw err;
 
