@@ -6,7 +6,8 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
-
+unable to move whole folder by dragging it in the file explorer
+actually it DID work, but I got an error message about not finding the folder!?
 
 ---
 regression: "ssh-keygen -f /.ssh/id_rsa -N

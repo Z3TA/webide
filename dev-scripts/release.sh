@@ -114,13 +114,12 @@ rm -rf temp/release/linux/.hg/
 rm -rf temp/release/linux/webextension/
 rm -rf temp/release/linux/hosted_chrome_app/
 rm -rf temp/release/linux/runtime/
-rm -rf temp/release/linux/client/plugin/jswordwrap/
 rm -rf temp/release/linux/guide/
 rm -rf temp/release/linux/promo/
 rm -rf temp/release/linux/dev-scripts/
 rm -rf temp/release/linux/todo/
 rm -rf temp/release/linux/vagrant/
-
+rm -rf temp/release/linux/client/plugin/not_used/
 
 rm temp/release/linux/testfile.txt
 rm temp/release/linux/.hgignore
