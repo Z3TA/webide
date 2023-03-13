@@ -8133,9 +8133,9 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 			p.load(); // Load the plugin right away if the editor has already started. 
 			p.loaded = true;
 		}
-		else {
-			console.log("EDITOR.plugin: Window has not yet loaded!");
-		}
+		//else {
+		//console.log("EDITOR.plugin: Window has not yet loaded!");
+		//
 		
 		for(var i=0; i<EDITOR.plugins.length; i++) {
 			if(EDITOR.plugins[i].desc == p.desc) throw new Error("A plugin with the same description is already loaded: " + p.desc);
