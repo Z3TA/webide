@@ -1004,7 +1004,7 @@ function Document(fileName, filePath, evaluate, fileRead) {
 				
 				log("metaEnds=" + metaEnds);
 				
-				data = module_marked(data); // Convert markdown to html
+				data = module_marked.parse(data); // Convert markdown to html
 				
 			}
 			else if(fileType == "docx") {

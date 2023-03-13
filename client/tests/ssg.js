@@ -29,4 +29,28 @@ EDITOR.addTest(function ssgCompileEmptyFile(callback) {
 	});
 });
 
+EDITOR.addTest(function ssgCompileMarkdown(callback) {
+	var testFolder = EDITOR.user.homeDir + "tmp/ssg-test/";
+	var srcDir = testFolder + "src/";
+	var previewDir = testFolder + "preview/";
+	EDITOR.createPath(srcDir, function(err) {
+		if(err) throw err;
+		EDITOR.saveToDisk(srcDir + "markdown.md", "# Hello world\nThis is a **markdown** file\n", function(err) {
+			if(err) throw err;
 
+			var opt = {source: srcDir, destination: previewDir, publish: false};
+
+			var timeout = 2000; // ms
+			CLIENT.cmd("SSG.compile", opt, timeout, function(err, json) {
+				if(err) throw err;
+
+				// Cleanup
+				CLIENT.cmd("deleteDirectory", {directory: testFolder, recursive: true}, function(err, json) {
+					if(err) throw err
+					callback(true);
+				});
+				
+			});
+		});
+	});
+});
