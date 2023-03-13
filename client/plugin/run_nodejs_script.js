@@ -1011,7 +1011,7 @@
 		});
 	});
 	
-	EDITOR.addTest(function testNodeErroMessage2(callback) {
+	EDITOR.addTest(false, function testNodeErroMessage2(callback) {
 		
 		var errMsg = "ErrorExample: This is the error description";
 		

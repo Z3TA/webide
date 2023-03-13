@@ -497,7 +497,7 @@
 		
 	});
 	
-	EDITOR.addTest(true, function testHashOnSftp(callback) {
+	EDITOR.addTest(1, false, function testHashOnSftp(callback) {
 		
 		// Todo: Also test on FTP!
 		

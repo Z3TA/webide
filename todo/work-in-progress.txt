@@ -7,7 +7,14 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 ---
 
 
+SFTP test failed
 
+github clone failed (we need to generate keys every time which is annying...)
+
+
+---
+regression: "ssh-keygen -f /.ssh/id_rsa -N
+can't generate ssh key via scp clone
 
 
 ---

@@ -200,7 +200,7 @@ function testClone() {
 						testClone(repository, testFolder);
 					});
 				}
-				else if(err) {
+				else if(err && err.message.indexOf('Warning: Permanently added the ECDSA host key') == -1) {
 					throw err;
 				}
 				else {

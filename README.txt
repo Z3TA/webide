@@ -1337,7 +1337,7 @@ sudo smartctl -x /dev/disk/by-id/ata-TOSHIBA_DT01ACA300_Z7I4AR5AS
 Problems cloning from Github
 ----------------------------
 Make sure the server has hggit installed!
-`python -c "import hggit"`
+`python3 -c "import hggit"`
 (should not give an error if it's installed)
 How to install:
 ````
@@ -1345,15 +1345,12 @@ sudo apt-get install python-pip
 sudo pip install hg-git
 ````
 
-Make sure hg-git and dulwich is installed in /usr/local/lib/ and not /home
-If hggit doesn't work in chroot, try:
+If that doesn't work try installing latest version of hg-git:
 ````
-sudo su
-pip install dulwich
-pip install hg-git
-
+hg clone https://foss.heptapod.net/mercurial/hg-git/
+cd hg-git
+python -m pip install .
 ````
-You might need to reboot the server to clear mounted libs
 
 
 Problems running apt 
