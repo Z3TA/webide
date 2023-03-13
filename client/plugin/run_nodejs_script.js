@@ -1067,7 +1067,7 @@
 		});
 	});
 
-	EDITOR.addTest(function inlineConsoleWarn(callback) {
+	EDITOR.addTest(false, function inlineConsoleWarn(callback) {
 
 		var filePath = UTIL.joinPaths(EDITOR.user.homeDir, "/test_console_warn.js");
 

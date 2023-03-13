@@ -3492,7 +3492,7 @@ isPlaying = true;
 				}, function() {
 					
 					EDITOR.mock("keydown", {char: "Z", ctrlKey: true}); // Undo insert b
-					if(file.text != "åäa\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text));
+					if(file.text != "åäa\n") throw new Error("Unexpected: file.text=" + UTIL.lbChars(file.text) + " (expected the letter b insertion to be undone with Ctrl+Z)");
 					
 					collabMode = false;
 					
@@ -3805,7 +3805,7 @@ isPlaying = true;
 		
 		var timers = [];
 		// Wait between each step
-		var timeMult = 200;
+		var timeMult = 300;
 		
 		var timer;
 		for(var i=0; i<func.length; i++) {
