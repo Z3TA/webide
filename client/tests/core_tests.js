@@ -2018,11 +2018,11 @@
 											if(err) throw err;
 											
 											setTimeout(function() {
-												var dialogCodes = EDITOR.openDialogs.map(function(dialog) { return dialog.code });
-												if(dialogCodes.indexOf("BIG_FILE") != -1) EDITOR.closeAllDialogs("BIG_FILE");
-											
-												callback(true);
-
+												setTimeout(function() {
+													EDITOR.closeAllDialogs("BIG_FILE");
+													callback(true);
+												}, 500);
+												
 											}, 3000);
 											
 										});
@@ -2056,7 +2056,7 @@
 		callback(true);
 	});
 	
-	EDITOR.addTest(500, false, function closeDialogWithCode(callback) {
+	EDITOR.addTest(5, false, function closeDialogWithCode(callback) {
 		
 		if(EDITOR.openDialogs.length > 0) throw new Error("Can not run test closeDialogWithCode while there are open dialogs!");
 		
