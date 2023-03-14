@@ -4168,7 +4168,7 @@ if(startColumn-indentationWidth > minIndentation*EDITOR.settings.tabSpace) {
 			return;
 		}
 		
-		//console.log("File.scrollTo: scrollTo: x=" + x + " y=" + y);
+		console.log("File.scrollTo: scrollTo: x=" + x + " y=" + y + " file.startColumn=" + file.startColumn + " file.startRow=" + file.startRow + " file.partStartRow=" + file.partStartRow + " callsite: " + UTIL.getStack("scroll"));
 		
 		if(x != undefined) startColumn = parseInt(x);
 		

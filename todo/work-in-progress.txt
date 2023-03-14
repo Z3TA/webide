@@ -6,6 +6,12 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
+
+fix annoying scroll bug!!!
+when scrolling using the mouse wheel it randomly scrolls down many pages
+
+---
+
 unable to move whole folder by dragging it in the file explorer
 actually it DID work, but I got an error message about not finding the folder!?
 

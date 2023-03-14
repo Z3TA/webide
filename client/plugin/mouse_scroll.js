@@ -45,20 +45,20 @@
 
 		var scrollSpeed = Math.floor((deltaY + deltaNext) * EDITOR.settings.scrollSpeedMultiplier);
 		
-		console.log("onScroll: scrollEvent{deltaY:" + scrollEvent.deltaY + "wheelDelta:" + scrollEvent.wheelDelta + " wheelDeltaY:" + scrollEvent.wheelDeltaY + "} scrollSpeed=" + scrollSpeed + " deltaY=" + deltaY + " deltaNext=" + deltaNext + " EDITOR.settings.scrollSpeedMultiplier=" + EDITOR.settings.scrollSpeedMultiplier + " dir=" + dir + " ");
+		console.log("mouse_scroll: onScroll: scrollEvent{deltaY:" + scrollEvent.deltaY + " wheelDelta:" + scrollEvent.wheelDelta + " wheelDeltaY:" + scrollEvent.wheelDeltaY + "} scrollSpeed=" + scrollSpeed + " deltaY=" + deltaY + " deltaNext=" + deltaNext + " EDITOR.settings.scrollSpeedMultiplier=" + EDITOR.settings.scrollSpeedMultiplier + " dir=" + dir + " ");
 
-		//console.log("onScroll: dir=" + dir + " time=" + (time - lastScroll) + " scrollSpeed=" + scrollSpeed + " deltaNext=" + deltaNext + " deltaY=" + deltaY + " scrollEvent.deltaY=" + scrollEvent.deltaY);
+		//console.log("mouse_scroll: onScroll: dir=" + dir + " time=" + (time - lastScroll) + " scrollSpeed=" + scrollSpeed + " deltaNext=" + deltaNext + " deltaY=" + deltaY + " scrollEvent.deltaY=" + scrollEvent.deltaY);
 		
 		//if((time - lastScroll) < 58 && navigator.platform.indexOf("Mac") != -1) {
 		// It's annoying if we limit scroll speed on most systems
 		// But on Mac it's super fast, so it's more annoying because it's too fast.
-		//console.log("onScroll: skipped scroll dir!");
+		//console.log("mouse_scroll: onScroll: skipped scroll dir!");
 		//return; // Fix insane fast scrolling
 		//}
 		
 		
 		if(scrollSpeed == 0) {
-			console.warn("onScroll: Incrementing deltaNext=" + deltaNext + " with deltaY=" + deltaY + " because scrollSpeed=" + scrollSpeed);
+			console.warn("mouse_scroll: onScroll: Incrementing deltaNext=" + deltaNext + " with deltaY=" + deltaY + " because scrollSpeed=" + scrollSpeed);
 			deltaNext += deltaY;
 		}
 		else deltaNext = 0;
@@ -68,7 +68,7 @@
 		
 		if(combo.sum == CTRL) {
 			// Resize text
-			//console.log("onScroll: Not scrolling because CTRL key was down");
+			//console.log("mouse_scroll: onScroll: Not scrolling because CTRL key was down");
 			return;
 		}
 		
@@ -96,12 +96,8 @@ if(file == undefined) return;
 					startRow = maxStartRow;
 				}
 				
-				//console.log("onScroll: file.startRow=" + file.startRow);
-			//console.log("onScroll: maxStartRow=" + maxStartRow);
-			//console.log("onScroll: startRow=" + startRow);
-			//console.log("onScroll: EDITOR.settings.topMargin=" + EDITOR.settings.topMargin);
-			//console.log("onScroll: originalTopMargin=" + originalTopMargin);
-				
+			console.log("mouse_scroll: onScroll: file.startRow=" + file.startRow + " maxStartRow=" + maxStartRow + " startRow=" + startRow + " EDITOR.settings.topMargin=" + EDITOR.settings.topMargin + " originalTopMargin=" + originalTopMargin + " file.path=" + file.path);
+			
 				/*
 					if(startRow < 0) {
 					// We are scrolling up above the first row, increase the top margin instead!
@@ -131,8 +127,8 @@ if(file == undefined) return;
 			*/
 				//EDITOR.view.visibleRows = Math.ceil((EDITOR.view.canvasHeight - EDITOR.settings.topMargin - EDITOR.settings.bottomMargin) / EDITOR.settings.gridHeight);
 
-			//console.log("onScroll: ... startRow=" +startRow);
-			//console.log("onScroll: EDITOR.settings.topMargin=" +EDITOR.settings.topMargin);
+			//console.log("mouse_scroll: onScroll: ... startRow=" +startRow);
+			//console.log("mouse_scroll: onScroll: EDITOR.settings.topMargin=" +EDITOR.settings.topMargin);
 
 				if(startRow < 0) startRow = 0;
 				
@@ -145,7 +141,7 @@ if(file == undefined) return;
 				*/
 				
 			}
-		//else {console.warn("onScroll: Scrolling, but no currentFile!")}
+		//else {console.warn("mouse_scroll: onScroll: Scrolling, but no currentFile!")}
 
 		
 		
