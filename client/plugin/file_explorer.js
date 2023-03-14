@@ -556,7 +556,10 @@ if(!iconLoadError) {
 }
 			
 			// 'd' for directory, '-' for file (or 'l' for symlink on *NIX only).
-			if(item.type == "d") type = "folder";
+			if(item.type == "d") {
+				type = "folder";
+				item.path = UTIL.trailingSlash(item.path);
+			}
 			else if(item.type == "-") type = "file";
 			else if(item.type == "l") type = "link";
 			else if(item.type == "*") type = "problem";
@@ -1038,9 +1041,17 @@ if(!iconLoadError) {
 		
 		var oldPath = fromPath;
 		var newPath = UTIL.trailingSlash(toFolder) + (UTIL.getFilenameFromPath(oldPath) || UTIL.getFolderName(oldPath));
-		console.log("File explorer:dropItem: fromPath=" + fromPath + " toFolder=" + toFolder + " newPath=" + newPath);
 		
-		EDITOR.move(oldPath, newPath, function fileRenamed(err, newPath) {
+		if(UTIL.isDirectory(oldPath)) {
+			newPath = UTIL.trailingSlash(newPath);
+		}
+		//else {
+		//console.log("File explorer: not a directory: " + oldPath);
+		//}
+
+		console.log("File explorer:dropItem: fromPath=" + fromPath + " toFolder=" + toFolder + " newPath=" + newPath);
+
+		EDITOR.move(oldPath, newPath, function fileRenamed(err) {
 			if(err) return alertBox(err.message);
 			
 			updateItemPaths(fromPath, newPath);

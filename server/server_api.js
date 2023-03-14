@@ -1438,13 +1438,16 @@ API.move = function move(user, json, callback) {
 
 	// Figure out if it's a directory or a file
 	if(UTIL.isDirectory(oldPath)) return moveDir();
-	API.listFiles(user, {pathToFolder: oldPath}, function(err, list) {
+	var pathToFolder = UTIL.getDirectoryFromPath(oldPath);
+	API.listFiles(user, {pathToFolder: pathToFolder}, function(err, list) {
 		if(err) return callback(err);
 
 		var name = UTIL.getFilenameFromPath(oldPath);
 
 		for (var i=0; i<list.length; i++) {
+			console.log("name=" + list[i].name + " type=" + list[i].type);
 			if(list[i].name == name) {
+				console.log("!!Found name=" + list[i].name + " type=" + list[i].type);
 				if(list[i].type=="d") return moveDir();
 				else if(list[i].type=="-") return moveFile();
 			}
@@ -1503,7 +1506,7 @@ API.move = function move(user, json, callback) {
 						err.code = "EISDIR";
 					}
 				}
-				callback(err, {oldPath: oldPath, newPath: newPath});
+				callback(err);
 			});
 		}
 	}
@@ -1512,16 +1515,16 @@ API.move = function move(user, json, callback) {
 		// Assume it's a file'
 		console.log("oldPath=" + oldPath + " is a file!");
 		API.readFromDisk(user, {path: oldPath, returnBuffer: true}, function fileRead(err, read) {
-			if(err) return callback(err);
+			if(err) return callback(new Error("Problems moving " + oldPath + " to " + newPath + " when reading Error: " + err.message));
 		
 			if(!Buffer.isBuffer(read.data)) throw new Error("readFromDisk did not give a Buffer! typeof read.data=" + typeof read.data);
 		
 			API.saveToDisk(user, {path: newPath, text: read.data, inputBuffer: true, public: json.public}, function fileWrite(err, write) {
-				if(err) return callback(err);
+				if(err) return callback(new Error("Problems moving " + oldPath + " to " + newPath + " when saving Error: " + err.message));
 			
 				API.deleteFile(user, {path: oldPath}, function fileDelete(err) {
-					if(err) return callback(err);
-					else callback(err, {oldPath: oldPath, newPath: newPath});
+					if(err) return callback(new Error("Problems moving " + oldPath + " to " + newPath + " when deleting Error: " + err.message));
+					else callback(err);
 				});
 			});
 		});
