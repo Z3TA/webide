@@ -2269,6 +2269,8 @@ if(err) return alertBox(err.message);
 				function hgPull(err, resp) {
 					if(err) {
 						
+						console.log("ssg: syncRepository:hgPull: err.message=" + err.message);
+
 						var authNeeded = err.message.match(/abort: http authorization required for (.*)/);
 						var authFailed = err.message.match(/abort: authorization failed/);
 						
@@ -2287,9 +2289,8 @@ if(err) return alertBox(err.message);
 							}
 						}
 						else if(authFailed) {
-							var repoUrl = authNeeded[1];
 							if(syncRepositoryCallback) syncRepositoryCallback("AUTH_FAILED");
-							else alertBox("Authorization failed!\nUnable to Pull from " + repoUrl);
+							else alertBox("Authorization failed!\nUnable to Pull from repository.");
 							return;
 						}
 						else throw err;
