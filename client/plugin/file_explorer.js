@@ -1038,7 +1038,7 @@ if(!iconLoadError) {
 		
 		var oldPath = fromPath;
 		var newPath = UTIL.trailingSlash(toFolder) + (UTIL.getFilenameFromPath(oldPath) || UTIL.getFolderName(oldPath));
-		//console.log("File explorer: fromPath=" + fromPath + " toFolder=" + toFolder + " newPath=" + newPath);
+		console.log("File explorer:dropItem: fromPath=" + fromPath + " toFolder=" + toFolder + " newPath=" + newPath);
 		
 		EDITOR.move(oldPath, newPath, function fileRenamed(err, newPath) {
 			if(err) return alertBox(err.message);

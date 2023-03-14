@@ -1278,32 +1278,32 @@ str = decoder.write(data);
 				path: user.toVirtualPath(path), 
 				data: returnBuffer ? buffer : buffer.toString(encoding), 
 				hash: shasum.digest('hex')
-			});
-			}
 				});
+			}
+		});
 			
 		/*
 			if(encoding == undefined) encoding = "utf8";
-				fs.readFile(path, encoding, function(err, string) {
+			fs.readFile(path, encoding, function(err, string) {
 			if(err) console.warn("WARN: " + err.message);
-					callback(err, {path: user.toVirtualPath(path), data: string});
-					});
+			callback(err, {path: user.toVirtualPath(path), data: string});
+			});
 		*/
 		
-		}
+	}
 		
-		// Functions to handle NodeJS ReadableStream's
-		function streamClose() {
-			console.log("Stream closed! path=" + path);
-		}
+	// Functions to handle NodeJS ReadableStream's
+	function streamClose() {
+		console.log("Stream closed! path=" + path);
+	}
 		
-		function streamError(err) {
-			console.log("Stream error! path=" + path);
-			throw err;
-		}
+	function streamError(err) {
+		console.log("Stream error! path=" + path);
+		throw err;
+	}
 		
-		function streamEnded() {
-			console.log("Stream ended! path=" + path);
+	function streamEnded() {
+		console.log("Stream ended! path=" + path);
 			
 		var resp = {path: path};
 
@@ -1311,41 +1311,41 @@ str = decoder.write(data);
 		
 		if(returnBuffer) {
 			resp.data = fileBuffer;
-}
+		}
 		else {
 			resp.data = fileContent;
 		}
 		
 		callback(null, resp);
 			
-		}
+	}
 	
-		function readStream() {
-			// Called each time there is something comming down the stream
+	function readStream() {
+		// Called each time there is something comming down the stream
 			
-			var chunk;
-			var str = "";
-			var StringDecoder = require('string_decoder').StringDecoder;
-			var decoder = new StringDecoder('utf8');
+		var chunk;
+		var str = "";
+		var StringDecoder = require('string_decoder').StringDecoder;
+		var decoder = new StringDecoder('utf8');
 			
-			//var chunkSize = 512; // How many bytes to recive in each chunk
+		//var chunkSize = 512; // How many bytes to recive in each chunk
 			
-			console.log("Reading stream ... isPaused=" + stream.isPaused());
+		console.log("Reading stream ... isPaused=" + stream.isPaused());
 			
-			while (null !== (chunk = stream.read()) && !stream.isPaused() ) {
+		while (null !== (chunk = stream.read()) && !stream.isPaused() ) {
 				
 			shasum.update(chunk);
 			
-				// chunk is Not a string! And it can cut utf8 characters in the middle, so use decoder
-				str = decoder.write(chunk);
+			// chunk is Not a string! And it can cut utf8 characters in the middle, so use decoder
+			str = decoder.write(chunk);
 				
-				fileContent += str;
+			fileContent += str;
 				
-				console.log("Got chunk! str.length=" + str.length + "");
+			console.log("Got chunk! str.length=" + str.length + "");
 				
-			}
 		}
 	}
+}
 
 API.copyFile = function copyFile(user, json, callback) {
 	
@@ -1379,31 +1379,31 @@ API.copyFile = function copyFile(user, json, callback) {
 		// note: The file permissions wont change if the file already exists!
 		}
 		
-	var cbCalled = false;
+		var cbCalled = false;
 	
-	var fs = require("fs");
+		var fs = require("fs");
 	
-	var rd = fs.createReadStream(source);
-	rd.on("error", function(err) {
+		var rd = fs.createReadStream(source);
+		rd.on("error", function(err) {
 		done(err);
-	});
+		});
 	
-	var wr = fs.createWriteStream(target, options);
-	wr.on("error", function(err) {
+		var wr = fs.createWriteStream(target, options);
+		wr.on("error", function(err) {
 		done(err);
-	});
-	wr.on("close", function(ex) {
+		});
+		wr.on("close", function(ex) {
 		done();
-	});
-	rd.pipe(wr);
+		});
+		rd.pipe(wr);
 
-	function done(err) {
+		function done(err) {
 		if (!cbCalled) {
 			
-			callback(err, {to: target});
-			cbCalled = true;
+		callback(err, {to: target});
+		cbCalled = true;
 		}
-	}
+		}
 	*/
 	
 }
@@ -1434,25 +1434,48 @@ API.move = function move(user, json, callback) {
 		return callback(error);
 	}
 
+	console.log("move: oldPath=" + oldPath + " newPath=" + newPath + "");
+
 	// Figure out if it's a directory or a file
-	var lastChar = oldPath.charAt(oldPath.length-1);
-	if(lastChar == "/" || lastChar == "\\") {
+	if(UTIL.isDirectory(oldPath)) return moveDir();
+	API.listFiles(user, {pathToFolder: oldPath}, function(err, list) {
+		if(err) return callback(err);
+
+		var name = UTIL.getFilenameFromPath(oldPath);
+
+		for (var i=0; i<list.length; i++) {
+			if(list[i].name == name) {
+				if(list[i].type=="d") return moveDir();
+				else if(list[i].type=="-") return moveFile();
+			}
+		}
+			
+		callback(new Error("Could not figure out if it's a file or a directory: oldPath=" + oldPath));
+
+	});
+
+
+	//var lastChar = oldPath.charAt(oldPath.length-1);
+	//if(lastChar == "/" || lastChar == "\\") 
+
+	function moveDir() {
 		// It's a directory!'
+		console.log("oldPath=" + oldPath + " is a directory!");
 		// Figure out protocol
 		var url = require("url");
 		var parse = url.parse(oldPath);
 		var dest = url.parse(oldPath);
 
-if(parse.protocol && parse.hostname != dest.hostname) {
-return callback(new Error("Moving folders between servers not yet implemented!"));
-}
+		if(parse.protocol && parse.hostname != dest.hostname) {
+			return callback(new Error("Moving folders between servers not yet implemented!"));
+		}
 
 		if(parse.protocol == "ftp:" || parse.protocol == "ftps:") {
 			if(user.remoteConnections.hasOwnProperty(parse.hostname)) {
 				var c = user.remoteConnections[parse.hostname].client;
 				c.rename(parse.pathname, dest.pathname, function renamedFileOnFtp(err) {
 					callback(err);
-});
+				});
 			}
 			else {
 				callback(new Error("Failed to move: " + oldPath + "\nNo connection open to FTP on " + parse.hostname + " !"));
@@ -1484,22 +1507,24 @@ return callback(new Error("Moving folders between servers not yet implemented!")
 			});
 		}
 	}
-	else {
+
+	function moveFile() {
 		// Assume it's a file'
+		console.log("oldPath=" + oldPath + " is a file!");
 		API.readFromDisk(user, {path: oldPath, returnBuffer: true}, function fileRead(err, read) {
-		if(err) return callback(err);
-		
-		if(!Buffer.isBuffer(read.data)) throw new Error("readFromDisk did not give a Buffer! typeof read.data=" + typeof read.data);
-		
-		API.saveToDisk(user, {path: newPath, text: read.data, inputBuffer: true, public: json.public}, function fileWrite(err, write) {
 			if(err) return callback(err);
-			
-			API.deleteFile(user, {path: oldPath}, function fileDelete(err) {
+		
+			if(!Buffer.isBuffer(read.data)) throw new Error("readFromDisk did not give a Buffer! typeof read.data=" + typeof read.data);
+		
+			API.saveToDisk(user, {path: newPath, text: read.data, inputBuffer: true, public: json.public}, function fileWrite(err, write) {
 				if(err) return callback(err);
-				else callback(err, {oldPath: oldPath, newPath: newPath});
+			
+				API.deleteFile(user, {path: oldPath}, function fileDelete(err) {
+					if(err) return callback(err);
+					else callback(err, {oldPath: oldPath, newPath: newPath});
+				});
 			});
 		});
-	});
 	}
 }
 
