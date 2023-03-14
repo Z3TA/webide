@@ -11,28 +11,6 @@ when scrolling using the mouse wheel it randomly scrolls down many pages
 
 ---
 
-Problem parsing arrow function:
-
-fs.open(npmPath, 'r', (err, fd) => {
-if (err) console.log("Not able to fs.open read " + npmPath);
-else console.log("It's possible to fs.open read " + npmPath);
-});
-
-expected on character=> to be a { ...
-
-
----
-
-if in string gives false posetive red circle:
-callback(new Error("Could not figure out if it's a file or a directory: oldPath=" + oldPath));
-
----
-regression: "ssh-keygen -f /.ssh/id_rsa -N
-can't generate ssh key via scp clone
-
-
----
-
 Auto import SSG sites !?
 
 I had a SSG site (my personal blog), but after cloning and started writing a new article, then clicking preview or WYSIWYG did not work...

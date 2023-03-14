@@ -10058,7 +10058,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 
 		var homeDir = (EDITOR.user && EDITOR.user.homeDir) || UTIL.homeDir(EDITOR.workingDirectory);
 		if(homeDir) pubKeyPath = UTIL.trailingSlash(homeDir) + pubKeyPath;
-
+		
 		EDITOR.readFromDisk(pubKeyPath, gotPubKeyMaybe);
 
 		function gotPubKeyMaybe(err, path, pubkey, hash) {
@@ -10067,7 +10067,11 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 				var no = "No";
 				confirmBox("Unable to find public key in " + pubKeyPath + " Do you want to generate a new SSH key ?", [yes, no], function(answer) {
 					if(answer == yes) {
-						CLIENT.cmd("run", {command: 'ssh-keygen -f /.ssh/id_rsa -N ""'}, function(err, channels) {
+
+						var privateKeyPath = "/.ssh/id_rsa";
+						if(homeDir) privateKeyPath = UTIL.joinPaths(homeDir, privateKeyPath);
+
+						CLIENT.cmd("run", {command: 'ssh-keygen -f ' + privateKeyPath + ' -N ""'}, function(err, channels) {
 							if(err) return callback(err);
 							//console.log("ssh-keygen: channels=" + JSON.stringify(channels, null, 2));
 							EDITOR.readFromDisk(pubKeyPath, gotPubKeyMaybe);

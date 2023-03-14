@@ -39,6 +39,26 @@ BUGS (and issues)
 
 ---
 
+
+
+---
+
+Problem parsing arrow function:
+
+fs.open(npmPath, 'r', (err, fd) => {
+if (err) console.log("Not able to fs.open read " + npmPath);
+else console.log("It's possible to fs.open read " + npmPath);
+});
+
+expected on character=> to be a { ...
+
+---
+
+if in string gives false posetive red circle:
+callback(new Error("Could not figure out if it's a file or a directory: oldPath=" + oldPath));
+
+---
+
 When in collaboration mode. A new client enters but has an old version of a file,
 others get the message "new client has made changes to X",
 then the new client reloads the file from disk,
