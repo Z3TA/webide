@@ -1740,7 +1740,7 @@ else var directory = EDITOR.workingDirectory;
 	}
 	
 	function showAnnotationsOnMoveCaret(file, caret) {
-		if(file == oldCaretFile && caret.row == oldCaretRow) return ALLOW_DEFAULT; // 
+		if(file == oldCaretFile && caret.row == oldCaretRow) return ALLOW_DEFAULT;
 
 		oldCaretFile = file;
 		oldCaretRow = caret.row;

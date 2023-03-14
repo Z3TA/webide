@@ -1565,6 +1565,8 @@ for(var i=0; i<options.length; i++) {
 		
 		if(!site) throw new Error("site=" + site);
 		
+		var notInHomeDir = EDITOR.user && EDITOR.user.homeDir && site.preview.indexOf(EDITOR.user.homeDir) == -1;
+
 		//console.log('Previewing site.name="' + site.name + '". edit=' + edit);
 		
 		/*
@@ -1708,8 +1710,20 @@ for(var i=0; i<options.length; i++) {
 				
 				//console.log("ignoreDraft=" + ignoreDraft); // publish flag that ignores files starting with _ (underscore)
 				compile(resolvePath(site, site.source), resolvePath(site, site.preview), ignoreDraft, function compiled_static(err) {
-					if(err) throw err;
-					
+					if(err) {
+
+						//console.log("notInHomeDir=" + notInHomeDir);
+
+						if(err.message.indexOf("EACCES") != -1 && notInHomeDir) {
+							var message = err.message + "\n\n(Try changing the preview direcotry!)";
+							editSiteSettings();
+							alertBox(message);
+							return;
+						}
+						else throw err;
+					}
+
+
 					var protocol = UTIL.urlProtocol(resolvePath(site, site.preview));
 					
 					if(protocol) {
@@ -1719,7 +1733,8 @@ for(var i=0; i<options.length; i++) {
 					
 					// If the editor is run with file:// protocol we don't have to use the serve API to view the preview
 					// Provided that the preview url is not a ftp/sft/ftps url
-					//console.log("site.preview=" + site.preview);
+					
+					console.log("ssg: site.preview=" + site.preview + " EDITOR.user=" + EDITOR.user + " EDITOR.user.homeDir=" + EDITOR.user.homeDir + " EDITOR.user.domain=" + EDITOR.user.domain + " inWWWpub?" + (site.preview.indexOf(EDITOR.user.homeDir + "wwwpub") != -1) );
 					
 					if(resolvePath(site, site.preview).match(/^(ftp|sftp|ftps):/i)) {
 						alertBox("Preview uploaded to: " + site.preview);
@@ -1728,6 +1743,11 @@ for(var i=0; i<options.length; i++) {
 					else if(document.location.href.match(/^file:/)) {
 						// Don't have to serve
 						previewServed(resolvePath(site, site.preview));
+					}
+					else if(EDITOR.user && EDITOR.user.homeDir && EDITOR.user.domain && site.preview.indexOf(EDITOR.user.homeDir + "wwwpub/") != -1) {
+						// Serve from wwwpub
+						var previewUrl = "http://" + EDITOR.user.domain + "/" + site.preview.replace(EDITOR.user.homeDir + "wwwpub/", "");
+						previewServed(previewUrl);
 					}
 					else {
 						
@@ -2513,12 +2533,14 @@ whenAllFilesReloaded();
 		
 		var opt = {source: source, destination: destination, publish: publish, pubUser: publish && selectedSite.pubUser, pubPw: publish && publish && selectedSite.pubPw, pubKey: publish && resolvePath(selectedSite, selectedSite.key)};
 		
+		console.log("ssg:compile: opt=" + JSON.stringify(opt));
+
 		CLIENT.cmd("SSG.compile", opt, function(err, json) {
-			
-			if(err) callback(err);
+			if(err) {
+				callback(err);
+			}
 			else callback(null);
-			
-		});
+			});
 		
 	}
 	
