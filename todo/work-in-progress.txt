@@ -16,6 +16,18 @@ unable to move whole folder by dragging it in the file explorer
 actually it DID work, but I got an error message about not finding the folder!?
 
 ---
+
+Problem parsing arrow function:
+
+fs.open(npmPath, 'r', (err, fd) => {
+if (err) console.log("Not able to fs.open read " + npmPath);
+else console.log("It's possible to fs.open read " + npmPath);
+});
+
+expected on character=> to be a { ...
+
+
+---
 regression: "ssh-keygen -f /.ssh/id_rsa -N
 can't generate ssh key via scp clone
 

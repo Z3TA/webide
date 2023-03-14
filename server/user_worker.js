@@ -764,7 +764,7 @@ process.on('message', function commandMessage(message) {
 						console.trace("Did not get a proper stack for err=" + JSON.stringify(err, null, 2));
 					}
 					else {
-						log("err.stack=" + JSON.stringify(err.stack));
+						log("command=err.stack=" + JSON.stringify(err.stack));
 					}
 					
 					msgResp.error = "API error: " + (err.message ? err.message : err) + "";
@@ -1609,7 +1609,7 @@ function npm(arg, extraOptions, callback) {
 				console.log(err ? 'No execute access to ' +  npmPath: 'Got execute access to ' + npmPath);
 			});
 			
-			fs.open(npmPath, 'r', (err, fd) => {
+			fs.open(npmPath, 'r', funcation (err, fd) {
 				if (err) console.log("Not able to fs.open read " + npmPath);
 				else console.log("It's possible to fs.open read " + npmPath);
 			});
