@@ -54,6 +54,9 @@
 	var _commitId;
 	var _showFile; // Show this file after cloning (will show README if undefined)
 
+	var oldCaretFile;
+	var oldCaretRow = 0;
+	
 	var testRepo = {
 		url: "https://hg.webtigerteam.com/repo/test",
 		into: "/repo/test/",
@@ -116,7 +119,7 @@
 		
 		//EDITOR.removeEvent("fileOpen", mercurialFileOpen);
 		
-		EDITOR.removeEvent("moveCaret", showAnnotations);
+		EDITOR.removeEvent("moveCaret", showAnnotationsOnMoveCaret);
 		EDITOR.removeEvent("commitTool", mercurialCommitTool);
 		EDITOR.removeEvent("resolveTool", mercurialResolveTool);
 		
@@ -1729,13 +1732,24 @@ else var directory = EDITOR.workingDirectory;
 		
 		if(!file) return alertBox("Open a file to see annotations");
 		
-		showAnnotations(file, file.caret);
+		showAnnotationsOnMoveCaret(file, file.caret);
 		
-		EDITOR.on("moveCaret", showAnnotations);
+		EDITOR.on("moveCaret", showAnnotationsOnMoveCaret);
 		
 		EDITOR.ctxMenu.hide();
 	}
 	
+	function showAnnotationsOnMoveCaret(file, caret) {
+		if(file == oldCaretFile && caret.row == oldCaretRow) return ALLOW_DEFAULT; // 
+
+		oldCaretFile = file;
+		oldCaretRow = caret.row;
+
+		showAnnotations(file, caret);
+
+		return ALLOW_DEFAULT;
+	}
+
 	function showAnnotations(file, caret) {
 		
 		if(!doAnnotate) return;
@@ -1933,7 +1947,7 @@ annotationRev.setAttribute("title", "Show diff");
 	function annotateOff() {
 		doAnnotate = false;
 		
-		EDITOR.removeEvent("moveCaret", showAnnotations);
+		EDITOR.removeEvent("moveCaret", showAnnotationsOnMoveCaret);
 		
 		EDITOR.ctxMenu.hide();
 		
