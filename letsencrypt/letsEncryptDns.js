@@ -275,7 +275,7 @@ log("Ending work=" + JSON.stringify(work) + " because IN_PROGRESS=" + IN_PROGRES
 			for example, if there's already www IN CNAME, we can not have a www IN A !
 		*/
 		
-		if(!zoneData.match( new RegExp(subname + " +IN +CNAME") )) {
+		if(!zoneData.match( new RegExp(subname + " +IN.* +CNAME") )) {
 			
 			// Find A and AAAA records for tld
 			var matchA = zoneData.match(/[@*]\s+\d*\s*IN\s+\d*?\s+A\s+([0-9.]*)/i);
