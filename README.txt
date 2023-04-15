@@ -542,10 +542,10 @@ sudo zfs snapshot rpool/home/userskeleton@base2
 ````
 Then send snapshot to prod server...
 If the fs do not exist:
-`sudo zfs send rpool/home/userskeleton@base2 | ssh root@webide.se zfs recv ben/home/userskeleton`
+`sudo zfs send rpool/home/userskeleton@base2 | pv | ssh root@webide.se zfs recv ben/home/userskeleton`
 
 If the fs already exist: (send incremental data)
-`sudo zfs send -i rpool/home/userskeleton@baseX rpool/home/userskeleton@baseY | ssh root@webide.se zfs recv ben/home/userskeleton`
+`sudo zfs send -i rpool/home/userskeleton@baseX rpool/home/userskeleton@baseY | pv | ssh root@webide.se zfs recv ben/home/userskeleton`
 
 (where snap X on the server is the last common snap and snap Y is the latest in dev)
 
@@ -734,7 +734,7 @@ It's a good idea to rsync and update folders just before switching over:
 ````
 rsync -r --links /etc/letsencrypt/ root@kaj.100m.se:/etc/letsencrypt/ --progress
 ssh root@ben.100m.se 'zfs snapshot -r tank/home@today2'
-ssh root@ben.100m.se 'zfs send -i tank/home@today tank/home@today2' pv | sudo zfs recv zpcdata/home.ben
+ssh root@ben.100m.se 'zfs send -i tank/home@today tank/home@today2' | pv | sudo zfs recv zpcdata/home.ben
 ````
 
 Make it so users only can see their own home dir:
@@ -1241,7 +1241,7 @@ Make it so a WebIDE user can access the virutal Mac:
 Moving user to another server using ZFS
 ---------------------------------------
 Run this command from the server you want to move the user TO:
-`ssh root@whereuserat 'zfs snapshot fromvol/home/nameofuser@backup && zfs send fromvol/home/nameofuser@backup' | sudo zfs receive tovol/home/nameofuser`
+`ssh root@whereuserat 'zfs snapshot fromvol/home/nameofuser@backup && zfs send fromvol/home/nameofuser@backup' | pv | sudo zfs receive tovol/home/nameofuser`
 
 (The same method can be used to make backups, see backup.sh)
 
