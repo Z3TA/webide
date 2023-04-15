@@ -477,7 +477,7 @@ console.warn("zoneData doesn't contain challangeString=" + challangeString + "\n
 								}
 								
 								if(correctValue) {
-									sendResp(true);
+									sendResp();
 								}
 								else {
 									// Try again
