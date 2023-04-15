@@ -39,7 +39,7 @@ BUGS (and issues)
 
 ---
 
-
+When opening a file with webider, then closing the browser for 2+ hours and then opening the same file again crashes the server!?
 
 ---
 

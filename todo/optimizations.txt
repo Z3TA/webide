@@ -8,6 +8,10 @@ paintLineNumbers performance regression!
 
 ---
 
+File.moveCaretToIndex is taking up a lot of CPU when moving the caret in the terminal emulator when it has 180k+ rows
+
+---
+
 Hitting Ctrl+A and then delete in terminal file that had 13k lines was so slow it crashed the browser!
 (doing the same in a normal file later worked just fine)
 

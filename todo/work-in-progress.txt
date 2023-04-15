@@ -11,9 +11,15 @@ when scrolling using the mouse wheel it randomly scrolls down many pages
 
 ---
 
+install instructions for ios and firefox
+which duont get the install dialog -
+show menu anyway
 
-File.moveCaretToIndex is taking up a lot of CPU when moving the caret in the terminal emulator when it has 180k+ rows
+---
 
+https://docs.nodegui.org/docs/guides/getting-started
+
+thinking about switching to "native" ui
 
 ---
 
