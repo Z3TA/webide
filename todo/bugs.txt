@@ -36,6 +36,25 @@ Run all tests! (to make sure you did not break anything else)
 BUGS (and issues)
 =================
 
+---
+
+When working with Github, and trying to push:
+
+Server: API error: Host key verification failed.
+abort: git remote error: The remote server unexpectedly closed the connection.
+
+Manually via terminal:
+
+johan@webide:/home/johan/repo/time_sync$ hg push
+pushing to git@github.com:Z3TA/time_sync.git
+Warning: the ECDSA host key for 'github.com' differs from the key for the IP address '140.82.121.4'
+Offending key for IP in /home/johan/.ssh/known_hosts:3
+Matching host key in /home/johan/.ssh/known_hosts:12
+Are you sure you want to continue connecting (yes/no)? yes
+Enter passphrase for key '/home/johan/.ssh/johan': 
+searching for changes
+no changes found
+
 
 ---
 

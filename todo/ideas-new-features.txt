@@ -36,10 +36,14 @@ Optimize if needed
 Feature list (Not ordered/prioritized)
 --------------------------------------
 
+---
+
+When all text is selected (select all) and copying, include the white space!!!!!!!
+
+---
+
 Warn when a variable is overshadowed.
 For example if a variable/parameter is used in a child function, that is also used in the parent scope,
-
-
 
 ---
 
