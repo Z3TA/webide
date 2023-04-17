@@ -6,6 +6,12 @@ Polishing (only existing features)
 
 ---
 
+webider - Can no longer connect using plain TCP because that port is taken by the TSL server...
+Need to edit server and webider to use a separate port for TCP fallback!
+
+
+---
+
 undo/redo/colab:
 A range/slider that allows you to playback backwards or forwards, so that you don't have to click Ctrl+Z a hundre times
 it becomes visible when you press Ctrl+Z

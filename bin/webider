@@ -14,18 +14,18 @@
 	
 	usage:
 	webide test.js
-
+	
 	command-flags/arguments:
 	-h [hostname]   Connect to this host
 	-p              Connect using this port
 	-u              Identify as this user
 	-ip             Connect to this IP
-
-
+	
+	
 	todo: Make it usuable for sending stdin:
 	process.stdin.on( 'data', function(data) { console.log( data ) } );
 	process.stdin.on( 'end', function() { console.log( 'EOF' ) } );
-
+	
 */
 
 if(process.argv.indexOf("--help") != -1) {
@@ -44,7 +44,23 @@ var module_string_decoder = require('string_decoder');
 var module_net = require("net");
 var module_tls = require('tls');
 
-var homeDir = module_os.homedir();
+if(typeof module_os.homedir == "function") {
+	var homeDir = module_os.homedir();
+}
+else if(module_os.platform() == "win32") {
+	var homeDir = "C:\\\\Documents and Settings\\Administrator";
+}
+else {
+	var homeDir = __dirname;
+}
+
+if(typeof module_os.userInfo == "function") {
+	var username = module_os.userInfo().username;
+}
+else {
+	var username = "Administrator";
+}
+
 
 var jsonFileLocation = "/.webide/webider.json";
 var settingsFileLocation1 = "/root" + jsonFileLocation;
@@ -71,7 +87,7 @@ function findSettings(settings) {
 						
 						settings.host = answer;
 						
-						ask("Username on " + settings.host, module_os.userInfo().username, function(err, answer) {
+						ask("Username on " + settings.host, username, function(err, answer) {
 							if(err) throw err;
 							
 							settings.username = answer;
@@ -158,14 +174,14 @@ function parseSettings(data, settings, fromFile) {
 
 function gotSettings(settings, settingsFile) {
 	if(typeof settings != "object") throw new Error("Expected a settings object! settings=" + settings);
-
+	
 	debug("Got settings: " + JSON.stringify(settings));
 	
 	if(!settings.host) return ask("Host name or IP of WebIDE instance", function(err, answer) {
 		if(err) throw err;
 		
 		settings.host = answer;
-
+		
 		dance(settings);
 	});
 	
@@ -277,13 +293,13 @@ function parseArguments(args) {
 	debug("Resolved filePath=" + filePath + "");
 	
 	var settings = {};
-
+	
 	if(host) settings.host = host;
 	if(port) settings.port = port;
-if(filePath) settings.filePath = filePath;
+	if(filePath) settings.filePath = filePath;
 	if(username) settings.username = username;
 	if(ip) settings.ip = ip;
-
+	
 	if(!host) {
 		debug("Looking up host and port from settings file(s) because it was not specified in arguments ...");
 		findSettings(settings);
@@ -333,7 +349,7 @@ if(filePath) settings.filePath = filePath;
 			
 		}
 	}
-	}
+}
 
 
 function dance(settings) {
@@ -350,7 +366,7 @@ function dance(settings) {
 	var pingInterval;
 	var connectionOptions = {};
 	var ping = [];
-
+	
 	if(!settings.host) throw new Error("No host in settings!");
 	
 	if(!settings.port) {
@@ -390,8 +406,8 @@ function dance(settings) {
 		/*
 			question: Will NodeJS keep the connection open for us, or do we have to send junk ?
 			answer: The connection will think it's open but you can't send data, so we need to send ping/pongs to check if the connection is still there
-		
-
+			
+			
 		*/
 		
 		connectionOptions.host = settings.ip || settings.host;
@@ -399,26 +415,26 @@ function dance(settings) {
 		connectionOptions.keepAlive = true;
 		
 		//connectionOptions.ca = module_fs.readFileSync("/etc/ssl/certs/ca-certificates.crt"),
-
+		
 		connectionOptions.servername = settings.host;
 		connectionOptions.hostname = settings.host;
 		connectionOptions.cn = settings.host;
-
+		
 		if(serverType == "tls") {
 			connection = module_tls.connect(connectionOptions);
-
+			
 			connection.on("secureConnect", connectionConnected);
 			connection.on("end", connectionClosed);
-
+			
 		}
 		else {
 			connection = module_net.connect(connectionOptions);
-
+			
 			connection.on("connect", connectionConnected);
 			connection.on("close", connectionClosed);
 			
 		}
-
+		
 		connection.on("error", connectionError);
 		connection.on("data", connectionData);
 		
@@ -428,14 +444,15 @@ function dance(settings) {
 		console.log(  "Connection error: " + (err && (err.message || err) ) + " code=" + (err && err.code) );
 		
 		debug(err.stack);
-
+		
 		if(err && err.code == "ECONNREFUSED") {
 			if(settings.loadedFrom) console.log("Edit " + settings.loadedFrom + " or ");
 			console.log("try connecting to another host using -host and -port flags");
 		}
-		else if(err && err.code == "EPROTO") {
-			// Remote server probably have not configured TLS, so use plain TCP/IP
+		else if(  err && (err.code == "EPROTO" || err.code == "CERT_HAS_EXPIRED")  ) {
+			// Remote server probably have not configured TLS, or the root cert on this machine is too old, so use plain TCP/IP
 			connection.destroy();
+			connection = null;
 			debug("Reconnecting using TCP/IP (no TLS)");
 			conn("tcp");
 			return; // Do not exit
@@ -450,24 +467,24 @@ function dance(settings) {
 		
 		var username = settings.username || module_os.userInfo().username;
 		var json = {username: username};
-
+		
 		if(settings.filePath) {
 			json.filePath = settings.filePath;
 			json.fileData = fileData;
 			var data = JSON.stringify(json);
 			debug("Sending: " + data);
 			connection.write(data + "\n");
-
+			
 		}
 		else {
 			// Send stdin
-
+			
 			// test: while sleep 1; do echo $((1 + $RANDOM % 10)); done | /bin/webider teststream.txt -debug
-
+			
 			isPipe = true;
 			
 			json.stream = true;
-
+			
 			var data = JSON.stringify(json);
 			debug("Sending: " + data);
 			connection.write(data + "\n");
@@ -483,7 +500,7 @@ function dance(settings) {
 			// When piping, the socket will automatically end when the piped stream end!
 			
 		}
-
+		
 		pingInterval = setInterval(sendPing, 4500);
 	}
 	
@@ -491,17 +508,17 @@ function dance(settings) {
 		if(ping.length > 0) {
 			throw new Error("Connection lost! ping=" + JSON.stringify(ping));
 		}
-
+		
 		var randomNr = Math.floor(Math.random() * 9999999);
 		var json = {ping: randomNr};
 		var data = JSON.stringify(json);
 		
 		ping.push(randomNr);
-
+		
 		debug("Sending: " + data);
 		connection.write(data + "\n");
 	}
-
+	
 	function connectionClosed(hadError) {
 		debug("connection closed. hadError=" + hadError);
 		
@@ -537,10 +554,10 @@ function dance(settings) {
 			//debug("Recieved content (" + totalCharacters + " characters) for " + settings.filePath);
 			
 			// note: There can be many json messages in the same chunk, separated by newline character
-
+			
 			var messages = strBuffer.split("\n");
 			messages.forEach(parseJson);
-
+			
 			// Reset the buffer, so we can get the file content again.
 			strBuffer = "";
 			
@@ -548,10 +565,10 @@ function dance(settings) {
 			
 		}
 	}
-
+	
 	function parseJson(str) {
 		var json = JSON.parse(str); // OK to throw if the parse fail
-
+		
 		if(json.error) {
 			console.log(json.error);
 			process.exit(json.error.code || 1);
@@ -574,19 +591,19 @@ function dance(settings) {
 			var fileContent = Buffer.from(json.fileData.data);
 		}
 		else {
-			throw new Error("Unknown json.fileData.type=" + json.fileData.type + " json = " + JSON.stringify(json, null2, ));
+			throw new Error("Unknown json.fileData.type=" + json.fileData.type + " json = " + JSON.stringify(json, null, 2));
 		}
-
+		
 		if(fileContent) {
 			module_fs.writeFile(settings.filePath, fileContent, function(err) {
 				if(err) throw err;
 				console.log(fileContent.length + " characters written to " + settings.filePath);
 			});
 		}
-
+		
 		debug(""); // empty line
 	}
-
+	
 }
 
 function debug() {
