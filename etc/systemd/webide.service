@@ -20,6 +20,11 @@ WorkingDirectory=/srv/webide/
 # Don't forget to change the hostname and email! If no hostname is given, the IP-address (default 127.0.0.1) will be used.
 ExecStart=/usr/local/bin/node server/server.js --port=8099 --hostname=webide.se --public_port=80 --nat-type=server
 
+# SystemD has changed how OnFailure works. OnFailure is only executed if the service fail to start, not if it crash like it used to be
+# ExecStopPost will be fired every time the service stops (including both crashes and graceful shutdowns)
+ExecStopPost=/usr/local/bin/systemd-email.sh zeta@zetafiles.org %i
+
+
 Restart=always
 
 [Install]
