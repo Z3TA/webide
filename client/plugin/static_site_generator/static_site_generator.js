@@ -1352,64 +1352,18 @@ for(var i=0; i<options.length; i++) {
 					importCfg(path);
 				}
 			});
-			
-			function importCfg(cfgPath) {
-				EDITOR.readFromDisk(cfgPath, function(err, path, data, hash) {
-					if(err) alertBox("Failed to import from " + cfgPath + ": " + err.message);
-					else {
-						try {
-							var site = JSON.parse(data); 
-						}
-						catch(err) {
-							return alertBox("Failed to parse " + cfgPath + ": " + err.message);
-						}
-
-						inputSiteName.value = site.name;
-						inputProjectFolder.value = site.projectFolder;
-						inputSourceFolder.value = site.source;
-						inputPreviewFolder.value = site.preview;
-						inputPublishFolder.value = site.publish;
-						inputTemplate.value = site.template;
-						inputPubAuthUser.value = site.pubUser;
-						inputPubAuthPw.value = site.pubPw;
-						inputPubAuthKey.value = site.key;
-						inputRepoAuthUser.value = site.repoUser;
-						inputRepoAuthPw.value = site.repoPw;
-						inputRepository.value = site.repository;
-						inputUrl.value = site.url;
-						
-						// Check if the path exist
-						EDITOR.folderExist(site.projectFolder, function(err, path) {
-
-							if(!err && path) return saveNewSite();
-
-							var path = UTIL.getDirectoryFromPath(cfgPath);
-
-							if(path.indexOf(site.projectFolder) != -1) throw new Error("Unexpected cfgPath=" + cfgPath + " site.projectFolder=" + site.projectFolder + " (does not exist!)");
-
-							var replace = "Yes, replace!";
-							var cancel = "Cancel";
-							confirmBox("The imported project folder (" + site.projectFolder + ") does not exist on your system. Do you want to replace it with " + path + " ?", [replace, cancel], function(answer) {
-								if(answer == replace) {
-									inputProjectFolder.value = site.projectFolder.replace(site.projectFolder, path);
-									inputSourceFolder.value = site.source.replace(site.projectFolder, path);
-									inputPreviewFolder.value = site.preview.replace(site.projectFolder, path);
-									inputPublishFolder.value = site.publish.replace(site.projectFolder, path);
-									inputTemplate.value = site.template.replace(site.projectFolder, path);
-									inputPubAuthKey.value = site.key.replace(site.projectFolder, path);
-
-									saveNewSite();
-								}
-							});
-						});
-						
-					} 
-				});
-			}
 		}
 		
 	}
 	
+	function lookForSettings(startFolder, callback) {
+		var fileName = "ssgconf.json";
+
+		EDITOR.findFileReverseRecursive([fileName], startFolder, function(err, files) {
+			callback(err, files);
+		});
+	}
+
 	function saveCnf(site) {
 		if(selectedSite != site) throw new Error( "not the same: site=" + JSON.stringify(site) + " selectedSite=" + JSON.stringify(selectedSite) );
 		if(typeof site != "object") throw new Error("site=" + site + " need to be an object!");
@@ -1441,6 +1395,60 @@ for(var i=0; i<options.length; i++) {
 		}
 	}
 	
+	function importCfg(cfgPath) {
+		EDITOR.readFromDisk(cfgPath, function(err, path, data, hash) {
+			if(err) alertBox("Failed to import from " + cfgPath + ": " + err.message);
+			else {
+				try {
+					var site = JSON.parse(data);
+				}
+				catch(err) {
+					return alertBox("Failed to parse " + cfgPath + ": " + err.message);
+				}
+
+				inputSiteName.value = site.name;
+				inputProjectFolder.value = site.projectFolder;
+				inputSourceFolder.value = site.source;
+				inputPreviewFolder.value = site.preview;
+				inputPublishFolder.value = site.publish;
+				inputTemplate.value = site.template;
+				inputPubAuthUser.value = site.pubUser;
+				inputPubAuthPw.value = site.pubPw;
+				inputPubAuthKey.value = site.key;
+				inputRepoAuthUser.value = site.repoUser;
+				inputRepoAuthPw.value = site.repoPw;
+				inputRepository.value = site.repository;
+				inputUrl.value = site.url;
+
+				// Check if the path exist
+				EDITOR.folderExist(site.projectFolder, function(err, path) {
+
+					if(!err && path) return saveNewSite();
+
+					var path = UTIL.getDirectoryFromPath(cfgPath);
+
+					if(path.indexOf(site.projectFolder) != -1) throw new Error("Unexpected cfgPath=" + cfgPath + " site.projectFolder=" + site.projectFolder + " (does not exist!)");
+
+					var replace = "Yes, replace!";
+					var cancel = "Cancel";
+					confirmBox("The imported project folder (" + site.projectFolder + ") does not exist on your system. Do you want to replace it with " + path + " ?", [replace, cancel], function(answer) {
+						if(answer == replace) {
+							inputProjectFolder.value = site.projectFolder.replace(site.projectFolder, path);
+							inputSourceFolder.value = site.source.replace(site.projectFolder, path);
+							inputPreviewFolder.value = site.preview.replace(site.projectFolder, path);
+							inputPublishFolder.value = site.publish.replace(site.projectFolder, path);
+							inputTemplate.value = site.template.replace(site.projectFolder, path);
+							inputPubAuthKey.value = site.key.replace(site.projectFolder, path);
+
+							saveNewSite();
+						}
+					});
+				});
+
+			}
+		});
+	}
+
 	function addSiteOption(site, index) {
 		
 		if(!selectSite) throw new Error("selectSite not yet created!");
@@ -1531,7 +1539,25 @@ for(var i=0; i<options.length; i++) {
 		}
 		
 		if(file.path.indexOf(resolvePath(selectedSite, selectedSite.source)) == -1) {
-			//console.log("selectedSite.source=" + selectedSite.source + " is not in file.path=" + file.path + "");
+			console.log("ssg:ssgPreviewTool: selectedSite.source=" + selectedSite.source + " is not in file.path=" + file.path + "");
+			
+			var searchFolder = UTIL.getDirectoryFromPath(file.path);
+			lookForSettings(searchFolder, function(err, files) {
+				if(err) {
+					console.log("ssg:ssgPreviewTool: Found no ssg config files in searchFolder=" + searchFolder + " Error: " + err.message);
+					return;
+				}
+
+
+
+				var msg = "Found a static site configuration in " + files[0] + " Do you want to import it?";
+				var importIt = "Import it";
+				var cancel = "Cancel";
+				confirmBox(msg, [importIt, cancel], function (answer) {
+					if(answer == importIt) importCfg(files[0]);
+				});
+			});
+
 			return false;
 		}
 		
