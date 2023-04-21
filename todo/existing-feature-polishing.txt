@@ -4,6 +4,13 @@ This file contains a list of things we can do to improve already implemented fea
 Polishing (only existing features)
 ==================================
 
+
+
+
+---
+
+Annoying that docker shuts down when I restart the browser! (how, when!?)
+
 ---
 
 ~ should resolve to home dir when using open command from terminal emulator!

@@ -152,10 +152,12 @@
 		if(totalTime == undefined) totalTime = 10000;
 
 		var tickTime = 1000;
-		progressBar.max = Math.round(totalTime / tickTime);
-		progressBar.value = 0;
+
 		progressBarWidget.show();
 
+		progressBar.max = Math.round(totalTime / tickTime);
+		progressBar.value = 0;
+		
 		var progressInterval = function tick() {
 			if(progressBar.value >= progressBar.max) {
 				progressBar.max = progressBar.max + 10;
@@ -3329,6 +3331,21 @@ if(err) return alertBox(err.message);
 					}
 			}
 		return arr;
-		}
+	}
 	
+	// TEST-CODE-START
+
+	EDITOR.addTest(1, function testFakeProgress(callback) {
+		var progressInterval = fakeProgress(4000);
+		setTimeout(done, 3000);
+		function done() {
+			clearInterval(progressInterval);
+			progressBarWidget.hide();
+
+			callback(true);
+		}
+	});
+
+	// TEST-CODE-END
+
 })();

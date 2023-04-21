@@ -38,6 +38,11 @@ BUGS (and issues)
 
 ---
 
+When searching right, somtimes it stops and beeps even though there is more to find! clicki Ctrl+f again usually continue searches (had Ignore case on)
+
+
+---
+
 When working with Github, and trying to push:
 
 Server: API error: Host key verification failed.
