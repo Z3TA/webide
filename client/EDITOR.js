@@ -2175,19 +2175,22 @@ EDITOR.env = {}; // Plugins can set custom env values that will be passed to ter
 		});
 	}
 	
-	EDITOR.writeLines = function writeLines(filePath, start, lines, callback) {
-		// Writes lines to file starting at line start
+	EDITOR.writeLines = function writeLines(filePath, startLine, textContent, callback) {
+		// Writes lines to file starting at line startLine
 		
-		if(typeof start != "number") throw new Error('Parameter "start" needs to be a number!');
-		if( Object.prototype.toString.call( lines ) != '[object Array]' ) throw new Error('Parameter "lines" needs to be an array!');
+		if(typeof startLine != "number") throw new Error('Parameter "startLine" needs to be a line number!');
+		if( typeof textContent != 'string' ) throw new Error('Parameter "textContent" needs to be a string!');
 		
-		//console.log("Writing lines to: filePath=" + filePath + " start=" + start);
+		//console.log("Writing lines to: filePath=" + filePath + " startLine=" + startLine);
 		
-		var json = {path: filePath, start: start, lines: lines};
+		var json = {path: filePath, start: startLine, content: textContent};
 		
-		CLIENT.cmd("writeLines", json, function readLines(err, json) {
+		CLIENT.cmd("writeLines", json, function readLines(err, resp) {
 			if(err) callback(err);
 			else callback(null);
+		
+			// resp = {totalRowsWritten, totalRowsRead, contentRows}
+
 		});
 	}
 	

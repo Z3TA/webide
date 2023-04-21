@@ -773,9 +773,13 @@ API.writeLines = function writeLines(user, json, writeLinesCallback) {
 	var path = user.translatePath(json.path);
 	if(path instanceof Error) return callback(path);
 	
-	if(overwrite != undefined && end == undefined) return writeLinesCallback(new Error("option overwrite=" + overwrite + " but end=" + end + " "));
-	if(overwrite == undefined && end != undefined) return writeLinesCallback(new Error("Expected overwrite=" + overwrite + " to be true when end=" + end + " is set!"));
+	if(content == undefined) return  writeLinesCallback(new Error("writeLines: content needs to be a string! json=" + JSON.stringify(json, null, 2)));
+
+	if(overwrite != undefined && end == undefined) return writeLinesCallback(new Error("writeLines: option overwrite=" + overwrite + " but end=" + end + " "));
+	if(overwrite == undefined && end != undefined) return writeLinesCallback(new Error("writeLines: Expected overwrite=" + overwrite + " to be true when end=" + end + " is set!"));
 	
+
+
 var encoding = "utf8";
 	var fs = require("fs");
 	var tmpPath = path + ".tmp";

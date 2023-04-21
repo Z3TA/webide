@@ -3335,7 +3335,7 @@ if(err) return alertBox(err.message);
 	
 	// TEST-CODE-START
 
-	EDITOR.addTest(1, function testFakeProgress(callback) {
+	EDITOR.addTest(function testFakeProgress(callback) {
 		var progressInterval = fakeProgress(4000);
 		setTimeout(done, 3000);
 		function done() {

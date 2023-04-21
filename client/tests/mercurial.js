@@ -138,7 +138,7 @@ function testClone() {
 	});
 	
 	
-	EDITOR.addTest(function cloneFromGithub(callback) {
+	EDITOR.addTest(1, function cloneFromGithubAndPush(callback) {
 		/*
 			This needs hggit!
 			
@@ -205,17 +205,72 @@ function testClone() {
 				}
 				else {
 					
-					if(++cloneSuccess == cloneTests) {
-						cleanup(function(err) {
-							if(err) throw err;
-							callback(true);
-						});
-					}
+					testPush(repository, testFolder);
 					
 				}
 			});
+
 		}
 		
+		function testPush(repository, testFolder) {
+
+			// test push, but only if we used ssh because Github doesn't support basic auth (you can create an auth string though)
+
+			/*
+
+				Warning: the ECDSA host key for 'github.com' differs from the key for the IP address '140.82.121.4'
+				Offending key for IP in /home/johan/.ssh/known_hosts:3
+				Matching host key in /home/johan/.ssh/known_hosts:12
+
+				Github changes their server keys on regular intervals, giving a "Are you sure you want to continue connecting" in Mercurial
+
+			*/
+
+			var badKey = '|1|Rx99z2FUsjfi2dsGVh/C0bToQX8=|BMa3Z3yX9bqbc0VoUH+oYfilNgA= ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==';
+			//vad badHost = '|1|PCbuSY1eTcaYqG7e4S5bK+JAknE=|ErxOeAworSkInkf6/ZEHjDXQzqA= ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBEmKSENjQEezOmxkZMy7opKgwFB9nkt5YRrYMjNuG5N87uRgg6CLrbo5wAdT/y6v0mKV0U2w0WZ2YB/++Tpockg='
+
+			if( repository.indexOf("git@") == 0 ) {
+
+				var randomString = "";
+				for (var i=0; i<10; i++) {
+					randomString += Math.floor(Math.random() * 10);
+				}
+
+				EDITOR.writeLines(UTIL.joinPaths(EDITOR.user.homeDir, ".ssh/","known_hosts"), 3, badKey + "\n", function(err) {
+					if(err) throw err;
+
+					EDITOR.saveToDisk(UTIL.joinPaths(testFolderParent, "ssh/", "testfile.txt"), randomString + "\n", function(err) {
+						if(err) throw err;
+
+						CLIENT.cmd("mercurial.commitAll", {directory: testFolder, message: "test " + (new Date()).toLocaleDateString('sv-SE')}, function commited(err, resp) {
+							if(err) throw err;
+
+							CLIENT.cmd("mercurial.push", {directory: testFolder}, 160000, function(err, json) {
+								if(err) throw err;
+
+								pushDone();
+
+							});
+
+						});
+
+					});
+
+				});
+
+			}
+			else pushDone();
+
+			function pushDone() {
+				if(++cloneSuccess == cloneTests) {
+					cleanup(function(err) {
+						if(err) throw err;
+						callback(true);
+					});
+				}
+			}
+		}
+
 		function cleanup(cleanupCallback) {
 			CLIENT.cmd("deleteDirectory", {directory: testFolderParent, recursive: true}, function(err, json) {
 				if(err) throw err

@@ -4077,7 +4077,7 @@ if(startColumn-indentationWidth > minIndentation*EDITOR.settings.tabSpace) {
 			});
 		} 
 		else {
-			throw new Error("File.gotoLine: fileRow=" + fileRow + " >= file.grid.length=" + file.grid.length);
+			throw new Error("File.gotoLine: fileRow=" + fileRow + " >= file.grid.length=" + file.grid.length + " (line=" + line + " file.totalRows=" + file.totalRows + " file.isBig=" + file.isBig + ")");
 		}
 		
 	}
