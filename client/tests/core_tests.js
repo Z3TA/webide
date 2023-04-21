@@ -1989,6 +1989,9 @@
 						
 						EDITOR.closeFile(file);
 						
+						// Prevent "Closed file is still in the editor!" error - which runs after 100ms
+
+						setTimeout(function() {
 						console.log("(Re)opening " + testFile + " ...");
 						EDITOR.openFile(testFile, function(err, file) {
 							if(err) throw err;
@@ -2032,6 +2035,7 @@
 								});
 							}
 						});
+						}, 200);
 					});
 				});
 			});

@@ -1,12 +1,11 @@
 (function() {
 	"use strict";
 	
-	/*
 		
-		
-		EDITOR.addTest(true, function createAndRenameSftpFolder(callback) {
+	EDITOR.addTest(function createAndRenameSftpFolder(callback) {
+		// sftp "sftptest"@"kaj.100m.se"
 		var protocol = "sftp";
-		var serverAddress = "ben.100m.se";
+		var serverAddress = "65.108.140.51"; // Use IP in case of DNS issues
 		var testFolder = protocol + "://" + serverAddress + "/uploads/testRenameFolder/";
 		var renameTo =   protocol + "://" + serverAddress + "/uploads/renameFolderTo/";
 		var connJson = {protocol: protocol, serverAddress: serverAddress,  user: "sftptest", passw: "12345"};
@@ -41,7 +40,7 @@
 		});
 		});
 		});
-	*/
+	
 	
 	EDITOR.addTest(function sftp_enoent(callback) {
 		// bug: SFTP does not give proper ENOENT error code when file doesn't exist

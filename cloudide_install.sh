@@ -247,6 +247,13 @@ apt-get install python-brotli -y || true
 # Ubuntu 20
 # todo: python-brotli does not exist in Ubuntu 20 ! Will hggit work!?
 
+# The official hggit package seem to be broken. Install directly from source:
+cd /tmp/
+hg clone https://foss.heptapod.net/mercurial/hg-git/
+cd hg-git
+python3 -m pip install .
+# todo: test the above line (it has not been tested)!
+
 echo "#webide: Installing Letsencrypt's certbot"
 # For Ubuntu 18 and earlier
 #apt-get install software-properties-common -y

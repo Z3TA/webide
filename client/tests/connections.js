@@ -117,7 +117,7 @@
 			protocol: protocol, 
 			serverAddress: serverAddress,
 			user: "test", 
-			passw: "ftptest123"
+			passw: "12345"
 		}, function(err, json) {
 			if(err) throw err
 			else {

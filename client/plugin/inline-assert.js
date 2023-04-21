@@ -199,7 +199,7 @@
 
 	// TEST-CODE-START
 
-	EDITOR.addTest(function testInlineAssertInFileWithWindowsLinebreak(callback) { // Might need to be sync ?
+	EDITOR.addTest(false, function testInlineAssertInFileWithWindowsLinebreak(callback) { // Might need to be sync ? yes
 		// inline-assert did not work because the file has window style line breaks
 		EDITOR.openFile("testInlineAssert.js", 'function foo() {return "bar"}\r\n// assert: foo()="baz"\r\n', function terminalTestFileOpened(err, file) {
 
@@ -209,7 +209,7 @@
 				EDITOR.closeFile(file);
 
 				callback(true);
-			}, 1000);
+			}, 500);
 
 		});
 			

@@ -2773,7 +2773,8 @@ EDITOR.env = {}; // Plugins can set custom env values that will be passed to ter
 		
 		if(EDITOR.settings.devMode && EDITOR.shouldResize == false) {
 			// For debugging, so we know why a resize was needed
-			console.log(UTIL.getStack("resizeNeeded"));
+			// uncomment if you want to know when resizeNeeded is called
+			//console.log(UTIL.getStack("resizeNeeded"));
 		}
 		EDITOR.shouldResize = true;
 	}
@@ -11818,7 +11819,7 @@ window.addEventListener("mousemove", mouseMove, false);
 		var aborted = false;
 		var firstTestOrder = 10000;
 		var firstTest;
-			var waitTime = 2000;
+			var waitTime = 120; // Time to wait between sync tests
 
 		if(testsToRun == 1) {
 			for (var i=0; i<EDITOR.tests.length; i++) {

@@ -6,6 +6,19 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
+Unable to use hg to clone from Github!
+
+Uncaught Error: Server: API error: Warning: Permanently added 'github.com,140.82.121.3' (ECDSA) to the list of known hosts.
+git@github.com: Permission denied (publickey).
+abort: git remote error: The remote server unexpectedly closed the connection. (code=undefined)
+
+
+---
+
+New release so that I can write blog posts! 
+
+---
+
 fix annoying scroll bug!!!
 when scrolling using the mouse wheel it randomly scrolls down many pages
 
