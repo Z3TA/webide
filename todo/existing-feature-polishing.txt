@@ -6,6 +6,10 @@ Polishing (only existing features)
 
 ---
 
+~ should resolve to home dir when using open command from terminal emulator!
+
+---
+
 webider - Can no longer connect using plain TCP because that port is taken by the TSL server...
 Need to edit server and webider to use a separate port for TCP fallback!
 

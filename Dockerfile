@@ -56,6 +56,9 @@ RUN echo -n true > /home/ltest1/.webide/storage/jsx
 RUN rm -rf /srv/webide
 # Will be mounted when running the container
 
+RUN ssh-keygen -t rsa -q -f "/home/ltest1/.ssh/id_rsa" -N "" 
+# Add the public key to Github so we can test cloning from Github!
+
 EXPOSE 80
 
 #CMD ["nginx", "-g", "daemon off;"]

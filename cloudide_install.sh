@@ -252,7 +252,9 @@ cd /tmp/
 hg clone https://foss.heptapod.net/mercurial/hg-git/
 cd hg-git
 python3 -m pip install .
-# todo: test the above line (it has not been tested)!
+cd ..
+rm -rf /tmp/hg-git
+
 
 echo "#webide: Installing Letsencrypt's certbot"
 # For Ubuntu 18 and earlier
