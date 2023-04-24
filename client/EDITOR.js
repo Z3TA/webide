@@ -11822,7 +11822,7 @@ window.addEventListener("mousemove", mouseMove, false);
 		var aborted = false;
 		var firstTestOrder = 10000;
 		var firstTest;
-			var waitTime = 120; // Time to wait between sync tests
+			var waitTime = 240; // Time to wait between sync tests
 
 		if(testsToRun == 1) {
 			for (var i=0; i<EDITOR.tests.length; i++) {
@@ -11849,10 +11849,10 @@ window.addEventListener("mousemove", mouseMove, false);
 		
 		function testLoop() {
 
-				console.warn("testLoop!");
+				console.warn("testInfo: testLoop! currently running: " + stillRunning.join(", "));
 
 			if(waitingForSync) {
-					//console.log("testInfo: Waiting for " + currentRunningTest + " ...");
+					console.log("testInfo: Waiting for " + currentRunningTest + " ...");
 					setTimeout(testLoop, waitTime);
 					return;
 			}
@@ -11860,7 +11860,7 @@ window.addEventListener("mousemove", mouseMove, false);
 			if(finished == testsToRun) return allTestsDone();
 			
 			if(aborted) {
-					//console.log("testLoop: Tests aborted!");
+					//console.log("testInfo: testLoop: Tests aborted!");
 				return;
 			}
 			
@@ -11898,7 +11898,7 @@ window.addEventListener("mousemove", mouseMove, false);
 		
 		function runTest(test) {
 			if(aborted) {
-				console.log("runTest: Tests aborted!");
+					console.log("testInfo: runTest: Tests aborted!");
 				return;
 			}
 			
