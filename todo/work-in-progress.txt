@@ -6,6 +6,12 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
+Make use of HOME env variable where /home is hardcoded for those that don't have home in /home ...
+Uncaught Error: Server: API error: ENOENT: no such file or directory, open '/home/zeta/.ssh/id_rsa'
+
+
+---
+
 2023-04-22 (22:21:10) ltest1: Creating path=sftp://65.108.140.51/uploads/testRenameFolder/ (at console.log (/srv/webide/server/user_worker.js:2247:2 <- at createPathSomewhere (/srv/webide/server/server_api.js:2180:11)
 2023-04-22 (22:21:10) ltest1: Failed to create path=/uploads/testRenameFolder/
                       Failure (at console.log (/srv/webide/server/user_worker.js:2247:2 <- at /srv/webide/server/server_api.js:2140:13)
