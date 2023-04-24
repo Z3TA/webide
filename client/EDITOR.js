@@ -948,6 +948,12 @@ EDITOR.env = {}; // Plugins can set custom env values that will be passed to ter
 				return gotSettingsString(localPackage.string);
 			}
 
+			if(localPackage.string == serverPackage.string) {
+				// Dunno why the hash is different!?
+				EDITOR.storage.setItem(settings, localString); // Store local version on the server
+				return gotSettingsString(localPackage.string);
+			}
+
 			var useServer = "Use server";
 			var useLocal = "Use local"
 
@@ -958,6 +964,12 @@ EDITOR.env = {}; // Plugins can set custom env values that will be passed to ter
 				useServer += " (newer)";
 			}
 
+			/*
+				if(localPackage.string.length < 100) {
+				var strCompare = "\n'" + UTIL.lbChars(serverPackage.string) + "' != '" + UTIL.lbChars(localPackage.string) + "' (" + (serverPackage.string==localPackage.string) + ")";
+				}
+			*/
+			
 			confirmBox("<h3>Settings for " + settings + "</h3>Which version do you want to load ?<br>Server version (" + serverPackage.date + "):<br><textarea>" + serverPackage.string + "</textarea><br>" +
 			"<br>Local version (" + localPackage.date + "):<br><textarea>" + localPackage.string + "</textarea>", [useLocal, useServer], function(answer) {
 				if(answer == useLocal) {
