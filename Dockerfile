@@ -57,6 +57,8 @@ RUN rm -rf /srv/webide
 # Will be mounted when running the container
 
 RUN ssh-keygen -t rsa -q -f "/home/ltest1/.ssh/id_rsa" -N "" 
+RUN chown ltest1:ltest1 /home/ltest1/.ssh/id_rsa
+RUN chown ltest1:ltest1 /home/ltest1/.ssh/id_rsa.pub
 # Add the public key to Github so we can test cloning from Github!
 
 EXPOSE 80
