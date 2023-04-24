@@ -138,7 +138,7 @@ function testClone() {
 	});
 	
 	
-	EDITOR.addTest(1, function cloneFromGithubAndPush(callback) {
+	EDITOR.addTest(function cloneFromGithubAndPush(callback) {
 		/*
 			This needs hggit!
 			
