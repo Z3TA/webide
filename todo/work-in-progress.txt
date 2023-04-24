@@ -6,6 +6,27 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
+2023-04-22 (22:21:10) ltest1: Creating path=sftp://65.108.140.51/uploads/testRenameFolder/ (at console.log (/srv/webide/server/user_worker.js:2247:2 <- at createPathSomewhere (/srv/webide/server/server_api.js:2180:11)
+2023-04-22 (22:21:10) ltest1: Failed to create path=/uploads/testRenameFolder/
+                      Failure (at console.log (/srv/webide/server/user_worker.js:2247:2 <- at /srv/webide/server/server_api.js:2140:13)
+2023-04-22 (22:21:10) ltest1: Initiating folder read on SFTP 65.108.140.51:/uploads/testRenameFolder/ (at console.log (/srv/webide/server/user_worker.js:2247:2 <- at Object.listFiles (/srv/webide/server/server_api.js:1857:12)
+2023-04-22 (22:21:10) ltest1: Reading folder: /uploads/testRenameFolder/ ... (at console.log (/srv/webide/server/user_worker.js:2247:2 <- at sftpReadDir (/srv/webide/server/server_api.js:1865:13)
+2023-04-22 (22:21:10) 155.4.8.162(1) <= 48{"resp":{"path":"sftp://65.108.140.51/uploads/testRenameFolder/"},"id":48} (server.js:5375:4)
+2023-04-22 (22:21:10) 155.4.8.162 => 49move{"oldPath":"sftp://65.108.140.51/uploads/testRenameFolder/","newPath":"sftp://65.108.140.51/uploads/renameFolderTo/"} (server.js:2642:3)
+2023-04-22 (22:21:10) ltest1 command=move connectionAuthorized=true (server.js:2874:3)
+2023-04-22 (22:21:10) ltest1: move: oldPath=sftp://65.108.140.51/uploads/testRenameFolder/ newPath=sftp://65.108.140.51/uploads/renameFolderTo/ (at console.log (/srv/webide/server/user_worker.js:2247:2 <- at move (/srv/webide/server/server_api.js:1441:10)
+2023-04-22 (22:21:10) ltest1: oldPath=sftp://65.108.140.51/uploads/testRenameFolder/ is a directory! (at console.log (/srv/webide/server/user_worker.js:2247:2 <- at moveDir (/srv/webide/server/server_api.js:1470:11)
+2023-04-22 (22:21:10) ltest1: Attempting to rename folder /uploads/testRenameFolder/ to /uploads/testRenameFolder/ on 65.108.140.51 ... (at console.log (/srv/webide/server/user_worker.js:2247:2 <- at moveDir (/srv/webide/server/server_api.js:1494:13)
+2023-04-22 (22:21:10) command=move err.stack="Error: Failure\n    at 101 (/srv/webide/node_modules/ssh2/lib/protocol/SFTP.js:2704:19)\n    at SFTP.push (/srv/webide/node_modules/ssh2/lib/protocol/SFTP.js:278:11)\n    at CHANNEL_DATA (/srv/webide/node_modules/ssh2/lib/client.js:525:23)\n    at 94 (/srv/webide/node_modules/ssh2/lib/protocol/handlers.misc.js:859:16)\n    at Protocol.onPayload (/srv/webide/node_modules/ssh2/lib/protocol/Protocol.js:2025:10)\n    at AESGCMDecipherNative.decrypt (/srv/webide/node_modules/ssh2/lib/protocol/crypto.js:987:26)\n    at Protocol.parsePacket [as _parse] (/srv/webide/node_modules/ssh2/lib/protocol/Protocol.js:1994:25)\n    at Protocol.parse (/srv/webide/node_modules/ssh2/lib/protocol/Protocol.js:293:16)\n    at Socket.<anonymous> (/srv/webide/node_modules/ssh2/lib/client.js:713:21)\n    at Socket.emit (node:events:513:28)\n    at Socket.emit (node:domain:489:12)\n    at addChunk (node:internal/streams/readable:324:12)\n    at readableAddChunk (node:internal/streams/readable:297:9)\n    at Readable.push (node:internal/streams/readable:234:10)\n    at TCP.onStreamRead (node:internal/stream_base_commons:190:23)" (at ranApi (/srv/webide/server/user_worker.js:767:7)
+2023-04-22 (22:21:10) ltest1: err.code=4 (at console.log (/srv/webide/server/user_worker.js:2247:2 <- at ranApi (/srv/webide/server/user_worker.js:773:15)
+2023-04-22 (22:21:10) 155.4.8.162(1) <= 49{"error":"API error: Failure","errorCode":4,"resp":1,"id":49} (server.js:5375:4)
+2023-04-22 (22:21:12) 155.4.8.162 => 50ping{"data":2} (server.js:2642:3)
+2023-04-22 (22:21:12) 155.4.8.162 <= 50{"resp":2,"id":"50"} (server.js:3519:4)
+
+todo: Make an isolated test case that creates a folder and tries to rename it!
+
+---
+
 the following known_hosts gives errors while pushing to a github repo:
 
 192.30.253.112 ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==
@@ -22,9 +43,15 @@ the following known_hosts gives errors while pushing to a github repo:
 |1|PCbuSY1eTcaYqG7e4S5bK+JAknE=|ErxOeAworSkInkf6/ZEHjDXQzqA= ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBEmKSENjQEezOmxkZMy7opKgwFB9nkt5YRrYMjNuG5N87uRgg6CLrbo5wAdT/y6v0mKV0U2w0WZ2YB/++Tpockg=
 
 
+But I do not get the "Are you sure you want to continue connecting " while testing...
+
 ---
 
 New release so that I can write blog posts! 
+
+---
+
+todo: Update README about "Editing files on remote computers" as we now use TSL
 
 ---
 
