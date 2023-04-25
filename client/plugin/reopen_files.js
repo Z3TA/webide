@@ -175,7 +175,7 @@
 			// Save state when exiting the editor
 
 			// problem: Sometimes there is already an exit event called saveStateOfOpenFiles!
-			//console.log("reopen_file:  reopenFilesMain: Adding exit event: saveStateOfOpenFiles! EDITOR.files=" + EDITOR.sortFileList());
+			console.log("reopen_file:  reopenFilesMain: Adding exit event: saveStateOfOpenFiles! EDITOR.files=" + EDITOR.sortFileList());
 			EDITOR.on("exit", saveStateOfOpenFiles);
 			
 
@@ -188,6 +188,9 @@
 			
 			//console.log("reopenFiles: All files reopened!");
 		});
+
+
+
 	}
 	
 	function reopenFilesMain(reopenFilesCallback) {
