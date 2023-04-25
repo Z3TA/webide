@@ -128,7 +128,7 @@ if( UTIL.getPathDelimiter(dir) != "/") return; // EDITOR.readFromDisk will compl
 							if(rcVersion != version) {
 								var msg = "You changed to " + version + " but .nvmrc in " + folder + " specifies " + rcVersion + ".<br>Do you want to edit .nvmrc ?";
 								var edit = "Edit";
-								confirmBox(msg, [edit, changeIt, cancel], function(answer) {
+								confirmBox(msg, [edit, cancel], function(answer) {
 									if(cancel) return;
 									var filePath = UTIL.joinPaths(folder, ".nvmrc");
 									EDITOR.openFile(filePath);
