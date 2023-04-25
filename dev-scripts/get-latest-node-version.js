@@ -1,13 +1,13 @@
 #!/bin/sh
 ':' //; exec "$(command -v nodejs || command -v node)" "$0" "$@"
 
-httpGet("https://nodejs.org/en/", function(err, str) {
+httpGet("https://nodejs.org/en", function(err, str) {
 	if(err) throw err;
 
 	var reLTS = /Download (\d+\.\d+\.\d+) LTS/;
 	var match = str.match(reLTS);
 
-	if(match == null) throw new Error("Can't find reLTS=" + reLTS + " in str=" + str);
+	if(match == null) throw new Error("Can't find reLTS=" + reLTS + " in str=" + str + " str.length=" + str.length);
 
 	//console.log(match);
 
@@ -27,6 +27,7 @@ function httpGet(url, callback) {
 
 	req.on("error", function(err) {
 		callback(err);
+		callback = null;
 	});
 
 	function httpResponse(res) {
@@ -42,6 +43,9 @@ function httpGet(url, callback) {
 
 		res.on('end', function() {
 			var str = Buffer.concat(data).toString();
+
+			if(str.length == 0) return callback(  new Error( "res.statusCode=" + res.statusCode + " Empty data! headers: " + JSON.stringify(res.headers, null, 2) )  );
+
 			callback(null, str);
 		});
 	}
