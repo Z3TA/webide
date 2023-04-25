@@ -781,21 +781,21 @@ for(var i=0; i<options.length; i++) {
 		var selectedSiteIndex = selectSite.options[selectSite.selectedIndex].id;
 		selectedSite = sites[selectedSiteIndex];
 		if(selectedSite) {
-		EDITOR.storage.setItem("cmsjz_selectedSiteName", selectedSite.name);
+			EDITOR.storage.setItem("cmsjz_selectedSiteName", selectedSite.name);
 		
-		inputSiteName.value = selectedSite.name;
-		inputProjectFolder.value = selectedSite.projectFolder;
-		inputSourceFolder.value = selectedSite.source;
-		inputPreviewFolder.value = selectedSite.preview;
-		inputPublishFolder.value = selectedSite.publish;
-		inputTemplate.value = selectedSite.template;
-		inputPubAuthUser.value = selectedSite.pubUser;
-		inputPubAuthPw.value = selectedSite.pubPw;
-		inputPubAuthKey.value = selectedSite.key;
-		inputRepoAuthUser.value = selectedSite.repoUser;
-		inputRepoAuthPw.value = selectedSite.repoPw;
-		inputRepository.value = selectedSite.repository;
-		inputUrl.value = selectedSite.url;
+			inputSiteName.value = selectedSite.name;
+			inputProjectFolder.value = selectedSite.projectFolder;
+			inputSourceFolder.value = selectedSite.source;
+			inputPreviewFolder.value = selectedSite.preview;
+			inputPublishFolder.value = selectedSite.publish;
+			inputTemplate.value = selectedSite.template;
+			inputPubAuthUser.value = selectedSite.pubUser;
+			inputPubAuthPw.value = selectedSite.pubPw;
+			inputPubAuthKey.value = selectedSite.key;
+			inputRepoAuthUser.value = selectedSite.repoUser;
+			inputRepoAuthPw.value = selectedSite.repoPw;
+			inputRepository.value = selectedSite.repository;
+			inputUrl.value = selectedSite.url;
 		}
 		//else console.warn("selectedSite=" + selectedSite);
 	}
@@ -1200,53 +1200,6 @@ for(var i=0; i<options.length; i++) {
 		
 		editView.appendChild(tr);
 		
-		
-		function saveNewSite() {
-			
-			if(!EDITOR.storage.ready()) throw new Error("EDITOR.storage not available ready!");
-			
-			// Make sure the name/alias is not in use
-			var name = inputSiteName.value;
-			for (var i=0; i<sites.length; i++) {
-				if(sites[i].name == name) {
-					alertBox(name + " alias already used!");
-					return;
-				}
-			}
-			
-			var index = sites.push({
-				name: name,
-				projectFolder: inputProjectFolder.value,
-				source: inputSourceFolder.value,
-				preview: inputPreviewFolder.value,
-				publish: inputPublishFolder.value,
-				template:  inputTemplate.value,
-				pubUser: inputPubAuthUser.value,
-				pubPw: inputPubAuthPw.value,
-				key: inputPubAuthKey.value,
-				repository: inputRepository.value,
-				repoUser: inputRepoAuthUser.value,
-				repoPw: inputRepoAuthPw.value,
-				url: inputUrl.value
-			}) - 1;
-			
-			selectedSite = sites[index];
-			EDITOR.storage.setItem("cmsjz_selectedSiteName", selectedSite.name);
-			
-			var selectedIndex = addSiteOption(selectedSite, index); // Add new option
-			
-			selectSite.selectedIndex = selectedIndex;// Select the new option
-			
-			EDITOR.storage.setItem("cmsjz_sites", JSON.stringify(sites, null, 2)); // Save all sites in local-storage
-			
-			editView.style.display = "none"; // Hide the edit view
-			controlView.style.display = "block"; // Show the connection view
-			EDITOR.resizeNeeded();
-			
-			saveCnf(selectedSite);
-			
-		}
-		
 		function browseKey() {
 			EDITOR.localFileDialog(undefined, function selectKey(path) {
 				inputPubAuthKey.value = path;
@@ -1356,6 +1309,54 @@ for(var i=0; i<options.length; i++) {
 		
 	}
 	
+	function saveNewSite(callback) {
+
+		if(!EDITOR.storage.ready()) throw new Error("EDITOR.storage not available ready!");
+
+		// Make sure the name/alias is not in use
+		var name = inputSiteName.value;
+		for (var i=0; i<sites.length; i++) {
+			if(sites[i].name == name) {
+				var msg = name + " alias already used!";
+				if(callback) return callback(new Error(msg));
+				alertBox(msg);
+				return;
+			}
+		}
+
+		var index = sites.push({
+			name: name,
+			projectFolder: inputProjectFolder.value,
+			source: inputSourceFolder.value,
+			preview: inputPreviewFolder.value,
+			publish: inputPublishFolder.value,
+			template:  inputTemplate.value,
+			pubUser: inputPubAuthUser.value,
+			pubPw: inputPubAuthPw.value,
+			key: inputPubAuthKey.value,
+			repository: inputRepository.value,
+			repoUser: inputRepoAuthUser.value,
+			repoPw: inputRepoAuthPw.value,
+			url: inputUrl.value
+		}) - 1;
+
+		selectedSite = sites[index];
+		EDITOR.storage.setItem("cmsjz_selectedSiteName", selectedSite.name);
+
+		var selectedIndex = addSiteOption(selectedSite, index); // Add new option
+
+		selectSite.selectedIndex = selectedIndex;// Select the new option
+
+		EDITOR.storage.setItem("cmsjz_sites", JSON.stringify(sites, null, 2)); // Save all sites in local-storage
+
+		editView.style.display = "none"; // Hide the edit view
+		controlView.style.display = "block"; // Show the connection view
+		EDITOR.resizeNeeded();
+
+		saveCnf(selectedSite, callback);
+
+	}
+
 	function lookForSettings(startFolder, callback) {
 		var fileName = "ssgconf.json";
 
@@ -1364,7 +1365,7 @@ for(var i=0; i<options.length; i++) {
 		});
 	}
 
-	function saveCnf(site) {
+	function saveCnf(site, callback) {
 		if(selectedSite != site) throw new Error( "not the same: site=" + JSON.stringify(site) + " selectedSite=" + JSON.stringify(selectedSite) );
 		if(typeof site != "object") throw new Error("site=" + site + " need to be an object!");
 		var fileName = "ssgconf.json";
@@ -1372,7 +1373,9 @@ for(var i=0; i<options.length; i++) {
 		if(folder == undefined || folder == ".") {
 			var defaultPath = EDITOR.currentFile && (UTIL.getDirectoryFromPath(EDITOR.currentFile.path) || EDITOR.workingDirectory);
 			EDITOR.pathPickerTool({instruction: "Choose a project folder", defaultPath: defaultPath}, function gotPath(err, folder) {
-				if(err) alertBox("Unable to pick a project folder: " + err.message);
+				if(err) {
+					alertBox("Unable to pick a project folder: " + err.message);
+				}
 				else {
 					// Update the project folder
 					site.projectFolder = folder;
@@ -1390,19 +1393,27 @@ for(var i=0; i<options.length; i++) {
 		function save(folder) {
 			var path = UTIL.joinPaths([folder, fileName]);
 			EDITOR.saveToDisk(path, JSON.stringify(site, null, 2), function(err, path, hash) {
-				if(err) alertBox("Unable to save yoyoyo " + fileName + ": " + err.message);
+				if(err) {
+					if(callback) return callback(err);
+					alertBox("Unable to save " + fileName + ": " + err.message);
+				}
+				if(callback) callback(null);
 			});
 		}
 	}
 	
-	function importCfg(cfgPath) {
+	function importCfg(cfgPath, callback) {
 		EDITOR.readFromDisk(cfgPath, function(err, path, data, hash) {
-			if(err) alertBox("Failed to import from " + cfgPath + ": " + err.message);
+			if(err) {
+				if(callback) return callback(err);
+				alertBox("Failed to import from " + cfgPath + ": " + err.message);
+			}
 			else {
 				try {
 					var site = JSON.parse(data);
 				}
 				catch(err) {
+					if(callback) return callback(err);
 					return alertBox("Failed to parse " + cfgPath + ": " + err.message);
 				}
 
@@ -1423,11 +1434,13 @@ for(var i=0; i<options.length; i++) {
 				// Check if the path exist
 				EDITOR.folderExist(site.projectFolder, function(err, path) {
 
-					if(!err && path) return saveNewSite();
+					if(!err && path) return saveNewSite(callback);
 
 					var path = UTIL.getDirectoryFromPath(cfgPath);
 
 					if(path.indexOf(site.projectFolder) != -1) throw new Error("Unexpected cfgPath=" + cfgPath + " site.projectFolder=" + site.projectFolder + " (does not exist!)");
+
+					if(callback) return saveNewSite(callback);
 
 					var replace = "Yes, replace!";
 					var cancel = "Cancel";
@@ -2784,6 +2797,40 @@ whenAllFilesReloaded();
 				callback(true);
 			});
 		});
+	});
+
+	EDITOR.addTest(1, function testImportStaticSiteSettings(callback) {
+
+		var homeDir = EDITOR.user.homeDir;
+
+		var exampleCfg = {
+			"name": "Test",
+			"projectFolder": UTIL.joinPaths(homeDir, "ssg_blog_example/"),
+			"source": UTIL.joinPaths(homeDir, "ssg_blog_example/source/"),
+			"preview": UTIL.joinPaths(homeDir, "wwwpub/test_preview/"),
+			"publish": "sftp://webide.se/upload/test/",
+			"template": UTIL.joinPaths(homeDir, "ssg_blog_example/template.htm"),
+			"pubUser": "test",
+			"pubPw": "12345",
+			"key": UTIL.joinPaths(homeDir, "ssg_blog_example/.ssh/id_rsa"),
+			"repository": "https://hg.webtigerteam.com/test",
+			"repoUser": EDITOR.user.name,
+			"repoPw": "",
+			"url": "http://" + EDITOR.user.domain + "/test/"
+		}
+
+		var cfgPath = UTIL.joinPaths(homeDir,"test-ssg-cfg.json");
+
+		EDITOR.saveToDisk(cfgPath, JSON.stringify(exampleCfg, null, 2), function(err) {
+			if(err) throw err;
+			showSSG();
+			importCfg(cfgPath, function(err) {
+				if(err) throw err;
+				hideSSG();
+				callback(true);
+			});
+		});
+
 	});
 
 
