@@ -4,7 +4,13 @@ This file contains a list of things we can do to improve already implemented fea
 Polishing (only existing features)
 ==================================
 
+---
 
+
+
+---
+
+When updating hg via gui in editor, ask to reload the updated files if they are open in the editor
 
 ---
 
