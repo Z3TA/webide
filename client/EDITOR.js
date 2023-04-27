@@ -10559,6 +10559,15 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		var filesFound = [];
 		var folders = UTIL.getFolders(startDir, true);
 
+		var reNames = [];
+		for (var i=0; i<names.length; i++) {
+			if(names[i] instanceof RegExp) {
+				reNames.push(names[i]);
+				names.splice(i, 1);
+				i--;
+			}
+		}
+
 		search(folders.pop()); // Search down recursively
 
 		return true;
@@ -10583,6 +10592,14 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 						filesFound.push(UTIL.trailingSlash(currentFolder) + files[i].name);
 					}
 				}
+
+				if(reNames.length > 0) reNames.forEach(function(reName) {
+					files.forEach(function(file) {
+						if(file.name.match(reName)) {
+							filesFound.push(UTIL.trailingSlash(currentFolder) + file.name);
+						}
+					});
+				});
 
 				if(folders.length > 0) search(folders.pop());
 				else {
@@ -10866,11 +10883,11 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 
 	// More Event listeners ...
 
-/*
-	window.addEventListener("drop", fileDrop, false);
-	window.ondrop = function(dropEvent) { dropEvent.preventDefault(); console.log("window.ondrop"); return false };
-	window.ondragdrop = function(dragDropEvent) { dragDropEvent.preventDefault(); console.log("window.ondragdrop"); return false };
-	window.ondragleave = function(dragLeaveEvent) { dragLeaveEvent.preventDefault(); console.log("window.ondragleave"); return false };
+	/*
+		window.addEventListener("drop", fileDrop, false);
+		window.ondrop = function(dropEvent) { dropEvent.preventDefault(); console.log("window.ondrop"); return false };
+		window.ondragdrop = function(dragDropEvent) { dragDropEvent.preventDefault(); console.log("window.ondragdrop"); return false };
+		window.ondragleave = function(dragLeaveEvent) { dragLeaveEvent.preventDefault(); console.log("window.ondragleave"); return false };
 		window.ondragover = function(dragOver) { dragOver.preventDefault(); console.log("window.ondragover"); return false };
 	*/
 
@@ -10880,12 +10897,12 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 	window.addEventListener("load", main, false);
 	window.addEventListener("resize", function resizeAndRenderOnInteraction(resizeEvent) {
 		//console.log("EVENT RESIZE!");
-	EDITOR.resizeNeeded();
-	EDITOR.renderNeeded();
+		EDITOR.resizeNeeded();
+		EDITOR.renderNeeded();
 	
-	EDITOR.interact("resize", resizeEvent);
+		EDITOR.interact("resize", resizeEvent);
 	
-}, false);
+	}, false);
 	
 	window.addEventListener("unload", function unloading() {
 		//console.log("unload event!");
@@ -10899,52 +10916,52 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		
 	}, false);
 	
-/*
+	/*
 	
-	The third argumentin addEventListener is a Boolean value 
-	that specifies whether the event should be executed in the capturing or in the bubbling phase.
-	true = capturing phase: start with the top (window)
-	false = bubbling phase: start with the inner-most element 
+		The third argumentin addEventListener is a Boolean value 
+		that specifies whether the event should be executed in the capturing or in the bubbling phase.
+		true = capturing phase: start with the top (window)
+		false = bubbling phase: start with the inner-most element 
 	
-*/
+	*/
 
 
-/*
-	Add your own scroll listeners using EDITOR.addEvent("scroll", yourFunction)
-	Your function should return false to prevent default action.
-*/
-window.addEventListener("mousewheel",scrollWheel,false);
-window.addEventListener("DOMMouseScroll",scrollWheel,false);
+	/*
+		Add your own scroll listeners using EDITOR.addEvent("scroll", yourFunction)
+		Your function should return false to prevent default action.
+	*/
+	window.addEventListener("mousewheel",scrollWheel,false);
+	window.addEventListener("DOMMouseScroll",scrollWheel,false);
 
 
-/*
-	Add your own key listeners via EDITOR.bindKey()
-	Your function should return false to prevent default action.
-*/
-window.addEventListener("keydown",keyIsDown,false);  // captures 
-window.addEventListener("keyup",keyIsUp,false);      // keyBindings
-window.addEventListener("keypress",keyPressed,false); // Writes to the document at caret position
+	/*
+		Add your own key listeners via EDITOR.bindKey()
+		Your function should return false to prevent default action.
+	*/
+	window.addEventListener("keydown",keyIsDown,false);  // captures 
+	window.addEventListener("keyup",keyIsUp,false);      // keyBindings
+	window.addEventListener("keypress",keyPressed,false); // Writes to the document at caret position
 
-/*
-	Add your own key listeners with EDITOR.on("eventName", callbackFunction);
-	Your function should return false to prevent default action.
-*/
+	/*
+		Add your own key listeners with EDITOR.on("eventName", callbackFunction);
+		Your function should return false to prevent default action.
+	*/
 
 	
-// Capture mobile events
-window.addEventListener("touchstart", mouseDown, false);
-window.addEventListener("touchend", mouseUp, false);
-window.addEventListener("touchmove", mouseMove, false);
+	// Capture mobile events
+	window.addEventListener("touchstart", mouseDown, false);
+	window.addEventListener("touchend", mouseUp, false);
+	window.addEventListener("touchmove", mouseMove, false);
 
 	
 	//window.addEventListener("touchcancel", mouseUp, false);
-//window.addEventListener("touchleave", mouseUp, false);
+	//window.addEventListener("touchleave", mouseUp, false);
 
-window.addEventListener("click", mouseclick, false);
-window.addEventListener("mousedown", mouseDown, false);
-window.addEventListener("mouseup", mouseUp, false);
+	window.addEventListener("click", mouseclick, false);
+	window.addEventListener("mousedown", mouseDown, false);
+	window.addEventListener("mouseup", mouseUp, false);
 
-window.addEventListener("mousemove", mouseMove, false);
+	window.addEventListener("mousemove", mouseMove, false);
 	
 	// Disable Zooming in iOS Safari
 	document.addEventListener('gesturestart', function (e) {
@@ -10968,10 +10985,10 @@ window.addEventListener("mousemove", mouseMove, false);
 	// Disable annoying menus
 	window.addEventListener("contextmenu", function(contextMenuEvent) {
 	
-	contextMenuEvent = contextMenuEvent || window.event;
+		contextMenuEvent = contextMenuEvent || window.event;
 	
-	var target = contextMenuEvent.target;
-	var tag = target.tagName;
+		var target = contextMenuEvent.target;
+		var tag = target.tagName;
 	
 		if(target.className == "allowDefault") {
 			//console.log("contextmenu: (target.className=allowDefault)");
