@@ -284,6 +284,17 @@
 		
 	});
 	
+	EDITOR.addTest(1, function testUTIL_urlHost(callback) {
+
+		UTIL.assert( UTIL.urlHost("googledrive://foo/ "), "foo");
+		UTIL.assert( UTIL.urlHost("http://google.com"), "google.com");
+		UTIL.assert( UTIL.urlHost("/some/file"), "");
+		UTIL.assert( UTIL.urlHost("git@github.com:Z3TA/tcp-ping-pong.git"), "github.com");
+
+		return callback(true);
+
+	});
+
 	EDITOR.addTest(function UTIL_getLocation(callback) {
 		
 		var loc = UTIL.getLocation("http://hostname.com/page.htm");

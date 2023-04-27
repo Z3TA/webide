@@ -120,7 +120,7 @@ MERCURIAL.clone = function hgclone(user, json, callback) {
 		*/
 		
 		//var execFile = require('child_process').execFile;
-		var arg = ["clone"];
+		var arg = ["--noninteractive", "clone"];
 		
 		//arg.push("--verbose");
 		//arg.push("--debug");
@@ -133,7 +133,7 @@ MERCURIAL.clone = function hgclone(user, json, callback) {
 		
 		var spawn = require('child_process').spawn;
 		var parentFolder = UTIL.parentFolder(localPath);
-		var options = {env: execFileOptions.env, shell: false, cwd: parentFolder};
+		var options = {env: execFileOptions.env, shell: false, cwd: parentFolder, detached: true};
 		console.log("Spawning hg with arg=" + JSON.stringify(arg) + " and options=" + JSON.stringify(options));
 		var clone = spawn(HG_PATH, arg, options);
 		var stdout = "";
@@ -148,9 +148,14 @@ MERCURIAL.clone = function hgclone(user, json, callback) {
 			progressCounter++;
 			progressMax++;
 			user.send({mercurialProgress: {max: Math.max(progressCounter, progressMax), value: progressCounter}});
-		}, 500); // Fake progress
+
+			console.log("MERCURIAL.clone: stdout=" + stdout + " stderr=" + stderr);
+
+		}, 1000); // Fake progress
 		
 		clone.stdout.on('data', function cloneStdout(data) {
+			console.log("MERCURIAL.clone: stdout: " + data);
+
 			stdout += data;
 			
 			console.log("clone stdout data=" + data);
@@ -177,10 +182,14 @@ progressCounter++;
 });
 
 clone.stderr.on('data', function cloneStderr(data) {
+			console.log("MERCURIAL.clone: stderr: " + data);
 stderr += data;
 });
 
 clone.on('error', function cloneError(err) {
+
+			console.log("MERCURIAL.clone: error: " + err.message);
+
 console.log("clone error stdout=" + stdout);
 console.log("clone error stderr=" + stderr);
 
@@ -202,9 +211,11 @@ console.log("clone error stderr=" + stderr);
 			
 			user.send({mercurialProgress: {max: 1, value: 1}});
 
-});
+		});
 
-clone.on('close', function cloneClose(exitCode) {
+		clone.on('close', function cloneClose(exitCode) {
+			console.log("MERCURIAL.clone: close: exitCode=" + exitCode);
+
 if(stdout.length < 500) console.log("hg clone stdout=" + stdout);
 else console.log("hg clone stdout=" + stdout.slice(0,500) + " ... (" + stdout.length + " characters)");
 
@@ -227,9 +238,10 @@ else console.log("hg clone stdout=" + stdout.slice(0,500) + " ... (" + stdout.le
 				// Warning: Permanently added the RSA host key for IP address '192.30.253.112' to the list of known hosts.
 				// Warning: Permanently added 'github.com,192.30.253.113' (RSA) to the list of known hosts.
 				// Warning: Permanently added the RSA host key for IP address '192.30.253.112' to the list of known hosts.
-				
+				// Warning: Permanently added the ECDSA host key for IP address '140.82.121.3' to the list of known hosts.
+
 				var reAddedHost1 = /Warning: Permanently added (.*) \(RSA\) to the list of known hosts\./;
-				var reAddedHost2 = /Warning: Permanently added the RSA host key for IP address (.*) to the list of known hosts\./;
+				var reAddedHost2 = /Warning: Permanently added the (.*) host key for IP address (.*) to the list of known hosts\./;
 				
 				var reNoSuchFileOrDirectory = /: No such file or directory$/;
 				

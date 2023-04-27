@@ -10,6 +10,15 @@ Polishing (only existing features)
 
 ---
 
+SHould have a function that resets the terminal - because it gets laggy after 50k lines
+typing clear should also reset it! reset=delete all text
+
+---
+
+Annying when you have scrolled down up the terminal and it auto scrolls down when new text arrives...
+
+---
+
 When updating hg via gui in editor, ask to reload the updated files if they are open in the editor
 
 ---

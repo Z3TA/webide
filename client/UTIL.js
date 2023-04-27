@@ -2503,7 +2503,8 @@ else {
 		var protocolIndex = url.indexOf("://");
 		if(protocolIndex == -1) {
 			//console.warn("url=" + url + " is not formatted as a URL!");
-			return "";
+			var reUnixHost = /(.*@)?([^:/]*):?(.*)?/;
+			return url.match(reUnixHost)[2];
 		}
 		
 		var host = url.slice(protocolIndex+3);
@@ -2524,10 +2525,10 @@ else {
 		
 		//console.log("getLocation url=" + url);
 		
-        var badCharater = [":", "@", "://"];
+		var badCharater = [":", "@", "://"];
 
 		var urlObject = {
-            host: "",
+			host: "",
             port: "",
             query: {},
             pathname: "",
