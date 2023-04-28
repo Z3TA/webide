@@ -38,8 +38,12 @@ BUGS (and issues)
 
 ---
 
-When searching right, somtimes it stops and beeps even though there is more to find! clicki Ctrl+f again usually continue searches (had Ignore case on)
+When opening a new terminal you can no longer click on file tabs,
+you must first click on the new terminal tab, after that it works to click on other tabs...
 
+---
+
+When searching right, somtimes it stops and beeps even though there is more to find! clicki Ctrl+f again usually continue searches (had Ignore case on)
 
 ---
 

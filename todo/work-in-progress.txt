@@ -4,6 +4,7 @@ Reporting a bug ? Make sure it's repeatable!
 note: When committing only non-whitespace using git:
 git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-zero -
 
+
 ---
 
 Make use of HOME env variable where /home is hardcoded for those that don't have home in /home ...

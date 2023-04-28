@@ -41,6 +41,8 @@
 	var discoveryBarIcon;
 	
 	var diaryWinMenu;
+
+	var reSsgconf = /ssgconf\.?(.*?)\.json/;
 	
 	// Add plugin to editor
 	EDITOR.plugin({
@@ -1295,14 +1297,18 @@ for(var i=0; i<options.length; i++) {
 		
 		function importSiteSettings() {
 			var fileName = "ssgconf.json";
-			var defaultPath = EDITOR.currentFile && (UTIL.getDirectoryFromPath(EDITOR.currentFile.path) || EDITOR.workingDirectory);
+			var defaultDir = EDITOR.currentFile && (UTIL.getDirectoryFromPath(EDITOR.currentFile.path) || EDITOR.workingDirectory);
 			
-			if(defaultPath.indexOf(fileName) != -1) importCfg(defaultPath);
-			else EDITOR.pathPickerTool({instruction: "Select a " + fileName + " file", defaultPath: defaultPath}, function(err, path) {
+			if( EDITOR.currentFile && EDITOR.currentFile.path.match(reSsgconf) ) { 
+				return importCfg(EDITOR.currentFile.path);
+			}
+
+			EDITOR.pathPickerTool({instruction: "Select a ssgconf file or folder to look in", defaultPath: defaultDir}, function(err, path) {
 				if(err) alertBox("Unable to pick a project folder: " + err.message);
 				else {
-					if(path.indexOf(fileName) == -1) path = UTIL.joinPaths([path, fileName]);
-					importCfg(path);
+					if(path.match(reSsgconf)) return importCfg(path)
+
+					importSettingsMaybe(path);
 				}
 			});
 		}
@@ -1358,9 +1364,7 @@ for(var i=0; i<options.length; i++) {
 	}
 
 	function lookForSettings(startFolder, callback) {
-		var fileName = "ssgconf.json";
-
-		EDITOR.findFileReverseRecursive([fileName], startFolder, function(err, files) {
+		EDITOR.findFileReverseRecursive([reSsgconf], startFolder, function(err, files) {
 			callback(err, files);
 		});
 	}
@@ -1368,40 +1372,95 @@ for(var i=0; i<options.length; i++) {
 	function saveCnf(site, callback) {
 		if(selectedSite != site) throw new Error( "not the same: site=" + JSON.stringify(site) + " selectedSite=" + JSON.stringify(selectedSite) );
 		if(typeof site != "object") throw new Error("site=" + site + " need to be an object!");
-		var fileName = "ssgconf.json";
-		var folder = site.projectFolder;
-		if(folder == undefined || folder == ".") {
-			var defaultPath = EDITOR.currentFile && (UTIL.getDirectoryFromPath(EDITOR.currentFile.path) || EDITOR.workingDirectory);
-			EDITOR.pathPickerTool({instruction: "Choose a project folder", defaultPath: defaultPath}, function gotPath(err, folder) {
-				if(err) {
-					alertBox("Unable to pick a project folder: " + err.message);
-				}
-				else {
-					// Update the project folder
-					site.projectFolder = folder;
-					inputProjectFolder.value = site.projectFolder;
-					if(selectedSite.projectFolder != folder) throw new Error("Folder didn't update for selectedSite=" + JSON.stringify(selectedSite) + " folder=" + folder);
-					
-					EDITOR.storage.setItem("cmsjz_sites", JSON.stringify(sites, null, 2));
-					
-					save(folder);
-				}
-			});
-		}
-		else save(folder);
 		
-		function save(folder) {
-			var path = UTIL.joinPaths([folder, fileName]);
-			EDITOR.saveToDisk(path, JSON.stringify(site, null, 2), function(err, path, hash) {
-				if(err) {
-					if(callback) return callback(err);
-					alertBox("Unable to save " + fileName + ": " + err.message);
+		CLIENT.cmd("run", {command: "hostname"}, function(err, resp) {
+			if(err) alertBox(err.message);
+
+			if(resp.stderr) alertBox( resp.stderr );
+
+			if(resp.stdout) {
+				var hostname = resp.stdout.trim();
+				var dot = hostname.indexOf(".");
+				if(dot != -1) {
+					hostname = hostname.slice(0, dot);
 				}
-				if(callback) callback(null);
-			});
-		}
+				var fileName = "ssgconf." + hostname + ".json";
+			}
+			else {
+				var fileName = "ssgconf.json";
+			}
+
+			var folder = site.projectFolder;
+			if(folder == undefined || folder == ".") {
+				var defaultPath = EDITOR.currentFile && (UTIL.getDirectoryFromPath(EDITOR.currentFile.path) || EDITOR.workingDirectory);
+				EDITOR.pathPickerTool({instruction: "Choose a project folder", defaultPath: defaultPath}, function gotPath(err, folder) {
+					if(err) {
+						alertBox("Unable to pick a project folder: " + err.message);
+					}
+					else {
+						// Update the project folder
+						site.projectFolder = folder;
+						inputProjectFolder.value = site.projectFolder;
+						if(selectedSite.projectFolder != folder) throw new Error("Folder didn't update for selectedSite=" + JSON.stringify(selectedSite) + " folder=" + folder);
+
+						EDITOR.storage.setItem("cmsjz_sites", JSON.stringify(sites, null, 2));
+
+						save(folder);
+					}
+				});
+			}
+			else save(folder);
+
+			function save(folder) {
+				var path = UTIL.joinPaths([folder, fileName]);
+				EDITOR.saveToDisk(path, JSON.stringify(site, null, 2), function(err, path, hash) {
+					if(err) {
+						if(callback) return callback(err);
+						alertBox("Unable to save " + fileName + ": " + err.message);
+					}
+					if(callback) callback(null);
+				});
+			}
+
+		});
+		
 	}
 	
+	function importSettingsMaybe(searchFolder) {
+
+		lookForSettings(searchFolder, function(err, files) {
+			if(err) {
+				console.log("ssg:importSettingsMaybe: Found no ssg config files in searchFolder=" + searchFolder + " Error: " + err.message);
+				return;
+			}
+
+			console.log("ssg:importSettingsMaybe: files=" + JSON.stringify(files, null, 2));
+
+			if(files.length == 0) return alertBox("No ssgconf files found in " + searchFolder);
+
+			if(files.length == 1) {
+				var msg = "Found a static site configuration in " + files[0] + " Do you want to import it?";
+				var importIt = "Import it";
+				var cancel = "Cancel";
+				confirmBox(msg, [importIt, cancel], function (answer) {
+					if(answer == importIt) importCfg(files[0]);
+				});
+			}
+			else {
+				var msg = "Do you want to load the static site configuration from any of the following files ?";
+				var cancel = "Cancel";
+				files.push(cancel);
+
+				console.log("ssg:importSettingsMaybe: files=" + JSON.stringify(files, null, 2));
+
+				confirmBox(msg, files, function (answer) {
+					if(answer != cancel) importCfg(answer);
+				});
+			}
+
+		});
+	}
+
 	function importCfg(cfgPath, callback) {
 		EDITOR.readFromDisk(cfgPath, function(err, path, data, hash) {
 			if(err) {
@@ -1555,21 +1614,8 @@ for(var i=0; i<options.length; i++) {
 			console.log("ssg:ssgPreviewTool: selectedSite.source=" + selectedSite.source + " is not in file.path=" + file.path + "");
 			
 			var searchFolder = UTIL.getDirectoryFromPath(file.path);
-			lookForSettings(searchFolder, function(err, files) {
-				if(err) {
-					console.log("ssg:ssgPreviewTool: Found no ssg config files in searchFolder=" + searchFolder + " Error: " + err.message);
-					return;
-				}
 
-
-
-				var msg = "Found a static site configuration in " + files[0] + " Do you want to import it?";
-				var importIt = "Import it";
-				var cancel = "Cancel";
-				confirmBox(msg, [importIt, cancel], function (answer) {
-					if(answer == importIt) importCfg(files[0]);
-				});
-			});
+			importSettingsMaybe(searchFolder);
 
 			return false;
 		}
@@ -2574,12 +2620,13 @@ whenAllFilesReloaded();
 		
 		console.log("ssg:compile: opt=" + JSON.stringify(opt));
 
-		CLIENT.cmd("SSG.compile", opt, function(err, json) {
+		var timeout = 120000;
+		CLIENT.cmd("SSG.compile", opt, timeout, function(err, json) {
 			if(err) {
 				callback(err);
 			}
 			else callback(null);
-			});
+		});
 		
 	}
 	
@@ -2799,7 +2846,9 @@ whenAllFilesReloaded();
 		});
 	});
 
-	EDITOR.addTest(1, function testImportStaticSiteSettings(callback) {
+	EDITOR.addTest(function testImportStaticSiteSettings(callback) {
+
+		// todo: cleanup afterwards !?
 
 		var homeDir = EDITOR.user.homeDir;
 

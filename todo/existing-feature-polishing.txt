@@ -6,7 +6,7 @@ Polishing (only existing features)
 
 ---
 
-
+Include white spaces and/or tabs indentation when copying code!! (because we migt copy it into an editor that doesn't auto format indentation!)
 
 ---
 
