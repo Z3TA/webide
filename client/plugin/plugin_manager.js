@@ -7,14 +7,17 @@
 
 (function() {
 
+	// Place optional plugins here:
 	var opt = [
+		"/plugin/opt/txt_calc.js",
 		"/plugin/opt/animate_delete_letter.js",
 		"/plugin/opt/bigger_text.js",
 		"/plugin/opt/coffee_break.js",
 		"/plugin/opt/emoji_modifier.js"
 	];
 
-	var dev = [ // Place the plugin you are currently working on ontop!
+	// Place the plugin you are currently working on ontop!
+	var dev = [ 
 		"/plugin/dev/t9_prediction.js",
 		"/plugin/dev/chromiumBrowserVnc.js",
 		"/plugin/dev/debug_keypresses.js",

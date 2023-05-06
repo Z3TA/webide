@@ -4781,7 +4781,7 @@ if(startColumn-indentationWidth > minIndentation*EDITOR.settings.tabSpace) {
 	
 	File.prototype.getCharacterAt = function getCharacterAt(caretOrIndex) {
 		var file = this;
-		var index = caretOrIndex.index || caretOrIndex;
+		var index = caretOrIndex.index || caretOrIndex || file.caret.index;
 		var r = file.rowFromIndex(index);
 		
 		if(r.indentChar) return r.indentChar;

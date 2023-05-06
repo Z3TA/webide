@@ -10706,6 +10706,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 			callback(obj.error, obj.result);
 		});
 	}
+
 	EDITOR.eval = function evaluate(str, callback) {
 		if(!evalWorker) return callback(new Error("Web Workers not supported by browser=" + BROWSER + "! (" + workerInitError.message + ")"));
 
@@ -10721,7 +10722,6 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 			id: id,
 			str: str
 		});
-
 	}
 
 	EDITOR.humanReadableNumber = function humanReadableNumber(n) {
