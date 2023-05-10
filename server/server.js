@@ -344,8 +344,8 @@ if(typeof NAT_TYPE == "string" && NAT_TYPE.indexOf("server") != -1) {
 	}
 }
 
-var TLS_KEY_PATH = getArg(["tls_key", "tls_key", "tls_key_path"]) || "/etc/ssl/private/" + DOMAIN + ".key";
-var TLS_CERT_PATH = getArg(["tls_cert", "tls_cert", "tls_cert_path"]) || "/etc/ssl/certs/letsencrypt/" + DOMAIN + ".crt";
+var TLS_KEY_PATH = getArg(["tls_key", "tls_key", "tls_key_path"]) || "/etc/letsencrypt/live/" + DOMAIN + "/privkey.pem";
+var TLS_CERT_PATH = getArg(["tls_cert", "tls_cert", "tls_cert_path"]) || "/etc/letsencrypt/live/" + DOMAIN + "/fullchain.pem";
 
 
 var INSIDE_DOCKER = getArg(["insidedocker", "insidedocker", "insidecontainer"]);
