@@ -4,6 +4,34 @@ Reporting a bug ? Make sure it's repeatable!
 note: When committing only non-whitespace using git:
 git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-zero -
 
+---
+
+openai 
+
+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
+
+gpt-3.5-turbo
+
+
+
+[
+  {"role": "system", "content": "You are a helpful assistant that translates English to French."},
+  {"role": "user", "content": 'Translate the following English text to French: "{text}"'}
+]
+
+{
+  "model": "gpt-3.5-turbo",
+  "messages": [{"role": "user", "content": "Hello!"}]
+}
+
+url https://api.openai.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $OPENAI_API_KEY" \
+  -d '{
+    "model": "gpt-3.5-turbo",
+    "messages": [{"role": "user", "content": "Hello!"}]
+  }'
+
 
 ---
 

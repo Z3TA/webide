@@ -9,6 +9,7 @@
 
 	// Place optional plugins here:
 	var opt = [
+		"/plugin/opt/chatgpt.js",
 		"/plugin/opt/txt_calc.js",
 		"/plugin/opt/animate_delete_letter.js",
 		"/plugin/opt/bigger_text.js",

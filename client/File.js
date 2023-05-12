@@ -258,6 +258,14 @@ var File; // File object is global
 		}
 		return txt;
 	}
+
+	/*
+		File.rowLength = function rowLength(row) {
+		var file = this;
+		if(row == undefined) row = file.caret.row;
+		return file.grid[row].length;
+		}
+	*/
 	
 	File.prototype.copyCaret = function copyCaret(caret) {
 		var file = this;

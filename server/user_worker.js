@@ -25,6 +25,7 @@ API.LSP = require("./plugin/lsp.js");
 API.display = require("./plugin/display.js");
 API.android = require("./plugin/android.js");
 API.git = require("./plugin/git.js");
+API.chatgtp = require("./plugin/openai/chatgtp_completion.js");
 
 var REMOTE_PROTOCOLS = ["ftp", "ftps", "sftp"]; // Supported remote connections
 
