@@ -25,7 +25,7 @@ API.LSP = require("./plugin/lsp.js");
 API.display = require("./plugin/display.js");
 API.android = require("./plugin/android.js");
 API.git = require("./plugin/git.js");
-API.chatgtp = require("./plugin/openai/chatgtp_completion.js");
+API.chatgpt = require("./plugin/openai/chatgpt_completion.js");
 
 var REMOTE_PROTOCOLS = ["ftp", "ftps", "sftp"]; // Supported remote connections
 
@@ -740,11 +740,11 @@ process.on('message', function commandMessage(message) {
 			for(var i=0; i<commands.length; i++) {
 				//log("command=" + command + " i=" + i + " commands=" + JSON.stringify(commands) + " keys=" + Object.keys(funToRun), DEBUG);
 				if(funToRun.hasOwnProperty(commands[i])) funToRun = funToRun[commands[i]];
-				else return send({error: "Unknown command=" + command + ": " + UTIL.shortString(message)});
+				else return send({error: "Known commands in " + JSON.stringify(commands) + " are: " + JSON.stringify(Object.keys(funToRun)) + " Unknown command=" + command + ": " + UTIL.shortString(message)});
 			}
 		}
 		else {
-			if( !API.hasOwnProperty(command) ) return send({error: "Unknown command=" + command + ": " + UTIL.shortString(message)});
+			if( !API.hasOwnProperty(command) ) return send({error: "Known commands are: " + JSON.stringify(Object.keys(API)) + " Unknown command=" + command + ": " + UTIL.shortString(message)});
 			
 			funToRun = API[command];
 			
@@ -757,6 +757,8 @@ process.on('message', function commandMessage(message) {
 
 			var msgResp = {};
 			if(message.internal) msgResp.internal = true;
+
+			console.log("Running funToRun.name=" + funToRun.name + " ...");
 
 			funToRun(user, json, function ranApi(err, answer) {
 				if(err) {

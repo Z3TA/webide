@@ -5333,7 +5333,7 @@ function createUserWorker(username, uid, gid, homeDir, groups, rootPath) {
 	}
 	
 	function messageFromWorker(workerMessage, handle) {
-		//console.log("Worker message from " + username + ": " + UTIL.shortString(workerMessage) + " handle=" + handle);
+		console.log("Worker message from " + username + ": " + UTIL.shortString(workerMessage) + " handle=" + handle);
 		
 		if(workerMessage.internal) {
 			var cb = INTERNAL_USERWORKER_REQ[workerMessage.id];

@@ -57,6 +57,8 @@ var counter = 0;
 API.complete = function complete(user, json, callback) {
     var url = "https://api.openai.com/v1/chat/completions";
 
+    console.log("chatGtp: complete: json=" + JSON.stringify(json, null, 2));
+
     var reqData = {
         "model": "gpt-3.5-turbo",
         "messages":[
@@ -67,39 +69,46 @@ API.complete = function complete(user, json, callback) {
         "user": user.name
     };
 
-    var postData = JSON.stringify(data);
+    var postData = JSON.stringify(reqData);
 
     var httpOptions = {
         method: "POST",
         headers: {
-            "Content-Type" "application/json",
-            "Content-Length": postData.length,
+            "Content-Type": "application/json",
+            "Content-Length": postData.length
         }
     }
+
+    console.log("chatGtp: Making request to url=" + url);
 
     var req = module_https.request(url, httpOptions, gotResp);
 
     req.on("error", function(err) {
+        console.log("chatGtp: request error: " + err.message);
+    
         callback(err);
         callback = null;
-
-        console.log("chatGtp: request error: " + err.message);
     });
 
     console.log("chatGtp: Sending reqData=" + JSON.stringify(reqData, null, 2));
     req.end();
 
-    resp.on('data', respData);
-    resp.on('end', respEnd);
+    function gotResp(resp) {
+        resp.on('data', respData);
+        resp.on('end', respEnd);
+    }
 
     function respData(data) {
         console.log("chatGtp: respData: data=" + data);
 
-        user.send({ssgProgressStatus: {value: 0, max: 1}});
+        user.send({chatgpt: {data: data}});
     }
 
     function respEnd() {
         console.log("chatGtp: respEnd");
+
+        callback(null);
+        callback = null;
     }
 
 }

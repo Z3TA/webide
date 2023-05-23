@@ -6,6 +6,12 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
+Whenever I click somewhere I get "Update login for webide" in Firefox...
+
+
+
+---
+
 openai 
 
 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

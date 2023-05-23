@@ -7,12 +7,13 @@ var order = 1500;
 EDITOR.plugin({
 	desc: "Use ChatGPT for code completions",
 	load: function loadChatGPT() {
-
+		console.log("chatGpt: !loadChatGPT");
 		CLIENT.on("chatGpt", chatGptMessage);
 		EDITOR.on("autoComplete", chatGptComplete, order);
 
 	},
 	unload: function unloadChatGPT() {
+		console.log("chatGpt: !unloadChatGPT");
 		CLIENT.removeEvent("chatGpt", chatGptMessage);
 
 		EDITOR.removeEvent("autoComplete", chatGptComplete);
@@ -20,10 +21,12 @@ EDITOR.plugin({
 	}
 });
 
+// 
+
 function chatGptComplete(file, wordToComplete, wordLength, gotOptions, autocompleteCb) {
 	console.log("chatGpt: chatGptComplete: wordToComplete=" + wordToComplete);
 
-	if( insideComment(file, caret) ) {
+	if( !insideComment(file, file.caret) ) {
 		console.log("chatGpt: chatGptComplete: Not inside a comment!");
 		return;
 	}
@@ -32,6 +35,7 @@ function chatGptComplete(file, wordToComplete, wordLength, gotOptions, autocompl
 	// max 2048 characters !?
 	var maxLen = 2048;
 
+	console.log("chatGpt: file.caret.index=" + file.caret.index  + " maxLen=" + maxLen);
 	if(file.caret.index > maxLen) {
 		var text = rowText(file.caret.row, false);
 		var len = text.length;
@@ -39,24 +43,35 @@ function chatGptComplete(file, wordToComplete, wordLength, gotOptions, autocompl
 		for (var row=file.caret.row, rowText; row>0; i--) {
 			rowText = rowText(row, false);
 			len += rowText.length;
-			if(len > maxLen) break;
+			len += file.lineBreak.length;
+			console.log("chatGpt: len=" + len);
+
+			if(len >= maxLen) break;
+
 			rowIndent = file.rowIndentationLevel(row);
+
 			if( rowIndent != indent ) break;
+
 			indent = rowIndent;
 			text = rowText + file.lineBreak + text;
+			console.log("chatGpt: text.length=" + text.length);
 		}
 	}
 	else {
-		var text = file.text.slice(file.caret.index);
+		var text = file.text.slice(0, file.caret.index);
 	}
 
 	var json = {
-		msg: text;
+		msg: text
 	};
+
+	console.log("chatGpt: text.length=" + text.length + " maxLen=" + maxLen + " text=" + text);
 
 	CLIENT.cmd("chatgpt", json, function (err, resp) {
 
-		autocompleteCb([result]);
+		console.log("chatGpt: text=" + text);
+
+		//autocompleteCb([result]);
 	});
 
 	return {async: true};
@@ -72,6 +87,9 @@ function chatGptMessage(msg) {
 
 function insideComment(file, caret) {
 	var parsed = file.parsed;
+
+	console.log("chatGpt: insideComment: parsed? + " + !!parsed);
+
 	if(!parsed) return null;
 
 	var comments = parsed.comments;
@@ -79,10 +97,13 @@ function insideComment(file, caret) {
 	var index = caret.index;
 
 	for (var i=0; i<comments.length; i++) {
-		if(comments[i].end > index && comments[i].start < caretIndex) {
+		if(comments[i].end > index && comments[i].start < caret.index) {
+			console.log("chatGpt: insideComment: comments[" + i + "].end=" + comments[i].end + " comments[" + i + "].start=" + comments[i].start + "  index=" + index + " is inside !");
 			return true;
 		}
 	}
 
 	return false;
 }
+
+// 
