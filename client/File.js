@@ -4757,6 +4757,14 @@ if(startColumn-indentationWidth > minIndentation*EDITOR.settings.tabSpace) {
 		}
 	}
 
+	File.prototype.rowIsEmpty = function rowIsEmpty(row) {
+		var file = this;
+
+		if(row == undefined) row = file.caret.row;
+
+		return file.grid[row].length == 0;
+	}
+
 	File.prototype.measureText = function measureText(row, endCol, includeEndCol) {
 		// Returns the total monospace (glyph) width from first column until and including endCol
 		if(typeof row != "number") throw new Error("measureText: First argument row=" + row + " should be a number!");

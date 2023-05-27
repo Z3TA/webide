@@ -56,6 +56,21 @@ var module_https = require("https");
 
 var counter = 0;
 
+var defaultPrompt = `You are a program code autocompleter. 
+You generate code in the JavaScript programming language. 
+You prefer classic vanilla ES5 JavaScript.
+When using Node.js use commonjs modules (require instead of import)
+When working with async functions use the callback convention instead of promises or async/await
+If the user provides code, use the style of that code.
+Use normal functions instead of arrow functions.
+Wrap explanations in comments. But try to avoid explaining the code.
+Do NOT wrap code in string literals.
+Do NOT use code snippets
+Do NOT explain the code
+Give the user only the code
+`
+
+
 API.complete = function complete(user, json, callback) {
     var url = "https://api.openai.com/v1/chat/completions";
 
@@ -64,7 +79,7 @@ API.complete = function complete(user, json, callback) {
     var reqData = {
         "model": "gpt-3.5-turbo",
         "messages":[
-            {"role": "system", "content": json.system || "You are a program code autocompleter. You generate code in the JavaScript programming language. You prefer classic vanilla ES5 JavaScript, commonjs modules, and callback convention"},
+            {"role": "system", "content": json.system || defaultPrompt},
             {"role": "user", "content": json.msg || '// hello world in JavaScript'}
         ],
         "stream": true,
@@ -110,6 +125,12 @@ API.complete = function complete(user, json, callback) {
         lines.forEach(function(line) {
             if(line.slice(0, 6) == "data: ") {
                 var jsonStr = line.slice(6);
+                
+                if(jsonStr=="[DONE]") {
+                    console.log("chatGtp: Done!");
+                    return;
+                }
+
                 var parseError = false;
                 try {
                     var json = JSON.parse(jsonStr);
@@ -119,12 +140,27 @@ API.complete = function complete(user, json, callback) {
                     console.error("chatGtp: Unable to parse (" + err.message + "): " + jsonStr);
                 }
             
-                if(!parseError) {
-                    user.send({chatgpt: json});
+                if(parseError) return;
+
+                var choices = json.choices;
+
+                if(choices.length >  1) {
+                    console.error("chatGtp: Unexpected multiple choices: " + JSON.stringify(choices, null, 2));
                 }
+
+                /*
+
+                */
+
+                var content = choices[0].delta && choices[0].delta.content;
+
+                console.log("chatGtp: content=" + content);
+
+                user.send({chatgpt: content});
+                
             }
-            else if(line=="[DONE]") {
-                console.log("chatGtp: Done!");
+            else {
+                console.log("chatGtp: Unexpected: (line with " + line.length + " characters does not begin with data: " + line);
             }
         });
     }
