@@ -5340,7 +5340,7 @@ function createUserWorker(username, uid, gid, homeDir, groups, rootPath) {
 			if(cb == undefined) throw new Error("Internal answer from user worker had no callback! workerMessage=" + JSON.stringify(workerMessage));
 			cb(workerMessage.error ? {message: workerMessage.error, code: workerMessage.errorCode} : null, workerMessage.resp);
 		}
-		else if(workerMessage.resp) {
+		else if(workerMessage.resp || workerMessage.error) {
 			
 			//log("workerMessage.id=" + workerMessage.id, DEBUG);
 			

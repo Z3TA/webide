@@ -6,9 +6,13 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
+Working on chatGPT completion, see /home/johan/repo/jzedit/server/plugin/openai/chatgpt_completion.js and test.js
+should probably only send the content to the client!?
+
+
+---
+
 Whenever I click somewhere I get "Update login for webide" in Firefox...
-
-
 
 ---
 

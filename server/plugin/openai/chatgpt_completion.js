@@ -1,7 +1,7 @@
 /*
     openai
 
-    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
+    export OPENAI_API_KEY=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
 
     gpt-3.5-turbo
 
@@ -17,7 +17,7 @@
     "messages": [{"role": "user", "content": "Hello!"}]
     }
 
-    url https://api.openai.com/v1/chat/completions \
+    curl https://api.openai.com/v1/chat/completions \
     -H "Content-Type: application/json" \
     -H "Authorization: Bearer $OPENAI_API_KEY" \
     -d '{
@@ -45,6 +45,8 @@
     }
 */
 
+var OPENAI_API_KEY = "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";
+
 var UTIL = require("../../../client/UTIL.js");
 var CORE = require("../../server_api.js");
 
@@ -65,7 +67,7 @@ API.complete = function complete(user, json, callback) {
             {"role": "system", "content": json.system || "You are a program code autocompleter. You generate code in the JavaScript programming language. You prefer classic vanilla ES5 JavaScript, commonjs modules, and callback convention"},
             {"role": "user", "content": json.msg || '// hello world in JavaScript'}
         ],
-        "stream": "true",
+        "stream": true,
         "user": user.name
     };
 
@@ -75,9 +77,10 @@ API.complete = function complete(user, json, callback) {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            "Content-Length": postData.length
+            "Content-Length": postData.length,
+            "Authorization": "Bearer " + OPENAI_API_KEY
         }
-    }
+    };
 
     console.log("chatGtp: Making request to url=" + url);
 
@@ -90,8 +93,8 @@ API.complete = function complete(user, json, callback) {
         callback = null;
     });
 
-    console.log("chatGtp: Sending reqData=" + JSON.stringify(reqData, null, 2));
-    req.end();
+    console.log("chatGtp: Sending postData=" + JSON.stringify(postData, null, 2));
+    req.end(postData);
 
     function gotResp(resp) {
         resp.on('data', respData);
@@ -101,7 +104,29 @@ API.complete = function complete(user, json, callback) {
     function respData(data) {
         console.log("chatGtp: respData: data=" + data);
 
-        user.send({chatgpt: {data: data}});
+        var str = data.toString();
+        var lines = str.split("\n");
+
+        lines.forEach(function(line) {
+            if(line.slice(0, 6) == "data: ") {
+                var jsonStr = line.slice(6);
+                var parseError = false;
+                try {
+                    var json = JSON.parse(jsonStr);
+                }
+                catch(err) {
+                    parseError = true;
+                    console.error("chatGtp: Unable to parse (" + err.message + "): " + jsonStr);
+                }
+            
+                if(!parseError) {
+                    user.send({chatgpt: json});
+                }
+            }
+            else if(line=="[DONE]") {
+                console.log("chatGtp: Done!");
+            }
+        });
     }
 
     function respEnd() {

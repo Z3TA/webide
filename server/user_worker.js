@@ -751,7 +751,7 @@ process.on('message', function commandMessage(message) {
 		}
 		
 		if (typeof funToRun !== "function") {
-			send({error: "API error: Unknown command: " + command});
+			send({error: "API error: Unknown command: " + command + " (" + typeof funToRun + " in " + commands[0] + " is not a function)", resp: 1});
 		}
 		else {
 

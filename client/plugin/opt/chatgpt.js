@@ -67,9 +67,13 @@ function chatGptComplete(file, wordToComplete, wordLength, gotOptions, autocompl
 
 	console.log("chatGpt: text.length=" + text.length + " maxLen=" + maxLen + " text=" + text);
 
-	CLIENT.cmd("chatgpt", json, function (err, resp) {
+	CLIENT.cmd("chatgpt.complete", json, function (err, resp) {
 
-		console.log("chatGpt: text=" + text);
+		if(err) {
+			console.log("chatGpt: error: " + err.message);
+		}
+
+		console.log("chatGpt: resp=" + JSON.stringify(resp, null, 2));
 
 		//autocompleteCb([result]);
 	});
@@ -96,9 +100,12 @@ function insideComment(file, caret) {
 
 	var index = caret.index;
 
+	console.log("chatGpt: insideComment: comments.length=" + comments.length);
+
 	for (var i=0; i<comments.length; i++) {
-		if(comments[i].end > index && comments[i].start < caret.index) {
-			console.log("chatGpt: insideComment: comments[" + i + "].end=" + comments[i].end + " comments[" + i + "].start=" + comments[i].start + "  index=" + index + " is inside !");
+		console.log("chatGpt: insideComment: comments[" + i + "].end=" + comments[i].end + " comments[" + i + "].start=" + comments[i].start + "  index=" + index + "");
+		if(comments[i].end >= index && comments[i].start < caret.index) {
+			console.log("chatGpt: insideComment: is inside !");
 			return true;
 		}
 	}
