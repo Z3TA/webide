@@ -917,23 +917,20 @@ var File; // File object is global
 		}
 		
 		var file = this;
-		
+		var textIndex = file.text.length;
+
 		if(text.indexOf(file.lineBreak) != -1) {
-			
 			var rows = text.split(file.lineBreak);
-			
-			for(var i=0; i<rows.length; i++) {
-				rows[i].replace(/\n|\r/g, ""); // Remove all CR and LF
-				if(rows[i] == "") file.writeLineBreak();
-				else file.writeLine(rows[i]);
-			}
-			addLineBreakMaybe();
-			FILE_WRITE_RECURSION--;
-			return;
+			text = rows.shift();
+		}
+		else {
+			var rows = [];
 		}
 		
+		text = text.replace(/\n|\r/g, ""); // Remove all CR and LF
+
 		var grid = file.grid;
-		var textIndex = file.text.length;
+		
 		var gridRow = grid[grid.length-1]; // Last row
 		
 		var char = "";
@@ -947,6 +944,19 @@ var File; // File object is global
 		
 		file.text += text;
 		
+		for(var i=0; i<rows.length; i++) {
+			rows[i].replace(/\n|\r/g, ""); // Remove all CR and LF
+
+			file.text += file.lineBreak;
+			textIndex += file.lineBreak.length;
+
+			insertGridRow(file, textIndex, rows[i]);
+			
+			file.text += rows[i];
+			textIndex += rows[i].length;
+		}
+
+
 		file.checkGrid();
 
 		if(file.caret.eof) {

@@ -40,6 +40,20 @@
 		
 	}
 	
+	EDITOR.addTest(1, function test_fileWrite(callback) {
+
+		EDITOR.openFile("test_fileWrite.js", '', function(err, file) {
+
+			file.write("foo", false);
+			UTIL.assert(file.text, "foo");
+
+			file.write("bar\nbaz", false);
+			UTIL.assert(file.text, "foobar\nbaz");
+
+			callback(true);
+		});
+	});
+
 	EDITOR.addTest(function test_getDirectoryFromPath(callback) {
 
 		UTIL.assert(UTIL.getDirectoryFromPath("/foo/bar"), "/foo/");
@@ -284,7 +298,7 @@
 		
 	});
 	
-	EDITOR.addTest(1, function testUTIL_urlHost(callback) {
+	EDITOR.addTest(function testUTIL_urlHost(callback) {
 
 		UTIL.assert( UTIL.urlHost("googledrive://foo/ "), "foo");
 		UTIL.assert( UTIL.urlHost("http://google.com"), "google.com");

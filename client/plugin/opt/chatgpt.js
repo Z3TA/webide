@@ -147,11 +147,10 @@ var order = 1500;
 
 			if(err) {
 				console.log("chatGpt: error: " + err.message);
+				alertBox(err.message, "chatGpt", "error");
 			}
 
 			console.log("chatGpt: resp=" + JSON.stringify(resp, null, 2));
-
-			//autocompleteCb([result]);
 		});
 
 		return {exclusive: true, add: []}; // exclusive means no other auto-completer will run after this
@@ -166,6 +165,7 @@ var order = 1500;
 
 		if(firstMessage) {
 			// Step out from the comment
+			console.log("chatGpt:chatGptMessage: firstMessage=" + firstMessage + " Stepping out from the comment!");
 
 			while( insideComment(file, file.caret) ) {
 				file.moveCaretDown();
@@ -186,8 +186,14 @@ var order = 1500;
 
 		msg = stripIndentation(msg);
 
-		if(file.caret.eof) file.write(msg, false);
-		else file.insertText(msg);
+		if(file.caret.eof) {
+			console.log("chatGpt:chatGptMessage: Using file.write to write msg=" + UTIL.lbChars(msg));
+			file.write(msg, false);
+		}
+		else {
+			file.insertText(msg);
+			console.log("chatGpt:chatGptMessage: Using file.insertText to write msg=" + UTIL.lbChars(msg));
+		}
 
 		EDITOR.renderNeeded();
 	}
@@ -213,6 +219,8 @@ var order = 1500;
 			stripped += str[i];
 			afterNewLine = false;
 		}
+
+		console.log("chatGpt:stripIndentation: str=" + UTIL.lbChars(str) + "\n stripped=" + UTIL.lbChars(stripped));
 
 		return stripped;
 	}

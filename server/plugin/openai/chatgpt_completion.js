@@ -154,7 +154,15 @@ API.complete = function complete(user, json, callback) {
             }
 
             if(!parseError) {
-                var error = new Error("Got an error from openIA: " + JSON.stringify(json, null, 2));
+                /*
+                    "error": {
+                    "message": "",
+                    "type": "invalid_request_error",
+                    "param": null,
+                    "code": "invalid_api_key"
+                    }
+                */
+                var error = new Error("Got an error from openIA: message=" + json.error.message + " type=" + json.error.type + " code=" + json.error.code);
                 callback(error);
                 callback = null;
                 return;
