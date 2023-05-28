@@ -63,6 +63,7 @@ When using Node.js use commonjs modules (require instead of import)
 When working with async functions use the callback convention instead of promises or async/await
 If the user provides code, use the style of that code.
 Use normal functions instead of arrow functions.
+Use var to declare variables instead of let and const
 Wrap explanations in comments. But try to avoid explaining the code.
 Do NOT wrap code in string literals.
 Do NOT use code snippets
@@ -70,6 +71,23 @@ Do NOT explain the code
 Give the user only the code
 `
 
+var PROMPT = {js: defaultPrompt}; // filetype: prompt
+
+API.init = function init(user, json, callback) {
+    if(json.OPENAI_API_KEY == undefined) return callback(new Error("No OPENAI_API_KEY key provided!"));
+    else OPENAI_API_KEY = json.OPENAI_API_KEY;
+
+    if(json.PROMPT != undefined) {
+        if(typeof json.PROMPT != "object") return callback(new Error("There should be an object named PROMPT that has the prompts for all file extensions!"));
+        if(Object.keys(json.PROMPT).length == 0) return callback(new Error("The PROMPT object should have at least one key (file extension)"));
+
+        for(var fileExt in json.PROMPT) {
+            PROMPT[fileExt] = json.PROMPT[fileExt];
+        }
+    }
+
+    callback(null);
+}
 
 API.complete = function complete(user, json, callback) {
     var url = "https://api.openai.com/v1/chat/completions";
@@ -79,7 +97,7 @@ API.complete = function complete(user, json, callback) {
     var reqData = {
         "model": "gpt-3.5-turbo",
         "messages":[
-            {"role": "system", "content": json.system || defaultPrompt},
+            {"role": "system", "content": json.system || PROMPT[json.ext] || defaultPrompt},
             {"role": "user", "content": json.msg || '// hello world in JavaScript'}
         ],
         "stream": true,
@@ -119,7 +137,30 @@ API.complete = function complete(user, json, callback) {
     function respData(data) {
         console.log("chatGtp: respData: data=" + data);
 
+        if(callback == null) return;
+
         var str = data.toString();
+
+        if(str[0] == "{") {
+            // Did we get a JSON object!?
+            // Is it an error message maybe ?
+            var parseError = false;
+            try {
+                var json = JSON.parse(str);
+            }
+            catch(err) {
+                // nope, it's not an error message
+                parseError = true;
+            }
+
+            if(!parseError) {
+                var error = new Error("Got an error from openIA: " + JSON.stringify(json, null, 2));
+                callback(error);
+                callback = null;
+                return;
+            }
+        }
+
         var lines = str.split("\n");
 
         lines.forEach(function(line) {
@@ -168,7 +209,7 @@ API.complete = function complete(user, json, callback) {
     function respEnd() {
         console.log("chatGtp: respEnd");
 
-        callback(null);
+        if(callback) callback(null);
         callback = null;
     }
 

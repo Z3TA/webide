@@ -6,6 +6,11 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
+Example from the README.txt doesn't work on Google Cloud Shell,
+it was a while since we published to npm! Should make a new major verions
+
+---
+
 Working on chatGPT completion, see /home/johan/repo/jzedit/server/plugin/openai/chatgpt_completion.js and test.js
 should probably only send the content to the client!?
 
