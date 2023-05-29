@@ -149,8 +149,13 @@ var order = 1500;
 				console.log("chatGpt: error: " + err.message);
 				alertBox(err.message, "chatGpt", "error");
 			}
+			else {
+				// Add a line break in order to make the editor parse the code
+				file.insertLineBreak();
+			}
 
 			console.log("chatGpt: resp=" + JSON.stringify(resp, null, 2));
+
 		});
 
 		return {exclusive: true, add: []}; // exclusive means no other auto-completer will run after this
