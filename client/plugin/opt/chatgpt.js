@@ -5,16 +5,16 @@
 (function() {
 	"use strict";
 
-var order = 1500;
+	var order = 1500;
 	var currentFile;
 	var firstMessage = true;
 	var ENABLED = true;
 	var winMenuChatGpt;
 
 	EDITOR.plugin({
-	desc: "Use ChatGPT for code completions",
-	load: function loadChatGPT() {
-		console.log("chatGpt: !loadChatGPT");
+		desc: "Use ChatGPT for code completions",
+		load: function loadChatGPT() {
+		//console.log("chatGpt: !loadChatGPT");
 			CLIENT.on("chatgpt", chatGptMessage);
 			EDITOR.on("autoComplete", chatGptComplete, order);
 
@@ -26,7 +26,7 @@ var order = 1500;
 
 		},
 		unload: function unloadChatGPT() {
-			console.log("chatGpt: !unloadChatGPT");
+			//console.log("chatGpt: !unloadChatGPT");
 			CLIENT.removeEvent("chatgpt", chatGptMessage);
 
 			EDITOR.removeEvent("autoComplete", chatGptComplete);
@@ -37,7 +37,7 @@ var order = 1500;
 	});
 
 	function chatGptSettingsSavedMaybe(file) {
-		console.log("chatGpt:chatGptSettingsSavedMaybe: file.path=" +  file.path);
+		//console.log("chatGpt:chatGptSettingsSavedMaybe: file.path=" +  file.path);
 
 		if(file.path != "settings://chatgpt") return ALLOW_DEFAULT;
 
@@ -57,7 +57,7 @@ var order = 1500;
 	function chatGptWinMenuClick() {
 		EDITOR.openFile("settings://chatgpt", function editSettings(err, file) {
 			if(err) {
-				console.log("chatGpt:chatGptWinMenuClick:editSettings err.code=" + err.code);
+				//console.log("chatGpt:chatGptWinMenuClick:editSettings err.code=" + err.code);
 
 				if(err.code == "ENOENT") {
 					var json = {
@@ -68,7 +68,7 @@ var order = 1500;
 					}
 
 					EDITOR.openFile("settings://chatgpt", JSON.stringify(json, null, 2), function editSettings(err, file) {
-						console.log("chatGpt:chatGptWinMenuClick:editSettings err.code=" + (err && err.code));
+						//console.log("chatGpt:chatGptWinMenuClick:editSettings err.code=" + (err && err.code));
 
 					});
 
@@ -80,7 +80,7 @@ var order = 1500;
 	function gotChatgptSettings(settings) {
 		if(settings == undefined) return;
 
-		console.log("chatGpt:gotChatgptSettings: settings=" + JSON.stringify(settings, null, 2));
+		//console.log("chatGpt:gotChatgptSettings: settings=" + JSON.stringify(settings, null, 2));
 
 		CLIENT.cmd("chatgpt.init", settings, function (err, resp) {
 			if(err) {
@@ -90,12 +90,12 @@ var order = 1500;
 	}
 
 	function chatGptComplete(file, wordToComplete, wordLength, gotOptions, autocompleteCb) {
-		console.log("chatGpt: chatGptComplete: ENABLED=" + ENABLED + " wordToComplete=" + wordToComplete);
+		//console.log("chatGpt: chatGptComplete: ENABLED=" + ENABLED + " wordToComplete=" + wordToComplete);
 
 		if(!ENABLED) return;
 
 		if( !insideComment(file, file.caret) ) {
-			console.log("chatGpt: chatGptComplete: Not inside a comment!");
+			//console.log("chatGpt: chatGptComplete: Not inside a comment!");
 			return;
 		}
 
@@ -103,7 +103,7 @@ var order = 1500;
 		// max 2048 characters !?
 		var maxLen = 2048;
 
-		console.log("chatGpt: file.caret.index=" + file.caret.index  + " maxLen=" + maxLen);
+		//console.log("chatGpt: file.caret.index=" + file.caret.index  + " maxLen=" + maxLen);
 		if(file.caret.index > maxLen) {
 			var text = file.rowText(file.caret.row, false);
 			var len = text.length;
@@ -113,7 +113,7 @@ var order = 1500;
 				rowText = file.rowText(row, false);
 				len += rowText.length;
 				len += file.lineBreak.length;
-				console.log("chatGpt: len=" + len);
+				//console.log("chatGpt: len=" + len);
 
 				if(len >= maxLen) break;
 
@@ -123,7 +123,7 @@ var order = 1500;
 
 				indent = rowIndent;
 				text = rowText + file.lineBreak + text;
-				console.log("chatGpt: text.length=" + text.length);
+				//console.log("chatGpt: text.length=" + text.length);
 			}
 		}
 		else {
@@ -136,7 +136,7 @@ var order = 1500;
 
 		if(file.savedAs) json.ext = UTIL.getFileExtension(file.path);
 
-		console.log("chatGpt: text.length=" + text.length + " maxLen=" + maxLen + " text=" + text);
+		//console.log("chatGpt: text.length=" + text.length + " maxLen=" + maxLen + " text=" + text);
 
 		currentFile = EDITOR.currentFile;
 		firstMessage = true;
@@ -146,7 +146,7 @@ var order = 1500;
 		CLIENT.cmd("chatgpt.complete", json, function (err, resp) {
 
 			if(err) {
-				console.log("chatGpt: error: " + err.message);
+				//console.log("chatGpt: error: " + err.message);
 				alertBox(err.message, "chatGpt", "error");
 			}
 			else {
@@ -154,7 +154,7 @@ var order = 1500;
 				file.insertLineBreak();
 			}
 
-			console.log("chatGpt: resp=" + JSON.stringify(resp, null, 2));
+			//console.log("chatGpt: resp=" + JSON.stringify(resp, null, 2));
 
 		});
 
@@ -164,18 +164,18 @@ var order = 1500;
 
 	function chatGptMessage(msg) {
 
-		console.log("chatGpt: chatGptMessage: firstMessage=" + firstMessage + " msg=" + UTIL.lbChars(msg));
+		//console.log("chatGpt: chatGptMessage: firstMessage=" + firstMessage + " msg=" + UTIL.lbChars(msg));
 
 		var file = currentFile;
 
 		if(firstMessage) {
 			// Step out from the comment
-			console.log("chatGpt:chatGptMessage: firstMessage=" + firstMessage + " Stepping out from the comment!");
+			//console.log("chatGpt:chatGptMessage: firstMessage=" + firstMessage + " Stepping out from the comment!");
 
 			while( insideComment(file, file.caret) ) {
 				file.moveCaretDown();
 
-				console.log("chatGpt: chatGptMessage: moved caret down to file.caret.index=" + file.caret.index + " eof=" + file.caret.eof + " empty?" + file.rowIsEmpty() );
+				//console.log("chatGpt: chatGptMessage: moved caret down to file.caret.index=" + file.caret.index + " eof=" + file.caret.eof + " empty?" + file.rowIsEmpty() );
 
 				if(file.caret.eof) {
 					file.insertLineBreak();
@@ -192,12 +192,12 @@ var order = 1500;
 		msg = stripIndentation(msg);
 
 		if(file.caret.eof) {
-			console.log("chatGpt:chatGptMessage: Using file.write to write msg=" + UTIL.lbChars(msg));
+			//console.log("chatGpt:chatGptMessage: Using file.write to write msg=" + UTIL.lbChars(msg));
 			file.write(msg, false);
 		}
 		else {
 			file.insertText(msg);
-			console.log("chatGpt:chatGptMessage: Using file.insertText to write msg=" + UTIL.lbChars(msg));
+			//console.log("chatGpt:chatGptMessage: Using file.insertText to write msg=" + UTIL.lbChars(msg));
 		}
 
 		EDITOR.renderNeeded();
@@ -225,7 +225,7 @@ var order = 1500;
 			afterNewLine = false;
 		}
 
-		console.log("chatGpt:stripIndentation: str=" + UTIL.lbChars(str) + "\n stripped=" + UTIL.lbChars(stripped));
+		//console.log("chatGpt:stripIndentation: str=" + UTIL.lbChars(str) + "\n stripped=" + UTIL.lbChars(stripped));
 
 		return stripped;
 	}
@@ -234,7 +234,7 @@ var order = 1500;
 	function insideComment(file, caret) {
 		var parsed = file.parsed;
 
-		console.log("chatGpt: insideComment: parsed? + " + !!parsed);
+		//console.log("chatGpt: insideComment: parsed? + " + !!parsed);
 
 		if(!parsed) return null;
 
@@ -242,12 +242,12 @@ var order = 1500;
 
 		var index = caret.index;
 
-		console.log("chatGpt: insideComment: comments.length=" + comments.length);
+		//console.log("chatGpt: insideComment: comments.length=" + comments.length);
 
 		for (var i=0; i<comments.length; i++) {
-			console.log("chatGpt: insideComment: comments[" + i + "].end=" + comments[i].end + " comments[" + i + "].start=" + comments[i].start + "  index=" + index + "");
+			//console.log("chatGpt: insideComment: comments[" + i + "].end=" + comments[i].end + " comments[" + i + "].start=" + comments[i].start + "  index=" + index + "");
 			if(comments[i].end >= index && comments[i].start < caret.index) {
-				console.log("chatGpt: insideComment: is inside !");
+				//console.log("chatGpt: insideComment: is inside !");
 				return true;
 			}
 		}
