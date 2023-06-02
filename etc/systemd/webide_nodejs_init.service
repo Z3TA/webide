@@ -15,12 +15,10 @@ User=root
 # Change to the webide directory
 WorkingDirectory=/srv/webide/
 
-# Change to node or nodejs if you are not using apparmor.
-# See etc/apparmor/usr.bin.webide for example apparmor profile (run makeprofile.sh to create one)
-
-# See etc/nginx/signup.webtigerteam.com.nginx for an nginx example profile to run as proxy infront of the signup service
-
+# Change to the path to the nodejs executable
 ExecStart=/usr/bin/nodejs nodejs_init.js
+
+ExecStopPost=/usr/local/bin/systemd-email.sh zeta@zetafiles.org %i
 
 Restart=always
 

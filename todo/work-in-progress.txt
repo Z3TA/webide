@@ -6,6 +6,22 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
+Need to be able to select which version of Node.js to run when adding script to production!!
+
+2023-06-02 (17:02:23): NODE_MODULE_VERSION 108. This version of Node.js requires
+2023-06-02 (17:02:23): NODE_MODULE_VERSION 93. Please try re-compiling or re-installing
+
+---
+
+Running a nodejs script from the terminal, and running it from the windows menu: Node.js run script,
+does not get the same process.env!!!
+
+process.env also need to be the same when adding a script to production!!!
+
+env need to be consistent everywhere you run a script! From the editor, from the termina, and in production!
+
+---
+
 Example from the README.txt doesn't work on Google Cloud Shell,
 it was a while since we published to npm! Should make a new major verions
 

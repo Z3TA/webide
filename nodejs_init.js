@@ -28,7 +28,7 @@ HOME_DIR = UTIL.trailingSlash(HOME_DIR); // Make sure the dir ends with a path d
 
 var NO_PW_HASH = !!(getArg(["nopwhash"]) || false);
 
-var HTTP_PORT = getArg(["p", "port"]) || DEFAULT.nodejs_deamon_manager_port; 
+var HTTP_PORT = getArg(["p", "port"]) || DEFAULT.nodejs_deamon_manager_port;
 var HTTP_IP = getArg(["ip", "ip"]) || DEFAULT.http_ip;
 var DOMAIN = getArg(["domain", "domain", "tld"]) || DEFAULT.domain;
 
