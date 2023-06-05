@@ -449,19 +449,23 @@
 						confirmBox("Unable to find a package.json in " + folder + ". Do you want to create it ?", [createPj, cancel], function(answer) {
 							if(answer == createPj) {
 							
-								var pjTemplate = {
-									"name": UTIL.getFolderName(folder),
-									"version": "1.0.0",
-									"description": "What this micro service does",
-									"author": EDITOR.user.name,
-									"main": UTIL.getFilenameFromPath(deployFilePath)
-								};
-								
-								EDITOR.openFile(folder + "package.json", JSON.stringify(pjTemplate, null, 2), {savedAs: false, isSaved: false}, function(openFileErr, file) {
-									if(openFileErr) alertBox(openFileErr.message, dialogCode);
-									else alertBox("Try deploying again when you have saved package.json", dialogCode);
+								getCurrentNodeVersion(function(err, nodeVersion) {
+									var pjTemplate = {
+										"name": UTIL.getFolderName(folder),
+										"version": "1.0.0",
+										"description": "What this micro service does",
+										"author": EDITOR.user.name,
+										"main": UTIL.getFilenameFromPath(deployFilePath),
+										"engines": {
+											"node": nodeVersion
+										}
+									};
+
+									EDITOR.openFile(folder + "package.json", JSON.stringify(pjTemplate, null, 2), {savedAs: false, isSaved: false}, function(openFileErr, file) {
+										if(openFileErr) alertBox(openFileErr.message, dialogCode);
+										else alertBox("Try deploying again when you have saved package.json", dialogCode);
+									});
 								});
-								
 							}
 						});
 					}
@@ -519,6 +523,19 @@
 		
 	}
 	
+	function getCurrentNodeVersion(callback) {
+		CLIENT.cmd("run", {command: "node -v"}, function(err, resp) {
+			if(err) return callback(err);
+
+			console.log("nodejs_deploy: resp=" + JSON.stringify(resp));
+
+			// Remove the v and new-line characters
+			var version = resp.stdout.slice(1, -1);
+
+			callback(null, version);
+		});
+	}
+
 	// TEST-CODE-START
 	
 	EDITOR.addTest(function testNodejsDeployAddToProd(testCallback) {

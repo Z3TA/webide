@@ -21,6 +21,12 @@
 # 
 # hint: EDITOR.changeWorkingDir("/home/ltest1/wwwpub/");
 #
+# Get another shell in a docker container: 
+# docker ps
+# docker exec -it 1c3bf57cf46b /bin/bash
+#
+#
+
 
 # FROM must be the first instruction!
 #FROM ubuntu:bionic

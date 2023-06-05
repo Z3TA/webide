@@ -35,11 +35,6 @@
 	todo: Able to run any executable, not just Node.JS scripts.
 	
 
-	idea: Make sure it uses the correct nodejs version to run the script! (the version the dev used when testing, prompt the user if not sure!? use .nvmrc !?)
-	it always uses the same version as the server!
-	we can however use execPath in fork to change to /usr/local/n/versions/node/12.22.12/bin/node
-	and find nodejs version in package.json under engines.node
-
 */
 
 "use strict"
@@ -279,7 +274,7 @@ else {
 					return;
 				}
 
-				startService(script.main, script.name, script.pathToFolder, script.log, script.email || EMAIL, function(err) {
+				startService({scriptPath: script.main, projectName: script.name, pathToFolder: script.pathToFolder, logFilePath: script.log, email: script.email || EMAIL, nodeVersion: script.nodeVersion}, function(err) {
 					if(reqId && (action=="start" || action=="restart")) {
 						send({id: reqId, restarting: script.pathToFolder});
 					}
@@ -693,7 +688,7 @@ function start(pathToFolder, callback) {
 							var scriptFilePath = path.join(pathToFolder, folderItem);
 							
 							if(folderItem == findFile + ".js") {
-								startService(scriptFilePath, findFile, pathToFolder, HOMEDIR+"log/" + folderItem + ".log", EMAIL, function(err) {
+								startService({scriptPath: scriptFilePath, projectName: findFile, pathToFolder: pathToFolder, logFilePath: HOMEDIR+"log/" + folderItem + ".log", email: EMAIL}, function(err) {
 									callback(err);
 								});
 							}
@@ -705,7 +700,7 @@ function start(pathToFolder, callback) {
 			else return callback(err);
 		}
 		else {
-			
+			log("Found " + packageJson);
 			try {
 				var json = JSON.parse(data);
 			}
@@ -717,7 +712,8 @@ function start(pathToFolder, callback) {
 				var name = json.name || findFile;
 				var path = require("path");
 				var mainFile = path.join(pathToFolder, json.main);
-				startService(mainFile, name, pathToFolder, HOMEDIR+"log/" + name + ".log", json.email || EMAIL, function(err) {
+				var nodeVersion = json.engines && json.engines.node;
+				startService({scriptPath: mainFile, projectName: name, pathToFolder: pathToFolder, logFilePath: HOMEDIR+"log/" + name + ".log", email: json.email || EMAIL, nodeVersion: nodeVersion}, function(err) {
 					callback(err);
 				});
 				
@@ -842,7 +838,8 @@ function findScripts(pathToFolder, callback) {
 				if(json.main) {
 					var name = json.name || findFile;
 					var mainFile = path.join(pathToFolder, json.main);
-					scripts.push({main: mainFile, name: name, pathToFolder: UTIL.trailingSlash(pathToFolder), log: HOMEDIR + "log/" + name + ".log", email: json.email});
+					var nodeVersion = json.engines && json.engines.node;
+					scripts.push({main: mainFile, name: name, pathToFolder: UTIL.trailingSlash(pathToFolder), log: HOMEDIR + "log/" + name + ".log", email: json.email, nodeVersion: nodeVersion});
 				}
 				else return log(packageJson + " has no main file entry!");
 				
@@ -861,8 +858,14 @@ function findScripts(pathToFolder, callback) {
 	
 }
 
-function startService(scriptPath, projectName, pathToFolder, logFilePath, email, callback) {
-	
+function startService(options, callback) {
+	var scriptPath = options.scriptPath;
+	var projectName = options.projectName;
+	var pathToFolder = options.pathToFolder;
+	var logFilePath = options.logFilePath;
+	var email = options.email;
+	var nodeVersion = options.nodeVersion;
+
 	if(scriptPath == undefined) return callback(new Error("startService: scriptPath=" + scriptPath));
 	if(pathToFolder == undefined) return callback(new Error("startService: pathToFolder=" + pathToFolder));
 	if(logFilePath == undefined) return callback(new Error("startService: logFilePath=" + logFilePath));
@@ -899,15 +902,35 @@ function startService(scriptPath, projectName, pathToFolder, logFilePath, email,
 			tld: TLD,
 			PATH: "/usr/bin:/bin:/.npm-packages/bin", // Able to find "executables"
 			NPM_CONFIG_PREFIX: "/.npm-packages", // Help npm figure out where global packages are
-		},
-		execPath: "/usr/bin/node" // note: we are in chroot!
+		}
 	};
+
 	var childProcess;
 	
 	var logStream = fs.createWriteStream(logFilePath, {'flags': 'a'});
 	logStream.write(myDate() + ": Starting ...\n");
 	
-	respawn(); // Starts the child process
+	log("nodeVersion=" + nodeVersion);
+
+	if(nodeVersion != undefined) {
+		// Make sure the executable exist
+		opt.execPath = "/usr/local/n/versions/node/" + nodeVersion + "/bin/node"
+		fs.stat(opt.execPath, function(err, stats) {
+			if(err) {
+				opt.execPath = undefined;
+				var os = require("os");
+				var hostname = os.hostname();
+				sendMail(ADMIN_EMAIL, hostname + " Node executable don't exist: " + err.message, "startService options: " + JSON.stringify(options, null, 2) + "\n\nWorker arguments:\n" + process.argv.join("\n"), function(mailError) {
+					if(mailError) log("Error sending email: " + mailError.message);
+				});
+			}
+			respawn(); // Starts the child process
+			
+		});
+	}
+	else {
+		respawn(); // Starts the child process
+	}
 
 	function respawn() {
 		
@@ -938,6 +961,8 @@ function startService(scriptPath, projectName, pathToFolder, logFilePath, email,
 		logStream = fs.createWriteStream(logFilePath, {'flags': 'a'});
 		logStream.write(myDate() + ": Starting " + scriptPath + " using argv=[" + arg.join(",") + "]\n");
 		
+		log("Forking " + scriptPath + " with arg=" + JSON.stringify(arg, null, 2) + "\noptions=" + JSON.stringify(opt, null, 2) + "");
+
 		CHILD[pathToFolder] = cp.fork(scriptPath, arg, opt);
 		
 		childProcess = CHILD[pathToFolder];
@@ -1065,7 +1090,7 @@ function startService(scriptPath, projectName, pathToFolder, logFilePath, email,
 		}, waitForRespawn);
 		//log("Started a respawnTimer!");
 		PROCESS_TIMERS[pathToFolder].push(respawnTimer);
-		}
+	}
 	
 	function historyAdd(msg) {
 		
