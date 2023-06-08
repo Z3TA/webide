@@ -1414,7 +1414,7 @@ function shutdownInitWorker(exitCode, callback) {
 	}
 
 	function doneKill() {
-		processsesKilled++;
+		processesKilled++;
 	}
 
 	function doneMaybe() {
