@@ -8542,6 +8542,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 			});
 		}
 	
+	// createFolder, createDirectory, mkdir
 	EDITOR.createPath = function(directoryPathToCreate, createPathCallback) {
 		/*
 			Traverse the path and try to creates the directories, then check if the full path exists

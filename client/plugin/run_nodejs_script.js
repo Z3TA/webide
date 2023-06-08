@@ -1105,6 +1105,136 @@
 		});
 	});
 	
+	EDITOR.addTest(1, function unifiedEnvVariables(callback) {
+		// We want to have the same process.env variables if we start the script from the terminal, as when we start the script using "run with nodejs" from the editors gui
+		var filePath = UTIL.joinPaths(EDITOR.user.homeDir, "test_env/", "test_env.js");
+		var folderPath = UTIL.getDirectoryFromPath(filePath);
+
+		var envTextFromTerminalNodejs = "";
+		var envTextFromNodejsRun = "";
+		var envTextFromProduction = "";
+
+
+		EDITOR.createPath(folderPath, function(err) {
+			if(err) throw err;
+
+			EDITOR.openFile(filePath, '\nconsole.log(process.env);\n', function(err, file) {
+				if(err) throw err;
+
+				EDITOR.deleteFile(filePath, function(err) { // In case it already exist
+					if(err && err.code != "ENOENT") throw err;
+
+					EDITOR.saveFile(file, function(err) {
+						if(err) throw err;
+
+						runNodeJsScript(file, function(err) {
+							if(err) throw err;
+
+							setTimeout(waitForStdoutFile, 300);
+
+							function waitForStdoutFile() {
+
+								var stdOutFilePath = filePath + ".stdout";
+
+								var stdoutFile = EDITOR.files[stdOutFilePath];
+
+								console.log("waitForStdoutFile: stdOutFilePath=" + stdOutFilePath);
+								if(stdoutFile == undefined) return setTimeout(waitForStdoutFile, 300);
+
+
+								var text = stdoutFile.text;
+
+								var start = text.indexOf("{");
+								var end = text.indexOf("}") + 1;
+
+								envTextFromNodejsRun = text.slice(start, end);
+
+								console.log("envTextFromNodejsRun=" + envTextFromNodejsRun);
+
+								runInTerminal();
+							}
+						});
+					});
+				});
+			});
+		});
+
+		function runInTerminal() {
+			// Run the same file from the terminal
+			var folder = UTIL.getDirectoryFromPath(filePath);
+			CLIENT.cmd("run", {command: "node " + filePath, cwd: folder}, function(err, resp) {
+				if(err) throw err;
+
+				console.log("resp=" + JSON.stringify(resp));
+
+				var envTextFromTerminalNodejs = resp.stdout;
+
+				//if(envTextFromTerminalNodejs != envTextFromNodejsRun) throw new Error("Not the same: envTextFromNodejsRun=" + envTextFromNodejsRun + "\n\nenvTextFromTerminalNodejs=" + envTextFromTerminalNodejs);
+
+				runInprodDeployment();
+			});
+		}
+
+
+		function runInprodDeployment(pw) {
+			// Run the script "in production" and see if we get the same result
+			
+			var packageJsonStr = '{"name": "test_env","version": "1.0.0","description": "env outpout","author": "ltest1","main": "test_env.js"}';
+			EDITOR.saveToDisk(UTIL.joinPaths(folderPath, "package.json"), packageJsonStr, function(err) {
+				if(err) throw err;
+
+				if(pw==undefined) pw = "1234";
+				CLIENT.cmd("nodejs_init_deploy", {folder: folderPath, pw: pw}, function(err, resp) {
+					console.log(err.code);
+					if(err && err.message.indexOf("password") != -1) {
+						var pw = prompt("Enter user password in order to send test_env to prod:");
+						return runInprodDeployment(pw);
+					}
+					else if(err) throw err;
+
+
+					console.log( JSON.stringify(resp, null, 2) );
+					var folderName = UTIL.getFolderName(filePath);
+					var logFile = UTIL.joinPaths(EDITOR.user.homeDir, "log/", folderName + ".log");
+
+					// open the log file and parse the output
+					EDITOR.openFile(logFile, function(err, file) {
+						if(err) throw err;
+
+						console.log(file.text);
+
+						cleanup();
+
+					});
+
+				});
+				});
+
+			
+		}
+
+		function cleanup(cleanupCallback) {
+			var nameOfFolder = UTIL.getFolderName(folder);
+			var folder = UTIL.getDirectoryFromPath(filePath);
+			CLIENT.cmd("nodejs_init_remove", {folder: folder, pw: pw}, function(err, resp) {
+				if(err) throw err;
+
+				EDITOR.closeFile(filePath, function(err) { // In case it already exist
+					if(err) throw err;
+					EDITOR.deleteFile(filePath, function(err) { // In case it already exist
+						if(err) throw err;
+						cleanupCallback();
+						callback(true);
+					});
+				});
+			});
+		}
+
+	});
+
+
+
+
 	// TEST-CODE-END
 	
 })();

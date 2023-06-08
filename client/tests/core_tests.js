@@ -40,7 +40,7 @@
 		
 	}
 	
-	EDITOR.addTest(1, function test_fileWrite(callback) {
+	EDITOR.addTest(function test_fileWrite(callback) {
 
 		EDITOR.openFile("test_fileWrite.js", '', function(err, file) {
 

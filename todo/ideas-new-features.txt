@@ -75,8 +75,11 @@ function startTerminal2(match) {
 	t2.write("node nodejs_init.js -insidedocker");
 }
 
+or just use bash script!?
 
-
+docker run -it -v /home/$(whoami)/repo/jzedit/:/srv/webide/ -p 80:80 cloudide << EOF
+  mkdir /home/ltest1/.webide/prod/ && chown ltest1:ltest1 /home/ltest1/.webide/prod/; 
+EOF
 
 
 
