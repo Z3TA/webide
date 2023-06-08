@@ -1109,6 +1109,9 @@
 		// We want to have the same process.env variables if we start the script from the terminal, as when we start the script using "run with nodejs" from the editors gui
 		var filePath = UTIL.joinPaths(EDITOR.user.homeDir, "test_env/", "test_env.js");
 		var folderPath = UTIL.getDirectoryFromPath(filePath);
+		var folderName = UTIL.getFolderName(folderPath);
+		var logFile = UTIL.joinPaths(EDITOR.user.homeDir, "log/", folderName + ".log");
+		var packageJsonPath = UTIL.joinPaths(folderPath, "package.json");
 
 		var envTextFromTerminalNodejs = "";
 		var envTextFromNodejsRun = "";
@@ -1118,7 +1121,7 @@
 		EDITOR.createPath(folderPath, function(err) {
 			if(err) throw err;
 
-			EDITOR.openFile(filePath, '\nconsole.log(process.env);\n', function(err, file) {
+			EDITOR.openFile(filePath, '\nconsole.log(JSON.stringify(process.env, null, 2));\n', function(err, file) {
 				if(err) throw err;
 
 				EDITOR.deleteFile(filePath, function(err) { // In case it already exist
@@ -1147,9 +1150,9 @@
 								var start = text.indexOf("{");
 								var end = text.indexOf("}") + 1;
 
-								envTextFromNodejsRun = text.slice(start, end);
+								envTextFromNodejsRun = JSON.parse(text.slice(start, end));
 
-								console.log("envTextFromNodejsRun=" + envTextFromNodejsRun);
+								console.log("envTextFromNodejsRun=" + JSON.stringify(envTextFromNodejsRun, null, 2));
 
 								runInTerminal();
 							}
@@ -1165,52 +1168,80 @@
 			CLIENT.cmd("run", {command: "node " + filePath, cwd: folder}, function(err, resp) {
 				if(err) throw err;
 
-				console.log("resp=" + JSON.stringify(resp));
+				//console.log("resp=" + JSON.stringify(resp));
 
-				var envTextFromTerminalNodejs = resp.stdout;
+				envTextFromTerminalNodejs = JSON.parse(resp.stdout);
 
-				//if(envTextFromTerminalNodejs != envTextFromNodejsRun) throw new Error("Not the same: envTextFromNodejsRun=" + envTextFromNodejsRun + "\n\nenvTextFromTerminalNodejs=" + envTextFromTerminalNodejs);
+				console.log("envTextFromTerminalNodejs=" + JSON.stringify(envTextFromTerminalNodejs, null, 2));
+
+				compareObjects(envTextFromTerminalNodejs, envTextFromNodejsRun);
 
 				runInprodDeployment();
 			});
 		}
 
-
 		function runInprodDeployment(pw) {
 			// Run the script "in production" and see if we get the same result
 			
 			var packageJsonStr = '{"name": "test_env","version": "1.0.0","description": "env outpout","author": "ltest1","main": "test_env.js"}';
-			EDITOR.saveToDisk(UTIL.joinPaths(folderPath, "package.json"), packageJsonStr, function(err) {
+			EDITOR.saveToDisk(packageJsonPath, packageJsonStr, function(err) {
 				if(err) throw err;
 
-				if(pw==undefined) pw = "1234";
+				if(pw==undefined) pw = "123";
 				CLIENT.cmd("nodejs_init_deploy", {folder: folderPath, pw: pw}, function(err, resp) {
-					console.log(err.code);
 					if(err && err.message.indexOf("password") != -1) {
 						var pw = prompt("Enter user password in order to send test_env to prod:");
 						return runInprodDeployment(pw);
 					}
 					else if(err) throw err;
 
-
 					console.log( JSON.stringify(resp, null, 2) );
-					var folderName = UTIL.getFolderName(filePath);
-					var logFile = UTIL.joinPaths(EDITOR.user.homeDir, "log/", folderName + ".log");
+					
+					parse();
 
-					// open the log file and parse the output
-					EDITOR.openFile(logFile, function(err, file) {
-						if(err) throw err;
+					function parse() {
+						// open the log file and parse the output
+						console.log("Opening " + logFile);
+						EDITOR.openFile(logFile, function(err, file) {
+							if(err) throw err;
 
-						console.log(file.text);
+							var text = file.text;
 
-						cleanup();
+							console.log(text);
 
-					});
+							var start = text.indexOf("{");
+
+							if(start == -1) {
+								console.log("No output in " + logFile);
+								EDITOR.closeFile(logFile);
+								return setTimeout(parse, 200);
+							}
+
+							var end = text.indexOf("}") + 1;
+
+							envTextFromProduction = text.slice(start, end);
+
+							console.log("envTextFromProduction=" + envTextFromProduction);
+
+							// Relace prod:true with dev:true so we can compare them
+							try {
+								var json = JSON.parse(envTextFromProduction);
+							}
+							catch(err) {
+								throw new Error("Unable to parse: envTextFromProduction=" + envTextFromProduction + " Error: " + err.message);
+							}
+
+							delete json.prod;
+							json.dev = "true";
+
+							compareObjects(envTextFromProduction, envTextFromNodejsRun);
+
+							cleanup();
+						});
+					}
 
 				});
-				});
-
-			
+			});
 		}
 
 		function cleanup(cleanupCallback) {
@@ -1218,16 +1249,35 @@
 			var folder = UTIL.getDirectoryFromPath(filePath);
 			CLIENT.cmd("nodejs_init_remove", {folder: folder, pw: pw}, function(err, resp) {
 				if(err) throw err;
-
-				EDITOR.closeFile(filePath, function(err) { // In case it already exist
+				EDITOR.closeFile(filePath, function(err) {
 					if(err) throw err;
-					EDITOR.deleteFile(filePath, function(err) { // In case it already exist
+					EDITOR.deleteFile(packageJsonPath, function(err) {
 						if(err) throw err;
-						cleanupCallback();
-						callback(true);
+						EDITOR.deleteFile(logFile, function(err) {
+							if(err) throw err;
+							if(cleanupCallback) cleanupCallback();
+							else callback(true);
+						});
 					});
 				});
 			});
+		}
+
+		function compareObjects(a, b) {
+			var keysA = Object.keys(a);
+			var keysB = Object.keys(b);
+
+			for (var i=0; i<keysA.length; i++) {
+				if( keysB.indexOf(keysA[i]) == -1) throw new Error("Key " + keysA[i] + " not in " + JSON.stringify(keysB, null, 2));
+			}
+
+			for (var i=0; i<keysB.length; i++) {
+				if( keysA.indexOf(keysB[i]) == -1)  throw new Error("Key " + keysB[i] + " not in " + JSON.stringify(keysA, null, 2));
+			}
+
+			for (var i=0; i<keysA.length; i++) {
+				if( a[keysA[i]] != b[keysA[i]] ) throw new Error("Key " + keysA[i] + " does not have the same value: a=" + a[keysA[i]] + " b=" + b[keysA[i]]);
+			}
 		}
 
 	});
