@@ -256,6 +256,13 @@ leftColumn.removeChild(functionListWrap);
 		
 		if(!functionListWrap) return true; // Some mobile browser doesn't support the function list, and the select element is moved
 		
+		// Prevent function list from updating when you get text in another file (for exampel a terminal file)
+		if(file != EDITOR.currentFile) {
+			console.log("Not updating function list because file=" + file && file.path + " is not currently in view: EDITOR.currentFile=" + EDITOR.currentFile && EDITOR.currentFile.path);
+			return true; 
+		}
+
+
 		var center = undefined;
 		
 		if(file == undefined) {
