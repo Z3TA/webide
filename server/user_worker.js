@@ -6,6 +6,7 @@
 
 "use strict";
 
+
 // Need to require non native modules here before we are chrooted
 
 var UTIL = require("../client/UTIL.js");
@@ -227,6 +228,8 @@ var parentRequestCallback = {}; // id: callback function
 var parentRequestId = 0; // Counter (id) for parentRequestCallback
 
 
+//console.log(JSON.stringify(process.env, null, 2));
+//process.exit();
 
 var user = {};
 user.id = 0;
@@ -1260,8 +1263,8 @@ function nodejs_init_action(action, prodFolder, pw, callback) {
 	httpGet(options, function nodejsInitActionCommand(err, resp) {
 		if(err) {
 			var error = new Error("Failed to " + action + " " + prodFolder + "\n" + err.message)
-			err.code = err.code;
-			log("nodejs_init_action: " + error.message);
+			error.code = err.code;
+			log("nodejs_init_action: " + error.message + " (code=" + err.code + ")");
 			callback(error);
 			callback = null;
 			return;
@@ -1344,7 +1347,9 @@ function httpGet(options, callback) {
 		res.on('end', function http_req_end() {
 			log("" + endPoint + " status=" + res.statusCode, DEBUG);
 			if(res.statusCode != 200) {
-				callback(new Error("Failed to get " + options.path + " statusCode=" + res.statusCode + " data=" + rawData));
+				var error = new Error("Failed to get " + options.path + " statusCode=" + res.statusCode + " data=" + rawData);
+				error.code = res.statusCode;
+				callback(error);
 			}
 			else {
 				callback(null, rawData);
@@ -1885,16 +1890,18 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, nodePath, c
 		var nodeScriptOptions = {
 			execPath: nodePath, 
 			cwd: directory,
-			env: {
-				myName: user.name,
-				dev: true,
-				tld: TLD,
-				TLD: TLD, // Have both tld and TLD because it's not obvious which one to use
-				PATH: process.env.PATH
-			},
+			env: process.env,
 			silent: true // Makes it possible to capture stdout and stderr, otherwise it will use this process's stdout and stderr
 		};
 		
+		nodeScriptOptions.env.myName = user.name;
+		nodeScriptOptions.env.dev = true;
+		nodeScriptOptions.env.tld = TLD;
+		nodeScriptOptions.env.TLD = TLD; // Have both tld and TLD because it's not obvious which one to use
+		
+		// We want the env variables to be like if we had run the command from terminal/bash shell
+		nodeScriptOptions.env.PWD = directory;
+
 		if(debugit) {
 			var inspectStr = "--inspect-brk=" + inspectorPort;
 			if(nodeScriptOptions.execArgv) nodeScriptOptions.execArgv.unshift(inspectStr);
