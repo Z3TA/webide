@@ -294,7 +294,7 @@ var HOSTNAME = getArg(["host", "host", "hostname"]) || HTTP_IP; // Same as "serv
 	DOMAIN is a public domain name
 */
 
-var DOMAIN = getArg(["domain", "domain"]) || HOSTNAME;
+var DOMAIN = getArg(["tld", "tld"]) || getArg(["domain", "domain"]) || HOSTNAME;
 
 //console.log("DOMAIN=" + DOMAIN);
 //console.log("HOSTNAME=" + HOSTNAME);
@@ -5142,13 +5142,13 @@ function createUserWorker(username, uid, gid, homeDir, groups, rootPath) {
 	log("Spawn user_worker.js with workerNode=" + workerNode);
 
 	// Using spawn instead of fork to be able to use Linux network namespaces
-	
+	// Directories in env variables traditionally do not end with a path delimiter
 	spawnOptions.env = {
 		HOME: homeDir,
 		USER: username,
 		LOGNAME: username,
 		//JAVA_OPTS: '-XX:+IgnoreUnrecognizedVMOptions --add-modules' // Makes it possible to run tools in ~/Android/Sdk/tools/bin
-		JAVA_HOME: HOME_DIR + username + "/Android/android-studio/jre/",
+		JAVA_HOME: HOME_DIR + username + "/Android/android-studio/jre",
 		ANDROID_HOME:  HOME_DIR + username + "/Android/Sdk",
 		EDITOR: "webide", // Assume bin/webider is copied to /usr/local/bin/
 		VISUAL: "webide",
@@ -5157,6 +5157,7 @@ function createUserWorker(username, uid, gid, homeDir, groups, rootPath) {
 	}
 	
 	// The paths will be checked in order (so put local first)
+	// (Don't forget to update nodejs_init_worker.js when changing path)
 	spawnOptions.env.PATH = "" + homeDir + ".npm-packages/bin:" + homeDir + ".local/bin:" + process.env.PATH;
 	spawnOptions.env["NPM_CONFIG_PREFIX"] = homeDir + ".npm-packages";
 	spawnOptions.env.NPM_PACKAGES = homeDir + ".npm-packages";

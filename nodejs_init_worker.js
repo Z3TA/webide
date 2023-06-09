@@ -81,7 +81,10 @@ var CLOSE_CALLBACK = {}; // pathToFolder: function (call this function when chil
 var NODE_MAILER = require('nodemailer');
 var SMTP_TRANSPORT = require('nodemailer-smtp-transport');
 
-var TLD = DEFAULT.domain;
+var shutdownWhenNothingTodoTimer;
+var lastMailDate;
+var mailQueue = {}; // to: {subject:subject, text:text, from:from}
+var sendMailInQueueTimer;
 
 if(!HOME_DIR) return hardError(new Error("No HOME_DIR specified. Use argument: --homeDir=/home/username/"));
 if(!UID) return hardError(new Error("No UID specified. Use argument: --uid=123"));
@@ -120,10 +123,7 @@ var module_ps = require("ps-node");
 // We need to wait after setuid though, unless we want to allow dac_read_search (allows root to override read-file permission)
 
 
-var shutdownWhenNothingTodoTimer;
-var lastMailDate;
-var mailQueue = {}; // to: {subject:subject, text:text, from:from}
-var sendMailInQueueTimer;
+
 
 // Must be numbers!
 GID = parseInt(GID);
@@ -165,14 +165,14 @@ if(process.env.GROUPS) {
 	}
 }
 
-
-
 if(process.getuid && process.getuid() === 0) return hardError(new Error("Failed to change user! Worker process is still root! process.getuid()=" + process.getuid()));
+
 
 
 var initLogFilePath = UTIL.joinPaths(HOME_DIR, "log/nodejs_init_worker.log");
 var fs = require("fs");
 var initLogStream = fs.createWriteStream(initLogFilePath, {'flags': 'a'});
+
 
 log("Starting nodejs init worker...");
 log("GID=" + GID + " UID=" + UID);
@@ -920,21 +920,25 @@ function startService(options, callback) {
 		env: process.env
 	};
 
-	opt.env.JAVA_HOME = HOME_DIR + USERNAME + "/Android/android-studio/jre/",
-	opt.env.ANDROID_HOME =  HOME_DIR + USERNAME + "/Android/Sdk",
-	opt.env.EDITOR = "webide", // Assume bin/webider is copied to /usr/local/bin/
-	opt.env.VISUAL = "webide",
+	// Directories in env variables traditionally do not end with a path delimiter
+	opt.env.JAVA_HOME = HOME_DIR + "Android/android-studio/jre";
+	opt.env.ANDROID_HOME =  HOME_DIR + "Android/Sdk";
+	opt.env.EDITOR = "webide"; // Assume bin/webider is copied to /usr/local/bin/
+	opt.env.VISUAL = "webide";
 
 	opt.env.GROUPS = "{}";
 
-	opt.env.NPM_CONFIG_PREFIX = HOME_DIR + ".npm-packages";
+	opt.env.NPM_CONFIG_PREFIX = HOME_DIR + ".npm-packages"; // Help npm figure out where global packages are
 	opt.env.NPM_PACKAGES = HOME_DIR + ".npm-packages";
 
+	opt.env.USER = USERNAME;
 	opt.env.LOGNAME = USERNAME;
 	opt.env.PROD = true; // Tell scripts we are in "production"
-	opt.env.TLD = TLD;
-	opt.env.PATH = "/usr/bin:/bin:/.npm-packages/bin"; // Able to find "executables"
-	opt.env.NPM_CONFIG_PREFIX = "/.npm-packages"; // Help npm figure out where global packages are
+	
+	// (also change server.js so the PATH is the same in "dev")
+	opt.env.PATH = HOME_DIR + ".npm-packages/bin:" + HOME_DIR + ".local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"; // Able to find "executables"
+	
+	delete opt.env.messageToInitWorker;
 
 
 	var childProcess;
@@ -1468,7 +1472,7 @@ function exit(exitCode) {
 
 	if(exitCode != undefined) process.exitCode = exitCode;
 
-	log("Shutting down init worker!");
+	log("Shutting down init worker! mailQueue=" + JSON.stringify(mailQueue));
 
 	if(Object.keys(mailQueue).length > 0) {
 		sendMailInQueue(true, endLog);
@@ -1476,16 +1480,24 @@ function exit(exitCode) {
 	else endLog();
 
 	function endLog() {
-		initLogStream.ended = true;
-		initLogStream.end(function() {
+		if(initLogStream) {
+			initLogStream.ended = true;
+			initLogStream.end(function() {
 
-			// note: initLogStream.closed is still false !..
+				// note: initLogStream.closed is still false !..
 
+				if(typeof process.disconnect == "function") process.disconnect(); // Only available when we get spawned from another proces!?
+
+				exitNow();
+
+			});
+		}
+		else {
 			if(typeof process.disconnect == "function") process.disconnect(); // Only available when we get spawned from another proces!?
 
 			exitNow();
+		}
 
-		});
 	}
 
 	function exitNow() {

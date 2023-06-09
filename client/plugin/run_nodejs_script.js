@@ -1239,6 +1239,11 @@
 							delete envProd.PROD;
 							envProd.DEV = "true";
 
+							// It's ok for the dirs to be different
+							delete envProd.PWD
+							delete envRunNodejs.PWD;
+
+
 							compareObjects(envProd, "envProd", envRunNodejs, "envRunNodejs");
 
 							cleanup();
@@ -1264,9 +1269,9 @@
 				if(EDITOR.files[logFile]) EDITOR.closeFile(logFile);
 
 				EDITOR.deleteFile(packageJsonPath, function(err) {
-					if(err) throw err;
+					if(err && err.code != "ENOENT") throw err;
 					EDITOR.deleteFile(logFile, function(err) {
-						if(err) throw err;
+						if(err && err.code != "ENOENT") throw err;
 						if(cleanupCallback) cleanupCallback();
 						else callback(true);
 					});

@@ -1894,7 +1894,7 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, nodePath, c
 			silent: true // Makes it possible to capture stdout and stderr, otherwise it will use this process's stdout and stderr
 		};
 		
-		nodeScriptOptions.env.MYNAME = user.name;
+		nodeScriptOptions.env.USER = user.name;
 		nodeScriptOptions.env.DEV = true;
 		nodeScriptOptions.env.TLD = TLD;
 		

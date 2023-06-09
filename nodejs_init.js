@@ -415,10 +415,15 @@ function startNodejsInitWorker(homeDir, username, uid, gid, messageToWorker) {
 			//var args = ["netns", "exec", username, "sudo -u " + username, workerNode, workerScript].concat(workerArgs);
 			var args = ["netns", "exec", username, workerNode, workerScript].concat(workerArgs);
 			var netnsIP = UTIL.int2ip(167772162 + uid); // Starts on 10.0.0.2 then adds the uid to get a unique local IP address
-			if(!INSIDE_DOCKER) {
+			
+			if(INSIDE_DOCKER) {
+				spawnOptions.env.NO_NETNS = "true";
+			}
+			else { // When not inside docker
 				spawnOptions.env.HOST = netnsIP;
 				spawnOptions.env.DISPLAY = netnsIP + ":" + uid; // Users must first create their display using display.start
 			}
+
 			spawnOptions.shell = "/bin/dash";
 			
 			spawnOptions.stdio = ['pipe', 'pipe', 'pipe', "ipc"]; // ipc needed for sending messages to the worker
