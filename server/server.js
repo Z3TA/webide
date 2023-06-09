@@ -68,6 +68,8 @@ var module_readlineSync = require('readline-sync');
 //var module_copyDirRecursive = require("../shared/copyDirRecursive.js");
 //var module_rmDirRecursive = require("../shared/rmDirRecursive.js");
 
+
+
 // Optional modules:
 try {
 	var module_generator = require('generate-password');
@@ -5142,16 +5144,16 @@ function createUserWorker(username, uid, gid, homeDir, groups, rootPath) {
 	// Using spawn instead of fork to be able to use Linux network namespaces
 	
 	spawnOptions.env = {
-		username: username,
 		HOME: homeDir,
 		USER: username,
 		LOGNAME: username,
-		USER_NAME: username,
 		//JAVA_OPTS: '-XX:+IgnoreUnrecognizedVMOptions --add-modules' // Makes it possible to run tools in ~/Android/Sdk/tools/bin
 		JAVA_HOME: HOME_DIR + username + "/Android/android-studio/jre/",
 		ANDROID_HOME:  HOME_DIR + username + "/Android/Sdk",
 		EDITOR: "webide", // Assume bin/webider is copied to /usr/local/bin/
-		VISUAL: "webide"
+		VISUAL: "webide",
+		UID: uid,
+		GID: gid
 	}
 	
 	// The paths will be checked in order (so put local first)
@@ -5159,17 +5161,16 @@ function createUserWorker(username, uid, gid, homeDir, groups, rootPath) {
 	spawnOptions.env["NPM_CONFIG_PREFIX"] = homeDir + ".npm-packages";
 	spawnOptions.env.NPM_PACKAGES = homeDir + ".npm-packages";
 
-	if(groups) {
-		// we have to manually serialize objects!
-		spawnOptions.env.groups = JSON.stringify(groups);
-	}
+	// we have to manually serialize objects!
+	spawnOptions.env.GROUPS = JSON.stringify(groups);
+	
 	
 	// For forking when running in the Termux Android app
 	if(module_os.platform()=="android") {
 		spawnOptions.env["LD_LIBRARY_PATH"] = "/data/data/com.termux/files/usr/lib";
 	}
 	
-	if(DOMAIN) spawnOptions.env.tld = DOMAIN;
+	if(DOMAIN) spawnOptions.env.TLD = DOMAIN;
 
 	// Need to start the worker as root if network namespaces are used!
 	if(NO_NETNS) {
@@ -5185,8 +5186,8 @@ function createUserWorker(username, uid, gid, homeDir, groups, rootPath) {
 	}
 	else {
 		// Spawning as root
-		spawnOptions.env.uid = uid;
-		spawnOptions.env.gid = gid;
+		spawnOptions.env.UID = uid;
+		spawnOptions.env.GID = gid;
 		
 		// Assume unix like system
 		

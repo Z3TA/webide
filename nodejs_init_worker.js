@@ -51,11 +51,11 @@ var DOMAIN = getArg(["domain", "domain", "tld"]) || DEFAULT.domain;
 var ADMIN_EMAIL = getArg(["email", "email", "mail", "admin", "admin_email", "admin_mail"]) || DEFAULT.admin_email; // Errors with This script is sent here
 
 var UTIL = require("./client/UTIL.js");
-var HOMEDIR = getArg(["home", "home", "homeDir"]) || process.env.homeDir;
-var EMAIL = getArg(["email", "email"]) || process.env.email; // E-mail address of the user. An service specific adress can also be specified in package.json!
-var UID = getArg(["uid", "uid"]) || process.env.uid;
-var GID = getArg(["gid", "gid"]) || process.env.gid;
-var USERNAME = getArg(["user", "user", "username"]) || process.env.user;
+var HOME_DIR = getArg(["home", "home", "homeDir"]) || process.env.HOME;
+var EMAIL = getArg(["email", "email"]) || process.env.EMAIL; // E-mail address of the user. An service specific adress can also be specified in package.json!
+var UID = getArg(["uid", "uid"]) || process.env.UID;
+var GID = getArg(["gid", "gid"]) || process.env.GID;
+var USERNAME = getArg(["user", "user", "username"]) || process.env.USER;
 var INIT_MESSAGE = getArg(["action", "action", "msg", "message"]) || process.env.messageToInitWorker; // JSON: {pathToFolder: {action: action, id:id}}
 
 
@@ -83,7 +83,7 @@ var SMTP_TRANSPORT = require('nodemailer-smtp-transport');
 
 var TLD = DEFAULT.domain;
 
-if(!HOMEDIR) return hardError(new Error("No HOMEDIR specified. Use argument: --homeDir=/home/username/"));
+if(!HOME_DIR) return hardError(new Error("No HOME_DIR specified. Use argument: --homeDir=/home/username/"));
 if(!UID) return hardError(new Error("No UID specified. Use argument: --uid=123"));
 if(!GID) return hardError(new Error("No UID specified. Use argument: --gid=123"));
 if(!USERNAME) return hardError(new Error("No USERNAME specified. Use argument: --user=123"));
@@ -101,9 +101,9 @@ var WARN = 4;
 var ERR = 3; // <3>This is an ERR level message
 var ERROR = 3;
 
-HOMEDIR = UTIL.trailingSlash(HOMEDIR); // Make sure it ends with a slash
+HOME_DIR = UTIL.trailingSlash(HOME_DIR); // Make sure it ends with a slash
 
-var USER_PROD_FOLDER = UTIL.joinPaths(HOMEDIR, ".webide/prod/");
+var USER_PROD_FOLDER = UTIL.joinPaths(HOME_DIR, ".webide/prod/");
 
 
 var ERR_GENERAL_HARD_ERROR = 100;
@@ -145,11 +145,32 @@ posix.initgroups(USERNAME, GID);
 
 process.setuid(UID);
 
+//log("process.env.GROUPS=" + process.env.GROUPS);
+if(process.env.GROUPS) {
+	try {
+		var groups = JSON.parse(process.env.GROUPS);
+	}
+	catch(err) {
+		throw new Error("Unable to parse process.env.GROUPS=" + process.env.GROUPS + " Error: " + err.message);
+	}
+
+	for(var group in groups) {
+		log("initgroups(" + username + ", " + groups[group] + ") name=" + group, INFO);
+		try {
+			posix.initgroups(username, parseInt(groups[group])); // Group needs to be an integer (number)
+		}
+		catch(err) {
+			log("initgroups(" + username + ", " + groups[group] + ") name=" + group + " failed: " + err.message, INFO);
+		}
+	}
+}
+
+
 
 if(process.getuid && process.getuid() === 0) return hardError(new Error("Failed to change user! Worker process is still root! process.getuid()=" + process.getuid()));
 
 
-var initLogFilePath = UTIL.joinPaths(HOMEDIR, "log/nodejs_init_worker.log");
+var initLogFilePath = UTIL.joinPaths(HOME_DIR, "log/nodejs_init_worker.log");
 var fs = require("fs");
 var initLogStream = fs.createWriteStream(initLogFilePath, {'flags': 'a'});
 
@@ -371,7 +392,7 @@ function findScriptList(callback) {
 
 		var json = scripts.map(function(script) {
 			/*
-				{main: scriptFilePath, name: findFile, pathToFolder: UTIL.trailingSlash(pathToFolder), log: HOMEDIR + "log/" + folderItem + ".log"}
+				{main: scriptFilePath, name: findFile, pathToFolder: UTIL.trailingSlash(pathToFolder), log: HOME_DIR + "log/" + folderItem + ".log"}
 			*/
 
 			return {
@@ -688,7 +709,7 @@ function start(pathToFolder, callback) {
 							var scriptFilePath = path.join(pathToFolder, folderItem);
 							
 							if(folderItem == findFile + ".js") {
-								startService({scriptPath: scriptFilePath, projectName: findFile, pathToFolder: pathToFolder, logFilePath: HOMEDIR+"log/" + folderItem + ".log", email: EMAIL}, function(err) {
+								startService({scriptPath: scriptFilePath, projectName: findFile, pathToFolder: pathToFolder, logFilePath: HOME_DIR+"log/" + folderItem + ".log", email: EMAIL}, function(err) {
 									callback(err);
 								});
 							}
@@ -713,7 +734,7 @@ function start(pathToFolder, callback) {
 				var path = require("path");
 				var mainFile = path.join(pathToFolder, json.main);
 				var nodeVersion = json.engines && json.engines.node;
-				startService({scriptPath: mainFile, projectName: name, pathToFolder: pathToFolder, logFilePath: HOMEDIR+"log/" + name + ".log", email: json.email || EMAIL, nodeVersion: nodeVersion}, function(err) {
+				startService({scriptPath: mainFile, projectName: name, pathToFolder: pathToFolder, logFilePath: HOME_DIR+"log/" + name + ".log", email: json.email || EMAIL, nodeVersion: nodeVersion}, function(err) {
 					callback(err);
 				});
 				
@@ -814,7 +835,7 @@ function findScripts(pathToFolder, callback) {
 								
 								var scriptFilePath = path.join(pathToFolder, folderItem);
 								
-								if(folderItem == findFile + ".js") scripts.push({main: scriptFilePath, name: findFile, pathToFolder: UTIL.trailingSlash(pathToFolder), log: HOMEDIR + "log/" + folderItem + ".log"});
+								if(folderItem == findFile + ".js") scripts.push({main: scriptFilePath, name: findFile, pathToFolder: UTIL.trailingSlash(pathToFolder), log: HOME_DIR + "log/" + folderItem + ".log"});
 								
 							});
 						}
@@ -839,7 +860,7 @@ function findScripts(pathToFolder, callback) {
 					var name = json.name || findFile;
 					var mainFile = path.join(pathToFolder, json.main);
 					var nodeVersion = json.engines && json.engines.node;
-					scripts.push({main: mainFile, name: name, pathToFolder: UTIL.trailingSlash(pathToFolder), log: HOMEDIR + "log/" + name + ".log", email: json.email, nodeVersion: nodeVersion});
+					scripts.push({main: mainFile, name: name, pathToFolder: UTIL.trailingSlash(pathToFolder), log: HOME_DIR + "log/" + name + ".log", email: json.email, nodeVersion: nodeVersion});
 				}
 				else return log(packageJson + " has no main file entry!");
 				
@@ -896,14 +917,25 @@ function startService(options, callback) {
 	var arg = [];
 	var opt = {
 		silent: true,
-		env: {
-			prod: true, // Tell scripts we are in "production"
-			myName: USERNAME,
-			tld: TLD,
-			PATH: "/usr/bin:/bin:/.npm-packages/bin", // Able to find "executables"
-			NPM_CONFIG_PREFIX: "/.npm-packages", // Help npm figure out where global packages are
-		}
+		env: process.env
 	};
+
+	opt.env.JAVA_HOME = HOME_DIR + USERNAME + "/Android/android-studio/jre/",
+	opt.env.ANDROID_HOME =  HOME_DIR + USERNAME + "/Android/Sdk",
+	opt.env.EDITOR = "webide", // Assume bin/webider is copied to /usr/local/bin/
+	opt.env.VISUAL = "webide",
+
+	opt.env.GROUPS = "{}";
+
+	opt.env.NPM_CONFIG_PREFIX = HOME_DIR + ".npm-packages";
+	opt.env.NPM_PACKAGES = HOME_DIR + ".npm-packages";
+
+	opt.env.LOGNAME = USERNAME;
+	opt.env.PROD = true; // Tell scripts we are in "production"
+	opt.env.TLD = TLD;
+	opt.env.PATH = "/usr/bin:/bin:/.npm-packages/bin"; // Able to find "executables"
+	opt.env.NPM_CONFIG_PREFIX = "/.npm-packages"; // Help npm figure out where global packages are
+
 
 	var childProcess;
 	

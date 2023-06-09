@@ -50,7 +50,7 @@ if(!module_Websocket) console.log("Unable to load module: ws");
 
 
 var nodejsDeamonManagerPort = DEFAULT.nodejs_deamon_manager_port;
-var TLD = getArg(["domain", "domain", "tld"]) || process.env.tld || DEFAULT.domain;
+var TLD = getArg(["domain", "domain", "tld"]) || process.env.TLD || DEFAULT.domain;
 
 var LOGLEVEL = getArg(["ll", "loglevel"]) || 7; // Will show log messages lower then or equal to this number
 logModule.setLogLevel(LOGLEVEL);
@@ -70,7 +70,7 @@ var DEBUG = 7;
 
 var VIRTUAL_ROOT = !!(getArg(["virtualroot", "virtualroot"]) || false);
 
-var USERNAME = getArg(["user", "username"])
+var USERNAME = getArg(["user", "username"]) || process.env.USER;
 var HOME = getArg(["home", "home"]) || '/home/' + USERNAME;
 
 HOME = UTIL.trailingSlash(HOME);
@@ -84,26 +84,26 @@ var module_fs = require("fs"); // todo: Replace all var fs = require("fs");
 
 console.log("================================== user_worker.js ==================================");
 
-var username = process.env.username;
-var uid = parseInt(process.env.uid);
-var gid = parseInt(process.env.gid);
+var username = USERNAME;
+var uid = parseInt(process.env.UID);
+var gid = parseInt(process.env.GID);
 
 console.log("username=" + username + " uid=" + uid + " gid=" + gid + " process.env=" + JSON.stringify(process.env));
 
-	/* 
+/* 
 	
-		posix seem to need node module version 48? 46? See: https://nodejs.org/en/download/releases/
-		nvm install or nvm use (the version you want)
-		npm rebuild
+	posix seem to need node module version 48? 46? See: https://nodejs.org/en/download/releases/
+	nvm install or nvm use (the version you want)
+	npm rebuild
 		
 	The posix module is needed because user_worker.js needs to be started as root
 	- in order for ip netns exec to work
 	
-	*/
+*/
 	
 // If we are in a network namespace with a uniqie /etc/passwd module_os.userInfo() will throw because it wont fint root in the local/namespace /etc/passwd 
 try {
-var info = module_os.userInfo ? module_os.userInfo() : {username: "ROOT", uid: process.geteuid()};
+	var info = module_os.userInfo ? module_os.userInfo() : {username: "ROOT", uid: process.geteuid()};
 }
 catch(err) {
 	log(err.message);
@@ -119,41 +119,41 @@ if(info.uid==0) {
 		console.warn("User worker is running as root, but no uid given!");
 	}
 	else {
-	var posix = require("posix");
+		var posix = require("posix");
 	
-	log("Before: egid=" + posix.getegid() + " euid=" + posix.geteuid() + " pgid=" + posix.getpgid(gid) + "  ", DEBUG);
-	
-	
-	log("setegid to " + gid, DEBUG);
-	posix.setegid(gid);
-	//process.setgid(gid);
-	
-	//posix.setegid(gid); // Doesn't seem to do anything
-	posix.setregid(gid, gid); // Doesn't seem to do anything
+		log("Before: egid=" + posix.getegid() + " euid=" + posix.geteuid() + " pgid=" + posix.getpgid(gid) + "  ", DEBUG);
 	
 	
-	// We must init groups or the user will be member of the root group!!
-	posix.initgroups(username, gid);
+		log("setegid to " + gid, DEBUG);
+		posix.setegid(gid);
+		//process.setgid(gid);
 	
-	log("process.env.groups=" + process.env.groups);
-	if(process.env.groups) {
-		try {
-			var groups = JSON.parse(process.env.groups);
-		}
-		catch(err) {
-			throw new Error("Unable to parse process.env.groups=" + process.env.groups + " Error: " + err.message);
-		}
-		
-		for(var group in groups) {
-			log("initgroups(" + username + ", " + groups[group] + ") name=" + group, INFO);
+		//posix.setegid(gid); // Doesn't seem to do anything
+		posix.setregid(gid, gid); // Doesn't seem to do anything
+	
+	
+		// We must init groups or the user will be member of the root group!!
+		posix.initgroups(username, gid);
+	
+		log("process.env.GROUPS=" + process.env.GROUPS);
+		if(process.env.GROUPS) {
 			try {
-				posix.initgroups(username, parseInt(groups[group])); // Group needs to be an integer (number)
+				var groups = JSON.parse(process.env.GROUPS);
 			}
 			catch(err) {
-				log("initgroups(" + username + ", " + groups[group] + ") name=" + group + " failed: " + err.message, INFO);
+				throw new Error("Unable to parse process.env.GROUPS=" + process.env.GROUPS + " Error: " + err.message);
+			}
+		
+			for(var group in groups) {
+				log("initgroups(" + username + ", " + groups[group] + ") name=" + group, INFO);
+				try {
+					posix.initgroups(username, parseInt(groups[group])); // Group needs to be an integer (number)
+				}
+				catch(err) {
+					log("initgroups(" + username + ", " + groups[group] + ") name=" + group + " failed: " + err.message, INFO);
+				}
 			}
 		}
-	}
 	
 	log("seteuid to " + uid, DEBUG);
 	//posix.seteuid(uid); // Wrapper for process.setuid
@@ -206,7 +206,7 @@ if(isRoot) {
 
 //if(isRoot) throw new Error("Can not run worker process as superuser!");
 
-var processUser = process.env.SUDO_USER || process.env.LOGNAME || process.env.USER || process.env.LNAME || process.env.USERNAME || process.env.username;
+var processUser = process.env.SUDO_USER || process.env.LOGNAME || process.env.USER || process.env.LNAME || process.env.USERNAME;
 
 if(process.getuid) log("User worker process is running with uid=" + process.getuid() + " (" + processUser + ") and gid=" +  process.getgid());
 else log("Unable to get process uid!", logModule.WARN);
@@ -1894,10 +1894,9 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, nodePath, c
 			silent: true // Makes it possible to capture stdout and stderr, otherwise it will use this process's stdout and stderr
 		};
 		
-		nodeScriptOptions.env.myName = user.name;
-		nodeScriptOptions.env.dev = true;
-		nodeScriptOptions.env.tld = TLD;
-		nodeScriptOptions.env.TLD = TLD; // Have both tld and TLD because it's not obvious which one to use
+		nodeScriptOptions.env.MYNAME = user.name;
+		nodeScriptOptions.env.DEV = true;
+		nodeScriptOptions.env.TLD = TLD;
 		
 		// We want the env variables to be like if we had run the command from terminal/bash shell
 		nodeScriptOptions.env.PWD = directory;

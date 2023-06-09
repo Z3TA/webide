@@ -1112,11 +1112,14 @@
 		var folderName = UTIL.getFolderName(folderPath);
 		var logFile = UTIL.joinPaths(EDITOR.user.homeDir, "log/", folderName + ".log");
 		var packageJsonPath = UTIL.joinPaths(folderPath, "package.json");
+		var prodPw = "123";
 
-		var envTextFromTerminalNodejs = "";
-		var envTextFromNodejsRun = "";
-		var envTextFromProduction = "";
+		var envTerminal = "";
+		var envRunNodejs = "";
+		var envProd = "";
 
+		cleanup(function(err) {
+			if(err) throw err;
 
 		EDITOR.createPath(folderPath, function(err) {
 			if(err) throw err;
@@ -1147,12 +1150,17 @@
 
 								var text = stdoutFile.text;
 
-								var start = text.indexOf("{");
-								var end = text.indexOf("}") + 1;
+								var start = text.indexOf("{\n");
+								var end = text.indexOf("}\n") + 1;
+								var str = text.slice(start, end);
+								try {
+									envRunNodejs = JSON.parse(str);
+								}
+								catch(err) {
+									throw new Error("Unable to parse start=" + start + " end=" + end + " str=" + str + " Error: " + err.message);
+								}
 
-								envTextFromNodejsRun = JSON.parse(text.slice(start, end));
-
-								console.log("envTextFromNodejsRun=" + JSON.stringify(envTextFromNodejsRun, null, 2));
+								console.log("envRunNodejs=" + JSON.stringify(envRunNodejs, null, 2));
 
 								runInTerminal();
 							}
@@ -1160,6 +1168,7 @@
 					});
 				});
 			});
+		});
 		});
 
 		function runInTerminal() {
@@ -1170,28 +1179,27 @@
 
 				//console.log("resp=" + JSON.stringify(resp));
 
-				envTextFromTerminalNodejs = JSON.parse(resp.stdout);
+				envTerminal = JSON.parse(resp.stdout);
 
-				console.log("envTextFromTerminalNodejs=" + JSON.stringify(envTextFromTerminalNodejs, null, 2));
+				console.log("envTerminal=" + JSON.stringify(envTerminal, null, 2));
 
-				compareObjects(envTextFromTerminalNodejs, envTextFromNodejsRun);
+				compareObjects(envTerminal, "envTerminal", envRunNodejs, "envRunNodejs");
 
 				runInprodDeployment();
 			});
 		}
 
-		function runInprodDeployment(pw) {
+		function runInprodDeployment() {
 			// Run the script "in production" and see if we get the same result
 			
 			var packageJsonStr = '{"name": "test_env","version": "1.0.0","description": "env outpout","author": "ltest1","main": "test_env.js"}';
 			EDITOR.saveToDisk(packageJsonPath, packageJsonStr, function(err) {
 				if(err) throw err;
 
-				if(pw==undefined) pw = "123";
-				CLIENT.cmd("nodejs_init_deploy", {folder: folderPath, pw: pw}, function(err, resp) {
+				CLIENT.cmd("nodejs_init_deploy", {folder: folderPath, pw: prodPw}, function(err, resp) {
 					if(err && err.message.indexOf("password") != -1) {
-						var pw = prompt("Enter user password in order to send test_env to prod:");
-						return runInprodDeployment(pw);
+						prodPw = prompt("Enter user password in order to send test_env to prod:");
+						return runInprodDeployment();
 					}
 					else if(err) throw err;
 
@@ -1209,7 +1217,7 @@
 
 							console.log(text);
 
-							var start = text.indexOf("{");
+							var start = text.indexOf("{\n");
 
 							if(start == -1) {
 								console.log("No output in " + logFile);
@@ -1217,24 +1225,21 @@
 								return setTimeout(parse, 200);
 							}
 
-							var end = text.indexOf("}") + 1;
-
-							envTextFromProduction = text.slice(start, end);
-
-							console.log("envTextFromProduction=" + envTextFromProduction);
-
+							var end = text.indexOf("}\n") + 1;
+							var str = text.slice(start, end);
+							
 							// Relace prod:true with dev:true so we can compare them
 							try {
-								var json = JSON.parse(envTextFromProduction);
+								envProd = JSON.parse(str);
 							}
 							catch(err) {
-								throw new Error("Unable to parse: envTextFromProduction=" + envTextFromProduction + " Error: " + err.message);
+								throw new Error("Unable to parse: str=" + str + " Error: " + err.message);
 							}
 
-							delete json.prod;
-							json.dev = "true";
+							delete envProd.PROD;
+							envProd.DEV = "true";
 
-							compareObjects(envTextFromProduction, envTextFromNodejsRun);
+							compareObjects(envProd, "envProd", envRunNodejs, "envRunNodejs");
 
 							cleanup();
 						});
@@ -1245,38 +1250,44 @@
 		}
 
 		function cleanup(cleanupCallback) {
-			var nameOfFolder = UTIL.getFolderName(folder);
-			var folder = UTIL.getDirectoryFromPath(filePath);
-			CLIENT.cmd("nodejs_init_remove", {folder: folder, pw: pw}, function(err, resp) {
-				if(err) throw err;
-				EDITOR.closeFile(filePath, function(err) {
+			var nameOfFolder = UTIL.getFolderName(folderPath);
+			CLIENT.cmd("nodejs_init_remove", {folder: folderPath, pw: prodPw}, function(err, resp) {
+				if(err) {
+					console.log("nodejs_init_remove: err.code=" + err.code);
+					if(err.code == 404) {
+						// The service did not exist, so we can ignore the error
+					}
+					else throw err;
+				}
+
+				if(EDITOR.files[filePath]) EDITOR.closeFile(filePath);
+				if(EDITOR.files[logFile]) EDITOR.closeFile(logFile);
+
+				EDITOR.deleteFile(packageJsonPath, function(err) {
 					if(err) throw err;
-					EDITOR.deleteFile(packageJsonPath, function(err) {
+					EDITOR.deleteFile(logFile, function(err) {
 						if(err) throw err;
-						EDITOR.deleteFile(logFile, function(err) {
-							if(err) throw err;
-							if(cleanupCallback) cleanupCallback();
-							else callback(true);
-						});
+						if(cleanupCallback) cleanupCallback();
+						else callback(true);
 					});
 				});
 			});
 		}
 
-		function compareObjects(a, b) {
+		function compareObjects(a, aName, b, bName) {
 			var keysA = Object.keys(a);
 			var keysB = Object.keys(b);
 
 			for (var i=0; i<keysA.length; i++) {
-				if( keysB.indexOf(keysA[i]) == -1) throw new Error("Key " + keysA[i] + " not in " + JSON.stringify(keysB, null, 2));
+				if( keysB.indexOf(keysA[i]) == -1) throw new Error("Key " + keysA[i] + "=" + a[keysA[i]] + " exist in " + aName + " but not in " + bName + ": " + JSON.stringify(keysB, null, 2));
 			}
 
 			for (var i=0; i<keysB.length; i++) {
-				if( keysA.indexOf(keysB[i]) == -1)  throw new Error("Key " + keysB[i] + " not in " + JSON.stringify(keysA, null, 2));
+				if( keysA.indexOf(keysB[i]) == -1) throw new Error("Key " + keysB[i] + "=" + b[keysB[i]] + " exist in " + bName + " but not in " + aName + ": " + JSON.stringify(keysA, null, 2));
 			}
 
 			for (var i=0; i<keysA.length; i++) {
-				if( a[keysA[i]] != b[keysA[i]] ) throw new Error("Key " + keysA[i] + " does not have the same value: a=" + a[keysA[i]] + " b=" + b[keysA[i]]);
+				if( a[keysA[i]] != b[keysA[i]] ) throw new Error("Key " + keysA[i] + " does not have the same value:  " + aName + "=" + a[keysA[i]] + "  " + bName + "=" + b[keysA[i]]);
 			}
 		}
 

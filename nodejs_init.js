@@ -336,11 +336,11 @@ function startNodejsInitWorker(homeDir, username, uid, gid, messageToWorker) {
 	var spawnOptions = {
 		//execPath: "/usr/bin/nodejs_" + username,
 		env: {
-			homeDir: homeDir,
-			uid: uid,
-			gid: gid,
-			user: username,
-			tld: DOMAIN
+			HOME: homeDir,
+			UID: uid,
+			GID: gid,
+			USER: username,
+			TLD: DOMAIN
 		}
 	};
 	
@@ -348,8 +348,17 @@ function startNodejsInitWorker(homeDir, username, uid, gid, messageToWorker) {
 		spawnOptions.env.messageToInitWorker = JSON.stringify(messageToWorker);
 	}
 
-	restart();
-	
+	readEtcPasswd(username, function(err, passwd) {
+		if(err) throw err;
+
+		var groups = passwd.groups;
+
+		spawnOptions.env.GROUPS = JSON.stringify(groups);
+
+		restart();
+	});
+
+
 	function respondWithErrorMaybe(err) {
 		log("startNodejsInitWorker:respondWithErrorMaybe: messageToWorker=" + JSON.stringify(messageToWorker) + " err.message=" + err.message);
 		if(!messageToWorker) return;
@@ -406,9 +415,10 @@ function startNodejsInitWorker(homeDir, username, uid, gid, messageToWorker) {
 			//var args = ["netns", "exec", username, "sudo -u " + username, workerNode, workerScript].concat(workerArgs);
 			var args = ["netns", "exec", username, workerNode, workerScript].concat(workerArgs);
 			var netnsIP = UTIL.int2ip(167772162 + uid); // Starts on 10.0.0.2 then adds the uid to get a unique local IP address
-			spawnOptions.env.HOST = netnsIP;
-			spawnOptions.env.DISPLAY = netnsIP + ":" + uid; // Users must first create their display using display.start
-			
+			if(!INSIDE_DOCKER) {
+				spawnOptions.env.HOST = netnsIP;
+				spawnOptions.env.DISPLAY = netnsIP + ":" + uid; // Users must first create their display using display.start
+			}
 			spawnOptions.shell = "/bin/dash";
 			
 			spawnOptions.stdio = ['pipe', 'pipe', 'pipe', "ipc"]; // ipc needed for sending messages to the worker
@@ -658,3 +668,91 @@ function sendMail(to, subject, text, from, callback) {
 	});
 }
 
+function readEtcPasswd(username, readEtcPasswdCallback) {
+	if(username == undefined) throw new Error("username=" + username);
+	//log("readEtcPasswd: Check for username=" + username + " in /etc/passwd ...", DEBUG);
+
+	var checked_passwd = false;
+	var checked_groups = false;
+	var error;
+	var info = {groups: {}};
+
+	module_fs.readFile("/etc/group", "utf8", function readEtcPasswdFile(err, str) {
+		checked_groups = true;
+
+		if(err) {
+			log("readEtcPasswd: Unable to read /etc/group !", WARN);
+			error = new Error("Unable to read /etc/group: " + err.message);
+			return doneMaybe();
+		}
+
+		var groups = str.split("\n");
+		for (var i=0, gName, gId, gUsers; i<groups.length; i++) {
+
+			groups[i] = groups[i].split(":");
+			gUsers = groups[i][3];
+
+			//log(JSON.stringify(groups[i]), DEBUG);
+
+			if(gUsers && gUsers.indexOf(username) != -1) {
+				gName = groups[i][0];
+				gId = groups[i][2];
+				info.groups[gName] = gId;
+			}
+		}
+
+		doneMaybe();
+
+	});
+
+	module_fs.readFile("/etc/passwd", "utf8", function readEtcPasswdFile(err, etcPasswd) {
+		checked_passwd = true;
+
+		if(err) {
+			log("readEtcPasswd: Unable to read /etc/passwd !", WARN);
+			error = new Error("Unable to read /etc/passwd: " + err.message);
+			return doneMaybe();
+		}
+		else {
+			// format: testuser2:x:1001:1001:Test user 2,,,:/home/testuser2:/bin/bash
+			var rows = etcPasswd.trim().split("\n");
+
+			for(var i=0, row, pName, pUid, pGid, pDir, pShell; i<rows.length; i++) {
+				row = rows[i].trim().split(":");
+
+				var pName = row[0];
+				var pUid = row[2];
+				var pGid = row[3];
+				var pDir = row[5];
+				var pShell = row[6];
+
+				if(pName == username) {
+					log("readEtcPasswd: Found username=" + username + " in /etc/passwd", DEBUG);
+
+					info.username = username;
+					info.homeDir = UTIL.trailingSlash(pDir);
+					info.uid = parseInt(pUid);
+					info.gid = parseInt(pGid);
+					info.shell = pShell
+
+					return doneMaybe();
+				}
+			}
+
+			log("readEtcPasswd: Did not find username=" + username + " in /etc/passwd", INFO);
+
+			error = new Error("Unable to find username=" + username + " in /etc/passwd ! A server admin need to add the user to the system.");
+			error.code = "USER_NOT_FOUND";
+			// Add user account: sudo useradd -r -s /bin/false nameofuser
+		}
+
+		doneMaybe();
+	});
+
+	function doneMaybe() {
+		if(checked_passwd && checked_groups) {
+			readEtcPasswdCallback(error, info);
+			readEtcPasswdCallback = null;
+		}
+	}
+}
