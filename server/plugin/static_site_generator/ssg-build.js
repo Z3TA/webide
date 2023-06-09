@@ -639,7 +639,10 @@ function compile(baseTree) {
 				
 			}
 			
-			
+			if(!Array.isArray(bodyOnloads)) {
+				throw new Error("bodyOnloads=" + bodyOnloads + " is not an Array!");
+			}
+
 			for(var i=0; i<footers.length; i++) {
 				// No head data in the footers.
 				
@@ -1582,6 +1585,9 @@ function toUniqueArray(str) {
 function mergeUnique(org, arr) {
 	// Pushes items from arr that does not exist in org to org
 	
+	if(!Array.isArray(org)) throw new Error("org=" + org + " is not an array!");
+	if(!Array.isArray(arr)) throw new Error("arr=" + arr + " is not an array!");
+
 	var item;
 	
 	for(var i=0; i<arr.length; i++) {
