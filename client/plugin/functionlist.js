@@ -258,7 +258,7 @@ leftColumn.removeChild(functionListWrap);
 		
 		// Prevent function list from updating when you get text in another file (for exampel a terminal file)
 		if(file != EDITOR.currentFile) {
-			console.log("Not updating function list because file=" + file && file.path + " is not currently in view: EDITOR.currentFile=" + EDITOR.currentFile && EDITOR.currentFile.path);
+			console.log("Not updating function list because file=" + (file && file.path) + " is not currently in view: EDITOR.currentFile=" + (EDITOR.currentFile && EDITOR.currentFile.path));
 			return true; 
 		}
 

@@ -38,6 +38,11 @@ Feature list (Not ordered/prioritized)
 
 ---
 
+Need a Node.js REPL for trying stuff...
+often I want to see if a regexp works
+
+---
+
 When all text is selected (select all) and copying, include the white space!!!!!!!
 
 ---

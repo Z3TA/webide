@@ -4,7 +4,7 @@
 (function() {
 
 	EDITOR.plugin({
-		desc: "Autocomplete JSX components",
+		desc: "Autocomplete math calculations",
 		load: function loadAutocompleteCalcMath() {
 
 			var order = 150; // After autocomplete_js.js

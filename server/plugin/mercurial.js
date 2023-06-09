@@ -239,10 +239,12 @@ else console.log("hg clone stdout=" + stdout.slice(0,500) + " ... (" + stdout.le
 				// Warning: Permanently added 'github.com,192.30.253.113' (RSA) to the list of known hosts.
 				// Warning: Permanently added the RSA host key for IP address '192.30.253.112' to the list of known hosts.
 				// Warning: Permanently added the ECDSA host key for IP address '140.82.121.3' to the list of known hosts.
+				// Warning: Permanently added 'github.com,140.82.121.4' (ECDSA) to the list of known hosts.
 
-				var reAddedHost1 = /Warning: Permanently added (.*) \(RSA\) to the list of known hosts\./;
+				var reAddedHost1 = /Warning: Permanently added .* \(.*\) to the list of known hosts\./;
 				var reAddedHost2 = /Warning: Permanently added the (.*) host key for IP address (.*) to the list of known hosts\./;
 				
+
 				var reNoSuchFileOrDirectory = /: No such file or directory$/;
 				
 				stderr = stderr.replace(reAddedHost1, "");

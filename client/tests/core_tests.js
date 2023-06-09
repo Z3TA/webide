@@ -50,6 +50,8 @@
 			file.write("bar\nbaz", false);
 			UTIL.assert(file.text, "foobar\nbaz");
 
+			EDITOR.closeFile(file);
+
 			callback(true);
 		});
 	});

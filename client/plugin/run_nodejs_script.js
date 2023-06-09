@@ -1105,7 +1105,7 @@
 		});
 	});
 	
-	EDITOR.addTest(1, function unifiedEnvVariables(callback) {
+	EDITOR.addTest(function unifiedEnvVariables(callback) {
 		// We want to have the same process.env variables if we start the script from the terminal, as when we start the script using "run with nodejs" from the editors gui
 		var filePath = UTIL.joinPaths(EDITOR.user.homeDir, "test_env/", "test_env.js");
 		var folderPath = UTIL.getDirectoryFromPath(filePath);
@@ -1201,9 +1201,12 @@
 						prodPw = prompt("Enter user password in order to send test_env to prod:");
 						return runInprodDeployment();
 					}
-					else if(err) throw err;
-
-					console.log( JSON.stringify(resp, null, 2) );
+					else if(err) {
+						console.log("nodejs_init_deploy: Error: " + err .message + " (code=" + err.code + ")");
+						throw err;
+					}
+					
+					console.log("nodejs_init_deploy: resp=" + JSON.stringify(resp, null, 2) );
 					
 					parse();
 
@@ -1264,7 +1267,8 @@
 					}
 					else throw err;
 				}
-
+				var stdoutFile = filePath + ".stdout";
+				if(EDITOR.files[stdoutFile]) EDITOR.closeFile(stdoutFile);
 				if(EDITOR.files[filePath]) EDITOR.closeFile(filePath);
 				if(EDITOR.files[logFile]) EDITOR.closeFile(logFile);
 

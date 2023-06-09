@@ -2847,13 +2847,10 @@ whenAllFilesReloaded();
 	});
 
 	EDITOR.addTest(function testImportStaticSiteSettings(callback) {
-
-		// todo: cleanup afterwards !?
-
 		var homeDir = EDITOR.user.homeDir;
 
 		var exampleCfg = {
-			"name": "Test",
+			"name": "testImportStaticSiteSettings",
 			"projectFolder": UTIL.joinPaths(homeDir, "ssg_blog_example/"),
 			"source": UTIL.joinPaths(homeDir, "ssg_blog_example/source/"),
 			"preview": UTIL.joinPaths(homeDir, "wwwpub/test_preview/"),
@@ -2870,15 +2867,32 @@ whenAllFilesReloaded();
 
 		var cfgPath = UTIL.joinPaths(homeDir,"test-ssg-cfg.json");
 
+		cleanup();
+
 		EDITOR.saveToDisk(cfgPath, JSON.stringify(exampleCfg, null, 2), function(err) {
 			if(err) throw err;
 			showSSG();
 			importCfg(cfgPath, function(err) {
 				if(err) throw err;
 				hideSSG();
+				cleanup();
 				callback(true);
 			});
 		});
+
+		function cleanup() {
+			for (var i=0; i<sites.length; i++) {
+				console.log(JSON.stringify(sites[i]));
+				if( sites[i].name == exampleCfg.name ) {
+					var site = sites[i];
+					break;
+				}
+			}
+			if(!site) return;
+
+			sites.splice(sites.indexOf(site), 1);
+			EDITOR.storage.setItem("cmsjz_sites", JSON.stringify(sites, null, 2)); // Save all sites in local-storage
+		}
 
 	});
 

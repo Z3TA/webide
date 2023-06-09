@@ -439,21 +439,34 @@
 		launchServe({sourcePage: fileHtml, testFile: "previewAutocomplete.htm"}, function(err, preview, cleanup) {
 			if(err) throw err;
 			
-			setTimeout(function() {
-				
+			var retry = 0;
 			var file = preview.sourceFile;
-			var index = file.text.indexOf(var1) + var1.length;
-			var atCaret = autoComplete(file, index);
-			UTIL.assert(atCaret.word, "document.activeElement");
-			
-			var index = file.text.indexOf(var2) + var2.length;
-			var atCaret = autoComplete(file, index);
-			UTIL.assert(atCaret.word, '.innerHTML');
-			
-			cleanup();
-			callback(true);
-			}, 2000); // Wait for the window to load (some times it can take a very long time)
-			
+
+			testA();
+
+			function testA() {
+				
+				var index = file.text.indexOf(var1) + var1.length;
+				var atCaret = autoComplete(file, index);
+
+				if(atCaret.word != "document.activeElement") {
+					if(retry++ <10) {
+						console.log("Autocomplete failed, atCaret.word=" + atCaret.word + "");
+						setTimeout(testA, 500);
+					}
+					else throw new Error("Autocomplete failed, atCaret.word=" + atCaret.word + " retry=" + retry);
+				}
+				else testB();
+			}
+
+			function testB() {
+				var index = file.text.indexOf(var2) + var2.length;
+				var atCaret = autoComplete(file, index);
+				UTIL.assert(atCaret.word, '.innerHTML');
+
+				cleanup();
+				callback(true);
+			}
 		});
 		
 		function autoComplete(file, index) {
