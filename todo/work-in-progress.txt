@@ -6,12 +6,15 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
-Running a nodejs script from the terminal, and running it from the windows menu: Node.js run script,
-does not get the same process.env!!!
 
-process.env also need to be the same when adding a script to production!!!
 
-env need to be consistent everywhere you run a script! From the editor, from the termina, and in production!
+---
+
+Can't open SQLITE db in prod!
+
+---
+
+regression: editor input loses focus when using Shift+Ctrl+Backspace to swtich between files
 
 ---
 
