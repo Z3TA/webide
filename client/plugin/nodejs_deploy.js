@@ -497,7 +497,21 @@
 						askForPassword(message, function(pw) {
 							if(pw == null) return;
 
-							CLIENT.cmd("nodejs_init_deploy", {folder: folder, pw: pw}, function(err, resp) {
+							// Show fake brogress bar
+							var progress = document.getElementById("progress");
+							progress.style.display="block";
+							EDITOR.resizeNeeded();
+							progress.max = 120;
+							progress.value = 0;
+							var progressInterval = setInterval(function() {
+								progress.value = progress.value + 1;
+							}, 1000);
+
+							CLIENT.cmd("nodejs_init_deploy", {folder: folder, pw: pw}, 120000, function(err, resp) {
+								clearInterval(progressInterval);
+								progress.style.display="none";
+								EDITOR.resizeNeeded();
+
 								if(err) {
 									alertBox(err.message, dialogCode);
 									if(callback) callback(err);
