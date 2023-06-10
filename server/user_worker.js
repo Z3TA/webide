@@ -1043,20 +1043,45 @@ API.nodejs_init_deploy = function nodejs_init_deploy(user, json, callback) {
 				if(err.code != "EEXIST") return callback(err);
 			}
 			
-			copyFolderRecursively(folder, prodFolder, {filter: filterPath}, function(copyFolderErr) {
-				if(copyFolderErr) return callback(copyFolderErr);
-				else {
-					nodejs_init_action("restart", prodFolder, pw, callback);
-				}
-			});
-			
+			console.log("nodejs_init_deploy: Copying folder...");
+
+			if(process.platform === "win32") {
+				copyFolderRecursively(folder, prodFolder, {filter: filterPath}, function(copyFolderErr) {
+					if(copyFolderErr) return callback(copyFolderErr);
+					else {
+						nodejs_init_action("restart", prodFolder, pw, callback);
+					}
+				});
+			}
+			else {
+				/*
+					copyFolderRecursively is too slow. tar is fast.
+					could use rsync or pipe tar through ssh if remote
+				*/
+				fs.mkdir(prodFolder, function(err) {
+					if(err) {
+						if(err.code != "EEXIST") return callback(err);
+					}
+					var cmd = "tar cf - . | (cd " + prodFolder + " && tar xvf -)";
+					var cwd = folder;
+					API.run(user, {cwd: folder, command: cmd}, function(err, resp) {
+						if(err) return callback("Unable to copy into prod: " + err.message);
+
+						console.log("nodejs_init_deploy: copy stdout=" + resp.stdout);
+						console.log("nodejs_init_deploy: copy stderr=" + resp.stderr);
+
+						nodejs_init_action("restart", prodFolder, pw, callback);
+					});
+				});
+			}
+
 			function filterPath(path) {
 				if(path.match(/data\/?$/)) return false;
 				else return true;
 			}
-			});
 		});
-	}
+	});
+}
 
 API.nodejs_init_ping = function nodejs_init_ping(user, json, callback) {
 	// Check if the init server is alive
