@@ -991,6 +991,7 @@ function startService(options, callback) {
 		}
 		
 		log("Running main script: " + scriptPath, 7);
+		log("nodeVersion=" + nodeVersion, 7);
 		
 		stdHistory.length = 0; // Reset the history
 		
