@@ -52,7 +52,7 @@ function makeSendPush(keys) {
 		var options = {
 			vapidDetails: {
 				// Put your e-mail, or URL to contact page in subject. More info: https://tools.ietf.org/html/draft-thomson-webpush-vapid-02
-				subject: 'mailto: ' + process.env.myName + "@" + process.env.tld,
+				subject: 'mailto: ' + process.env.USER + "@" + process.env.TLD,
 				
 				publicKey: keys.publicKey,
 				privateKey: keys.privateKey
@@ -121,9 +121,9 @@ function getKeys(cb) {
 }
 
 function startServer(httpServer, cb) {
-	if(process.env.myName) {
+	if(process.env.USER) {
 		var appName = "PushNoti".toLowerCase();
-		var unixSocket = "/home/" + process.env.myName + "/sock/" + appName;
+		var unixSocket = "/home/" + process.env.USER + "/sock/" + appName;
 	}
 	else {
 		var port = 8000;
@@ -135,7 +135,7 @@ function startServer(httpServer, cb) {
 	console.log("Changed umask from " + oldMask.toString(8) + " to " + newMask.toString(8));
 	
 	if(unixSocket) {
-		var url = "http://" + appName + "." + process.env.myName + "." + process.env.tld;
+		var url = "http://" + appName + "." + process.env.USER + "." + process.env.TLD;
 	}
 	else {
 		var url = "http://localhost:" + port + "/";

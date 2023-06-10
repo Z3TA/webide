@@ -11,8 +11,8 @@
 	Press Ctrl+F2 to deploy into production.
 	(the project root folder will be copied to a production environment)
 
-	When the script is started in the editor, process.env.dev will exist.
-	When the script is started in production, process.env.prod will exist.
+	When the script is started in the editor, process.env.DEV will exist.
+	When the script is started in production, process.env.PROD will exist.
 
 	Scripts deployed to production will keep running even if you close the editor.
 	Press Ctrl+F4 to stop a in-production script.
@@ -21,8 +21,8 @@
 	
 */
 
-if(process.env.dev) var unixSocket = "%HOMEDIR%sock/http_server_example_dev";
-else if(process.env.prod) var unixSocket = "%HOMEDIR%sock/http_server_example";
+if(process.env.DEV) var unixSocket = "%HOMEDIR%sock/http_server_example_dev";
+else if(process.env.PROD) var unixSocket = "%HOMEDIR%sock/http_server_example";
 else throw new Error("Did not find dev nor prod environment variables!");
 
 // We need the group (www-data) to have write access to the unix socket
@@ -56,6 +56,6 @@ function httpRequest(request, response) {
 	}
 	
 	function notifyListening() {
-	console.log("Listening on http://" + unixSocket.split("/")[4] + "." + process.env.myName + "." + process.env.tld);
+	console.log("Listening on http://" + unixSocket.split("/")[4] + "." + process.env.USER + "." + process.env.TLD);
 	}
 
