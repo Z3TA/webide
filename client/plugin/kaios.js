@@ -45,7 +45,7 @@
 
 
 	// Don't do anything if it's not a KaiOS device!
-	if( UTIL.is("window.navigator.mozApps", "object") ) return;
+	if( !UTIL.is("window.navigator.mozApps", "object") ) return;
 
 	//if(! QUERY_STRING["kaios"] ) return;
 
