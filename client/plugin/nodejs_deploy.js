@@ -678,7 +678,7 @@
 	});
 	
 
-	EDITOR.addTest(1, function runSqliteInProd(testCallback) {
+	EDITOR.addTest(function runSqliteInProd(testCallback) {
 		// The problem was that cwd was in another directory where we did not have write access...
 
 		var dir = UTIL.joinPaths(EDITOR.user.homeDir, "nodejs/sqlite/");

@@ -939,6 +939,8 @@ function startService(options, callback) {
 	// (also change server.js so the PATH is the same in "dev")
 	opt.env.PATH = HOME_DIR + ".npm-packages/bin:" + HOME_DIR + ".local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"; // Able to find "executables"
 	
+	opt.env.PORT = UTIL.joinPaths(HOME_DIR, "sock/", UTIL.getFolderName(pathToFolder));
+
 	delete opt.env.messageToInitWorker;
 
 

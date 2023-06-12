@@ -1105,7 +1105,7 @@
 		});
 	});
 	
-	EDITOR.addTest(function unifiedEnvVariables(callback) {
+	EDITOR.addTest(1, function unifiedEnvVariables(callback) {
 		// We want to have the same process.env variables if we start the script from the terminal, as when we start the script using "run with nodejs" from the editors gui
 		var filePath = UTIL.joinPaths(EDITOR.user.homeDir, "test_env/", "test_env.js");
 		var folderPath = UTIL.getDirectoryFromPath(filePath);
@@ -1121,54 +1121,54 @@
 		cleanup(function(err) {
 			if(err) throw err;
 
-		EDITOR.createPath(folderPath, function(err) {
-			if(err) throw err;
-
-			EDITOR.openFile(filePath, '\nconsole.log(JSON.stringify(process.env, null, 2));\n', function(err, file) {
+			EDITOR.createPath(folderPath, function(err) {
 				if(err) throw err;
 
-				EDITOR.deleteFile(filePath, function(err) { // In case it already exist
-					if(err && err.code != "ENOENT") throw err;
+				EDITOR.openFile(filePath, '\nconsole.log(JSON.stringify(process.env, null, 2));\n', function(err, file) {
+					if(err) throw err;
 
-					EDITOR.saveFile(file, function(err) {
-						if(err) throw err;
+					EDITOR.deleteFile(filePath, function(err) { // In case it already exist
+						if(err && err.code != "ENOENT") throw err;
 
-						runNodeJsScript(file, function(err) {
+						EDITOR.saveFile(file, function(err) {
 							if(err) throw err;
 
-							setTimeout(waitForStdoutFile, 300);
+							runNodeJsScript(file, function(err) {
+								if(err) throw err;
 
-							function waitForStdoutFile() {
+								setTimeout(waitForStdoutFile, 300);
 
-								var stdOutFilePath = filePath + ".stdout";
+								function waitForStdoutFile() {
 
-								var stdoutFile = EDITOR.files[stdOutFilePath];
+									var stdOutFilePath = filePath + ".stdout";
 
-								console.log("waitForStdoutFile: stdOutFilePath=" + stdOutFilePath);
-								if(stdoutFile == undefined) return setTimeout(waitForStdoutFile, 300);
+									var stdoutFile = EDITOR.files[stdOutFilePath];
+
+									console.log("waitForStdoutFile: stdOutFilePath=" + stdOutFilePath);
+									if(stdoutFile == undefined) return setTimeout(waitForStdoutFile, 300);
 
 
-								var text = stdoutFile.text;
+									var text = stdoutFile.text;
 
-								var start = text.indexOf("{\n");
-								var end = text.indexOf("}\n") + 1;
-								var str = text.slice(start, end);
-								try {
-									envRunNodejs = JSON.parse(str);
+									var start = text.indexOf("{\n");
+									var end = text.indexOf("}\n") + 1;
+									var str = text.slice(start, end);
+									try {
+										envRunNodejs = JSON.parse(str);
+									}
+									catch(err) {
+										throw new Error("Unable to parse start=" + start + " end=" + end + " str=" + str + " Error: " + err.message);
+									}
+
+									console.log("envRunNodejs=" + JSON.stringify(envRunNodejs, null, 2));
+
+									runInTerminal();
 								}
-								catch(err) {
-									throw new Error("Unable to parse start=" + start + " end=" + end + " str=" + str + " Error: " + err.message);
-								}
-
-								console.log("envRunNodejs=" + JSON.stringify(envRunNodejs, null, 2));
-
-								runInTerminal();
-							}
+							});
 						});
 					});
 				});
 			});
-		});
 		});
 
 		function runInTerminal() {
