@@ -187,8 +187,8 @@ var CLIENT = {}; // Client object is global
 			callback = json;
 			json = null;
 		}
-		else if(typeof json != "object" || json == null) {
-throw new Error("Second argument json (" + (typeof json) + ") must be an object!");
+		else if(typeof json != "object") {
+			throw new Error("Second argument json (" + (typeof json) + ") must be an object!"); // it can also be null, which is typeof "object"
 		}
 		
 		if(!CLIENT.connected) {
