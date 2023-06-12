@@ -13,19 +13,19 @@ EDITOR.plugin({
 			winMenuForkWebsite = EDITOR.windowMenu.add(S("download_website"), [S("Tools"), 70], forkWebsite);
 			
 			if(1==2) { // This will cause a security confirmation box, (which can be confused with install request), and thus not worth it.
-			if(typeof navigator == "object" && typeof navigator.registerProtocolHandler == "function") {
-				var self = window.location.protocol + window.location.hostname + "/?fork=%s";
+				if( UTIL.is("navigator.registerProtocolHandler", "function") ) {
+					var self = window.location.protocol + window.location.hostname + "/?fork=%s";
 				
-				// Possible to have links like <a href="web+edit:https://www.tutorials.com/example/">Open in editor</a>
-				// todo: Add to documentation!
-				// note: This triggers a security alert in Chrome!
-				// This will give a DOMException in Mobile classic:
-				try {
-					navigator.registerProtocolHandler("web+edit", self, "Web IDE (editor for HTML, JavaScript, CSS");
-				}
-				catch(err) {
-					console.error(err);
-				}
+					// Possible to have links like <a href="web+edit:https://www.tutorials.com/example/">Open in editor</a>
+					// todo: Add to documentation!
+					// note: This triggers a security alert in Chrome!
+					// This will give a DOMException in Mobile classic:
+					try {
+						navigator.registerProtocolHandler("web+edit", self, "Web IDE (editor for HTML, JavaScript, CSS");
+					}
+					catch(err) {
+						console.error(err);
+					}
 				}
 			}
 			

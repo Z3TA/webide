@@ -1214,7 +1214,7 @@ recordInfo.files[file.path] = {
 		if(fileOrData instanceof File) {
 var file = fileOrData;
 		}
-		else if(typeof fileOrData == "object") {
+		else if(typeof fileOrData == "object" && fileOrData != null) {
 			var data = fileOrData;
 		}
 		else if(fileOrData == undefined) {

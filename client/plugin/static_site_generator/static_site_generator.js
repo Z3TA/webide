@@ -1371,7 +1371,7 @@ for(var i=0; i<options.length; i++) {
 
 	function saveCnf(site, callback) {
 		if(selectedSite != site) throw new Error( "not the same: site=" + JSON.stringify(site) + " selectedSite=" + JSON.stringify(selectedSite) );
-		if(typeof site != "object") throw new Error("site=" + site + " need to be an object!");
+		if(typeof site != "object" || site == null) throw new Error("site=" + site + " need to be an object!");
 		
 		CLIENT.cmd("run", {command: "hostname"}, function(err, resp) {
 			if(err) alertBox(err.message);
@@ -1705,7 +1705,7 @@ for(var i=0; i<options.length; i++) {
 					else compileIt(file);
 				});
 			}
-			else if((typeof sourceFile != "object")) {
+			else if((typeof sourceFile != "object") || sourceFile == null) {
 				throw new Error("sourceFile needs to be a File object! sourceFile=" + sourceFile);
 			}
 			else {

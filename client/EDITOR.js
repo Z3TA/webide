@@ -562,7 +562,7 @@ EDITOR.env = {}; // Plugins can set custom env values that will be passed to ter
 				var stack = UTIL.getStack("EDITOR.storage.setItem");
 			}
 			
-			if(typeof idOrKey == "object") {
+			if(typeof idOrKey == "object" && idOrKey != null) {
 				var itemsObject = idOrKey;
 				if(typeof val == "function" && callback == undefined) {
 					callback = val;
@@ -744,7 +744,7 @@ EDITOR.env = {}; // Plugins can set custom env values that will be passed to ter
 	var _localStorage = {}; // Fallback for browsers that don't support localStorage
 	EDITOR.localStorage = {
 		setItem: function localStorageSetItem(key, value, callback) {
-			if(typeof key == "object") {
+			if(typeof key == "object" && key != null) {
 				var itemsObject = key;
 				if(typeof value == "function" && callback == undefined) {
 					callback = value; 
@@ -1366,7 +1366,7 @@ EDITOR.env = {}; // Plugins can set custom env values that will be passed to ter
 			if(!(err instanceof Error)) {
 				if(typeof err == "undefined") err = new Error("Accessing the clipboard is Not supported by your browser!"+ 
 				" You might have to clear all browsning data and answer Yes when prompted to allow accessing the clipboard.");
-				else if(typeof err == "object") err = new Error(err.message || JSON.stringify(err));
+				else if(typeof err == "object" && err != null) err = new Error(err.message || JSON.stringify(err));
 				else err = new Error(JSON.stringify(err));
 			}
 			
@@ -11633,11 +11633,6 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		// Voice recognition only works for some people...
 		enableVoiceCommands = EDITOR.windowMenu.add(S("enable_voice_commands"), [S("Editor"), S("Settings"), 50], toggleVoiceCommands);
 		
-		
-		//console.log("typeof navigator.keyboard = " + (typeof navigator.keyboard));
-		if(typeof navigator.keyboard == "object") {
-			//navigator.keyboard.lock();
-		}
 		
 		// Loading styles reset
 		removeBeforeloadClassesTimeout = setTimeout(removeBeforeloadClasses, 12850);

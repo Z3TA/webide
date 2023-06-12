@@ -334,7 +334,7 @@ EDITOR.unbindKey(show_gotoFileInput2);
 		
 		var text = inputGoto.value;
 		
-		if(typeof keyUpEvent == "object") {
+		if(typeof keyUpEvent == "object" && keyUpEvent != null) {
 			
 			var code = UTIL.code(keyUpEvent);
 			

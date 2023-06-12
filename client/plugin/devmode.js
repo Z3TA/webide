@@ -139,7 +139,7 @@ console.time = console.timeEnd = function() {};
 			Only use the Chrome dev tools when you are actually debugging! Turn devMode OFF when you are not debugging (watching the console)
 		*/
 		
-		if(typeof navigator == "object" && navigator.serviceWorker &&  navigator.serviceWorker.controller) {
+		if( UTIL.is("navigator.serviceWorker.controller.postMessage", "function") ) {
 			try {
 				navigator.serviceWorker.controller.postMessage("devModeOff");
 			}
@@ -173,7 +173,7 @@ console.time = console.timeEnd = function() {};
 		console.time = consoleTimeOriginal
 		console.timeEnd = consoleTimeEndOriginal
 		
-		if(typeof navigator == "object" && navigator.serviceWorker &&  navigator.serviceWorker.controller) {
+		if( UTIL.is("navigator.serviceWorker.controller.postMessage", "function") ) {
 			// Firefox on Macbook pro might give "Service Worker state is redudant"
 			try {
 				navigator.serviceWorker.controller.postMessage("devModeOn");

@@ -45,7 +45,7 @@
 
 
 	// Don't do anything if it's not a KaiOS device!
-	if(typeof window.navigator != "object" || typeof window.navigator.mozApps != "object") return;
+	if( UTIL.is("window.navigator.mozApps", "object") ) return;
 
 	//if(! QUERY_STRING["kaios"] ) return;
 
@@ -399,7 +399,7 @@
 
 	function mozInfo() {
 
-		if(typeof window.navigator == "object" || typeof window.navigator.mozApps == "object" || typeof window.navigator.mozApps.getSelf != "function") return;
+		if( !UTIL.is("window.navigator.mozApps.getSelf", "function") ) return;
 
 		var request = window.navigator.mozApps.getSelf();
 		request.onsuccess = function() {
@@ -427,7 +427,7 @@
 			window.open("http://192.168.0.3/index.htm");
 
 		*/
-		if(typeof window.navigator == "object" && typeof window.navigator.mozApps == "object" && typeof window.navigator.mozApps.install == "function") {
+		if( UTIL.is("window.navigator.mozApps.install", "function") ) {
 			//console.log("KaiOS: : Attempting install ...");
 
 			/*

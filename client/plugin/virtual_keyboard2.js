@@ -296,7 +296,7 @@
 	}
 	
 	function isTextBox(element) {
-		if(typeof element != "object") return false;
+		if(typeof element != "object" || element == null) return false;
 		if(!element.tagName) return false;
 		
 		var tagName = element.tagName.toLowerCase();

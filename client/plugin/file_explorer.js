@@ -127,10 +127,6 @@
 		EDITOR.removeEvent("fileExplorer", openFileExplorerTool);
 		EDITOR.removeEvent("move", fileExplorerFileMoved);
 		
-		if(typeof gapi == "object" && typeof gapi.auth2 == "object") {
-			gapi.auth2.getAuthInstance().signOut();
-		}
-		
 		EDITOR.discoveryBar.remove(discoveryBarIcon);
 	}
 	

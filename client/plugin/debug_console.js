@@ -106,7 +106,7 @@
 		if(typeof arg == "number") {
 			return arg.toString();
 		}
-		else if(typeof arg == "object") {
+		else if(typeof arg == "object" && arg != null) {
 			if(typeof arg.toString == "function") {
 				return arg.toString();
 			}

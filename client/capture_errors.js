@@ -26,7 +26,7 @@ var JAVASCRIPT_ERRORS = [];
 			error: error
 		});
 		
-		if(typeof console == "object") {
+		if(typeof console == "object" && console != null) {
 			if(typeof console.warn == "function") console.warn("Error detected! message=" + message + " source=" + source + " lineno=" + lineno + " colno=" + colno + "");
 			if(typeof console.error == "function") console.error(error);
 			else alert("Error: " + message);

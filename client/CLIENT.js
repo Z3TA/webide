@@ -37,7 +37,7 @@ var CLIENT = {}; // Client object is global
 	var WEBSOCK_OPEN = 1;
 	
 	var timer = (function() {
-		if(typeof window.performance == "object" && typeof window.performance.now == "function") return function() {
+		if( UTIL.is("window.performance.now", "function") ) return function() {
 			return window.performance.now();
 		}
 		else return function() {
@@ -186,8 +186,8 @@ var CLIENT = {}; // Client object is global
 		if(typeof json == "function" && callback == undefined) {
 			callback = json;
 			json = null;
-}
-		else if(typeof json != "object") {
+		}
+		else if(typeof json != "object" || json == null) {
 throw new Error("Second argument json (" + (typeof json) + ") must be an object!");
 		}
 		
@@ -426,7 +426,7 @@ throw new Error("Second argument json (" + (typeof json) + ") must be an object!
 		
 		// Always tell the service worker what version the server is on, so it can update the cache if needed
 		var serviceWorkerError = true;
-		if(typeof navigator == "object" && navigator.serviceWorker &&  navigator.serviceWorker.controller) {
+		if( UTIL.is("navigator.serviceWorker.controller.postMessage", "function") ) {
 			//console.log("CLIENT: editorVersion: Telling the serviceWorker about server version=" + newVersion);
 			serviceWorkerError = false;
 			try {

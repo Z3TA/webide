@@ -1052,10 +1052,10 @@
 					for(var i=0; i<options.length; i++) {
 					
 						//console.log("optionExist options=" + JSON.stringify(options) + "");
-						if(typeof options[i]  == "object") {
-							//console.log("options[" + i + "]=" + JSON.stringify(options[i]) + "");
-							if(options[i][0].indexOf(variableName) != -1) return true;
-						}
+					if(typeof options[i]  == "object" && options[i] != null) {
+						//console.log("options[" + i + "]=" + JSON.stringify(options[i]) + "");
+						if(options[i][0].indexOf(variableName) != -1) return true;
+					}
 						else {
 							if(options[i].indexOf(variableName) != -1) return true;
 						}

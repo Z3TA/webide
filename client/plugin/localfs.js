@@ -1028,7 +1028,7 @@
 			mode = "readwrite";
 		}
 
-		if(typeof fileHandle != "object") throw new Error("verifyNativeFileSystemPermission: Does not seem like a fileHandle: fileHandle=" + fileHandle + " typeof fileHandle = " + (typeof fileHandle));
+		if(typeof fileHandle != "object" || fileHandle == null) throw new Error("verifyNativeFileSystemPermission: Does not seem like a fileHandle: fileHandle=" + fileHandle + " typeof fileHandle = " + (typeof fileHandle));
 		if(typeof fileHandle.queryPermission != "function") {
 			console.log(fileHandle);
 			throw new Error("verifyNativeFileSystemPermission: File handle does not have a queryPermission function: " + fileHandle);
@@ -1237,7 +1237,7 @@
 
 		console.log("listLocalDir: dirHandle=", dirHandle);
 
-		if(typeof dirHandle != "object" || typeof dirHandle.values != "function") {
+		if(typeof dirHandle != "object" || dirHandle == null || typeof dirHandle.values != "function") {
 			return callback( new Error("Expected first parameter in listLocalDir to be a directory handle! dirHandle=" + dirHandle + " typeof " + (typeof dirHandle)) );
 		}
 		

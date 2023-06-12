@@ -21,8 +21,44 @@ if(typeof EDITOR == "undefined") {
 }
 
 var UTIL = {
-	// Converts psuedo array (like arguments and some DOM data structures) to a real array
-	toArray: function toArray(pseudoArray) {
+	is: function is(stringWithDots, type) { // Checks if object foo.bar.baz is of type (type=function, object, number, etc)
+		if( typeof stringWithDots != "string") throw new Error("Expected first argument to be a string! stringWithDots=" + stringWithDots);
+
+		// Avoid using eval due to Content Security Policy: The page’s settings blocked the loading of a resource at eval 
+		if(typeof window != "object" || window.window!=window) {
+			throw new Error("UTIL.is() only works in the browser!"); // Because Node.js don't allow global variables
+		}
+
+		//console.log("stringWithDots=" + stringWithDots);
+
+		var objects = stringWithDots.split(".");
+		var obj = window;
+		for (var i=0; i<objects.length; i++) {
+			obj = obj[objects[i]];
+
+			//console.log(typeof obj + " = " + obj);
+
+			if(obj === undefined) return type=="undefined" || false;
+			else if(obj === null) {
+				if(i<objects.length) {
+					// techically it's undefined
+					return type=="undefined" || false;
+				}
+				else {
+					// It really is null
+					return type=="null" || false;
+				}
+			}
+		}
+			
+		if(Object.prototype.toString.call( obj ) == '[object Array]') {
+			return type=="array" || type===undefined;
+		}
+		else if(typeof obj == "object") return type=="object" || type===undefined;
+		else return type == typeof obj || type===undefined;
+
+	},
+	toArray: function toArray(pseudoArray) { // Converts psuedo array (like arguments and some DOM data structures) to a real array
 		var args = new Array(pseudoArray.length);
 		for(var i = 0; i < args.length; ++i) {
 			args[i] = pseudoArray[i];
