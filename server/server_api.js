@@ -3602,6 +3602,7 @@ API.run = function run(user, json, callback) {
 						}, 1000);
 					});
 				}
+				else return callback(err, {stdout: stdout, stderr: stderr});
 			}
 			else return callback(null, {stdout: stdout, stderr: stderr});
 		
