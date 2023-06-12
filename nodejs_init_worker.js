@@ -917,7 +917,8 @@ function startService(options, callback) {
 	var arg = [];
 	var opt = {
 		silent: true,
-		env: process.env
+		env: process.env,
+		cwd: pathToFolder
 	};
 
 	// Directories in env variables traditionally do not end with a path delimiter

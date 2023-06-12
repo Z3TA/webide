@@ -677,6 +677,95 @@
 		}
 	});
 	
+
+	EDITOR.addTest(1, function runSqliteInProd(testCallback) {
+		// The problem was that cwd was in another directory where we did not have write access...
+
+		var dir = UTIL.joinPaths(EDITOR.user.homeDir, "nodejs/sqlite/");
+		
+		var testProgram = 'console.log("Node.js version: " + process.version);\nvar env = process.env.DEV ? "dev" : "prod";\nvar db = require("better-sqlite3")("test" + env + ".db");\n';
+		
+		var packageJson = JSON.stringify({
+			"name": "testProgram",
+			"version": "1.0.0",
+			"description": "test if sqlite can create a db in prod",
+			"author": "ltest1",
+			"main": "test.js",
+			"dependencies":{
+				"better-sqlite3":"^8.4.0"
+			}
+		}, null, 2);
+
+		var logFile = UTIL.joinPaths(EDITOR.user.homeDir, "log/testProgram.log");
+		var testFile = UTIL.joinPaths(dir, "test.js");
+		var packageJsonPath = UTIL.joinPaths(dir, "package.json")
+
+		tmpPw = "123"; // The password for the test account
+		pwDate = new Date();
+
+		cleanup(function() {
+			EDITOR.createPath(dir, function(err) {
+				if(err) throw err;
+				EDITOR.saveToDisk(testFile, testProgram, function(err) {
+					if(err) throw err;
+					EDITOR.saveToDisk(packageJsonPath, packageJson, function(err) {
+						if(err) throw err;
+
+						CLIENT.cmd("run", {command: "npm install", cwd: dir}, function(err, resp) {
+							if(err) throw err;
+
+							prodDeploy(dir, function(err) {
+								if(err) throw err;
+
+								setTimeout(testCheckLog, 1000);
+							});
+						});
+					});
+				});
+			});
+		});
+
+		function testCheckLog() {
+			EDITOR.closeAllDialogs(dialogCode);
+
+			EDITOR.openFile(logFile, function(err, file) {
+				if(err) throw err;
+
+				var text = file.text;
+
+				if(text.indexOf("SQLITE_CANTOPEN") != -1) throw new Error("Sqlite3 can't create a database file in prod!");
+			
+				cleanup();
+			});
+		}
+
+		function cleanup(cleanupCallback) {
+			CLIENT.cmd("nodejs_init_remove", {folder: dir, pw: tmpPw}, function(err, resp) {
+				if(err) {
+					console.log("nodejs_init_remove: err.code=" + err.code);
+					if(err.code == 404) {
+						// The service did not exist, so we can ignore the error
+					}
+					else throw err;
+				}
+				
+				if(EDITOR.files[logFile]) EDITOR.closeFile(logFile);
+
+				EDITOR.deleteFile(logFile, function(err) {
+					if(err && err.code != "ENOENT") throw err;
+
+					EDITOR.deleteFolder(dir, true, function(err) {
+						if(err && err.code != "ENOENT") throw err;
+
+						if(cleanupCallback) cleanupCallback();
+						else testCallback(true);
+					});
+				});
+			});
+		}
+	});
+
 	// TEST-CODE-END
+
 
 })();
