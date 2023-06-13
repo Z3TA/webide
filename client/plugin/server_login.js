@@ -509,7 +509,7 @@
 		
 		function connectToServer(e) {
 			
-			if(typeof e == "object" && typeof e.preventDefault == "function") e.preventDefault();
+			if( typeof e == "object" && e != null && typeof e.preventDefault == "function") e.preventDefault();
 			
 			// ## Manually logging in via login form
 			

@@ -502,8 +502,8 @@ self.addEventListener('fetch', function serviceWorkerFetch(event) {
 		"editor cache/client version: " + VERSION + "<br>" +
 		"editor developer mode: " + DEV_MODE + "<br>" +
 		"fetch error message: " + err.message + "<br>" +
-		"navigator.onLine: " + (typeof navigator == "object" && navigator.onLine) + "<br>" + 
-		"navigator.userAgent: " + (typeof navigator == "object" && navigator.userAgent) + "<br>" +
+		"navigator.onLine: " + (typeof navigator == "object" && navigator != null && navigator.onLine) + "<br>" + 
+		"navigator.userAgent: " + (typeof navigator == "object" && navigator != null && navigator.userAgent) + "<br>" +
 		"</p>";
 		
 		var response = new Response(body, {

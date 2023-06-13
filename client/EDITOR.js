@@ -1478,7 +1478,7 @@ EDITOR.env = {}; // Plugins can set custom env values that will be passed to ter
 		// Just so that we are consistent
 		if(text === null) throw new Error("text is null! It should be undefined for the file to open from disk"); // note: null == undefined = true
 		
-		if(typeof text === "object" && state == undefined) {
+		if(typeof text == "object" && state == undefined) {
 			state = text;
 			text = undefined;
 		}
@@ -7379,7 +7379,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 			
 			//console.log("EDITOR.autoComplete: ret=" + JSON.stringify(ret) + " waitingForAsync=" + waitingForAsync);
 			
-			if(!Array.isArray(ret) && typeof ret == "object") {
+			if(!Array.isArray(ret) && typeof ret == "object" && ret != null) {
 				if(ret.remove) removeOptions = removeOptions.concat(ret.remove);
 				if(ret.exclusive) removeOptions =  removeOptions.concat(options);
 				ret = ret.add;
@@ -7594,7 +7594,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 				window.open('','_parent','');
 				window.close();
 				
-				if(typeof browser == "object" && browser.tabs && typeof browser.tabs.remove == "function") browser.tabs.remove();
+				if(typeof browser == "object" && browser != null && browser.tabs && typeof browser.tabs.remove == "function") browser.tabs.remove();
 				
 				
 				alertBox("Manually close the window to exit");
@@ -11588,7 +11588,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 					var pluginName = UTIL.getFunctionName(pluginLoaders[i]) + " (" + pluginDesc[i] + ")";
 					var debugInfo = "Error: " + err.message + "\n";
 					debugInfo = debugInfo + "StackTrace: " + err.stack + "\n";
-					debugInfo = debugInfo + "Browser: " + ((typeof navigator == "object" && navigator.userAgent) || window.userAgent) + " (" + BROWSER + ")\n";
+					debugInfo = debugInfo + "Browser: " + ((typeof navigator == "object" && navigator != null && navigator.userAgent) || window.userAgent) + " (" + BROWSER + ")\n";
 					debugInfo = debugInfo + "Version: " + EDITOR.version + "\n";
 					debugInfo = debugInfo + "Dist: " + EDITOR.dist + "\n";
 

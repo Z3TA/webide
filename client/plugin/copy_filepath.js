@@ -43,7 +43,7 @@
 	function copyFilePath(filePath) {
 		// Puts the text into the clipboard
 		
-		if(typeof filePath == "object" && filePath.hasOwnProperty("path")) filePath = filePath.path; // Can be a File object
+		if(typeof filePath == "object" && filePath != null && filePath.hasOwnProperty("path")) filePath = filePath.path; // Can be a File object
 		
 				EDITOR.putIntoClipboard(filePath, function(err) {
 					if(err) alertBox(err.message);

@@ -871,7 +871,7 @@
 	function removeFromOpenedFiles(filePath, callback) {
 		// Called when the editor close a file
 		
-		if(typeof filePath == "object" && typeof filePath.path == "string") filePath = filePath.path;
+		if(typeof filePath == "object" && filePath != null && typeof filePath.path == "string") filePath = filePath.path;
 		
 		//console.log(UTIL.getStack("reopenFiles: Removing file from openedFiles path='" + filePath + "'"));
 		

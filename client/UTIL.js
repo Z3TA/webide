@@ -11,7 +11,7 @@
 // When using UTIL.js on the server side where EDITOR is unavailable
 if(typeof EDITOR == "undefined") {
 	var EDITOR = {
-		workingDirectory: (typeof process == "object" && typeof process.cwd == "function") ? process.cwd() : "/",
+		workingDirectory: (typeof process == "object" && process != null && typeof process.cwd == "function") ? process.cwd() : "/",
 		protocols: function() {return []},
 		remoteProtocols: ["ftp", "ftps", "sftp"],
 		settings: {
@@ -1965,7 +1965,7 @@ console.warn("Unable to decodeURIComponent on filePath=" + filePath);
 	canvasLocation: function screenLocation(row, col) {
 		// Returns the screen location of the center of the box located at row,col
 		
-		if(typeof row == "object" && row.row != undefined && row.col != undefined) {
+		if(typeof row == "object" && row != null && row.row != undefined && row.col != undefined) {
 			col = row.col;
 			row = row.row;
 		}

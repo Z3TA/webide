@@ -177,7 +177,7 @@ sendit();
 		
 		EDITOR.stat("error");
 		
-		var errorCode = typeof error == "object" ? error.code : "?";
+		var errorCode = (typeof error == "object" && error != null) ? error.code : "?";
 
 		if(!EDITOR.settings.devMode) {
 			// People are generally *very* bad at reporting bugs, only 1 in 10000 bugs will be reported.
@@ -187,7 +187,7 @@ sendit();
 			"Code: " + errorCode + "\n" +
 			"\nStacktrace:\n" + (error && error.stack) + "\n" + 
 			"\nCurrent file: " + EDITOR.currentFile.path + "\n" + 
-			"Browser: " + ((typeof navigator == "object" && navigator.userAgent) || window.userAgent) + " (" + BROWSER + ")\n" +
+			"Browser: " + ((typeof navigator == "object" && navigator != null && navigator.userAgent) || window.userAgent) + " (" + BROWSER + ")\n" +
 			"Version: " + EDITOR.version + "\n" +
 			"Dist: " + EDITOR.dist + "\n" +
 			"Homedir: " + (EDITOR.user && EDITOR.user.homeDir) + "\n" +
