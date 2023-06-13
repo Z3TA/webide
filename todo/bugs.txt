@@ -2232,6 +2232,13 @@ Issues with Hg annotations after hot reloading the plugin!
 Unable to repeat bugs (happens rarely)
 ---------------------------------------
 
+
+---
+
+editor input loses focus when using Shift+Ctrl+Backspace to swtich between files
+
+---
+
 Sometimes when pushing using Merucrial you get "Server: API error: abort: error: Name or service not known"
 /etc/resolv.conf do exist!
 

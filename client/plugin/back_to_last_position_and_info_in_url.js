@@ -51,6 +51,7 @@
 				EDITOR.on("changeProject", updateProjectInUrl);
 				EDITOR.on("changeBranch", updateBranchInUrl);
 				EDITOR.on("start", checkUrlParametersOnStart);
+				//EDITOR.on("fileClose", resetLastFile);
 
 				window.addEventListener("popstate", browserNavigation);
 				window.addEventListener("hashchange", hashChange);

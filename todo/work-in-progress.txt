@@ -10,10 +10,6 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
-regression: editor input loses focus when using Shift+Ctrl+Backspace to swtich between files
-
----
-
 Example from the README.txt doesn't work on Google Cloud Shell,
 it was a while since we published to npm! Should make a new major verions
 
