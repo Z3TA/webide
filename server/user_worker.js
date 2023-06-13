@@ -1857,6 +1857,7 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, nodePath, c
 		var fs = require("fs");
 		fs.readdir(directory, function readdir(err, folderItems) {
 			if(err) {
+				//console.log("findRootFolder: err: " + err.message);
 				if(directory == "/home/" && err.code == "EACCES") return askForDebugPort(); // We can't read /home/
 				else return callback(err);
 			}
@@ -1864,12 +1865,15 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, nodePath, c
 			// folderItems is name of files and folders
 			for (var i=0; i<folderItems.length; i++) {
 				if(folderItems[i] == "package.json") {
+					//console.log("findRootFolder: Found package.json in " + directory);
 					packageJsonExist = true;
 					rootFolder = directory;
 				}
 				else if(folderItems[i] == ".hg" || folderItems[i] == ".git") {
+					//console.log("findRootFolder: Found " + folderItems[i] + " in " + directory);
 					rootFolder = directory;
 				}
+				//else console.log("findRootFolder: ? " + folderItems[i]);
 			}
 			
 			if(rootFolder) {
@@ -1881,7 +1885,10 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, nodePath, c
 				if(folders.length > 1) {
 					findRootFolder(folders[folders.length-2]);
 				}
-				else installDependencies();
+				else {
+					//console.log("findRootFolder: root folder not found!");
+					installDependencies();
+				}
 			}
 		});
 	}
@@ -1932,8 +1939,13 @@ function runNodeJsScript(filePath, args, installAllModules, debugit, nodePath, c
 			else nodeScriptOptions.execArgv = [inspectStr];
 		}
 		
+		// Some code examples use process.env.PORT so we populate it for convenience
 if(rootFolder) {
 			nodeScriptOptions.env.PORT = UTIL.joinPaths(HOME, "sock/", UTIL.getFolderName(rootFolder));
+		}
+		else {
+			// Use the script name
+			nodeScriptOptions.env.PORT = UTIL.joinPaths(HOME, "sock/", UTIL.getFileNameWithoutExtension(filePath));
 		}
 
 		start();

@@ -6,10 +6,7 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
-The test unifiedEnvVariables finds env.PORT,
-test_env becomes app when running from editor... why?
 
-Also we did not get env.PORT when testing before! Why!?
 
 ---
 
