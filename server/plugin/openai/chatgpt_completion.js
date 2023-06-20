@@ -47,6 +47,7 @@
 
 var OPENAI_API_KEY = "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";
 
+
 var UTIL = require("../../../client/UTIL.js");
 var CORE = require("../../server_api.js");
 
@@ -163,6 +164,9 @@ API.complete = function complete(user, json, callback) {
                     }
                 */
                 var error = new Error("Got an error from openIA: message=" + json.error.message + " type=" + json.error.type + " code=" + json.error.code);
+
+                if(json.error.code == "invalid_api_key") error.message = error.message + " OPENAI_API_KEY=" + OPENAI_API_KEY;
+
                 callback(error);
                 callback = null;
                 return;
