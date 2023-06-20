@@ -7386,13 +7386,16 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 			if(options.length == 0) EDITOR.stat("autocomplete_nothing");
 			else EDITOR.stat("autocomplete_found");
 
-			if(typeof whenAutocompletedCallback == "function") whenAutocompletedCallback();
+			if(typeof whenAutocompletedCallback == "function") {
+				whenAutocompletedCallback();
+				whenAutocompletedCallback = null;
+			}
 		}
 		
 		function callback(ret, notAsync) {
 			if(!ret) return;
 			
-			//console.log("EDITOR.autoComplete: ret=" + JSON.stringify(ret) + " waitingForAsync=" + waitingForAsync);
+			//console.log("EDITOR.autoComplete: ret=" + JSON.stringify(ret) + " waitingForAsync=" + waitingForAsync + " notAsync=" + notAsync);
 			
 			if(!Array.isArray(ret) && typeof ret == "object" && ret != null) {
 				if(ret.remove) removeOptions = removeOptions.concat(ret.remove);
@@ -7427,10 +7430,20 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 				throw new Error(UTIL.getFunctionName(f[i]) + " did not return an array! It returned " + (typeof ret));
 			}
 			
+			//console.log("EDITOR.autoComplete: options=" + JSON.stringify(options) + " typeof whenAutocompletedCallback=" + typeof whenAutocompletedCallback);
+
 			if(!notAsync) {
 				waitingForAsync--;
 				if(waitingForAsync == 0) {
 					gotOptions();
+				}
+				//console.log("EDITOR.autoComplete: waitingForAsync=" + waitingForAsync);
+			}
+			else {
+				if(typeof whenAutocompletedCallback == "function") {
+					//console.log("EDITOR.autoComplete: calling whenAutocompletedCallback");
+					whenAutocompletedCallback();
+					whenAutocompletedCallback = null;
 				}
 			}
 			

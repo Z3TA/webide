@@ -7,7 +7,7 @@
 		desc: "Autocomplete math calculations",
 		load: function loadAutocompleteCalcMath() {
 
-			var order = 150; // After autocomplete_js.js
+			var order = 150; // After autocomplete_js.js but before chatgpt
 
 			EDITOR.on("autoComplete", autoCompleteMath, order);
 
@@ -63,7 +63,7 @@
 		EDITOR.eval(left, function(err, result) {
 			if(err) {
 				console.log("txt_calc: eval err: " + err.message);
-				autocompleteCb(null);
+				return autocompleteCb(null);
 			}
 
 			console.log("txt_calc: eval result: " + result);
@@ -76,16 +76,45 @@
 				}
 
 			}
-			else {
+			else if(result != null && typeof result.toString == "function")  {
 				result = result.toString();
 			}
+			else if(result == undefined) {
+				return autocompleteCb(null);
+			}
+			else throw new Error("result=" + result + " err=" + err);
 
 			console.log("txt_calc: string result=" + result);
 
 			autocompleteCb([result]);
 		});
 		
-		return {async: true};
+		return {async: true, exclusive: true};
 	}
+
+
+	// TEST-CODE-START
+
+	EDITOR.addTest(1, function arithmeticsInComments(callback) {
+		EDITOR.openFile("arithmeticsInComments.js", '// 1+2=', function(err, file) {
+			if(err) throw err;
+
+			file.moveCaret(undefined, 0, 7);
+
+			console.log("Autocompleting...");
+
+			EDITOR.autoComplete(file, function() {
+				console.log("Autocomplete callback!");
+				console.log("file.wordAtCaret=", file.wordAtCaret());
+
+				var word = file.wordAtCaret().word;
+
+				if(word != "3") throw new Error("Unexpected autocomplete: world=" + word);
+
+			});
+		});
+	});
+
+	// TEST-CODE-END
 
 })();
