@@ -4050,17 +4050,26 @@ if(elements[i].style.display != "none") {
 	EDITOR.on = function(eventName, order, callback) {
 		/*
 			lowest order nr will execute first!
+
 		*/
 		
-		if(typeof order == "function") {
-			callback = order;
-			order = undefined;
+		//console.log("EDITOR.on: eventName=" + eventName + " order=" + order);
+
+		if(typeof eventName != "string") throw new Error("First argument to EDITOR.on should be the event name!");
+
+		if(typeof order != "number") {
+			if(typeof order == "function" && typeof callback == "number") {
+				var _order = callback;
+				callback = order;
+				order = _order;
+			}
+			else {
+				callback = order;
+				order = undefined;
+			}
 		}
-		else if( typeof callback == "number" && typeof order == "function") {
-			var _order = callback;
-			callback = order;
-			order = _order;
-		}
+
+		//console.log("EDITOR.on: eventName=" + eventName + " order=" + order);
 
 		if(typeof callback != "function") {
 throw new Error("Second or third argument to EDITOR.on: callback=" + callback + " (" + (typeof callback) + ") needs to be a function! Did you mean EDITOR.addEvent ?");
@@ -4076,6 +4085,8 @@ throw new Error("Second or third argument to EDITOR.on: callback=" + callback + 
 		}
 		else if(order != undefined) throw new Error("Unable to determine what parameter order=" + order + " in third argument to EDITOR.on means!");
 		
+		//console.log("EDITOR.on: eventName=" + eventName + " order=" + order + " options=", options);
+
 		return EDITOR.addEvent(eventName, options);
 	}
 	
@@ -4137,6 +4148,8 @@ throw new Error("Second or third argument to EDITOR.on: callback=" + callback + 
 			}
 		}
 		
+		//console.log("EDITOR.addEvent: eventName=" + eventName + " options=", options);
+
 		if(options.order == undefined) options.order = EDITOR.settings.defaultEventOrder;
 		if(typeof options.fun != "function") {
 			throw new Error("There needs to be a function!");
@@ -7198,7 +7211,7 @@ var renderWidth = EDITOR.canvasContext.measureText(char).width;
 return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWidth*10));
 }
 	
-	EDITOR.autoComplete = function autoComplete(file) {
+	EDITOR.autoComplete = function autoComplete(file, whenAutocompletedCallback) {
 		/*
 			An abstraction that lets you have many auto-complete functions. 
 			Register using: EDITOR.on("autoComplete", function)
@@ -7372,6 +7385,8 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 			
 			if(options.length == 0) EDITOR.stat("autocomplete_nothing");
 			else EDITOR.stat("autocomplete_found");
+
+			if(typeof whenAutocompletedCallback == "function") whenAutocompletedCallback();
 		}
 		
 		function callback(ret, notAsync) {
@@ -7422,7 +7437,6 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		}
 		
 		function completeWord(word, wholeWord, moveCaret) {
-			
 			if(wholeWord.length == 0) console.warn("wholeWord.length=" + wholeWord.length + " wholeWord=" + wholeWord + " word=" + word + " moveCaret=" + moveCaret)
 			
 			if(wholeWord.substring(0, word.length) != word && wholeWord.length > 0) {
@@ -7474,7 +7488,6 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 			// If not linebreak was inserted, render only row!? (check file.insertText and file.moveCaretLeft)
 			
 			EDITOR.renderNeeded();
-			
 		}
 		
 	}
@@ -11544,7 +11557,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		calledStartListeners = true;
 	
 		
-		// Sort and load plugins
+		// Sort and load plugins, lowest number first
 		EDITOR.plugins.sort(function(a, b) {
 			if(a.order < b.order) {
 				return -1;
