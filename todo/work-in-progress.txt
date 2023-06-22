@@ -6,7 +6,7 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
-
+regression: Function list no longer autoscroll when you type in it
 
 ---
 

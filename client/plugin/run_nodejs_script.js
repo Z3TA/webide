@@ -1105,7 +1105,7 @@
 		});
 	});
 	
-	EDITOR.addTest(1, function unifiedEnvVariables(callback) {
+	EDITOR.addTest(function unifiedEnvVariables(callback) {
 		// We want to have the same process.env variables if we start the script from the terminal, as when we start the script using "run with nodejs" from the editors gui
 		var filePath = UTIL.joinPaths(EDITOR.user.homeDir, "test_env/", "test_env.js");
 		var folderPath = UTIL.getDirectoryFromPath(filePath);

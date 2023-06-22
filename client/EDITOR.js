@@ -7250,6 +7250,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		var rightParentheses = 0;
 		var dotInWord = false;
 		var caretStepLeft = 0;
+
 		for(var i=file.caret.index-1; i>-1; i--) {
 			char = left1;
 			left1 = left2;
@@ -7298,24 +7299,36 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		
 		word = word.trim();
 		var wordLength = word.length;
-		//console.log("EDITOR.autoComplete: Autocomplete: *" + word + "* (" + wordLength + " chars)");
+		console.log("EDITOR.autoComplete: Autocomplete: *" + word + "* (" + wordLength + " chars)");
 		
 		var ret, addWord, addMcl, functionArguments, removeOptions = [];
 		
 		var f = EDITOR.eventListeners.autoComplete.map(funMap);
-		//console.log("EDITOR.autoComplete: Calling autoComplete listeners (" + f.length + ") ...");
+		var functionsToCall = f.length;
+		var callbackCounter = 0;
+		console.log("EDITOR.autoComplete: Calling autoComplete listeners (" + f.length + ") ...");
 		for(var i=0; i<f.length; i++) {
 			
 			ret = f[i](file, word, wordLength, options.length, callback);
 			
-			//console.log("EDITOR.autoComplete: function " + UTIL.getFunctionName(f[i]) + " returned: " + JSON.stringify(ret));
+			console.log("EDITOR.autoComplete: function " + UTIL.getFunctionName(f[i]) + " returned: " + JSON.stringify(ret));
 			
-			if(ret == undefined) continue;
+			if(ret == undefined) {
+				callbackCounter++;
+				continue;
+			}
+
+			if(ret.exclusive) {
+				functionsToCall = i+1;
+			}
 
 			if(!ret.async) callback(ret, true);
 			else waitingForAsync++;
 			
-			if(ret.exclusive) break;
+			if(ret.exclusive) {
+				console.log("EDITOR.autoComplete: breaking because " + UTIL.getFunctionName(f[i]) + " want to run exclusive!");
+				break;
+			}
 		}
 		
 		if(waitingForAsync == 0) gotOptions();
@@ -7387,6 +7400,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 			else EDITOR.stat("autocomplete_found");
 
 			if(typeof whenAutocompletedCallback == "function") {
+				console.warn("EDITOR.autoComplete: calling whenAutocompletedCallback");
 				whenAutocompletedCallback();
 				whenAutocompletedCallback = null;
 			}
@@ -7395,6 +7409,8 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		function callback(ret, notAsync) {
 			if(!ret) return;
 			
+			callbackCounter++;
+
 			//console.log("EDITOR.autoComplete: ret=" + JSON.stringify(ret) + " waitingForAsync=" + waitingForAsync + " notAsync=" + notAsync);
 			
 			if(!Array.isArray(ret) && typeof ret == "object" && ret != null) {
@@ -7430,23 +7446,9 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 				throw new Error(UTIL.getFunctionName(f[i]) + " did not return an array! It returned " + (typeof ret));
 			}
 			
-			//console.log("EDITOR.autoComplete: options=" + JSON.stringify(options) + " typeof whenAutocompletedCallback=" + typeof whenAutocompletedCallback);
+			console.log("EDITOR.autoComplete: options=" + JSON.stringify(options) + " typeof whenAutocompletedCallback=" + typeof whenAutocompletedCallback + " notAsync=" + notAsync + " waitingForAsync=" + waitingForAsync + " callbackCounter=" + callbackCounter + " functionsToCall=" + functionsToCall);
 
-			if(!notAsync) {
-				waitingForAsync--;
-				if(waitingForAsync == 0) {
-					gotOptions();
-				}
-				//console.log("EDITOR.autoComplete: waitingForAsync=" + waitingForAsync);
-			}
-			else {
-				if(typeof whenAutocompletedCallback == "function") {
-					//console.log("EDITOR.autoComplete: calling whenAutocompletedCallback");
-					whenAutocompletedCallback();
-					whenAutocompletedCallback = null;
-				}
-			}
-			
+			if(callbackCounter == functionsToCall) gotOptions();
 		}
 		
 		function completeWord(word, wholeWord, moveCaret) {

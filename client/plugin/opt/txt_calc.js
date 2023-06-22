@@ -26,7 +26,9 @@
 
 		if(characterAt != "=") return;
 
-		var row = file.rowText();
+		var row = file.rowText().trim();
+
+		if(row.slice(0,2) == "//") row = row.slice(2); // Inside a comment
 
 		// Ignore everything left of colon:
 		var colon = row.indexOf(":");
@@ -104,13 +106,14 @@
 			console.log("Autocompleting...");
 
 			EDITOR.autoComplete(file, function() {
-				console.log("Autocomplete callback!");
-				console.log("file.wordAtCaret=", file.wordAtCaret());
+				console.log("txt_calc: Autocomplete callback!");
+				console.log("txt_calc: file.wordAtCaret=", file.wordAtCaret());
 
 				var word = file.wordAtCaret().word;
 
 				if(word != "3") throw new Error("Unexpected autocomplete: world=" + word);
 
+				callback(true);
 			});
 		});
 	});
