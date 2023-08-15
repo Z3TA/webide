@@ -21,11 +21,27 @@ function handleMsg(msg) {
 
 	if(typeof result == "object") result = JSON.stringify(result); // Don't want [object object]
 
-	self.postMessage({
-		id: id,
-		error: error,
-		result: result
-	});
+	// Might get an DataCloneError: Function object could not be cloned
+	try {
+		var returnObj = {
+			id: id,
+			error: error,
+			result: result
+		}
+		self.postMessage(returnObj);
+	}
+	catch(err) {
+		console.error(err);
+		var returnObj = {
+			id: id,
+			error: "internal error",
+			result: ""
+		}
+		self.postMessage(returnObj);
+	}
+
+	
+	
 
 }
 

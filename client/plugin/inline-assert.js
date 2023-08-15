@@ -92,62 +92,33 @@
 
 		//console.log("inline-assert:checkComment: ", test);
 
-		var scope = UTIL.scope(start, file.parsed.functions);
-
-		//console.log("inline-assert:checkComment: scope=", scope);
-
-		var func = scope.functions[test.fname];
-
 		var row = file.rowFromIndex(end).row;
 		var pos = {row: row, col: str.length + 4};
 		
-		if(!func) {
-			// It might be a builtin function!
 
-			//render.push({pos: pos, text: "Can't find function " + test.fname});
-			//return;
-
-			var fBody = "";
-		}
-		else {
-
-			// note: function body does not include function declaration (but does include start and end angel bracket, unless its a arrow function)
-
-			var fBody = "function " + test.fname + "(" + func.arguments + ")" + file.text.slice(func.start, func.end+1);
-		}
-
-		//console.log("inline-assert: checkComment: fBody=", fBody);
-		// First test the function to make sure it's parseable
-		EDITOR.eval(fBody, function(err, result) {
+			
+		EDITOR.eval(file.text + ";" + test.left, function(err, result) {
 			if(err) {
-				render.push({pos: pos, text: err.message});
+				render.push({pos: pos, text: err && err.message || err});
 				EDITOR.renderNeeded();
 				return;
 			}
 
-			// Need to pass both the function and test function call so that it is run in the same eval
-			EDITOR.eval(fBody + ";" + test.left, function(err, result) {
-				if(err) {
-					render.push({pos: pos, text: err && err.message || err});
-					EDITOR.renderNeeded();
-					return;
-				}
+			var fReturn = result;
 
-				var fReturn = result;
+			if(fReturn == test.right) {
+				render.push({pos: pos, text: "✅"});
+			}
+			else {
+				//render.push({pos: pos, text: "Returned " + fReturn + ""});
+				render.push({pos: pos, text: fReturn});
+			}
 
-				if(fReturn == test.right) {
-					render.push({pos: pos, text: "✅"});
-				}
-				else {
-					//render.push({pos: pos, text: "Returned " + fReturn + ""});
-					render.push({pos: pos, text: fReturn});
-				}
-
-				EDITOR.renderNeeded();
-
-			});
+			EDITOR.renderNeeded();
 
 		});
+
+		
 
 	}
 
@@ -199,20 +170,46 @@
 
 	// TEST-CODE-START
 
-	EDITOR.addTest(false, function testInlineAssertInFileWithWindowsLinebreak(callback) { // Might need to be sync ? yes
+	EDITOR.addTest(1, false, function testInlineAssertInFileWithWindowsLinebreak(callback) { // Might need to be sync ? yes
 		// inline-assert did not work because the file has window style line breaks
 		EDITOR.openFile("testInlineAssert.js", 'function foo() {return "bar"}\r\n// assert: foo()="baz"\r\n', function terminalTestFileOpened(err, file) {
 
 			// Give the eval function time to run
 			setTimeout(function() {
 				if( render.length == 0 ) throw new Error("Expected non empty array render=" + JSON.stringify(render, null, 2) + "");
+				
+				if(render[0].text != "bar") throw new Error("Expected render[0].text=" + render[0].text + " to be bar");
+
 				EDITOR.closeFile(file);
 
 				callback(true);
 			}, 500);
 
 		});
-			
+	});
+
+	EDITOR.addTest(false, function assertVariables(callback) { // Might need to be sync ? yes
+		// include declared variables as well when doing assertions
+		EDITOR.openFile("testInlineAssert.js", 'const foo = _ => 1;\nlet bar = 2;\n// assert: foo() + bar = 2\n', function terminalTestFileOpened(err, file) {
+
+			// Give the eval function time to run
+			setTimeout(function() {
+
+				if( render.length == 0 ) throw new Error("Expected non empty array render=" + JSON.stringify(render, null, 2) + "");
+				
+				//console.log("render=" + JSON.stringify(render, null, 2));
+
+				//console.log("render[0].text=" + render[0].text);
+
+				if(render[0].text != "3") throw new Error("Expected render[0].text=" + render[0].text + " to be 3");
+
+
+				EDITOR.closeFile(file);
+
+				callback(true);
+			}, 500);
+
+		});
 	});
 
 	// TEST-CODE-END
