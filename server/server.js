@@ -144,6 +144,7 @@ var MYSQL_PORT = getArg(["mysql", "mysql_port", "mysql_unix_socket"]) || "/var/r
 var EOF = String.fromCharCode(3);
 
 // Log levels
+var IMPORTANT = 2;
 var ERROR = 3;
 var WARN = 4;
 var NOTICE = 5;
@@ -1724,7 +1725,8 @@ function main() {
 		module_fs.readFile(passwordFile, "utf8", function(err, data) {
 			if(err && err.code == "ENOENT") {
 				log("Did not find " + passwordFile, NOTICE);
-				log("Please specify --username=user and --password=pw in argv!\nOr use ./hashPw.js to generate a password hash and save it in " + passwordFile + "\nAnd specify the home root folder using -h or --homedir=path", NOTICE);
+				log("Please specify --username=user and --password=pw in argv!", IMPORTANT);
+				log("Or use ./hashPw.js to generate a password hash and save it in " + passwordFile + "\nAnd specify the home root folder using -h or --homedir=path", NOTICE);
 				process.exit();
 			}
 		});
@@ -1833,7 +1835,7 @@ function main() {
 		if(HTTP_IP == "127.0.0.1" && (typeof process.getuid == "undefined" || process.getuid() != 0)) openStdinChannel();
 		else log("Not opening stdin channel! HTTP_IP=" + " USERNAME=" + USERNAME + " process.getuid()=" + process.getuid(), DEBUG);
 
-		log("Editor backend/server running on URL/address: http://" + makeUrl() + "");
+		log("Editor backend/server running on URL/address: http://" + makeUrl() + "", IMPORTANT);
 		
 		
 		if(HTTP_IP != "127.0.0.1" && !NO_BROADCAST) {

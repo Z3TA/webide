@@ -9,6 +9,7 @@ var CONSOLE_WARN_ORIGINAL = console.warn;
 //var _emerg = 0;
 //var _alert = 1;
 //var _crit = 2;
+var _important = 2; // note: not the same a critical. We won't post critical stuff anyway because we are not the kernel, so we'll use it to post text in bold!
 //var _err = 3;
 var _warning = 4;
 var _notice = 5;
@@ -133,6 +134,7 @@ function log(msg, lvl, noTrace) {
 		var colorReset = "\x1b[0m"
 		var colorBlink = "\x1b[5m";
 		var colorUnderscore = "\x1b[4m";
+		var colorBold = "\x1b[1m";
 
 		var msgString = "";
 
@@ -146,6 +148,7 @@ function log(msg, lvl, noTrace) {
 
 			if(lvl == _warning) msgString += colorUnderscore;
 			//else if(lvl == _notice) msgString += colorUnderscore;
+			else if(lvl == _important) msgString += colorBold;
 
 			msgString += msg;
 
@@ -218,6 +221,7 @@ module.exports = {
 	setLogFile: setLogFile,
 	setLogLevel: setLogLevel,
 	overrideConsole: overrideConsole,
+	IMPORTANT: 2,
 	ERROR: 3,
 	WARN: 4,
 	NOTICE: 5,
