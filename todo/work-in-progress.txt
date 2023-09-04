@@ -6,6 +6,16 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
+Looking to replace our own JS parser with something better...
+
+TreeSitter looks decent but documentation is difficult to understand and lacks examples.
+
+---
+
+Annoying when the terminal emulator's input row get cut in half because it's too far down...
+
+---
+
 regression: Function list no longer autoscroll when you type in it
 
 ---
@@ -56,7 +66,7 @@ url https://api.openai.com/v1/chat/completions \
 
 Make use of HOME env variable where /home is hardcoded for those that don't have home in /home ...
 Uncaught Error: Server: API error: ENOENT: no such file or directory, open '/home/zeta/.ssh/id_rsa'
-
+(home was /zpool/arch/home/zeta/)
 
 ---
 

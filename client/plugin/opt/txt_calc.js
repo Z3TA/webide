@@ -97,7 +97,7 @@
 
 	// TEST-CODE-START
 
-	EDITOR.addTest(1, function arithmeticsInComments(callback) {
+	EDITOR.addTest(function arithmeticsInComments(callback) {
 		EDITOR.openFile("arithmeticsInComments.js", '// 1+2=', function(err, file) {
 			if(err) throw err;
 
@@ -112,6 +112,8 @@
 				var word = file.wordAtCaret().word;
 
 				if(word != "3") throw new Error("Unexpected autocomplete: world=" + word);
+
+				EDITOR.closeFile(file);
 
 				callback(true);
 			});
