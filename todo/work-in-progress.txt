@@ -6,6 +6,23 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 
 ---
 
+
+Creating a headless runtime so that we can run tests without the browser
+
+Evaluating cloude code!
+
+
+Resume this session with:
+claude --resume 803610a3-20a2-4e85-baa8-f84953015c9a
+
+
+---
+
+webider no longer work with plain TCP!
+Need to be able to downgrade to plain TCP when TSL cert is not available!
+
+---
+
 Looking to replace our own JS parser with something better...
 
 TreeSitter looks decent but documentation is difficult to understand and lacks examples.
@@ -3981,6 +3998,13 @@ Forgot to close lamda function. Ex:
 functionCall(function callback() {
 
 } <!-- forgot parenthesis here
+
+
+
+
+
+
+
 
 
 

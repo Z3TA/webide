@@ -58,7 +58,7 @@ function Dialog(msg, options) {
 	
 	msg = msg.toString(); // Convert numbers etc to string so we can use the replace method
 	
-	//console.log("Dialog msg=" + msg);
+	console.log("Dialog msg=" + msg);
 	
 	msg = msg.replace(/\n/g, "<br>");
 	

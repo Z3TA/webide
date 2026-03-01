@@ -988,7 +988,7 @@ if(protocolIndex != -1) slashes = slashes - 2;
 			Use for debug, to see properties in an object. 
 			Useful for events like click etc.
 		*/
-		print("######################## OBJ INFO #########################");
+		print("######################## START OBJ INFO #########################");
 		
 		if(console.dir && !ret) return console.dir(o);
 		

@@ -409,7 +409,7 @@ EDITOR.env = {}; // Plugins can set custom env values that will be passed to ter
 	
 	var lastMouseDownEventType = "";
 	
-	var workingDirectory;
+	var workingDirectory = "";
 	var _editorInput = true;
 	var _soundAssist = false;
 	var _project = "default";
@@ -10533,7 +10533,6 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		}
 
 		// ********************************** Do not throw errors below **********************************
- 
 		if(typeof settings.found == "function") _findFiles.found.push(settings.found);
 		if(typeof settings.finish == "function") _findFiles.finish.push(settings.finish);
 		if(typeof settings.glob == "function") _findFiles.glob.push(settings.glob);

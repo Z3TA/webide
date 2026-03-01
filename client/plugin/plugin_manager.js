@@ -14,7 +14,8 @@
 		"/plugin/opt/animate_delete_letter.js",
 		"/plugin/opt/bigger_text.js",
 		"/plugin/opt/coffee_break.js",
-		"/plugin/opt/emoji_modifier.js"
+		"/plugin/opt/emoji_modifier.js",
+		"/plugin/opt/claudeIsGreat.js"
 	];
 
 	// Place the plugin you are currently working on ontop!
@@ -26,7 +27,8 @@
 		"/plugin/dev/lsp.js",
 		"/plugin/dev/qml.js",
 		"/plugin/dev/test_dialog.js",
-		"/plugin/dev/treesitter.js"
+		//"/plugin/dev/treesitter.js",
+		"/plugin/dev/treesitter2.js"
 	];
 
 	var tests = [
