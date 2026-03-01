@@ -14,7 +14,9 @@
 
 // With a web-app-manifest, users can add the app to home screen!
 // https://developers.google.com/web/fundamentals/web-app-manifest/
-var DISPLAY_MODE = "browser";
+if(typeof DISPLAY_MODE == 'undefined'){
+	var DISPLAY_MODE = "browser";
+}
 // detect if the display-mode is standalone from JavaScript:
 if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) {
 	console.log('display-mode is standalone');

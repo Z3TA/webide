@@ -14,8 +14,7 @@
 		"/plugin/opt/animate_delete_letter.js",
 		"/plugin/opt/bigger_text.js",
 		"/plugin/opt/coffee_break.js",
-		"/plugin/opt/emoji_modifier.js",
-		"/plugin/opt/claudeIsGreat.js"
+		"/plugin/opt/emoji_modifier.js"
 	];
 
 	// Place the plugin you are currently working on ontop!

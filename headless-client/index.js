@@ -3,6 +3,9 @@ var UTIL = require("../client/UTIL.js");
 
 
 
+var scriptTags = 0;
+var scriptTagsLoaded = 0;
+
 
 // Need to keep track of all elements so they can get returned by getElementById
 var allElements = [];
@@ -61,6 +64,12 @@ function createCanvas(element) {
 		},
 		beginPath: function() {
 
+		},
+		drawImage: function() {
+
+		},
+		fill: function () {
+
 		}
 	};
 	
@@ -82,8 +91,10 @@ function getElementWithId(id) {
 			return allElements[i];
 		}
 	}
-	console.log("Unable to find a element with id=" + id);
+	//console.log("Unable to find a element with id=" + id);
 	//console.log( allElements.map( (obj) => obj.attributes.id) );
+
+	return null;
 }
 
 function createElement(elementType) {
@@ -118,6 +129,11 @@ function createElement(elementType) {
 		el.attributes.class = classNames.join(" ");
 	}
 
+	el.getElementsByClassName = function getElementsByClassName(className) {
+		var allChildren = findAllChildren(el.childNodes);
+		return allChildren.filter( el => el.attributes.class.hasOwnProperty(className) );
+	},
+
 
 	el.setAttribute = function setAttribute(attribute, value) {
 		el.attributes[attribute] = value;
@@ -133,6 +149,9 @@ function createElement(elementType) {
 	el.style = {
 	}
 
+	el.offsetWidth = 0;
+	el.offsetHeight = 0;
+
 	el.appendChild = function(childElement) {
 		el.childNodes.push(childElement);
 		el.firstChild = el.childNodes[0];
@@ -143,10 +162,28 @@ function createElement(elementType) {
 		if(index == -1) return;
 		
 		var allIndex = allElements.indexOf(childElement);
-		if(allIndex != -1) allElements.splice(allIndex, 1);
+		if(allIndex != -1) {
+			//console.log( "Removing from allElements: childElement=" + JSON.stringify(childElement) );
+			allElements.splice(allIndex, 1);
+		}
+		else {
+			//console.log( "Did not find in allElements: childElement=" + JSON.stringify(childElement) );
+		}
 
+		var node = el.childNodes.splice(index, 1);
 
-		return el.childNodes.splice(index, 1);
+		// We need to recursely remove all children so that they can't be found with document.getElementById
+		// But keep them in memory, just not in the DOM tree...
+		var nodesToRemove = findAllChildren(node);
+
+		nodesToRemove.forEach(function(nodeToBeRemoved) {
+			var allIndex = allElements.indexOf(nodeToBeRemoved);
+			if(allIndex != -1) allElements.splice(allIndex, 1);
+		});
+
+		if( el.childNodes.length == 0 ) el.firstChild = null;
+
+		return node;
 	}
 
 	el.insertBefore = function(node, newNode) {
@@ -155,7 +192,7 @@ function createElement(elementType) {
 		el.childNodes.splice(index, 0, newNode);
 		return newNode;
 	}
-
+	
 	el.getId = function getId() {
 		if(el.id !== undefined) return el.id;
 		if(el.attributes["id"] !== undefined) return el.attributes["id"];
@@ -163,28 +200,43 @@ function createElement(elementType) {
 	}
 
 	el.getElementsByTagName = function(tag) {
-		var elements = [];
-		for (var i=0; i<el.childNodes.length; i++) {
-			if(el.childNodes[i].tagName == tag) elements.push(el.childNodes[i]);
-		}
-
-		if(elements.length == 0) console.log("getElementsByTagName: Found no elements with tag=" + tag + " in " + el.tagName + " with id=" + el.getId());
-
-		return elements;
+		var allChildren = findAllChildren(el.childNodes);
+		return allChildren.filter( el => el.tagName == tag );
 	}
 
 	el.focus = function() {
-		console.log("Element " + el.tagName + " id=" + el.id + " should be in focus");
+		//console.log("Element " + el.tagName + " id=" + el.id + " should be in focus");
 	}
 
 	if(elementType == "canvas") el = createCanvas(el);
-	else if(elementType == "script") watchScriptSrc(el)
-
+	else if(elementType == "script") {
+		scriptTags++;
+		watchScriptSrc(el)
+	}
 	//console.log("typeof allElements: " + typeof allElements);
 
 	allElements.push(el);
 
 	return el;
+}
+
+
+function findAllChildren(nodes) {
+	var allChildren = [];
+
+	nodes.forEach(recursiveFindChildren);
+
+	return allChildren;
+
+	function recursiveFindChildren(node) {
+
+		if(node.childNodes == undefined) throw new Error("Node has no childNodes! node=" + JSON.stringify(node));
+
+		node.childNodes.forEach(function (childNode) {
+			allChildren.push(childNode);
+			recursiveFindChildren(childNode);
+		});
+	}
 }
 
 function watchScriptSrc(element) {
@@ -200,9 +252,12 @@ function watchScriptSrc(element) {
 }
 
 
-function createTextNode() {
+function createTextNode(data) {
 	
-	var textNode = {};
+	var textNode = {
+		childNodes: [],
+		data: data
+	};
 
 	return textNode;
 }
@@ -210,7 +265,7 @@ function createTextNode() {
 
 var globalEvents = {};
 function addGlobalEventListener(event, fun) {
-	console.log("addGlobalEventListener: event=" + event + " fun=" + fun.name);
+	//console.log("addGlobalEventListener: event=" + event + " fun=" + fun.name);
 	if(globalEvents[event] == undefined) {
 		globalEvents[event] = [];
 	}
@@ -218,7 +273,9 @@ function addGlobalEventListener(event, fun) {
 }
 
 // Put any browser context here
-var interfaceContext = {};
+var interfaceContext = {
+	DISPLAY_MODE: "headless"
+};
 
 
 interfaceContext.document = {
@@ -230,6 +287,9 @@ interfaceContext.document = {
 		if(el != null) return el;
 
 		return null;
+	},
+	getElementsByClassName: function getElementsByClassName(className) {
+		return allElements.filter( el => el.attributes.class.hasOwnProperty(className) );
 	},
 	cookie: "",
 	createElement: createElement,
@@ -270,22 +330,55 @@ interfaceContext.localStorage = {
 	items: []
 };
 interfaceContext.localStorage.getItem = function (name) {
-	console.log("Get localStorage item=" + name);
+	//console.log("Get localStorage item=" + name);
 	if(interfaceContext.localStorage.items.hasOwnProperty(name)) return interfaceContext.localStorage.items[name];
 	else return null;
 }
 interfaceContext.localStorage.setItem = function (name, value) {
-	console.log("Set localStorage item=" + name);
-	return interfaceContext.localStorage[name] = value;
+	//console.log("Set localStorage item=" + name);
+	interfaceContext.localStorage[name] = value;
 }
-
+interfaceContext.localStorage.removeItem = function (name) {
+	//console.log("Remove localStorage item=" + name);
+	delete interfaceContext.localStorage[name];
+}
 
 interfaceContext.window = {
 	navigator: interfaceContext.navigator,
 	document: interfaceContext.document,
 	location: interfaceContext.location,
 	addEventListener: addGlobalEventListener,
-	localStorage: interfaceContext.localStorage
+	localStorage: interfaceContext.localStorage,
+	getComputedStyle: function getComputedStyle(el) {
+		var comp = {
+			width: getPropertyValue("width"),
+			height: getPropertyValue("height"),
+			getPropertyValue: getPropertyValue
+		};
+		
+		return comp;
+
+		function getPropertyValue(name) {
+			var val = el.style[name];
+			var parsedVal = 0;
+
+			if(val == undefined) parsedVal = 0;
+			else parsedVal = parseInt(val);
+
+			if(isNaN(parsedVal)) parsedVal = 0;
+
+			//console.log("getComputedStyle:getPropertyValue: name=" + name + " val=" + val + " parsedVal=" + parsedVal);
+
+			return parsedVal;
+		}
+
+	},
+	innerHeight: 0,
+	innerWidth: 0,
+	resizeTo: function(width, height) {
+		this.innerHeight = height;
+		this.innerWidth = width;
+	}
 };
 
 interfaceContext.window.window = interfaceContext.window; // Trick the editor that we are a browser...
@@ -293,7 +386,7 @@ interfaceContext.window.window = interfaceContext.window; // Trick the editor th
 
 
 
-// hmm, will these work!?
+// hmm, will these work!? yep :)
 interfaceContext.setInterval = setInterval;
 interfaceContext.clearInterval = clearInterval;
 interfaceContext.setTimeout = setTimeout;
@@ -306,10 +399,10 @@ interfaceContext.alert = function alert(msg) {
 
 interfaceContext.console = {
 	log: function(msg) {
-		console.log("log: " + msg);
+		//console.log("log: " + msg);
 	},
 	warn: function(msg) {
-		console.warn("warn: " + msg);
+		//console.warn("warn: " + msg);
 	},
 	error: function(msg) {
 		console.log("error: " + msg);
@@ -375,6 +468,8 @@ globalEvents["load"].forEach(function (fun) {
 	fun();
 });
 
+console.log("scriptTags=" + scriptTags + " scriptTagsLoaded=" + scriptTagsLoaded);
+
 var waitTimeout;
 
 wait();
@@ -382,13 +477,27 @@ wait();
 function wait() {
 	clearTimeout(waitTimeout);
 	console.log("waiting...");
-	waitTimeout = setTimeout(doYourThing, 5000);
+
+	console.log("scriptTags=" + scriptTags + " scriptTagsLoaded=" + scriptTagsLoaded);
+
+	waitTimeout = setTimeout(check, 250);
+
+	function check() {
+		if(scriptTags < 31) return wait();
+
+		if(scriptTags == scriptTagsLoaded) doYourThing();
+
+	}
+
+	//waitTimeout = setTimeout(doYourThing, 5000);
 }
 
 function doYourThing() {
-	console.log("I'm doing my thing!");
+	//console.log("I'm doing my thing!");
 
-	var onlyOne = true;
+	//console.log("scriptTags=" + scriptTags + " scriptTagsLoaded=" + scriptTagsLoaded);
+
+	var onlyOne = false;
 	var allInSync = true;
 
 	var EDITOR = interfaceContext.EDITOR;
@@ -402,12 +511,27 @@ function doYourThing() {
 
 	//EDITOR.changeWorkingDir("/wwwpub/");
 
-	interfaceContext.EDITOR.runTests(onlyOne, allInSync)
+	interfaceContext.EDITOR.runTests(onlyOne, allInSync, function(result, description) {
 
+		//console.log("ALL TESTS DONE!!?=?!?!?!!??!");
 
+		var exitCode = 1;
 
+		if(interfaceContext.EDITOR.currentFile) {
+			var file = interfaceContext.EDITOR.currentFile;
+			console.log("============== " + file.path + " ==============");
+			console.log(file.text);
+			exitCode = 0;
+		}
+
+		if(description) console.log(description);
+
+		if(result) console.error(result);
+
+		//process.exit(exitCode);
+
+	});
 }
-
 
 function dynamicLoadScript(src) {
 
@@ -422,6 +546,7 @@ function dynamicLoadScript(src) {
 	includeFile = includes[includes.length-1];
 
 	loadScript(includeFile);
+	scriptTagsLoaded++;
 }
 
 function loadScript(includeFile) {
@@ -452,7 +577,7 @@ function loadScript(includeFile) {
 	}
 
 	lines = lines + fileLines;
-	console.log("Lines: " + lines);
+	//console.log("Lines: " + lines);
 
 
 }

@@ -1,12 +1,17 @@
 
 EDITOR.addTest(function dontPanicWhenReturningVoid(callback) {
+	console.log("Test: dontPanicWhenReturningVoid yoyo");
 	EDITOR.openFile("dontPanicWhenReturningVoid.js", '{\nreturn;\n}\n', function(err, file) {
 		
 		// bug: Will throw an error: Cannot read property 'returns' of undefined
 		// Only when returning void, outside of a function.
 		
+		console.log("File opened successfully");
+
 		EDITOR.closeFile(file.path);
 		
+		console.log("File closed successfully");
+
 		callback(true);
 	});
 });

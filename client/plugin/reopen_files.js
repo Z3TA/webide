@@ -128,7 +128,7 @@
 	
 	
 	function reopenFiles() {
-		console.log("reopenFiles: Opening files ...");
+		//console.log("reopenFiles: Opening files ...");
 		
 		if(reopenFilesCalled) {
 			// Happens when you get disconnected, and storageReady is called.
@@ -170,7 +170,7 @@
 		
 		firstRun = false;
 		
-		console.log("reopenFiles: calling reopenFilesMain!");
+		//console.log("reopenFiles: calling reopenFilesMain!");
 		reopenFilesMain(function allFilesHaveReopened() {
 			// Save state when exiting the editor
 
@@ -206,11 +206,11 @@
 			so try to recover the last session ...
 		*/
 		
-		console.log("reopenFiles: get openedFiles from EDITOR.localStorage ...");
+		//console.log("reopenFiles: get openedFiles from EDITOR.localStorage ...");
 		EDITOR.localStorage.getItem("openedFiles", function(err, openedFilesString) {
 			if(err) throw err;
 			
-			console.log("reopenFiles: Got openedFiles from EDITOR.localStorage!");
+			//console.log("reopenFiles: Got openedFiles from EDITOR.localStorage!");
 
 			if(openedFilesString == null) openedFilesString = "";
 			
@@ -873,7 +873,7 @@
 		
 		if(typeof filePath == "object" && filePath != null && typeof filePath.path == "string") filePath = filePath.path;
 		
-		//console.log(UTIL.getStack("reopenFiles: Removing file from openedFiles path='" + filePath + "'"));
+		console.log(UTIL.getStack( "reopenFiles: Removing file from openedFiles path='" + filePath + "' EDITOR.files=" + JSON.stringify(Object.keys(EDITOR.files)) ));
 		
 		EDITOR.localStorage.getItem("openedFiles", function gotItemFromLocalStorage(err, openedFilesString) {
 			if(err) {
@@ -885,10 +885,17 @@
 				else throw err;
 			}
 			
+			//console.log("removeFromOpenedFiles: openedFilesString=" + openedFilesString);
+
 			if(openedFilesString == undefined) {
 				// User might have cleared history
 				openedFilesString = "";
-				for(var path in EDITOR.files) addToStringList(openedFilesString, path, fileDelimiter);
+				for(var path in EDITOR.files) {
+					//console.log( "removeFromOpenedFiles: Adding path=" + path + " to openedFilesString=" + openedFilesString + " (" + typeof openedFilesString + ")" );
+					openedFilesString = addToStringList(openedFilesString, path, fileDelimiter);
+					//console.log( "removeFromOpenedFiles: After adding path=" + path + " now openedFilesString=" + openedFilesString + " (" + typeof openedFilesString + ")" );
+				}
+				//console.log( "removeFromOpenedFiles: Added to openedFilesString=" + openedFilesString + " EDITOR.files=" + JSON.stringify(Object.keys(EDITOR.files)) );
 			}
 			
 			//console.log("reopenFiles: List before=" + openedFilesString);

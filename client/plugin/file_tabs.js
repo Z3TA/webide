@@ -147,13 +147,16 @@
 	}
 	
 	function showFileTabs(excludeFile) {
-		//console.warn("showFileTabs: hiddenBecauseEmty=" + hiddenBecauseEmty);
+		console.warn("showFileTabs: hiddenBecauseEmty=" + hiddenBecauseEmty);
 		
 		hiddenBecauseEmty = false;
 		
 		buildTabs(excludeFile);
 		fileTabsActive = true;
 		if(winMenuToggleFileTabs) winMenuToggleFileTabs.activate();
+
+		console.warn("showFileTabs: calling EDITOR.resizeNeeded()");
+
 		EDITOR.resizeNeeded();
 	}
 	
@@ -339,9 +342,14 @@ function switchTabInStandaloneMode() {
 	}
 	
 	function tabFileShow(file) {
+
+		//console.log("tabFileShow: inside!");
+
 		if(hiddenBecauseEmty) return showFileTabs();
 		if(!fileTabsActive) return;
 		
+		//console.log("tabFileShow: calling buildTabs() ...");
+
 		buildTabs();
 	}
 	
@@ -388,14 +396,16 @@ function switchTabInStandaloneMode() {
 		
 		if(tabList !== null) {
 			// Empty the list
+			console.warn("buildTabs: emptying list...");
 			while(tabList.firstChild ) {
 				tabList.removeChild( tabList.firstChild );
 			}
+			console.warn("buildTabs: Done emptying list! tabList=" + JSON.stringify(tabList));
 		}
 		
 		var fileList = EDITOR.sortFileList(); // An array of files sorted by file.order
 		
-		//console.warn("buildTabs: excludeFile=" + excludeFile + " fileList=" + JSON.stringify(fileList.map(function(f) {return f.path})));
+		console.warn("buildTabs: excludeFile=" + excludeFile + " fileList=" + JSON.stringify(fileList.map(function(f) {return f.path})));
 		
 		if(excludeFile) {
 			if(fileList.indexOf(excludeFile) == -1) throw new Error("The file we want to exclude is not in the file list! excludeFile.path=" + excludeFile.path);
@@ -407,7 +417,7 @@ function switchTabInStandaloneMode() {
 		
 		// Create tabs
 		for(var i=0; i<fileList.length; i++) {
-			//console.log("file_tabs: file_tab_" + i + "=" + fileList[i].path);
+			//console.log("file_tabs:buildTabs: file_tab_" + i + "=" + fileList[i].path);
 			openTab(fileList[i].path);
 		}
 		
@@ -500,16 +510,18 @@ tabFileText.setAttribute("path", path);
 		}
 		
 		folderList = document.getElementById("tab_folder_list_" + folderName);
-		tabFolderItem = document.getElementById("tab_folder_" + folderName);
 		
 		if(!folderList) {
 			createFolder(folderName);
 			single = " single";
 		}
 		else {
+			//console.log( "openTab: Not creating folder because folderList: (" + typeof folderList + ") " + JSON.stringify(folderList) );
 			single = "";
 		}
 		
+		tabFolderItem = document.getElementById("tab_folder_" + folderName);
+
 		folderList.appendChild(tabFileItem);
 		
 		if(active) {
@@ -557,6 +569,8 @@ tabFileText.setAttribute("path", path);
 		}
 		
 		function createFolder(folderName) {
+			//console.log("createFolder: folderName=" + folderName);
+
 			tabFolderItem = document.createElement("li");
 			tabFolderItem.setAttribute("class", "tabFolderItem");
 			tabFolderItem.setAttribute("id", "tab_folder_" + folderName);
@@ -636,6 +650,7 @@ tabFileText.setAttribute("path", path);
 		}
 		
 		function createTabList() {
+			//console.log("file_tabs: createTabList!");
 			tabList = document.createElement("ul");
 			tabList.setAttribute("id", "tabList");
 			tabList.setAttribute("class", "tabList");
@@ -643,10 +658,7 @@ tabFileText.setAttribute("path", path);
 			tabList.setAttribute("aria-label", "File tabs");
 			tabList.setAttribute("class", "noselect"); // Disable text selecting
 			
-			
 			header.appendChild(tabList);
-			
-			
 		}
 		
 		function contextmenu(ev) {

@@ -505,7 +505,7 @@ EDITOR.env = {}; // Plugins can set custom env values that will be passed to ter
 				}
 				var oldEndingColumn = _endingColumn;
 				_endingColumn = newEndingColumn;
-				//console.log(UTIL.getStack("Did set oldEndingColumn=" + oldEndingColumn + " to newEndingColumn=" + newEndingColumn + " ... EDITOR.currentFile.path=" + (EDITOR.currentFile && EDITOR.currentFile.path) + " EDITOR.currentFile.startColumn=" + (EDITOR.currentFile && EDITOR.currentFile.startColumn) + " EDITOR.view=" + JSON.stringify(EDITOR.view) + ""));
+				console.log(UTIL.getStack("Did set oldEndingColumn=" + oldEndingColumn + " to newEndingColumn=" + newEndingColumn + " ... EDITOR.currentFile.path=" + (EDITOR.currentFile && EDITOR.currentFile.path) + " EDITOR.currentFile.startColumn=" + (EDITOR.currentFile && EDITOR.currentFile.startColumn) + " EDITOR.view=" + JSON.stringify(EDITOR.view) + ""));
 			},
 			enumerable: true // if this property shows up during enumeration of the properties
 		});
@@ -692,6 +692,11 @@ EDITOR.env = {}; // Plugins can set custom env values that will be passed to ter
 				delete serverStorageWaitingItems[id];
 			}
 			
+			if(_serverStorage == null) {
+				console.warn("EDITOR.storage.removeItem: _serverStorage not yet available!");
+				return;
+			}
+
 			if(_serverStorage.hasOwnProperty(id)) {
 				CLIENT.cmd("storageRemove", {item: id}, function(err, json) {
 					if(callback) {
@@ -1690,7 +1695,7 @@ EDITOR.env = {}; // Plugins can set custom env values that will be passed to ter
 			
 			if(err) return fileOpenError(err);
 			
-			//console.log("Loading file (isImage=" + isImage + ") to editor: " + path);
+			console.log("Loading file (isImage=" + isImage + ") to editor: " + path);
 			
 			if(!notFromDisk && path != pathToBeOpened) throw new Error("path=" + path + " not pathToBeOpened=" + pathToBeOpened + " notFromDisk=" + notFromDisk + " tooBig=" + tooBig);
 			
@@ -1766,22 +1771,27 @@ EDITOR.env = {}; // Plugins can set custom env values that will be passed to ter
 				}
 				
 				var f = EDITOR.eventListeners.fileOpen.map(funMap);
-				//console.log("Calling fileOpen listeners (" + f.length + ") path=" + path);
+				console.log("Calling fileOpen listeners (" + f.length + ") path=" + path);
 				for(var i=0; i<f.length; i++) {
 					//console.log("function " + UTIL.getFunctionName(f[i]));
 					f[i](file); // Call function
 				}
+				console.log("Done calling fileOpen listeners!");
+
 				
 				//console.warn("EDITOR.openFile: state?" + !!state + " state.show=" + (state && state.show) + " showFile=" + showFile + " path=" + path);
 				if( (!state || state.show !== false) && (showFile == undefined || showFile == path) ) {
 					// Switch to this file
-					//console.log("EDITOR.openFile: Showing file.path=" + file.path + " " + UTIL.getStack("showing file"));
+					console.log("EDITOR.openFile: Showing file.path=" + file.path + " " + UTIL.getStack("showing file"));
 					EDITOR.showFile(file);
 				}
 				else if(showFile != undefined) {
-					//console.warn("Not switching to " + path + " because showFile is set to " + showFile);
+					console.warn("Not switching to " + path + " because showFile is set to " + showFile);
 				}
 				
+				console.log("Here I go again...");
+				console.log("Here I go again... err=" + err + " fileLoadError=" + fileLoadError);
+
 				if(err || fileLoadError) throw new Error("err=" + err + " fileLoadError=" + fileLoadError);
 				
 				removeFromQueue(path);
@@ -1838,6 +1848,8 @@ EDITOR.env = {}; // Plugins can set custom env values that will be passed to ter
 		}
 		
 		function callCallbacks(err, file) {
+			console.log("EDITOR.openFile: Calling callbacks...");
+
 			if(callback) {
 				callback(err, file); // after fileOpen even: reasoning: some plugin might want to add fileopen events AFTER they have opened a particular file
 			}
@@ -1994,7 +2006,7 @@ EDITOR.env = {}; // Plugins can set custom env values that will be passed to ter
 		}
 		else {
 			
-			//console.log("Closing file: path=" + path);
+			console.log("Closing file: path=" + path);
 			
 			var file = EDITOR.files[path];
 			
@@ -7661,7 +7673,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		
 		if(!file) throw new Error("fileOrFilePath=" + fileOrFilePath + " need to be a File object or a path to an open file");
 		
-		console.log("EDITOR.showFile: file.path=" + file.path + " " + UTIL.getStack("showFile"));
+		//console.log("EDITOR.showFile: file.path=" + file.path + " " + UTIL.getStack("showFile"));
 
 		if(!overrideShowFile && showFile != undefined && showFile != file.path) {
 			console.warn("Not showing: file.path=" + file.path + " because showFile=" + showFile);
@@ -7714,16 +7726,20 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		var f = EDITOR.eventListeners.fileShow.map(funMap);
 		//console.log("Calling fileShow listeners (" + f.length + ") file.path=" + file.path);
 		for(var i=0; i<f.length; i++) {
+			//console.log("EDITOR.showFile: Calling fileShow listener: " + UTIL.getFunctionName(f[i]) + " ...")
 			f[i](file, EDITOR.lastFileShowed); // Call function
+			//console.log("EDITOR.showFile: Done calling fileShow listener: " + UTIL.getFunctionName(f[i]) + " !")
 		}
 		
 		// Update the view
 		EDITOR.view.endingColumn = EDITOR.view.visibleColumns + file.startColumn;
 
-
+		//console.log("EDITOR.showFile: Calling EDITOR.renderNeeded()!");
 		EDITOR.renderNeeded();
 		
 		//EDITOR.interact("showFile", window.event);
+
+		//console.log("EDITOR.showFile done!");
 
 		return file;
 	}
@@ -9151,16 +9167,18 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		}
 	}
 	
-	EDITOR.runTests = function runTests(onlyOne, allInSync) {
+	EDITOR.runTests = function runTests(onlyOne, allInSync, callback) {
 		
 		if(EDITOR.workingDirectory.indexOf("/wwwpub/") == -1 && !onlyOne) {
-			return alertBox("Make sure you are running the editor as a cloud IDE before running tests!\
-			(Working directory (" + EDITOR.workingDirectory + ") needs to be wwwpub/)");
+			var msg = "Make sure you are running the editor as a cloud IDE before running tests! (Working directory (" + EDITOR.workingDirectory + ") needs to be wwwpub/)";
+			callback(new Error(msg));
+			alertBox(msg);
+			return;
 		}
 		
 		//if(!onlyOne) EDITOR.changeWorkingDir("/");
 		
-		runTests_5616458984153156(onlyOne, allInSync);
+		runTests_5616458984153156(onlyOne, allInSync, callback);
 		return true;
 	}
 	
@@ -11798,7 +11816,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 		}
 	}
 	
-	function runTests_5616458984153156(onlyOne, allInSync) { // Random numbers to make sure it's unique
+	function runTests_5616458984153156(onlyOne, allInSync, allTestsDoneCallback) { // Random numbers to make sure it's unique
 		
 		// TEST-CODE-START
 
@@ -12027,19 +12045,33 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 			
 			EDITOR.openFile("testresults.txt", testResults.join("\n"), function(err, file) {
 				
-			});
+					console.log("testInfo: testresults.txt opened!");
+
+					console.log("testInfo: allTestsDoneCallback=" + typeof allTestsDoneCallback);
+
+					if(typeof allTestsDoneCallback == "function") {
+						allTestsDoneCallback(null);
+						allTestsDoneCallback = null;
+					}
+				});
 			
-			testFirstTest = false; // Run only the first test the first time, and all tests after that.
-		}
+				testFirstTest = false; // Run only the first test the first time, and all tests after that.
+			}
 		
-		function testFail(description, result) {
-			if(abortOnError) aborted = true;
-			
-			fails++;
-			testResults.push("");
-			testResults.push(description);
-			if(result.message) {
-				// It returned an error
+			function testFail(description, result) {
+				if(abortOnError) {
+					aborted = true;
+					if(typeof allTestsDoneCallback == "function") {
+						allTestsDoneCallback(result, description);
+						allTestsDoneCallback = null;
+					}
+				}
+
+				fails++;
+				testResults.push("");
+				testResults.push(description);
+				if(result.message) {
+					// It returned an error
 				//console.log(result.message);
 				testResults.push(result.stack);
 			}
