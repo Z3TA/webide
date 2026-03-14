@@ -61,11 +61,13 @@ var CLIENT = {}; // Client object is global
 	CLIENT.connect = function(server, callback) {
 		
 		var loc = UTIL.getLocation(window.location.href);
-		var protocol = loc.protocol;
 		
+
+		var protocol = loc.protocol;
+
 		if(!protocol) throw new Error("Unable to get protocol from window.location.href=" + window.location.href);
 
-		//console.log("CLIENT: Connecting... protocol=" + protocol + " loc=" + JSON.stringify(loc, null, 2));
+		console.log("CLIENT: Connecting... protocol=" + protocol + " loc=" + JSON.stringify(loc, null, 2));
 
 		var defaultURL = loc.protocol + "://" + loc.host + "/webide"; // loc.host includes port!
 		
@@ -75,6 +77,9 @@ var CLIENT = {}; // Client object is global
 		else if(protocol.toLowerCase() == "chrome-extension") {
 			// We are running as *the* chromeos app !?
 			defaultURL = "https://webide.se/webide";
+		}
+		else if(navigator.userAgent=="headless") {
+			defaultURL = "http://localhost:8099/webide/";
 		}
 		
 		//console.log("CLIENT: defaultURL=" + defaultURL);

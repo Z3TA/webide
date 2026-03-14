@@ -33,6 +33,14 @@ var globalElements = {
 
 	body: createElement("body"),
 	head: createElement("head"),
+
+	loginScreen: createElement("div"),
+	loginAsGuest: createElement("button"),
+	loginMessage: createElement("div"),
+	backend_url: createElement("input"),
+	nat_code: createElement("input"),
+	connectButton: createElement("button"),
+	loginButton: createElement("button"),
 };
 
 
@@ -186,6 +194,14 @@ function createElement(elementType) {
 		return node;
 	}
 
+	el.contains = function(childElement) {
+		var children = findAllChildren(el.childNodes);
+		for (var i=0; i<children.length; i++) {
+			if(childElement == children[i]) return true;
+		}
+		return false;
+	}
+
 	el.insertBefore = function(node, newNode) {
 		var index = el.childNodes.indexOf(node);
 		if(index == -1) index = 0;
@@ -208,6 +224,19 @@ function createElement(elementType) {
 		//console.log("Element " + el.tagName + " id=" + el.id + " should be in focus");
 	}
 
+	el.getBoundingClientRect = function() {
+		return {
+			x: 0,
+			y: 0,
+			width: 0,
+			height: 0,
+			top: 0,
+			right: 0,
+			bottom: 0,
+			left: 0
+		}
+	}
+
 	if(elementType == "canvas") el = createCanvas(el);
 	else if(elementType == "script") {
 		scriptTags++;
@@ -215,11 +244,28 @@ function createElement(elementType) {
 	}
 	//console.log("typeof allElements: " + typeof allElements);
 
+	watchProperty(el, "innerText", "", function(newValue) {
+		//console.log(el.tagName + "#" + el.id + " innerText: " + newValue);
+	});
+	
+
 	allElements.push(el);
 
 	return el;
 }
 
+
+function watchProperty(el, prop, defaultValue, callback) {
+	var value = defaultValue;
+	Object.defineProperty(el, prop, {
+		get: function () { return value; },
+		set: function (newValue) {
+			value = newValue;
+			if(callback) callback(newValue);
+		},
+		enumerable: true
+	});
+}
 
 function findAllChildren(nodes) {
 	var allChildren = [];
@@ -305,8 +351,8 @@ interfaceContext.navigator = {
 
 interfaceContext.location = {
 	search: process.argv.join("&"),
-	href: "headless",
-	hostname: "headless",
+	href: "ws://localhost:8099/webide/",
+	hostname: "localhost",
 	hash: "",
 	origin: "headless"
 };
@@ -378,7 +424,9 @@ interfaceContext.window = {
 	resizeTo: function(width, height) {
 		this.innerHeight = height;
 		this.innerWidth = width;
-	}
+	},
+	console: console,
+	WebSocket: WebSocket,
 };
 
 interfaceContext.window.window = interfaceContext.window; // Trick the editor that we are a browser...
@@ -393,16 +441,12 @@ interfaceContext.setTimeout = setTimeout;
 interfaceContext.clearTimeout = clearTimeout;
 
 
-interfaceContext.alert = function alert(msg) {
-	console.log("ALERT: " + msg);
-}
-
 interfaceContext.console = {
 	log: function(msg) {
-		//console.log("log: " + msg);
+		console.log("log: " + msg);
 	},
 	warn: function(msg) {
-		//console.warn("warn: " + msg);
+		console.warn("warn: " + msg);
 	},
 	error: function(msg) {
 		console.log("error: " + msg);
@@ -426,7 +470,9 @@ var coreFiles = [
 	{path: "client/UTIL.js"},
 	{path: "client/global.js"},
 	{path: "client/locale/en.js"},
-	// sockjs?
+
+	{path: "client/sockjs-0.3.4.js"},
+
 	{path: "client/CLIENT.js"},
 	{path: "client/Dialog.js"},
 	{path: "client/File.js"},
@@ -483,7 +529,7 @@ function wait() {
 	waitTimeout = setTimeout(check, 250);
 
 	function check() {
-		if(scriptTags < 31) return wait();
+		if(scriptTags < 20) return wait();
 
 		if(scriptTags == scriptTagsLoaded) doYourThing();
 
@@ -511,6 +557,13 @@ function doYourThing() {
 
 	//EDITOR.changeWorkingDir("/wwwpub/");
 
+	// Connect to server
+
+	console.log("CLIENT.connected=" + interfaceContext.CLIENT.connected);
+
+
+	function runTests() {
+
 	interfaceContext.EDITOR.runTests(onlyOne, allInSync, function(result, description) {
 
 		//console.log("ALL TESTS DONE!!?=?!?!?!!??!");
@@ -531,6 +584,7 @@ function doYourThing() {
 		//process.exit(exitCode);
 
 	});
+	}
 }
 
 function dynamicLoadScript(src) {

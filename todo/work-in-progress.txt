@@ -7,6 +7,8 @@ git diff -U0 -w --no-color | git apply --cached --ignore-whitespace --unidiff-ze
 ---
 
 
+get server running i docker working
+
 Creating a headless runtime so that we can run tests without the browser
 
 Evaluating cloude code!

@@ -8755,8 +8755,11 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 			if(buildFunction == undefined) build = document.createElement("div");
 			else build = buildFunction(widget); // Example use: return widget.create(...);
 			
-			if(! (build instanceof HTMLElement)) throw new Error("Widget build function must return a HTML element!");
 			
+			// Note: We might add other runtimes then the browser! Like Qt 
+			//if(! (build instanceof HTMLElement)) throw new Error("Widget build function must return a HTML element!");
+			
+
 			if(build.parentNode) throw new Error("Widget build function should not append itself to another element!");
 			
 			widget.mainElement = build;
@@ -9169,7 +9172,7 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 	
 	EDITOR.runTests = function runTests(onlyOne, allInSync, callback) {
 		
-		if(EDITOR.workingDirectory.indexOf("/wwwpub/") == -1 && !onlyOne) {
+		if(EDITOR.workingDirectory.indexOf("/wwwpub/") == -1 && !onlyOne && DISPLAY_MODE != "headless") {
 			var msg = "Make sure you are running the editor as a cloud IDE before running tests! (Working directory (" + EDITOR.workingDirectory + ") needs to be wwwpub/)";
 			callback(new Error(msg));
 			alertBox(msg);
@@ -11169,8 +11172,10 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 			connectToBackend(server, nat_code);
 
 			function connectToBackend(server, nat_code) {
-				//console.log("Connecting to backend server=" + JSON.stringify(server) + " ...");
+				console.log("Connecting to backend server=" + JSON.stringify(server) + " ...");
 				CLIENT.connect(server, function connectedToServer(err, url) {
+					console.log("Connected to backend!? err=" + err + " url=" + url);
+
 					if(err) {
 						loginMessage.innerText = err.message;
 						return;
@@ -11194,6 +11199,9 @@ return Math.ceil(Math.floor(renderWidth*10) / Math.floor(EDITOR.settings.gridWid
 					}
 
 					function loginMaybe() {
+
+						console.log("loginMaybe: QUERY_STRING.user=" + QUERY_STRING.user + " QUERY_STRING.pw=" + QUERY_STRING.pw + " stored.editorServerUser=" + stored.editorServerUser + " stored.editorServerPw=" + stored.editorServerPw + " locally=" + locally + " DEFAULT_USERNAME=" + DEFAULT_USERNAME + " DEFAULT_PASSWORD=" + DEFAULT_PASSWORD);
+
 						if(QUERY_STRING.user && QUERY_STRING.pw) return attemptLogin(QUERY_STRING.user, QUERY_STRING.pw);
 						if(stored.editorServerUser && stored.editorServerPw) return attemptLogin(stored.editorServerUser, stored.editorServerPw);
 						if(locally) return attemptLogin(DEFAULT_USERNAME, DEFAULT_PASSWORD);

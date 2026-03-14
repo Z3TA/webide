@@ -106,7 +106,7 @@
 	function serverReLoginOnConnected(err) {
 		// ## Automaitcally re-loggin when re-connected to server
 		
-		//console.log("serverReLoginOnConnected: CLIENT.lastCommand=" + CLIENT.lastCommand + " CLIENT.commandCounter=" + CLIENT.commandCounter + " CLIENT.inFlight=" + CLIENT.inFlight);
+		console.log("serverReLoginOnConnected: CLIENT.lastCommand=" + CLIENT.lastCommand + " CLIENT.commandCounter=" + CLIENT.commandCounter + " CLIENT.inFlight=" + CLIENT.inFlight);
 
 		var loginScreen = document.getElementById("loginScreen");
 		if(loginScreen && loginScreen.style.display != "none") {
@@ -230,6 +230,7 @@
 	
 	function showLoginDialog(options) {
 
+		var loginScreen = document.getElementById("loginScreen");
 		if(loginScreen) {
 			var loginButton = document.getElementById("loginButton");
 			if(loginButton) loginButton.disabled = false;

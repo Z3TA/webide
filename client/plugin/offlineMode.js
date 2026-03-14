@@ -24,7 +24,7 @@
 		}
 	});
 
-	function checkIfOnline(babar) {
+	function checkIfOnline() {
 		/*
 			note: We might be working locally, so check both navigator.onLine and CLIENT.connected (if we have a server connection)!
 
