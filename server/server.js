@@ -2829,7 +2829,7 @@ function sockJsConnection(connection) {
 		"use strict";
 		
 		if(message.indexOf(GS) == -1) {
-			return send({error: "Command does not contain " + GS + " separator : " + message});
+			return send({id: 1, error: "Command does not contain " + GS + " separator : " + message});
 		}
 		
 		var json;
@@ -2844,7 +2844,7 @@ function sockJsConnection(connection) {
 				json = JSON.parse(arr[2]);
 			}
 			catch(err) {
-				return send({error: "Failed to parse JSON (" + err.message + "): " + message});
+				return send({id: id || 1, error: "Failed to parse JSON (" + err.message + "): " + message});
 			}
 		}
 		
